@@ -48,7 +48,7 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends(), response: Resp
     return result
 
 @auth_router.post("/api/token/demo")
-async def token(response: Response = None):
+async def token_demo(response: Response = None):
     DEMO_USERNAME = env_handler.get_instance().env("DEMO_USERNAME")
     DEMO_PASSWORD = env_handler.get_instance().env("DEMO_PASSWORD")
 

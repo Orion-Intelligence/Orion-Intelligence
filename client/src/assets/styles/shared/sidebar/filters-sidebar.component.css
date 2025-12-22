@@ -83,7 +83,7 @@
 
 .sidebar_input {
   display: block;
-  color: var(--color-gray-900);
+  color: var(--color-gray-900) !important;
   font-size: 12px;
   font-family: Inter, sans-serif;
   font-weight: 500;
@@ -248,13 +248,17 @@
 .sidebar_container {
   width: 300px;
   position: fixed;
-  top: 0px;
+  top: 0;
   background: #2A5784;
   height: 96vh;
   border-bottom-left-radius: 0;
   border-top-left-radius: 15px;
   box-shadow: rgb(0 0 0 / 24%) 0 3px 8px;
   transition: right 0.2s ease;
+}
+
+.profile .sidebar_container {
+  background: #00000000 !important;
 }
 
 .sidebar_overlay {

@@ -68,9 +68,12 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
     this.isFreeStrategic = isFree && hasStrategic;
   }
 
-  openURL(item: any) {
-    if (!item?.m_url) return;
-    window.open(item.m_url, '_blank');
+  isWithinDays(dateString = '', days: number): boolean {
+    if (!dateString) return false;
+    const createdDate = new Date(dateString);
+    const today = new Date();
+    const diffInDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+    return diffInDays <= days;
   }
 
   isMobileMode(): boolean {

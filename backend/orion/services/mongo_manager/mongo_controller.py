@@ -1,7 +1,6 @@
 import motor.motor_asyncio
 from odmantic import AIOEngine
-from odmantic.exceptions import DuplicateKeyError
-
+from orion.api.interactive.tenant_manager.tenant_bootstrap import tenant_boostrap
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
@@ -13,7 +12,6 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_
 from orion.services.mongo_manager.shared_views.tenant_admin_view import TenantAdminView
 from orion.services.mongo_manager.shared_views.tenant_key_admin_view import TenantKeyAdminView
 from orion.services.mongo_manager.shared_views.user_admin_view import UserAdminView
-from orion.services.session_manager.session_enums import admin_mock, crawler_mock
 
 
 class mongo_controller:
@@ -59,7 +57,7 @@ class mongo_controller:
         )
 
         await user_collection.create_index(
-            [("company_uuid", 1)],
+            [("tenant_uuid", 1)],
             unique=True,
             partialFilterExpression={"licenses": ["maintainer"]},
             name="unique_maintainer_per_company",
@@ -72,27 +70,10 @@ class mongo_controller:
 
     async def initialize(self):
         await self.ensure_indexes()
-        existing_admin = await self.__engine.find_one(db_user_account, db_user_account.role == user_role.ADMIN)
-        if not existing_admin:
-            try:
-                admin_user = db_user_account(
-                    username=admin_mock["username"],
-                    password=admin_mock["password"],
-                    role=user_role.ADMIN,
-                    status= UserStatus.ACTIVE,
-                    licenses = LicenseName.FREE
-                )
-                await self.__engine.save(admin_user)
-                crawler_user = db_user_account(
-                    username=crawler_mock["username"],
-                    password=crawler_mock["password"],
-                    role=user_role.CRAWLER,
-                    status= UserStatus.ACTIVE,
-                    licenses = LicenseName.ENTERPRISE
-                )
-                await self.__engine.save(crawler_user)
-            except DuplicateKeyError:
-                log.g().ex("⚠️ Duplicate admin user detected. Skipping insert.")
+
+        default_tenant = await self.__engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
+        if not default_tenant:
+            await tenant_boostrap(self.__engine)
 
     def get_admin(self):
         from starlette_admin.contrib.odmantic import Admin, ModelView

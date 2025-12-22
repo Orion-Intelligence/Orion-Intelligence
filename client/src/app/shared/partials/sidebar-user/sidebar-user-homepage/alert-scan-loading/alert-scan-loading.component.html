@@ -1,0 +1,20 @@
+<div class="alert-scan-loading-overlay" #overlay role="dialog" aria-modal="true">
+  <div class="loading-content">
+    <div class="loading-top">
+      <div class="spinner"></div>
+      <div class="loading-title">Scanning data</div>
+    </div>
+
+    <div class="loading-text">This may take a moment. Please keep this tab open.</div>
+
+    <div class="loading-progress">
+      <span class="loading-bar"></span>
+    </div>
+
+    <div class="loading-actions">
+      <button type="button" class="loading-btn loading-btn--ghost" (click)="cancelScan()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

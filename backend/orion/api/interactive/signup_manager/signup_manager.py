@@ -6,7 +6,7 @@ from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, LicenseName
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -24,7 +24,7 @@ class SignupManager:
         engine = mongo_controller.get_instance().get_engine()
         username = (data.username or "").strip()
         email = (data.email or "").strip().lower()
-        password = "Doorsoffreedom@00"
+        password = data.password
 
         username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
         if not re.match(username_pattern, username):
@@ -65,14 +65,6 @@ class SignupManager:
             except Exception:
                 raise HTTPException(status_code=422, detail="Invalid password")
 
-        print("1::::::::::::::::::::::::", flush=True)
-        print(password, flush=True)
-        print("1::::::::::::::::::::::::", flush=True)
-
-        print("1HASH::::::::::::::::::::::::", flush=True)
-        print(repr(hashed_password), flush=True)
-        print("1HASH::::::::::::::::::::::::", flush=True)
-
         _verification_token = session_manager.get_instance().generate_verification_token()
         _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
 
@@ -82,7 +74,7 @@ class SignupManager:
 
         tenant = db_tenant_model(
             iocs=[],
-            companyName=company,
+            name=company,
             phone="",
             country="",
             city="",
@@ -97,12 +89,11 @@ class SignupManager:
             username=username,
             email=email,
             password=hashed_password,
-            role=user_role.PROFILE,
-            status=UserStatus.PENDING,
+            role=user_role.MEMBER,
             verification_token=_verification_token,
             verification_expiry=_verification_token_expire,
             licenses=[LicenseName.MAINTAINER],
-            company_uuid=str(tenant.id)
+            tenant_uuid=str(tenant.id)
         )
         await engine.save(user)
 
@@ -140,9 +131,6 @@ class SignupManager:
             user = await auth_manager.get_instance().authenticate_user(mail, password)
             if not user:
                 raise HTTPException(status_code=401, detail="Invalid credentials")
-
-            if user.status != UserStatus.PENDING:
-                raise HTTPException(status_code=404, detail="User not found or not pending")
 
             redis_inst = redis_controller.getInstance()
             rate_key = f"resend_verification:{user.id}"

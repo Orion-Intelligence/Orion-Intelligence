@@ -42,7 +42,9 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.router.navigate(['dashboard'], { replaceUrl: true }).then();
+        this.appService.loadSession().then(() => {
+          this.router.navigate(['dashboard'], { replaceUrl: true }).then();
+        });
       } else {
         this.authenticated = false;
       }
@@ -89,17 +91,29 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   submitOtp() {
+    this.errorMessage = null;
+
     if (!this.tempToken || !this.pendingUsername) return;
-    this.authService.verifyTwofa(this.otpCode, this.tempToken, this.pendingUsername).subscribe(() => {
-      if (!this.authService.isAuthenticated()) return;
-      this.twofaRequired = false;
-      this.otpUri = null;
-      this.otpDataUrl = null;
-      this.otpSecret = null;
-      this.otpCode = '';
-      this.tempToken = null;
-      this.pendingUsername = null;
-    });
+
+    this.authService
+      .verifyTwofa(this.otpCode, this.tempToken, this.pendingUsername)
+      .subscribe({
+        next: () => {
+          if (!this.authService.isAuthenticated()) return;
+          this.otpUri = null;
+          this.otpDataUrl = null;
+          this.otpSecret = null;
+          this.otpCode = '';
+          this.tempToken = null;
+          this.pendingUsername = null;
+        },
+        error: (err) => {
+          this.errorMessage =
+            err?.error?.detail ||
+            err?.message ||
+            'Login failed';
+        }
+      });
   }
 
   goToSignUp() {

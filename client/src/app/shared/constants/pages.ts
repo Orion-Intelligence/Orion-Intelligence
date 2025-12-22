@@ -71,6 +71,7 @@ export enum ApiSubCategory {
   EMAIL = 'Email-Breach',
   SOCIAL = 'Social-Scanner',
   CRACKED = 'Playstore-Scanner',
+  SOFTWARE = 'Software-Scanner',
 }
 
 export enum SocialSubCategory {
@@ -117,6 +118,7 @@ export enum TenantSubCategory {
 export enum ProfileSubCategory {
   HOMEPAGE = 'Homepage',
   IOC = 'IOC',
+  TENANT_SETTINGS = 'Tenant-Settings',
   ACCOUNT = 'Account',
   USERS = 'Users',
   STATISTICS = 'Statistics',

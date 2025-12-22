@@ -10,13 +10,6 @@ import { AppService } from '../core/app/app.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private username = signal<string>('');
-  private role = signal<string | null>(null);
-  private onboarding = signal<boolean>(this.toBool(localStorage.getItem('onboarding')));
-  private subscription = signal<boolean>(false);
-  private verificationDate = signal<string>('');
-  private licenses = signal<string[]>([]);
-
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
   constructor(
@@ -27,7 +20,7 @@ export class AuthService {
     private tokenRefreshService: TokenRefreshService
   ) {
     if (this.isAuthenticated()) {
-      const needsSession = !this.username() && !this.role() && !this.verificationDate();
+      const needsSession = !this.appService.userSessionData().user.username && !this.appService.userSessionData().user.role && !this.appService.userSessionData().user.verificationDate;
       if (needsSession) this.refreshToken().subscribe();
       this.startTokenRefresh();
     }
@@ -35,14 +28,6 @@ export class AuthService {
 
   get authState$(): Observable<AuthModel> {
     return this.authState.asObservable();
-  }
-
-  getUsername$(): Observable<string | null> {
-    return this.authState$.pipe(map((state) => state.username));
-  }
-
-  getRole$(): Observable<string | null> {
-    return this.authState$.pipe(map((state) => state.role));
   }
 
   login(mail: string, password: string, isDemo: boolean = false): Observable<any> {
@@ -66,11 +51,8 @@ export class AuthService {
           if (response.twofa_required) {
             this.authState.next({
               token: null,
-              username: response.username,
-              role: null,
               isAuthenticated: false,
               isValidated: true,
-              onboarding: null,
               error: '2FA required'
             });
             return response.provisioning_uri || null;
@@ -79,11 +61,8 @@ export class AuthService {
           if (!response?.access_token) {
             this.authState.next({
               token: null,
-              username: null,
-              role: null,
               isAuthenticated: false,
               isValidated: true,
-              onboarding: null,
               error: 'Access denied!'
             });
             return;
@@ -93,22 +72,12 @@ export class AuthService {
           if (sessionData?.role === 'crawler') {
             this.authState.next({
               token: null,
-              username: null,
-              role: null,
               isAuthenticated: false,
               isValidated: true,
-              onboarding: null,
               error: 'Access denied!'
             });
             return;
           }
-
-          this.username.set(sessionData?.username ?? '');
-          this.role.set(sessionData?.role ?? null);
-          this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
-          this.subscription.set(this.toBool(sessionData?.subscription));
-          this.verificationDate.set(sessionData?.verificationDate ?? '');
-          this.licenses.set(sessionData?.licenses ?? []);
 
           this.setToken(response.access_token);
           this.startTokenRefresh();
@@ -118,22 +87,16 @@ export class AuthService {
           if (error?.error?.detail === 'Verification pending.') {
             this.authState.next({
               token: null,
-              username: null,
-              role: null,
               isAuthenticated: false,
               isValidated: false,
               error: 'Access denied!',
-              onboarding: null
             });
           } else {
             this.authState.next({
               token: null,
-              username: null,
-              role: null,
               isAuthenticated: false,
               isValidated: true,
               error: 'Access denied!',
-              onboarding: null
             });
           }
         }
@@ -155,11 +118,8 @@ export class AuthService {
           if (!response?.access_token) {
             this.authState.next({
               token: null,
-              username,
-              role: null,
               isAuthenticated: false,
               isValidated: true,
-              onboarding: null,
               error: 'Invalid 2FA code'
             });
             return;
@@ -169,22 +129,12 @@ export class AuthService {
           if (sessionData?.role === 'crawler') {
             this.authState.next({
               token: null,
-              username: null,
-              role: null,
               isAuthenticated: false,
               isValidated: true,
-              onboarding: null,
               error: 'Access denied!'
             });
             return;
           }
-
-          this.username.set(sessionData?.username ?? username ?? '');
-          this.role.set(sessionData?.role ?? null);
-          this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
-          this.subscription.set(this.toBool(sessionData?.subscription));
-          this.verificationDate.set(sessionData?.verificationDate ?? '');
-          this.licenses.set(sessionData?.licenses ?? []);
 
           this.setToken(response.access_token);
           this.startTokenRefresh();
@@ -192,11 +142,8 @@ export class AuthService {
         error: () => {
           this.authState.next({
             token: null,
-            username,
-            role: null,
             isAuthenticated: false,
             isValidated: true,
-            onboarding: null,
             error: 'Invalid 2FA code'
           });
         }
@@ -207,22 +154,12 @@ export class AuthService {
   logout(): void {
     this.authState.next({
       token: null,
-      username: null,
-      role: null,
       isAuthenticated: false,
       isValidated: true,
-      onboarding: null,
       error: null,
-      licenses: []
     });
-    this.username.set('');
-      this.router.navigate(['/login']).then();
-      this.router.navigate(['/login']).then(() => {
-      this.role.set(null);
-      this.setOnboarding(false);
-      this.subscription.set(false);
-      this.verificationDate.set('');
-      this.licenses.set([]);
+    this.router.navigate(['/login']).then();
+    this.router.navigate(['/login']).then(() => {
       this.apiService.post('logout', {}).subscribe();
 
       localStorage.clear();
@@ -255,30 +192,6 @@ export class AuthService {
     return this.apiService.post('updatePassword', { token, password });
   }
 
-  getRole(): string | null {
-    return this.role();
-  }
-
-  getOnboardingStatus(): boolean {
-    return this.onboarding();
-  }
-
-  getUsername(): string {
-    return this.username();
-  }
-
-  getSubscriptionStatus(): boolean {
-    return this.subscription();
-  }
-
-  getVerificationDate(): string {
-    return this.verificationDate();
-  }
-
-  getLicenses(): string[] {
-    return this.licenses();
-  }
-
   getIsMobileDemo(): boolean {
     return localStorage.getItem('mobileDemo') === 'true';
   }
@@ -289,26 +202,18 @@ export class AuthService {
 
   getSessionStatus(): { isAuthenticated: boolean; hasSession: boolean } {
     const isAuthenticated = !!this.getStoredToken();
-    const hasSession = !!this.username() || !!this.role() || !!this.verificationDate();
+    const hasSession = !!this.appService.userSessionData().user.username && !!this.appService.userSessionData().user.role && !!this.appService.userSessionData().user.verificationDate;
     return { isAuthenticated, hasSession };
   }
 
-  setOnboarding(value: boolean): void {
-    this.onboarding.set(value);
-    localStorage.setItem('onboarding', String(value));
-  }
 
   private setToken(token: string): void {
     localStorage.setItem('token', token);
     this.authState.next({
       token,
-      username: this.username(),
-      role: this.role(),
       isAuthenticated: true,
       isValidated: true,
-      onboarding: String(this.onboarding()),
       error: null,
-      licenses: this.licenses()
     });
   }
 
@@ -320,13 +225,9 @@ export class AuthService {
     const token = this.getStoredToken();
     return {
       token,
-      username: this.username(),
-      role: this.role(),
       isValidated: true,
       isAuthenticated: !!token,
-      onboarding: String(this.onboarding()),
       error: null,
-      licenses: this.licenses()
     };
   }
 
@@ -348,12 +249,6 @@ export class AuthService {
         tap((response) => {
           if (response?.session) {
             const sessionData = response.session;
-            this.username.set(sessionData?.username ?? this.username());
-            this.role.set(sessionData?.role ?? this.role());
-            this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding ?? this.onboarding()));
-            this.subscription.set(this.toBool(sessionData?.subscription ?? this.subscription()));
-            this.verificationDate.set(sessionData?.verificationDate ?? this.verificationDate());
-            this.licenses.set(sessionData?.licenses ?? []);
           }
           if (response?.access_token) this.setToken(response.access_token);
         }),

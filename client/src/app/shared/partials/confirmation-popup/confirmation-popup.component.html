@@ -1,4 +1,4 @@
-<div class="confirmation-popup_backdrop">
+<div class="confirmation-popup_backdrop" @popupAnimation>
   <div class="confirmation-popup_box">
 
     <div class="confirmation-popup_title">Confirmation!</div>
@@ -8,7 +8,7 @@
     </div>
 
     <div class="confirmation-popup_actions">
-      <button class="confirmation-popup_btn-primary" (click)="onYes()">Yes, Confirm</button>
+      <button triggerAutoFocus class="confirmation-popup_btn-primary" (click)="onYes()" >Yes, Confirm</button>
       <button class="confirmation-popup_btn-secondary" (click)="onNo()">Cancel</button>
     </div>
 

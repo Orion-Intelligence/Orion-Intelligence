@@ -138,7 +138,6 @@
 .license-card:hover {
   background-color: var(--color-blue-870);
   border-color: var(--color-blue-640);
-  transform: translateY(-1px);
 }
 
 .license-selected {

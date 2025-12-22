@@ -143,6 +143,7 @@ class _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad(leak_extractor_i
 
             entity_data = entity_model(
                 m_team="Obscura",
+                m_scrap_file=self.__class__.__name__,
             )
 
             self.append_leak_data(card_data, entity_data)

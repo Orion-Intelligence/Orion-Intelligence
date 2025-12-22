@@ -8,8 +8,8 @@
         <span *ngIf="!last" (click)="navigateToCrumb(i)" [class.inactive]="breadcrumb.length <= 2"
           class="breadcrumb-item">
           {{ crumb.label.replace('-', ' ') | titlecase }}
-          <img alt="breadcrumb" class="header-bar__breadcrum" height="20" ngSrc="assets/images/shared/theme/nav-next.svg"
-            priority width="20" />
+          <img alt="breadcrumb" class="header-bar__breadcrum" height="20"
+            ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
         </span>
 
         <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
@@ -20,9 +20,9 @@
   </ng-container>
   <ng-container *ngIf="authService.getIsMobileDemo()">
     <div class="header-bar_title-container">
-        <span class="breadcrumb-item breadcrumb-item-large breadcrumb-active ml-3">
-          {{ this.appService.getConfig().appSettings.app_name }}
-        </span>
+      <span class="breadcrumb-item breadcrumb-item-large breadcrumb-active ml-3">
+        {{ this.appService.getConfig().appSettings.app_name }}
+      </span>
     </div>
   </ng-container>
 

@@ -2,8 +2,9 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HomeSearchComponent } from './home-search/home-search.component';
-import {AuthService} from '../../services/authetication/auth.service';
-import {LicenseService} from '../../services/licenses/licenses.service';
+import { AuthService } from '../../services/authetication/auth.service';
+import { LicenseService } from '../../services/licenses/licenses.service';
+import { AppService } from '../../services/core/app/app.service';
 
 @Component({
   selector: 'app-index',
@@ -12,16 +13,16 @@ import {LicenseService} from '../../services/licenses/licenses.service';
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {
-  constructor(private router: Router, private authService:AuthService, private licenseService:LicenseService) {
+  constructor(private router: Router, private authService: AuthService, private licenseService: LicenseService, private appService: AppService) {
   }
 
   ngOnInit() {
 
-    const role = this.authService.getRole();
-    if (role == "profile" || role=="admin")
+    const role = this.appService.userSessionData().user.role;
+    if (role == "profile" || role == "admin")
       this.router.navigate(['dashboard/profile/homepage']).then();
-    if (this.authService.getIsMobileDemo())
-      this.router.navigate(['dashboard/strategic/all']).then();
+    // if (this.authService.getIsMobileDemo())
+    //   this.router.navigate(['dashboard/strategic/all']).then();
 
 
     this.router.events

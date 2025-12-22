@@ -166,7 +166,7 @@
   </form>
 </ng-container>
 <ul
-  *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated) &&(!checkProfile() || hasIOCs())"
+  *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated) &&(!checkMember() || hasIOCs())"
   class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
   <li class="nav-item" *ngIf="list_grid">
     <a class="nav-link cursor-pointer active">List</a>
@@ -198,7 +198,7 @@
 </ng-container>
 
 <ng-container *ngIf="result_count_enabled">
-  <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkProfile() || hasIOCs()); else noResults"
+  <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs()); else noResults"
     @fadeInDashboardItem>
     <div class="right-text label-text">
       <span>{{ result_count }} Results Found</span>
@@ -206,7 +206,7 @@
   </div>
 
   <ng-template #noResults>
-    <div *ngIf="(!checkProfile() || hasIOCs()) && isLoading" class="right-text label-text">
+    <div *ngIf="(!checkMember() || hasIOCs()) && isLoading" class="right-text label-text">
       <span>Searching for results ...</span><br><br>
     </div>
   </ng-template>
@@ -225,7 +225,7 @@
   <app-empty-query></app-empty-query>
 </div>
 
-<div *ngIf="!(checkProfile() && !hasIOCs())
+<div *ngIf="!(checkMember() && !hasIOCs())
          && showNoResult
          && isLoading!=null
          && (this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0)
@@ -252,6 +252,6 @@
   </div>
 </ng-container>
 
-<div *ngIf="!isLoading && result_count>0 && !disableScroll && (!checkProfile() || hasIOCs())">
+<div *ngIf="!isLoading && result_count>0 && !disableScroll && (!checkMember() || hasIOCs())">
   <app-scroll-top></app-scroll-top>
 </div>

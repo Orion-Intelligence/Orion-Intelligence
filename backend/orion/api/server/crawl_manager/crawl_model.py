@@ -120,7 +120,7 @@ class crawl_model:
     @staticmethod
     async def scan_domain(model):
         try:
-            async with httpx.AsyncClient() as client:
+           async with httpx.AsyncClient() as client:
                 response = await client.post(
                     "http://trusted-micros-api:8010/urlscan/domain",
                     json=model.model_dump(),

@@ -308,7 +308,7 @@ class search_model:
         )
 
     async def search_stealerlogs_result(self, param: search_credential_param_model):
-        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, None)
+        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         hits = m_documents.get("hits", {}).get("hits", [])

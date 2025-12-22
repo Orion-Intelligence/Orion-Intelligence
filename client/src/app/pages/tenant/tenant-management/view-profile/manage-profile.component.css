@@ -1,0 +1,124 @@
+.view-tenant-container {
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.view-tenant-container .label-text-dropdown {
+  font-size: 14px !important;
+  font-weight: normal !important;
+  padding: 8px 13px 8px 15px;
+  border: none;
+  border-radius: 25px;
+  background-color: #D4D4D40D;
+}
+
+.view-tenant_dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+  width: auto;
+  margin: 7px;
+}
+
+.view-tenant-container .dropdown-item.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.view-tenant-container .dropdown-item:hover {
+  background: #e6e6e6;
+}
+
+.view-tenant-container .dropdown-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.view-tenant-container .dropdown-divider {
+  height: 1px;
+  margin: 0;
+}
+
+.view-tenant-container .dropdown-menu::before {
+  visibility: hidden;
+}
+
+.view-tenant_dropdown-wrapper::after,
+.no-chevron::after {
+  display: none !important;
+  content: none !important;
+}
+
+.view-tenant_dropdown-wrapper-min {
+  width: 45px !important;
+}
+
+.action-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.view-tenant-container .list__container {
+  overflow: visible !important;
+}
+
+.view-tenant-container .list__container table {
+  overflow: visible !important;
+}
+
+.view-tenant-container .list__container table td,
+.view-tenant-container .list__container table th {
+  vertical-align: middle !important;
+  overflow: clip !important;
+}
+
+.view-tenant-container .dropdown {
+  overflow: visible !important;
+}
+
+.view-tenant-container .list__container table tr {
+  background: transparent none !important;
+}
+
+.view-tenant-container .list__container table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.view-tenant-container .label-text-dropdown{
+  margin-right: 0;
+}
+
+.view-tenant-container .list__container{
+  margin: 0 !important;
+}
+
+.view-tenant-container .directory-listing_container{
+  padding: 20px;
+}
+
+.status-active .list__status-default-pointer {
+  background-color: #00C853 !important;
+}
+
+.status-disabled .list__status-default-pointer {
+  background-color: #FF3B30 !important;
+}
+
+.status-other .list__status-default-pointer {
+  background-color: #FFA500 !important;
+}
+
+
+@media only screen and (width <=1300px) {
+  .view-tenant-container .list__container table tbody tr:last-child td {
+    border-bottom: 1px solid #ffffff10 !important;
+  }
+
+  .view-tenant-container .directory-listing_upper-heading{
+    height: 60px;
+  }
+
+  .view-tenant-container .directory-listing_container{
+    padding: 0;
+  }
+}

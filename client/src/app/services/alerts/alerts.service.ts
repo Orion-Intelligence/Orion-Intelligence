@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, switchMap, takeWhile, tap, timer } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { switchMap, takeWhile, tap, timer } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../core/app/app.service';
 
@@ -7,14 +7,14 @@ import { AppService } from '../core/app/app.service';
     providedIn: 'root'
 })
 export class AlertService {
-    isAlertScanLoading$ = new BehaviorSubject<boolean>(false);
+    isAlertScanLoading = signal<boolean>(true);
     private isCheckingStatus = false;
     private hasAutoCheckedOnce = false;
 
     constructor(protected apiService: ApiService, private appService: AppService) { }
 
     scanIOCs() {
-        this.isAlertScanLoading$.next(true)
+        this.isAlertScanLoading.set(true)
         this.apiService.post<any>('profile/alert/scan', null).subscribe({
             next: (_) => {
                 this.getLatestAlerts();
@@ -22,7 +22,18 @@ export class AlertService {
             error: (err) => {
                 console.error('Scan failed with an error:', err);
                 alert(err?.error?.detail || 'IOC Scan failed to start or complete.');
-                this.isAlertScanLoading$.next(false)
+                this.isAlertScanLoading.set(false)
+            },
+        });
+    }
+    cancelScanIOCs() {
+        this.apiService.post<any>('profile/alert/scan/cancel', null).subscribe({
+            next: (_) => {
+                this.isAlertScanLoading.set(false)
+            },
+            error: (err) => {
+                console.error('Cancel scan failed with an error:', err);
+                alert(err?.error?.detail || 'Failed to cancel IOC Scan.');
             },
         });
     }
@@ -30,8 +41,15 @@ export class AlertService {
     getLatestAlerts() {
         this.apiService.get<any>('profile/alerts').subscribe({
             next: response => {
-                this.appService.userProfile().alerts = response
-                this.isAlertScanLoading$.next(false)
+                this.appService.userSessionData().alerts = response
+                this.isAlertScanLoading.set(false)
+            },
+            error: err => {
+                if (err.status === 202) {
+                    this.isAlertScanLoading.set(true)
+                } else {
+                    this.isAlertScanLoading.set(false)
+                }
             }
         })
     }
@@ -46,14 +64,14 @@ export class AlertService {
         }
         this.hasAutoCheckedOnce = true;
         this.isCheckingStatus = true;
-        this.isAlertScanLoading$.next(true);
+        this.isAlertScanLoading.set(true);
         return timer(0, intervalMs).pipe(
             switchMap(() => this.getScanStatus()),
             takeWhile((res: any) => res.scan_running === true, true),
             tap((res) => {
                 if (!res.scan_running) {
                     this.isCheckingStatus = false;
-                    this.isAlertScanLoading$.next(false);
+                    this.isAlertScanLoading.set(false);
                 }
             })
         );

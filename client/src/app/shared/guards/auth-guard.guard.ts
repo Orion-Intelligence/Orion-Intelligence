@@ -6,7 +6,7 @@ import { map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(private authService: AuthService, private router: Router, private appService: AppService) {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -15,10 +15,6 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    if (this.authService.getOnboardingStatus() && state.url !== '/onboarding' && this.authService.getRole() === 'profile') {
-      this.router.navigate(['/onboarding'], { queryParams: { redirect: state.url } }).then();
-      return false;
-    }
 
     return true;
   }

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
@@ -41,14 +41,14 @@ export class ReportComponent implements OnInit {
   isExpandedMetadata = true
   protected readonly last = last;
   protected readonly Category = Category;
-  username$!: Observable<string | null>;
-  role$!: Observable<string | null>;
+  username = signal<string>('');
+  role = signal<string>('');
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, protected authService: AuthService) {
     this.lang = appService.getConfig().appSettings.language_allowed
     this.lang_detected = appService.getConfig().appSettings.language_allowed
-    this.username$ = this.authService.getUsername$();
-    this.role$ = this.authService.getRole$();
+    this.username.set(this.appService.userSessionData().user.username);
+    this.role.set(this.appService.userSessionData().user.role);
   }
 
   get filteredArrayKeys(): string[] {

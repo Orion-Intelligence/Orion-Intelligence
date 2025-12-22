@@ -1,0 +1,116 @@
+<div class="user-settings_section" @fadeInDashboardItem>
+
+  <div class="user-settings_section-header">
+    <span class="user-settings_section-title">System Settings</span>
+  </div>
+
+  <span class="user-settings_section-description">
+    Manage platform-level configuration and integrations.
+  </span>
+
+  <div class="user-settings_card">
+
+    <div class="user-settings_info">
+
+      <div class="user-avatar">
+        <div class="avatar-wrapper">
+          <app-user-image-picker [imageUrl]="this.appService.getConfig().appSettings.logo_url"
+            [defaultImage]="'/api/s/static/system/default'" (onImageSelected)="updateUserResource($event)"
+            (onClear)="deleteUserResource()">
+          </app-user-image-picker>
+        </div>
+      </div>
+
+      <div>
+        <div class="user-settings_company-name">
+          {{ systemData.app_name }}
+        </div>
+        <div class="user-settings_company-location">
+          System Administrator
+        </div>
+      </div>
+
+    </div>
+
+    <div class="user-settings_action-buttons">
+      <button class="user-settings_edit-btn" *ngIf="isEditing" (click)="cancelEdit()">
+        Cancel
+      </button>
+
+      <button class="user-settings_edit-btn" (click)="toggleEdit()">
+        {{ isEditing ? 'Save' : 'Edit' }}
+      </button>
+    </div>
+
+  </div>
+
+  <div class="user-settings_box">
+
+    <div class="user-settings_box-header">
+      Configuration
+    </div>
+
+    <div class="user-settings_box-content">
+
+      <div class="row">
+
+        <div class="col-12 mt-1">
+          <div class="user-settings_info-item py-2">
+            <div class="user-settings_info-label">App Name</div>
+
+            <div class="user-settings_info-value mt-2" *ngIf="!isEditing">
+              {{ systemData.app_name }}
+            </div>
+
+            <input *ngIf="isEditing" class="user-settings_info-value mt-2 user-settings_editable" type="text"
+              [(ngModel)]="form.app_name" />
+          </div>
+        </div>
+
+        <div class="col-12 mt-1">
+          <div class="user-settings_info-item py-2">
+            <div class="user-settings_info-label">Language</div>
+            <select class="user-settings_info-value no-arrow-when-disabled" [(ngModel)]="form.language"
+              [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }">
+
+              <option *ngFor="let lang of languageOptions" [value]="lang">
+                {{ lang.toUpperCase() }}
+              </option>
+
+            </select>
+          </div>
+        </div>
+
+        <div class="col-12 mt-1">
+          <div class="user-settings_info-item py-2">
+            <div class="user-settings_info-label">Version</div>
+            <div class="user-settings_info-value mt-2">
+              {{ systemData.version }}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 mt-1">
+          <div class="user-settings_info-item py-2">
+            <div class="user-settings_info-label">API Allowed</div>
+            <div class="user-settings_info-value mt-2">
+              {{ systemData.api_allowed === '1' ? 'Enabled' : 'Disabled' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 mt-1">
+          <div class="user-settings_info-item py-2">
+            <div class="user-settings_info-label">AI Endpoint</div>
+            <div class="user-settings_info-value mt-2">
+              {{ systemData.ai_endpoint }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

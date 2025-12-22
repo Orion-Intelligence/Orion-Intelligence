@@ -11,7 +11,6 @@ class AllowedKeys(str, Enum):
     API_ALLOWED = "api_allowed"
     APP_NAME = "app_name"
     LANGUAGE_ALLOWED = "language_allowed"
-    TELEGRAM_ALLOWED = "telegram_allowed"
     LOGO_URL = "logo_url"
     AI_ENDPOINT = "ai_endpoint"
 
@@ -35,7 +34,6 @@ class db_system_model(Model):
 
         validators = {
             AllowedKeys.API_ALLOWED: lambda v: v in ("0", "1"),
-            AllowedKeys.TELEGRAM_ALLOWED: lambda v: v in ("0", "1"),
             AllowedKeys.VERSION: lambda v: bool(v.strip()),
             AllowedKeys.APP_NAME: lambda v: bool(v.strip()),
             AllowedKeys.LANGUAGE_ALLOWED: lambda v: v in VALID_LANGUAGE_CODES,
@@ -44,7 +42,6 @@ class db_system_model(Model):
 
         error_messages = {
             AllowedKeys.API_ALLOWED: "API_ALLOWED must be '0' or '1'",
-            AllowedKeys.TELEGRAM_ALLOWED: "TELEGRAM_ALLOWED must be '0' or '1'",
             AllowedKeys.VERSION: "VERSION must be a non-empty string",
             AllowedKeys.APP_NAME: "APP_NAME must be a non-empty string",
             AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}",

@@ -1,37 +1,48 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { NgIf, NgFor, NgSwitch, NgSwitchCase, CommonModule } from '@angular/common';
-import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {NgIf, NgFor, NgSwitch, NgSwitchCase, CommonModule} from '@angular/common';
+import {HeaderComponent} from "../../shared/partials/header/login-header/header.component";
 import {TenantModel, TenantStatus, TenantStatusValues} from '../../shared/model/tenant/tenant.model';
-import { search_filter_labels } from '../../shared/constants/shared-enums';
-import { AuthService } from '../../services/authetication/auth.service';
-import { Router } from '@angular/router';
-import { ApiService } from '../../shared/services/api.service';
-import { AppService } from '../../services/core/app/app.service';
+import {search_filter_labels} from '../../shared/constants/shared-enums';
+import {AuthService} from '../../services/authetication/auth.service';
+import {Router} from '@angular/router';
+import {ApiService} from '../../shared/services/api.service';
+import {AppService} from '../../services/core/app/app.service';
+import {LicenseName} from '../../shared/model/licenses/license.rules';
+import {TooltipDirective} from '../../shared/directive/tooltip-directive.directive';
+import {ConfirmationPopupComponent} from '../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-tenant',
-  imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, FormsModule, CommonModule, HeaderComponent],
+  imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, FormsModule, CommonModule, HeaderComponent, TooltipDirective, ConfirmationPopupComponent],
   templateUrl: './tenant.component.html'
 })
 export class TenantComponent implements OnInit {
   onboardingData: TenantModel = {
-    companyName: '',
-    iocs: []
+    id: '',
+    name: '',
+    iocs: [],
+    phone: '',
+    country: '',
+    city: '',
+    postal_code: ''
   };
   currentStep = 1;
-  @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
+  @ViewChild('categoryScroll', {static: false}) categoryScroll!: ElementRef;
   showLeftFade = false;
   showRightFade = false;
   selectedCategoryId = '';
+  isConfirmationOpen: boolean = false;
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
 
   constructor(private router: Router, public auth_service: AuthService, public apiService: ApiService, public appService: AppService) {
   }
+
   ngOnInit(): void {
     this.initializeIOCs();
   }
+
   private initializeIOCs(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
     this.onboardingData.iocs = Array.from(search_filter_keys).map(key => ({
@@ -41,6 +52,7 @@ export class TenantComponent implements OnInit {
     }));
     this.selectedCategoryId = this.onboardingData.iocs[0]?.ioc_id;
   }
+
   onCategoryClick(categoryId: string): void {
     this.selectedCategoryId = categoryId;
   }
@@ -53,18 +65,20 @@ export class TenantComponent implements OnInit {
       category.values.push(value.trim());
     }
   }
+
   removeIoc(iocId: string, value: string): void {
     const ioc = this.onboardingData.iocs.find(i => i.ioc_id === iocId);
     if (ioc) {
       ioc.values = ioc.values.filter(v => v !== value);
     }
   }
+
   scrollLeft() {
-    this.categoryScroll.nativeElement.scrollBy({ left: -250, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: -250, behavior: 'smooth'});
   }
 
   scrollRight() {
-    this.categoryScroll.nativeElement.scrollBy({ left: 250, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: 250, behavior: 'smooth'});
   }
 
   goNext() {
@@ -78,9 +92,11 @@ export class TenantComponent implements OnInit {
       this.currentStep--;
     }
   }
+
   hasIocsWithValues(): boolean {
     return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
   }
+
   getFilteredIocs() {
     if (!this.iocSearchText) {
       return this.onboardingData.iocs;
@@ -89,10 +105,11 @@ export class TenantComponent implements OnInit {
       ioc.name.toLowerCase().includes(this.iocSearchText.toLowerCase())
     );
   }
+
   confirm() {
     const filteredOnboardingData: TenantModel = {
-      companyName: this.onboardingData.companyName,
-      status:TenantStatusValues.ACTIVE,
+      name: this.onboardingData.name,
+      status: TenantStatusValues.ACTIVE,
       iocs: this.onboardingData.iocs.filter(ioc => ioc.values && ioc.values.length > 0)
     };
     this.categories = {};
@@ -101,9 +118,9 @@ export class TenantComponent implements OnInit {
     });
     this.appService.set('entityfilterCategories', this.categories);
 
-    this.apiService.post('tenants/update', filteredOnboardingData).subscribe({
+    this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => {
-        this.auth_service.setOnboarding(false);
+        this.appService.setOnboardingStatus(false);
         this.router.navigate(['/dashboard']).then();
       },
       error: (err) => {
@@ -112,4 +129,27 @@ export class TenantComponent implements OnInit {
       },
     });
   }
+
+  clearAllIocs(value: boolean): void {
+    if (value) {
+      if (this.onboardingData?.iocs) {
+        this.onboardingData.iocs.forEach(ioc => {
+          ioc.values = [];
+        });
+      }
+      const filteredOnboardingData: TenantModel = {
+        name: this.onboardingData?.name || '',
+        iocs: []
+      };
+
+      this.appService.tenantData.set({...filteredOnboardingData});
+      this.isConfirmationOpen = false;
+    } else {
+      this.isConfirmationOpen = false;
+    }
+  }
+  openConfirmationPopup() {
+    this.isConfirmationOpen = true;
+  }
+
 }

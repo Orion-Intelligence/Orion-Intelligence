@@ -13,7 +13,8 @@ export const TenantStatusValues = {
 };
 
 export interface TenantModel {
-  companyName: string;
+  id?: string;
+  name: string;
   iocs: IocCategory[];
   phone?: string;
   country?: string;
@@ -26,7 +27,6 @@ export interface TenantModel {
   licenses?: string[];
   quotaExceeded?: boolean;
 }
-
 export interface TenantRequest {
   companyName: string;
   iocs: IocCategory[];
@@ -35,19 +35,27 @@ export interface TenantRequest {
 export interface User {
   username: string;
   email: string;
-  role: 'admin' | 'crawler' | 'demo' | 'profile' | 'analyst';
-  status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
+  role: string;
+  status: 'active' | 'disable';
   subscription?: boolean;
   verificationDate: string;
   licenses?: string[] | null;
+}
+
+export interface UserMeta {
+  username: string;
+  email: string;
+  preferences?: {
+    [key: string]: any;
+  };
 }
 
 export interface TenantTeamModel {
   username: string;
   email: string;
   password: string;
-  role: 'profile' | 'analyst' | 'demo';
-  status: 'verification_pending' | 'active' | 'disable';
+  role: 'member' | 'analyst';
+  status: 'active' | 'disable';
   subscription: boolean;
   licenses?: string[] | null;
   quotaExceeded?: boolean;

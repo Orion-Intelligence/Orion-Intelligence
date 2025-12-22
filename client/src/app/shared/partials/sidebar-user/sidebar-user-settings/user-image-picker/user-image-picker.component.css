@@ -1,0 +1,57 @@
+.user-image-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid #1D2939;
+    background-color: #1D2939;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.user-avatar .user-image-container:hover .user-image {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.user-avatar .user-image {
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+.user-image-container:hover {
+    transform: scale(1.02);
+}
+
+.user-image-container:hover .user-image-overlay {
+    opacity: 1;
+}
+
+.user-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.user-image-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+}
+
+.user-mask-svg {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+}
+
+.user-image-camera-icon {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    z-index: 1;
+}

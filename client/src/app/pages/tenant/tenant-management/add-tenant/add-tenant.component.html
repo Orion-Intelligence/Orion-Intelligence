@@ -11,8 +11,10 @@
             <input type="text" class="add-tenant_input" placeholder="Enter username" [(ngModel)]="model.username"
                 name="username" />
             <div class="username-suggestion" *ngIf="usernameSuggestion">
-              <div class="suggestion-title">Username already taken, suggested usernames below</div>
-              <div class="suggestion-list">{{ usernameSuggestion.replace('Username already taken. Suggested usernames: ', '') }}</div>
+                <div class="suggestion-title">Username already taken, suggested usernames below</div>
+                <div class="suggestion-list">
+                    {{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}
+                </div>
             </div>
 
             <label class="add-tenant_label">Email</label>
@@ -28,11 +30,12 @@
                     <label class="add-tenant_label">Role</label>
                     <select class="add-tenant_select" [(ngModel)]="model.role" name="role">
                         <ng-container *ngIf="isAdmin; else nonAdminRoles">
-                            <option [ngValue]="'demo'">Demo</option>
                             <option [ngValue]="'analyst'">Analyst</option>
+                            <option [ngValue]="'member'">Member</option>
                         </ng-container>
                         <ng-template #nonAdminRoles>
-                            <option [ngValue]="'profile'">Profile</option>
+                            <option [ngValue]="'analyst'">Analyst</option>
+                            <option [ngValue]="'member'">Member</option>
                         </ng-template>
                     </select>
                 </div>
@@ -49,28 +52,32 @@
             <div class="add-tenant_label">Licenses</div>
 
             <div class="license-grid">
-                <ng-container *ngFor="let license of licenseList">
-                    <div class="license-card" *ngIf="getLicenseLabel(license) !== 'maintainer'"
-                        [class.license-selected]="model.licenses?.includes(license)"
-                        (click)="toggleTenantLicense(model, license)">
+              <ng-container *ngFor="let license of licenseList">
+                <div
+                  class="license-card"
+                  *ngIf="getLicenseLabel(license) !== 'maintainer'"
+                  [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')"
+                  (click)="toggleTenantLicense(model, license)">
 
-                        <input type="checkbox" class="license-checkbox" [checked]="model.licenses?.includes(license)" />
+                  <input
+                    type="checkbox"
+                    class="license-checkbox"
+                    [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
 
-                        <span class="license-label">
-                            {{ getLicenseLabel(license) }}
-                        </span>
-
-                    </div>
-                </ng-container>
+                  <span class="license-label">
+                    {{ getLicenseLabel(license) }}
+                  </span>
+                </div>
+              </ng-container>
             </div>
 
             <hr class="tenant-divider">
 
             <div *ngIf="errorText"
-                 class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm d-block">
+                class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm d-block">
 
-              <i class="bi bi-exclamation-diamond-fill me-2"></i>
-              {{ errorText }}
+                <i class="bi bi-exclamation-diamond-fill me-2"></i>
+                {{ errorText }}
             </div>
 
         </form>

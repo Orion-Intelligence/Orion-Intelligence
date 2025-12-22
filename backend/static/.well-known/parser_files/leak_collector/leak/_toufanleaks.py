@@ -131,7 +131,8 @@ class _toufanleaks(leak_extractor_interface, ABC):
 
                 entity_data = entity_model(
                     m_team="cyber_toufan",
-                  )
+                    m_scrap_file=self.__class__.__name__,
+                )
 
                 self.append_leak_data(card_data, entity_data)
 

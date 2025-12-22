@@ -1,11 +1,10 @@
 
-from datetime import datetime
+from datetime import datetime, timezone
+import hashlib
 import threading
 from typing import List
 from fastapi import HTTPException
-
-from orion.api.interactive.search_manager.search_model import search_model
-from orion.api.interactive.alert_manager.function_map.function_maping import DOC_REQUEST_MAP, MODULE_ALERT_TYPE_MAP, SCANNING_ALERT_TYPES
+from orion.api.interactive.alert_manager.function_map.function_maping import MODULE_ALERT_TYPE_MAP, SCANNING_ALERT_TYPES
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
 from configs.app_dependency import get_user_permissions
@@ -30,22 +29,38 @@ class AlertManager:
 
     async def get_user_alerts(self, user_id: str) -> db_alert_model | None:
         return await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == user_id)
-    
 
-    async def upsert_alert(self, tenantId: str, data_hash: str, category: str, ioc_type: str, ioc_value: str,
-                           title:str,url:str,description:str,source:str,all_ioc:List[alert_all_ioc]=[], content_types: List[str] = []):
+    def _smart_hash(*parts) -> str:
+        base = "|".join(str(p).strip().lower() for p in parts if p is not None)
+        return hashlib.sha256(base.encode("utf-8")).hexdigest()
+
+    async def upsert_alert(self,
+        tenantId: str,
+        category: str,
+        ioc_type: str,
+        ioc_value: str,
+        title: str,
+        url: str,
+        description: str,
+        source: str,
+        all_ioc: List[alert_all_ioc],
+        content_types: List[str],
+        data_hash=''):
+        
+        if(data_hash==''):
+            data_hash = self._smart_hash(category, ioc_type, ioc_value, source, url)
+
         existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenantId)
         alert_updated = False
+
         if existing_doc and existing_doc.alerts:
             for alert in existing_doc.alerts:
-                if (alert.data_hash == data_hash and 
-                    alert.ioc_value == ioc_value and 
-                    alert.type == category):
-                    
-                    alert.last_seen = datetime.utcnow()
+                if (alert.data_hash or "") == data_hash:
+                    alert.last_seen = datetime.now(timezone.utc)
+
                     alert_updated = True
                     break
-        
+
         if not alert_updated:
             new_alert = AlertModel(
                 alert_id=f"{data_hash}-{ioc_value}",
@@ -59,112 +74,79 @@ class AlertManager:
                 source=source,
                 content_types=content_types,
                 status=alert_status.ACTIVE,
-                first_seen=datetime.utcnow(),
-                last_seen=datetime.utcnow(),
-                all_ioc=all_ioc,
-            )
+                first_seen=datetime.now(timezone.utc),
+                last_seen=datetime.now(timezone.utc),
+                all_ioc=all_ioc, )
 
             if existing_doc:
                 existing_doc.alerts.append(new_alert)
                 doc_to_save = existing_doc
             else:
-                doc_to_save = db_alert_model(
-                    tenant_id=tenantId,
-                    alerts=[new_alert]
-                )
-
+                doc_to_save = db_alert_model(tenant_id=tenantId, alerts=[new_alert])
         else:
             doc_to_save = existing_doc
 
-
-        save_result = await self._engine.save(doc_to_save)
-        
+        await self._engine.save(doc_to_save)
         return "Updated" if alert_updated else "Created"
-    
 
     async def add_custom_alert(self, data: AlertModel, current_user):
-        company_uuid = str(current_user.company_uuid)
-        doc_id = data.data_hash  
+        tenant_uuid = str(current_user.tenant_uuid)
 
+        all_ioc = data.all_ioc or []
+        if not all_ioc and (data.ioc_type and data.ioc_value):
+            all_ioc = [alert_all_ioc(name=data.ioc_type, values=[data.ioc_value])]
 
-        if data.type not in DOC_REQUEST_MAP:
-            return {"error": f"Unsupported alert type '{data.type}'"}
-
-        func_name = DOC_REQUEST_MAP[data.type]
-        request_func = getattr(search_model.getInstance(), func_name)
-
-        try:
-            if data.type in ["breach", "exploit", "general", "chat", "social", "defacement"]:
-                doc_result = await request_func(doc_id, lang=None)
-            else:
-                doc_result = await request_func(doc_id)
-        except Exception as e:
-            raise HTTPException(status_code=500,detail=f"Failed to fetch document")
-
- 
-        if not doc_result:
-            raise HTTPException(status_code=400, detail="No document found for this hash. Not a valid hash or not found.")
-
-        if hasattr(doc_result, "dict"):
-            doc_dict = doc_result.dict()
-        elif hasattr(doc_result, "model_dump"):
-            doc_dict = doc_result.model_dump()
-        elif isinstance(doc_result, dict):
-            doc_dict = doc_result
-        else:
-            raise HTTPException(status_code=500,detail=f"Unexpected document response type")
-
-        if doc_dict.get("m_hash") != doc_id:
-            raise HTTPException(status_code=400,detail=f"Hash does not match the document")
+        data.data_hash = self._smart_hash(data.type, data.ioc_type, data.ioc_value, data.source, data.url)
 
         alert_id = data.alert_id or f"{data.data_hash}-{data.ioc_value}"
+
         new_alert = AlertModel(
             alert_id=alert_id,
             custom_alert=True,
             type=data.type or '',
             ioc_type=data.ioc_type or '',
             ioc_value=data.ioc_value or '',
-            data_hash=data.data_hash or '',
+            data_hash=data.data_hash,
             title=data.title or '',
             description=data.description or '',
             source=data.source or '',
             url=data.url or '',
-            all_ioc=data.all_ioc or [],
+            all_ioc=all_ioc,
             content_types=data.content_types or [],
             status=data.status or alert_status.ACTIVE,
-            first_seen=datetime.utcnow(),
-            last_seen=datetime.utcnow(),
-        )
+            first_seen=datetime.now(timezone.utc),
+            last_seen=datetime.now(timezone.utc), )
 
-        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == company_uuid)
+        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+
         if existing_doc and existing_doc.alerts:
             for alert in existing_doc.alerts:
-                if (
-                    alert.data_hash == new_alert.data_hash and
-                    alert.ioc_value == new_alert.ioc_value and
-                    alert.type == new_alert.type
-                ):
-                    raise HTTPException(status_code=400,detail=f"Alert already exists")
+                if (alert.data_hash or "") == new_alert.data_hash:
+                    alert.title = new_alert.title
+                    alert.description = new_alert.description
+                    alert.source = new_alert.source
+                    alert.url = new_alert.url
+                    alert.all_ioc = new_alert.all_ioc
+                    alert.content_types = new_alert.content_types
+                    alert.status = new_alert.status
+                    alert.last_seen = datetime.now(timezone.utc)
+                    await self._engine.save(existing_doc)
+                    return {"message": "Updated"}
 
-   
         if existing_doc:
             existing_doc.alerts.append(new_alert)
             save_doc = existing_doc
         else:
-            save_doc = db_alert_model(
-                tenant_id=company_uuid,
-                alerts=[new_alert]
-            )
+            save_doc = db_alert_model(tenant_id=tenant_uuid, alerts=[new_alert])
 
         await self._engine.save(save_doc)
         return {"message": "Created"}
-    
 
     async def update_alert(self, alert_to_update: AlertModel, current_user):
-        company_uuid = str(current_user.company_uuid)
+        tenant_uuid = str(current_user.tenant_uuid)
         existing_doc = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.tenant_id == company_uuid)
+            db_alert_model.tenant_id == tenant_uuid)
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=404, detail="No alerts found for this user")
         hash_to_find = alert_to_update.data_hash
@@ -178,7 +160,7 @@ class AlertManager:
                 stored_alert.type=_type
                 stored_alert.ioc_type=_iocType
                 stored_alert.ioc_value=_iocValue
-                stored_alert.last_seen = datetime.utcnow()
+                stored_alert.last_seen = datetime.now(timezone.utc)
                 updated = True
                 break
         if not updated:
@@ -191,10 +173,10 @@ class AlertManager:
 
 
     async def set_alert_seen(self, alerts_to_update: list[AlertModel], current_user):
-        company_uuid = str(current_user.company_uuid)
+        tenant_uuid = str(current_user.tenant_uuid)
         existing_doc = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.tenant_id == company_uuid
+            db_alert_model.tenant_id == tenant_uuid
         )
 
         if not existing_doc or not existing_doc.alerts:
@@ -224,11 +206,11 @@ class AlertManager:
         }
     
     async def delete_alert(self, id: str, current_user):
-        company_uuid = str(current_user.company_uuid)
+        tenant_uuid = str(current_user.tenant_uuid)
 
         existing_doc = await self._engine.find_one(
             db_alert_model, 
-            db_alert_model.tenant_id == company_uuid
+            db_alert_model.tenant_id == tenant_uuid
         )
 
         if not existing_doc or not existing_doc.alerts:
@@ -244,24 +226,27 @@ class AlertManager:
         await self._engine.save(existing_doc)
 
         return {"message": "Alert deleted successfully", "id": id}
-    
+
     async def getAllAlerts(self, current_user):
         alerts_data = await self._engine.find_one(
-            db_alert_model,
-            db_alert_model.tenant_id == str(current_user.company_uuid)
-        )
-        
+            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
+
+        scan_status = await self.get_scan_status(current_user)
+        if scan_status.get("scan_running", False):
+            raise HTTPException(
+                status_code=202, detail="Scan is still processing")
+
         if not alerts_data:
-            return [] 
+            return []
 
         return alerts_data.alerts
 
     async def delete_all_alerts(self, current_user):
-        company_uuid = str(current_user.company_uuid)
+        tenant_uuid = str(current_user.tenant_uuid)
 
         existing_doc = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.tenant_id == company_uuid
+            db_alert_model.tenant_id == tenant_uuid
         )
 
         if not existing_doc:
@@ -276,11 +261,11 @@ class AlertManager:
         return {"message": "All alerts deleted successfully"}
 
     async def delete_alerts_by_type(self, current_user, alert_type: str):
-        company_uuid = str(current_user.company_uuid)
+        tenant_uuid = str(current_user.tenant_uuid)
 
         existing_doc = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.tenant_id == company_uuid
+            db_alert_model.tenant_id == tenant_uuid
         )
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=400, detail="No alerts to delete")
@@ -305,7 +290,7 @@ class AlertManager:
         }
     
     async def set_scan_running(self,tenant_id: str, value: bool) -> dict:
-        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
+        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant_id))
 
         if alert_doc:
             alert_doc.scan_running = value
@@ -314,17 +299,17 @@ class AlertManager:
         return {"tenant_id": tenant_id, "scan_running": value}
     
     async def get_scan_status(self, current_user):
-        company_uuid = str(current_user.company_uuid)
-        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == company_uuid)
+        alerts_data = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
 
-        if alert_doc:
+        if alerts_data:
             return {
-                "scan_running": alert_doc.scan_running
+                "scan_running": alerts_data.scan_running
             }
         return {
             "scan_running": False
         }
-    
+
+
     @staticmethod
     def get_allowed_alert_types(user) -> set[str]:
         permissions = get_user_permissions(user)

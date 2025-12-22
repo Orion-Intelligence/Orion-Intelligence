@@ -10,101 +10,83 @@
 
 
   <ul class="sidebar__items">
-    <ng-container
-      *ngIf="authService.getRole() === 'profile' || authService.getRole() === 'admin' || authService.getRole()=='analyst'">
-      <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
-        [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
-        [title]="authService.getUsername()">
-      </app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container
-      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'admin'&& authService.getRole() !== 'analyst')">
-      <li class="sidebar__item">
-        <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{
-        'active':
-          (selectionStore.selectedSection$ | async) === null ||
-          (selectionStore.selectedSection$ | async) === category.HOMEPAGE ||
-          (selectionStore.selectedSection$ | async) === category.CONSOLIDATED
-      }" [queryParamsHandling]="'merge'" [routerLink]="'home'" class="sidebar__item-dropdown">
-
-          <img alt="Home" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/home.svg" width="20" />Homepage
-        </div>
-      </li>
-    </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('general')">
+    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+      (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+      [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
+      [title]="this.appService.userSessionData().user.username">
+    </app-dashboard-sidebar-items>
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('general')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
         [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [routePrefix]="'strategic'"
         [title]="'General Intelligence'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('breach')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('breach')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.BREACH"
         [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [routePrefix]="'breach'"
         [title]="'Data Breach'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('discussion')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('discussion')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DISCUSSION"
         [icon]="'assets/images/sidebar/data_breach.svg'" [items]="discussionCategories" [routePrefix]="'discussion'"
         [title]="'Discussion'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('defacement')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('defacement')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DEFACEMENT"
         [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [routePrefix]="'defacement'"
         [title]="'Defacement'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('social')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.SOCIAL"
         [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories" [routePrefix]="'social'"
         [title]="'Social'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('exploit')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('exploit')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.EXPLOIT"
         [icon]="'assets/images/sidebar/exploits.svg'" [items]="exploitCategories" [routePrefix]="'exploit'"
         [title]="'Exploit'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('feed')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('feed')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.FEED"
         [icon]="'assets/images/sidebar/news.svg'" [items]="newsCategories" [routePrefix]="'feed'"
         [title]="'Feed'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('stealer_logs')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('stealer_logs')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS"
         [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'"
         [title]="'Stealer logs'"></app-dashboard-sidebar-items></ng-container>
-    <ng-container *ngIf="licenseService.canUseScanning()">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.SCANNER"
         [icon]="'assets/images/sidebar/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
         [title]="'Web Scans'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseScanning()">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.API"
         [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
         [title]="'Live APIs'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('dumps')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'"
         [title]="'Dump'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="authService.getRole() === 'admin'">
+    <!-- <ng-container *ngIf="authService.getRole() === 'admin'">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
         [icon]="'assets/images/sidebar/tenant.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
         [title]="'Tenant'"></app-dashboard-sidebar-items>
-    </ng-container>
-    <ng-container *ngIf="licenseService.canUseCtiGraph()">
+    </ng-container> -->
+    <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <div class="sidebar__item">
         <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph" target="_blank">
           <img alt="Links" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/graph.svg" width="20"> CTI
@@ -133,7 +115,8 @@
       </div>
     </div>
 
-    <a class="gc-clear-selection" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+    <a class="gc-clear-selection"
+      href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="sidebar__item">
         <div class="sidebar__item-dropdown">
           <img alt="Documentation" class="sidebar__icon" height="20"
@@ -154,14 +137,13 @@
   </div>
 
   <ul class="sidebar__items">
-    <ng-container *ngIf="authService.getRole() === 'profile' || authService.getRole()==='admin'; else homeTemplate">
-      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
-        [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
-        [selectionStore]="selectionStore" [title]="authService.getUsername()"></app-dashboard-sidebar-collapsed>
-    </ng-container>
+    <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+      (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+      [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
+      [selectionStore]="selectionStore"
+      [title]="appService.userSessionData().user.username"></app-dashboard-sidebar-collapsed>
 
-    <ng-template #homeTemplate>
+    <!-- <ng-template #homeTemplate>
       <li class="sidebar__item">
         <div (click)="onSectionSelected(category.HOMEPAGE)"
           [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" [routerLink]="'home'"
@@ -170,10 +152,10 @@
             width="20">
         </div>
       </li>
-    </ng-template>
+    </ng-template> -->
 
 
-    <ng-container *ngIf="licenseService.canUseModule('general')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('general')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
         [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [routePrefix]="'strategic'"
@@ -181,7 +163,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseModule('breach')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('breach')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.BREACH"
         [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [routePrefix]="'breach'"
@@ -189,7 +171,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseModule('defacement')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('defacement')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DEFACEMENT"
         [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [routePrefix]="'defacement'"
@@ -197,7 +179,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseModule('social')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.SOCIAL"
         [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories" [routePrefix]="'social'"
@@ -205,7 +187,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseModule('exploit')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('exploit')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.EXPLOIT"
         [icon]="'assets/images/sidebar/exploits.svg'" [items]="exploitCategories" [routePrefix]="'exploit'"
@@ -213,7 +195,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseModule('feed')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('feed')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.FEED"
         [icon]="'assets/images/sidebar/news.svg'" [items]="newsCategories" [routePrefix]="'feed'"
@@ -221,7 +203,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseModule('stealer_logs')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('stealer_logs')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS"
         [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'"
@@ -229,7 +211,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseScanning()">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.API"
         [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
@@ -237,7 +219,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseScanning()">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.SCANNER"
         [icon]="'assets/images/sidebar/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
@@ -245,7 +227,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseModule('dumps')">
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'"
@@ -253,15 +235,15 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="authService.getRole() === 'admin'">
+    <!-- <ng-container *ngIf="authService.getRole() === 'admin'">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
         [icon]="'assets/images/sidebar/tenant.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
         [selectionStore]="selectionStore" [title]="'Tenant'">
       </app-dashboard-sidebar-collapsed>
-    </ng-container>
+    </ng-container> -->
 
-    <div class="sidebar__item" *ngIf="licenseService.canUseCtiGraph()">
+    <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph"
         target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/graph.svg"
           width="19"> </a>
@@ -286,7 +268,8 @@
       </div>
     </div>
 
-    <a class="gc-clear-selection" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+    <a class="gc-clear-selection"
+      href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="sidebar__item">
         <div class="sidebar__item-dropdown">
           <img appTooltip="documentation" alt="Documentation" class="sidebar__icon" height="20"

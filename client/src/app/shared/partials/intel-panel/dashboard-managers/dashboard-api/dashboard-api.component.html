@@ -1,37 +1,42 @@
-<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" class="default-input-container"
-  enctype="multipart/form-data" method="GET">
-  <div class="row dashboard__api-search-input-div" [ngClass]="{ 'email-search': apiType === 'user' }">
+<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action=""
+      class="default-input-container default-input-container-api"
+      enctype="multipart/form-data" method="GET">
+  <div class="row dashboard__api-search-input-div dashboard__api-search-input-div-extended"
+       [ngClass]="{ 'email-search': apiType === 'user', 'dashboard__api-search-input-div-extended': (apiType === 'social' || apiType === 'cracked' || apiType === 'software') }">
     <div
-      [ngClass]="(apiType === 'social' || apiType === 'cracked') ? 'col-xl-8 col-12 input-container' : 'col-xl-5 col-12 input-container'">
+      [ngClass]="(apiType === 'social' || apiType === 'cracked'|| apiType === 'software') ? 'col-xl-9 input-api-padding-right col-12 input-container' : 'col-xl-5 col-12 input-container'">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/user1.svg" priority width="20">
         </div>
         <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input"
-          [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150"
-          [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : 'q1'))"
-          [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : 'Query 1'))"
-          [type]="apiType === 'cracked' ? 'url' : 'text'"
-          [required]="(apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))">
+               [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150"
+               [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : 'q1')))"
+               [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))"
+               [type]="apiType === 'cracked' ? 'url' : 'text'"
+               [required]="(apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))">
+
         <input type="hidden" value="1"> <span class="input-group-text"></span>
       </div>
     </div>
 
-    <div class="col-xl-5 col-12 mt-lg-0 mt-2 input-container" *ngIf="apiType !== 'social' && apiType !== 'cracked'">
+    <div class="col-xl-5 col-12 mt-lg-0 mt-2 input-container"
+         *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/email.svg" priority width="20">
         </div>
         <input [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="form-control default-input" email
-          maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email"
-          [required]="apiType === 'email' ? true : !(q1 && q1.trim())"> <input type="hidden" value="1"> <span
-          class="input-group-text"></span>
+               maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email"
+               [required]="apiType === 'email' ? true : !(q1 && q1.trim())"> <input type="hidden" value="1"> <span
+        class="input-group-text"></span>
       </div>
     </div>
 
-    <div class="col-2 mt-lg-0 mt-2">
+    <div class="col-2 mt-lg-0 mt-2 dash-search-button-container">
       <button [disabled]="!searchForm.valid || (apiType === 'cracked' && !crackedValid)"
-        class="dash-search-button">Search</button>
+              class="dash-search-button">Search
+      </button>
     </div>
   </div>
 </form>
@@ -48,16 +53,18 @@
 <div class="ml-lg-4 dash-api_hint">
   <div class="default-notification-banner default-notification-banner-stealer">
     <span>
-      <img alt="Info Icon" class="default-notification-banner-icon" src="/assets/images/shared/hint.svg" />
+      <img alt="Info Icon" class="default-notification-banner-icon" src="/assets/images/shared/hint.svg"/>
       <span>
         {{
-        apiType === 'user'
-        ? 'Determines whether the specified user has a presence on any (clearnet) platform.'
-        : apiType === 'social'
-        ? 'Determines whether the provided username exists on (clearnet) social platforms.'
-        : apiType === 'cracked'
-        ? 'Checks for cracked key signals for the provided Play Store URL.'
-        : ''
+          apiType === 'user'
+            ? 'Determines whether the specified user has a presence on any (clearnet) platform.'
+            : apiType === 'social'
+              ? 'Determines whether the provided username exists on (clearnet) social platforms.'
+              : apiType === 'cracked'
+                ? 'Checks for cracked key signals for the provided Play Store URL.'
+                : apiType === 'software'
+                  ? 'Checks for cracked mirrors of known softwares.'
+                  : ''
         }}
       </span>
     </span>
@@ -65,50 +72,90 @@
 </div>
 
 <div class="search__result-detail search__result-detail-extended"
-  *ngIf="query_triggered && !loading && emailCallbackbackModel.cards_data.length > 0" @fadeInDashboardItem>
+     *ngIf="query_triggered && !loading && emailCallbackbackModel.cards_data.length > 0" @fadeInDashboardItem>
 
-  <ng-container *ngIf="apiType === 'cracked'; else nonCrackedSwitch">
-    <div class="flex-col-gap-12">
-      <div *ngFor="let item of emailCallbackbackModel.cards_data; let last = last" class="dashboard-result-card">
-        <div class="report__defacement-detail-header-url dashboard-header-header">
-          {{ item?.m_app_name }}
+  <ng-container *ngIf="apiType === 'cracked' || apiType === 'software'; else nonCrackedSwitch">
+    <div class="flex-col-gap-12 flex-col-gap-12--cards">
+      <div *ngFor="let item of emailCallbackbackModel.cards_data; let last = last"
+           class="dashboard-result-card dashboard-result-card--app">
+        <div class="card-head">
+          <div class="report__defacement-detail-header-url dashboard-header-header card-title"
+               title="{{ item?.m_app_name }}">
+            {{ item?.m_app_name }}
+          </div>
+
+          <div class="card-subtitle mt-1">
+            <a class="color-text1 card-link" [href]="item?.m_app_url" target="_blank" rel="noopener noreferrer">
+              <span class="link-ico" aria-hidden="true">🔗</span>
+              <span class="link-text">{{ item?.m_app_url }}</span>
+            </a>
+          </div>
         </div>
 
-        <div class="mt-1">
-          <a class="color-text1" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url }}</a>
+        <div class="card-grid">
+          <div class="field">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">Package ID</div>
+            <div class="color-text1 field-value mono clamp-2"
+                 title="{{ item?.m_package_id }}">{{ item?.m_package_id }}
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">Network</div>
+            <div class="color-text1 field-value clamp-2" title="{{ item?.m_network }}">{{ item?.m_network }}</div>
+          </div>
+
+          <div class="field">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">Version</div>
+            <div class="color-text1 field-value mono" title="{{ item?.m_version }}">{{ item?.m_version }}</div>
+          </div>
+
+          <div class="field field--chips">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">Content Type</div>
+            <div class="flex-wrap-gap-8 chips">
+              <span *ngFor="let ct of item?.m_content_type" class="badge-red chip" title="{{ ct }}">{{ ct }}</span>
+            </div>
+          </div>
+
+          <div class="field field--chips field--full">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">Download Links</div>
+            <div class="flex-wrap-gap-8 chips">
+              <a *ngFor="let d of item?.m_download_link"
+                 class="badge-red chip chip-link"
+                 [href]="d"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 title="{{ d }}">
+                <span class="chip-dot" aria-hidden="true"></span>
+                <span class="chip-text">{{ d }}</span>
+              </a>
+              <span *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0"
+                    class="color-text1 field-value">not available</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">APK Size</div>
+            <div class="color-text1 field-value mono"
+                 title="{{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}">
+              {{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">Latest Date</div>
+            <div class="color-text1 field-value mono" title="{{ item?.m_latest_date }}">{{ item?.m_latest_date }}</div>
+          </div>
+
+          <div class="field field--full"
+               *ngIf="item?.m_mod_features && (item?.m_mod_features + '').trim().length > 0">
+            <div class="report__defacement-detail-header-items dashboard-header-label field-label">Mod Features</div>
+            <pre class="color-text1 pre-wrap-m0 mod-pre" [title]="item?.m_mod_features">{{ item?.m_mod_features }}</pre>
+          </div>
         </div>
 
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Package ID</div>
-        <div class="color-text1">{{ item?.m_package_id }}</div>
-
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Network</div>
-        <div class="color-text1">{{ item?.m_network }}</div>
-
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Version</div>
-        <div class="color-text1">{{ item?.m_version }}</div>
-
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Content Type</div>
-        <div class="flex-wrap-gap-8">
-          <span *ngFor="let ct of item?.m_content_type" class="badge-red">{{ ct }}</span>
-        </div>
-
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Download Links</div>
-        <div class="flex-wrap-gap-8">
-          <a *ngFor="let d of item?.m_download_link" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d
-            }}</a> <span *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0" class="color-text1">not
-            available</span>
-        </div>
-
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">APK Size</div>
-        <div class="color-text1">{{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}</div>
-
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Latest Date</div>
-        <div class="color-text1">{{ item?.m_latest_date }}</div>
-
-        <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Mod Features</div>
-        <pre class="color-text1 pre-wrap-m0">{{ item?.m_mod_features }}</pre>
-
-        <hr class="dashboard-header-divider" *ngIf="!last">
+        <div class="card-glow" aria-hidden="true"></div>
+        <hr class="dashboard-header-divider card-divider" *ngIf="!last">
       </div>
     </div>
   </ng-container>
@@ -117,49 +164,103 @@
     <ng-container *ngIf="apiType === 'social'; else nonSocialView">
       <div class="flex-col-gap-12">
         <div *ngFor="let item of emailCallbackbackModel.cards_data; let last = last" class="dashboard-result-card">
-          <div class="report__defacement-detail-header-url dashboard-header-header">
-            {{ item?.m_title }}
-          </div>
-          <div class="mt-1">
-            <a class="color-text1" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
-          </div>
+          <div class="card-head">
+            <div class="report__defacement-detail-header-url dashboard-header-header card-title"
+                 title="{{ item?.m_title }}">
+              {{ item?.m_title }}
+            </div>
 
-          <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Found On</div>
-          <div class="color-text1">{{ item?.m_base_url }}</div>
-
-          <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Links</div>
-          <div class="flex-wrap-gap-8">
-            <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a>
-            <a *ngFor="let d of item?.m_dumplink" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d
-              }}</a>
+            <div class="card-subtitle mt-1">
+              <a class="color-text1 card-link" [href]="item?.m_url" target="_blank" rel="noopener"
+                 title="{{ item?.m_url }}">
+                <span class="link-ico" aria-hidden="true">🔗</span>
+                <span class="link-text">{{ item?.m_url }}</span>
+              </a>
+            </div>
           </div>
 
-          <hr class="dashboard-header-divider" *ngIf="!last">
+          <div class="card-body">
+            <div class="field field--full">
+              <div class="report__defacement-detail-header-items dashboard-header-label field-label">Found On</div>
+              <div class="color-text1 field-value clamp-2" title="{{ item?.m_base_url }}">{{ item?.m_base_url }}</div>
+            </div>
+
+            <div class="field field--full">
+              <div class="report__defacement-detail-header-items dashboard-header-label field-label">Links</div>
+              <div class="flex-wrap-gap-8 chips">
+                <a *ngFor="let w of item?.m_weblink"
+                   class="badge-red chip chip-link"
+                   [href]="w"
+                   target="_blank"
+                   rel="noopener"
+                   title="{{ w }}">
+                  <span class="chip-dot" aria-hidden="true"></span>
+                  <span class="chip-text">{{ w }}</span>
+                </a>
+
+                <a *ngFor="let d of item?.m_dumplink"
+                   class="badge-red chip chip-link"
+                   [href]="d"
+                   target="_blank"
+                   rel="noopener"
+                   title="{{ d }}">
+                  <span class="chip-dot" aria-hidden="true"></span>
+                  <span class="chip-text">{{ d }}</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <hr class="dashboard-header-divider card-divider" *ngIf="!last">
         </div>
       </div>
     </ng-container>
   </ng-template>
 
   <ng-template #nonSocialView>
-    <div class="report__defacement-detail-header-url dashboard-header-header">
-      {{ breachData?.m_url }}
-    </div>
-    <hr class="dashboard-header-divider" />
-    <div class="report__defacement-detail-header-items mb-1 dashboard-header-label">Content Type:</div>
-    <span class="color-text1">stolen</span>
-    <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
-      {{ apiType === 'user' ? 'Username:' : 'Query 1:' }}
-    </div>
-    <span class="color-text1">{{ displayQ1 && displayQ1.trim() !== '' ? displayQ1 : 'not found' }}</span>
-    <ng-container *ngIf="apiType !== 'social' && apiType !== 'cracked'">
-      <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
-        {{ apiType === 'user' ? 'Email Address:' : 'Query 2:' }}
+    <div class="dashboard-result-card dashboard-result-card--app">
+      <div class="card-head">
+        <div class="report__defacement-detail-header-url dashboard-header-header card-title"
+             title="{{ breachData?.m_url }}">
+          {{ breachData?.m_url }}
+        </div>
       </div>
-      <span class="color-text1">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</span>
-    </ng-container>
-    <div class="report__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">Breaches:</div>
-    <div class="flex-wrap-gap-8">
-      <span *ngFor="let item of breachData?.m_dumplink" class="badge-red">{{ item }}</span>
+
+      <hr class="dashboard-header-divider card-divider"/>
+
+      <div class="card-body">
+        <div class="field">
+          <div class="report__defacement-detail-header-items mb-1 dashboard-header-label field-label">Content Type:
+          </div>
+          <span class="color-text1 field-value">stolen</span>
+        </div>
+
+        <div class="field">
+          <div class="report__defacement-detail-header-items mt-1 mb-1 dashboard-header-label field-label">
+            {{ apiType === 'user' ? 'Username:' : 'Query 1:' }}
+          </div>
+          <span
+            class="color-text1 field-value">{{ displayQ1 && displayQ1.trim() !== '' ? displayQ1 : 'not found' }}</span>
+        </div>
+
+        <ng-container *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
+          <div class="field">
+            <div class="report__defacement-detail-header-items mt-1 mb-1 dashboard-header-label field-label">
+              {{ apiType === 'user' ? 'Email Address:' : 'Query 2:' }}
+            </div>
+            <span
+              class="color-text1 field-value">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</span>
+          </div>
+        </ng-container>
+
+        <div class="field">
+          <div class="report__defacement-detail-header-items mt-2 mb-2 dashboard-header-label field-label">Breaches:
+          </div>
+          <div class="flex-wrap-gap-8 chips">
+            <span *ngFor="let item of breachData?.m_dumplink" class="badge-red chip"
+                  title="{{ item }}">{{ item }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </ng-template>
 </div>

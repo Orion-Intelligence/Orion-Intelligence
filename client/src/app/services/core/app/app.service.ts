@@ -6,9 +6,10 @@ import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
-import { CompanyProfile } from '../../../shared/model/company-profile/company.profile.model';
+import { userSessionData } from '../../../shared/model/company-profile/node.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -20,24 +21,38 @@ export class AppService {
 
   private entitiesCache: any[] | null = null;
 
-  public userProfile = signal<CompanyProfile>({
-    companyName: '',
-    email: '',
-    phone: null,
-    country: '',
-    city: '',
-    postalCode: '',
-    taxId: '',
-    alerts: [],
-    licenses: [],
-    assignedQuota:0,
-    quotaExceeded:false
+  public userSessionData = signal<userSessionData>({
+    user: {
+      email: '',
+      twofa_enabled: false,
+      username: '',
+      role: '',
+      status: '',
+      subscription: false,
+      verificationDate: '',
+      license: []
+    },
+    tenant: {
+      id: '',
+      name: '',
+      phone: '',
+      hasOnboarding: false,
+      country: '',
+      city: '',
+      postalCode: '',
+      taxId: '',
+      userId: '',
+      licenses: [],
+      assignedQuota: '0',
+      quotaExceeded: false
+    },
+    alerts: []
   });
   public tenantData = signal<TenantModel>({
-    companyName: '',
+    name: '',
     iocs: []
   });
-  public profileImageUrl = signal<string | null>(null);
+  public userImageUrl = signal<string | null>(null);
 
   constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
     this.loadEntities()
@@ -49,6 +64,41 @@ export class AppService {
 
     this.loadStaticConfig();
     this.appStorageService.setupWatcher(this.configData);
+  }
+
+  async loadSession(): Promise<void> {
+    try {
+      const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
+      if (session) this.userSessionData.set(session);
+    } catch {
+      this.userSessionData.set({
+        user: {
+          email: '',
+          twofa_enabled: false,
+          username: '',
+          role: '',
+          status: '',
+          subscription: false,
+          verificationDate: '',
+          license: []
+        },
+        tenant: {
+          id: '',
+          name: '',
+          phone: '',
+          hasOnboarding: false,
+          country: '',
+          city: '',
+          postalCode: '',
+          taxId: '',
+          userId: '',
+          licenses: [],
+          assignedQuota: '0',
+          quotaExceeded: false
+        },
+        alerts: []
+      });
+    }
   }
 
   loadConfig(): void {
@@ -121,25 +171,52 @@ export class AppService {
   clearAll(): void {
     this.appStorageService.clearStorage();
     this.configData.set(new ConfigSettings());
-    this.profileImageUrl.set(null);
-    this.userProfile.set({
-      companyName: '',
-      email: '',
-      phone: null,
-      country: '',
-      city: '',
-      postalCode: '',
-      taxId: '',
-      alerts: [],
-      preferences: [],
-      licenses: [],
-      assignedQuota:0,
-      quotaExceeded:false
+    this.userImageUrl.set(null);
+    this.userSessionData.set({
+      user: {
+        email: '',
+        twofa_enabled: false,
+        username: '',
+        role: '',
+        status: '',
+        subscription: false,
+        verificationDate: '',
+        license: []
+      },
+      tenant: {
+        id: '',
+        name: '',
+        phone: '',
+        hasOnboarding: false,
+        country: '',
+        city: '',
+        postalCode: '',
+        taxId: '',
+        userId: '',
+        licenses: [],
+        assignedQuota: '0',
+        quotaExceeded: false
+      },
+      alerts: []
     });
   }
 
   isMobileMode(): boolean {
     return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+  }
+
+  setOnboardingStatus(value: boolean) {
+    this.userSessionData.update(state => {
+      if (!state) return state;
+      localStorage.setItem('onboarding', String(value));
+      return {
+        ...state,
+        tenant: {
+          ...state.tenant,
+          hasOnboarding: value
+        }
+      };
+    });
   }
 
 }

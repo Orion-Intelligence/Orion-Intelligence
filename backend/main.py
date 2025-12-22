@@ -1,11 +1,9 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
-
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
-
 from configs.token_auth_provider import setup_admin
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from configs.swagger_config import configure_swagger
@@ -18,7 +16,7 @@ from routes.api_micros import micro_routes
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
-from routes.private_api_routes import private_api_routes, public_routes
+from routes.public_api_routes import public_routes
 from routes.tenant_routes import tenant_routes
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -55,7 +53,6 @@ app.include_router(admin_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
 app.include_router(micro_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
-app.include_router(private_api_routes, include_in_schema=False)
 app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)

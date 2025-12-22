@@ -134,6 +134,7 @@ class _securo45z554mw7rgrt7wcgv5eenj2xmxyrsdj3fcjsvindu63s4bsid(leak_extractor_i
 
                 entity_data = entity_model(
                     m_team="securo",
+                    m_scrap_file=self.__class__.__name__,
                 )
 
                 self.append_leak_data(card_data, entity_data)

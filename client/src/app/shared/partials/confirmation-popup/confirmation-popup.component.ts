@@ -1,9 +1,14 @@
 import { Component, EventEmitter, HostListener, Output, Input } from '@angular/core';
+import {FocusDirective} from '../../directive/focus.directive';
+import {popupAnimation} from '../../animations/popup.animations';
 
 @Component({
   selector: 'app-confirmation-popup',
-  imports: [],
-  templateUrl: './confirmation-popup.component.html'
+  imports: [
+    FocusDirective
+  ],
+  templateUrl: './confirmation-popup.component.html',
+  animations: [popupAnimation],
 })
 export class ConfirmationPopupComponent {
   @Input() message = 'Are you sure you want to perform this action?';

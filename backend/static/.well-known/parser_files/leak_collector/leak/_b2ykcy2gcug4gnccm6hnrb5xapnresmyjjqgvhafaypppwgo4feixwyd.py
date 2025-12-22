@@ -150,7 +150,7 @@ class _b2ykcy2gcug4gnccm6hnrb5xapnresmyjjqgvhafaypppwgo4feixwyd(leak_extractor_i
             entity_data = entity_model(
                 m_team="Black Shrantac",
                 m_country=[country],
-            )
+                m_scrap_file=self.__class__.__name__, )
 
             self.append_leak_data(card_data, entity_data)
 

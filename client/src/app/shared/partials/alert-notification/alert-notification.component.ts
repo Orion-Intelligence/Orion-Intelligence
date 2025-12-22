@@ -4,18 +4,20 @@ import { filterAnimation } from '../../animations/filter.animation';
 import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
-import { AlertModel } from '../../model/company-profile/company.profile.model';
+import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { Subscription } from 'rxjs';
+import {searchFilterAnimation} from '../../animations/search.filter.animation';
+import {overlayAnimation, sidebarAnimation} from '../../animations/sidebar.animations';
 
 
 @Component({
   selector: 'app-alert-notification',
   imports: [NgIf, NgFor, CommonModule],
   templateUrl: './alert-notification.component.html',
-  animations: [filterAnimation],
+  animations: [sidebarAnimation, overlayAnimation],
 })
 export class AlertNotificationComponent implements OnChanges {
   @Input() isNotificationOpen!: boolean | null;
@@ -31,7 +33,7 @@ export class AlertNotificationComponent implements OnChanges {
     if (changes['isNotificationOpen']) {
       const value = changes['isNotificationOpen'].currentValue;
       if (value === true) {
-        this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
+        this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
       }
     }
   }
@@ -107,7 +109,7 @@ export class AlertNotificationComponent implements OnChanges {
       const hasEnterprise = licenses.includes('enterprise');
 
       if (hasEnterprise) {
-        const alerts = this.appService.userProfile().alerts;
+        const alerts = this.appService.userSessionData().alerts;
         const _alert = alerts.find(a => a.data_hash === hash);
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';
@@ -203,7 +205,7 @@ export class AlertNotificationComponent implements OnChanges {
     this.closeNotification.emit();
   }
   clearAll() {
-    const alerts = this.appService.userProfile().alerts;
+    const alerts = this.appService.userSessionData().alerts;
 
     if (!alerts) return;
 
@@ -229,8 +231,8 @@ export class AlertNotificationComponent implements OnChanges {
   getLatestAlerts() {
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
-        this.appService.userProfile().alerts = response
-        this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
+        this.appService.userSessionData().alerts = response
+        this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
       }
     })
   }

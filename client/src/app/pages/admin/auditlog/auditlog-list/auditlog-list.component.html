@@ -5,7 +5,8 @@
       <th class="list__column-id-min">ID</th>
       <th class="list__column-service-url">Timestamp</th>
       <th class="list__column-category">Actor</th>
-      <th class="list__column-url-status">Event</th>
+      <th class="list__column-category">Tenant</th>
+      <th class="list__column-service-url">Event</th>
     </tr>
     </thead>
 
@@ -14,6 +15,7 @@
         <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
         <td>{{ item.ts | date:'dd MMM yyyy, HH:mm:ss' }}</td>
         <td>{{ item.actor_id }}</td>
+        <td>{{ item.tenant_id }}</td>
         <td>{{ item.event }}</td>
       </tr>
 
@@ -29,6 +31,7 @@
       <tr *ngFor="let _ of [1,2,3,4,5]">
         <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
         <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+        <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
         <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
         <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
       </tr>

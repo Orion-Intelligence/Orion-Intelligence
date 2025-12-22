@@ -1,0 +1,103 @@
+<div class="user-settings_section" @fadeInDashboardItem>
+  <div class="user-settings_section-header" (click)="toggleSection('profile')">
+    <span class="user-settings_section-title">
+      {{ isAdmin() ? 'Admin Profile' : 'User Profile' }}
+    </span>
+    <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon"
+      [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
+  </div>
+
+  <span class="user-settings_section-description">
+    {{
+    isAdmin()
+    ? 'Manage profile information.'
+    : 'Manage and edit your company details, including phone, address, and profile information.'
+    }}
+  </span>
+
+  <div *ngIf="isAccountSectionOpen">
+    <div class="user-settings_card">
+      <div class="user-settings_info">
+        <div class="user-avatar">
+          <div class="avatar-wrapper">
+            <app-user-image-picker [imageUrl]="userSessionData.user.image || ''"
+              (onImageSelected)="updateUserResource($event)" (onClear)="deleteUserResource()">
+            </app-user-image-picker>
+          </div>
+        </div>
+
+        <div>
+          <ng-container
+            *ngIf="isAdmin() || licenseService.getLicenses().includes('free'); then adminProfileBlock; else companyProfileBlock">
+          </ng-container>
+
+          <ng-template #adminProfileBlock>
+            <div class="user-settings_company-name">
+              {{ getLocationDisplay() || this.appService.userSessionData().user.username }}
+            </div>
+            <div class="user-settings_company-location">
+              {{ getLocationDisplay() || this.appService.userSessionData().user.username }}
+            </div>
+          </ng-template>
+
+          <ng-template #companyProfileBlock>
+            <div class="user-settings_company-name">
+              <input type="text" [(ngModel)]="userSessionData.user.username" class="user-settings_input" disabled
+                placeholder="Enter company name" />
+            </div>
+
+            <div class="user-settings_company-location">
+              Licenses〡{{ userSessionData.user.preferences?.['licenses']?.join(', ') || 'No licenses assigned' }}
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="user-settings_section" @fadeInDashboardItem>
+  <div class="user-settings_section-header" (click)="toggleSection('twoFA')">
+    <span class="user-settings_section-title">2 Factor Authentication</span>
+    <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt="" />
+  </div>
+
+  <span class="user-settings_section-description">
+    Enhance your account security by enabling or managing two-factor authentication settings.
+  </span>
+
+  <div *ngIf="is2FAOpen">
+    <div class="user-settings_toggle-row">
+      <div class="user-settings_toggle-label">
+        {{ userSessionData.user.twofa_enabled ? 'Enabled' : 'Disabled' }}
+      </div>
+      <label class="user-settings_switch">
+        <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()" />
+        <span class="user-settings_slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="user-settings_section" @fadeInDashboardItem>
+  <div class="user-settings_section-header" (click)="toggleSection('theme')">
+    <span class="user-settings_section-title">Theme</span>
+    <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt="" />
+  </div>
+
+  <span class="user-settings_section-description">
+    Customize the look and feel of your dashboard by choosing between available themes.
+  </span>
+
+  <div *ngIf="isThemeOpen">
+    <div class="user-settings_toggle-row">
+      <div class="user-settings_toggle-label">Dark Mode</div>
+      <label class="user-settings_switch">
+        <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()" />
+        <span class="user-settings_slider"></span>
+      </label>
+    </div>
+  </div>
+</div>

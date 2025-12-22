@@ -27,26 +27,27 @@ import { TenantComponent } from './pages/tenant/tenant.component';
 import { WelcomeComponent } from './pages/welcome/welcome.component';
 import { ResetPasswordComponent } from './shared/partials/forgot-password/reset-password.component';
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
-import { SidebarProfileHomepageComponent } from './shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
-import { SidebarProfileIocComponent } from './shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component';
+import { SidebarUserStatisticsComponent } from './shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component';
+import { SidebarUserIocComponent } from './shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component';
 import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
 import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
 import { PaymentGatewayComponent } from './shared/partials/payment-gateway/payment-gateway.component';
 import { NotificationComponent } from './shared/partials/notification/notification.component';
 import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
-import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
-import { ProfileResolver } from './shared/resolvers/profile.resolver';
+import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/account-settings.component';
+import { NodeResolver } from './shared/resolvers/session-data-resolver.service';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
-import { LicenseGuard } from './shared/guards/license.guard';
-import { SidebarProfileAlertsComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component';
-import { CategoryAlertReportComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component';
-import { AddCustomAlertComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component';
+import { SidebarUserHomepageComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component';
+import { CategoryAlertReportComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component';
+import { AddCustomAlertComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component';
 import { HomeAccessGuard } from './shared/guards/home-access.guard';
-import { ViewProfileComponent } from './pages/tenant/tenant-management/view-profile/view-profile.component';
+import { ManageProfileComponent } from './pages/tenant/tenant-management/view-profile/manage-profile.component';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
-import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-system-settings/sidebar-profile-system-settings.component';
-import {ConfigResolver} from './shared/resolvers/config.resolver';
+import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component';
+import { ConfigResolver } from './shared/resolvers/config.resolver';
+import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
+import { OnboardingGuard } from './shared/guards/onboarding-guar';
 
 const consolidatedChildren = [
   {
@@ -160,8 +161,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     resolve: {
       config: ConfigResolver,
-      session: DashboardResolver,
-      profile: ProfileResolver
+      session: DashboardResolver
     },
     data: { animation: 'DashboardPage' },
     children: [
@@ -217,6 +217,11 @@ export const routes: Routes = [
             path: 'playstore-scanner',
             component: DashboardApiComponent,
             data: { animation: 'CrackedAPI', type: 'cracked' }
+          },
+          {
+            path: 'software-scanner',
+            component: DashboardApiComponent,
+            data: { animation: 'SoftwareAPI', type: 'software' }
           }
         ]
       },
@@ -287,6 +292,10 @@ export const routes: Routes = [
             component: ReportDefacementComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: '**',
+            redirectTo: 'all'
           }
         ]
       },
@@ -576,7 +585,7 @@ export const routes: Routes = [
           },
           {
             path: 'view-profiles',
-            component: ViewProfileComponent,
+            component: ManageProfileComponent,
             data: { type: 'view', animation: 'CategoryPage' }
           },
           {
@@ -593,7 +602,8 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        canActivate: [subscriptionGuard, LicenseGuard],
+        canActivate: [subscriptionGuard, OnboardingGuard],
+        resolve: { ioc: IocResolver },
         data: { animation: 'ProifilePage' },
         children: [
           {
@@ -619,20 +629,19 @@ export const routes: Routes = [
           },
           {
             path: 'homepage',
-            component: SidebarProfileAlertsComponent,
+            component: SidebarUserHomepageComponent,
             resolve: { insights: InsightResolver },
             data: { type: 'homepage', animation: 'HomepagePage' },
           },
           {
             path: 'statistics',
-            component: SidebarProfileHomepageComponent,
+            component: SidebarUserStatisticsComponent,
             resolve: { insights: InsightResolver },
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {
             path: 'ioc',
-            component: SidebarProfileIocComponent,
-            resolve: { ioc: IocResolver },
+            component: SidebarUserIocComponent,
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {
@@ -647,13 +656,18 @@ export const routes: Routes = [
           },
           {
             path: 'users',
-            component: ViewProfileComponent,
+            component: ManageProfileComponent,
             data: { type: 'profile', animation: 'CategoryPage' }
           },
           {
             path: 'account',
-            component: SidebarProfileSettingsComponent,
+            component: AccountSettingsComponent,
             data: { type: 'account', animation: 'CategoryPage' }
+          },
+          {
+            path: 'tenant-settings',
+            component: TenantSettingsComponent,
+            data: { type: 'settings', animation: 'CategoryPage' }
           },
           {
             path: 'tenant',
@@ -664,6 +678,10 @@ export const routes: Routes = [
             path: 'system-settings',
             component: SidebarProfileSystemSettingsComponent,
             data: { type: 'srttings', animation: 'CategoryPage' }
+          },
+          {
+            path: '**',
+            redirectTo: 'consolidated/all'
           }
         ]
       }

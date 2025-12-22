@@ -38,6 +38,10 @@
   width: 30%;
 }
 
+.list__column-service-url-small {
+  width: 15%;
+}
+
 .list__column-category {
   width: 18%;
 }

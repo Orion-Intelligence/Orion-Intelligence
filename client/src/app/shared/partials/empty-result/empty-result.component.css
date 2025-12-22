@@ -11,6 +11,10 @@
   padding: 20px 20px 5px;
 }
 
+.category_report .empty-result_suggestion{
+  margin-left: 0;
+}
+
 .empty-result_suggestion-header {
   padding-top: 10px;
   font-family: Inter, sans-serif;

@@ -1,15 +1,18 @@
-from typing import List
-from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role
-from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, ConfigDict
 from enum import Enum
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
 
 class UserStatus(str, Enum):
     ACTIVE = "active"
     DISABLE = "disable"
 
 class tenant_param_model(BaseModel):
-    username: str
-    email: str
-    status: UserStatus
-    subscription:bool
-    licenses: List[LicenseName] 
+    username: Optional[str] = None
+    email: Optional[str] = None
+    status: Optional[UserStatus] = None
+    subscription: Optional[bool] = None
+    licenses: Optional[List[LicenseName]] = None
+    preferences: Optional[Dict[str, Any]] = None
+
+    model_config = ConfigDict(extra="allow")
