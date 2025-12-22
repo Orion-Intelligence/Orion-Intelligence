@@ -161,7 +161,8 @@ class _ctyfftrjgtwdjzlgqh4avbd35sqrs6tde4oyam2ufbjch6oqpqtkdtid(leak_extractor_i
 
             entity_data = entity_model(
                 m_team="Clist",
-                m_industry=category
+                m_industry=category,
+                m_scrap_file = self.__class__.__name__,
             )
 
             self.append_leak_data(card_data, entity_data)

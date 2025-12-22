@@ -107,6 +107,7 @@ class _tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad(leak_extractor_i
 
             entity_data = entity_model(
                 m_team="THE GENTLEMEN",
+                m_scrap_file=self.__class__.__name__,
             )
 
             self.append_leak_data(card_data, entity_data)

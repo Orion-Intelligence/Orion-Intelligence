@@ -50,6 +50,9 @@ export class DashboardApiComponent implements OnInit {
       } else if (this.apiType === 'cracked') {
         if (params['playstore']) this.q1 = params['playstore'];
         this.q2 = '';
+      } else if (this.apiType === 'software') {
+        if (params['name']) this.q1 = params['name'];
+        this.q2 = '';
       } else {
         if (params['q1']) this.q1 = params['q1'];
         if (params['q2']) this.q2 = params['q2'];
@@ -73,6 +76,8 @@ export class DashboardApiComponent implements OnInit {
       payload = {text: {username: this.q1}};
     } else if (this.apiType === 'cracked') {
       payload = {text: {playstore: this.q1}};
+    } else if (this.apiType === 'software') {
+      payload = {text: {name: this.q1}};
     } else {
       payload = {text: {q1: this.q1, q2: this.q2}};
     }
@@ -84,6 +89,8 @@ export class DashboardApiComponent implements OnInit {
           ? '/api/dynamic/social'
           : this.apiType === 'cracked'
             ? '/api/dynamic/cracked'
+          : this.apiType === 'software'
+            ? '/api/dynamic/software'
             : '/api/dynamic/';
 
     this.query_triggered = true;

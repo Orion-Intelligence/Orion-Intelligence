@@ -767,6 +767,26 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
 async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "cracked")
 
+@api_routes.post(
+    "/api/dynamic/software",
+    summary="Dynamic cracked credential search",
+    description=DYNAMIC_DOCS["dynamic_cracked"]["description"],
+    tags=["Live Dynamic Scan"],
+    operation_id="dynamicCrackedCredentialSearch",
+    response_description=DYNAMIC_DOCS["dynamic_cracked"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]
+            )
+        ),
+        Depends(license_required("scanning")),
+    ],
+)
+async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
+    return await search_model.getInstance().dynamic_search(param, "software")
+
 
 @api_routes.post(
     "/api/urlscan/domain",

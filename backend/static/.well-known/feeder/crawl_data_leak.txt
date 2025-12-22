@@ -73,6 +73,14 @@
 {"file": "_dragonforxxbp3awc7mzs5dkswrua3znqyx5roefmi4smjrsdi22xwqd", "url": "http://dragonforxxbp3awc7mzs5dkswrua3znqyx5roefmi4smjrsdi22xwqd.onion"}
 {"file": "_lunalockcccxzkpfovwzifwxcytqkiuak6wzybnniqwxcmpsetpbetid", "url": "http://lunalockcccxzkpfovwzifwxcytqkiuak6wzybnniqwxcmpsetpbetid.onion"}
 {"file": "_brohoodyaifh2ptccph5zfljyajjabwjjo4lg6gfp4xb6ynw5w7ml6id", "url": "http://lunalockcccxzkpfovwzifwxcytqkiuak6wzybnniqwxcmpsetpbetid.onion"}
+{"file": "_zktnif5vckhmz5tyrukp5bamatbfhkxjnb23rspsanyzywcrx3bvtqad", "url": "http://zktnif5vckhmz5tyrukp5bamatbfhkxjnb23rspsanyzywcrx3bvtqad.onion"}
+{"file": "_warlockhga5iw3t54ps5iytlilf7hlvxy7kwrkidspn4qoh64s4vsuyd", "url": "http://warlockhga5iw3t54ps5iytlilf7hlvxy7kwrkidspn4qoh64s4vsuyd.onion"}
+{"file": "_benzona6x5ggng3hx52h4mak5sgx5vukrdlrrd3of54g2uppqog2joyd", "url": "http://benzona6x5ggng3hx52h4mak5sgx5vukrdlrrd3of54g2uppqog2joyd.onion"}
+{"file": "_dcarryhaih5oldidg3tbqwnde4lxljytnpvberrwgj2vlvunopd46dad", "url": "http://dcarryhaih5oldidg3tbqwnde4lxljytnpvberrwgj2vlvunopd46dad.onion"}
+{"file": "_direwolfcdkv5whaz2spehizdg22jsuf5aeje4asmetpbt6ri4jnd4qd", "url": "http://direwolfcdkv5whaz2spehizdg22jsuf5aeje4asmetpbt6ri4jnd4qd.onion"}
+{"file": "_jvkpexgkuaw5toiph7fbgucycvnafaqmfvakymfh5pdxepvahw3xryqd", "url": "http://jvkpexgkuaw5toiph7fbgucycvnafaqmfvakymfh5pdxepvahw3xryqd.onion"}
+{"file": "_peargxn3oki34c4savcbcfqofjjwjnnyrlrbszfv6ujlx36mhrh57did", "url": "http://peargxn3oki34c4savcbcfqofjjwjnnyrlrbszfv6ujlx36mhrh57did.onion"}
+
 {"file": "_toufanleaks", "url": "https://toufanleaks.org"}
 {"file": "_handala_hack", "url": "http://handala-hack.to"}
 {"file": "_github_doormanbreach", "url": "https://github.com/doormanBreach"}

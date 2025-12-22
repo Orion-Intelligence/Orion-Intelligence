@@ -155,7 +155,8 @@ class _fjg4zi4opkxkvdz7mvwp7h6goe4tcby3hhkrz43pht4j3vakhy75znyd(leak_extractor_i
 
             entity_data = entity_model(
                 m_team="Coinbase Cartel",
-                m_industry=industry
+                m_industry=industry,
+                m_scrap_file = self.__class__.__name__,
             )
 
             self.append_leak_data(card_data, entity_data)

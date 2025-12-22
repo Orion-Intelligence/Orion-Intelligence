@@ -1,18 +1,18 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
+
 from playwright.sync_api import Page
 
-from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad(leak_extractor_interface, ABC):
+class _3bnusfu2lgk5at43ceu7cdok5yv4gfbono2jv57ho74ucjvc7czirfid(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
@@ -32,7 +32,7 @@ class _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad(leak_extractor_i
     def __new__(cls, callback=None):
 
         if cls._instance is None:
-            cls._instance = super(_obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad, cls).__new__(cls)
+            cls._instance = super(_3bnusfu2lgk5at43ceu7cdok5yv4gfbono2jv57ho74ucjvc7czirfid, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -42,7 +42,7 @@ class _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad(leak_extractor_i
 
     @property
     def seed_url(self) -> str:
-        return "http://obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad.onion/leaks"
+        return "http://3bnusfu2lgk5at43ceu7cdok5yv4gfbono2jv57ho74ucjvc7czirfid.onion/leaked-data"
 
     @property
     def developer_signature(self) -> str:
@@ -51,11 +51,11 @@ class _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad(leak_extractor_i
 
     @property
     def base_url(self) -> str:
-        return "http://obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad.onion/"
+        return "http://3bnusfu2lgk5at43ceu7cdok5yv4gfbono2jv57ho74ucjvc7czirfid.onion"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK,m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -70,7 +70,7 @@ class _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad(leak_extractor_i
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-        return "http://obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad.onion/"
+        return "https://www.iana.org/help/example-domains"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
 
@@ -82,68 +82,95 @@ class _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad(leak_extractor_i
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-        page.wait_for_load_state('networkidle', timeout=30000)
 
-        post_links = page.locator("a[href*='/leaks/']").all()
-        hrefs = [a.get_attribute("href") for a in post_links if a.get_attribute("href")]
+        page.wait_for_load_state("networkidle", timeout=60000)
+        page.wait_for_selector('div.ant-card.ant-card-bordered.ant-card-hoverable', timeout=30000)
 
-        for href in hrefs:
-            full_url = self.base_url + href if not href.startswith('http') else href
-            try:
-                page.goto(full_url, timeout=30000, wait_until='networkidle')
-            except Exception as e:
-                print(f"Failed to navigate to {full_url}: {str(e)}")
-                continue
+        card_locators = page.locator('div.ant-card.ant-card-bordered.ant-card-hoverable')
 
-            title = page.locator('#company-title').inner_text() if page.locator('#company-title').count() > 0 else ''
-            if not title and page.locator('.leak-detail h1').count() > 0:
-                title = page.locator('.leak-detail h1').inner_text()
+        for card_index in range(card_locators.count()):
+            card = card_locators.nth(card_index)
 
-            description = ''
-            description_elem = page.locator('#company-description span').first
-            if description_elem.count() > 0:
-                description = description_elem.inner_text()
+            card.click()
+            page.wait_for_selector('div.ant-descriptions', timeout=30000)
+
+            title = page.inner_text("h3.ant-typography")
+            description = page.inner_text("h4:has-text('Description') + div")
+            website = page.inner_text("th:has-text('Website') + td span")
+            date_text = page.inner_text("th:has-text('Date of Publication') + td span").strip()
+            formats = [
+                "%Y-%m-%d %H:%M:%S",
+                "%Y/%m/%d %H:%M:%S",
+                "%Y-%m-%d",
+                "%m-%d-%Y",
+                "%d-%m-%Y",
+                "%B %d, %Y",
+            ]
+
+            date_obj = None
+            for fmt in formats:
+                try:
+                    date_obj = datetime.strptime(date_text, fmt)
+                    break
+                except ValueError:
+                    continue
+
+            if date_obj:
+                date_obj = date_obj.date()
             else:
-                description_parent = page.locator(".leak-detail p", has_text="Description:")
-                if description_parent.count() > 0:
-                    raw = description_parent.first.inner_text().strip()
-                    description = raw.replace("Description:", "").strip()
+                print(f"Could not parse date: {date_text}")
 
-            magnet_link_elem = page.locator('a.magnet-link').first
-            magnet_url = magnet_link_elem.get_attribute('href') if magnet_link_elem.count() > 0 else ''
-            if not magnet_url:
-                dl_parent = page.locator(".leak-detail p", has_text="Download the leak:")
-                magnet_url = dl_parent.locator("a").first.get_attribute("href") if dl_parent.count() > 0 else ''
-            if not magnet_url or magnet_url == "None":
-                continue
+            leaked_urls = []
+            for li in page.query_selector_all("ul.ant-list-items li.ant-list-item"):
+                try:
+                    link_tag = li.query_selector("a")
+                    href = link_tag.get_attribute("href") if link_tag else None
+                    text = li.inner_text().strip() if li.inner_text().strip() else None
 
-            locked_date = None
-            ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                    if href:
+                        if text and text != href:
+                            leaked_urls.append(f"{href} ({text})")
+                        else:
+                            leaked_urls.append(href)
+                except AttributeError:
+                    continue
+
+            screenshot_imgs = []
+            for img in page.query_selector_all("div.ant-image img"):
+                src = img.get_attribute("src")
+                if src:
+                    screenshot_imgs.append(src)
 
             m_content = (
                 f"Title: {title}\n"
                 f"Description: {description}\n"
-                f"Locked: {locked_date}\n"
-                f"Magnet: {magnet_url}\n"
+                f"Website: {website}\n"
+                f"Date: {date_text}\n"
+                f"Leaked URL: {leaked_urls}\n"
+                f"Screenshot Img Src: {screenshot_imgs}"
             )
 
             card_data = leak_model(
                 m_title=title,
-                m_url=full_url,
-                m_ref_html=ref_html,
+                m_url=page.url,
                 m_base_url=self.base_url,
                 m_content=m_content,
                 m_network=helper_method.get_network_type(self.base_url),
                 m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
-                m_important_content=description[:500],
-                m_dumplink=[magnet_url],
+                m_important_content=description,
+                m_dumplink=leaked_urls if leaked_urls else [],
+                m_weblink=[website] if website else [],
                 m_content_type=["leaks"],
-                m_leak_date=locked_date,
+                m_logo_or_images=screenshot_imgs if screenshot_imgs else [],
+                m_leak_date=date_obj
             )
 
             entity_data = entity_model(
-                m_team="Obscura",
+                m_team="RADAR",
                 m_scrap_file=self.__class__.__name__,
             )
 
             self.append_leak_data(card_data, entity_data)
+
+            page.click("button.ant-modal-close[aria-label='Close']")
+            page.wait_for_load_state("networkidle", timeout=30000)
