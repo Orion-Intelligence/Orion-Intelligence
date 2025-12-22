@@ -44,8 +44,11 @@ class AlertManager:
         description: str,
         source: str,
         all_ioc: List[alert_all_ioc],
-        content_types: List[str]):
-        data_hash = self._smart_hash(category, ioc_type, ioc_value, source, url)
+        content_types: List[str],
+        data_hash=''):
+        
+        if(data_hash==''):
+            data_hash = self._smart_hash(category, ioc_type, ioc_value, source, url)
 
         existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenantId)
         alert_updated = False

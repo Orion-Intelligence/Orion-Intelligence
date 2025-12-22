@@ -332,20 +332,24 @@
     overflow: visible !important;
 }
 
+.category_report .rotate-180 {
+    transform: rotate(180deg);
+}
+
 @media (max-width: 1000px) {
-  .category_report_searchbar {
-    display: block;
-    text-align: left;
-  }
+    .category_report_searchbar {
+        display: block;
+        text-align: left;
+    }
 
-  .category_report_flex {
-    margin-left: 10px;
-    margin-top: 4px;
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
+    .category_report_flex {
+        margin-left: 10px;
+        margin-top: 4px;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
 
-  .report-menu-option-container {
-    justify-content: flex-start;
-  }
+    .report-menu-option-container {
+        justify-content: flex-start;
+    }
 }
