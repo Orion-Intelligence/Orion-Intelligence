@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect} from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, computed } from '@angular/core';
 import { NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -46,12 +46,16 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     private appStorage: AppStorageService,
     protected licenseService: LicenseService
   ) {
-    this.username.set(this.appService.userSessionData().user.username);
-    this.role.set(this.appService.userSessionData().user.role);
+    this.username.set(this.appService.userSessionData()?.user?.username);
+    this.role.set(this.appService.userSessionData()?.user?.role);
+
     effect(() => {
       if (this.dropdownOpen()) {
         this.onDropdownOpen();
       }
+      const data = this.appService.userSessionData();
+      this.username.set(data?.user?.username ?? '');
+      this.role.set(data?.user?.role ?? '');
     });
   }
 

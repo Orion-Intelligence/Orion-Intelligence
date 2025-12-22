@@ -4,8 +4,8 @@ import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs';
 import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common';
-import {AppService} from '../../../../services/core/app/app.service';
-import {AuthService} from '../../../../services/authetication/auth.service';
+import { AppService } from '../../../../services/core/app/app.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-dashboard-header',
@@ -16,7 +16,7 @@ import {AuthService} from '../../../../services/authetication/auth.service';
 export class DashboardHeaderComponent implements OnInit {
   breadcrumb: { path: string; label: string }[] = [];
 
-  constructor(public authService:AuthService, private router: Router, protected appService:AppService) {
+  constructor(public authService: AuthService, private router: Router, protected appService: AppService) {
   }
 
   ngOnInit() {
@@ -41,7 +41,7 @@ export class DashboardHeaderComponent implements OnInit {
     const currentUrlTree: UrlTree = this.router.parseUrl(this.router.url);
     const queryParams = currentUrlTree.queryParams;
 
-    if (this.router.url.includes('profile/consolidated/all') || this.router.url.includes('profile/alerts/')) {
+    if (this.router.url.includes('profile/consolidated/all') || this.router.url.includes('profile/alerts')) {
       this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
       return;
     }

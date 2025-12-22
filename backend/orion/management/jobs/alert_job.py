@@ -329,6 +329,7 @@ class alert_job:
 
                         if results:
                             for result in results:
+                                hash=result.get("m_hash") or ""
                                 _content_types=result.get("m_content_type") or []
                                 raw = result.get("raw") or ""
                                 m_title = result.get("m_title")
@@ -373,7 +374,8 @@ class alert_job:
                                     url=_url,
                                     source=_source,
                                     content_types=_content_types,
-                                    all_ioc=all_ioc_list
+                                    all_ioc=all_ioc_list,
+                                    data_hash=hash
                                     )
                                 total_alerts_processed += 1
                     except Exception as sub_e:

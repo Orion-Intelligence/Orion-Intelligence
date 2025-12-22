@@ -20,7 +20,7 @@ import { HelperService } from '../../../../services/helper.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
 import { NgxPrintModule } from 'ngx-print';
 import { AlertExportComponentComponent } from "../alert-export-component/alert-export-component.component";
-import {EmptyResultComponent} from '../../../empty-result/empty-result.component';
+import { EmptyResultComponent } from '../../../empty-result/empty-result.component';
 
 @Component({
   selector: 'app-category-alert-report',
@@ -515,25 +515,29 @@ export class CategoryAlertReportComponent implements OnInit {
     reader.onload = () => {
       try {
         const jsonData = JSON.parse(reader.result as string);
+
         if (Array.isArray(jsonData)) {
-          this.messageNotificationService.show('Only one alert is allowed. Please upload a JSON with a single alert object.')
+          this.messageNotificationService.show(
+            'Only one STIX bundle is allowed per upload'
+          );
+          return;
         }
 
         this.importedAlert = this.validateAlert(jsonData);
+
         this.apiService.post('alert/add', this.importedAlert).subscribe({
           next: () => {
             this.getLatestAlerts();
-            this.messageNotificationService.show('Add alert successfully!')
+            this.messageNotificationService.show('Alert imported successfully!', 'success');
           },
           error: (err) => {
-            const mess = err?.error?.detail || 'Add alert failed'
-            this.messageNotificationService.show(mess)
+            const mess = err?.error?.detail || 'Add alert failed';
+            this.messageNotificationService.show(mess);
           },
         });
-        console.log("Imported Alert:", this.importedAlert);
 
       } catch (error: any) {
-        this.messageNotificationService.show('Invalid JSON file')
+        this.messageNotificationService.show(error.message || 'Invalid JSON file');
       }
     };
 
@@ -541,30 +545,58 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   validateAlert(data: any): AlertModel {
-    const required = ['data_hash', 'ioc_type', 'ioc_value', 'first_seen', 'last_seen'];
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid JSON structure');
+    }
 
-    for (let field of required) {
-      if (!data[field]) {
-        this.messageNotificationService.show(`Missing required field: ${field}`)
+    if (data.type !== 'bundle' || !Array.isArray(data.objects)) {
+      throw new Error('Uploaded file must be a STIX 2.1 bundle');
+    }
+
+    const report = data.objects.find((o: any) => o.type === 'report');
+
+    if (!report) {
+      throw new Error('STIX bundle must contain a report object');
+    }
+
+    const requiredReportFields = ['id', 'name', 'created', 'modified'];
+    for (const field of requiredReportFields) {
+      if (!report[field]) {
+        throw new Error(`Report missing required field: ${field}`);
       }
     }
 
-    return {
-      type: data.type ?? '',
-      ioc_type: data.ioc_type,
-      ioc_value: data.ioc_value,
-      data_hash: data.data_hash,
+    const firstSeen = new Date(report.created);
+    const lastSeen = new Date(report.modified);
 
-      first_seen: new Date(data.first_seen),
-      last_seen: new Date(data.last_seen),
+    if (isNaN(firstSeen.getTime()) || isNaN(lastSeen.getTime())) {
+      throw new Error('Invalid report timestamps');
+    }
+
+    return {
+      type: report.type ?? 'report',
+
+      data_hash: '',
+      ioc_type: 'stix-bundle',
+      ioc_value: report.name,
+
+      first_seen: firstSeen,
+      last_seen: lastSeen,
 
       status: 'active',
-      title: data.title ?? '',
-      description: data.description ?? '',
-      url: data.url ?? '',
-      source: data.source ?? '',
-      all_ioc: data.all_ioc ?? [],
-      content_types: data.content_types ?? [],
+
+      title: report.name ?? '',
+      description: report.description ?? '',
+
+      url:
+        report.external_references?.find((r: any) => r.url)?.url ?? '',
+
+      source:
+        report.external_references?.[0]?.source_name ?? 'import',
+
+      all_ioc: data.objects,
+      content_types: report.labels ?? [],
     };
   }
+
 }

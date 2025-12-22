@@ -9,31 +9,17 @@
         </div>
         <div class="category_report_flex">
             <div class="btn-group report-menu-option-container mr-0">
-                <button *ngIf="!canExportstix()" (click)="showAlertPopup('add','')" appTooltip="add icon"
-                    class="p-0 report-menu-option">
+                <button (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option">
                     <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
                 </button>
-                <div *ngIf="!canExportstix()" class="vr report-menu-divider"></div>
-                <div *ngIf="canExportstix()" class="dropdown p-0 report-menu-option" appTooltip="add or import alert">
-                    <div class="category_report_searchbar-btn" role="button" id="dropdownAddMenu"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="/assets/images/shared/theme/burger_icon.svg" alt="add icon">
-                    </div>
-
-                    <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownAddMenu">
-                        <li>
-                            <a class="dropdown-item" (click)="showAlertPopup('add', '')">Add Alert</a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider mx-3" />
-                        </li>
-                        <input type="file" #fileInput accept="application/json" style="display: none;"
-                            (change)="onFileUpload($event)" />
-                        <li><a class="dropdown-item" (click)="fileInput.click()">Import
-                                Alert</a></li>
-                    </ul>
-                </div>
                 <div class="vr report-menu-divider"></div>
+                <button *ngIf="canExportstix()" type="button" (click)="fileInput.click()" appTooltip="import alert"
+                    class="p-0 report-menu-option">
+                    <img alt="add" height="30" width="30" src="/assets/images/shared/theme/print.svg"
+                        class="rotate-180" />
+                </button>
+                <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
+                <div *ngIf="canExportstix()" class="vr report-menu-divider"></div>
                 <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
                     <img alt="scan" height="20" src="assets/images/shared/bin.svg" width="20" />
                 </button>
@@ -88,7 +74,7 @@
     </div>
 
     <ng-container *ngIf="filteredAlerts.length==0">
-      <app-empty-result class="p-0 m-0"></app-empty-result>
+        <app-empty-result class="p-0 m-0"></app-empty-result>
     </ng-container>
 
     <div class="category_report_alerts">

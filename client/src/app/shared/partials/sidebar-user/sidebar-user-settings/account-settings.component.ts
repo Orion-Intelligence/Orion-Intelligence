@@ -9,10 +9,12 @@ import { AppStorageService } from '../../../../services/core/app/app-storage.ser
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
   imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
+  animations: [fadeInDashboardItem],
   templateUrl: './account-settings.component.html'
 })
 export class AccountSettingsComponent implements OnInit {
