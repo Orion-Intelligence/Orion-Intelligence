@@ -38,20 +38,35 @@ jobs:
       - id: compose_dir
         run: |
           set -euo pipefail
-          d="$(find . -maxdepth 6 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit | xargs -r dirname || true)"
-          [ -n "${d:-}" ] || { echo "No compose file found"; exit 1; }
-          echo "dir=$d" >> "$GITHUB_OUTPUT"
+          f="$(find . -maxdepth 6 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit || true)"
+          [ -n "${f:-}" ] || { echo "No compose file found"; exit 1; }
+          echo "file=$f" >> "$GITHUB_OUTPUT"
+          echo "dir=$(dirname "$f")" >> "$GITHUB_OUTPUT"
 
       - run: |
           set -euo pipefail
-          docker network prune -f || true
+          [ -n "${{ secrets.ENV_FILE }}" ] || { echo "ENV_FILE secret is empty/unavailable in this run"; exit 1; }
 
       - run: |
           set -euo pipefail
           cd "${{ steps.compose_dir.outputs.dir }}"
-          echo "${{ secrets.ENV_FILE }}" > .env
+          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
+          test -s .env
+
+      - run: |
+          set -euo pipefail
+          cd "${{ steps.compose_dir.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose up -d --build
+          subnet_octet=$(( ( (${{ github.run_id }} + ${{ github.run_attempt }} ) % 200 ) + 20 ))
+          cat > ci.override.yml <<EOF
+version: "3.8"
+networks:
+  backend:
+    ipam:
+      config:
+        - subnet: "172.250.${subnet_octet}.0/24"
+EOF
+          docker-compose -f "${{ steps.compose_dir.outputs.file }}" -f ci.override.yml up -d --build
 
       - run: |
           set -euo pipefail
@@ -83,4 +98,4 @@ jobs:
           set -euo pipefail
           cd "${{ steps.compose_dir.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose down -v || true
+          docker-compose -f "${{ steps.compose_dir.outputs.file }}" -f ci.override.yml down -v || true
