@@ -42,8 +42,7 @@ jobs:
           targets = {"docker-compose.yml","docker-compose.yaml","compose.yml","compose.yaml"}
           found = None
           for root, dirs, files in os.walk("."):
-            rel_depth = root.count(os.sep)
-            if rel_depth > 6:
+            if root.count(os.sep) > 6:
               dirs[:] = []
               continue
             for f in files:
@@ -61,10 +60,17 @@ jobs:
           print(d)
           PY
 
-      - run: |
+      - env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
           set -euo pipefail
           cd "${{ steps.compose_dir.outputs.dir }}"
-          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
+          python3 - <<'PY'
+          import os, pathlib
+          content = os.environ.get("ENV_FILE", "")
+          pathlib.Path(".env").write_text(content, encoding="utf-8")
+          PY
+          test -s .env
 
       - run: |
           set -euo pipefail
