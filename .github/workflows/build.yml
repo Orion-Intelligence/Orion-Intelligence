@@ -48,6 +48,11 @@ jobs:
       - run: |
           set -euo pipefail
           cd "${{ steps.compose_dir.outputs.dir }}"
+          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
+
+      - run: |
+          set -euo pipefail
+          cd "${{ steps.compose_dir.outputs.dir }}"
           docker-compose up -d --build
 
       - run: |
