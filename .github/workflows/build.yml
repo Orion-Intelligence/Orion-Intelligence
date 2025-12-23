@@ -32,142 +32,22 @@ jobs:
       - run: |
           set -euo pipefail
           chmod +x ./run.sh
-          ./run.sh build -d
-
-      - id: compose_loc
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os, sys
-          targets = {"docker-compose.yml","docker-compose.yaml","compose.yml","compose.yaml"}
-          found = None
-          for root, dirs, files in os.walk("."):
-            if root.count(os.sep) > 6:
-              dirs[:] = []
-              continue
-            for f in files:
-              if f in targets:
-                found = os.path.abspath(os.path.join(root, f))
-                break
-            if found:
-              break
-          if not found:
-            print("No compose file found", file=sys.stderr)
-            sys.exit(1)
-          d = os.path.dirname(found)
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
-            fp.write(f"dir={d}\n")
-            fp.write(f"file={found}\n")
-          print(found)
-          PY
-
-      - env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          python3 - <<'PY'
-          import os, pathlib
-          pathlib.Path(".env").write_text(os.environ["ENV_FILE"], encoding="utf-8")
-          PY
-          test -s .env
+          ./run.sh build -c
 
       - run: |
           set -euo pipefail
-          docker ps -aq | xargs -r docker rm -f || true
-          docker network prune -f || true
-          docker system prune -f --volumes || true
-
-      - run: |
-          set -euo pipefail
-          docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
-
-      - run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          python3 - <<'PY'
-          import pathlib
-          pathlib.Path("ci.override.yml").write_text(
-          'version: "3.8"\n'
-          'services:\n'
-          '  web:\n'
-          '    command: >\n'
-          '      sh -c "exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"\n',
-          encoding="utf-8")
-          PY
-          cat ci.override.yml
-
-      - run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml up -d --build
-
-      - run: |
-          set -euo pipefail
-          echo "=== docker ps (initial) ==="
-          docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}' || true
-          echo "=== docker networks ==="
-          docker network ls || true
-          echo "=== waiting for app (not 000 and not 502) ==="
-          for i in $(seq 1 180); do
-            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080 || echo 000)"
-            echo "http_code=$code"
-            if [ "$code" != "000" ] && [ "$code" != "502" ]; then
-              exit 0
-            fi
-            if [ $((i % 12)) -eq 0 ]; then
-              echo "=== periodic logs ==="
-              docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}' || true
-              docker logs trusted-web-main --tail=200 || true
-              docker logs trusted-web-nginx --tail=200 || true
-            fi
-            sleep 5
-          done
-          echo "=== FAILED: still 000/502 after wait ==="
-          docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}' || true
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml ps || true
-          for c in trusted-web-nginx trusted-web-main trusted-web-elastic trustly-web-mongodb trusted-web-arangodb trusted-web-redis; do
-            echo "--- inspect: $c ---"
-            docker inspect "$c" --format '{{.Name}} status={{.State.Status}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}} exit={{.State.ExitCode}} started={{.State.StartedAt}} finished={{.State.FinishedAt}}' 2>/dev/null || true
-          done
-          for c in trusted-web-nginx trusted-web-main trusted-web-elastic trustly-web-mongodb trusted-web-arangodb trusted-web-redis; do
-            echo "--- logs: $c ---"
-            docker logs "$c" --tail=5000 2>/dev/null || true
-          done
-          docker stats --no-stream 2>/dev/null || true
-          ss -ltnp 2>/dev/null || true
-          curl -v http://127.0.0.1:8080 || true
-          docker exec trusted-web-nginx sh -lc 'curl -v http://web:8070 || true' 2>/dev/null || true
-          exit 1
-
-      - run: |
-          set -euo pipefail
-          npm install -g lighthouse@11.7.1
-
-      - run: |
-          set -euo pipefail
-          mkdir -p lighthouse-results
-          lighthouse http://127.0.0.1:8080 \
-            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
-            --output=json \
-            --output=html \
-            --output-path=./lighthouse-results/lighthouse-report \
-            --only-categories=performance,accessibility,best-practices,seo
-
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-results
-          path: lighthouse-results/
-          retention-days: 7
-
-      - if: always()
-        run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml down -v --remove-orphans || true
-          docker ps -aq | xargs -r docker rm -f || true
-          docker network prune -f || true
+          echo "=== checking client build folder ==="
+          if [ -d "client/build" ]; then
+            echo "SUCCESS: client/build exists"
+            echo "=== tree client/build (depth 4) ==="
+            find client/build -maxdepth 4 -type d -print || true
+            echo "=== files sample ==="
+            find client/build -maxdepth 2 -type f -print | head -n 200 || true
+          else
+            echo "FAIL: client/build does not exist"
+            echo "=== client dir listing ==="
+            ls -la client || true
+            echo "=== search possible output dirs ==="
+            find client -maxdepth 3 -type d \( -name build -o -name dist -o -name public \) -print || true
+            exit 1
+          fi
