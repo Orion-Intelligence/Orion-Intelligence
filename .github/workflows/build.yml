@@ -4,136 +4,68 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-    inputs:
-      target_distribution:
-        description: "Target distribution (bionic, bookworm, bullseye, focal, jammy, noble, trixie)"
-        required: false
-        default: trixie
-        type: choice
-        options:
-          - bionic
-          - bookworm
-          - bullseye
-          - focal
-          - jammy
-          - noble
-          - trixie
 
 permissions: read-all
 
-env:
-  TARGET_DISTRIBUTION: ${{ github.event.inputs.target_distribution || 'trixie' }}
-
 jobs:
-  build_and_lighthouse_smoke:
+  build_and_lighthouse:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        distribution: ${{ fromJson(github.event.inputs.target_distribution == 'all' && '["bionic","bookworm","bullseye","focal","jammy","noble","trixie"]' || format('["{0}"]', github.event.inputs.target_distribution || 'trixie')) }}
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: lts/*
 
-      - name: Install build dependencies
-        run: |
+      - run: |
           set -euo pipefail
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            git curl wget ca-certificates gnupg lsb-release jq \
-            build-essential debhelper devscripts \
-            brotli dh-apparmor \
-            dh-python pybuild-plugin-pyproject python3-all python3-setuptools python3-sphinx \
-            docker-compose
-
-          # Install Chrome for Lighthouse
+            bash curl git ca-certificates gnupg jq docker-compose
           curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google.gpg
           echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends google-chrome-stable
 
-      - name: Build packages for target distribution
-        env:
-          TARGET_DISTRIBUTION: ${{ matrix.distribution }}
-        run: |
+      - run: |
           set -euo pipefail
-          echo "Building packages for: $TARGET_DISTRIBUTION"
-          COMMIT_HASH="$(git rev-parse HEAD)"
-          ./scripts/build.sh -d "$TARGET_DISTRIBUTION" -t "$COMMIT_HASH" -n -l
+          chmod +x ./run.sh
+          ./run.sh build -c
 
-      # ---- START YOUR APP ON localhost:8080 ----
-      #
-      # IMPORTANT:
-      # Replace the command below with the REAL command that starts your app on port 8080.
-      # Examples (choose ONE and delete the others):
-      #   - docker-compose up -d --build
-      #   - ./run.sh build -d
-      #   - ./scripts/dev.sh
-      #   - npm run start
-      #
-      - name: Start app (localhost:8080)
-        run: |
+      - run: |
           set -euo pipefail
-          # TODO: replace this with your actual start command
-          # Example using docker-compose if your compose exposes 8080:
-          # ./docker/generate_docker_compose.sh "${{ matrix.distribution }}" > ./docker/docker-compose.yml
-          # cd docker
-          # docker-compose up -d --build
+          cd docker
+          docker-compose up -d --build
 
-          echo "ERROR: You must set the real start command for localhost:8080 in this step."
-          exit 1
-
-      - name: Wait for app to be ready (http://localhost:8080)
-        run: |
+      - run: |
           set -euo pipefail
-          echo "Waiting for http://localhost:8080 ..."
-          timeout 180 bash -c 'until curl -fsS http://localhost:8080 >/dev/null 2>&1; do sleep 3; done' || {
-            echo "❌ App did not become ready on http://localhost:8080"
-            exit 1
-          }
-          echo "✅ App is reachable on http://localhost:8080"
+          timeout 180 bash -c 'until curl -fsS http://localhost:8080 >/dev/null 2>&1; do sleep 3; done'
 
-      - name: Install Lighthouse (CLI)
-        run: |
+      - run: |
           set -euo pipefail
           npm install -g lighthouse@11.7.1
 
-      - name: Lighthouse smoke check (fails if app is down)
-        run: |
+      - run: |
           set -euo pipefail
           mkdir -p lighthouse-results
-
-          lighthouse "http://localhost:8080" \
+          lighthouse http://localhost:8080 \
             --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
             --output=json \
             --output=html \
-            --output-path="./lighthouse-results/lighthouse-report" \
+            --output-path=./lighthouse-results/lighthouse-report \
             --only-categories=performance,accessibility,best-practices,seo
 
-          echo "✅ Lighthouse completed (app reachable)"
-
-      - name: Upload build + lighthouse artifacts
-        if: always()
+      - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-and-lighthouse-${{ matrix.distribution }}
-          path: |
-            lighthouse-results/
-            build/**/*.deb
+          name: lighthouse-results
+          path: lighthouse-results/
           retention-days: 7
 
-      # Optional cleanup if you started docker-compose (uncomment if used)
-      # - name: Cleanup containers
-      #   if: always()
-      #   run: |
-      #     set -euo pipefail
-      #     cd docker
-      #     docker-compose down || true
+      - if: always()
+        run: |
+          cd docker
+          docker-compose down || true
