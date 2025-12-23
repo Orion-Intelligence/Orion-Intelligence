@@ -23,8 +23,7 @@ jobs:
       - run: |
           set -euo pipefail
           sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends \
-            bash curl git ca-certificates gnupg jq docker-compose
+          sudo apt-get install -y --no-install-recommends bash curl git ca-certificates gnupg jq docker-compose python3
           curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google.gpg
           echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update -q
@@ -38,21 +37,29 @@ jobs:
       - id: compose_dir
         run: |
           set -euo pipefail
-          d="$(find . -maxdepth 4 -type f -name 'docker-compose.yml' -print -quit | xargs -r dirname || true)"
-          if [ -z "${d:-}" ]; then
-            d="$(find . -maxdepth 4 -type f -name 'docker-compose.yaml' -print -quit | xargs -r dirname || true)"
-          fi
-          if [ -z "${d:-}" ]; then
-            d="$(find . -maxdepth 4 -type f -name 'compose.yml' -print -quit | xargs -r dirname || true)"
-          fi
-          if [ -z "${d:-}" ]; then
-            d="$(find . -maxdepth 4 -type f -name 'compose.yaml' -print -quit | xargs -r dirname || true)"
-          fi
-          if [ -z "${d:-}" ]; then
-            echo "No compose file found"
-            exit 1
-          fi
-          echo "dir=$d" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY'
+          import os, sys
+          targets = {"docker-compose.yml","docker-compose.yaml","compose.yml","compose.yaml"}
+          found = None
+          for root, dirs, files in os.walk("."):
+            rel_depth = root.count(os.sep)
+            if rel_depth > 6:
+              dirs[:] = []
+              continue
+            for f in files:
+              if f in targets:
+                found = os.path.abspath(os.path.join(root, f))
+                break
+            if found:
+              break
+          if not found:
+            print("No compose file found", file=sys.stderr)
+            sys.exit(1)
+          d = os.path.dirname(found)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
+            fp.write(f"dir={d}\n")
+          print(d)
+          PY
 
       - run: |
           set -euo pipefail
