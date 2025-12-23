@@ -137,6 +137,13 @@ jobs:
 
       - run: |
           set -euo pipefail
+          cd client
+          npm ci --include=dev || npm install --include=dev
+          npx cypress verify
+          npx cypress run --browser chrome --config baseUrl="http://127.0.0.1:8080"
+
+      - run: |
+          set -euo pipefail
           npm install -g lighthouse@11.7.1
 
       - run: |
@@ -154,6 +161,15 @@ jobs:
         with:
           name: lighthouse-results
           path: lighthouse-results/
+          retention-days: 7
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            client/cypress/screenshots/
+            client/cypress/videos/
           retention-days: 7
 
       - if: always()
