@@ -353,6 +353,7 @@ export class CategoryAlertReportComponent implements OnInit {
       case 'social-scanner':
       case 'email-breach':
       case 'stealerlogs':
+      case 'software-scanning':
         return 'Critical';
 
       case 'defacement':

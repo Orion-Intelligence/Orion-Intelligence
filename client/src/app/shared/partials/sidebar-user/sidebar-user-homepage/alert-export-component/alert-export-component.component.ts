@@ -1,12 +1,12 @@
-import {CommonModule, UpperCasePipe} from '@angular/common';
+import { CommonModule, UpperCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   Input,
   OnChanges
 } from '@angular/core';
-import {NgIf, NgFor} from '@angular/common';
-import {AlertModel} from '../../../../model/company-profile/node.model';
+import { NgIf, NgFor } from '@angular/common';
+import { AlertModel } from '../../../../model/company-profile/node.model';
 
 type AlertStatusClass = 'alert-active' | 'alert-ignore' | 'alert-info';
 type AlertRiskClass =
@@ -65,6 +65,7 @@ export class AlertExportComponentComponent implements OnChanges {
       case 'social-scanner':
       case 'email-breach':
       case 'stealerlogs':
+      case 'software-scanning':
         return 'Critical';
 
       case 'defacement':

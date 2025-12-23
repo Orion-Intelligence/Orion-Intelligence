@@ -115,6 +115,7 @@ export class SidebarUserHomepageComponent implements OnInit {
       "playstore-scanning",
       "social-scanner",
       "email-breach",
+      "software-scanning",
       "repo scanning",
       "seo scanning"
     ];
@@ -176,6 +177,7 @@ export class SidebarUserHomepageComponent implements OnInit {
       case 'social-scanner':
       case 'email-breach':
       case 'stealerlogs':
+      case 'software-scanning':
         return 'Critical';
 
       case 'defacement':
