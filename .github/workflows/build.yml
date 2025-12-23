@@ -34,7 +34,7 @@ jobs:
           chmod +x ./run.sh
           ./run.sh build -c
 
-      - id: compose_dir
+      - id: compose_loc
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -57,14 +57,15 @@ jobs:
           d = os.path.dirname(found)
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
             fp.write(f"dir={d}\n")
-          print(d)
+            fp.write(f"file={found}\n")
+          print(found)
           PY
 
       - env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         run: |
           set -euo pipefail
-          cd "${{ steps.compose_dir.outputs.dir }}"
+          cd "${{ steps.compose_loc.outputs.dir }}"
           python3 - <<'PY'
           import os, pathlib
           content = os.environ.get("ENV_FILE", "")
@@ -74,12 +75,39 @@ jobs:
 
       - run: |
           set -euo pipefail
-          cd "${{ steps.compose_dir.outputs.dir }}"
-          docker-compose up -d --build
+          cd "${{ steps.compose_loc.outputs.dir }}"
+          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" down -v --remove-orphans || true
+          docker network prune -f || true
+          docker system prune -f --volumes || true
 
       - run: |
           set -euo pipefail
-          timeout 240 bash -c 'until curl -fsS http://localhost:8080 >/dev/null 2>&1; do sleep 3; done'
+          cd "${{ steps.compose_loc.outputs.dir }}"
+          python3 - <<'PY'
+          import os, pathlib
+          run_id = int(os.environ.get("GITHUB_RUN_ID", "0"))
+          attempt = int(os.environ.get("GITHUB_RUN_ATTEMPT", "1"))
+          subnet_octet = ((run_id + attempt) % 200) + 20
+          content = f'''version: "3.8"
+          networks:
+            backend:
+              ipam:
+                config:
+                  - subnet: "172.250.{subnet_octet}.0/24"
+          '''
+          pathlib.Path("ci.override.yml").write_text(content, encoding="utf-8")
+          PY
+
+      - run: |
+          set -euo pipefail
+          cd "${{ steps.compose_loc.outputs.dir }}"
+          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml up -d --build
+
+      - run: |
+          set -euo pipefail
+          timeout 300 bash -c 'until curl -fsS http://localhost:8080 >/dev/null 2>&1; do sleep 3; done'
 
       - run: |
           set -euo pipefail
@@ -105,5 +133,6 @@ jobs:
       - if: always()
         run: |
           set -euo pipefail
-          cd "${{ steps.compose_dir.outputs.dir }}"
-          docker-compose down || true
+          cd "${{ steps.compose_loc.outputs.dir }}"
+          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml down -v --remove-orphans || true
