@@ -7,7 +7,7 @@ from bson import ObjectId
 from cryptography.fernet import Fernet
 from fastapi import HTTPException
 
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
@@ -192,58 +192,93 @@ class alert_job:
                                     ioc_type_name,
                                     scan_type
                                 )
+                                
                     for ioc_value in ioc.values or []:
-                        search_payload = {}
-                        scan_type = None
+                        scans = []
+                        if ioc_type_name == "m_email" and "@" in ioc_value:
+                            scans.append({
+                                "scan_type": "email-breach",
+                                "payload": {
+                                    "username": ioc_value.split("@")[0],
+                                    "email": ioc_value,
+                                },
+                                "category": "user",
+                                "model": search_dynamic_param_model,
+                            })
+                        if (
+                            ioc_type_name == "m_url"
+                            and re.search(r"play\.google\.com\/store\/apps\/details", ioc_value, re.IGNORECASE)
+                        ):
+                            scans.append({
+                                "scan_type": "playstore-scanning",
+                                "payload": {"playstore": ioc_value},
+                                "category": "cracked",
+                                "model": search_dynamic_crack_model,
+                            })
+                        if ioc_type_name in [
+                            "m_mention",
+                            "m_social_media_profiles",
+                            "m_person",
+                            "m_company_name",
+                            "m_org",
+                        ]:
+                            scans.append({
+                                "scan_type": "social-scanner",
+                                "payload": {"username": ioc_value},
+                                "category": "social",
+                                "model": search_dynamic_social_model,
+                            })
+                        if ioc_type_name == "m_company_name":
+                            scans.append({
+                                "scan_type": "software-scanning",
+                                "payload": {"name": ioc_value},
+                                "category": "software",
+                                "model": search_dynamic_crack_model,
+                            })
 
-                        if ioc_type_name == "m_email":
-                            if "@" in ioc_value:
-                                username = ioc_value.split("@")[0]
-                                search_payload = {"username": username, "email": ioc_value}
-                                scan_type = "email-breach"
 
-                        elif ioc_type_name == "m_url" and re.search(r"play\.google\.com\/store\/apps\/details", ioc_value, re.IGNORECASE):
-                            search_payload = {"playstore": ioc_value}
-                            scan_type = "playstore-scanning"
+                    for scan in scans:
+                        scan_type = scan["scan_type"]
+                        search_payload = scan["payload"]
+                        dynamic_search_category = scan["category"]
+                        model_cls = scan["model"]
 
-                        elif ioc_type_name in ["m_mention", "m_social_media_profiles", "m_person", "m_company_name", "m_org"]:
-                            search_payload = {"username": ioc_value}
-                            scan_type = "social-scanner"
+                        print(
+                            f"Processing Dynamic Scan | "
+                            f"Type: {ioc_type_name} | "
+                            f"Value: {ioc_value} | "
+                            f"Scan: {scan_type}"
+                        )
 
-                        if scan_type and search_payload:
-                            print(f"Processing Dynamic Scan | Type: {ioc_type_name} | Value: {ioc_value} | Scan: {scan_type}")
-                            param_model = search_dynamic_param_model(text=search_payload)
-                            dynamic_search_category = ""
-                            if scan_type == "email-breach":
-                                dynamic_search_category = "user"
-                            elif scan_type == "social-scanner":
-                                dynamic_search_category = "social"
-                            elif scan_type == "playstore-scanning":
-                                dynamic_search_category = "cracked"
+                        try:
+                            param_model = model_cls(text=search_payload)
 
-                            try:
-                                response = await self._search_model.dynamic_search(param_model, dynamic_search_category)
+                            response = await self._search_model.dynamic_search(
+                                param_model,
+                                dynamic_search_category
+                            )
+
+                            if isinstance(response, dict):
+                                scan_result = response
+                            elif hasattr(response, "body"):
+                                scan_result = json.loads(response.body)
+                            elif hasattr(response, "model_dump"):
+                                scan_result = response.model_dump()
+                            else:
                                 scan_result = {}
-                                if isinstance(response, dict):
-                                    scan_result = response
-                                elif hasattr(response, 'body'):
-                                    scan_result = json.loads(response.body)
-                                elif hasattr(response, 'model_dump'):
-                                     scan_result = response.model_dump()
 
-                                result_list = scan_result.get("result", [])
-                                if result_list:
-                                    await self._handle_dynamic_scanning_alert(
-                                        str(tenant.id),
-                                        ioc_type_name,
-                                        ioc_value,
-                                        scan_type,
-                                        result_list
-                                    )
+                            result_list = scan_result.get("result", [])
+                            if result_list:
+                                await self._handle_dynamic_scanning_alert(
+                                    str(tenant.id),
+                                    ioc_type_name,
+                                    ioc_value,
+                                    scan_type,
+                                    result_list
+                                )
 
-                            except Exception as dynamic_e:
-                                print(f"[{datetime.now().strftime('%H:%M:%S')}] -> DYNAMIC SEARCH CALL ERROR for {scan_type}:{ioc_type_name}:{ioc_value}. Error: {dynamic_e}")
-
+                        except Exception as dynamic_e:
+                            print(f"Dynamic scan failed | "f"Type: {scan_type} | "f"Value: {ioc_value} | "f"Error: {dynamic_e}",flush=True)
                 return
 
             search_data_category='all'

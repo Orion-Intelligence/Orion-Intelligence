@@ -9,8 +9,8 @@ import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { Subscription } from 'rxjs';
-import {searchFilterAnimation} from '../../animations/search.filter.animation';
-import {overlayAnimation, sidebarAnimation} from '../../animations/sidebar.animations';
+import { searchFilterAnimation } from '../../animations/search.filter.animation';
+import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 
 
 @Component({
@@ -69,6 +69,7 @@ export class AlertNotificationComponent implements OnChanges {
       case 'social-scanner':
       case 'email-breach':
       case 'stealerlogs':
+      case 'software-scanning':
         return 'Critical';
 
       case 'defacement':

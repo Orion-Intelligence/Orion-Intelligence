@@ -50,7 +50,10 @@ export class AlertService {
     getLatestAlerts() {
         this.apiService.get<any>('profile/alerts').subscribe({
             next: response => {
-                this.appService.userSessionData().alerts = response;
+                this.appService.userSessionData.update(data => ({
+                    ...data,
+                    alerts: response
+                }));
                 this.isAlertScanLoading.set(false);
             },
             error: err => {
