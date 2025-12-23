@@ -103,8 +103,8 @@ jobs:
 
       - run: |
           set -euo pipefail
-          if ! timeout 900 bash -c 'until curl -fsS http://127.0.0.1:8080 >/dev/null 2>&1; do sleep 5; done'; then
-            docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}' || true
+          if ! timeout 900 bash -c 'until [ "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080 || echo 000)" != "000" ] && [ "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080 || echo 000)" != "502" ]; do sleep 5; done'; then
+            docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Status}}" || true
             docker logs trusted-web-nginx --tail=300 || true
             docker logs trusted-web-main --tail=300 || true
             exit 1
