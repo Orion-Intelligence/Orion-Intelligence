@@ -133,7 +133,7 @@ class test_manager:
         persistent={"action.destructive_requires_name": True}
     )
 
-    mocks_dir = (Path(__file__).resolve().parents[3] / "static" / "resource" / "test" / "mocks" / "elastic")
+    mocks_dir = (Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "elastic")
     if not mocks_dir.exists():
       await es.close()
       return
