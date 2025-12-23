@@ -5,7 +5,7 @@ from pathlib import Path
 from odmantic import ObjectId
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
-from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS, ELASTIC_INDEX, ELASTIC_ENUMS
+from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.session_manager.session_enums import admin_mock, admin_user, crawler_mock, crawler_user
 from elasticsearch import AsyncElasticsearch, helpers as es_helpers
@@ -101,79 +101,74 @@ class test_manager:
       es = AsyncElasticsearch(
         hosts=[{"host": es_host, "port": es_port, "scheme": "http"}], basic_auth=(es_user, es_pass), )
     else:
-      es = AsyncElasticsearch(hosts=[{"host": es_host, "port": es_port, "scheme": "http"}])
+      es = AsyncElasticsearch(
+        hosts=[{"host": es_host, "port": es_port, "scheme": "http"}])
 
-    try:
-      indices = await es.indices.get(index="*", ignore_unavailable=True)
-      for idx in list(indices.keys()):
+    indices = await es.indices.get(index="*", ignore_unavailable=True)
+    for idx in list(indices.keys()):
+      if idx.startswith("."):
+        continue
+      await es.indices.delete(index=idx, ignore_unavailable=True)
+
+    await es.cluster.put_settings(
+        persistent={
+            "action.destructive_requires_name": False,
+            "cluster.blocks.read_only_allow_delete": None,
+        }
+    )
+
+    ds = await es.indices.get_data_stream(name="*")
+    for d in ds.get("data_streams", []):
+        await es.indices.delete_data_stream(name=d["name"])
+
+    indices = await es.indices.get(index="*", expand_wildcards="all", ignore_unavailable=True)
+    for idx in list(indices.keys()):
         if idx.startswith("."):
-          continue
-        try:
-          await es.indices.delete(index=idx, ignore_unavailable=True)
-        except Exception:
-          pass
+            continue
+        await es.indices.delete(index=idx, ignore_unavailable=True)
 
-      try:
-        await es.indices.refresh(index="*", ignore_unavailable=True)
-      except Exception:
-        pass
+    await es.indices.refresh(index="*", ignore_unavailable=True)
 
-      mappings_to_create = {ELASTIC_INDEX.S_GENERIC_INDEX: ELASTIC_ENUMS.mapping_generic_model, ELASTIC_INDEX.S_LEAK_INDEX: ELASTIC_ENUMS.mapping_leakdatamodel, ELASTIC_INDEX.S_DEFACEMENT_INDEX: ELASTIC_ENUMS.mapping_defacement_model, ELASTIC_INDEX.S_CHATS_INDEX: ELASTIC_ENUMS.mapping_chat_model, ELASTIC_INDEX.S_EXPLOIT_INDEX: ELASTIC_ENUMS.mapping_exploit_model, ELASTIC_INDEX.S_CREDENTIAL_INDEX: ELASTIC_ENUMS.mapping_credential_model, ELASTIC_INDEX.S_STEALERLOGS_INDEX: ELASTIC_ENUMS.mapping_stealer_log_model, ELASTIC_INDEX.S_SOCIAL_INDEX: ELASTIC_ENUMS.mapping_social_model, }
+    await es.cluster.put_settings(
+        persistent={"action.destructive_requires_name": True}
+    )
 
-      for idx, body in mappings_to_create.items():
-        settings = body.get("settings", {}) if isinstance(body, dict) else {}
-        mappings = body.get("mappings", {}) if isinstance(body, dict) else {}
-        try:
-          await es.indices.create(index=idx, settings=settings, mappings=mappings)
-        except Exception:
-          pass
-
-      mocks_dir = Path(__file__).resolve().parents[3] / "static" / "resource" / "test" / "mocks" / "elastic"
-      if not mocks_dir.exists():
-        return
-
-      def _has_data(fp: Path) -> bool:
-        if not fp.exists():
-          return False
-        try:
-          if fp.stat().st_size == 0:
-            return False
-        except Exception:
-          return False
-        try:
-          with fp.open("r", encoding="utf-8") as f:
-            for line in f:
-              if line.strip():
-                return True
-        except Exception:
-          return False
-        return False
-
-      for data_fp in sorted(mocks_dir.glob("*.data.ndjson")):
-        if not _has_data(data_fp):
-          continue
-
-        idx = data_fp.name.replace(".data.ndjson", "")
-
-        async def gen(fp=data_fp, default_index=idx):
-          with fp.open("r", encoding="utf-8") as f:
-            for line in f:
-              line = line.strip()
-              if not line:
-                continue
-              d = json.loads(line)
-              _index = d.get("_index") or default_index
-              _id = d.get("_id")
-              src = {k: v for k, v in d.items() if not k.startswith("_")}
-              a = {"_op_type": "index", "_index": _index, "_source": src}
-              if _id is not None:
-                a["_id"] = _id
-              yield a
-
-        try:
-          await es_helpers.async_bulk(
-            es, gen(), chunk_size=2000, request_timeout=120, raise_on_error=False, raise_on_exception=False, )
-        except Exception:
-          pass
-    finally:
+    mocks_dir = (Path(__file__).resolve().parents[3] / "static" / "resource" / "test" / "mocks" / "elastic")
+    if not mocks_dir.exists():
       await es.close()
+      return
+
+    def _has_data(p: Path) -> bool:
+      with p.open("r", encoding="utf-8") as f:
+        for line in f:
+          if line.strip():
+            return True
+      return False
+
+    for data_fp in sorted(mocks_dir.glob("*.data.ndjson")):
+      if data_fp.stat().st_size == 0:
+        continue
+      if not _has_data(data_fp):
+        continue
+
+      idx = data_fp.name.replace(".data.ndjson", "")
+
+      async def gen(fp=data_fp, default_index=idx):
+        with fp.open("r", encoding="utf-8") as f:
+          for line in f:
+            line = line.strip()
+            if not line:
+              continue
+            d = json.loads(line)
+            _id = d.get("_id")
+            _index = d.get("_index") or default_index
+            src = d.get("_source", d)
+            a = {"_op_type": "index", "_index": _index, "_source": src}
+            if _id is not None:
+              a["_id"] = _id
+            yield a
+
+      await es_helpers.async_bulk(
+        es, gen(), chunk_size=2000, request_timeout=120, raise_on_error=False, raise_on_exception=False, )
+
+    await es.close()

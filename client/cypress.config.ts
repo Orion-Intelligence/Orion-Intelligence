@@ -1,6 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
-
 import { defineConfig } from "cypress";
 import registerCodeCoverageTasks from "@cypress/code-coverage/task";
 
@@ -43,24 +40,6 @@ export default defineConfig({
           launchOptions.args.push("--force-device-scale-factor=1");
         }
         return launchOptions;
-      });
-
-      on("after:screenshot", (details) => {
-        if (details.path.includes("failed")) return;
-
-        const language = config.env["language"];
-        const destPath = path.resolve(
-          __dirname,
-          "../documentation/images",
-          details.path.replace(".png", "").split("/").slice(-2).join("/") +
-            "." +
-            language +
-            ".png"
-        );
-        const destDir = path.dirname(destPath);
-        if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-        fs.copyFileSync(details.path, destPath);
-        return { path: destPath };
       });
 
       on("task", {

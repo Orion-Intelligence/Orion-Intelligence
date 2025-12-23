@@ -74,13 +74,16 @@ class homepage_model:
             elif index == "defacement_model":
                 defacement_hits = hits
 
-        display_data = {
-            "leak_model": [homepage_model.transform_for_display("leak_model", hit["_source"]) for hit in leak_hits],
-            "exploit_model": [homepage_model.transform_for_display("exploit_model", hit["_source"]) for hit in exploit_hits],
-            "chat_model": [homepage_model.transform_for_display("chat_model", hit["_source"]) for hit in chat_hits],
-            "generic_model": [homepage_model.transform_for_display("generic_model", hit["_source"]) for hit in general_hits],
-            "defacement_model": [homepage_model.transform_for_display("defacement_model", hit["_source"]) for hit in defacement_hits]
-        }
+        display_data = {"leak_model": [homepage_model.transform_for_display("leak_model", hit["_source"]) for hit in
+            leak_hits if "m_hash" in hit.get("_source", {})], "exploit_model": [
+            homepage_model.transform_for_display("exploit_model", hit["_source"]) for hit in exploit_hits if
+            "m_hash" in hit.get("_source", {})], "chat_model": [
+            homepage_model.transform_for_display("chat_model", hit["_source"]) for hit in chat_hits if
+            "m_hash" in hit.get("_source", {})], "generic_model": [
+            homepage_model.transform_for_display("generic_model", hit["_source"]) for hit in general_hits if
+            "m_hash" in hit.get("_source", {})], "defacement_model": [
+            homepage_model.transform_for_display("defacement_model", hit["_source"]) for hit in defacement_hits if
+            "m_hash" in hit.get("_source", {})], }
 
         await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(display_data), 1])
 
@@ -89,6 +92,7 @@ class homepage_model:
 
     @staticmethod
     def transform_for_display(model_key: str, item: dict) -> dict:
+
         m_hash = item["m_hash"] or item.get("m_message_id")
 
         title = item.get("m_title") or item.get("m_name") or item.get("m_caption") or item.get("m_url") or "Untitled"
