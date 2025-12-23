@@ -21,7 +21,7 @@ class search_dynamic_crack_model(BaseModel):
         default_factory=dict,
         examples=[
             {
-                "playstore": "https://play.google.com/store/apps/details?id=com.jrzheng.supervpnfree&hl=en"
+                "name": "gta"
             }
         ]
     )

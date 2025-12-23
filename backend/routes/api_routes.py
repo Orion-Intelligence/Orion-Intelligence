@@ -106,6 +106,7 @@ REPORT_DOCS = {
 DYNAMIC_DOCS = {
     "dynamic_user_email": _doc("dynamic/dynamic_user_email.md"),
     "dynamic_cracked": _doc("dynamic/dynamic_cracked.md"),
+    "dynamic_software": _doc("dynamic/dynamic_software.md"),
     "dynamic_social": _doc("dynamic/dynamic_social.md"),
     "domain_scan": _doc("dynamic/domain_scan.md"),
 }
@@ -769,11 +770,11 @@ async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
 
 @api_routes.post(
     "/api/dynamic/software",
-    summary="Dynamic cracked credential search",
-    description=DYNAMIC_DOCS["dynamic_cracked"]["description"],
+    summary="Dynamic software credential search",
+    description=DYNAMIC_DOCS["dynamic_software"]["description"],
     tags=["Live Dynamic Scan"],
-    operation_id="dynamicCrackedCredentialSearch",
-    response_description=DYNAMIC_DOCS["dynamic_cracked"]["response_description"],
+    operation_id="dynamicSoftwareCredentialSearch",
+    response_description=DYNAMIC_DOCS["dynamic_software"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(

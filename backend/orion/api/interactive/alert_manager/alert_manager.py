@@ -309,7 +309,6 @@ class AlertManager:
             "scan_running": False
         }
 
-
     @staticmethod
     def get_allowed_alert_types(user) -> set[str]:
         permissions = get_user_permissions(user)

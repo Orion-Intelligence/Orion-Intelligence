@@ -26,11 +26,7 @@ create_parser_zip() {
 client_build() {
     cd client || exit
     npm install
-    if [ "$1" = "-p" ]; then
-        ng build --configuration production
-    else
-        ng build --configuration production
-    fi
+    ng build --configuration production
     cd ..
     rm -rf backend/build
     mkdir -p backend/build
@@ -53,10 +49,20 @@ wait_for_server() {
     sudo systemctl restart tor@default
 }
 
+run_test_task() {
+    local url="http://127.0.0.1:8080"
+    until curl -s -o /dev/null "$url"; do
+        sleep 2
+    done
+    cd client || exit
+    npm test run
+    cd ..
+    exit 0
+}
+
 stop_docker
 
 if [ "$1" = "stop" ]; then
-    echo "Crawler service stopped"
     exit 0
 fi
 
@@ -65,22 +71,19 @@ create_parser_zip
 COMMAND=$1
 FLAG=$2
 
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
+    export TESTTING_ENABLED="1"
+else
+    export TESTTING_ENABLED="0"
+fi
+
 if [ "$COMMAND" = "build" ]; then
     docker pull python:3.11-slim
     docker volume prune -f
 
     case "$FLAG" in
-        -c)
-            client_build "$FLAG"
-            cp nginx/nginx-dev.conf nginx/nginx.conf
-            use_compose_file "default"
-            ;;
-        -b)
-            cp nginx/nginx-dev.conf nginx/nginx.conf
-            use_compose_file "default"
-            ;;
-        -d)
-            client_build "$FLAG"
+        -c|-b|-d|-t)
+            [ "$FLAG" != "-b" ] && client_build "$FLAG"
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
@@ -93,12 +96,13 @@ if [ "$COMMAND" = "build" ]; then
             export ELASTIC_ROOT_IP="37.27.128.168"
             ;;
         *)
-            echo "Unknown build flag: $FLAG"
             exit 1
             ;;
     esac
 
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
+    TESTING_ENABLED="$TESTTING_ENABLED" docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
+
+    [ "$FLAG" = "-t" ] && run_test_task
 elif [ "$COMMAND" = "production" ]; then
     use_compose_file "production"
 else
@@ -106,8 +110,6 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
+TESTTING_ENABLED="$TESTTING_ENABLED" docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
 
-if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
-    wait_for_server
-fi
+[ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && wait_for_server
