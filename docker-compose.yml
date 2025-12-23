@@ -1,148 +1,210 @@
-name: Build & Lighthouse
+services:
+  web:
+    container_name: trusted-web-main
+    build:
+      context: .
+      dockerfile: dockerFiles/api_docker
+    env_file:
+      - .env
+    environment:
+      BLOOM_DIR: /app
+    working_dir: /app
+    depends_on:
+      - elasticsearch
+      - mongo
+      - arangodb
+    volumes:
+      - ./backend/orion:/app/orion:cached
+      - ./backend/routes:/app/routes:cached
+      - ./backend/static:/app/static:cached
+      - ./backend/migrations:/app/migrations:cached
+      - ./client/build:/client_build:delegated
+      - ./bloom_data:/app/bloom_data
+    expose:
+      - "8070"
+    networks:
+      - backend
+      - shared_bridge
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8070" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    command: >
+      sh -c "exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
 
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
+  arangodb:
+    container_name: trusted-web-arangodb
+    image: arangodb:3.11
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD}
+      ARANGODB_DEFAULT_SERVER_ENDPOINT: tcp://0.0.0.0:8529
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb:/var/lib/arangodbx
+    networks:
+      backend:
+        ipv4_address: 172.20.1.15
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
-permissions: read-all
+  nginx:
+    container_name: trusted-web-nginx
+    image: fholzer/nginx-brotli:latest
+    ports:
+      - "8080:8080"
+      - "443:443"
+    depends_on:
+      - web
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/static:/app/static:cached
+      - /var/www/certbot:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      backend:
+        ipv4_address: 172.20.1.13
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080 || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    environment:
+      - ENABLE_BROTLI=1
 
-jobs:
-  build_and_lighthouse:
-    runs-on: ubuntu-latest
+  elasticsearch:
+    container_name: trusted-web-elastic
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
+    environment:
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - discovery.type=single-node
+      - network.host=0.0.0.0
+      - http.port=9400
+      - ELASTIC_USERNAME=${ELASTIC_ROOT_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - indices.memory.index_buffer_size=5%
+      - node.store.allow_mmap=false
+    env_file:
+      - .env
+    ports:
+      - "9400:9400"
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
+    healthcheck:
+      test: curl -f http://localhost:9400/_cluster/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    command:
+      - bash
+      - -c
+      - |
+        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m"
+        exec /usr/local/bin/docker-entrypoint.sh eswrapper
+    networks:
+      backend:
+        ipv4_address: 172.20.1.11
+    deploy:
+      resources:
+        limits:
+          memory: 5G
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+  redis_server:
+    container_name: trusted-web-redis
+    image: redis:7.4.0
+    logging:
+      driver: none
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      backend:
+        ipv4_address: 172.20.1.12
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
-      - run: |
-          set -euo pipefail
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends bash curl git ca-certificates gnupg jq docker-compose python3
-          curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google.gpg
-          echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends google-chrome-stable
+  mongo:
+    image: mongo:latest
+    container_name: trustly-web-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo:/data/db
+    command: >
+      bash -c "
+      mongod --bind_ip_all --fork --logpath /var/log/mongodb.log &&
+      sleep 10 &&
+      mongosh --eval '
+        db = db.getSiblingDB(\"admin\");
+        if (db.getUser(\"${MONGO_ROOT_USERNAME}\") === null) {
+          db.createUser({
+            user: \"${MONGO_ROOT_USERNAME}\",
+            pwd: \"${MONGO_ROOT_PASSWORD}\",
+            roles: [{ role: \"userAdminAnyDatabase\", db: \"admin\" }, { role: \"readWriteAnyDatabase\", db: \"admin\" }]
+          });
+        }
+      ' &&
+      mongod --shutdown &&
+      sleep 5 &&
+      mongod --auth --bind_ip_all --fork --logpath /var/log/mongodb.log &&
+      tail -f /var/log/mongodb.log
+      "
+    networks:
+      backend:
+        ipv4_address: 172.20.1.14
+    healthcheck:
+      test: [ "CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/27017' || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
-      - run: |
-          set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -d
+networks:
+  shared_bridge:
+    external: true
+  backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.1.0/24
 
-      - id: compose_loc
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os, sys
-          targets = {"docker-compose.yml","docker-compose.yaml","compose.yml","compose.yaml"}
-          found = None
-          for root, dirs, files in os.walk("."):
-            if root.count(os.sep) > 6:
-              dirs[:] = []
-              continue
-            for f in files:
-              if f in targets:
-                found = os.path.abspath(os.path.join(root, f))
-                break
-            if found:
-              break
-          if not found:
-            print("No compose file found", file=sys.stderr)
-            sys.exit(1)
-          d = os.path.dirname(found)
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
-            fp.write(f"dir={d}\n")
-            fp.write(f"file={found}\n")
-          print(found)
-          PY
-
-      - env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          python3 - <<'PY'
-          import os, pathlib
-          pathlib.Path(".env").write_text(os.environ["ENV_FILE"], encoding="utf-8")
-          PY
-
-      - run: |
-          set -euo pipefail
-          docker ps -aq | xargs -r docker rm -f || true
-          docker network prune -f || true
-          docker system prune -f --volumes || true
-
-      - run: |
-          set -euo pipefail
-          docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
-
-      - run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
-
-      - run: |
-          set -euo pipefail
-          echo "=== docker ps (initial) ==="
-          docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}' || true
-          echo "=== docker networks ==="
-          docker network ls || true
-          echo "=== waiting for app (not 000 and not 502) ==="
-          for i in $(seq 1 120); do
-            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080 || echo 000)"
-            echo "http_code=$code"
-            if [ "$code" != "000" ] && [ "$code" != "502" ]; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "=== FAILED: still 000/502 after wait ==="
-          docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}' || true
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" ps || true
-          docker logs trusted-web-main --tail=2000 || true
-          docker logs trusted-web-nginx --tail=2000 || true
-          docker logs trusted-web-elastic --tail=2000 || true
-          docker logs trustly-web-mongodb --tail=2000 || true
-          docker logs trusted-web-arangodb --tail=2000 || true
-          docker logs trusted-web-redis --tail=2000 || true
-          docker stats --no-stream 2>/dev/null || true
-          ss -ltnp 2>/dev/null || true
-          curl -v http://127.0.0.1:8080 || true
-          docker exec trusted-web-nginx sh -lc 'curl -v http://web:8070 || true' 2>/dev/null || true
-          exit 1
-
-      - run: |
-          set -euo pipefail
-          npm install -g lighthouse@11.7.1
-
-      - run: |
-          set -euo pipefail
-          mkdir -p lighthouse-results
-          lighthouse http://127.0.0.1:8080 \
-            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
-            --output=json \
-            --output=html \
-            --output-path=./lighthouse-results/lighthouse-report \
-            --only-categories=performance,accessibility,best-practices,seo
-
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-results
-          path: lighthouse-results/
-          retention-days: 7
-
-      - if: always()
-        run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" down -v --remove-orphans || true
-          docker ps -aq | xargs -r docker rm -f || true
-          docker network prune -f || true
+volumes:
+  redis:
+  mongo:
+  elastic:
+  static_volume:
+  media_volume:
+  arangodb:
