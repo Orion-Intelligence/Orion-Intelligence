@@ -1,0 +1,21 @@
+[{
+  "_id": {
+    "$oid": "6942fc487720aacfcdeb030b"
+  },
+  "city": "gAAAAABpRmFygaGSilV3MOCGZ1pIIxF8-rW2HMyyAqZM4FFpqA_BlT1lpF9DtFBWE1So54C6grF_gFdjay7NxZct-pD8F0uKCA==",
+  "country": "gAAAAABpRmFyNIwbD9cBo_6WpheMY7jFdaQgJcS2JWQf2fswJ0sfFCzBgBd3g-IhvGozEoXanV6mGeNfqSMHxDcCifqXyKEnMg==",
+  "iocs": [],
+  "is_default": true,
+  "licenses": [
+    "gAAAAABpRmFyD4gfJJouVmLblrL7bjaNDmEBjeAAkLnNLVQUrvVPvm06C-frZcRyZR9i77corYPiJ3cgllQXGZSg2ees_HeZQg==",
+    "gAAAAABpRmFy3JnL0y46ms7BM3e9lfp8FsqCwodboKYwtOc54uFTPA0X5uqrxRibSERrxrrPzjRNc0TAuZ1P9nyrey-jmqDIVA==",
+    "gAAAAABpRmFyAuS4IJ8f5sfmvXh8SnmaXqjxYpJ0Kn8PK4aInncbFXTTb5s1OaH3bVSqSmmEbmjwRnAWqNH8tAI_AM4P7F6Pow=="
+  ],
+  "name": "gAAAAABpRmFyNmkVOPhuPGknB_STGku5qpkLrvwvrS8qoDjD_f5mE0VI1Aqj9QvX-bOEWCsMB9ozMLjr7N7ZRkWFcX13s3BxYQ==",
+  "phone": "gAAAAABpRmFyDzFruD4yr2KnTeowlg_xZ7pTuxmhDxixXSwZyOGY0BeorX3ZLm6XnJsUlk6JFsfNNE3WkDAJNnrpb9JaPs-o8A==",
+  "postal_code": "gAAAAABpRmFyfKzPufcGJ8DxeUBN9VB2sQPxOvsK2oU6haPYNcvNhsmr3TnSM3DYjDLVCXxESb6NhpZ6xl22kSxs1ltD2Jbpcw==",
+  "status": "active",
+  "subscription": true,
+  "user_quota": 1,
+  "verified": true
+}]
