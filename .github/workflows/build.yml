@@ -38,7 +38,16 @@ jobs:
       - id: compose_dir
         run: |
           set -euo pipefail
-          d="$(find . -maxdepth 4 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit | xargs -r dirname || true)"
+          d="$(find . -maxdepth 4 -type f -name 'docker-compose.yml' -print -quit | xargs -r dirname || true)"
+          if [ -z "${d:-}" ]; then
+            d="$(find . -maxdepth 4 -type f -name 'docker-compose.yaml' -print -quit | xargs -r dirname || true)"
+          fi
+          if [ -z "${d:-}" ]; then
+            d="$(find . -maxdepth 4 -type f -name 'compose.yml' -print -quit | xargs -r dirname || true)"
+          fi
+          if [ -z "${d:-}" ]; then
+            d="$(find . -maxdepth 4 -type f -name 'compose.yaml' -print -quit | xargs -r dirname || true)"
+          fi
           if [ -z "${d:-}" ]; then
             echo "No compose file found"
             exit 1
