@@ -35,14 +35,24 @@ jobs:
           chmod +x ./run.sh
           ./run.sh build -c
 
+      - id: compose_dir
+        run: |
+          set -euo pipefail
+          d="$(find . -maxdepth 4 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit | xargs -r dirname || true)"
+          if [ -z "${d:-}" ]; then
+            echo "No compose file found"
+            exit 1
+          fi
+          echo "dir=$d" >> "$GITHUB_OUTPUT"
+
       - run: |
           set -euo pipefail
-          cd docker
+          cd "${{ steps.compose_dir.outputs.dir }}"
           docker-compose up -d --build
 
       - run: |
           set -euo pipefail
-          timeout 180 bash -c 'until curl -fsS http://localhost:8080 >/dev/null 2>&1; do sleep 3; done'
+          timeout 240 bash -c 'until curl -fsS http://localhost:8080 >/dev/null 2>&1; do sleep 3; done'
 
       - run: |
           set -euo pipefail
@@ -67,5 +77,6 @@ jobs:
 
       - if: always()
         run: |
-          cd docker
+          set -euo pipefail
+          cd "${{ steps.compose_dir.outputs.dir }}"
           docker-compose down || true
