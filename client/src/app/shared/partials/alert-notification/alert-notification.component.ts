@@ -192,7 +192,6 @@ export class AlertNotificationComponent implements OnChanges {
           },
           error: (err) => {
             console.error(err);
-            alert(err?.error?.detail || 'Update failed');
           },
         });
       } else {

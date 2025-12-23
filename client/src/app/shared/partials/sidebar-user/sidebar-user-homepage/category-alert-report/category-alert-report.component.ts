@@ -299,7 +299,6 @@ export class CategoryAlertReportComponent implements OnInit {
             },
             error: (err) => {
               console.error(err);
-              alert(err?.error?.detail || 'Update failed');
             },
           });
         }

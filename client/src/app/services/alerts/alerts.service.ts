@@ -31,7 +31,6 @@ export class AlertService {
             },
             error: (err) => {
                 console.error('Scan failed with an error:', err);
-                alert(err?.error?.detail || 'IOC Scan failed to start.');
                 this.isAlertScanLoading.set(false);
             },
         });
@@ -44,7 +43,6 @@ export class AlertService {
             },
             error: (err) => {
                 console.error('Cancel scan failed with an error:', err);
-                alert(err?.error?.detail || 'Failed to cancel IOC Scan.');
             },
         });
     }

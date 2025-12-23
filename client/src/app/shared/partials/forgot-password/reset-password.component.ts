@@ -77,7 +77,6 @@ export class ResetPasswordComponent implements OnInit{
     if (token != null) {
       this.token = token;
       this.hasToken = true;
-      alert(this.hasToken)
     }
   }
   onSubmit(form: NgForm) {

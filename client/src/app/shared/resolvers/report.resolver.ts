@@ -56,7 +56,6 @@ export class ReportResolver implements Resolve<any> {
 
     return this.apiService.get<any>(apiUrl).pipe(
       catchError((_) => {
-        alert(_?.message || 'Unknown error');
         this.router.navigate(['/']).then();
         return of(null);
       })

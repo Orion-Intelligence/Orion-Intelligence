@@ -242,7 +242,6 @@ class alert_job:
                                     )
 
                             except Exception as dynamic_e:
-                                print("11_22x2 :::::::::::::::::::::::::::::", flush=True)
                                 print(f"[{datetime.now().strftime('%H:%M:%S')}] -> DYNAMIC SEARCH CALL ERROR for {scan_type}:{ioc_type_name}:{ioc_value}. Error: {dynamic_e}")
 
                 return
