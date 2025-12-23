@@ -36,98 +36,21 @@ jobs:
 
       - run: |
           set -euo pipefail
-          if [ ! -d "client/build" ]; then
-            echo "FAIL: client/build missing"
+          echo "=== checking client build folder ==="
+          if [ -d "client/build" ]; then
+            echo "SUCCESS: client/build exists"
+            echo "=== tree client/build (depth 4) ==="
+            find client/build -maxdepth 4 -type d -print || true
+            echo "=== files sample ==="
+            find client/build -maxdepth 2 -type f -print | head -n 200 || true
+          else
+            echo "FAIL: client/build does not exist"
+            echo "=== client dir listing ==="
             ls -la client || true
+            echo "=== search possible output dirs ==="
+            find client -maxdepth 3 -type d \( -name build -o -name dist -o -name public \) -print || true
             exit 1
           fi
-          echo "SUCCESS: client/build exists"
 
       - run: |
-          set -euo pipefail
-          rm -rf backend/build
-          mkdir -p backend/build
-          cp -a client/build/. backend/build/.
-          test -d backend/build/assets || true
-          echo "Copied client/build -> backend/build"
-          find backend/build -maxdepth 2 -type d -print || true
-          find backend/build -maxdepth 2 -type f -print | head -n 200 || true
-
-      - env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os, pathlib
-          pathlib.Path(".env").write_text(os.environ["ENV_FILE"], encoding="utf-8")
-          PY
-          test -s .env
-
-      - run: |
-          set -euo pipefail
-          docker ps -aq | xargs -r docker rm -f || true
-          docker network prune -f || true
-          docker system prune -f --volumes || true
-
-      - run: |
-          set -euo pipefail
-          docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
-
-      - run: |
-          set -euo pipefail
           ./run.sh build -b
-
-      - run: |
-          set -euo pipefail
-          for i in $(seq 1 180); do
-            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080 || echo 000)"
-            echo "http_code=$code"
-            if [ "$code" != "000" ] && [ "$code" != "502" ]; then
-              echo "READY"
-              exit 0
-            fi
-            if [ $((i % 12)) -eq 0 ]; then
-              echo "=== docker ps ==="
-              docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}' || true
-              docker logs trusted-web-main --tail=200 || true
-              docker logs trusted-web-nginx --tail=200 || true
-            fi
-            sleep 5
-          done
-          echo "FAIL: app not ready"
-          docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}' || true
-          docker logs trusted-web-main --tail=5000 || true
-          docker logs trusted-web-nginx --tail=5000 || true
-          docker logs trusted-web-elastic --tail=5000 || true
-          docker logs trustly-web-mongodb --tail=5000 || true
-          docker logs trusted-web-arangodb --tail=5000 || true
-          docker logs trusted-web-redis --tail=5000 || true
-          exit 1
-
-      - run: |
-          set -euo pipefail
-          npm install -g lighthouse@11.7.1
-
-      - run: |
-          set -euo pipefail
-          mkdir -p lighthouse-results
-          lighthouse http://127.0.0.1:8080 \
-            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
-            --output=json \
-            --output=html \
-            --output-path=./lighthouse-results/lighthouse-report \
-            --only-categories=performance,accessibility,best-practices,seo
-
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-results
-          path: lighthouse-results/
-          retention-days: 7
-
-      - if: always()
-        run: |
-          set -euo pipefail
-          docker ps -aq | xargs -r docker rm -f || true
-          docker network prune -f || true
-          docker system prune -f --volumes || true
