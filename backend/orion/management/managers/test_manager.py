@@ -70,7 +70,7 @@ class test_manager:
     for c in cols:
       await db[c].delete_many({})
 
-    mocks_dir = Path(__file__).resolve().parents[3] / "static" / "resource" / "test" / "mocks" / "mongo"
+    mocks_dir = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "mongo"
     if mocks_dir.exists():
       for fp in sorted(mocks_dir.glob("*.json")):
         parts = fp.name.split(".")
