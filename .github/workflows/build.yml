@@ -52,13 +52,11 @@ jobs:
             if found:
               break
           if not found:
-            print("No compose file found", file=sys.stderr)
             sys.exit(1)
           d = os.path.dirname(found)
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fp:
             fp.write(f"dir={d}\n")
             fp.write(f"file={found}\n")
-          print(found)
           PY
 
       - env:
@@ -68,18 +66,14 @@ jobs:
           cd "${{ steps.compose_loc.outputs.dir }}"
           python3 - <<'PY'
           import os, pathlib
-          pathlib.Path(".env").write_text(os.environ.get("ENV_FILE",""), encoding="utf-8")
+          pathlib.Path(".env").write_text(os.environ["ENV_FILE"], encoding="utf-8")
           PY
-          test -s .env
 
       - run: |
           set -euo pipefail
           docker ps -aq | xargs -r docker rm -f || true
           docker network ls --format '{{.Name}}' | while read -r n; do
-            case "$n" in
-              bridge|host|none) ;;
-              *) docker network rm "$n" >/dev/null 2>&1 || true ;;
-            esac
+            case "$n" in bridge|host|none) ;; *) docker network rm "$n" >/dev/null 2>&1 || true ;; esac
           done
           docker network prune -f || true
           docker system prune -f --volumes || true
@@ -97,25 +91,13 @@ jobs:
       - id: wait_app
         run: |
           set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-
           docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}'
-
-          url="http://127.0.0.1:8080"
-          host_port="$(docker ps --format '{{.Ports}}' | tr ',' '\n' | grep -Eo '0\.0\.0\.0:[0-9]+->(80|8080)/tcp|127\.0\.0\.1:[0-9]+->(80|8080)/tcp' | head -n1 | sed -E 's/.*:([0-9]+)->.*/\1/' || true)"
-          if [ -n "${host_port:-}" ]; then
-            url="http://127.0.0.1:${host_port}"
-          fi
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "Waiting for $url"
-
-          if ! timeout 300 bash -c "until curl -fsS '$url' >/dev/null 2>&1; do sleep 3; done"; then
-            echo "App did not become ready. Printing compose status and logs."
-            docker-compose -f \"${{ steps.compose_loc.outputs.file }}\" ps || true
-            docker-compose -f \"${{ steps.compose_loc.outputs.file }}\" logs --no-color --tail=300 || true
+          if ! timeout 600 bash -c 'until curl -fsS http://127.0.0.1:8080 >/dev/null 2>&1; do sleep 5; done'; then
+            docker logs trusted-web-nginx --tail=300 || true
+            docker logs trusted-web-main --tail=300 || true
             exit 1
           fi
+          echo "url=http://127.0.0.1:8080" >> "$GITHUB_OUTPUT"
 
       - run: |
           set -euo pipefail
