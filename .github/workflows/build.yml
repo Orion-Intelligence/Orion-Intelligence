@@ -72,9 +72,6 @@ jobs:
       - run: |
           set -euo pipefail
           docker ps -aq | xargs -r docker rm -f || true
-          docker network ls --format '{{.Name}}' | while read -r n; do
-            case "$n" in bridge|host|none) ;; *) docker network rm "$n" >/dev/null 2>&1 || true ;; esac
-          done
           docker network prune -f || true
           docker system prune -f --volumes || true
 
@@ -85,19 +82,33 @@ jobs:
       - run: |
           set -euo pipefail
           cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
+          python3 - <<'PY'
+          import pathlib
+          pathlib.Path("ci.override.yml").write_text(
+          'version: "3.8"\n'
+          'services:\n'
+          '  web:\n'
+          '    networks:\n'
+          '      backend:\n'
+          '        ipv4_address: 172.20.1.2\n'
+          '      shared_bridge: {}\n',
+          encoding="utf-8")
+          PY
 
-      - id: wait_app
-        run: |
+      - run: |
           set -euo pipefail
-          docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}'
-          if ! timeout 600 bash -c 'until curl -fsS http://127.0.0.1:8080 >/dev/null 2>&1; do sleep 5; done'; then
+          cd "${{ steps.compose_loc.outputs.dir }}"
+          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml up -d --build
+
+      - run: |
+          set -euo pipefail
+          if ! timeout 900 bash -c 'until curl -fsS http://127.0.0.1:8080 >/dev/null 2>&1; do sleep 5; done'; then
+            docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}' || true
             docker logs trusted-web-nginx --tail=300 || true
             docker logs trusted-web-main --tail=300 || true
             exit 1
           fi
-          echo "url=http://127.0.0.1:8080" >> "$GITHUB_OUTPUT"
 
       - run: |
           set -euo pipefail
@@ -106,7 +117,7 @@ jobs:
       - run: |
           set -euo pipefail
           mkdir -p lighthouse-results
-          lighthouse "${{ steps.wait_app.outputs.url }}" \
+          lighthouse http://127.0.0.1:8080 \
             --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
             --output=json \
             --output=html \
@@ -125,6 +136,6 @@ jobs:
           set -euo pipefail
           cd "${{ steps.compose_loc.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" down -v --remove-orphans || true
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml down -v --remove-orphans || true
           docker ps -aq | xargs -r docker rm -f || true
           docker network prune -f || true
