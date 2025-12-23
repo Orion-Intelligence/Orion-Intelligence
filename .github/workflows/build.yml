@@ -35,38 +35,88 @@ jobs:
           chmod +x ./run.sh
           ./run.sh build -c
 
-      - id: compose
+      - run: |
+          set -euo pipefail
+          cd docker
+          docker-compose up -d --build
+
+      - run: |
+          set -euo pipefail
+          timeout 180 bash -c 'until curl -fsS http://localhost:8080 >/dev/null 2>&1; do sleep 3; done'
+
+      - run: |
+          set -euo pipefail
+          npm install -g lighthouse@11.7.1
+
+      - run: |
+          set -euo pipefail
+          mkdir -p lighthouse-results
+          lighthouse http://localhost:8080 \
+            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
+            --output=json \
+            --output=html \
+            --output-path=./lighthouse-results/lighthouse-report \
+            --only-categories=performance,accessibility,best-practices,seo
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results
+          path: lighthouse-results/
+          retention-days: 7
+
+      - if: always()
+        run: |name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build_and_lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - run: |
+          set -euo pipefail
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            bash curl git ca-certificates gnupg jq docker-compose
+          curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google.gpg
+          echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends google-chrome-stable
+
+      - run: |
+          set -euo pipefail
+          chmod +x ./run.sh
+          ./run.sh build -c
+
+      - id: compose_dir
         run: |
           set -euo pipefail
-          f="$(find . -maxdepth 6 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit || true)"
-          [ -n "${f:-}" ] || { echo "No compose file found"; exit 1; }
-          echo "file=$f" >> "$GITHUB_OUTPUT"
-          echo "dir=$(dirname "$f")" >> "$GITHUB_OUTPUT"
+          d="$(find . -maxdepth 4 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit | xargs -r dirname || true)"
+          if [ -z "${d:-}" ]; then
+            echo "No compose file found"
+            exit 1
+          fi
+          echo "dir=$d" >> "$GITHUB_OUTPUT"
 
       - run: |
           set -euo pipefail
-          [ -n "${{ secrets.ENV_FILE }}" ] || { echo "ENV_FILE secret is empty/unavailable in this run"; exit 1; }
-
-      - run: |
-          set -euo pipefail
-          cd "${{ steps.compose.outputs.dir }}"
-          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
-          test -s .env
-
-      - run: |
-          set -euo pipefail
-          cd "${{ steps.compose.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          subnet_octet=$(( ( (${{ github.run_id }} + ${{ github.run_attempt }} ) % 200 ) + 20 ))
-          cat > ci.override.yml <<EOF
-version: "3.8"
-networks:
-  backend:
-    ipam:
-      config:
-        - subnet: "172.250.${subnet_octet}.0/24"
-EOF
-          docker-compose -f "${{ steps.compose.outputs.file }}" -f ci.override.yml up -d --build
+          cd "${{ steps.compose_dir.outputs.dir }}"
+          docker-compose up -d --build
 
       - run: |
           set -euo pipefail
@@ -96,6 +146,8 @@ EOF
       - if: always()
         run: |
           set -euo pipefail
-          cd "${{ steps.compose.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose.outputs.file }}" -f ci.override.yml down -v || true
+          cd "${{ steps.compose_dir.outputs.dir }}"
+          docker-compose down || true
+
+          cd docker
+          docker-compose down || true
