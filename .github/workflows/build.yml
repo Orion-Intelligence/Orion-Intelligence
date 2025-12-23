@@ -31,8 +31,9 @@ jobs:
 
       - run: |
           set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -c
+          cd client
+          npm install
+          npx ng build
 
       - run: |
           set -euo pipefail
