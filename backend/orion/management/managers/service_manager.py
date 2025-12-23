@@ -2,9 +2,9 @@ import asyncio
 import json
 from asyncio import sleep
 from jinja2 import Environment, FileSystemLoader
-
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
+from orion.management.managers.test_manager import test_manager
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -31,6 +31,8 @@ class service_manager:
         self._is_available = False
 
     async def init_services(self):
+        await test_manager.get_instance().apply_test_overrides()
+
         while not self._is_available:
             try:
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
@@ -41,6 +43,10 @@ class service_manager:
                 await mongo_controller.get_instance().link_connection()
                 await mongo_controller.get_instance().ensure_indexes()
                 await mongo_controller.get_instance().initialize()
+
+                await test_manager.get_instance().reset_test_mongo_and_import_mocks()
+                await test_manager.get_instance().reset_test_elastic_and_import_mocks()
+
                 await redis_controller.getInstance().initialize()
                 await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)
@@ -81,6 +87,5 @@ class service_manager:
         constant.mail_template = mail_templete_env.get_template("mail_template.html")
         license_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"))
         license_rules_template = license_rules_env.get_template("license_rules.json")
-        license_rules_json_str = license_rules_template.render() 
+        license_rules_json_str = license_rules_template.render()
         constant.license_rules = json.loads(license_rules_json_str)
-        
