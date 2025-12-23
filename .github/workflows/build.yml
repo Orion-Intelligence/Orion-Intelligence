@@ -38,16 +38,19 @@ jobs:
       - id: compose_dir
         run: |
           set -euo pipefail
-          d="$(find . -maxdepth 4 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit | xargs -r dirname || true)"
-          if [ -z "${d:-}" ]; then
-            echo "No compose file found"
-            exit 1
-          fi
+          d="$(find . -maxdepth 6 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit | xargs -r dirname || true)"
+          [ -n "${d:-}" ] || { echo "No compose file found"; exit 1; }
           echo "dir=$d" >> "$GITHUB_OUTPUT"
 
       - run: |
           set -euo pipefail
+          docker network prune -f || true
+
+      - run: |
+          set -euo pipefail
           cd "${{ steps.compose_dir.outputs.dir }}"
+          echo "${{ secrets.ENV_FILE }}" > .env
+          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
           docker-compose up -d --build
 
       - run: |
@@ -79,4 +82,5 @@ jobs:
         run: |
           set -euo pipefail
           cd "${{ steps.compose_dir.outputs.dir }}"
-          docker-compose down || true
+          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
+          docker-compose down -v || true
