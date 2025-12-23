@@ -74,6 +74,18 @@ jobs:
 
       - run: |
           set -euo pipefail
+          docker ps -aq | xargs -r docker rm -f || true
+          docker network ls --format '{{.Name}}' | while read -r n; do
+            case "$n" in
+              bridge|host|none) ;;
+              *) docker network rm "$n" >/dev/null 2>&1 || true ;;
+            esac
+          done
+          docker network prune -f || true
+          docker system prune -f --volumes || true
+
+      - run: |
+          set -euo pipefail
           docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
 
       - run: |
@@ -113,3 +125,5 @@ jobs:
           cd "${{ steps.compose_loc.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
           docker-compose -f "${{ steps.compose_loc.outputs.file }}" down -v --remove-orphans || true
+          docker ps -aq | xargs -r docker rm -f || true
+          docker network prune -f || true
