@@ -143,6 +143,7 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server
 fi
 
+
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
     wait_for_test_service
 #    run_test_task
