@@ -35,7 +35,7 @@ jobs:
           chmod +x ./run.sh
           ./run.sh build -c
 
-      - id: compose_dir
+      - id: compose
         run: |
           set -euo pipefail
           f="$(find . -maxdepth 6 -type f \( -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print -quit || true)"
@@ -49,13 +49,13 @@ jobs:
 
       - run: |
           set -euo pipefail
-          cd "${{ steps.compose_dir.outputs.dir }}"
+          cd "${{ steps.compose.outputs.dir }}"
           printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
           test -s .env
 
       - run: |
           set -euo pipefail
-          cd "${{ steps.compose_dir.outputs.dir }}"
+          cd "${{ steps.compose.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
           subnet_octet=$(( ( (${{ github.run_id }} + ${{ github.run_attempt }} ) % 200 ) + 20 ))
           cat > ci.override.yml <<EOF
@@ -66,7 +66,7 @@ networks:
       config:
         - subnet: "172.250.${subnet_octet}.0/24"
 EOF
-          docker-compose -f "${{ steps.compose_dir.outputs.file }}" -f ci.override.yml up -d --build
+          docker-compose -f "${{ steps.compose.outputs.file }}" -f ci.override.yml up -d --build
 
       - run: |
           set -euo pipefail
@@ -96,6 +96,6 @@ EOF
       - if: always()
         run: |
           set -euo pipefail
-          cd "${{ steps.compose_dir.outputs.dir }}"
+          cd "${{ steps.compose.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_dir.outputs.file }}" -f ci.override.yml down -v || true
+          docker-compose -f "${{ steps.compose.outputs.file }}" -f ci.override.yml down -v || true
