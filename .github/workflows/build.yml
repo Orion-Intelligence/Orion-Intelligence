@@ -52,11 +52,13 @@ jobs:
             if found:
               break
           if not found:
+            print("No compose file found", file=sys.stderr)
             sys.exit(1)
           d = os.path.dirname(found)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fp:
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
             fp.write(f"dir={d}\n")
             fp.write(f"file={found}\n")
+          print(found)
           PY
 
       - env:
@@ -82,31 +84,43 @@ jobs:
       - run: |
           set -euo pipefail
           cd "${{ steps.compose_loc.outputs.dir }}"
-          python3 - <<'PY'
-          import pathlib
-          pathlib.Path("ci.override.yml").write_text(
-          'version: "3.8"\n'
-          'services:\n'
-          '  web:\n'
-          '    networks:\n'
-          '      backend:\n'
-          '        ipv4_address: 172.20.1.2\n'
-          '      shared_bridge: {}\n',
-          encoding="utf-8")
-          PY
-
-      - run: |
-          set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml up -d --build
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
 
       - run: |
           set -euo pipefail
-          if ! timeout 900 bash -c 'until [ "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080 || echo 000)" != "000" ] && [ "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080 || echo 000)" != "502" ]; do sleep 5; done'; then
-            docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Status}}" || true
-            docker logs trusted-web-nginx --tail=300 || true
-            docker logs trusted-web-main --tail=300 || true
+          echo "=== docker ps (initial) ==="
+          docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}' || true
+          echo "=== docker networks ==="
+          docker network ls || true
+          echo "=== waiting for app (not 000 and not 502) ==="
+          if ! timeout 900 bash -c 'until code=$(curl -s -o /dev/null -w '\''%{http_code}'\'' http://127.0.0.1:8080 || echo 000); echo "http_code=$code"; [ "$code" != "000" ] && [ "$code" != "502" ]; do sleep 5; done'; then
+            echo "=== FAILED: app not ready ==="
+            echo "=== docker ps ==="
+            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}' || true
+            echo "=== docker inspect (health/status) ==="
+            for c in trusted-web-nginx trusted-web-main trusted-web-elastic trustly-web-mongodb trusted-web-arangodb trusted-web-redis; do
+              echo "--- inspect: $c ---"
+              docker inspect "$c" --format '{{.Name}} status={{.State.Status}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}} exit={{.State.ExitCode}} started={{.State.StartedAt}} finished={{.State.FinishedAt}}' 2>/dev/null || true
+            done
+            echo "=== docker compose ps ==="
+            cd "${{ steps.compose_loc.outputs.dir }}"
+            docker-compose -f "${{ steps.compose_loc.outputs.file }}" ps || true
+            echo "=== docker logs (tail 2000) ==="
+            for c in trusted-web-nginx trusted-web-main trusted-web-elastic trustly-web-mongodb trusted-web-arangodb trusted-web-redis; do
+              echo "--- logs: $c ---"
+              docker logs "$c" --tail=2000 2>/dev/null || true
+            done
+            echo "=== docker events (last 2m) ==="
+            timeout 10 docker events --since 2m --until 0s 2>/dev/null || true
+            echo "=== docker stats (one-shot) ==="
+            docker stats --no-stream 2>/dev/null || true
+            echo "=== netstat/ss listening ports ==="
+            ss -ltnp 2>/dev/null || true
+            echo "=== curl verbose ==="
+            curl -v http://127.0.0.1:8080 || true
+            echo "=== curl to upstream container (if reachable) ==="
+            docker exec trusted-web-nginx sh -lc 'curl -v http://web:8070 || true' 2>/dev/null || true
             exit 1
           fi
 
@@ -136,6 +150,6 @@ jobs:
           set -euo pipefail
           cd "${{ steps.compose_loc.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" -f ci.override.yml down -v --remove-orphans || true
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" down -v --remove-orphans || true
           docker ps -aq | xargs -r docker rm -f || true
           docker network prune -f || true
