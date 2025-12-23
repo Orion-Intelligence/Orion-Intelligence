@@ -242,7 +242,7 @@ class TenantManager:
 
       requested = set(data.licenses or [])
 
-      if requested and not requested.issubset(tenant_allowed):
+      if requested and not requested.issubset(tenant_allowed) and not current_user.role in ["admin"]:
         raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
 
       users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)

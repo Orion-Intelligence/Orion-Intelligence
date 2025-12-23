@@ -35,7 +35,6 @@ import { PaymentGatewayComponent } from './shared/partials/payment-gateway/payme
 import { NotificationComponent } from './shared/partials/notification/notification.component';
 import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
 import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/account-settings.component';
-import { NodeResolver } from './shared/resolvers/session-data-resolver.service';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
 import { SidebarUserHomepageComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component';
@@ -678,6 +677,11 @@ export const routes: Routes = [
             path: 'system-settings',
             component: SidebarProfileSystemSettingsComponent,
             data: { type: 'srttings', animation: 'CategoryPage' }
+          },
+          {
+            path: 'alerts',
+            redirectTo: 'homepage',
+            pathMatch: 'full'
           },
           {
             path: '**',

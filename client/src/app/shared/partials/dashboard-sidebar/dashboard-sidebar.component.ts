@@ -58,17 +58,28 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.handleProfileRoute(this.router.url);
+
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => {
-        if (e.urlAfterRedirects.startsWith('/dashboard/profile/consolidated/') || e.urlAfterRedirects.startsWith('/dashboard/profile/homepage') || e.urlAfterRedirects.startsWith('/dashboard/profile/alerts/general')) {
-          this.selectionStore.setSelectedSection('Profile');
-          this.selectionStore.setSelectedOption('Homepage');
-        }
+        this.handleProfileRoute(e.urlAfterRedirects);
       });
 
     window.addEventListener('resize', this.checkScreenWidth.bind(this));
     this.checkScreenWidth();
+  }
+
+  private handleProfileRoute(url: string) {
+    if (
+      url.startsWith('/dashboard/profile/consolidated/') ||
+      url.startsWith('/dashboard/profile/homepage') ||
+      url.startsWith('/dashboard/profile/alerts/general') ||
+      url.startsWith('/dashboard/profile/alerts')
+    ) {
+      this.selectionStore.setSelectedSection('Profile');
+      this.selectionStore.setSelectedOption('Homepage');
+    }
   }
 
   ngOnDestroy() {
@@ -177,7 +188,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       );
     }
 
-    if (this.isMember() && !this.licenseService.getLicenses().includes('free')) {
+    if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(
         c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS

@@ -95,7 +95,6 @@ export class SidebarUserIocComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        alert(err?.error?.detail || 'Onboarding failed');
       },
     });
   }
@@ -132,7 +131,6 @@ export class SidebarUserIocComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          alert(err?.error?.detail || 'Clearing IOCs failed');
         },
       });
       this.isConfirmationOpen = false;

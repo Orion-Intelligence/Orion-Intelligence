@@ -104,48 +104,37 @@ export class ManageProfileComponent implements OnInit {
   }
 
   isLicenseDisabled(user: any, license: LicenseName): boolean {
-    const licenses: LicenseName[] = user.licenses || [];
-    const hasFree = licenses.includes(LicenseName.FREE);
-    const hasEnterprise = licenses.includes(LicenseName.ENTERPRISE);
-    const hasBasic = licenses.includes(LicenseName.OSINT_BASIC);
-    const hasAdvanced = licenses.includes(LicenseName.OSINT_ADVANCED);
-
-    if (license === LicenseName.FREE) {
-      return licenses.length > 0 && !hasFree;
-    }
-
-    if (hasFree && license !== LicenseName.FREE.valueOf()) {
-      return true;
-    }
-
-    if (license === LicenseName.ENTERPRISE) {
-      return licenses.length > 1 || (licenses.length === 1 && !hasEnterprise);
-    }
-
-    if (hasEnterprise && license !== LicenseName.ENTERPRISE.valueOf()) {
-      return true;
-    }
-
-    if (license === LicenseName.OSINT_BASIC && hasAdvanced && !hasBasic) {
-      return true;
-    }
-
-    if (license === LicenseName.OSINT_ADVANCED && hasBasic && !hasAdvanced) {
-      return true;
-    }
-
     return false;
   }
 
   toggleUserLicense(user: any, license: LicenseName) {
     if (!user.licenses) user.licenses = [];
-    const index = user.licenses.indexOf(license);
-    if (index > -1) {
-      user.licenses.splice(index, 1);
-    } else {
-      user.licenses.push(license);
+
+    if (user.licenses.includes(license)) {
+      user.licenses = user.licenses.filter((l: LicenseName) => l !== license);
+      return;
     }
+
+    if (license === LicenseName.FREE || license === LicenseName.ENTERPRISE) {
+      user.licenses = [license];
+      return;
+    }
+
+    user.licenses = user.licenses.filter(
+      (l: LicenseName) => l !== LicenseName.FREE && l !== LicenseName.ENTERPRISE
+    );
+
+    if (license === LicenseName.OSINT_BASIC) {
+      user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.OSINT_ADVANCED);
+    }
+
+    if (license === LicenseName.OSINT_ADVANCED) {
+      user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.OSINT_BASIC);
+    }
+
+    user.licenses.push(license);
   }
+
 
   deleteUser(user: User) {
     this.userToDelete = user;

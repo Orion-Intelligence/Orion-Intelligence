@@ -125,7 +125,6 @@ export class AccountSettingsComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        alert(err?.error?.detail || 'save company profile failed');
       },
     });
   }

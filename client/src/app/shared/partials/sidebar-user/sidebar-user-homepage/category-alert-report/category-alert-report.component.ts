@@ -303,8 +303,7 @@ export class CategoryAlertReportComponent implements OnInit {
             },
           });
         }
-        else (alert("null"))
-      } else {
+        else (alert("null"))} else {
         this.messageNotificationService.show("Please purchase enterprise license to view reports")
       }
     });

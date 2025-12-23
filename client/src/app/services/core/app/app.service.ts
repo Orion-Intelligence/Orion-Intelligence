@@ -36,6 +36,7 @@ export class AppService {
       id: '',
       name: '',
       phone: '',
+      isDefault: false,
       hasOnboarding: false,
       country: '',
       city: '',
@@ -85,6 +86,7 @@ export class AppService {
         tenant: {
           id: '',
           name: '',
+          isDefault: false,
           phone: '',
           hasOnboarding: false,
           country: '',
@@ -186,6 +188,7 @@ export class AppService {
       tenant: {
         id: '',
         name: '',
+        isDefault: false,
         phone: '',
         hasOnboarding: false,
         country: '',

@@ -27,6 +27,7 @@ export interface TenantDataModel {
     city: string;
     postalCode: string;
     hasOnboarding: boolean;
+    isDefault: boolean;
     taxId: string;
     userId: string;
     licenses: string[];

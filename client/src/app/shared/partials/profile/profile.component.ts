@@ -139,7 +139,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   changePassword() {
     this.logout();
-    this.router.navigate(['/forgot']);
+    this.router.navigate(['/reset']);
   }
 
   logout() {

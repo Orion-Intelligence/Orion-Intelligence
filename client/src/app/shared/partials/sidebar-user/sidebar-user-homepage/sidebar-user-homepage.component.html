@@ -1,5 +1,8 @@
-<div *ngIf="!isAdmin(); else showAdmin">
-    <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst();else showFree">
+{{isAdmin()}}
+{{licenseService.isMaintainer()}}
+
+<div *ngIf="!isAdmin() && !appService.userSessionData().tenant.isDefault; else showAdmin">
+  <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst();else showFree">
         <div class="ioc-dashboard-content-wrapper">
             <div *ngIf="alertService.isAlertScanLoading()">
                 <app-alert-scan-loading></app-alert-scan-loading>

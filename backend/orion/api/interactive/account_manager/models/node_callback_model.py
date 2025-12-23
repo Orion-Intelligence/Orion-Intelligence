@@ -26,6 +26,7 @@ class TenantDataModel(BaseModel):
     postalCode: str
     taxId: str
     hasOnboarding: bool
+    isDefault: bool
     userId: str
     licenses: list[str]
     assignedQuota: str

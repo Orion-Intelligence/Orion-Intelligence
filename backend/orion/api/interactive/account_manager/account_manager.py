@@ -260,6 +260,7 @@ class AccountManager:
         "tenant": {
           "hasOnboarding": tenant.status == TenantStatus.ONBOARDING,
           "id": str(tenant.id),
+          "isDefault": str(tenant.is_default),
           "name": self.safe_decrypt(enc, tenant.name),
           "phone": self.safe_decrypt(enc, tenant.phone),
           "country": self.safe_decrypt(enc, tenant.country),

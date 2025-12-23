@@ -4,7 +4,6 @@ import { NgFor, NgIf } from '@angular/common';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
 import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 import { AppService } from '../../../../services/core/app/app.service';
 
@@ -49,6 +48,7 @@ export class AddTenantComponent implements OnInit {
   onSubmit() {
     this.errorText = '';
     this.usernameSuggestion = '';
+
     if (!this.model.username) {
       this.errorText = 'Username is required';
       return;
@@ -64,6 +64,11 @@ export class AddTenantComponent implements OnInit {
       this.errorText = 'Password is required';
       return;
     }
+
+    if (!this.model.licenses || this.model.licenses.length === 0) {
+      this.model.licenses = [LicenseName.FREE];
+    }
+
     const endpoint = this.isAdmin ? 'tenant/create/user' : 'tenant/create/user';
     this.apiService.post(endpoint, this.model).subscribe({
       next: () => {
