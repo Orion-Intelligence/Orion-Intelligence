@@ -18,7 +18,7 @@ services:
       - ./backend/routes:/app/routes:cached
       - ./backend/static:/app/static:cached
       - ./backend/migrations:/app/migrations:cached
-      - ./client/build:/client_build:delegated
+      - ./client/build:/app/build:delegated
       - ./bloom_data:/app/bloom_data
     expose:
       - "8070"
@@ -32,7 +32,7 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c "exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
 
   arangodb:
     container_name: trusted-web-arangodb
