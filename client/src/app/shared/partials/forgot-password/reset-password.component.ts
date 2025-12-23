@@ -15,7 +15,7 @@ export class ResetPasswordComponent implements OnInit{
   password = '';
   errorMessage: string | null = null;
   responseError = false;
-  hasToken: boolean = true;
+  hasToken: boolean = false;
   token: string = '';
   confirmPassword: string = 'asdsadasd';
 
@@ -77,6 +77,7 @@ export class ResetPasswordComponent implements OnInit{
     if (token != null) {
       this.token = token;
       this.hasToken = true;
+      alert(this.hasToken)
     }
   }
   onSubmit(form: NgForm) {

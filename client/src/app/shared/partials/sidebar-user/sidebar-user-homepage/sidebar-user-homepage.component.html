@@ -1,6 +1,3 @@
-{{isAdmin()}}
-{{licenseService.isMaintainer()}}
-
 <div *ngIf="!isAdmin() && !appService.userSessionData().tenant.isDefault; else showAdmin">
   <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst();else showFree">
         <div class="ioc-dashboard-content-wrapper">
