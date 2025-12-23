@@ -30,7 +30,7 @@
   transition: transform 0.3s ease;
 }
 
-.insight-card .card-body {
+.insight-card .insight-card-body {
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
@@ -40,14 +40,14 @@
   padding: 1rem;
 }
 
-.insight-card .card-body .divider {
+.insight-card .insight-card-body .divider {
   width: 1px;
   height: 50px;
   background-color: var(--color-border);
   margin: 0 1rem;
 }
 
-.insight-card .card-body .dot {
+.insight-card .insight-card-body .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -55,7 +55,7 @@
   margin-right: 6px;
 }
 
-.insight-card .card-body .stat-item {
+.insight-card .insight-card-body .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -63,13 +63,13 @@
   text-align: center;
 }
 
-.insight-card .card-body .stat-item .stat-value {
+.insight-card .insight-card-body .stat-item .stat-value {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--color-text1);
 }
 
-.insight-card .card-body .stat-item .stat-label {
+.insight-card .insight-card-body .stat-item .stat-label {
   font-size: 0.9rem;
   opacity: 0.9;
   margin-top: 0.3rem;

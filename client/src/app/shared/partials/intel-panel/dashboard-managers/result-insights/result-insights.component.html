@@ -7,7 +7,7 @@
     </div>
   </div>
 
-  <div class="card-body" *ngIf="isSectionExpanded('isKeywordExpanded')">
+  <div class="insight-card-body" *ngIf="isSectionExpanded('isKeywordExpanded')">
     <ng-container *ngFor="let item of keywordData; let i = index">
       <div class="stat-item">
         <div class="stat-value">{{ item.value }}</div>
@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  <div class="card-body" *ngIf="isSectionExpanded('isCoverageExpanded')">
+  <div class="insight-card-body" *ngIf="isSectionExpanded('isCoverageExpanded')">
     <ng-container *ngFor="let item of coverageData; let i = index">
       <div class="stat-item">
         <div class="stat-value">{{ item.value }}</div>
