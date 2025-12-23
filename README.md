@@ -8,7 +8,7 @@
 [![PageSpeed Insights](https://img.shields.io/badge/PageSpeed%20Insights-100%25-brightgreen)](https://pagespeed.web.dev/analysis/https-orion-genesistechnologies-org/hfe5h3u485?form_factor=desktop)
 
 ![homepage](https://github.com/user-attachments/assets/37fcf444-40be-46c9-8bd8-45a22d824141)
-[![Uptime Status](https://img.shields.io/uptimerobot/status/m794706490-1e2b8d2c1a0c7d6e.svg)](https://stats.uptimerobot.com/TAPnbEAyUD)
+[![Uptime Status](https://img.shields.io/uptimerobot/status/m794706490-XXXXXXXXXX.svg)](https://stats.uptimerobot.com/TAPnbEAyUD)
 
 # Orion Platform
 
