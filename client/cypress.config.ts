@@ -13,7 +13,7 @@ export default defineConfig({
     },
     pgp: false,
     ADMIN_USERNAME:"admin",
-    ADMIN_PASSWORD:"cmUFD@CRw(MpYEj!)^rBhSAxk+HXWbu&#eGaq#ePysJNtgnV91",
+    ADMIN_PASSWORD:"Zq9M#rX@e7W^B0T+f(ysG!kJc1d2mC&N%hAUEP)6Y4n$R8VbHS",
     field_types: [
       "Single-line text input",
       "Multi-line text input",

@@ -46,4 +46,5 @@ __pycache__/
 
 .DS_Store
 **/.DS_Store
-cypress/screenshots/
+client/cypress/screenshots/*
+client/coverage/*

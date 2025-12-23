@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PROJECT_NAME="trusted-search"
+ENV_FILE=".env"
 
 stop_docker() {
     docker compose -p "$PROJECT_NAME" down --remove-orphans
@@ -26,7 +27,11 @@ create_parser_zip() {
 client_build() {
     cd client || exit
     npm install
-    ng build --configuration production
+    if [ "$1" = "-p" ]; then
+        ng build --configuration production
+    else
+        ng build --configuration production
+    fi
     cd ..
     rm -rf backend/build
     mkdir -p backend/build
@@ -49,20 +54,33 @@ wait_for_server() {
     sudo systemctl restart tor@default
 }
 
-run_test_task() {
+wait_for_test_service() {
     local url="http://127.0.0.1:8080"
     until curl -s -o /dev/null "$url"; do
         sleep 2
     done
+}
+
+run_test_task() {
     cd client || exit
     npm test run
     cd ..
     exit 0
 }
 
+set_testing_enabled() {
+    sed -i '/^TESTING_ENABLED=/d' "$ENV_FILE" 2>/dev/null || true
+    if [ "$1" = "-t" ]; then
+        echo 'TESTING_ENABLED="1"' >> "$ENV_FILE"
+    else
+        echo 'TESTING_ENABLED="0"' >> "$ENV_FILE"
+    fi
+}
+
 stop_docker
 
 if [ "$1" = "stop" ]; then
+    echo "Crawler service stopped"
     exit 0
 fi
 
@@ -71,19 +89,29 @@ create_parser_zip
 COMMAND=$1
 FLAG=$2
 
-if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
-    export TESTTING_ENABLED="1"
-else
-    export TESTTING_ENABLED="0"
-fi
+set_testing_enabled "$FLAG"
 
 if [ "$COMMAND" = "build" ]; then
     docker pull python:3.11-slim
     docker volume prune -f
 
     case "$FLAG" in
-        -c|-b|-d|-t)
-            [ "$FLAG" != "-b" ] && client_build "$FLAG"
+        -t)
+            client_build "-d"
+            cp nginx/nginx-dev.conf nginx/nginx.conf
+            use_compose_file "default"
+            ;;
+        -c)
+            client_build "$FLAG"
+            cp nginx/nginx-dev.conf nginx/nginx.conf
+            use_compose_file "default"
+            ;;
+        -b)
+            cp nginx/nginx-dev.conf nginx/nginx.conf
+            use_compose_file "default"
+            ;;
+        -d)
+            client_build "$FLAG"
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
@@ -96,13 +124,12 @@ if [ "$COMMAND" = "build" ]; then
             export ELASTIC_ROOT_IP="37.27.128.168"
             ;;
         *)
+            echo "Unknown build flag: $FLAG"
             exit 1
             ;;
     esac
 
-    TESTING_ENABLED="$TESTTING_ENABLED" docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
-
-    [ "$FLAG" = "-t" ] && run_test_task
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
 elif [ "$COMMAND" = "production" ]; then
     use_compose_file "production"
 else
@@ -110,6 +137,13 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-TESTTING_ENABLED="$TESTTING_ENABLED" docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
 
-[ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && wait_for_server
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
+    wait_for_server
+fi
+
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
+    wait_for_test_service
+#    run_test_task
+fi
