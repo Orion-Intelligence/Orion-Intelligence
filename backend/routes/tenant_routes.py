@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Body
+import asyncio
+
+from fastapi import APIRouter, Body, HTTPException
 from fastapi import Depends, UploadFile
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
 from orion.api.interactive.account_manager.account_manager import AccountManager
@@ -314,15 +316,9 @@ async def update_alert(data: AlertModel, current_user=Depends(get_current_user))
 async def get_user_alerts(current_user=Depends(get_current_user)):
     return await AlertManager.getInstance().getAllAlerts(current_user)
 
-
 @tenant_routes.post(
     "/api/profile/alert/scan",
-    summary="Run IOC alert scan",
-    description="Run indicator-of-compromise alert scanning for all categories for the current user.",
-    tags=["Alerts", "Scanning"],
-    operation_id="runUserIOCAlerts",
-    response_description="Scan job execution information.",
-    status_code=200,
+    status_code=202,
     include_in_schema=False,
     dependencies=[
         Depends(role_required([user_role.MEMBER])),
@@ -331,7 +327,15 @@ async def get_user_alerts(current_user=Depends(get_current_user)):
     ],
 )
 async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
-    return await alert_job.get_instance().run_all_categories_for_api(current_user)
+    scan_status = await AlertManager.getInstance().get_scan_status(current_user)
+    if scan_status.get("scan_running", False):
+        raise HTTPException(
+            status_code=202, detail="Scan is still processing")
+
+    asyncio.create_task(
+        alert_job.get_instance().run_all_categories_for_api(current_user)
+    )
+    return {"started": True}
 
 @tenant_routes.post(
     "/api/profile/alert/scan/cancel",

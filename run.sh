@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PROJECT_NAME="trusted-search"
+ENV_FILE=".env"
 
 stop_docker() {
     docker compose -p "$PROJECT_NAME" down --remove-orphans
@@ -53,6 +54,29 @@ wait_for_server() {
     sudo systemctl restart tor@default
 }
 
+wait_for_test_service() {
+    local url="http://127.0.0.1:8080"
+    until curl -s -o /dev/null "$url"; do
+        sleep 2
+    done
+}
+
+run_test_task() {
+    cd client || exit
+    npm test run
+    cd ..
+    exit 0
+}
+
+set_testing_enabled() {
+    sed -i '/^TESTING_ENABLED=/d' "$ENV_FILE" 2>/dev/null || true
+    if [ "$1" = "-t" ]; then
+        echo 'TESTING_ENABLED="1"' >> "$ENV_FILE"
+    else
+        echo 'TESTING_ENABLED="0"' >> "$ENV_FILE"
+    fi
+}
+
 stop_docker
 
 if [ "$1" = "stop" ]; then
@@ -65,11 +89,18 @@ create_parser_zip
 COMMAND=$1
 FLAG=$2
 
+set_testing_enabled "$FLAG"
+
 if [ "$COMMAND" = "build" ]; then
     docker pull python:3.11-slim
     docker volume prune -f
 
     case "$FLAG" in
+        -t)
+            client_build "-d"
+            cp nginx/nginx-dev.conf nginx/nginx.conf
+            use_compose_file "default"
+            ;;
         -c)
             client_build "$FLAG"
             cp nginx/nginx-dev.conf nginx/nginx.conf
@@ -110,4 +141,9 @@ docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server
+fi
+
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
+    wait_for_test_service
+#    run_test_task
 fi

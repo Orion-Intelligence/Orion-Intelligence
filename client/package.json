@@ -2,13 +2,10 @@
   "name": "client",
   "version": "0.0.0",
   "scripts": {
-    "prebuild": "node tools/generate-preload-script.mjs",
     "ng": "ng",
-    "start": "ng serve",
     "build": "npm run prebuild && ng build --configuration=production && node post-build.js",
     "production": "npm run prebuild && ng build --configuration=production && node post-build.js",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "npx cypress run --browser=chromium"
   },
   "private": true,
   "dependencies": {
@@ -20,8 +17,10 @@
     "@angular/forms": "19.2.17",
     "@angular/localize": "19.2.17",
     "@angular/platform-browser": "19.2.17",
+    "cypress-axe": "1.7.0",
     "@angular/platform-browser-dynamic": "19.2.17",
     "@angular/router": "19.2.17",
+    "@cypress/code-coverage": "^3.14.7",
     "@ng-bootstrap/ng-bootstrap": "^18.0.0",
     "@popperjs/core": "^2.11.8",
     "franc-min": "^6.2.0",
@@ -46,6 +45,7 @@
     "@types/qrcode": "^1.5.5",
     "@typescript-eslint/eslint-plugin": "^8.34.0",
     "@typescript-eslint/parser": "^8.34.0",
+    "cypress": "^15.7.1",
     "eslint": "^9.29.0",
     "stylelint": "^16.20.0",
     "stylelint-config-standard": "^38.0.0",

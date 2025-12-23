@@ -14,22 +14,33 @@ export class AlertService {
     constructor(protected apiService: ApiService, private appService: AppService) { }
 
     scanIOCs() {
-        this.isAlertScanLoading.set(true)
+        this.isAlertScanLoading.set(true);
         this.apiService.post<any>('profile/alert/scan', null).subscribe({
-            next: (_) => {
-                this.getLatestAlerts();
+            next: () => {
+                this.autoCheckScanStatus()?.subscribe({
+                    next: (res: any) => {
+                        if (!res?.scan_running) {
+                            this.getLatestAlerts();
+                        }
+                    },
+                    error: (err) => {
+                        console.error('Status check failed with an error:', err);
+                        this.isAlertScanLoading.set(false);
+                    }
+                });
             },
             error: (err) => {
                 console.error('Scan failed with an error:', err);
-                alert(err?.error?.detail || 'IOC Scan failed to start or complete.');
-                this.isAlertScanLoading.set(false)
+                alert(err?.error?.detail || 'IOC Scan failed to start.');
+                this.isAlertScanLoading.set(false);
             },
         });
     }
+
     cancelScanIOCs() {
         this.apiService.post<any>('profile/alert/scan/cancel', null).subscribe({
             next: (_) => {
-                this.isAlertScanLoading.set(false)
+                this.isAlertScanLoading.set(false);
             },
             error: (err) => {
                 console.error('Cancel scan failed with an error:', err);
@@ -41,17 +52,17 @@ export class AlertService {
     getLatestAlerts() {
         this.apiService.get<any>('profile/alerts').subscribe({
             next: response => {
-                this.appService.userSessionData().alerts = response
-                this.isAlertScanLoading.set(false)
+                this.appService.userSessionData().alerts = response;
+                this.isAlertScanLoading.set(false);
             },
             error: err => {
                 if (err.status === 202) {
-                    this.isAlertScanLoading.set(true)
+                    this.isAlertScanLoading.set(true);
                 } else {
-                    this.isAlertScanLoading.set(false)
+                    this.isAlertScanLoading.set(false);
                 }
             }
-        })
+        });
     }
 
     getScanStatus() {
@@ -59,17 +70,17 @@ export class AlertService {
     }
 
     autoCheckScanStatus(intervalMs = 10000) {
-        if (this.hasAutoCheckedOnce || this.isCheckingStatus) {
+        if (this.isCheckingStatus) {
             return;
         }
-        this.hasAutoCheckedOnce = true;
         this.isCheckingStatus = true;
         this.isAlertScanLoading.set(true);
+
         return timer(0, intervalMs).pipe(
             switchMap(() => this.getScanStatus()),
-            takeWhile((res: any) => res.scan_running === true, true),
+            takeWhile((res: any) => res?.scan_running === true, true),
             tap((res) => {
-                if (!res.scan_running) {
+                if (!res?.scan_running) {
                     this.isCheckingStatus = false;
                     this.isAlertScanLoading.set(false);
                 }

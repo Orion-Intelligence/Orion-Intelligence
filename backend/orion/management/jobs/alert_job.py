@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 from datetime import datetime, timezone
 from bson import ObjectId
 from cryptography.fernet import Fernet
+from fastapi import HTTPException
 
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
