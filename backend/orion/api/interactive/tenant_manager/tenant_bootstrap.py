@@ -12,7 +12,8 @@ from orion.services.session_manager.session_enums import admin_mock, crawler_moc
 async def create_default_tenant(engine):
   from orion.services.encryption_manager.key_manager import KeyManager
 
-  data = db_tenant_model(id=ObjectId(),
+  data = db_tenant_model(
+    id=ObjectId(),
     name="default",
     is_default=True,
     status=TenantStatus.ACTIVE,
@@ -36,9 +37,10 @@ async def create_default_tenant(engine):
   data.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
   data.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
-  data.iocs = [
-    IocCategory(ioc_id=enc.encrypt((ioc.ioc_id or "").encode()).decode(), name=enc.encrypt((ioc.name or "").encode()).decode(), values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])], )
-    for ioc in (data.iocs or [])]
+  data.iocs = [IocCategory(
+    ioc_id=enc.encrypt((ioc.ioc_id or "").encode()).decode(),
+    name=enc.encrypt((ioc.name or "").encode()).decode(),
+    values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])], ) for ioc in (data.iocs or [])]
 
   data.status = TenantStatus.ACTIVE
   data.user_quota = -1
@@ -55,14 +57,16 @@ async def create_default_users(engine, tenant_id):
     return
 
   try:
-    admin_user = db_user_account(username=admin_mock["username"],
+    admin_user = db_user_account(
+      username=admin_mock["username"],
       password=admin_mock["password"],
       role=user_role.ADMIN,
       status=UserStatus.ACTIVE,
       licenses=[LicenseName.ENTERPRISE, LicenseName.MAINTAINER],
       tenant_uuid=str(tenant_id), )
     await engine.save(admin_user)
-    crawler_user = db_user_account(username=crawler_mock["username"],
+    crawler_user = db_user_account(
+      username=crawler_mock["username"],
       password=crawler_mock["password"],
       role=user_role.CRAWLER,
       status=UserStatus.ACTIVE,

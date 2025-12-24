@@ -15,145 +15,148 @@ from playwright.sync_api import Page
 
 
 class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_interface, ABC):
-    _instance = None
+  _instance = None
 
-    def __init__(self, callback=None):
-        self.callback = callback
-        self._card_data = []
-        self._entity_data = []
-        self.soup = None
-        self._initialized = None
-        self._redis_instance = redis_controller()
-        self._is_crawled = False
+  def __init__(self, callback=None):
+    self.callback = callback
+    self._card_data = []
+    self._entity_data = []
+    self.soup = None
+    self._initialized = None
+    self._redis_instance = redis_controller()
+    self._is_crawled = False
 
-    def init_callback(self, callback=None):
-        self.callback = callback
+  def init_callback(self, callback=None):
+    self.callback = callback
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(_leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
+  def __new__(cls):
+    if cls._instance is None:
+      cls._instance = super(_leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid, cls).__new__(cls)
+      cls._instance._initialized = False
+    return cls._instance
 
-    @property
-    def is_crawled(self) -> bool:
-        return self._is_crawled
+  @property
+  def is_crawled(self) -> bool:
+    return self._is_crawled
 
-    def developer_signature(self) -> str:
-        return "open:open"
+  def developer_signature(self) -> str:
+    return "open:open"
 
-    @property
-    def seed_url(self) -> str:
-        return "http://leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.onion/"
+  @property
+  def seed_url(self) -> str:
+    return "http://leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.onion/"
 
-    @property
-    def base_url(self) -> str:
-        return "http://leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.onion/"
+  @property
+  def base_url(self) -> str:
+    return "http://leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.onion/"
 
-    @property
-    def rule_config(self) -> RuleModel:
-        return RuleModel(m_timeout=277200, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
+  @property
+  def rule_config(self) -> RuleModel:
+    return RuleModel(
+      m_timeout=277200,
+      m_fetch_proxy=FetchProxy.TOR,
+      m_fetch_config=FetchConfig.PLAYRIGHT,
+      m_threat_type=ThreatType.LEAK)
 
-    @property
-    def card_data(self) -> List[leak_model]:
-        return self._card_data
+  @property
+  def card_data(self) -> List[leak_model]:
+    return self._card_data
 
-    @property
-    def entity_data(self) -> List[entity_model]:
-        return self._entity_data
+  @property
+  def entity_data(self) -> List[entity_model]:
+    return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
+  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
-    def contact_page(self) -> str:
-        return "hackteam@dnmx.su"
+  def contact_page(self) -> str:
+    return "hackteam@dnmx.su"
 
-    def append_leak_data(self, leak: leak_model, entity: entity_model):
-        self._card_data.append(leak)
-        self._entity_data.append(entity)
-        if self.callback:
-            if self.callback():
-                self._card_data.clear()
-                self._entity_data.clear()
+  def append_leak_data(self, leak: leak_model, entity: entity_model):
+    self._card_data.append(leak)
+    self._entity_data.append(entity)
+    if self.callback:
+      if self.callback():
+        self._card_data.clear()
+        self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-        self._card_data = []
+  def parse_leak_data(self, page: Page):
+    self._card_data = []
+
+    error_count = 0
+
+    while True:
+      try:
+        page.wait_for_selector(".list tbody tr", timeout=400)
+        rows = page.query_selector_all(".list tbody tr")
+
+        for row in rows:
+          try:
+            year = row.query_selector("td:nth-child(1)").inner_text().strip()
+            database = row.query_selector("td:nth-child(2)").inner_text().strip()
+            site = row.query_selector("td:nth-child(3)").inner_text().strip()
+            records = row.query_selector("td:nth-child(4)").inner_text().strip()
+            price = row.query_selector("td:nth-child(5)").inner_text().strip()
+
+            buy_button = row.query_selector("td:nth-child(6) button")
+            if not buy_button:
+              continue
+
+            with page.expect_popup() as new_page_info:
+              buy_button.click()
+
+            buy_page = new_page_info.value
+            buy_page.wait_for_load_state("domcontentloaded")
+
+            description_element = buy_page.query_selector(".order-details tr:nth-child(4) td")
+            description = description_element.inner_text().strip() if description_element else "No description"
+
+            btc_address = ""
+            address_element = buy_page.query_selector(".paycontainer pre")
+            if address_element:
+              btc_address = address_element.inner_text().strip()
+
+            ref_html = helper_method.extract_refhtml(
+              site,
+              self.invoke_db,
+              REDIS_COMMANDS,
+              CUSTOM_SCRIPT_REDIS_KEYS,
+              RAW_PATH_CONSTANTS,
+              page)
+
+            content = (
+              description + btc_address if description else f"{year} | {database} | {site} | {records} | {price} {self.base_url} {page.url} - {btc_address}")
+
+            card_data = leak_model(
+              m_ref_html=ref_html,
+              m_screenshot=helper_method.get_screenshot_base64(page, database, self.base_url),
+              m_title=database,
+              m_url=page.url,
+              m_base_url=self.base_url,
+              m_content=content,
+              m_network=helper_method.get_network_type(self.base_url),
+              m_important_content=description[:500],
+              m_weblink=[site],
+              m_content_type=["leaks"],
+              m_data_size=records,
+              m_leak_date=datetime.strptime(year, '%Y').date(), )
+
+            entity_data = entity_model(
+              m_scrap_file=self.__class__.__name__, m_company_name=database, m_team="Hacked databases store")
+
+            self.append_leak_data(card_data, entity_data)
+
+            buy_page.close()
+            page.bring_to_front()
+
+          except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
 
         error_count = 0
+        break
 
-        while True:
-            try:
-                page.wait_for_selector(".list tbody tr", timeout=400)
-                rows = page.query_selector_all(".list tbody tr")
-
-                for row in rows:
-                    try:
-                        year = row.query_selector("td:nth-child(1)").inner_text().strip()
-                        database = row.query_selector("td:nth-child(2)").inner_text().strip()
-                        site = row.query_selector("td:nth-child(3)").inner_text().strip()
-                        records = row.query_selector("td:nth-child(4)").inner_text().strip()
-                        price = row.query_selector("td:nth-child(5)").inner_text().strip()
-
-                        buy_button = row.query_selector("td:nth-child(6) button")
-                        if not buy_button:
-                            continue
-
-                        with page.expect_popup() as new_page_info:
-                            buy_button.click()
-
-                        buy_page = new_page_info.value
-                        buy_page.wait_for_load_state("domcontentloaded")
-
-                        description_element = buy_page.query_selector(".order-details tr:nth-child(4) td")
-                        description = description_element.inner_text().strip() if description_element else "No description"
-
-                        btc_address = ""
-                        address_element = buy_page.query_selector(".paycontainer pre")
-                        if address_element:
-                            btc_address = address_element.inner_text().strip()
-
-                        ref_html = helper_method.extract_refhtml(site, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
-
-                        content = (
-                            description + btc_address
-                            if description
-                            else f"{year} | {database} | {site} | {records} | {price} {self.base_url} {page.url} - {btc_address}"
-                        )
-
-                        card_data = leak_model(
-                            m_ref_html=ref_html,
-                            m_screenshot=helper_method.get_screenshot_base64(page, database, self.base_url),
-                            m_title=database,
-                            m_url=page.url,
-                            m_base_url=self.base_url,
-                            m_content=content,
-                            m_network=helper_method.get_network_type(self.base_url),
-                            m_important_content=description[:500],
-                            m_weblink=[site],
-                            m_content_type=["leaks"],
-                            m_data_size=records,
-                            m_leak_date=datetime.strptime(year, '%Y').date(),
-                        )
-
-                        entity_data = entity_model(
-                            m_scrap_file=self.__class__.__name__,
-                            m_company_name=database,
-                            m_team="Hacked databases store"
-                        )
-
-                        self.append_leak_data(card_data, entity_data)
-
-                        buy_page.close()
-                        page.bring_to_front()
-
-                    except Exception as ex:
-                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
-                error_count = 0
-                break
-
-            except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                error_count += 1
-                if error_count >= 3:
-                    break
+      except Exception as ex:
+        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+        error_count += 1
+        if error_count >= 3:
+          break

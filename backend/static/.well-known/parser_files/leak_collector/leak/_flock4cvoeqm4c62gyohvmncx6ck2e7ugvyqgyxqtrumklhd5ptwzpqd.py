@@ -15,159 +15,161 @@ from playwright.sync_api import Page
 
 
 class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_interface, ABC):
-    _instance = None
+  _instance = None
 
-    def __init__(self, callback=None):
-        self.callback = callback
-        self._card_data = []
-        self._entity_data = []
-        self.soup = None
-        self._initialized = None
-        self._redis_instance = redis_controller()
-        self._is_crawled = False
+  def __init__(self, callback=None):
+    self.callback = callback
+    self._card_data = []
+    self._entity_data = []
+    self.soup = None
+    self._initialized = None
+    self._redis_instance = redis_controller()
+    self._is_crawled = False
 
-    def init_callback(self, callback=None):
-        self.callback = callback
+  def init_callback(self, callback=None):
+    self.callback = callback
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(_flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
+  def __new__(cls):
+    if cls._instance is None:
+      cls._instance = super(_flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd, cls).__new__(cls)
+      cls._instance._initialized = False
+    return cls._instance
 
-    @property
-    def is_crawled(self) -> bool:
-        return self._is_crawled
+  @property
+  def is_crawled(self) -> bool:
+    return self._is_crawled
 
-    def developer_signature(self) -> str:
-        return "open:open"
+  def developer_signature(self) -> str:
+    return "open:open"
 
-    @property
-    def seed_url(self) -> str:
-        return "http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion"
+  @property
+  def seed_url(self) -> str:
+    return "http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion"
 
-    @property
-    def base_url(self) -> str:
-        return "http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion"
+  @property
+  def base_url(self) -> str:
+    return "http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion"
 
-    @property
-    def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
+  @property
+  def rule_config(self) -> RuleModel:
+    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.LEAK)
 
-    @property
-    def card_data(self) -> List[leak_model]:
-        return self._card_data
+  @property
+  def card_data(self) -> List[leak_model]:
+    return self._card_data
 
-    @property
-    def entity_data(self) -> List[entity_model]:
-        return self._entity_data
+  @property
+  def entity_data(self) -> List[entity_model]:
+    return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
+  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
-    def contact_page(self) -> str:
-        return "http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion"
+  def contact_page(self) -> str:
+    return "http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion"
 
-    def append_leak_data(self, leak: leak_model, entity: entity_model):
-        self._card_data.append(leak)
-        self._entity_data.append(entity)
-        if self.callback:
-            if self.callback():
-                self._card_data.clear()
-                self._entity_data.clear()
+  def append_leak_data(self, leak: leak_model, entity: entity_model):
+    self._card_data.append(leak)
+    self._entity_data.append(entity)
+    if self.callback:
+      if self.callback():
+        self._card_data.clear()
+        self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-        self._card_data = []
-        processed_urls = set()
-        error_count = 0
-        no_new_card_attempts = 0
-        last_card_count = 0
+  def parse_leak_data(self, page: Page):
+    self._card_data = []
+    processed_urls = set()
+    error_count = 0
+    no_new_card_attempts = 0
+    last_card_count = 0
+
+    while True:
+      try:
+        page.wait_for_selector("article.post", timeout=10000)
 
         while True:
+          cards = page.query_selector_all("article.post")
+
+          if not cards or len(cards) == last_card_count:
+            no_new_card_attempts += 1
+            if no_new_card_attempts >= 3:
+              return
+          else:
+            no_new_card_attempts = 0
+
+          last_card_count = len(cards)
+
+          for index, card in enumerate(cards):
             try:
-                page.wait_for_selector("article.post", timeout=10000)
+              cards = page.query_selector_all("article.post")
+              card = cards[index]
 
-                while True:
-                    cards = page.query_selector_all("article.post")
+              title_element = card.query_selector("h2.entry-title a")
+              date_element = card.query_selector("span.published")
 
-                    if not cards or len(cards) == last_card_count:
-                        no_new_card_attempts += 1
-                        if no_new_card_attempts >= 3:
-                            return
-                    else:
-                        no_new_card_attempts = 0
+              title_text = title_element.inner_text().strip() if title_element else "Unknown"
+              date_text = date_element.inner_text().strip() if date_element else "Unknown Date"
+              card_url = title_element.get_attribute("href") if title_element else None
 
-                    last_card_count = len(cards)
+              if not card_url or card_url in processed_urls:
+                continue
+              processed_urls.add(card_url)
 
-                    for index, card in enumerate(cards):
-                        try:
-                            cards = page.query_selector_all("article.post")
-                            card = cards[index]
+              with page.expect_navigation(wait_until="domcontentloaded"):
+                title_element.click()
 
-                            title_element = card.query_selector("h2.entry-title a")
-                            date_element = card.query_selector("span.published")
+              content_element = page.query_selector("div.entry-content")
 
-                            title_text = title_element.inner_text().strip() if title_element else "Unknown"
-                            date_text = date_element.inner_text().strip() if date_element else "Unknown Date"
-                            card_url = title_element.get_attribute("href") if title_element else None
+              paragraphs = content_element.query_selector_all("p") if content_element else []
+              content_text = "\n".join(
+                p.inner_text().strip() for p in paragraphs if p.inner_text().strip())
 
-                            if not card_url or card_url in processed_urls:
-                                continue
-                            processed_urls.add(card_url)
+              links = [a.get_attribute("href") for a in content_element.query_selector_all("a") if
+                a.get_attribute("href")]
+              for link in links:
+                content_text = content_text.replace(link, "")
 
-                            with page.expect_navigation(wait_until="domcontentloaded"):
-                                title_element.click()
+              ref_html = helper_method.extract_refhtml(
+                title_text,
+                self.invoke_db,
+                REDIS_COMMANDS,
+                CUSTOM_SCRIPT_REDIS_KEYS,
+                RAW_PATH_CONSTANTS,
+                page)
 
-                            content_element = page.query_selector("div.entry-content")
+              card_data = leak_model(
+                m_ref_html=ref_html,
+                m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
+                m_title=title_text,
+                m_url=page.url,
+                m_base_url=self.base_url,
+                m_content=content_text.strip() + " " + self.base_url + " " + page.url,
+                m_network=helper_method.get_network_type(self.base_url),
+                m_important_content=content_text.strip(),
+                m_dumplink=links,
+                m_content_type=["leaks"],
+                m_leak_date=datetime.strptime(date_text, '%B %d, %Y').date(), )
 
-                            paragraphs = content_element.query_selector_all("p") if content_element else []
-                            content_text = "\n".join(
-                                p.inner_text().strip() for p in paragraphs if p.inner_text().strip()
-                            )
+              entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__, m_team="fsociety")
 
-                            links = [a.get_attribute("href") for a in content_element.query_selector_all("a") if
-                                     a.get_attribute("href")]
-                            for link in links:
-                                content_text = content_text.replace(link, "")
+              self.append_leak_data(card_data, entity_data)
 
-                            ref_html = helper_method.extract_refhtml(title_text, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
-
-                            card_data = leak_model(
-                                m_ref_html=ref_html,
-                                m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
-                                m_title=title_text,
-                                m_url=page.url,
-                                m_base_url=self.base_url,
-                                m_content=content_text.strip() + " " + self.base_url + " " + page.url,
-                                m_network=helper_method.get_network_type(self.base_url),
-                                m_important_content=content_text.strip(),
-                                m_dumplink=links,
-                                m_content_type=["leaks"],
-                                m_leak_date=datetime.strptime(date_text, '%B %d, %Y').date(),
-                            )
-
-                            entity_data = entity_model(
-                                m_scrap_file=self.__class__.__name__,
-                                m_team="fsociety"
-                            )
-
-                            self.append_leak_data(card_data, entity_data)
-
-                            with page.expect_navigation(wait_until="domcontentloaded"):
-                                page.go_back()
-                            page.wait_for_selector("article.post", timeout=10000)
-
-                        except Exception as ex:
-                            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                    error_count = 0
-
-                    for _ in range(3):
-                        page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
-                        page.wait_for_timeout(2000)
-
+              with page.expect_navigation(wait_until="domcontentloaded"):
+                page.go_back()
+              page.wait_for_selector("article.post", timeout=10000)
 
             except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                error_count += 1
-                if error_count >= 3:
-                    break
+              log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+          error_count = 0
+
+          for _ in range(3):
+            page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
+            page.wait_for_timeout(2000)
+
+
+      except Exception as ex:
+        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+        error_count += 1
+        if error_count >= 3:
+          break

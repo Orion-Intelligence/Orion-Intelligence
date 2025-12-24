@@ -1,16 +1,16 @@
 import re
 from typing import List
+from pathlib import Path
 
 from bson import ObjectId
 from cryptography.fernet import Fernet
+from fastapi import HTTPException
+from fastapi.responses import Response
 
 from orion.api.interactive.account_manager.models.node_callback_model import NodeCallbackModel
 from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
-from pathlib import Path
 from orion.api.interactive.account_manager.models.user_model import user_model
-from fastapi import HTTPException
-
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
@@ -20,8 +20,6 @@ from orion.services.mongo_manager.shared_model.db_auth_models import db_user_acc
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
-from fastapi.responses import Response
-
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
 
 
@@ -51,8 +49,7 @@ class AccountManager:
     if current_user.role == "admin" or LicenseName.MAINTAINER in (current_user.licenses or []):
       tenant_uuid = current_user.tenant_uuid
       users = await self._engine.find(
-        db_user_account,
-        (db_user_account.tenant_uuid == tenant_uuid) & (db_user_account.role != user_role.CRAWLER))
+        db_user_account, (db_user_account.tenant_uuid == tenant_uuid) & (db_user_account.role != user_role.CRAWLER))
       return [user_param_model(**u.dict()) for u in users]
     return []
 
@@ -101,8 +98,7 @@ class AccountManager:
         role=data.role,
         status=data.status,
         subscription=data.subscription,
-        licenses=data.licenses,
-      )
+        licenses=data.licenses, )
 
       await engine.save(user)
       await KeyManager.get_instance().create_user_dek(user.id)
@@ -122,7 +118,9 @@ class AccountManager:
 
     if current_user.licenses.__contains__(LicenseName.MAINTAINER):
       if user.tenant_uuid != current_user.tenant_uuid:
-        raise HTTPException(status_code=401, detail="Maintainer can only delete non-maintainer users from the same tenant")
+        raise HTTPException(
+          status_code=401,
+          detail="Maintainer can only delete non-maintainer users from the same tenant")
     else:
       raise HTTPException(status_code=401, detail="You are not allowed to delete users")
 
@@ -134,8 +132,7 @@ class AccountManager:
 
     await self._engine.delete(user)
     await AuditLogManager.get_instance().register(
-      str(user.tenant_uuid), str(current_user.id), "User deleted"
-    )
+      str(user.tenant_uuid), str(current_user.id), "User deleted")
 
     return {"message": "User deleted successfully"}
 
@@ -143,29 +140,29 @@ class AccountManager:
     user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
     if not user:
       await AuditLogManager.get_instance().register(
-        str(current_user.tenant_uuid), str(current_user.id), "User update failed"
-      )
+        str(current_user.tenant_uuid), str(current_user.id), "User update failed")
       raise HTTPException(status_code=401, detail="User not found")
 
-    if current_user.licenses.__contains__(LicenseName.MAINTAINER) and str(user.tenant_uuid) == str(current_user.tenant_uuid):
+    if current_user.licenses.__contains__(LicenseName.MAINTAINER) and str(user.tenant_uuid) == str(
+        current_user.tenant_uuid):
       pass
     else:
       await AuditLogManager.get_instance().register(
-        str(current_user.tenant_uuid), str(current_user.id), "User update denied"
-      )
+        str(current_user.tenant_uuid), str(current_user.id), "User update denied")
       raise HTTPException(status_code=401, detail="You are not allowed to update this user")
 
     if user.role in ["admin", "crawl"]:
       await AuditLogManager.get_instance().register(
-        str(user.tenant_uuid), str(current_user.id), "User update denied"
-      )
+        str(user.tenant_uuid), str(current_user.id), "User update denied")
       raise HTTPException(status_code=401, detail="This user type cannot be updated")
 
     if request.status.value == "disable":
       user.status = UserStatus.DISABLE.value
     else:
       tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
-      active_count = await self._engine.count(db_user_account, (db_user_account.tenant_uuid == str(user.tenant_uuid)) & (db_user_account.status == UserStatus.ACTIVE.value))
+      active_count = await self._engine.count(
+        db_user_account,
+        (db_user_account.tenant_uuid == str(user.tenant_uuid)) & (db_user_account.status == UserStatus.ACTIVE.value))
       if tenant and (not tenant.is_default) and tenant.user_quota is not None and active_count >= tenant.user_quota:
         raise HTTPException(status_code=400, detail="User quota exceeded")
       user.status = UserStatus.ACTIVE.value
@@ -174,8 +171,7 @@ class AccountManager:
     await self._engine.save(user)
 
     await AuditLogManager.get_instance().register(
-      str(user.tenant_uuid), str(current_user.id), "User updated"
-    )
+      str(user.tenant_uuid), str(current_user.id), "User updated")
 
     return {"message": "User updated successfully", "id": str(user.id)}
 
@@ -195,8 +191,7 @@ class AccountManager:
 
     await self._engine.save(user)
     await AuditLogManager.get_instance().register(
-      str(user.tenant_uuid), str(user.id), "Self profile updated"
-    )
+      str(user.tenant_uuid), str(user.id), "Self profile updated")
 
     return {"message": "User updated successfully"}
 
@@ -213,8 +208,7 @@ class AccountManager:
     return Response(
       content=data,
       media_type="image/png",
-      headers={"X-Default-Image": "true" if is_default else "false", "Access-Control-Expose-Headers": "X-Default-Image"}
-    )
+      headers={"X-Default-Image": "true" if is_default else "false", "Access-Control-Expose-Headers": "X-Default-Image"})
 
   def safe_decrypt(self, enc: Fernet, value: str | None) -> str:
     if not value:
@@ -245,36 +239,18 @@ class AccountManager:
     user_image_path = "/api/s/static/user/" + (str(user.id) if user_image_file.is_file() else "default")
 
     node = NodeCallbackModel.model_validate(
-      {
-        "user": {
-          "email": user.email,
-          "twofa_enabled": user.twofa_enabled,
-          "username": user.username,
-          "role": user.role,
-          "status": user.status,
-          "subscription": user.subscription,
-          "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
-          "license": [license.value for license in user.licenses],
-          "image": user_image_path,
-        },
-        "tenant": {
-          "hasOnboarding": tenant.status == TenantStatus.ONBOARDING,
-          "id": str(tenant.id),
-          "isDefault": str(tenant.is_default),
-          "name": self.safe_decrypt(enc, tenant.name),
-          "phone": self.safe_decrypt(enc, tenant.phone),
-          "country": self.safe_decrypt(enc, tenant.country),
-          "city": self.safe_decrypt(enc, tenant.city),
-          "postalCode": self.safe_decrypt(enc, tenant.postal_code),
-          "taxId": self.safe_decrypt(enc, tenant.id),
-          "userId": "",
-          "licenses": [self.safe_decrypt(enc, l) for l in (tenant.licenses or [])],
-          "assignedQuota": str(assigned_quota),
-          "quotaExceeded": bool(not tenant.is_default and tenant.user_quota is not None and assigned_quota < total_user),
-          "image": tenant_image_path,
-        },
-        "alerts": alerts_list,
-      }
-    )
+      {"user": {"email": user.email, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "license": [
+        license.value for license in
+        user.licenses], "image": user_image_path, }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
+        tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(
+        enc,
+        tenant.name), "phone": self.safe_decrypt(enc, tenant.phone), "country": self.safe_decrypt(
+        enc,
+        tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
+        enc,
+        tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
+        self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
+        assigned_quota), "quotaExceeded": bool(
+        not tenant.is_default and tenant.user_quota is not None and assigned_quota < total_user), "image": tenant_image_path, }, "alerts": alerts_list, })
 
     return node

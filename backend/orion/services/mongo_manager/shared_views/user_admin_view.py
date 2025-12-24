@@ -30,7 +30,9 @@ class UserAdminView(ModelView):
         raise ActionFailed("Cannot delete admin user.")
 
       if obj.role == user_role.CRAWLER:
-        other = await self._engine.find_one(db_user_account, (db_user_account.role == user_role.CRAWLER) & (db_user_account.id != obj.id), )
+        other = await self._engine.find_one(
+          db_user_account,
+          (db_user_account.role == user_role.CRAWLER) & (db_user_account.id != obj.id), )
         if other is None:
           raise ActionFailed("Cannot delete the last crawler user.")
 

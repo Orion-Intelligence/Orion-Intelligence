@@ -1,12 +1,14 @@
-from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
-from orion.constants import constant
-from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
-from fastapi import HTTPException, Depends, Request
-from bson import ObjectId
-from odmantic import AIOEngine
 import threading
 from datetime import datetime, timedelta, timezone
 
+from fastapi import HTTPException, Depends, Request
+from bson import ObjectId
+from odmantic import AIOEngine
+import pyotp
+
+from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.constants import constant
+from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus
@@ -14,7 +16,6 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.helper_manager.env_handler import env_handler
-import pyotp
 
 
 class auth_manager:

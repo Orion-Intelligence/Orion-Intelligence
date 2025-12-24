@@ -2,7 +2,7 @@
 .add-alert-wrapper {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgb(0 0 0 / 55%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -21,8 +21,8 @@
   position: relative;
   overflow-y: auto;
   color: var(--color-text1);
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-  font-family: 'Inter', sans-serif;
+  box-shadow: 0 0 30px rgb(0 0 0 / 30%);
+  font-family: Inter, sans-serif;
 }
 
 .add-tenant_header .add-tenant_heading,

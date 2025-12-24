@@ -1,21 +1,18 @@
 from typing import Optional, Annotated, Dict, List
+
 from pydantic import BaseModel, StringConstraints, Field
 
 
 class search_credential_param_model(BaseModel):
-    daterange: Annotated[str,
-        StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
-    ] = ""
+  daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
 
-    q: Optional[str] = ""
-    url: Optional[str] = ""
-    user: Optional[str] = ""
-    type: Optional[str] = "c"
-    page: Optional[int] = 1
-    category: Optional[str] = ""
-    fullsearch: Optional[bool] = False
+  q: Optional[str] = ""
+  url: Optional[str] = ""
+  user: Optional[str] = ""
+  type: Optional[str] = "c"
+  page: Optional[int] = 1
+  category: Optional[str] = ""
+  fullsearch: Optional[bool] = False
 
-    entity_filter: Optional[Dict[str, List[str]]] = Field(
-        default=None,
-        examples=[{"m_country": ["pakistan"]}]
-    )
+  entity_filter: Optional[Dict[str, List[str]]] = Field(
+    default=None, examples=[{"m_country": ["pakistan"]}])

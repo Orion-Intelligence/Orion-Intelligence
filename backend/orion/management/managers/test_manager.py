@@ -1,14 +1,16 @@
 import json
-import motor.motor_asyncio
 from datetime import datetime, timezone
 from pathlib import Path
+
+import motor.motor_asyncio
 from odmantic import ObjectId
+from elasticsearch import AsyncElasticsearch, helpers as es_helpers
+
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.session_manager.session_enums import admin_mock, admin_user, crawler_mock, crawler_user
-from elasticsearch import AsyncElasticsearch, helpers as es_helpers
 
 
 class test_manager:
@@ -111,27 +113,22 @@ class test_manager:
       await es.indices.delete(index=idx, ignore_unavailable=True)
 
     await es.cluster.put_settings(
-        persistent={
-            "action.destructive_requires_name": False,
-            "cluster.blocks.read_only_allow_delete": None,
-        }
-    )
+      persistent={"action.destructive_requires_name": False, "cluster.blocks.read_only_allow_delete": None, })
 
     ds = await es.indices.get_data_stream(name="*")
     for d in ds.get("data_streams", []):
-        await es.indices.delete_data_stream(name=d["name"])
+      await es.indices.delete_data_stream(name=d["name"])
 
     indices = await es.indices.get(index="*", expand_wildcards="all", ignore_unavailable=True)
     for idx in list(indices.keys()):
-        if idx.startswith("."):
-            continue
-        await es.indices.delete(index=idx, ignore_unavailable=True)
+      if idx.startswith("."):
+        continue
+      await es.indices.delete(index=idx, ignore_unavailable=True)
 
     await es.indices.refresh(index="*", ignore_unavailable=True)
 
     await es.cluster.put_settings(
-        persistent={"action.destructive_requires_name": True}
-    )
+      persistent={"action.destructive_requires_name": True})
 
     mocks_dir = (Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "elastic")
     if not mocks_dir.exists():

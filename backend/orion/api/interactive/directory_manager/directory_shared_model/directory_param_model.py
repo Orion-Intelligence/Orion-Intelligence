@@ -1,26 +1,18 @@
 from typing import Literal
+
 from typing_extensions import Annotated
 from pydantic import BaseModel, Field, StringConstraints
 
+
 class directory_param_model(BaseModel):
-    page: int = Field(
-        1,
-        ge=1,
-    )
+  page: int = Field(
+    1, ge=1, )
 
-    content_type: Literal[
-        "all", "general", "forums", "news", "stolen", "drugs",
-        "hacking", "marketplaces", "cryptocurrency", "leaks",
-        "adult", "tracking", "chat", "social"
-    ] = "all"
+  content_type: Literal[
+    "all", "general", "forums", "news", "stolen", "drugs", "hacking", "marketplaces", "cryptocurrency", "leaks", "adult", "tracking", "chat", "social"] = "all"
 
-    index: Literal[
-        "all", "general", "leak", "defacement", "chat",
-        "exploit", "twitter", "reddit"
-    ] = "all"
+  index: Literal["all", "general", "leak", "defacement", "chat", "exploit", "twitter", "reddit"] = "all"
 
-    network: Literal["all", "clearnet", "onion", "i2p"] = "all"
+  network: Literal["all", "clearnet", "onion", "i2p"] = "all"
 
-    mDateRange: Annotated[str,
-        StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
-    ] = ""
+  mDateRange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""

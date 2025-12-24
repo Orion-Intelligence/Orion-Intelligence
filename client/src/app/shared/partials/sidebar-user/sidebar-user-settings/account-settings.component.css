@@ -236,7 +236,6 @@
 
 .no-arrow-when-disabled:disabled {
     appearance: none;
-    -webkit-appearance: none;
     background-image: none !important;
     padding-right: 0 !important;
 }
@@ -254,15 +253,15 @@
     height: 26px;
     border: none;
     border-radius: 50%;
-    background: rgba(15, 15, 15, 0.78);
-    color: #ffffff;
+    background: rgb(15 15 15 / 78%);
+    color: #fff;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 28%);
     backdrop-filter: blur(4px);
     opacity: 0.95;
     transition:
@@ -273,15 +272,15 @@
 }
 
 .delete-img-btn:hover {
-    background: rgba(255, 65, 65, 0.9);
+    background: rgb(255 65 65 / 90%);
     opacity: 1;
     transform: scale(1.08);
-    box-shadow: 0 3px 10px rgba(255, 0, 0, 0.35);
+    box-shadow: 0 3px 10px rgb(255 0 0 / 35%);
 }
 
 .delete-img-btn:active {
     transform: scale(0.92);
-    background: rgba(255, 50, 50, 1);
+    background: rgb(255 50 50 / 100%);
 }
 
 .avatar-wrapper:hover .delete-img-btn {

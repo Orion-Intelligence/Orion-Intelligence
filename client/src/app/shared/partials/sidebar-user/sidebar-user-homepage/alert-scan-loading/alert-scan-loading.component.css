@@ -57,7 +57,7 @@
   height: 38px;
   border-radius: 50%;
   border: 3px solid rgb(248 250 252 / 18%);
-  border-top-color: var(--color-primary, #57a5eb);
+  border-top-color: var(#57a5eb);
   animation: spin 0.8s linear infinite;
 }
 
@@ -112,9 +112,11 @@
   0% {
     left: -40%;
   }
+
   50% {
     left: 30%;
   }
+
   100% {
     left: 100%;
   }

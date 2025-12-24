@@ -1,14 +1,14 @@
 import re
 import threading
-
 from pathlib import Path
 from typing import List
 
-from orion.api.interactive.account_manager.models.user_model import user_model
 from bson import ObjectId
 from fastapi import HTTPException
 from starlette import status
 from cryptography.fernet import Fernet
+
+from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
@@ -70,7 +70,10 @@ class TenantManager:
   async def get_tenant(self, current_user) -> TenantRequest:
     tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.tenant_uuid))
     if not tenant:
-      await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "failed to get tenant")
+      await AuditLogManager.get_instance().register(
+        str(current_user.tenant_uuid),
+        str(current_user.id),
+        "failed to get tenant")
       raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found in get tenant")
 
     dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
@@ -97,7 +100,10 @@ class TenantManager:
 
     tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
     if not tenant:
-      await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "failed to update tenant")
+      await AuditLogManager.get_instance().register(
+        str(current_user.tenant_uuid),
+        str(current_user.id),
+        "failed to update tenant")
       raise HTTPException(status_code=401, detail="Onboarding record not found for this user.")
 
     if tenant.is_default:
@@ -150,7 +156,9 @@ class TenantManager:
         u.licenses = ["free"]
         await self._engine.save(u)
 
-    active_count = await self._engine.count(db_user_account, (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
+    active_count = await self._engine.count(
+      db_user_account,
+      (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
 
     if tenant.user_quota and active_count > tenant.user_quota:
       excess = active_count - tenant.user_quota
@@ -162,7 +170,10 @@ class TenantManager:
       for u in extra_users:
         u.status = UserStatus.DISABLE.value
         await self._engine.save(u)
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id),"tenant updated successfully")
+    await AuditLogManager.get_instance().register(
+      str(current_user.tenant_uuid),
+      str(current_user.id),
+      "tenant updated successfully")
 
     return {"message": "Tenant updated", "user": current_user.username, "company": tenant.name}
 
@@ -200,7 +211,6 @@ class TenantManager:
       username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
       if not re.match(username_pattern, username):
         raise HTTPException(status_code=400, detail="Username already exist")
-
 
       email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
       if not re.match(email_pattern, email):
@@ -260,7 +270,10 @@ class TenantManager:
         tenant_uuid=tenant_uuid, )
 
       await engine.save(user)
-      await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "tenent created successfully")
+      await AuditLogManager.get_instance().register(
+        str(current_user.tenant_uuid),
+        str(current_user.id),
+        "tenent created successfully")
 
       return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
         tenant_allowed), }

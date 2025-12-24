@@ -14,168 +14,169 @@ from playwright.sync_api import Page
 
 
 class _j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid(leak_extractor_interface, ABC):
-    _instance = None
+  _instance = None
 
-    def __init__(self, callback=None):
+  def __init__(self, callback=None):
 
-        self.callback = callback
-        self._card_data = []
-        self._entity_data = []
-        self.soup = None
-        self._initialized = None
-        self._redis_instance = redis_controller()
-        self._is_crawled = False
+    self.callback = callback
+    self._card_data = []
+    self._entity_data = []
+    self.soup = None
+    self._initialized = None
+    self._redis_instance = redis_controller()
+    self._is_crawled = False
 
-    def init_callback(self, callback=None):
+  def init_callback(self, callback=None):
 
-        self.callback = callback
+    self.callback = callback
 
-    def __new__(cls, callback=None):
+  def __new__(cls, callback=None):
 
-        if cls._instance is None:
-            cls._instance = super(_j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
+    if cls._instance is None:
+      cls._instance = super(_j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid, cls).__new__(cls)
+      cls._instance._initialized = False
+    return cls._instance
 
-    @property
-    def is_crawled(self) -> bool:
-        return self._is_crawled
+  @property
+  def is_crawled(self) -> bool:
+    return self._is_crawled
 
-    def developer_signature(self) -> str:
-        return "open:open"
+  def developer_signature(self) -> str:
+    return "open:open"
 
-    @property
-    def seed_url(self) -> str:
-        return "http://j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.onion"
+  @property
+  def seed_url(self) -> str:
+    return "http://j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.onion"
 
-    @property
-    def base_url(self) -> str:
-        return "http://j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.onion"
+  @property
+  def base_url(self) -> str:
+    return "http://j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.onion"
 
-    @property
-    def rule_config(self) -> RuleModel:
+  @property
+  def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
+    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.LEAK)
 
-    @property
-    def card_data(self) -> List[leak_model]:
+  @property
+  def card_data(self) -> List[leak_model]:
 
-        return self._card_data
+    return self._card_data
 
-    @property
-    def entity_data(self) -> List[entity_model]:
+  @property
+  def entity_data(self) -> List[entity_model]:
 
-        return self._entity_data
+    return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
+  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
-    def contact_page(self) -> str:
+  def contact_page(self) -> str:
 
-        return "http://j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.onion/#contact"
+    return "http://j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.onion/#contact"
 
-    def append_leak_data(self, leak: leak_model, entity: entity_model):
+  def append_leak_data(self, leak: leak_model, entity: entity_model):
 
-        self._card_data.append(leak)
-        self._entity_data.append(entity)
-        if self.callback:
-            if self.callback():
-                self._card_data.clear()
-                self._entity_data.clear()
+    self._card_data.append(leak)
+    self._entity_data.append(entity)
+    if self.callback:
+      if self.callback():
+        self._card_data.clear()
+        self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+  def parse_leak_data(self, page: Page):
+    try:
+      href_elements = page.query_selector_all('.slider-slides nav ul li a')
+      href_links = []
+
+      for element in href_elements:
+        href = element.get_attribute("href")
+        if href and href.startswith('#'):
+          target_id = href[1:]
+          if target_id not in href_links:
+            href_links.append(target_id)
+
+      error_count = 0
+
+      for target_id in href_links:
         try:
-            href_elements = page.query_selector_all('.slider-slides nav ul li a')
-            href_links = []
+          article = page.query_selector(f'#{target_id}')
+          if not article:
+            error_count += 1
+            if error_count >= 3:
+              break
+            continue
 
-            for element in href_elements:
-                href = element.get_attribute("href")
-                if href and href.startswith('#'):
-                    target_id = href[1:]
-                    if target_id not in href_links:
-                        href_links.append(target_id)
+          title_element = article.query_selector('h2')
+          title = title_element.inner_text().strip() if title_element else ""
 
-            error_count = 0
+          description = ""
+          h3_elements = article.query_selector_all('h3')
+          revenue = ""
+          size = ""
 
-            for target_id in href_links:
-                try:
-                    article = page.query_selector(f'#{target_id}')
-                    if not article:
-                        error_count += 1
-                        if error_count >= 3:
-                            break
-                        continue
+          for h3 in h3_elements:
+            h3_text = h3.inner_text().strip()
 
-                    title_element = article.query_selector('h2')
-                    title = title_element.inner_text().strip() if title_element else ""
+            if "Revenue" in h3_text:
+              revenue = h3_text.split("Revenue", 1)[1].strip()
 
-                    description = ""
-                    h3_elements = article.query_selector_all('h3')
-                    revenue = ""
-                    size = ""
+            if "ZIP - " in h3_text:
+              size = h3_text.split("ZIP - ", 1)[1].strip()
 
-                    for h3 in h3_elements:
-                        h3_text = h3.inner_text().strip()
+            if not h3.query_selector('a') and h3_text:
+              description += h3_text + " "
 
-                        if "Revenue" in h3_text:
-                            revenue = h3_text.split("Revenue", 1)[1].strip()
+          description = description.strip()
 
-                        if "ZIP - " in h3_text:
-                            size = h3_text.split("ZIP - ", 1)[1].strip()
+          download_links = []
+          link_elements = article.query_selector_all('h3 a')
+          for link in link_elements:
+            href = link.get_attribute("href")
+            if href:
+              if href.startswith('download/') or (not href.startswith('http') and not href.startswith('#')):
+                if not href.startswith('/'):
+                  full_href = f"{self.base_url}/{href}"
+                else:
+                  full_href = f"{self.base_url}{href}"
+              else:
+                full_href = href
+              download_links.append(full_href)
 
-                        if not h3.query_selector('a') and h3_text:
-                            description += h3_text + " "
+          ref_html = helper_method.extract_refhtml(
+            title,
+            self.invoke_db,
+            REDIS_COMMANDS,
+            CUSTOM_SCRIPT_REDIS_KEYS,
+            RAW_PATH_CONSTANTS,
+            page)
 
-                    description = description.strip()
+          card_data = leak_model(
+            m_ref_html=ref_html,
+            m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
+            m_title=title,
+            m_url=f"{self.base_url}/#{target_id}",
+            m_base_url=self.base_url,
+            m_content=description,
+            m_network=helper_method.get_network_type(self.base_url),
+            m_important_content=description,
+            m_content_type=["leaks"],
+            m_dumplink=download_links,
+            m_weblink=[title],
+            m_revenue=revenue,
+            m_data_size=size)
 
-                    download_links = []
-                    link_elements = article.query_selector_all('h3 a')
-                    for link in link_elements:
-                        href = link.get_attribute("href")
-                        if href:
-                            if href.startswith('download/') or (
-                                    not href.startswith('http') and not href.startswith('#')):
-                                if not href.startswith('/'):
-                                    full_href = f"{self.base_url}/{href}"
-                                else:
-                                    full_href = f"{self.base_url}{href}"
-                            else:
-                                full_href = href
-                            download_links.append(full_href)
+          entity_data = entity_model(
+            m_scrap_file=self.__class__.__name__, m_company_name=title, m_team="safepay")
 
-                    ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS,page)
-
-                    card_data = leak_model(
-                        m_ref_html=ref_html,
-                        m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
-                        m_title=title,
-                        m_url=f"{self.base_url}/#{target_id}",
-                        m_base_url=self.base_url,
-                        m_content=description,
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=description,
-                        m_content_type=["leaks"],
-                        m_dumplink=download_links,
-                        m_weblink=[title],
-                        m_revenue=revenue,
-                        m_data_size=size
-                    )
-
-                    entity_data = entity_model(
-                        m_scrap_file=self.__class__.__name__,
-                        m_company_name=title,
-                        m_team="safepay"
-                    )
-
-                    self.append_leak_data(card_data, entity_data)
-                    error_count = 0
-
-                except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                    error_count += 1
-                    if error_count >= 3:
-                        break
+          self.append_leak_data(card_data, entity_data)
+          error_count = 0
 
         except Exception as ex:
-            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-            raise
+          log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+          error_count += 1
+          if error_count >= 3:
+            break
+
+    except Exception as ex:
+      log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+      raise

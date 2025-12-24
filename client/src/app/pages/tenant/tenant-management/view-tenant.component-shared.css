@@ -16,7 +16,7 @@
 .section-heading {
   font-weight: 700;
   font-size: 24px;
-  color: #FFFFFF;
+  color: #FFF;
   margin-bottom: 0.55rem;
 }
 
@@ -177,6 +177,7 @@
 }
 
 .pill-on .pill-dot { background-color: #28a745; }
+
 .pill-text {
   font-size: 0.8rem;
   font-weight: 600;
@@ -212,9 +213,9 @@
 
 .license-btn{
   background: var(--color-blue-820);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 10px;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.16);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 16%);
   transition: background .15s ease, transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 
@@ -222,19 +223,19 @@
   background: var(--color-blue-850);
   border-color: var(--color-blue-640);
   transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.24);
+  box-shadow: 0 3px 6px rgb(0 0 0 / 24%);
 }
 
 .license-btn:active{
   background: var(--color-blue-880);
   transform: translateY(0);
-  box-shadow: inset 0 2px 3px rgba(0,0,0,0.35);
+  box-shadow: inset 0 2px 3px rgb(0 0 0 / 35%);
 }
 
 .license-selected{
   background: var(--color-blue-640);
   border-color: var(--color-blue-630);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.45);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 45%);
 }
 
 .license-selected:hover{
@@ -253,7 +254,7 @@
 .license-disabled{
   opacity: 0.5;
   cursor: not-allowed;
-  border-color: rgba(255,255,255,0.05);
+  border-color: rgb(255 255 255 / 5%);
   color: var(--color-text4);
   background: #0a0a0a;
 }

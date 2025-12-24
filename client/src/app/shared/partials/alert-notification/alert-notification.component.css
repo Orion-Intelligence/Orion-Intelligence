@@ -23,13 +23,13 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--color-border);
-    padding: 0px 6px 12px 6px;
+    padding: 0 6px 12px;
 }
 
 .notification_sidebar-title {
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
     font-weight: 600;
-    font-size: var(--text-lg, 18px);
+    font-size: 18px;
     color: var(--color-text1);
 }
 
@@ -62,10 +62,8 @@
     padding: 16px;
     border-bottom: 1px solid var(--color-border);
     transition: background 0.2s, border 0.2s;
-    margin: 10px 0px;
-    border: 1px solid var(--color-border);
+    margin: 10px 0;
     border-radius: 12px;
-
 }
 
 .notification_sidebar-item:hover {
@@ -79,43 +77,43 @@
 }
 
 .notification_sidebar-item-category {
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
     font-weight: 500;
     font-size: 16px;
     color: var(--color-text1);
 }
 
 .notification_sidebar-item-risk_tag {
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
     font-weight: 600;
-    font-size: var(--text-xs, 12px);
+    font-size: 12px;
     padding: 4px 8px;
     border-radius: 100px;
     border: 1px solid var(--color-border);
 }
 
 .notification_sidebar-item-risk_tag-critical {
-    background: rgba(255, 0, 0, 0.15);
+    background: rgb(255 0 0 / 15%);
     color: #ff4d4f;
 }
 
 .notification_sidebar-item-risk_tag-high {
-    background: rgba(255, 165, 0, 0.15);
+    background: rgb(255 165 0 / 15%);
     color: #f59e0b;
 }
 
 .notification_sidebar-item-risk_tag-medium {
-    background: rgba(255, 215, 0, 0.15);
+    background: rgb(255 215 0 / 15%);
     color: #facc15;
 }
 
 .notification_sidebar-item-risk_tag-low {
-    background: rgba(0, 255, 0, 0.15);
+    background: rgb(0 255 0 / 15%);
     color: #4ade80;
 }
 
 .notification_sidebar-item-message {
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
     font-weight: 400;
     font-size: 12px;
     color: var(--color-text1);
@@ -128,16 +126,16 @@
     align-items: center;
     margin-top: 8px;
     width: 100%;
-    margin-bottom: 0px !important;
+    margin-bottom: 0 !important;
 }
 
 .notification_sidebar-item-footer-left {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
     font-weight: 400;
-    font-size: var(--text-xs, 12px);
+    font-size: 12px;
     color: #a0b8d1;
 }
 
@@ -153,8 +151,8 @@
     border: none;
     color: #57a5eb;
     font-weight: 600;
-    font-size: var(--text-xs, 12px);
-    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-family: Inter, sans-serif;
     cursor: pointer;
 }
 

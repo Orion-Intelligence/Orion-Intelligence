@@ -42,7 +42,7 @@
 .cancel-btn {
     margin-top: 20px;
     padding: 8px 16px;
-    background-color: var(--color-danger, #ff4d4f);
+    background-color: #ff4d4f;
     color: #fff;
     border: none;
     border-radius: 6px;

@@ -6,42 +6,38 @@ from orion.constants import constant
 
 
 class PaymentManager:
-    __instance = None
+  __instance = None
 
-    @staticmethod
-    def get_instance():
-        if PaymentManager.__instance is None:
-            PaymentManager.__instance = PaymentManager()
-        return PaymentManager.__instance
+  @staticmethod
+  def get_instance():
+    if PaymentManager.__instance is None:
+      PaymentManager.__instance = PaymentManager()
+    return PaymentManager.__instance
 
-    def __init__(self):
-        if PaymentManager.__instance is not None:
-            raise Exception("This class is a singleton!")
-        PaymentManager.__instance = self
+  def __init__(self):
+    if PaymentManager.__instance is not None:
+      raise Exception("This class is a singleton!")
+    PaymentManager.__instance = self
 
-    @staticmethod
-    async def send_subscription_info(request: PaymentParamModel):
-        support_email = env_handler.get_instance().env("SUPPORT_EMAIL") or "support@genesistechnologies.org"
-        APP_URL = env_handler.get_instance().env("APP_URL")
+  @staticmethod
+  async def send_subscription_info(request: PaymentParamModel):
+    support_email = env_handler.get_instance().env("SUPPORT_EMAIL") or "support@genesistechnologies.org"
+    APP_URL = env_handler.get_instance().env("APP_URL")
 
-        html_content = constant.mail_template.render(
-            username=request.name,
-            email=request.email,
-            subject=MailSubject.PRO_SUBSCRIPTION.value,
-            lurlHeading=MailUrlHeading.PRO_SUBSCRIPTION.value,
-            url=APP_URL,
-            extra_message=f"""
+    html_content = constant.mail_template.render(
+      username=request.name,
+      email=request.email,
+      subject=MailSubject.PRO_SUBSCRIPTION.value,
+      lurlHeading=MailUrlHeading.PRO_SUBSCRIPTION.value,
+      url=APP_URL,
+      extra_message=f"""
                 <p><b>Name:</b> {request.name}</p>
                 <p><b>Phone:</b> {request.phone}</p>
                 <p><b>Email:</b> {request.email}</p>
                 <p><b>Plan:</b> {request.plan}</p>
-            """
-        )
+            """)
 
-        await mail_manager.get_instance().send_verification_mail_list(
-            to_list=[support_email, request.email],
-            subject=MailSubject.PRO_SUBSCRIPTION.value,
-            body=html_content
-        )
+    await mail_manager.get_instance().send_verification_mail_list(
+      to_list=[support_email, request.email], subject=MailSubject.PRO_SUBSCRIPTION.value, body=html_content)
 
-        return {"message": "Subscription request sent successfully."}
+    return {"message": "Subscription request sent successfully."}

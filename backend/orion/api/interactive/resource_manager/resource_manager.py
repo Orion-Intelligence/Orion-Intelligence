@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import FileResponse
 
@@ -48,7 +49,6 @@ class ResourceManager:
 
     await AuditLogManager.get_instance().register(current_user.tenant_uuid, current_user.id, "upload_tenant_image")
     return {"tenant_image": "upload complete"}
-
 
   async def get_user_image(self, user_id: str):
     default_path = self.USER_DIR / "default.png"

@@ -2,5 +2,5 @@ from pydantic import BaseModel
 
 
 class ScreenshotPayload(BaseModel):
-    filename: str
-    data: str
+  filename: str
+  data: str

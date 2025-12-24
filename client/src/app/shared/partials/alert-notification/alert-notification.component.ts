@@ -1,6 +1,5 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { NgIf, NgFor, CommonModule } from '@angular/common';
-import { filterAnimation } from '../../animations/filter.animation';
 import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
@@ -8,8 +7,6 @@ import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { Subscription } from 'rxjs';
-import { searchFilterAnimation } from '../../animations/search.filter.animation';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 
 
