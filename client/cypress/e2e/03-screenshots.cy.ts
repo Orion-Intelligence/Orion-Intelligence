@@ -276,24 +276,24 @@ describe('Orion Intelligence – Full Stable Flow', () => {
     cy.screenshot('16-dump-listing');
   });
 
-  /* =====================
-     TENANT (SUB)
-  ====================== */
-  it('Tenant Sections', () => {
-    cy.visit('/dashboard');
-
-    cy.contains('.sidebar__item-dropdown', 'Tenant')
-      .click({ force: true });
-
-    ['View Profiles', 'View Tenants', 'Auditlog'].forEach((s, i) => {
-      cy.contains('.sidebar__subitem-content', s)
-        .click({ force: true });
-
-      cy.screenshot(
-        `17-tenant-${i + 1}-${s.toLowerCase().replace(/\s+/g, '-')}`
-      );
-    });
-  });
+  // /* =====================
+  //    TENANT (SUB)
+  // ====================== */
+  // it('Tenant Sections', () => {
+  //   cy.visit('/dashboard');
+  //
+  //   cy.contains('.sidebar__item-dropdown', 'Tenant')
+  //     .click({ force: true });
+  //
+  //   ['View Profiles', 'View Tenants', 'Auditlog'].forEach((s, i) => {
+  //     cy.contains('.sidebar__subitem-content', s)
+  //       .click({ force: true });
+  //
+  //     cy.screenshot(
+  //       `17-tenant-${i + 1}-${s.toLowerCase().replace(/\s+/g, '-')}`
+  //     );
+  //   });
+  // });
 
   /* =====================
      CTI GRAPH

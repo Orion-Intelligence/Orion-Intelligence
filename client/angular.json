@@ -14,7 +14,7 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "customWebpackConfig": {
-              "path": "./webpack.config.js",
+              "path": "./webpack.instrument.js",
               "replaceDuplicatePlugins": true
             },
             "outputPath": "build",
