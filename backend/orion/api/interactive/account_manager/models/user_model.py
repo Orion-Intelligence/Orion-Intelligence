@@ -6,10 +6,10 @@ from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
 
 
 class user_model(BaseModel):
-  username: str
-  email: str
-  password: str
-  role: user_role
-  status: UserStatus
-  subscription: bool
-  licenses: List[LicenseName]
+    username: str
+    email: str
+    password: str
+    role: user_role
+    status: UserStatus
+    subscription: bool
+    licenses: List[LicenseName]

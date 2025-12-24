@@ -15,152 +15,150 @@ from playwright.sync_api import Page
 
 
 class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_interface, ABC):
-  _instance = None
+    _instance = None
 
-  def __init__(self, callback=None):
-    self.callback = callback
-    self._card_data = []
-    self._entity_data = []
-    self.soup = None
-    self._initialized = None
-    self._redis_instance = redis_controller()
-    self._is_crawled = False
+    def __init__(self, callback=None):
+        self.callback = callback
+        self._card_data = []
+        self._entity_data = []
+        self.soup = None
+        self._initialized = None
+        self._redis_instance = redis_controller()
+        self._is_crawled = False
 
-  def init_callback(self, callback=None):
-    self.callback = callback
+    def init_callback(self, callback=None):
+        self.callback = callback
 
-  def __new__(cls):
-    if cls._instance is None:
-      cls._instance = super(_7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd, cls).__new__(cls)
-      cls._instance._initialized = False
-    return cls._instance
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(_7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
-  @property
-  def is_crawled(self) -> bool:
-    return self._is_crawled
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
-  def developer_signature(self) -> str:
-    return "open:open"
+    def developer_signature(self) -> str:
+        return "open:open"
 
-  @property
-  def seed_url(self) -> str:
-    return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
+    @property
+    def seed_url(self) -> str:
+        return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
 
-  @property
-  def base_url(self) -> str:
-    return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
+    @property
+    def base_url(self) -> str:
+        return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
 
-  @property
-  def rule_config(self) -> RuleModel:
-    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.LEAK)
+    @property
+    def rule_config(self) -> RuleModel:
+        return RuleModel(
+            m_fetch_proxy=FetchProxy.TOR,
+            m_fetch_config=FetchConfig.PLAYRIGHT,
+            m_threat_type=ThreatType.LEAK)
 
-  @property
-  def card_data(self) -> List[leak_model]:
-    return self._card_data
+    @property
+    def card_data(self) -> List[leak_model]:
+        return self._card_data
 
-  @property
-  def entity_data(self) -> List[entity_model]:
-    return self._entity_data
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
 
-  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
+    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
-  def contact_page(self) -> str:
-    return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
+    def contact_page(self) -> str:
+        return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
 
-  def append_leak_data(self, leak: leak_model, entity: entity_model):
-    self._card_data.append(leak)
-    self._entity_data.append(entity)
-    if self.callback:
-      if self.callback():
-        self._card_data.clear()
-        self._entity_data.clear()
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
+        self._card_data.append(leak)
+        self._entity_data.append(entity)
+        if self.callback:
+            if self.callback():
+                self._card_data.clear()
+                self._entity_data.clear()
 
-  def parse_leak_data(self, page: Page):
-    self._card_data = []
+    def parse_leak_data(self, page: Page):
+        self._card_data = []
 
-    try:
-      page.wait_for_selector("div.border.border-warning.card-body.shadow-lg", timeout=30000)
-      cards = page.query_selector_all("div.border.border-warning.card-body.shadow-lg")
-      if not cards:
-        return
-
-      error_count = 0
-      if self.is_crawled:
-        cards = cards[0:5]
-
-      for card in cards:
         try:
-          description_el = card.query_selector("p.card-text")
-          description = description_el.inner_text().strip() if description_el else "No content available"
-          imp_content = description[:500]
+            page.wait_for_selector("div.border.border-warning.card-body.shadow-lg", timeout=30000)
+            cards = page.query_selector_all("div.border.border-warning.card-body.shadow-lg")
+            if not cards:
+                return
 
-          website = ""
-          subtitle_blocks = card.query_selector_all("h6.card-subtitle")
-          for h6 in subtitle_blocks:
-            if "Web Site:" in h6.inner_text():
-              a_tag = h6.query_selector("a[href]")
-              if a_tag:
-                website = a_tag.get_attribute("href").strip()
-              break
+            error_count = 0
+            if self.is_crawled:
+                cards = cards[0:5]
 
-          dumplinks = []
-          for h6 in subtitle_blocks:
-            a_tag = h6.query_selector("a[href]")
-            if a_tag:
-              href = a_tag.get_attribute("href")
-              if href:
-                dumplinks.append(href.strip())
+            for card in cards:
+                try:
+                    description_el = card.query_selector("p.card-text")
+                    description = description_el.inner_text().strip() if description_el else "No content available"
+                    imp_content = description[:500]
 
-          if not dumplinks or not website:
-            continue
+                    website = ""
+                    subtitle_blocks = card.query_selector_all("h6.card-subtitle")
+                    for h6 in subtitle_blocks:
+                        if "Web Site:" in h6.inner_text():
+                            a_tag = h6.query_selector("a[href]")
+                            if a_tag:
+                                website = a_tag.get_attribute("href").strip()
+                            break
 
-          title_el = card.query_selector("h4.card-title")
-          raw_title = title_el.inner_text().strip() if title_el else "Unknown"
-          match = re.search(r"(.*?)\s*\(([^)]+)\)", raw_title)
-          if match:
-            company_name = match.group(1).strip()
-            location = match.group(2).strip()
-          else:
-            company_name = raw_title
-            location = None
+                    dumplinks = []
+                    for h6 in subtitle_blocks:
+                        a_tag = h6.query_selector("a[href]")
+                        if a_tag:
+                            href = a_tag.get_attribute("href")
+                            if href:
+                                dumplinks.append(href.strip())
 
-          ref_html = helper_method.extract_refhtml(
-            website,
-            self.invoke_db,
-            REDIS_COMMANDS,
-            CUSTOM_SCRIPT_REDIS_KEYS,
-            RAW_PATH_CONSTANTS,
-            page)
-          card_data = leak_model(
-            m_ref_html=ref_html,
-            m_screenshot=helper_method.get_screenshot_base64(page, company_name, self.base_url),
-            m_title=company_name,
-            m_url=page.url,
-            m_weblink=[website] if website else [],
-            m_base_url=self.base_url,
-            m_content=f"{description} {self.base_url} {page.url}",
-            m_network=helper_method.get_network_type(self.base_url),
-            m_important_content=imp_content,
-            m_content_type=["leaks"],
-            m_dumplink=dumplinks, )
+                    if not dumplinks or not website:
+                        continue
 
-          entity_data = entity_model(
-            m_scrap_file=self.__class__.__name__,
-            m_company_name=company_name,
-            m_location=location.split(",") if location else None,
-            m_team="diaxin")
+                    title_el = card.query_selector("h4.card-title")
+                    raw_title = title_el.inner_text().strip() if title_el else "Unknown"
+                    match = re.search(r"(.*?)\s*\(([^)]+)\)", raw_title)
+                    if match:
+                        company_name = match.group(1).strip()
+                        location = match.group(2).strip()
+                    else:
+                        company_name = raw_title
+                        location = None
 
-          self.append_leak_data(card_data, entity_data)
-          error_count = 0
+                    ref_html = helper_method.extract_refhtml(
+                        website, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                    card_data = leak_model(
+                        m_ref_html=ref_html,
+                        m_screenshot=helper_method.get_screenshot_base64(page, company_name, self.base_url),
+                        m_title=company_name,
+                        m_url=page.url,
+                        m_weblink=[website] if website else [],
+                        m_base_url=self.base_url,
+                        m_content=f"{description} {self.base_url} {page.url}",
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=imp_content,
+                        m_content_type=["leaks"],
+                        m_dumplink=dumplinks, )
+
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_company_name=company_name,
+                        m_location=location.split(",") if location else None,
+                        m_team="diaxin")
+
+                    self.append_leak_data(card_data, entity_data)
+                    error_count = 0
+
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                    error_count += 1
+                    if error_count >= 3:
+                        break
+
 
         except Exception as ex:
-          log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-          error_count += 1
-          if error_count >= 3:
-            break
-
-
-    except Exception as ex:
-      log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-      raise
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

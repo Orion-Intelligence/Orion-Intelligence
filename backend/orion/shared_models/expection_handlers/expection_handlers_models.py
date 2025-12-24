@@ -4,18 +4,18 @@ from pydantic import BaseModel
 
 
 class TracebackModel(BaseModel):
-  traceback: List[str]
+    traceback: List[str]
 
 
 class ErrorResponseModel(TracebackModel):
-  error: str
+    error: str
 
 
 class ValidationErrorDetail(BaseModel):
-  field: str
-  message: str
-  type: str
+    field: str
+    message: str
+    type: str
 
 
 class ValidationErrorResponseModel(TracebackModel):
-  validation_errors: List[ValidationErrorDetail]
+    validation_errors: List[ValidationErrorDetail]

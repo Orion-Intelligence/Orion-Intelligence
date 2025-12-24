@@ -27,8 +27,8 @@ create_parser_zip() {
 client_build() {
     cd client || exit
     npm install
-    if [ "$1" = "-p" ]; then
-        ng build --configuration production
+    if [ "$1" = "-t" ]; then
+        ng build --configuration instrumented
     else
         ng build --configuration production
     fi
@@ -97,7 +97,7 @@ if [ "$COMMAND" = "build" ]; then
 
     case "$FLAG" in
         -t)
-            client_build "-d"
+            client_build "-t"
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
@@ -137,7 +137,7 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server
@@ -145,5 +145,4 @@ fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
     wait_for_test_service
-#    run_test_task
 fi

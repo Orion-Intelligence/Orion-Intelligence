@@ -33,7 +33,7 @@ jobs:
           set -euo pipefail
           cd client
           npm install
-          npx ng build
+          npx ng build --configuration=instrumented
 
       - run: |
           set -euo pipefail
@@ -52,7 +52,7 @@ jobs:
       - run: |
           set -euo pipefail
           chmod +x ./run.sh
-          ./run.sh build -d
+          ./run.sh build -b
 
       - id: compose_loc
         run: |
@@ -140,7 +140,17 @@ jobs:
           cd client
           npm ci --include=dev || npm install --include=dev
           npx cypress verify
-          npx cypress run --browser chrome --config baseUrl="http://127.0.0.1:8080"
+          CYPRESS=true npx cypress run --browser chrome --config baseUrl="http://127.0.0.1:8080"
+
+      - run: |
+          set -euo pipefail
+          test -f client/coverage/lcov.info
+
+      - name: Upload coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: client/coverage/lcov.info
 
       - run: |
           set -euo pipefail

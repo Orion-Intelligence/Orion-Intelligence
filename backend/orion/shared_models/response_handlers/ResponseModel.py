@@ -4,7 +4,7 @@ from typing import Optional, Dict
 
 @dataclass
 class ResponseModel:
-  success: bool
-  message: str
-  data: Optional[Dict] = None
-  error_code: Optional[int] = None
+    success: bool
+    message: str
+    data: Optional[Dict] = None
+    error_code: Optional[int] = None

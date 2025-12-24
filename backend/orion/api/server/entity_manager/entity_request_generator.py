@@ -2,11 +2,11 @@ from orion.constants.constant import allowed_keys
 
 
 class EntityRequestGenerator:
-  @staticmethod
-  def get_cluster_documents_query(normalized_value: str, depth_level: int, document_limit: int):
-    if normalized_value == "all":
-      queried_id = "all_clusters"
-      query_str = f"""
+    @staticmethod
+    def get_cluster_documents_query(normalized_value: str, depth_level: int, document_limit: int):
+        if normalized_value == "all":
+            queried_id = "all_clusters"
+            query_str = f"""
             LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat", "cti_vertices/exploit", "cti_vertices/social"]
 
             LET cluster_data = (
@@ -90,10 +90,10 @@ class EntityRequestGenerator:
               matched_ids: clusters
             }}
             """
-      return queried_id, query_str, {}
-    else:
-      queried_id = f"cti_vertices/{normalized_value}"
-      query_str = f"""
+            return queried_id, query_str, {}
+        else:
+            queried_id = f"cti_vertices/{normalized_value}"
+            query_str = f"""
             LET doc_nodes = (
               FOR v, e, p IN {depth_level}..{depth_level} ANY @cluster_id GRAPH 'cti_graph'
                 OPTIONS {{ bfs: true, uniqueVertices: "global" }}
@@ -169,13 +169,13 @@ class EntityRequestGenerator:
               matched_ids: [@cluster_id]
             }}
             """
-      bind_vars = {"cluster_id": queried_id}
-      return queried_id, query_str, bind_vars
+            bind_vars = {"cluster_id": queried_id}
+            return queried_id, query_str, bind_vars
 
-  @staticmethod
-  def build_property_search_query(normalized_value: str, depth_level: int, document_limit: int):
-    queried_id = "all_properties"
-    query_str = f"""
+    @staticmethod
+    def build_property_search_query(normalized_value: str, depth_level: int, document_limit: int):
+        queried_id = "all_properties"
+        query_str = f"""
         LET props = (
           FOR property IN cti_vertices
             FILTER CONTAINS(LOWER(property.label), @search_value) || CONTAINS(LOWER(property.value), @search_value)
@@ -215,23 +215,23 @@ class EntityRequestGenerator:
         }}
         """
 
-    bind_vars = {"search_value": normalized_value.lower()}
+        bind_vars = {"search_value": normalized_value.lower()}
 
-    return queried_id, query_str, bind_vars
+        return queried_id, query_str, bind_vars
 
-  @staticmethod
-  def get_document_or_property_query(normalized_value: str,
-      normalized_type: str,
-      depth_level: int,
-      secondary_depth_level: int,
-      document_limit: int,
-      data_point_type: str):
-    start_vertex = (
-      f"cti_vertices/{normalized_value}" if data_point_type == "document" else f"cti_vertices/{normalized_type}:{normalized_value}")
+    @staticmethod
+    def get_document_or_property_query(normalized_value: str,
+            normalized_type: str,
+            depth_level: int,
+            secondary_depth_level: int,
+            document_limit: int,
+            data_point_type: str):
+        start_vertex = (
+            f"cti_vertices/{normalized_value}" if data_point_type == "document" else f"cti_vertices/{normalized_type}:{normalized_value}")
 
-    queried_id = start_vertex
+        queried_id = start_vertex
 
-    query_str = f"""
+        query_str = f"""
         LET depth1_nodes = (
           FOR v, e, p IN {depth_level}..{depth_level} ANY @start_vertex GRAPH 'cti_graph'
             OPTIONS {{ bfs: true, uniqueVertices: "global" }}
@@ -337,12 +337,12 @@ class EntityRequestGenerator:
         }}
         """
 
-    bind_vars = {"start_vertex": start_vertex}
-    return queried_id, query_str, bind_vars
+        bind_vars = {"start_vertex": start_vertex}
+        return queried_id, query_str, bind_vars
 
-  @staticmethod
-  def deduplicate_key(key: str) -> str | None:
-    dedup_map = {'m_ipv4_addresses': 'm_ip', 'm_ipv6_addresses': 'm_ip', 'm_ipv4_cidrs': 'm_ip', 'm_cves': 'm_cve', 'm_phone_numbers': 'm_phone_number', 'm_telephone_nums': 'm_phone_number', 'm_domains': 'm_domain', 'm_weblink': 'm_url', 'm_websites': 'm_url', 'm_urls': 'm_url', 'm_unencoded_urls': 'm_url'}
+    @staticmethod
+    def deduplicate_key(key: str) -> str | None:
+        dedup_map = {'m_ipv4_addresses': 'm_ip', 'm_ipv6_addresses': 'm_ip', 'm_ipv4_cidrs': 'm_ip', 'm_cves': 'm_cve', 'm_phone_numbers': 'm_phone_number', 'm_telephone_nums': 'm_phone_number', 'm_domains': 'm_domain', 'm_weblink': 'm_url', 'm_websites': 'm_url', 'm_urls': 'm_url', 'm_unencoded_urls': 'm_url'}
 
-    canonical = dedup_map.get(key, key)
-    return canonical if canonical in allowed_keys else None
+        canonical = dedup_map.get(key, key)
+        return canonical if canonical in allowed_keys else None

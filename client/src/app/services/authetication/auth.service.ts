@@ -217,7 +217,7 @@ export class AuthService {
     });
   }
 
-  private getStoredToken(): string | null {
+  public getStoredToken(): string | null {
     return localStorage.getItem('token');
   }
 

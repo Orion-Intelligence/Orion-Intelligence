@@ -6,18 +6,18 @@ from orion.helper_manager.helper_controller import helper_controller
 
 
 class search_general_param_model(BaseModel, helper_controller):
-  q: Optional[str] = Field("")
-  category: Optional[str] = "all"
-  page: Optional[int] = 1
-  safe: bool = False
-  must: bool = False
-  network: str = "all"
-  matchtype: Optional[str] = "or"
-  content: Optional[str] = "all"
+    q: Optional[str] = Field("")
+    category: Optional[str] = "all"
+    page: Optional[int] = 1
+    safe: bool = False
+    must: bool = False
+    network: str = "all"
+    matchtype: Optional[str] = "or"
+    content: Optional[str] = "all"
 
-  daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
-  entity_filter: Optional[Dict[str, List[str]]] = Field(
-    default=None, examples=[{"m_country": ["pakistan"]}])
+    daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
+    entity_filter: Optional[Dict[str, List[str]]] = Field(
+        default=None, examples=[{"m_country": ["pakistan"]}])
 
-  class Config:
-    populate_by_name = True
+    class Config:
+        populate_by_name = True

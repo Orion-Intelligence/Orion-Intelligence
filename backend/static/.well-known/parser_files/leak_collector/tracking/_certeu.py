@@ -14,147 +14,147 @@ from crawler.crawler_services.shared.helper_method import helper_method
 
 
 class _certeu(leak_extractor_interface, ABC):
-  _instance = None
+    _instance = None
 
-  def __new__(cls, *args, **kwargs):
-    if cls._instance is None:
-      cls._instance = super(_certeu, cls).__new__(cls)
-      cls._instance._initialized = False
-    return cls._instance
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(_certeu, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
-  def __init__(self, callback=None):
-    if self._initialized:
-      return
-    self.callback = callback
-    self._card_data: List[leak_model] = []
-    self._entity_data: List[entity_model] = []
-    self._redis_instance = redis_controller()
-    self._is_crawled = False
-    self._initialized = True
+    def __init__(self, callback=None):
+        if self._initialized:
+            return
+        self.callback = callback
+        self._card_data: List[leak_model] = []
+        self._entity_data: List[entity_model] = []
+        self._redis_instance = redis_controller()
+        self._is_crawled = False
+        self._initialized = True
 
-  def init_callback(self, callback=None):
-    self.callback = callback
+    def init_callback(self, callback=None):
+        self.callback = callback
 
-  @property
-  def seed_url(self) -> str:
-    return "https://cert.europa.eu/blog"
+    @property
+    def seed_url(self) -> str:
+        return "https://cert.europa.eu/blog"
 
-  @property
-  def base_url(self) -> str:
-    return "https://cert.europa.eu"
+    @property
+    def base_url(self) -> str:
+        return "https://cert.europa.eu"
 
-  @property
-  def developer_signature(self) -> str:
-    return "Muhammad Abdullah:owGbwMvMwMEYdOzLoajv79gZTxskMWRU6bi8370 / LLUoMy0zNUUhJbUsNSe / ILXISsG3NCMxNzcxRcExKaU0Jycxg5erYzMLAyMHg6yYIkuQ4M9 / l7siYpT2b / oFM5GVCWQcAxenAEykRYSFYcHRJWUetXMKmo78Ec5ueHZq52rX / vuHpJTf / G31ULsywdC23 + fM4tmaUbP2cXYm7y9kPHnAdbXgspWerkeXW8ZYmm2xrpdTF / Yyvi0aGdn5iMne8PQGgSgWxeOMKUo8IQvL3W1PN4gtYYkxfr6kMZ3t0tmSRR2qnu / fZ2yfqfdm9szOQpt2AA ===weDX"
+    @property
+    def developer_signature(self) -> str:
+        return "Muhammad Abdullah:owGbwMvMwMEYdOzLoajv79gZTxskMWRU6bi8370 / LLUoMy0zNUUhJbUsNSe / ILXISsG3NCMxNzcxRcExKaU0Jycxg5erYzMLAyMHg6yYIkuQ4M9 / l7siYpT2b / oFM5GVCWQcAxenAEykRYSFYcHRJWUetXMKmo78Ec5ueHZq52rX / vuHpJTf / G31ULsywdC23 + fM4tmaUbP2cXYm7y9kPHnAdbXgspWerkeXW8ZYmm2xrpdTF / Yyvi0aGdn5iMne8PQGgSgWxeOMKUo8IQvL3W1PN4gtYYkxfr6kMZ3t0tmSRR2qnu / fZ2yfqfdm9szOQpt2AA ===weDX"
 
-  @property
-  def rule_config(self) -> RuleModel:
-    return RuleModel(
-      m_fetch_proxy=FetchProxy.NONE,
-      m_fetch_config=FetchConfig.REQUESTS,
-      m_resoource_block=False,
-      m_threat_type=ThreatType.TRACKING)
+    @property
+    def rule_config(self) -> RuleModel:
+        return RuleModel(
+            m_fetch_proxy=FetchProxy.NONE,
+            m_fetch_config=FetchConfig.REQUESTS,
+            m_resoource_block=False,
+            m_threat_type=ThreatType.TRACKING)
 
-  @property
-  def card_data(self) -> List[leak_model]:
-    return self._card_data
+    @property
+    def card_data(self) -> List[leak_model]:
+        return self._card_data
 
-  @property
-  def is_crawled(self) -> bool:
-    return self._is_crawled
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
-  @property
-  def entity_data(self) -> List[entity_model]:
-    return self._entity_data
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
 
-  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-    return self._redis_instance.invoke_trigger(
-      command, [key + self.__class__.__name__, default_value, expiry])
+    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+        return self._redis_instance.invoke_trigger(
+            command, [key + self.__class__.__name__, default_value, expiry])
 
-  def contact_page(self) -> str:
-    return self.base_url
+    def contact_page(self) -> str:
+        return self.base_url
 
-  def append_leak_data(self, leak: leak_model, entity: entity_model):
-    self._card_data.append(leak)
-    self._entity_data.append(entity)
-    if self.callback and self.callback():
-      self._card_data.clear()
-      self._entity_data.clear()
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
+        self._card_data.append(leak)
+        self._entity_data.append(entity)
+        if self.callback and self.callback():
+            self._card_data.clear()
+            self._entity_data.clear()
 
-  @staticmethod
-  def _format_date(dt: str) -> str:
-    return datetime.fromisoformat(dt.replace("Z", "")).strftime("%Y-%m-%d")
+    @staticmethod
+    def _format_date(dt: str) -> str:
+        return datetime.fromisoformat(dt.replace("Z", "")).strftime("%Y-%m-%d")
 
-  def parse_leak_data(self, page):
-    targets = [
-      {"url": "https://cert.europa.eu/blog", "country": "European Union", "team": "CERT-EU", "card_selector": "article.news--articles--item", "link_selector": "a", "date_selector": "time.news--articles--item--time", "date_format": "iso", "content_date_selector": "time.text-grey"},
-      {"url": "https://cert.europa.eu/publications/threat-intelligence/2025", "country": "European Union", "team": "CERT-EU", "card_selector": "div.c-teaser__content", "link_selector": "h3 > a", "date_selector": "p.c-meta", "date_format": "%d %b %Y", "content_date_selector": ""}]
-    for target in targets:
-      try:
-        resp = page.get(target["url"], timeout=60)
-        resp.raise_for_status()
-        list_soup = BeautifulSoup(resp.text, "html.parser")
-        cards = list_soup.select(target["card_selector"])
-        articles = []
-        for card in cards[:30]:
-          try:
-            link_elem = card.select_one(target["link_selector"])
-            if not link_elem:
-              continue
-            href = link_elem.get("href")
-            url = urljoin(self.base_url, href) if href else None
-            title = link_elem.get_text(strip=True)
-            raw_date = ""
-            if target["date_selector"]:
-              date_elem = card.select_one(target["date_selector"])
-              if target["date_format"] == "iso" and date_elem:
-                raw_date = date_elem.get("datetime", "").strip()
-              elif date_elem:
-                raw_date = date_elem.get_text(strip=True)
+    def parse_leak_data(self, page):
+        targets = [
+            {"url": "https://cert.europa.eu/blog", "country": "European Union", "team": "CERT-EU", "card_selector": "article.news--articles--item", "link_selector": "a", "date_selector": "time.news--articles--item--time", "date_format": "iso", "content_date_selector": "time.text-grey"},
+            {"url": "https://cert.europa.eu/publications/threat-intelligence/2025", "country": "European Union", "team": "CERT-EU", "card_selector": "div.c-teaser__content", "link_selector": "h3 > a", "date_selector": "p.c-meta", "date_format": "%d %b %Y", "content_date_selector": ""}]
+        for target in targets:
             try:
-              date = (datetime.fromisoformat(raw_date.replace("Z", "")).date() if target[
-                                                                                    "date_format"] == "iso" and raw_date else datetime.strptime(
-                raw_date,
-                target["date_format"]).date())
-            except Exception:
-              date = None
-            articles.append((url, title, date, target["country"], target["team"], target["content_date_selector"]))
-          except Exception:
-            continue
-        for index, (url, title, _, country, team, _) in enumerate(articles):
-          try:
-            if not url:
-              continue
-            resp = page.get(url, timeout=60)
-            resp.raise_for_status()
-            s = BeautifulSoup(resp.text, "html.parser")
-            date = None
-            try:
-              content_date_elem = s.select_one("time.text-grey[datetime]")
-              if content_date_elem:
-                content_date_raw = content_date_elem.get("datetime", "")
-                if content_date_raw:
-                  date = datetime.fromisoformat(content_date_raw.replace("Z", "")).date()
-            except Exception:
-              pass
-            content_elems = s.select("main p, article p")
-            paragraphs = [p.get_text(strip=True) for p in content_elems if p.get_text(strip=True)]
-            full_content = "\n".join(paragraphs)
-            leak_obj = leak_model(
-              m_title=title,
-              m_weblink=[url],
-              m_dumplink=[url],
-              m_url=url,
-              m_base_url=self.base_url,
-              m_content=full_content,
-              m_network=helper_method.get_network_type(self.base_url),
-              m_important_content=f"{title}\n{full_content}",
-              m_content_type=["news", "tracking"],
-              m_leak_date=date, )
-            entity_data = entity_model(
-              m_scrap_file=self.__class__.__name__, m_team=team, m_country=[country])
-            self.append_leak_data(leak_obj, entity_data)
-          except Exception as ex:
-            log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")
-      except Exception as ex:
-        log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")
+                resp = page.get(target["url"], timeout=60)
+                resp.raise_for_status()
+                list_soup = BeautifulSoup(resp.text, "html.parser")
+                cards = list_soup.select(target["card_selector"])
+                articles = []
+                for card in cards[:30]:
+                    try:
+                        link_elem = card.select_one(target["link_selector"])
+                        if not link_elem:
+                            continue
+                        href = link_elem.get("href")
+                        url = urljoin(self.base_url, href) if href else None
+                        title = link_elem.get_text(strip=True)
+                        raw_date = ""
+                        if target["date_selector"]:
+                            date_elem = card.select_one(target["date_selector"])
+                            if target["date_format"] == "iso" and date_elem:
+                                raw_date = date_elem.get("datetime", "").strip()
+                            elif date_elem:
+                                raw_date = date_elem.get_text(strip=True)
+                        try:
+                            date = (datetime.fromisoformat(raw_date.replace("Z", "")).date() if target[
+                                                                                                    "date_format"] == "iso" and raw_date else datetime.strptime(
+                                raw_date, target["date_format"]).date())
+                        except Exception:
+                            date = None
+                        articles.append(
+                            (url, title, date, target["country"], target["team"], target["content_date_selector"]))
+                    except Exception:
+                        continue
+                for index, (url, title, _, country, team, _) in enumerate(articles):
+                    try:
+                        if not url:
+                            continue
+                        resp = page.get(url, timeout=60)
+                        resp.raise_for_status()
+                        s = BeautifulSoup(resp.text, "html.parser")
+                        date = None
+                        try:
+                            content_date_elem = s.select_one("time.text-grey[datetime]")
+                            if content_date_elem:
+                                content_date_raw = content_date_elem.get("datetime", "")
+                                if content_date_raw:
+                                    date = datetime.fromisoformat(content_date_raw.replace("Z", "")).date()
+                        except Exception:
+                            pass
+                        content_elems = s.select("main p, article p")
+                        paragraphs = [p.get_text(strip=True) for p in content_elems if p.get_text(strip=True)]
+                        full_content = "\n".join(paragraphs)
+                        leak_obj = leak_model(
+                            m_title=title,
+                            m_weblink=[url],
+                            m_dumplink=[url],
+                            m_url=url,
+                            m_base_url=self.base_url,
+                            m_content=full_content,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=f"{title}\n{full_content}",
+                            m_content_type=["news", "tracking"],
+                            m_leak_date=date, )
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__, m_team=team, m_country=[country])
+                        self.append_leak_data(leak_obj, entity_data)
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")

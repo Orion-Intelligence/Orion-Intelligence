@@ -2,6 +2,7 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "orion-client",
+  "defaultProject": "client",
   "projects": {
     "client": {
       "projectType": "application",
@@ -14,7 +15,7 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "customWebpackConfig": {
-              "path": "./webpack.instrument.js",
+              "path": "./webpack.config.js",
               "replaceDuplicatePlugins": true
             },
             "outputPath": "build",
@@ -94,6 +95,14 @@
               },
               "extractLicenses": false,
               "namedChunks": true
+            },
+            "instrumented": {
+              "customWebpackConfig": {
+                "path": "./webpack.instrument.js",
+                "replaceDuplicatePlugins": true
+              },
+              "optimization": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -110,6 +119,9 @@
             },
             "development": {
               "buildTarget": "client:build:development"
+            },
+            "instrumented": {
+              "buildTarget": "client:build:instrumented"
             }
           },
           "defaultConfiguration": "development"

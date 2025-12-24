@@ -16,173 +16,178 @@ from playwright.sync_api import Page
 
 
 class _leak_lookup(leak_extractor_interface, ABC):
-  _instance = None
+    _instance = None
 
-  def __init__(self, callback=None):
-    self.callback = callback
-    self._card_data = []
-    self._entity_data = []
-    self.soup = None
-    self._initialized = None
-    self._redis_instance = redis_controller()
-    self._is_crawled = False
+    def __init__(self, callback=None):
+        self.callback = callback
+        self._card_data = []
+        self._entity_data = []
+        self.soup = None
+        self._initialized = None
+        self._redis_instance = redis_controller()
+        self._is_crawled = False
 
-  def init_callback(self, callback=None):
-    self.callback = callback
+    def init_callback(self, callback=None):
+        self.callback = callback
 
-  def __new__(cls):
-    if cls._instance is None:
-      cls._instance = super(_leak_lookup, cls).__new__(cls)
-      cls._instance._initialized = False
-    return cls._instance
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(_leak_lookup, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
-  @property
-  def is_crawled(self) -> bool:
-    return self._is_crawled
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
-  def developer_signature(self) -> str:
-    return "open:open"
+    def developer_signature(self) -> str:
+        return "open:open"
 
-  @property
-  def seed_url(self) -> str:
-    return "https://leak-lookup.com/breaches"
+    @property
+    def seed_url(self) -> str:
+        return "https://leak-lookup.com/breaches"
 
-  @property
-  def base_url(self) -> str:
-    return "https://leak-lookup.com"
+    @property
+    def base_url(self) -> str:
+        return "https://leak-lookup.com"
 
-  @property
-  def rule_config(self) -> RuleModel:
-    return RuleModel(
-      m_fetch_proxy=FetchProxy.NONE,
-      m_fetch_config=FetchConfig.PLAYRIGHT,
-      m_resoource_block=False,
-      m_threat_type=ThreatType.LEAK)
+    @property
+    def rule_config(self) -> RuleModel:
+        return RuleModel(
+            m_fetch_proxy=FetchProxy.NONE,
+            m_fetch_config=FetchConfig.PLAYRIGHT,
+            m_resoource_block=False,
+            m_threat_type=ThreatType.LEAK)
 
-  @property
-  def card_data(self) -> List[leak_model]:
-    return self._card_data
+    @property
+    def card_data(self) -> List[leak_model]:
+        return self._card_data
 
-  @property
-  def entity_data(self) -> List[entity_model]:
-    return self._entity_data
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
 
-  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
+    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
-  def contact_page(self) -> str:
-    return "https://twitter.com/LeakLookup"
+    def contact_page(self) -> str:
+        return "https://twitter.com/LeakLookup"
 
-  def append_leak_data(self, leak: leak_model, entity: entity_model):
-    self._card_data.append(leak)
-    self._entity_data.append(entity)
-    if self.callback:
-      if self.callback():
-        self._card_data.clear()
-        self._entity_data.clear()
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
+        self._card_data.append(leak)
+        self._entity_data.append(entity)
+        if self.callback:
+            if self.callback():
+                self._card_data.clear()
+                self._entity_data.clear()
 
-  def parse_leak_data(self, page: Page):
-    max_pages = 500
-    current_page = 0
-    if self.is_crawled:
-      max_pages = 4
+    def parse_leak_data(self, page: Page):
+        max_pages = 500
+        current_page = 0
+        if self.is_crawled:
+            max_pages = 4
 
-    while current_page < max_pages:
-      rows = page.query_selector_all("table tr")
+        while current_page < max_pages:
+            rows = page.query_selector_all("table tr")
 
-      error_count = 0
-      m_prev_content = ""
+            error_count = 0
+            m_prev_content = ""
 
-      for row in rows:
-        try:
-          link_element = row.query_selector("td a")
-          if not link_element:
-            error_count += 1
-            if error_count >= 3:
-              break
-            continue
+            for row in rows:
+                try:
+                    link_element = row.query_selector("td a")
+                    if not link_element:
+                        error_count += 1
+                        if error_count >= 3:
+                            break
+                        continue
 
-          site_name = link_element.inner_text().strip()
-          site_url = link_element.get_attribute("href")
+                    site_name = link_element.inner_text().strip()
+                    site_url = link_element.get_attribute("href")
 
-          if site_url.startswith("#"):
-            site_url = f"{self.base_url}/breaches{site_url}"
-          elif not site_url.startswith("http"):
-            site_url = f"{self.base_url}/{site_url.lstrip('/')}"
+                    if site_url.startswith("#"):
+                        site_url = f"{self.base_url}/breaches{site_url}"
+                    elif not site_url.startswith("http"):
+                        site_url = f"{self.base_url}/{site_url.lstrip('/')}"
 
-          breach_size_element = row.query_selector("td.d-xl-table-cell:nth-of-type(2)")
-          breach_size = breach_size_element.inner_text().strip() if breach_size_element else "Unknown"
+                    breach_size_element = row.query_selector("td.d-xl-table-cell:nth-of-type(2)")
+                    breach_size = breach_size_element.inner_text().strip() if breach_size_element else "Unknown"
 
-          date_indexed_element = row.query_selector("td.d-xl-table-cell:nth-of-type(3)")
-          date_indexed = date_indexed_element.inner_text().strip() if date_indexed_element else "Unknown"
+                    date_indexed_element = row.query_selector("td.d-xl-table-cell:nth-of-type(3)")
+                    date_indexed = date_indexed_element.inner_text().strip() if date_indexed_element else "Unknown"
 
-          dropdown_button = row.query_selector("td .dropdown a")
-          if dropdown_button:
-            dropdown_button.click()
+                    dropdown_button = row.query_selector("td .dropdown a")
+                    if dropdown_button:
+                        dropdown_button.click()
 
-            info_link = row.query_selector("td .dropdown-menu a[data-bs-toggle='modal']")
-            if info_link:
-              info_link.click()
+                        info_link = row.query_selector("td .dropdown-menu a[data-bs-toggle='modal']")
+                        if info_link:
+                            info_link.click()
 
-              page.wait_for_selector('h5.modal-title#modalTitle')
-              page.wait_for_selector("#breachModal .modal-body")
+                            page.wait_for_selector('h5.modal-title#modalTitle')
+                            page.wait_for_selector("#breachModal .modal-body")
 
-              modal_content_element = page.query_selector("#breachModal .modal-body")
-              start = time.time()
-              while time.time() - start < 5:
-                if page.query_selector("#breachModal .modal-body").inner_text() != m_prev_content:
-                  break
-                page.wait_for_timeout(200)
+                            modal_content_element = page.query_selector("#breachModal .modal-body")
+                            start = time.time()
+                            while time.time() - start < 5:
+                                if page.query_selector("#breachModal .modal-body").inner_text() != m_prev_content:
+                                    break
+                                page.wait_for_timeout(200)
 
-              m_prev_content = page.query_selector("#breachModal .modal-body").inner_text()
-              modal_content = modal_content_element.inner_text() if modal_content_element else "No data available"
-              modal_content_cleaned = []
-              for line in modal_content.split("\n"):
-                stripped_line = line.strip()
-                if stripped_line:
-                  modal_content_cleaned.append(stripped_line)
+                            m_prev_content = page.query_selector("#breachModal .modal-body").inner_text()
+                            modal_content = modal_content_element.inner_text() if modal_content_element else "No data available"
+                            modal_content_cleaned = []
+                            for line in modal_content.split("\n"):
+                                stripped_line = line.strip()
+                                if stripped_line:
+                                    modal_content_cleaned.append(stripped_line)
 
-              modal_content_cleaned = "\n".join(modal_content_cleaned)
+                            modal_content_cleaned = "\n".join(modal_content_cleaned)
 
-              ref_html = helper_method.extract_refhtml(
-                site_name, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                            ref_html = helper_method.extract_refhtml(
+                                site_name,
+                                self.invoke_db,
+                                REDIS_COMMANDS,
+                                CUSTOM_SCRIPT_REDIS_KEYS,
+                                RAW_PATH_CONSTANTS,
+                                page)
 
-              cleaned = " - ".join(
-                line.strip() for line in modal_content_cleaned.strip().splitlines() if line.strip())
+                            cleaned = " - ".join(
+                                line.strip() for line in modal_content_cleaned.strip().splitlines() if line.strip())
 
-              card_data = leak_model(
-                m_ref_html=ref_html,
-                m_screenshot=helper_method.get_screenshot_base64(page, site_name, self.base_url),
-                m_title=site_name,
-                m_url=site_url,
-                m_base_url=self.base_url,
-                m_content=modal_content_cleaned + " " + self.base_url + " " + site_url,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=cleaned,
-                m_data_size=breach_size,
-                m_leak_date=datetime.strptime(date_indexed, '%Y-%m-%d').date(),
-                m_content_type=["leaks"], )
+                            card_data = leak_model(
+                                m_ref_html=ref_html,
+                                m_screenshot=helper_method.get_screenshot_base64(page, site_name, self.base_url),
+                                m_title=site_name,
+                                m_url=site_url,
+                                m_base_url=self.base_url,
+                                m_content=modal_content_cleaned + " " + self.base_url + " " + site_url,
+                                m_network=helper_method.get_network_type(self.base_url),
+                                m_important_content=cleaned,
+                                m_data_size=breach_size,
+                                m_leak_date=datetime.strptime(date_indexed, '%Y-%m-%d').date(),
+                                m_content_type=["leaks"], )
 
-              entity_data = entity_model(
-                m_scrap_file=self.__class__.__name__, m_company_name=site_name, m_team="leak lookup")
+                            entity_data = entity_model(
+                                m_scrap_file=self.__class__.__name__, m_company_name=site_name, m_team="leak lookup")
 
-              self.append_leak_data(card_data, entity_data)
-              error_count = 0
+                            self.append_leak_data(card_data, entity_data)
+                            error_count = 0
 
-              close_button = page.query_selector("#breachModal .btn-close")
-              if close_button:
-                close_button.click()
+                            close_button = page.query_selector("#breachModal .btn-close")
+                            if close_button:
+                                close_button.click()
 
-        except Exception as ex:
-          log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-          error_count += 1
-          if error_count >= 3:
-            break
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                    error_count += 1
+                    if error_count >= 3:
+                        break
 
-      next_button = page.query_selector("#datatables-indexed-breaches_next a.page-link")
-      if next_button and "disabled" not in next_button.get_attribute("class"):
-        next_button.click()
-        page.wait_for_selector("table tr")
-        current_page += 1
-      else:
-        break
+            next_button = page.query_selector("#datatables-indexed-breaches_next a.page-link")
+            if next_button and "disabled" not in next_button.get_attribute("class"):
+                next_button.click()
+                page.wait_for_selector("table tr")
+                current_page += 1
+            else:
+                break

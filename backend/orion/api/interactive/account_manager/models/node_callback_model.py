@@ -8,35 +8,35 @@ from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
 
 
 class UserDataModel(BaseModel):
-  email: str
-  twofa_enabled: bool
-  username: str
-  role: user_role
-  status: UserStatus
-  subscription: bool
-  verificationDate: Optional[datetime]
-  license: List[LicenseName]
-  image: Optional[str] = None
+    email: str
+    twofa_enabled: bool
+    username: str
+    role: user_role
+    status: UserStatus
+    subscription: bool
+    verificationDate: Optional[datetime]
+    license: List[LicenseName]
+    image: Optional[str] = None
 
 
 class TenantDataModel(BaseModel):
-  id: str
-  name: str
-  phone: str
-  country: str
-  city: str
-  postalCode: str
-  taxId: str
-  hasOnboarding: bool
-  isDefault: bool
-  userId: str
-  licenses: list[str]
-  assignedQuota: str
-  quotaExceeded: bool
-  image: Optional[str] = None
+    id: str
+    name: str
+    phone: str
+    country: str
+    city: str
+    postalCode: str
+    taxId: str
+    hasOnboarding: bool
+    isDefault: bool
+    userId: str
+    licenses: list[str]
+    assignedQuota: str
+    quotaExceeded: bool
+    image: Optional[str] = None
 
 
 class NodeCallbackModel(BaseModel):
-  user: UserDataModel
-  tenant: TenantDataModel
-  alerts: List[AlertModel] = Field(default_factory=list)
+    user: UserDataModel
+    tenant: TenantDataModel
+    alerts: List[AlertModel] = Field(default_factory=list)

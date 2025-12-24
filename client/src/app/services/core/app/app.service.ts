@@ -68,38 +68,41 @@ export class AppService {
   }
 
   async loadSession(): Promise<void> {
-    try {
-      const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
-      if (session) this.userSessionData.set(session);
-    } catch {
-      this.userSessionData.set({
-        user: {
-          email: '',
-          twofa_enabled: false,
-          username: '',
-          role: '',
-          status: '',
-          subscription: false,
-          verificationDate: '',
-          license: []
-        },
-        tenant: {
-          id: '',
-          name: '',
-          isDefault: false,
-          phone: '',
-          hasOnboarding: false,
-          country: '',
-          city: '',
-          postalCode: '',
-          taxId: '',
-          userId: '',
-          licenses: [],
-          assignedQuota: '0',
-          quotaExceeded: false
-        },
-        alerts: []
-      });
+    let token = localStorage.getItem('token');
+    if(token){
+      try {
+        const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
+        if (session) this.userSessionData.set(session);
+      } catch {
+        this.userSessionData.set({
+          user: {
+            email: '',
+            twofa_enabled: false,
+            username: '',
+            role: '',
+            status: '',
+            subscription: false,
+            verificationDate: '',
+            license: []
+          },
+          tenant: {
+            id: '',
+            name: '',
+            isDefault: false,
+            phone: '',
+            hasOnboarding: false,
+            country: '',
+            city: '',
+            postalCode: '',
+            taxId: '',
+            userId: '',
+            licenses: [],
+            assignedQuota: '0',
+            quotaExceeded: false
+          },
+          alerts: []
+        });
+      }
     }
   }
 
