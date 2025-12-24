@@ -39,13 +39,9 @@ jobs:
           set -euo pipefail
           echo "=== checking client build folder ==="
           if [ -d "client/build" ]; then
-            echo "SUCCESS: client/build exists"
             find client/build -maxdepth 4 -type d -print || true
             find client/build -maxdepth 2 -type f -print | head -n 200 || true
           else
-            echo "FAIL: client/build does not exist"
-            ls -la client || true
-            find client -maxdepth 3 -type d \( -name build -o -name dist -o -name public \) -print || true
             exit 1
           fi
 
@@ -72,13 +68,11 @@ jobs:
             if found:
               break
           if not found:
-            print("No compose file found", file=sys.stderr)
             sys.exit(1)
           d = os.path.dirname(found)
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
             fp.write(f"dir={d}\n")
             fp.write(f"file={found}\n")
-          print(found)
           PY
 
       - env:
@@ -110,29 +104,13 @@ jobs:
 
       - run: |
           set -euo pipefail
-          echo "=== waiting for app (not 000 and not 502) ==="
           for i in $(seq 1 180); do
             code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080 || echo 000)"
-            echo "http_code=$code"
             if [ "$code" != "000" ] && [ "$code" != "502" ]; then
-              echo "READY"
               exit 0
-            fi
-            if [ $((i % 12)) -eq 0 ]; then
-              docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}' || true
-              docker logs trusted-web-main --tail=200 || true
-              docker logs trusted-web-nginx --tail=200 || true
             fi
             sleep 5
           done
-          echo "FAIL: app not ready"
-          docker ps --format 'table {{.Names}}\t{{.Ports}}\t{{.Status}}' || true
-          docker logs trusted-web-main --tail=5000 || true
-          docker logs trusted-web-nginx --tail=5000 || true
-          docker logs trusted-web-elastic --tail=5000 || true
-          docker logs trustly-web-mongodb --tail=5000 || true
-          docker logs trusted-web-arangodb --tail=5000 || true
-          docker logs trusted-web-redis --tail=5000 || true
           exit 1
 
       - run: |
@@ -151,27 +129,6 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: client/coverage/lcov.info
-
-      - run: |
-          set -euo pipefail
-          npm install -g lighthouse@11.7.1
-
-      - run: |
-          set -euo pipefail
-          mkdir -p lighthouse-results
-          lighthouse http://127.0.0.1:8080 \
-            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
-            --output=json \
-            --output=html \
-            --output-path=./lighthouse-results/lighthouse-report \
-            --only-categories=performance,accessibility,best-practices,seo
-
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-results
-          path: lighthouse-results/
-          retention-days: 7
 
       - if: always()
         uses: actions/upload-artifact@v4
