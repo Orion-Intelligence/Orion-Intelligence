@@ -21,7 +21,7 @@
                 <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
                 <div *ngIf="canExportstix()" class="vr report-menu-divider"></div>
                 <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
-                    <img alt="scan" height="20" src="assets/images/shared/bin.svg" width="20" />
+                    <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" />
                 </button>
                 <div class="vr report-menu-divider"></div>
                 <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option">
@@ -39,7 +39,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Total IOC</span>
-                <img src="/assets/images/shared/info-light.svg" alt="Critical Alert"
+                <img src="/assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                     class="user-homepage_alerts-card-icon" appTooltip="Total unique IOCs found in alerts" />
             </div>
             <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(filteredAlerts)}}</span>
@@ -48,7 +48,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Newly Found</span>
-                <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                     class="user-homepage_alerts-card-icon" appTooltip="Total non seen alert report" />
             </div>
             <span class="category_report_summary-card-value">{{getNewAlertCount()}}</span>
@@ -57,7 +57,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Last Update</span>
-                <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                     class="user-homepage_alerts-card-icon" appTooltip="Alerts update on" />
             </div>
             <span class="category_report_summary-card-value">{{getLatestDetectedDate(filteredAlerts)}}</span>
@@ -66,7 +66,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Sources</span>
-                <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                     class="user-homepage_alerts-card-icon" appTooltip="Total sources found in alerts" />
             </div>
             <span class="category_report_summary-card-value">{{countUniqueSources(filteredAlerts)}}</span>

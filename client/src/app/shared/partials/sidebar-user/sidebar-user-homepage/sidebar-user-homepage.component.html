@@ -1,5 +1,5 @@
 <div *ngIf="!isAdmin() && !appService.userSessionData().tenant.isDefault; else showAdmin">
-  <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst();else showFree">
+    <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst();else showFree">
         <div class="ioc-dashboard-content-wrapper">
             <div *ngIf="alertService.isAlertScanLoading()">
                 <app-alert-scan-loading></app-alert-scan-loading>
@@ -12,15 +12,15 @@
                     <div class="btn-group report-menu-option-container mr-0">
                         <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true"
                             appTooltip="Print Alerts" class="p-0 report-menu-option">
-                            <img src="assets/images/shared/theme/print.svg" height="25"  alt="print"/>
+                            <img src="assets/images/shared/theme/print.svg" height="25" alt="print" />
                         </button>
                         <div class="vr report-menu-divider"></div>
                         <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
-                            <img alt="flush" height="20" ngSrc="assets/images/shared/bin.svg" width="20" />
+                            <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" />
                         </button>
                         <div class="vr report-menu-divider"></div>
                         <button (click)="scanIOCs()" appTooltip="scan all" class="p-0 report-menu-option">
-                            <img alt="scan" height="20" ngSrc="assets/images/sidebar/scanner.svg" width="20" />
+                            <img alt="scan" height="20" ngSrc="assets/images/sidebar/theme/scanner.svg" width="20" />
                         </button>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                             <div class="user-homepage_alerts-card-count">
                                 {{ criticalRisks }}
                             </div>
-                            <img src="assets/images/shared/info-light.svg" alt="Critical Alert"
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                                 class="user-homepage_alerts-card-icon" appTooltip="Total critical alert types" />
                         </div>
                         <div class="user-homepage_alerts-card-label">
@@ -63,7 +63,7 @@
                     <div class="user-homepage_alerts-card high">
                         <div class="user-homepage_alerts-card-content">
                             <div class="user-homepage_alerts-card-count">{{ highRisks }}</div>
-                            <img src="assets/images/shared/info-light.svg" alt="Critical Alert"
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                                 class="user-homepage_alerts-card-icon" appTooltip="Total high risk alert types" />
                         </div>
                         <div class="user-homepage_alerts-card-label">High Risk Alerts</div>
@@ -72,7 +72,7 @@
                     <div class="user-homepage_alerts-card medium">
                         <div class="user-homepage_alerts-card-content">
                             <div class="user-homepage_alerts-card-count">{{ mediumRisks }}</div>
-                            <img src="assets/images/shared/info-light.svg" alt="Critical Alert"
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                                 class="user-homepage_alerts-card-icon" appTooltip="Total medium risk alert types" />
                         </div>
                         <div class="user-homepage_alerts-card-label">Medium Risk</div>
@@ -81,7 +81,7 @@
                     <div class="user-homepage_alerts-card low">
                         <div class="user-homepage_alerts-card-content">
                             <div class="user-homepage_alerts-card-count">{{ lowRisks }}</div>
-                            <img src="assets/images/shared/info-light.svg" alt="Critical Alert"
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert"
                                 class="user-homepage_alerts-card-icon" appTooltip="Total low rish alert types" />
                         </div>
                         <div class="user-homepage_alerts-card-label">Low Risk</div>
@@ -98,8 +98,7 @@
                             <div class="user-homepage_cards-card-header">
 
                                 <div class="user-homepage_cards-card-header-title">
-                                    <img alt="icon"
-                                        src="assets/images/shared/theme/alert-categories-icon.svg">
+                                    <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg">
                                     {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
                                 </div>
 

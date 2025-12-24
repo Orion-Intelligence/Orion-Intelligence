@@ -74,7 +74,6 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
     const theme = this.isDarkMode ? 'dark-theme' : 'light-theme';
 
     this.appStorage.setTheme(theme);
@@ -88,14 +87,15 @@ export class AccountSettingsComponent implements OnInit {
           ...state.user,
           preferences: {
             ...(state.user.preferences || {}),
-            theme: theme
+            theme
           }
         }
       };
-    })
+    });
 
     this.applyTheme();
   }
+
   toggleTwoFa() {
     this.userSessionData.user.twofa_enabled = !this.userSessionData.user.twofa_enabled
     this.updateUser()

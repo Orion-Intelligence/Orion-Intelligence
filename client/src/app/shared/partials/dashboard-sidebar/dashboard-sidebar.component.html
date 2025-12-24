@@ -65,7 +65,7 @@
     <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.SCANNER"
-        [icon]="'assets/images/sidebar/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
+        [icon]="'assets/images/sidebar/theme/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
         [title]="'Web Scans'"></app-dashboard-sidebar-items>
     </ng-container>
     <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
@@ -222,7 +222,7 @@
     <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.SCANNER"
-        [icon]="'assets/images/sidebar/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
+        [icon]="'assets/images/sidebar/theme/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
         [selectionStore]="selectionStore" [title]="'Scanner'">
       </app-dashboard-sidebar-collapsed>
     </ng-container>
