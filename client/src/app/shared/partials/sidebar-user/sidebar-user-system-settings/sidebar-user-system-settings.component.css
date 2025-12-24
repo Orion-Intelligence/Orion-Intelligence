@@ -19,3 +19,15 @@
     margin-bottom: 6px;
     font-weight: 400;
 }
+
+@keyframes editFieldIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

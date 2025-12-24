@@ -57,7 +57,7 @@
   height: 38px;
   border-radius: 50%;
   border: 3px solid rgb(248 250 252 / 18%);
-  border-top-color: var(#57a5eb);
+  border-top-color: var(--color-blue-640);
   animation: spin 0.8s linear infinite;
 }
 
@@ -77,12 +77,10 @@
   width: 40%;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgb(87 165 235 / 25%),
-    rgb(87 165 235 / 95%),
-    rgb(87 165 235 / 25%)
-  );
+  background: linear-gradient(90deg,
+      rgb(87 165 235 / 25%),
+      rgb(87 165 235 / 95%),
+      rgb(87 165 235 / 25%));
   animation: indeterminate 1.2s ease-in-out infinite;
 }
 

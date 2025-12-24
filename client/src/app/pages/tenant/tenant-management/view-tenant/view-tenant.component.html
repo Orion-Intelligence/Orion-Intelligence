@@ -36,7 +36,7 @@
 
                       <td>
                         <a class="list__table-url text-decoration-none">
-                          {{ tenant.companyName || tenant.company || '-' }}
+                          {{ tenant.companyName || tenant.name || '-' }}
                         </a>
                       </td>
 
@@ -68,7 +68,8 @@
                       </td>
 
                       <td class="text-center col-action">
-                        <img (click)="tenant._expanded = !tenant._expanded" class="cursor-pointer" src="assets/images/shared/edit.svg" width="20" alt="edit"/>
+                        <img (click)="tenant._expanded = !tenant._expanded" class="cursor-pointer"
+                          src="assets/images/shared/edit.svg" width="20" alt="edit" />
 
                       </td>
                     </tr>
@@ -193,22 +194,22 @@
 
                               <div class="tenant-edit-control field-equal">
                                 <div class="dropdown w-100">
-                                  <button
-                                    aria-expanded="false"
+                                  <button aria-expanded="false"
                                     class="btn dropdown-toggle sidebar_input form-select form-select-sm tenant-input w-100 text-start d-flex justify-content-between align-items-center"
-                                    data-bs-toggle="dropdown"
-                                    type="button">
+                                    data-bs-toggle="dropdown" type="button">
                                     {{ getStatusLabel(tenant.status) }}
                                   </button>
 
                                   <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow rounded-3">
                                     <li>
-                                      <a class="dropdown-item py-0 align-items-center" (click)="tenant.status = TenantStatus.ACTIVE">Active</a>
+                                      <a class="dropdown-item py-0 align-items-center"
+                                        (click)="tenant.status = TenantStatus.ACTIVE">Active</a>
                                     </li>
                                     <li class="dropdown-divider m-0 mx-3"></li>
 
                                     <li>
-                                      <a class="dropdown-item py-0 align-items-center" (click)="tenant.status = TenantStatus.DISABLE">Disable</a>
+                                      <a class="dropdown-item py-0 align-items-center"
+                                        (click)="tenant.status = TenantStatus.DISABLE">Disable</a>
                                     </li>
                                     <li class="dropdown-divider m-0 mx-3"></li>
                                   </ul>
