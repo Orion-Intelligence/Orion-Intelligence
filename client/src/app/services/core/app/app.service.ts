@@ -67,9 +67,9 @@ export class AppService {
     this.appStorageService.setupWatcher(this.configData);
   }
 
-  async loadSession(): Promise<void> {
+  async loadSession(forced = false): Promise<void> {
     let token = localStorage.getItem('token');
-    if(token){
+    if(token || forced){
       try {
         const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
         if (session) this.userSessionData.set(session);

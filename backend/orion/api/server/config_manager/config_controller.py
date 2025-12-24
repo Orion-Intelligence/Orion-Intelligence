@@ -55,6 +55,7 @@ class config_controller:
             fresh_config = {record.key.value: record.value for record in records}
             logo_name = "logo.png"
             logo_file = self.SYSTEM_DIR / logo_name
+            fresh_config["ai_endpoint"] = "1"
             fresh_config["logo_url"] = (
                 f"/api/s/static/system/{logo_name}" if logo_name and logo_file.is_file() else "")
             return config_data(settings=fresh_config)

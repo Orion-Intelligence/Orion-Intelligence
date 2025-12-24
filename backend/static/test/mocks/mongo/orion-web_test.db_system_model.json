@@ -21,13 +21,6 @@
 },
 {
   "_id": {
-    "$oid": "68270cbd70740707bf4f2307"
-  },
-  "key": "telegram_allowed",
-  "value": "1"
-},
-{
-  "_id": {
     "$oid": "68270cc470740707bf4f2308"
   },
   "key": "api_allowed",

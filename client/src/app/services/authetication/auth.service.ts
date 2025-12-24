@@ -81,7 +81,9 @@ export class AuthService {
 
           this.setToken(response.access_token);
           this.startTokenRefresh();
-          this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+          this.appService.loadSession(true).then(() => {
+            this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+          });
         },
         error: (error) => {
           if (error?.error?.detail === 'Verification pending.') {

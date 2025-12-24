@@ -96,17 +96,19 @@
         </div>
         <div class="dashboard__search-status">
           <span class="dashboard__info-label">Status</span>
-          <div class="d-flex align-items-center">
-            <span
-              [ngClass]="{
-                'bg-success': isWithinDays(item.m_creation_date, 5),
-                'bg-warning': isWithinDays(item.m_creation_date, 10) && !isWithinDays(item.m_creation_date, 5),
-                'bg-danger': !isWithinDays(item.m_creation_date, 10)
-              }"
-              class="rounded-circle d-inline-block me-2 dashboard__status-dot">
-            </span>
-            <span class="dashboard__status-text">&nbsp;active</span>
-          </div>
+            <div class="d-flex align-items-center">
+              <span
+                [ngClass]="{
+                  'bg-success': isWithinDays(item.m_creation_date, 5),
+                  'bg-warning': isWithinDays(item.m_creation_date, 10) && !isWithinDays(item.m_creation_date, 5),
+                  'bg-danger': !isWithinDays(item.m_creation_date, 10)
+                }"
+                class="rounded-circle d-inline-block me-2 dashboard__status-dot">
+              </span>
+              <span class="dashboard__status-text">
+                {{ isWithinDays(item.m_creation_date, 5) ? 'active' : 'inactive' }}
+              </span>
+            </div>
         </div>
       </div>
 
