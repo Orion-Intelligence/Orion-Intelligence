@@ -143,6 +143,17 @@ class alert_job:
                     _url = result.get("m_app_url", "-")
                     _source = result.get("m_network", "-")
                     _content_types = result.get("m_content_type") or []
+                elif scan_type == "software-scanning":
+                    _title = result.get("m_app_name", "Software Match Found")
+                    _description = (
+                        f"Package ID: {result.get('m_package_id', 'N/A')}\n"
+                        f"Version: {result.get('m_version', 'N/A')}\n"
+                        f"Latest Date: {result.get('m_latest_date', 'N/A')}\n"
+                        f"Mod Features: {result.get('m_mod_features') or 'None'}"
+                    )
+                    _url = result.get("m_app_url", "-")
+                    _source = result.get("m_network", "-")
+                    _content_types = result.get("m_content_type") or []
                 else:
                     continue
 
@@ -266,7 +277,7 @@ class alert_job:
                                 scan_result = response.model_dump()
                             else:
                                 scan_result = {}
-
+                            
                             result_list = scan_result.get("result", [])
                             if result_list:
                                 await self._handle_dynamic_scanning_alert(
