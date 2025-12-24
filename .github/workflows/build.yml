@@ -148,7 +148,7 @@ jobs:
             --output=html \
             --output-path=./lighthouse-results/lighthouse-report \
             --only-categories=performance,accessibility,best-practices,seo || true
-          
+
       - if: always()
         uses: actions/upload-artifact@v4
         with:
