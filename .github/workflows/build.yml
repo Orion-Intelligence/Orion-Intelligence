@@ -110,11 +110,12 @@ jobs:
 
       - run: |
           set -euo pipefail
-          echo "=== waiting for app (not 000 and not 502) ==="
+          echo "=== waiting for app ==="
           for i in $(seq 1 180); do
-            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080 || echo 000)"
-            echo "http_code=$code"
-            if [ "$code" != "000" ] && [ "$code" != "502" ]; then
+            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/ || echo 000)"
+            body="$(curl -s http://127.0.0.1:8080/ || true)"
+            echo "http_code=$code body_len=${#body}"
+            if [ "$code" = "200" ] && echo "$body" | grep -qiE '<app-root|<div id="root"'; then
               echo "READY"
               exit 0
             fi
@@ -143,7 +144,7 @@ jobs:
           set -euo pipefail
           mkdir -p lighthouse-results
           lighthouse http://127.0.0.1:8080 \
-            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
+            --chrome-flags="--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1365,768" \
             --output=json \
             --output=html \
             --output-path=./lighthouse-results/lighthouse-report \
