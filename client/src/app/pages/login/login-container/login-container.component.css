@@ -168,7 +168,7 @@
 }
 
 .header-link {
-  color: #55799d95;
+  color: #000000;
   font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -313,7 +313,7 @@ input.login-input:-webkit-autofill:active {
 }
 
 .footer-copyright p {
-  color: #55799d95;
+  color: #000000;
   font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
