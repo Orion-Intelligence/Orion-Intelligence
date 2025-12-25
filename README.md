@@ -8,8 +8,12 @@
 [![PageSpeed Insights](https://img.shields.io/badge/PageSpeed%20Insights-100%25-brightgreen)](https://pagespeed.web.dev/analysis/https-orion-genesistechnologies-org/hfe5h3u485?form_factor=desktop)
 [![Lighthouse Performance](https://img.shields.io/badge/Lighthouse%20Performance-Run%20Artifacts-blue)](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/build.yml)
 
-![homepage](https://github.com/user-attachments/assets/37fcf444-40be-46c9-8bd8-45a22d824141)
-[![Uptime Status](https://img.shields.io/uptimerobot/status/m794706490-XXXXXXXXXX.svg)](https://stats.uptimerobot.com/TAPnbEAyUD)
+<img width="5121" height="2909" alt="CYBERATTACK HITS FRENCH INTERIOR(3)" src="https://github.com/user-attachments/assets/4266afc8-1d52-41ac-a2fe-b445e1b6b848" />
+
+<br><br>
+
+![Web App](https://img.shields.io/uptimerobot/status/m802042352-33d9c489257791a41a505a06?label=web%20app&logo=googlechrome)
+![Docs](https://img.shields.io/uptimerobot/status/m802042420-50c04caf485479764330029b?label=docs&logo=readthedocs)
 
 # Orion Platform
 
