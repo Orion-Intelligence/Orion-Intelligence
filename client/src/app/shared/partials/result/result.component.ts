@@ -238,7 +238,9 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   setFilterOverlay(newValue: boolean) {
-    this.showFiltersOverlay = newValue;
+    if(!this.authService.getIsMobileDemo()){
+      this.showFiltersOverlay = newValue;
+    }
   }
 
   reloadFilter() {
