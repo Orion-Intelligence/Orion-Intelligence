@@ -138,7 +138,7 @@
 }
 
 .login-container__forgot {
-  color: #5B7FA6;
+  color: #A0B8D1;
   font-weight: 400;
 }
 
@@ -168,7 +168,7 @@
 }
 
 .header-link {
-  color: #5B7FA6;
+  color: #a0b8d1;
   font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -227,7 +227,7 @@
   font-weight: 400;
   font-family: Inter, sans-serif;
   background-color: #fff;
-  border: 1px solid #5B7FA6;
+  border: 1px solid #a0b8d1;
   border-radius: 8px;
   padding: 0 16px 0 42px;
   box-sizing: border-box;
@@ -312,7 +312,7 @@ input.login-input:-webkit-autofill:active {
 }
 
 .footer-copyright p {
-  color: #5B7FA6;
+  color: #a0b8d1;
   font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
