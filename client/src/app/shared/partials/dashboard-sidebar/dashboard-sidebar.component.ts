@@ -13,7 +13,7 @@ import {
 
 } from '../../constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { filter, take } from 'rxjs';
+import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
 import { GeneralCallbackModel } from '../../model/results/general/general.callback.model';
@@ -72,6 +72,12 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   private handleProfileRoute(url: string) {
     if (
+      this.appService.userSessionData().user.role == "demo"
+    ) {
+      this.selectionStore.setSelectedSection('Strategic');
+      this.selectionStore.setSelectedOption('All');
+    }
+    else if (
       url.startsWith('/dashboard/profile/consolidated/') ||
       url.startsWith('/dashboard/profile/homepage') ||
       url.startsWith('/dashboard/profile/alerts/general') ||
@@ -188,7 +194,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       );
     }
 
-    if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
+    if ( this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(
         c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS
@@ -206,6 +212,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
   isAdmin(): boolean {
     return this.appService.userSessionData().user.role === 'admin';
+  }
+  isDemo(): boolean {
+    return this.appService.userSessionData().user.role === 'demo';
   }
   isMember(): boolean {
     return this.appService.userSessionData().user.role === 'member';

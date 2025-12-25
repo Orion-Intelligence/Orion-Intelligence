@@ -207,13 +207,14 @@ class TenantManager:
                 raise HTTPException(status_code=400, detail="Username already exist")
 
             email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
-            if not re.match(email_pattern, email):
+            if not re.match(email_pattern, email) and not data.role in ["demo"]:
                 raise HTTPException(status_code=400, detail="Invalid email format")
 
             existing_user = await engine.find_one(
                 db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
             existing_mail = await engine.find_one(db_user_account, (db_user_account.email == email))
-            if existing_user or existing_mail:
+
+            if (existing_user or existing_mail) and data.role != "demo":
                 raise HTTPException(status_code=400, detail="Username or email already exists")
 
             if password.startswith("$2b$") and len(password) >= 60:
@@ -238,6 +239,11 @@ class TenantManager:
 
             if tenant.is_default == False and tenant.user_quota is not None and (users_count + 1) > tenant.user_quota:
                 raise HTTPException(status_code=400, detail="User allocated quota exceeded")
+
+            if data.role in ["demo"] and current_user.role not in ["admin"]:
+                await AuditLogManager.get_instance().register(
+                    str(tenant_uuid), str(current_user.id), "User creation denied")
+                raise HTTPException(status_code=401, detail="You are not allowed to manage this user")
 
             dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
             enc = Fernet(dek)

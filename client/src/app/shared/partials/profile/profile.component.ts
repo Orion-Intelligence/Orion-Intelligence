@@ -118,6 +118,10 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     const currentRole = this.appService.userSessionData().user.role;
     return currentRole === 'admin';
   }
+  isDemo(): boolean {
+    const currentRole = this.appService.userSessionData().user.role;
+    return currentRole === 'demo';
+  }
   isMember(): boolean {
     const currentRole = this.appService.userSessionData().user.role;
     return currentRole === 'member';

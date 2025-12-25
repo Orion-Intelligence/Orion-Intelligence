@@ -73,6 +73,9 @@ export class SidebarUserHomepageComponent implements OnInit {
   isAnalyst(): boolean {
     return this.appService.userSessionData().user.role === 'analyst';
   }
+  isDemo(): boolean {
+    return this.appService.userSessionData().user.role === 'demo';
+  }
   isMember(): boolean {
     return this.appService.userSessionData().user.role === 'member';
   }

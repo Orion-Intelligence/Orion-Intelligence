@@ -56,7 +56,7 @@ export class AddTenantComponent implements OnInit {
     if (!this.validateUsername()) {
       return;
     }
-    if (!this.model.email) {
+    if (!this.model.email && this.model.role != "demo") {
       this.errorText = 'Email is required';
       return;
     }

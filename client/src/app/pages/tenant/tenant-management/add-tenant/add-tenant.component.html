@@ -32,6 +32,7 @@
                         <ng-container *ngIf="isAdmin; else nonAdminRoles">
                             <option [ngValue]="'analyst'">Analyst</option>
                             <option [ngValue]="'member'">Member</option>
+                            <option [ngValue]="'demo'">Demo</option>
                         </ng-container>
                         <ng-template #nonAdminRoles>
                             <option [ngValue]="'analyst'">Analyst</option>

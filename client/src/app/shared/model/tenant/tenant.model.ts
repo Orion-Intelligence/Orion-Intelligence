@@ -54,7 +54,7 @@ export interface TenantTeamModel {
   username: string;
   email: string;
   password: string;
-  role: 'member' | 'analyst';
+  role: 'member' | 'analyst' | 'demo';
   status: 'active' | 'disable';
   subscription: boolean;
   licenses?: string[] | null;

@@ -32,7 +32,7 @@ tenant_routes = APIRouter(
     response_description="Tenant information for the current user.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
+    dependencies=[Depends(role_required([user_role.DEMO, user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def get_tenant(current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_tenant(current_user)
 
@@ -197,7 +197,7 @@ async def create_tenant_user(data: user_model, current_user=Depends(get_current_
     response_description="Audit log entries matching the filter.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.DEMO])),
         Depends(license_required("maintainer"))], )
 async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=Depends(get_current_user)):
     return await AuditLogManager.get_instance().get(param, current_user)

@@ -151,6 +151,11 @@ class AccountManager:
                 str(current_user.tenant_uuid), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="You are not allowed to update this user")
 
+        if user.role in ["demo"] and current_user.role not in ["admin"]:
+            await AuditLogManager.get_instance().register(
+                str(user.tenant_uuid), str(current_user.id), "User update denied")
+            raise HTTPException(status_code=401, detail="You are not allowed to manage this user")
+
         if user.role in ["admin", "crawl"]:
             await AuditLogManager.get_instance().register(
                 str(user.tenant_uuid), str(current_user.id), "User update denied")

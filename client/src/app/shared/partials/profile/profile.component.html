@@ -37,7 +37,7 @@
       <span>Manage IOC’s</span>
     </li>
 
-    <li *ngIf="!isAdmin()" class="profile-item" (click)="changePassword()">
+    <li *ngIf="!isAdmin() && !isDemo()" class="profile-item" (click)="changePassword()">
       <img src="assets/images/shared/forgot.svg" alt="Change Password" />
       <span>Change Password</span>
     </li>

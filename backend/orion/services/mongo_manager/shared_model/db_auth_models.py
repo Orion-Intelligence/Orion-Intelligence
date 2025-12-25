@@ -18,6 +18,7 @@ class user_role(str, Enum):
     CRAWLER = "crawler"
     MEMBER = "member"
     ANALYST = "analyst"
+    DEMO = "demo"
 
 
 class UserStatus(str, Enum):

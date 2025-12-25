@@ -10,7 +10,7 @@
 
 
   <ul class="sidebar__items">
-    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" *ngIf="!isDemo()"
       (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
       [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
       [title]="this.appService.userSessionData().user.username">
