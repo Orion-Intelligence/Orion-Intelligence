@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, Body, Response, Request, HTTPException, 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from starlette.responses import JSONResponse
 
-from configs.app_dependency import get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager
@@ -48,7 +47,7 @@ async def token_demo(response: Response = None):
     DEMO_USERNAME = env_handler.get_instance().env("DEMO_USERNAME")
     DEMO_PASSWORD = env_handler.get_instance().env("DEMO_PASSWORD")
 
-    result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD)
+    result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD, True)
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
 
@@ -82,15 +81,12 @@ async def refresh_token(request: Request, response: Response = None):
 
 
 @auth_router.post("/api/logout")
-async def logout(request: Request, current_user=Depends(get_current_user)):
-    if current_user.role not in ["demo"]:
-        m_token = request.cookies.get(ACCESS_COOKIE)
-        session_manager.logout_user(ptoken=m_token)
-        resp = JSONResponse(content={"detail": "Logged out"})
-        resp.delete_cookie(ACCESS_COOKIE, path="/")
-        return resp
-    else:
-        return {}
+async def logout(request: Request):
+    token = request.cookies.get(ACCESS_COOKIE)
+    session_manager.logout_user(ptoken=token)
+    resp = JSONResponse(content={"detail": "Logged out"})
+    resp.delete_cookie(ACCESS_COOKIE, path="/")
+    return resp
 
 
 @auth_router.post("/api/signup")

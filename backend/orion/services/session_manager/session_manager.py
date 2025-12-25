@@ -56,12 +56,16 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
+            if payload.get("free") is True:
+                return user
+
             if not user:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
             session_id = payload.get("sid")
             if user.role in (user_role.CRAWLER):
                 return user
+
             if not session_id:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
@@ -69,13 +73,13 @@ class session_manager:
             redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
 
             if redis_sid is None:
-                if user.current_session_id != session_id and user.role not in (user_role.DEMO):
+                if user.current_session_id != session_id:
                     raise HTTPException(status_code=401, detail="Logged out due to multiple active sessions")
                 await self._redis.invoke_trigger(
                     REDIS_COMMANDS.S_SET_STRING,
                     [redis_key, session_id, self._session_ttl])
             else:
-                if redis_sid != user.current_session_id or redis_sid != session_id and user.role not in (user_role.DEMO):
+                if redis_sid != user.current_session_id or redis_sid != session_id:
                     raise HTTPException(status_code=401, detail="Logged out due to multiple active sessions")
                 await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._session_ttl])
 
@@ -110,24 +114,25 @@ class session_manager:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User access not found")
         return user_status
 
-    async def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
+    async def create_access_token(self, data: dict, expires_delta: timedelta | None = None, free=False):
         to_encode = data.copy()
         username = to_encode.get("sub")
 
-        if expires_delta is None:
-            expires_delta = timedelta(minutes=30)
+        if not free:
+            if expires_delta is None:
+                expires_delta = timedelta(minutes=30)
 
         user = None
         if username:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
 
-        if user and user.role not in (user_role.CRAWLER) and expires_delta > timedelta(minutes=30):
+        if not free and user and user.role not in (user_role.CRAWLER) and expires_delta > timedelta(minutes=30):
             expires_delta = timedelta(minutes=30)
 
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta if not free else None
 
         session_id = None
-        if user and user.role not in (user_role.CRAWLER):
+        if user and user.role not in (user_role.CRAWLER) and not free:
             session_id = secrets.token_urlsafe(32)
             user.current_session_id = session_id
             await self._engine.save(user)
@@ -136,8 +141,11 @@ class session_manager:
 
         if session_id:
             to_encode.update({"exp": expire.timestamp(), "sid": session_id})
-        else:
+        elif not free:
             to_encode.update({"exp": expire.timestamp()})
+
+        if free:
+            to_encode.update({"free": True})
 
         token = jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
         role = await self.get_current_role(token)
@@ -205,6 +213,9 @@ class session_manager:
                 CONSTANTS.S_AUTH_SECRET_KEY,
                 algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
                 options={"verify_exp": True}, )
+            if payload.get("free") is True:
+                return {"access_token": token, "token_type": "bearer"}
+
             username = payload.get("sub")
             if not username:
                 raise HTTPException(status_code=401, detail="Invalid token")
