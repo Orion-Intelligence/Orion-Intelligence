@@ -10,6 +10,7 @@
 
 <img width="5122" height="2922" alt="CYBERATTACK HITS FRENCH INTERIOR" src="https://github.com/user-attachments/assets/a92f869c-3bfc-4e04-8e06-f1e8aa1b64f5" />
 
+<br>
 ![Web App](https://img.shields.io/uptimerobot/status/m802042352-33d9c489257791a41a505a06?label=web%20app&logo=googlechrome)
 ![Docs](https://img.shields.io/uptimerobot/status/m802042420-50c04caf485479764330029b?label=docs&logo=readthedocs)
 
