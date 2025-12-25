@@ -35,7 +35,7 @@
                 required type="password" />
             </div>
 
-            <a (click)="goToForgot()" class="reset-password">Reset password?</a>
+            <div (click)="goToForgot()" class="reset-password">Reset password?</div>
 
             <div *ngIf="errorMessage == 'verification pending'" class="d-flex align-items-center justify-content-between mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
               <span class="text-start"><b>{{ errorMessage }}</b></span>
@@ -56,7 +56,7 @@
           </form>
 
           <p class="signup-text">
-            Don't have an account? <a (click)="goToSignUp()" class="signup-link cursor-pointer">Sign Up</a>
+            Don't have an account? <div (click)="goToSignUp()" class="signup-link cursor-pointer">Sign Up</div>
           </p>
         </div>
       </div>

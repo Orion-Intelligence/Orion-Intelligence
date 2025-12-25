@@ -14,6 +14,7 @@ class ResourceManager:
         self.USER_DIR = self.BASE_DIR / "static" / "resource" / "profile"
         self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "tenant"
         self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
+        self.ROBOTS_FILE = self.BASE_DIR / "static" / "robots.txt"
 
         self.USER_DIR.mkdir(parents=True, exist_ok=True)
         self.TENANT_DIR.mkdir(parents=True, exist_ok=True)
@@ -107,3 +108,12 @@ class ResourceManager:
             image_path.unlink()
 
         return {"system_image": "deleted"}
+
+    async def get_robots_txt(self):
+        if not self.ROBOTS_FILE.is_file():
+            raise HTTPException(status_code=404, detail="robots.txt not found")
+
+        return FileResponse(
+            self.ROBOTS_FILE,
+            media_type="text/plain"
+        )

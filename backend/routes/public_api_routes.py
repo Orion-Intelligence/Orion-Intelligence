@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from fastapi import Request, HTTPException
-
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 
@@ -37,3 +36,7 @@ async def get_user_resource(id: str):
 @public_routes.get("/api/s/static/system/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
 async def get_user_resource():
     return await ResourceManager.get_instance().get_system_image(id)
+
+@public_routes.get("/robots.txt", include_in_schema=False)
+async def robots_txt():
+    return await ResourceManager.get_instance().get_robots_txt()
