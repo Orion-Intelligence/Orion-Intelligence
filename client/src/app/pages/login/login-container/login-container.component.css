@@ -168,7 +168,7 @@
 }
 
 .header-link {
-  color: #000000;
+  color: #000;
   font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -258,8 +258,7 @@ input.login-input:-webkit-autofill,
 input.login-input:-webkit-autofill:hover,
 input.login-input:-webkit-autofill:focus,
 input.login-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px rgb(255, 255, 255) inset !important;
-  box-shadow: 0 0 0 1000px rgb(255, 255, 255) inset !important;
+  box-shadow: 0 0 0 1000px rgb(255 255 255) inset !important;
   -webkit-text-fill-color: #000 !important;
 }
 
@@ -313,7 +312,7 @@ input.login-input:-webkit-autofill:active {
 }
 
 .footer-copyright p {
-  color: #000000;
+  color: #000;
   font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
