@@ -69,7 +69,7 @@ class session_manager:
             redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
 
             if redis_sid is None:
-                if user.current_session_id != session_id and user.role in (user_role.DEMO):
+                if user.current_session_id != session_id and user.role not in (user_role.DEMO):
                     raise HTTPException(status_code=401, detail="Logged out due to multiple active sessions")
                 await self._redis.invoke_trigger(
                     REDIS_COMMANDS.S_SET_STRING,
