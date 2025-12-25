@@ -5,10 +5,11 @@
   Access is restricted until existing users are removed or the quota is increased.
 </div>
 
-<div *ngIf="isVisible">
+<main *ngIf="isVisible" id="main-content">
   <app-loader></app-loader>
-  <div [@appAnimation]="shouldAnimate()" id="main-content">
+
+  <div [@appAnimation]="shouldAnimate()">
     <router-outlet></router-outlet>
   </div>
-</div>
+</main>
 <app-message-notification></app-message-notification>
