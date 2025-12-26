@@ -893,9 +893,6 @@ class elastic_request_generator:
         query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "_source": [
             "url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
-        if not p_query_model.fullsearch:
-            query["collapse"] = {"field": "raw.keyword"}
-
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     def on_search_general_data(self, p_query_model, pfilter=None):
