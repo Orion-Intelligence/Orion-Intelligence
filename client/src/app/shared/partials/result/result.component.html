@@ -166,7 +166,7 @@
   </form>
 </ng-container>
 <ul
-  *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated) &&(!checkMember() || hasIOCs())"
+  *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated)"
   class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
   <li class="nav-item" *ngIf="list_grid">
     <a class="nav-link cursor-pointer active">List</a>
