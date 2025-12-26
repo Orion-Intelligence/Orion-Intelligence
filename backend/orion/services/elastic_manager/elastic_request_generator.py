@@ -825,11 +825,11 @@ class elastic_request_generator:
                 "_id", "file"], }
             return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
-        category = (p_query_model.category or "").strip()
-        if category and category.lower() in ("log", "logs"):
-            must_should = [{"term": {"type.keyword": "logs"}}]
-        else:
-            must_should = [{"terms": {"type.keyword": ["c", "credential"]}}]
+        # category = (p_query_model.category or "").strip()
+        # if category and category.lower() in ("log", "logs"):
+        #     must_should = [{"term": {"type.keyword": "logs"}}]
+        # else:
+        #     must_should = [{"terms": {"type.keyword": ["c", "credential"]}}]
 
         date_range_filter = {}
 
