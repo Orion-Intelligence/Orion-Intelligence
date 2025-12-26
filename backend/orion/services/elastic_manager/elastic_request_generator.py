@@ -878,12 +878,12 @@ class elastic_request_generator:
             bool_query.setdefault("filter", []).append(date_range_filter)
 
         page = getattr(p_query_model, "page", 1) or 1
-        size = 10000
+        size = getattr(p_query_model, "size", 500) or 100
         frm = (page - 1) * size
         if frm < 0:
             frm = 0
 
-        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "collapse": {"field": "raw.keyword"}, "_source": [
+        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": True, "collapse": {"field": "raw.keyword"}, "_source": [
             "url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
         if not (user_query or url_query or extra_user_terms or extra_domains):
