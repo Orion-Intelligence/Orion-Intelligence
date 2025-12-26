@@ -883,7 +883,7 @@ class elastic_request_generator:
         if frm < 0:
             frm = 0
 
-        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": True, "collapse": {"field": "username.keyword"}, "_source": [
+        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": True, "collapse": {"field": "username.keyword"}, "aggs": {"unique_count": {"cardinality": {"field": "username.keyword", "precision_threshold": 100000}}}, "_source": [
             "url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
         if not (user_query or url_query or extra_user_terms or extra_domains):
