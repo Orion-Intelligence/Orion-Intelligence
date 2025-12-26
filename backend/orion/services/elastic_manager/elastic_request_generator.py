@@ -890,7 +890,7 @@ class elastic_request_generator:
         if frm < 0:
             frm = 0
 
-        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": False, "collapse": {"field": "raw.keyword"}, "track_scores": False, "_source": [
+        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "_source": [
             "url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
