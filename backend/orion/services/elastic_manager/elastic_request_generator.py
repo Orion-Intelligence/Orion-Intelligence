@@ -885,7 +885,7 @@ class elastic_request_generator:
             bool_query.setdefault("filter", []).append(date_range_filter)
 
         page = getattr(p_query_model, "page", 1) or 1
-        size = getattr(p_query_model, "size", 1000) or 100
+        size = getattr(p_query_model, "size", 500) or 100
         frm = (page - 1) * size
         if frm < 0:
             frm = 0
