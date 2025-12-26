@@ -819,6 +819,12 @@ class elastic_request_generator:
                         if re.match(r'^[a-z0-9.-]+\.[a-z]{2,}$', d2):
                             extra_domains.append(d2)
 
+        if not (user_query or url_query or extra_user_terms or extra_domains):
+            query = {"query": {"match_all": {}}, "from": 0, "size": 100, "track_total_hits": False, "track_scores": False, "sort": [
+                "_doc"], "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw",
+                "_id", "file"], }
+            return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
             must_should = [{"term": {"type.keyword": "logs"}}]
@@ -835,59 +841,57 @@ class elastic_request_generator:
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
                 for quoted, unquoted in terms:
                     term = (quoted or unquoted).lower()
-                    clause = {"bool": {"should": [
-                        {"wildcard": {"raw.keyword": {"value": f"*{term}*", "case_insensitive": True}}}], "minimum_should_match": 1}}
-                    must_should.append(clause)
+                    must_should.append(
+                        {"bool": {"should": [
+                            {"wildcard": {"raw.keyword": {"value": f"*{term}*", "case_insensitive": True}}}], "minimum_should_match": 1}})
             for t in extra_user_terms:
                 t = t.lower()
-                clause = {"bool": {"should": [
-                    {"wildcard": {"raw.keyword": {"value": f"*{t}*", "case_insensitive": True}}}], "minimum_should_match": 1}}
-                must_should.append(clause)
+                must_should.append(
+                    {"bool": {"should": [
+                        {"wildcard": {"raw.keyword": {"value": f"*{t}*", "case_insensitive": True}}}], "minimum_should_match": 1}})
             if url_query:
-                should_clauses.append({"term": {"domain": url_query}})
+                should_clauses.append({"term": {"domain.keyword": url_query}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain": d}})
+                should_clauses.append({"term": {"domain.keyword": d}})
         else:
             if user_query:
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query.lower())
                 for quoted, unquoted in terms:
                     term = (quoted or unquoted).lower()
                     if '@' in term:
-                        clause = {"bool": {"should": [{"term": {"email.keyword": term}}], "minimum_should_match": 1}}
+                        must_should.append(
+                            {"bool": {"should": [{"term": {"email.keyword": term}}], "minimum_should_match": 1}})
                     else:
-                        clause = {"bool": {"should": [{"term": {"username.keyword": term}}], "minimum_should_match": 1}}
-                    must_should.append(clause)
+                        must_should.append(
+                            {"bool": {"should": [{"term": {"username.keyword": term}}], "minimum_should_match": 1}})
 
             for t in extra_user_terms:
                 t = t.lower()
-                clause = {"bool": {"should": [{"term": {"email": t}}, {"term": {"username": t}},
-                    {"term": {"domain": t}}], "minimum_should_match": 1}}
-                must_should.append(clause)
+                must_should.append(
+                    {"bool": {"should": [{"term": {"email.keyword": t}}, {"term": {"username.keyword": t}},
+                        {"term": {"domain.keyword": t}}], "minimum_should_match": 1}})
             if url_query:
-                should_clauses.append({"term": {"domain": url_query}})
+                should_clauses.append({"term": {"domain.keyword": url_query}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain": d}})
+                should_clauses.append({"term": {"domain.keyword": d}})
 
         bool_query = {}
         if must_should:
             bool_query["must"] = must_should
         if should_clauses:
-            bool_query["should"] = should_clauses
-            bool_query["minimum_should_match"] = 1
+            bool_query.setdefault("filter", []).append(
+                {"bool": {"should": should_clauses, "minimum_should_match": 1}})
         if date_range_filter:
             bool_query.setdefault("filter", []).append(date_range_filter)
 
         page = getattr(p_query_model, "page", 1) or 1
-        size = getattr(p_query_model, "size", 500) or 100
+        size = getattr(p_query_model, "size", 1000) or 100
         frm = (page - 1) * size
         if frm < 0:
             frm = 0
 
-        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": False, "_source": [
+        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "_source": [
             "url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
-
-        if not (user_query or url_query or extra_user_terms or extra_domains):
-            query["sort"] = ["_doc"]
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
