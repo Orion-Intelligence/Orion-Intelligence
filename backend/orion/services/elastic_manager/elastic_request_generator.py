@@ -819,6 +819,12 @@ class elastic_request_generator:
                         if re.match(r'^[a-z0-9.-]+\.[a-z]{2,}$', d2):
                             extra_domains.append(d2)
 
+        if not (user_query or url_query or extra_user_terms or extra_domains):
+            query = {"query": {"match_all": {}}, "from": 0, "size": 100, "track_total_hits": False, "sort": [
+                "_doc"], "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw",
+                "_id", "file"], }
+            return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
             must_should = [{"term": {"type.keyword": "logs"}}]
