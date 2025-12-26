@@ -186,12 +186,12 @@
   <li class="nav-item" *ngIf="!list_grid && consolidated">
     <a class="nav-link cursor-pointer">Ranked</a>
   </li>
-  <li class="nav-item" *ngIf="!list_grid && domain">
-    <a class="nav-link cursor-pointer active">Fast Search</a>
-  </li>
-  <li class="nav-item" *ngIf="!list_grid && domain">
-    <a class="nav-link cursor-pointer">Full Search</a>
-  </li>
+<!--  <li class="nav-item" *ngIf="!list_grid && domain">-->
+<!--    <a class="nav-link cursor-pointer active">Fast Search</a>-->
+<!--  </li>-->
+<!--  <li class="nav-item" *ngIf="!list_grid && domain">-->
+<!--    <a class="nav-link cursor-pointer">Full Search</a>-->
+<!--  </li>-->
 </ul>
 <ng-container *ngIf="suggestion && suggestion.options.length > 0">
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
