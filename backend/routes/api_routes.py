@@ -172,8 +172,7 @@ async def search_consolidated(param: search_credential_param_model = Body(...)):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),
-        Depends(license_required("maintainer", [user_role.ADMIN])), ], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), ], )
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     return await search_model.getInstance().search_consolidated_result(param)
 
@@ -188,8 +187,7 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),
-        Depends(license_required("maintainer", [user_role.ADMIN])), ], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), ], )
 async def search_consolidated_ranked(param: search_consolidated_param_model = Body(...)):
     base_index = [ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_INDEX.S_EXPLOIT_INDEX,
         ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ]

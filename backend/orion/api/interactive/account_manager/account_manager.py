@@ -161,18 +161,17 @@ class AccountManager:
                 str(user.tenant_uuid), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="This user type cannot be updated")
 
-        if request.status.value == "disable":
-            user.status = UserStatus.DISABLE.value
-        else:
+        if request.status == UserStatus.DISABLE:
+            user.status = UserStatus.DISABLE
+        elif user.status == UserStatus.DISABLE:
             tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
             active_count = await self._engine.count(
                 db_user_account,
                 (db_user_account.tenant_uuid == str(user.tenant_uuid)) & (
                             db_user_account.status == UserStatus.ACTIVE.value))
-            if tenant and (
-            not tenant.is_default) and tenant.user_quota is not None and active_count >= tenant.user_quota:
-                raise HTTPException(status_code=400, detail="User quota exceeded")
-            user.status = UserStatus.ACTIVE.value
+
+            if tenant is not None and not tenant.is_default and tenant.user_quota is not None and request.status == UserStatus.ACTIVE and user.status == UserStatus.DISABLE and active_count >= tenant.user_quota:
+                raise HTTPException(status_code=400, detail="User quota exceeded1")
 
         user.licenses = request.licenses
         await self._engine.save(user)

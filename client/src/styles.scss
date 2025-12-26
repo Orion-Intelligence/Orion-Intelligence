@@ -418,3 +418,8 @@ table tr:last-child td {
   border-bottom: 1px solid #6B5600;
   color: #FFD966;
 }
+
+.dropdown-disabled {
+  opacity: 0.2;
+  pointer-events: none;
+}

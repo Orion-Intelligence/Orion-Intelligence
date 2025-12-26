@@ -75,7 +75,7 @@ async def get_tenant_users(current_user=Depends(get_current_user)):
     response_description="List of all tenants.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
 async def get_all_tenants():
     return await TenantManager.get_instance().get_all_tenant()
 
