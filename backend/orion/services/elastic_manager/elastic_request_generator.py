@@ -827,7 +827,7 @@ class elastic_request_generator:
 
         date_range_filter = {}
 
-        filter_clauses = []
+        should_clauses = []
 
         if p_query_model.fullsearch:
             if user_query:
@@ -844,9 +844,9 @@ class elastic_request_generator:
                     {"wildcard": {"raw.keyword": {"value": f"*{t}*", "case_insensitive": True}}}], "minimum_should_match": 1}}
                 must_should.append(clause)
             if url_query:
-                filter_clauses.append({"term": {"domain": url_query}})
+                should_clauses.append({"term": {"domain": url_query}})
             for d in extra_domains:
-                filter_clauses.append({"term": {"domain": d}})
+                should_clauses.append({"term": {"domain": d}})
         else:
             if user_query:
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query.lower())
@@ -864,26 +864,27 @@ class elastic_request_generator:
                     {"term": {"domain": t}}], "minimum_should_match": 1}}
                 must_should.append(clause)
             if url_query:
-                filter_clauses.append({"term": {"domain": url_query}})
+                should_clauses.append({"term": {"domain": url_query}})
             for d in extra_domains:
-                filter_clauses.append({"term": {"domain": d}})
+                should_clauses.append({"term": {"domain": d}})
 
         bool_query = {}
         if must_should:
             bool_query["must"] = must_should
-        if filter_clauses:
-            bool_query.setdefault("filter", []).extend(filter_clauses)
+        if should_clauses:
+            bool_query["should"] = should_clauses
+            bool_query["minimum_should_match"] = 1
         if date_range_filter:
             bool_query.setdefault("filter", []).append(date_range_filter)
 
         page = getattr(p_query_model, "page", 1) or 1
-        size = getattr(p_query_model, "size", 500) or 100
+        size = getattr(p_query_model, "size", 100) or 100
         frm = (page - 1) * size
         if frm < 0:
             frm = 0
 
-        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": False, "_source": ["url",
-            "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
+        query = {"query": {"bool": bool_query}, "from": frm, "size": size, "track_total_hits": False, "collapse": {"field": "raw.keyword"}, "_source": [
+            "url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
         if not (user_query or url_query or extra_user_terms or extra_domains):
             query["sort"] = ["_doc"]
