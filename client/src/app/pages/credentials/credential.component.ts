@@ -13,11 +13,12 @@ import { stealer_filters } from '../../shared/constants/filters';
 import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { PaginationComponent } from "../../shared/partials/pagination/pagination.component";
+import {TooltipDirective} from '../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-credential',
   standalone: true,
-  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage, EmptyQueryComponent, NgIf, PaginationComponent],
+  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage, EmptyQueryComponent, NgIf, PaginationComponent, TooltipDirective],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })

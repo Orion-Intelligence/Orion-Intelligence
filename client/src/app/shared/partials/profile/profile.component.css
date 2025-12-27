@@ -25,7 +25,7 @@
 
 .profile-dropdown-width {
   width: 220px;
-  padding: 16px 16px 8px 16px;
+  padding: 16px 16px 8px;
 }
 
 .profile-dropdown.show {
@@ -77,7 +77,7 @@
 }
 
 .profile input:checked+.small-slider {
-  background-color: #000000;
+  background-color: #000;
 }
 
 .profile input:checked+.small-slider::before {
@@ -157,15 +157,19 @@
 }
 
 .profile-name {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 14px;
   color: #344054;
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 130px;
+  text-overflow: ellipsis;
 }
 
 .profile-email {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 400;
   font-size: 12px;
   color: #a0b8d1;
@@ -197,7 +201,7 @@
 }
 
 .profile-item span {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 14px;
   color: #172235;
@@ -231,7 +235,7 @@
 }
 
 .red-badge {
-  background: #FF0000;
+  background: #F00;
 }
 
 .notification-icon {

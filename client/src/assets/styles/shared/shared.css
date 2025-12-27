@@ -641,7 +641,7 @@ table a:visited {
 
 @media only screen and (width <=1000px) {
   .default-notification-banner {
-    width: calc(100% - 30px) !important;
+    width: calc(100%) !important;
   }
 
   .label-text {
