@@ -399,6 +399,7 @@ table a:visited {
   border: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
+  min-width: 150px;
   align-items: center;
   flex-direction: row;
 }

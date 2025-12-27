@@ -3,17 +3,13 @@ import {KeyValuePipe, NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@ang
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
-import {
-  AlertExportComponentComponent
-} from '../../../shared/partials/sidebar-user/sidebar-user-homepage/alert-export-component/alert-export-component.component';
-import {NgxPrintDirective} from 'ngx-print';
 
 @Component({
   selector: 'app-credential-list',
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem],
-  imports: [NgForOf, NgIf, KeyValuePipe, TitleCasePipe, NgOptimizedImage, TooltipDirective, AlertExportComponentComponent, NgxPrintDirective]
+  imports: [NgForOf, NgIf, KeyValuePipe, TitleCasePipe, NgOptimizedImage, TooltipDirective]
 })
 export class CredentialListComponent {
   @Input() stealerData$!: StealerLogCallbackModel;

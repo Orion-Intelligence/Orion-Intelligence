@@ -135,6 +135,28 @@ export class AddTenantComponent implements OnInit {
     }
   }
 
+  get hasFullLicenseAccess(): boolean {
+    return this.appService.userSessionData()?.user?.role === 'admin';
+  }
+
+  get tenantLicenses(): string[] {
+    return this.appService.userSessionData()?.tenant?.licenses ?? [];
+  }
+
+  get visibleTenantLicensesCount(): number {
+    if (this.hasFullLicenseAccess) {
+      return this.licenseList.filter(
+        license => this.getLicenseLabel(license) !== 'maintainer'
+      ).length;
+    }
+
+    return this.licenseList.filter(
+      license =>
+        this.tenantLicenses.includes(license) &&
+        this.getLicenseLabel(license) !== 'maintainer'
+    ).length;
+  }
+
   toggleTenantLicense(tenant: any, license: LicenseName): void {
     if (!tenant.licenses) {
       tenant.licenses = [];
