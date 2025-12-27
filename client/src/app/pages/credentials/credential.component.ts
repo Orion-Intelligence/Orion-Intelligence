@@ -145,4 +145,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.dashboardService.consolidatedParamModel.page = step;
     this.fetchSearchResults();
   }
+
+  protected readonly length = length;
 }

@@ -17,7 +17,7 @@ export class CredentialListComponent {
   @Input() isLoading!: boolean;
 
   expandedIndex: number | null = null;
-  pageSize: number = 100;
+  pageSize: number = 500;
 
   copyRowData(data: string): void {
     navigator.clipboard.writeText(data).catch(() => {
