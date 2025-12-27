@@ -165,6 +165,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         .pipe(switchMap(response => timer(300).pipe(map(() => response))))
         .subscribe(response => {
           if (response.success && response.data) {
+            const seen = new Set<string>();
+            response.data.Result = response.data.Result.filter((item: any) => {
+              const raw = item?.raw;
+              if (!raw) return true;
+              if (seen.has(raw)) return false;
+              seen.add(raw);
+              return true;
+            });
+
             this.stealerlogCallbackModel = response.data;
             this.dashboardService.stealerlogCallbackModel = response.data;
           }

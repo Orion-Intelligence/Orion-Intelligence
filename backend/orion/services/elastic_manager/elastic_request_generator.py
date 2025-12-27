@@ -826,9 +826,10 @@ class elastic_request_generator:
             if frm < 0:
                 frm = 0
 
-            query = {"query": {"match_all": {}}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "sort": [
+            query = {"query": {"match_all": {}}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "terminate_after": 3000, "sort": [
                 {"_shard_doc": "asc"}], "_source": ["url", "username", "domain", "email", "password", "ip", "channel",
-                "type", "raw", "_id", "file"]}
+                "type", "raw", "file"]}
+
             return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
         category = (p_query_model.category or "").strip()
