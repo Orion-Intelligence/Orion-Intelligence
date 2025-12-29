@@ -20,7 +20,7 @@
                 </button>
                 <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
                 <div *ngIf="canExportstix()" class="vr report-menu-divider"></div>
-                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
+                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="this.alerts.length>0">
                     <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" />
                 </button>
                 <div class="vr report-menu-divider"></div>

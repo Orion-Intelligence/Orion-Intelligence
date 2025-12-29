@@ -46,7 +46,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
   @ViewChild('printBtn') printBtn!: ElementRef<HTMLButtonElement>;
 
-  constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService,
+  constructor(private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService,
     private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }

@@ -269,10 +269,15 @@ class AlertManager:
         return {"message": f"Deleted {deleted_count} alerts of type '{alert_type}'"}
 
     async def set_scan_running(self, tenant_id: str, value: bool) -> dict:
-        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant_id))
+        alert_doc = await self._engine.find_one(
+            db_alert_model, db_alert_model.tenant_id == str(tenant_id))
 
         if alert_doc:
             alert_doc.scan_running = value
+            await self._engine.save(alert_doc)
+        else:
+            alert_doc = db_alert_model(
+                tenant_id=str(tenant_id), scan_running=value, alerts=[])
             await self._engine.save(alert_doc)
 
         return {"tenant_id": tenant_id, "scan_running": value}

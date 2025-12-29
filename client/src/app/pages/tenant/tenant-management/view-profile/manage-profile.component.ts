@@ -8,9 +8,7 @@ import { User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { AddTenantComponent } from "../add-tenant/add-tenant.component";
-import {
-  ConfirmationPopupComponent
-} from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import {ConfirmationPopupComponent} from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { AppService } from '../../../../services/core/app/app.service';
 import {TooltipDirective} from '../../../../shared/directive/tooltip-directive.directive';
 import {finalize, switchMap, tap} from 'rxjs';
@@ -54,17 +52,6 @@ export class ManageProfileComponent implements OnInit {
     this.expandedUserIndex = this.expandedUserIndex === index ? null : index;
   }
 
-  getRoleLabel(role: User['role']): string {
-    switch (role) {
-      case 'admin': return 'Admin';
-      case 'crawler': return 'Crawler';
-      case 'demo': return 'Demo';
-      case 'profile': return 'Profile';
-      case 'analyst': return 'Analyst';
-      default: return '';
-    }
-  }
-
   updateUser(user: User) {
     if (!user.licenses || user.licenses.length === 0) {
       user.licenses = [LicenseName.FREE];
@@ -76,7 +63,7 @@ export class ManageProfileComponent implements OnInit {
       switchMap(() => this.nodeResolver.resolve()),
       finalize(() => (this.isLoading = false))
     ).subscribe({
-      next: (ok) => {
+      next: (_) => {
       },
       error: () => {
       }

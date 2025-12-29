@@ -15,7 +15,7 @@
                             <img src="assets/images/shared/theme/print.svg" height="25" alt="print" />
                         </button>
                         <div class="vr report-menu-divider"></div>
-                        <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
+                        <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0">
                             <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" />
                         </button>
                         <div class="vr report-menu-divider"></div>

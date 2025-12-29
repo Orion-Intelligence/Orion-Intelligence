@@ -5,6 +5,7 @@ from starlette.requests import Request
 from starlette_admin.contrib.odmantic import ModelView
 from starlette_admin.exceptions import ActionFailed, FormValidationError
 
+from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
@@ -59,5 +60,9 @@ class TenantAdminView(ModelView):
             tenant_keys = await self._engine.find(db_keys, db_keys.auth_id == str(tenant.id))
             for key in tenant_keys:
                 await self._engine.delete(key)
+
+            tenant_alerts = await self._engine.find(db_alert_model, db_alert_model.tenant_id == str(tenant.id))
+            for alert in tenant_alerts:
+                await self._engine.delete(alert)
 
         return await super().delete(request, pks)

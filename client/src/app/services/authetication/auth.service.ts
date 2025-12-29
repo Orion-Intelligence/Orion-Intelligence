@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
@@ -249,9 +249,6 @@ export class AuthService {
       .post<{ access_token: string; session?: any }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ Authorization: `Bearer ${currentToken}` }) })
       .pipe(
         tap((response) => {
-          if (response?.session) {
-            const sessionData = response.session;
-          }
           if (response?.access_token) this.setToken(response.access_token);
         }),
         map((response) => response?.access_token || null)

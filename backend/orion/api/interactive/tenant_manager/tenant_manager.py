@@ -11,6 +11,7 @@ from cryptography.fernet import Fernet
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
@@ -169,7 +170,32 @@ class TenantManager:
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid), str(current_user.id), "tenant updated successfully")
 
-        return {"message": "Tenant updated", "user": current_user.username, "company": tenant.name}
+        tenant_data = tenant.model_dump()
+        tenant_data["id"] = str(tenant.id)
+
+        tenant_data["name"] = enc.decrypt((tenant_data.get("name") or "").encode()).decode() if tenant_data.get(
+            "name") else ""
+        tenant_data["phone"] = enc.decrypt((tenant_data.get("phone") or "").encode()).decode() if tenant_data.get(
+            "phone") else ""
+        tenant_data["country"] = enc.decrypt((tenant_data.get("country") or "").encode()).decode() if tenant_data.get(
+            "country") else ""
+        tenant_data["city"] = enc.decrypt((tenant_data.get("city") or "").encode()).decode() if tenant_data.get(
+            "city") else ""
+        tenant_data["postal_code"] = enc.decrypt(
+            (tenant_data.get("postal_code") or "").encode()).decode() if tenant_data.get("postal_code") else ""
+        tenant_data["licenses"] = [enc.decrypt(x.encode()).decode() for x in (tenant_data.get("licenses") or [])]
+        tenant_data["iocs"] = [{**ioc, "ioc_id": enc.decrypt((ioc.get("ioc_id") or "").encode()).decode() if ioc.get(
+            "ioc_id") else "", "name": enc.decrypt((ioc.get("name") or "").encode()).decode() if ioc.get(
+            "name") else "", "values": [enc.decrypt(v.encode()).decode() for v in (ioc.get("values") or [])], } for ioc
+            in (tenant_data.get("iocs") or [])]
+
+        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant.id))
+        alerts_data = []
+        if alert_doc:
+            alerts_data = alert_doc.model_dump().get("alerts") or []
+
+        return {"message": "Tenant updated", "user": current_user.username, "company": tenant_data[
+            "name"], "tenant": tenant_data, "alerts": alerts_data}
 
     async def get_all_tenant(self) -> List[db_tenant_model]:
         tenants = await self._engine.find(db_tenant_model, db_tenant_model.is_default == False)

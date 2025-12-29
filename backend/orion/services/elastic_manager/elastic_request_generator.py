@@ -780,7 +780,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False):
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False, alert=False):
         url = helper_controller.extract_domains_from_text(p_query_model.q)
         if len(url) > 0:
             p_query_model.url = url[0]
@@ -791,7 +791,7 @@ class elastic_request_generator:
             p_query_model.user = user
 
         if not p_query_model.url and not p_query_model.user and consolidated:
-            return None, None
+            return ELASTIC_INDEX.S_STEALERLOGS_INDEX, {}
 
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
 
@@ -819,6 +819,10 @@ class elastic_request_generator:
                         if re.match(r'^[a-z0-9.-]+\.[a-z]{2,}$', d2):
                             extra_domains.append(d2)
 
+
+        if not extra_domains and not url_query and alert:
+            return ELASTIC_INDEX.S_STEALERLOGS_INDEX, {}
+
         if not (user_query or url_query or extra_user_terms or extra_domains):
             page = getattr(p_query_model, "page", 1) or 1
             size = getattr(p_query_model, "size", 500) or 500
@@ -833,6 +837,7 @@ class elastic_request_generator:
             return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
         category = (p_query_model.category or "").strip()
+
         if category and category.lower() in ("log", "logs"):
             must_should = [{"term": {"type.keyword": "logs"}}]
         else:
@@ -843,25 +848,6 @@ class elastic_request_generator:
         should_clauses = []
 
         if p_query_model.fullsearch:
-            pass
-            # if user_query:
-            #     user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query).lower()
-            #     terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
-            #     for quoted, unquoted in terms:
-            #         term = (quoted or unquoted).lower()
-            #         must_should.append(
-            #             {"bool": {"should": [
-            #                 {"wildcard": {"raw.keyword": {"value": f"*{term}*", "case_insensitive": True}}}], "minimum_should_match": 1}})
-            # for t in extra_user_terms:
-            #     t = t.lower()
-            #     must_should.append(
-            #         {"bool": {"should": [
-            #             {"wildcard": {"raw.keyword": {"value": f"*{t}*", "case_insensitive": True}}}], "minimum_should_match": 1}})
-            # if url_query:
-            #     should_clauses.append({"term": {"domain.keyword": url_query}})
-            # for d in extra_domains:
-            #     should_clauses.append({"term": {"domain.keyword": d}})
-        else:
             if user_query:
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query.lower())
                 for quoted, unquoted in terms:

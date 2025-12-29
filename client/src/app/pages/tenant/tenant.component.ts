@@ -2,13 +2,11 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NgIf, NgFor, NgSwitch, NgSwitchCase, CommonModule} from '@angular/common';
 import {HeaderComponent} from "../../shared/partials/header/login-header/header.component";
-import {TenantModel, TenantStatus, TenantStatusValues} from '../../shared/model/tenant/tenant.model';
+import {TenantModel, TenantStatusValues} from '../../shared/model/tenant/tenant.model';
 import {search_filter_labels} from '../../shared/constants/shared-enums';
-import {AuthService} from '../../services/authetication/auth.service';
 import {Router} from '@angular/router';
 import {ApiService} from '../../shared/services/api.service';
 import {AppService} from '../../services/core/app/app.service';
-import {LicenseName} from '../../shared/model/licenses/license.rules';
 import {TooltipDirective} from '../../shared/directive/tooltip-directive.directive';
 import {ConfirmationPopupComponent} from '../../shared/partials/confirmation-popup/confirmation-popup.component';
 
@@ -36,7 +34,7 @@ export class TenantComponent implements OnInit {
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
 
-  constructor(private router: Router, public auth_service: AuthService, public apiService: ApiService, public appService: AppService) {
+  constructor(private router: Router, public apiService: ApiService, public appService: AppService) {
   }
 
   ngOnInit(): void {
@@ -118,10 +116,27 @@ export class TenantComponent implements OnInit {
     });
     this.appService.set('entityfilterCategories', this.categories);
 
-    this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
-      next: () => {
-        this.appService.setOnboardingStatus(false);
-        this.router.navigate(['/dashboard']).then();
+    this.apiService.post<any>('update/tenants', filteredOnboardingData).subscribe({
+      next: (res) => {
+        this.appService.userSessionData.update(state => {
+          if (!state) return state;
+
+          const updated = {
+            ...state,
+            tenant: res.tenant ?? state.tenant,
+            alerts: res.alerts ?? state.alerts
+          };
+
+          this.appService.tenantData.set({
+            name: (res.tenant?.name ?? this.appService.tenantData().name) || '',
+            iocs: (res.tenant?.iocs ?? this.appService.tenantData().iocs) || []
+          });
+
+          this.appService.setOnboardingStatus(false);
+          this.router.navigate(['/dashboard']).then();
+
+          return updated;
+        });
       },
       error: (err) => {
         console.error(err);

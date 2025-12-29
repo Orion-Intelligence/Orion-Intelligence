@@ -291,7 +291,9 @@ async def get_user_alerts(current_user=Depends(get_current_user)):
         Depends(license_required("maintainer")), ], )
 async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
     scan_status = await AlertManager.getInstance().get_scan_status(current_user)
+    print("::::::::::::::::::::::::::::::::::: x1", flush=True)
     if scan_status.get("scan_running", False):
+        print("::::::::::::::::::::::::::::::::::: x2", flush=True)
         raise HTTPException(
             status_code=202, detail="Scan is still processing")
 

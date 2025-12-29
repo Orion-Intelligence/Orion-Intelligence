@@ -119,6 +119,7 @@ class alert_job:
             ioc_value: str,
             scan_type: str,
             result_list: List[Dict[str, Any]]):
+
         try:
             if not result_list:
                 return False
@@ -298,7 +299,7 @@ class alert_job:
                                 search_param.url = ioc_value
                             elif ioc_type_name == "m_user":
                                 search_param.user = ioc_value
-                            es_response = await search_func(search_param)
+                            es_response = await search_func(search_param, True)
                         elif category == "social":
                             es_response = await search_func(search_param, base_index, [], [])
                         elif category == "discussion":

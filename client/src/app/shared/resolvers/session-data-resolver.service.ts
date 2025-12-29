@@ -15,20 +15,19 @@ export class NodeResolver implements Resolve<userSessionData> {
 
   resolve(): Observable<userSessionData> {
     return this.apiService
-      .post<userSessionData>('get/tenant/node', {})
-      .pipe(
-        catchError(err => {
-          console.error('Failed to load session data', err);
-          return of(null as any);
-        }),
-        tap(sessionData => {
-          if (sessionData) {
-            this.appService.userSessionData.set(sessionData);
-            console.log(this.appService.userSessionData().user.preferences?.['userId']);
-          }
-        }),
-        shareReplay(1)
-      );
+    .post<userSessionData>('get/tenant/node', {})
+    .pipe(
+      catchError(err => {
+        console.error('Failed to load session data', err);
+        return of(null as any);
+      }),
+      tap(sessionData => {
+        if (sessionData) {
+          this.appService.userSessionData.set(sessionData);
+          console.log(this.appService.userSessionData().user.preferences?.['userId']);
+        }
+      }),
+      shareReplay(1)
+    );
   }
-
 }
