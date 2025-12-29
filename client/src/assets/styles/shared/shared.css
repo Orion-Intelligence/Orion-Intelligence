@@ -701,13 +701,16 @@ table a:visited {
   }
 }
 
-@media (max-width: 550px) {
-  .default-input-container .input-group-text {
-    width: 0 !important;
-  }
+@media (max-width: 700px) {
 
   .side-menu-container {
     display: none !important;
+  }
+}
+
+@media (max-width: 550px) {
+  .default-input-container .input-group-text {
+    width: 0 !important;
   }
 
   .homebar-advance>* {
@@ -750,7 +753,7 @@ table a:visited {
   }
 }
 
-@media (max-width: 1000px) and (min-width: 551px) {
+@media (max-width: 1000px) and (min-width: 701px) {
   .tools-shrink {
     display: inherit !important;
   }

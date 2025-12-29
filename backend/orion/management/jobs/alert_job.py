@@ -326,17 +326,27 @@ class alert_job:
                                 m_description = result.get("m_content") or result.get("m_important_content")
                                 _description = ""
                                 _title = ""
-                                if m_title:
-                                    _title = m_title
-                                else:
-                                    if ":" in raw:
-                                        parts = raw.split(":", 1)
-                                        _title = parts[0] or "-"
-                                        _description = parts[1] or "-"
+                                if category == "stealerlogs":
+                                    if result.get("username") and result.get("password"):
+                                        _title = result.get("username")
+                                        _description = result.get("password")
                                     else:
-                                        _title = raw or "-"
-                                        _description = m_description or "-"
-                                _url = result.get("m_url") or result.get("m_base_url") or "-"
+                                        if raw:
+                                            cleaned = raw.split("://")[-1]
+                                            if ":" in cleaned:
+                                                parts = cleaned.split(":", 1)
+                                                _title = parts[0]
+                                                _description = parts[1]
+                                            else:
+                                                _title = cleaned
+                                                _description = "-"
+                                        else:
+                                            _title = "-"
+                                            _description = "-"
+                                else:
+                                    _title = m_title
+                                    _description = m_description or "-"
+                                _url = result.get("m_url") or result.get("m_base_url") or result.get("domain") or "-"
                                 _source = result.get("m_network") or result.get("channel") or "-"
                                 additional_keys_and_values = self.get_additional_result_keys(result)
                                 all_ioc_list = []

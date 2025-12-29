@@ -69,7 +69,7 @@
 }
 
 .selected-filter-bar__clear-btn {
-  max-width: 110px;
+  width: 110px;
   height: 32px;
   border: 1px solid #57A5EB;
   border-radius: 6px;
