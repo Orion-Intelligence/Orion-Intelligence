@@ -842,7 +842,7 @@ class elastic_request_generator:
             return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
         category = (p_query_model.category or "").strip()
-        if category and category.lower() in ("log", "logs"):
+        if category and category.lower().startswith("log"):
             must_should = [{"term": {"type.keyword": "logs"}}]
         else:
             must_should = []
