@@ -843,7 +843,7 @@ class elastic_request_generator:
 
         category = (p_query_model.category or "").strip()
         if category and category.lower().startswith("log"):
-            must_should = [{"term": {"type.keyword": "logs"}}]
+            must_should = []
         else:
             must_should = []
 
