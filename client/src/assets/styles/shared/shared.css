@@ -399,7 +399,8 @@ table a:visited {
   border: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
-  min-width: 150px;
+  min-width: 160px;
+  max-width: 160px;
   align-items: center;
   flex-direction: row;
 }
@@ -663,10 +664,6 @@ table a:visited {
   }
 
   .side-menu-container {
-    margin: 10px 0 0 !important;
-  }
-
-  .side-menu-container {
     justify-content: start;
   }
 
@@ -676,8 +673,19 @@ table a:visited {
     background-color: white !important;
   }
 
+  .dashboard-general-scan {
+    margin-left: 0px;
+    margin-top: -8px;
+  }
+}
+
+@media (max-width: 1200px) {
   .default-input-container {
     margin: 15px !important;
+  }
+
+  .side-menu-container {
+    margin: 10px 0 0 !important;
   }
 }
 
@@ -693,13 +701,11 @@ table a:visited {
   }
 }
 
-@media (width <=550px) {
+@media (max-width: 550px) {
   .default-input-container .input-group-text {
     width: 0 !important;
   }
-}
 
-@media only screen and (width <=550px) {
   .side-menu-container {
     display: none !important;
   }
@@ -744,7 +750,13 @@ table a:visited {
   }
 }
 
-@media only screen and (width <=1000px) {
+@media (max-width: 1000px) and (min-width: 551px) {
+  .tools-shrink {
+    display: inherit !important;
+  }
+}
+
+@media (max-width: 1000px) {
   .default-input-container-justify {
     justify-content: flex-start !important
   }
@@ -764,7 +776,6 @@ table a:visited {
   }
 
   .tools-shrink {
-    display: inherit !important;
     padding-right: 10px;
     margin-top: 10px;
   }

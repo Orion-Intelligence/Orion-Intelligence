@@ -41,7 +41,7 @@
   box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
   padding: 8px 24px 8px 17px;
   margin-left: 0;
-  min-width: 350px;
+  min-width: 450px;
   font-family: Inter, sans-serif;
   color: var(--color-text1);
   max-width: 912px;
@@ -69,7 +69,7 @@
 }
 
 .selected-filter-bar__clear-btn {
-  width: 110px;
+  max-width: 110px;
   height: 32px;
   border: 1px solid #57A5EB;
   border-radius: 6px;
@@ -175,4 +175,14 @@
   margin-bottom: 10px;
   font-weight: 500;
   font-size: 14px;
+}
+
+@media (max-width: 850px) {
+  .selected-filter-bar__filter-type {
+    font-size: 8px;
+  }
+
+  .selected-filter-bar__clear-btn {
+    font-size: 9px;
+  }
 }

@@ -1,7 +1,7 @@
 <ng-container>
   <form (submit)="onFormSubmit()" @fadeInDashboardItem
     class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
-    <div class="d-flex search-filter-row">
+    <div class="search-filter-d-flex search-filter-row">
       <div class="search-bar-wrapper default-input-container-mobile">
         <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
         <div class="input-group default-input-sub-container" [ngClass]="{
@@ -52,9 +52,8 @@
                 <span class="dashboard-general-scan-header">Run Scan</span> <small
                   class="dashboard-general-scan-desc text-muted"> <span
                     class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }}
-                  Resources
-                  Found </small>
-              </div>0
+                  Resources Found </small>
+              </div>
               <img src="../../../../assets/images/shared/security-scan-arrow.svg" alt="arrow"
                 class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans" />
               <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
@@ -137,36 +136,37 @@
           (clearAll)="reloadFilter()"
           [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
       </div>
-
-      <div *ngIf="!shrinkmenu && filterModel"
-        class="filter-button-wrapper side-menu-container d-flex align-items-start justify-content-start gap-3">
-        <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results"
-          class="filters-button d-flex align-items-center"> <img alt="Filter Icon" height="24"
-            ngSrc="../../../../assets/images/shared/theme/filter_icon.svg" priority width="24"> <span
-            class="ms-2">Filter</span>
-        </label>
-      </div>
-      <div *ngIf="!shrinkmenu && licenseService.canUseScanning()"
-        class="side-menu-container tools-shrink d-flex align-items-start justify-content-start mt-2 gap-3">
-        <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown"
-          *ngIf="scandomains.length > 0" (click)="toggleScan()">
-          <span class="dashboard-general-scan-header">Run Scan</span> <small
-            class="dashboard-general-scan-desc text-muted"> <span
-              class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources
-            Found
-          </small>
-          <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
-            <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
-              <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</span>
-            </li>
-          </ul>
+      <div class="filter-scan_flex">
+        <div *ngIf="!shrinkmenu && filterModel"
+          class="filter-button-wrapper side-menu-container d-flex align-items-start justify-content-start gap-3">
+          <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results"
+            class="filters-button d-flex align-items-center"> <img alt="Filter Icon" height="24"
+              ngSrc="../../../../assets/images/shared/theme/filter_icon.svg" priority width="24"> <span
+              class="ms-2">Filter</span>
+          </label>
         </div>
+        <div *ngIf="!shrinkmenu && licenseService.canUseScanning()"
+          class="side-menu-container tools-shrink d-flex flex-column align-items-start justify-content-start mt-2 gap-3">
+          <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown"
+            *ngIf="scandomains.length > 0" (click)="toggleScan()">
+            <span class="dashboard-general-scan-header">Run Scan</span>
+            <small class="dashboard-general-scan-desc text-muted">
+              <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>
+              {{ scandomains.length }} Resources Found
+            </small>
+            <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
+              <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
+                <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
       </div>
     </div>
   </form>
 </ng-container>
-<ul
-  *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated)"
+<ul *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated)"
   class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
   <li class="nav-item" *ngIf="list_grid">
     <a class="nav-link cursor-pointer active">List</a>
@@ -186,12 +186,12 @@
   <li class="nav-item" *ngIf="!list_grid && consolidated">
     <a class="nav-link cursor-pointer">Ranked</a>
   </li>
-<!--  <li class="nav-item" *ngIf="!list_grid && domain">-->
-<!--    <a class="nav-link cursor-pointer active">Fast Search</a>-->
-<!--  </li>-->
-<!--  <li class="nav-item" *ngIf="!list_grid && domain">-->
-<!--    <a class="nav-link cursor-pointer">Full Search</a>-->
-<!--  </li>-->
+  <!--  <li class="nav-item" *ngIf="!list_grid && domain">-->
+  <!--    <a class="nav-link cursor-pointer active">Fast Search</a>-->
+  <!--  </li>-->
+  <!--  <li class="nav-item" *ngIf="!list_grid && domain">-->
+  <!--    <a class="nav-link cursor-pointer">Full Search</a>-->
+  <!--  </li>-->
 </ul>
 <ng-container *ngIf="suggestion && suggestion.options.length > 0">
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>

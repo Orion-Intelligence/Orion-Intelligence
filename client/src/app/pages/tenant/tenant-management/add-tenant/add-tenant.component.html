@@ -52,21 +52,18 @@
 
             <div class="add-tenant_label" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">Licenses</div>
             <div class="license-grid" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
-              <ng-container *ngFor="let license of licenseList">
-                <div
-                  class="license-card"
-                  *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && getLicenseLabel(license) !== 'maintainer'"
-                  [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')"
-                  (click)="toggleTenantLicense(model, license)">
-                  <input
-                    type="checkbox"
-                    class="license-checkbox"
-                    [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
-                  <span class="license-label">
-                    {{ getLicenseLabel(license) }}
-                  </span>
-                </div>
-              </ng-container>
+                <ng-container *ngFor="let license of licenseList">
+                    <div class="license-card"
+                        *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && getLicenseLabel(license) !== 'maintainer'"
+                        [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')"
+                        (click)="toggleTenantLicense(model, license)">
+                        <input type="checkbox" class="license-checkbox"
+                            [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
+                        <span class="license-label">
+                            {{ getLicenseLabel(license) }}
+                        </span>
+                    </div>
+                </ng-container>
             </div>
 
             <hr class="tenant-divider">
@@ -82,7 +79,7 @@
 
         <div class="add-tenant_footer">
             <button class="add-tenant_btn-outline" (click)="onClose()">Cancel</button>
-            <button class="add-tenant_btn-primary" (click)="onSubmit()">Add Tenant</button>
+            <button class="add-tenant_btn-primary" (click)="onSubmit()">Add User</button>
         </div>
 
     </div>

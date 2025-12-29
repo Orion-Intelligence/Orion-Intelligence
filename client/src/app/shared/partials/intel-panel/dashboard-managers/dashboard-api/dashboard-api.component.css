@@ -139,7 +139,7 @@
   margin-left: 35px;
 }
 
-@media (width <= 1200px) {
+@media (width <=1200px) {
   .dash-search-button {
     margin-left: -5px;
   }
@@ -149,12 +149,9 @@
     padding: 10px 10px 10px 0 !important;
   }
 
-  .default-input-container {
-    margin-right: 15px;
-  }
 }
 
-@media (width <= 1000px) {
+@media (width <=1000px) {
   .dash-api_hint {
     margin: 0 !important;
   }
@@ -169,14 +166,11 @@
   }
 }
 
-@media (width <= 1200px) {
+@media (width <=1200px) {
   .dashboard__api-search-input-div {
     padding: 15px 15px 15px 0;
   }
 
-  .default-input-container {
-    margin-right: 15px;
-  }
 }
 
 .search__result-detail-extended {
@@ -298,7 +292,7 @@
   position: relative;
 }
 
-@media (width >= 1101px) {
+@media (width >=1101px) {
   .field:not(.field--full)::after {
     content: "";
     position: absolute;
@@ -417,12 +411,13 @@
   margin: 0 16px 14px;
 }
 
-@media (width <= 1100px) {
+@media (width <=1100px) {
   .card-grid {
     grid-template-columns: repeat(6, 1fr);
   }
 
-  .field, .field--chips {
+  .field,
+  .field--chips {
     grid-column: span 6;
   }
 
@@ -448,12 +443,13 @@
   }
 }
 
-@media (width <= 640px) {
+@media (width <=640px) {
   .card-grid {
     grid-template-columns: repeat(1, 1fr);
   }
 
-  .field, .field--chips {
+  .field,
+  .field--chips {
     grid-column: 1 / -1;
   }
 
@@ -645,7 +641,7 @@
   margin: 0 16px 14px;
 }
 
-@media (width <= 640px) {
+@media (width <=640px) {
   .card-head {
     padding: 14px 14px 12px;
   }
@@ -758,7 +754,7 @@
   margin: 0 16px;
 }
 
-@media (width >= 900px) {
+@media (width >=900px) {
   .card-body {
     grid-template-columns: repeat(12, 1fr);
   }
@@ -780,7 +776,7 @@
   }
 }
 
-@media (width <= 640px) {
+@media (width <=640px) {
   .card-head {
     padding: 14px 14px 12px;
   }

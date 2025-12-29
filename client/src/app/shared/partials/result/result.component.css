@@ -255,6 +255,10 @@
   gap: 10px;
 }
 
+.search-filter-d-flex {
+  display: flex !important;
+}
+
 .search-bar-wrapper {
   flex: 1 1 auto;
   min-width: 0;
@@ -266,4 +270,20 @@
 
 .filter-button-wrapper {
   flex: 0 0 auto;
+}
+
+@media (max-width: 1200px) {
+  .search-filter-d-flex {
+    display: block !important;
+  }
+
+  .filter-scan_flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .filter-scan_flex:has(> :only-child) {
+    justify-content: flex-end;
+  }
 }
