@@ -329,7 +329,7 @@ class alert_job:
                                 _title = ""
                                 if category == "stealerlogs":
                                     if result.get("username") and result.get("password"):
-                                        _title = result.get("username")
+                                        _title = result.get("username")[0]
                                         _description = result.get("password")
                                     else:
                                         if raw:
@@ -347,7 +347,9 @@ class alert_job:
                                 else:
                                     _title = m_title
                                     _description = m_description or "-"
+
                                 _url = result.get("m_url") or result.get("m_base_url") or result.get("domain") or "-"
+                                _url = _url[0] if isinstance(_url, list) and _url else _url
                                 _source = result.get("m_network") or result.get("channel") or "-"
                                 additional_keys_and_values = self.get_additional_result_keys(result)
                                 all_ioc_list = []
