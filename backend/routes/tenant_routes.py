@@ -312,7 +312,7 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")), ], )
 async def cancel_user_ioc_alerts(current_user=Depends(get_current_user)):
-    return await AlertManager.getInstance().set_scan_running(current_user.tenant_uuid, False)
+    return await AlertManager.getInstance().set_scan_running(current_user.tenant_uuid, False,True)
 
 
 @tenant_routes.post(

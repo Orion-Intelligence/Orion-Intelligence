@@ -79,7 +79,7 @@ class cronjob_manager:
             except Exception as e:
                 print(f"[{datetime.now(timezone.utc)}] ALERT JOB ERROR: {e}")
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(300)
 
         tz = ZoneInfo("Australia/Sydney")
         while True:

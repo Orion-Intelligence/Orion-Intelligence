@@ -44,6 +44,7 @@ class alert_job:
         self._alert_manager = AlertManager.getInstance()
         self._search_model = search_model.getInstance()
         self._crawl_model = crawl_model.getInstance()
+        self._cancel_scan_flags = {}
 
     async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
         try:
@@ -56,6 +57,8 @@ class alert_job:
             payload = DomainScanRequest(domain=clean_domain, scanType=scan_type)
 
             while True:
+                if self._cancel_scan_flags.get(tenant_id):
+                    return
                 response = await self._crawl_model.scan_domain(payload)
 
                 if isinstance(response, dict):
@@ -124,11 +127,13 @@ class alert_job:
             if not result_list:
                 return False
             for result in result_list:
+                if self._cancel_scan_flags.get(tenant_id):
+                    return
                 if scan_type in ["email-breach", "social-scanner"]:
                     _title = result.get("m_title", "Records for provided queries")
                     _description = result.get("m_important_content") or result.get("m_content", "A match was found.")
                     _url = result.get("m_url") or result.get("m_base_url") or "-"
-                    _source = result.get("m_network", "-")
+                    _source = result.get("m_network") or "-"
                     _content_types = result.get("m_content_type") or []
 
                 elif scan_type == "playstore-scanning":
@@ -175,13 +180,15 @@ class alert_job:
             return False
 
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
-
+        self._cancel_scan_flags[str(tenant.id)] = False
         try:
             iocs = tenant.iocs
             if not iocs:
                 return
             if category == "scanning":
                 for ioc in iocs:
+                    if self._cancel_scan_flags.get(tenant.id):
+                        return
                     ioc_type_name = ioc.ioc_id
                     if ioc_type_name in ["m_domain", "m_url"]:
                         for ioc_value in ioc.values or []:
@@ -218,13 +225,6 @@ class alert_job:
                         search_payload = scan["payload"]
                         dynamic_search_category = scan["category"]
                         model_cls = scan["model"]
-
-                        print(
-                            f"Processing Dynamic Scan | "
-                            f"Type: {ioc_type_name} | "
-                            f"Value: {ioc_value} | "
-                            f"Scan: {scan_type}")
-
                         try:
                             param_model = model_cls(text=search_payload)
 
@@ -389,19 +389,18 @@ class alert_job:
         all_tenants = await self._tenant_manager.get_all_tenant()
         if not all_tenants:
             return
-
         for tenant in all_tenants:
-            if not tenant.is_default:
+            if tenant.is_default:
                 continue
 
             await self._alert_manager.getInstance().set_scan_running(tenant.id, True)
-
             try:
                 for category in ALERT_CATEGORIES:
                     await self._process_tenant_alerts(tenant, category)
             except Exception as ex:
                 pass
             finally:
+                self._cancel_scan_flags.pop(tenant.id, None)
                 await self._alert_manager.getInstance().set_scan_running(tenant.id, False)
 
     def get_additional_result_keys(self, result: any) -> list[tuple[str, any]]:
@@ -476,7 +475,6 @@ class alert_job:
 
             for category in ALERT_CATEGORIES:
                 category_start_time = datetime.now(timezone.utc)
-                print(f"[INFO] Processing category: {category} for Tenant: {tenant_id}")
                 try:
                     await self._process_tenant_alerts(current_tenant, category)
 
@@ -490,7 +488,6 @@ class alert_job:
                             datetime.now(timezone.utc) - category_start_time).total_seconds(), "error_count": 1}
 
                 category_statuses.append(category_status)
-                print(f"[INFO] Completed category: {category} for Tenant: {tenant_id}")
 
             end_time = datetime.now(timezone.utc)
             return {"status": "success" if overall_success else "completed_with_errors", "message": f"Alert generation job finished for tenant {tenant_id}.", "start_time": start_time.isoformat(), "end_time": end_time.isoformat(), "total_duration_seconds": (
@@ -499,3 +496,6 @@ class alert_job:
             pass
         finally:
             await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
+
+    async def cancel_tenant_scan(self, tenant_id: str):
+        self._cancel_scan_flags[tenant_id] = True

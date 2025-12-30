@@ -29,6 +29,11 @@ class AlertManager:
             raise Exception("This class is a singleton!")
         AlertManager.__instance = self
 
+    def get_alert_job(self):
+        from orion.management.jobs.alert_job import alert_job
+        return alert_job
+
+
     async def get_user_alerts(self, user_id: str) -> db_alert_model | None:
         return await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == user_id)
 
@@ -268,7 +273,7 @@ class AlertManager:
 
         return {"message": f"Deleted {deleted_count} alerts of type '{alert_type}'"}
 
-    async def set_scan_running(self, tenant_id: str, value: bool) -> dict:
+    async def set_scan_running(self, tenant_id: str, value: bool, cancle_scan:bool=False) -> dict:
         alert_doc = await self._engine.find_one(
             db_alert_model, db_alert_model.tenant_id == str(tenant_id))
 
@@ -279,6 +284,10 @@ class AlertManager:
             alert_doc = db_alert_model(
                 tenant_id=str(tenant_id), scan_running=value, alerts=[])
             await self._engine.save(alert_doc)
+        
+        if(cancle_scan==True):
+            alert_job = self.get_alert_job()
+            await alert_job.get_instance().cancel_tenant_scan(tenant_id)
 
         return {"tenant_id": tenant_id, "scan_running": value}
 

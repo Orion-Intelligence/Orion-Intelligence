@@ -23,7 +23,7 @@ export class LocalSettingsModel {
   advance_setting_toggle: boolean = true;
   iocExpanded: boolean = true;
   entityfilterCategories: Record<string, string[]> = {};
-  entityFilterCondition: boolean = false;
+  entityFilterCondition: boolean = true;
   isSidebarOpen: boolean = true;
   matchType: string = "";
   sortType: string = "";
