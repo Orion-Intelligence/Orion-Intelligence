@@ -24,15 +24,16 @@ import { HttpClient } from '@angular/common/http';
 import { ConsolidatedApisComponent } from './consolidated-apis/consolidated-apis.component';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
 import { StealerLogCallbackModel } from '../../../../model/results/credentials/credential.callback.model';
-import { NgbAccordionModule } from "@ng-bootstrap/ng-bootstrap";
+import { NgbAccordionModule, NgbSlide } from "@ng-bootstrap/ng-bootstrap";
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../../services/authetication/auth.service';
+import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
 
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent, NgbAccordionModule],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent, NgbAccordionModule, NgbSlide, ConsolidatedIocComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -51,6 +52,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   public pageCounts: { [key: string]: number } = {};
 
   isGrouped = true
+  isIOC = false;
   query: string = '';
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
@@ -319,8 +321,14 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   onToggleMenu(tab: string): void {
     if (tab == "Group") {
       this.isGrouped = true
+      this.isIOC = false
       this.fetchSearchResults();
     } else if (tab == "Ranked") {
+      this.isGrouped = false
+      this.isIOC = false
+      this.fetchRanked()
+    } else if (tab == "IOCs") {
+      this.isIOC = true;
       this.isGrouped = false
       this.fetchRanked()
     }
