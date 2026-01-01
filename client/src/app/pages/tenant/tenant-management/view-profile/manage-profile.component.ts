@@ -8,11 +8,11 @@ import { User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { AddTenantComponent } from "../add-tenant/add-tenant.component";
-import {ConfirmationPopupComponent} from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { AppService } from '../../../../services/core/app/app.service';
-import {TooltipDirective} from '../../../../shared/directive/tooltip-directive.directive';
-import {finalize, switchMap, tap} from 'rxjs';
-import {NodeResolver} from '../../../../shared/resolvers/session-data-resolver.service';
+import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
+import { finalize, switchMap, tap } from 'rxjs';
+import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver.service';
 
 @Component({
   selector: 'app-view-profile',
@@ -162,6 +162,10 @@ export class ManageProfileComponent implements OnInit {
   clossAddTenant() {
     this.showAddTenantPopup = false;
   }
+  setStatus(user: User, status: 'active' | 'disable') {
+    user.status = status;
+  }
+
 
   protected readonly JSON = JSON;
 }
