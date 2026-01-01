@@ -9,6 +9,7 @@ import { GraphModel } from '../../../shared/model/charts/charts.model';
 import { GraphInsightCallbackModel } from '../../../shared/model/homepage/graph.insight.model';
 import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
 import { AppService } from '../../../services/core/app/app.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-home-insight',
@@ -24,7 +25,7 @@ export class HomeInsightComponent implements OnInit {
   latestDocumentModelKeys: string[] = [];
   GraphData!: GraphModel[];
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, public appService: AppService) {
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, public appService: AppService, protected licenseService: LicenseService) {
   }
 
   ngOnInit() {

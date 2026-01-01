@@ -11,10 +11,13 @@
       <span class="loading-bar"></span>
     </div>
 
-    <div class="loading-actions">
+    <div *ngIf="this.licenseService.getLicenses().includes('maintainer'); else brakLine" class="loading-actions">
       <button type="button" class="loading-btn loading-btn--ghost" (click)="cancelScan()">
         Cancel
       </button>
     </div>
+    <ng-template #brakLine>
+      <div class="alert-scan-loading_space"></div>
+    </ng-template>
   </div>
 </div>

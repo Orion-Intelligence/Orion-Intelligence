@@ -92,6 +92,14 @@
                             </div>
 
                             <div class="tenant-block">
+                              <div class="tenant-title">Mail</div>
+                              <div class="tenant-value">
+                                {{ tenant.email || '-' }}
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
                               <div class="tenant-title">Phone</div>
                               <div class="tenant-value">{{ tenant.phone || '-' }}</div>
                               <hr class="tenant-divider">

@@ -26,6 +26,7 @@ export interface TenantModel {
   status?: TenantStatus;
   licenses?: string[];
   quotaExceeded?: boolean;
+  email?: string;
 }
 export interface TenantRequest {
   companyName: string;

@@ -61,9 +61,11 @@
             </div>
           </div>
 
-          <div class="home_insight__divider"></div>
+          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')"
+            class="home_insight__divider"></div>
 
-          <div class="home-insight-card-footer-section">
+          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')"
+            class="home-insight-card-footer-section">
             <p appTooltip="Open Report" (click)="openReport(modelKey, item.hash, item.title)"
               class="home-insight-card-view-details-button">View Details</p>
           </div>

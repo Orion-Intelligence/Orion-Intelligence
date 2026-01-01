@@ -339,8 +339,7 @@ async def delete_all_alerts(current_user=Depends(get_current_user)):
     response_description="Result of the delete-all operation.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])),
-        Depends(license_required("maintainer")), ], )
+    dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
 async def delete_all_alerts(_type: str, current_user=Depends(get_current_user)):
     return await AlertManager.getInstance().delete_alerts_by_type(current_user, _type)
 

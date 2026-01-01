@@ -54,6 +54,7 @@ class TenantManager:
             data.city = enc.encrypt((data.city or "").encode()).decode()
             data.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
             data.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
+            data.email = enc.encrypt((data.email or "").encode()).decode()
 
             data.iocs = [IocCategory(
                 ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
@@ -141,17 +142,18 @@ class TenantManager:
         if "maintainer" in allowed_licenses and current_user.role not in ["admin"]:
             raise HTTPException(status_code=401, detail="Only admin can assign maintainer license")
 
-        users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
-        for u in users:
-            if "maintainer" in (u.licenses or []):
-                u.status = UserStatus.ACTIVE
-                if set(allowed_licenses) == {"free"}:
-                    u.licenses = ["maintainer"]
-                await self._engine.save(u)
-            elif not set(u.licenses or []).issubset(allowed_licenses):
-                u.status = UserStatus.DISABLE
-                u.licenses = ["free"]
-                await self._engine.save(u)
+        if current_user.role in ["admin"]:
+            users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
+            for u in users:
+                if "maintainer" in (u.licenses or []):
+                    u.status = UserStatus.ACTIVE
+                    if set(allowed_licenses) == {"free"}:
+                        u.licenses = ["maintainer"]
+                    await self._engine.save(u)
+                elif not set(u.licenses or []).issubset(allowed_licenses):
+                    u.status = UserStatus.DISABLE
+                    u.licenses = ["free"]
+                    await self._engine.save(u)
 
         active_count = await self._engine.count(
             db_user_account,
@@ -210,6 +212,10 @@ class TenantManager:
             tenant.city = enc.decrypt(tenant.city.encode()).decode()
             tenant.postal_code = enc.decrypt(tenant.postal_code.encode()).decode()
             tenant.licenses = [enc.decrypt(l.encode()).decode() for l in (tenant.licenses or [])]
+            if tenant.email:
+                tenant.email = enc.decrypt(tenant.email.encode()).decode()
+            else:
+                tenant.email = ""
 
             tenant.iocs = [IocCategory(
                 ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),

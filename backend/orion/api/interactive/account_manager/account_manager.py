@@ -172,6 +172,9 @@ class AccountManager:
 
             if tenant is not None and not tenant.is_default and tenant.user_quota is not None and request.status == UserStatus.ACTIVE and user.status == UserStatus.DISABLE and active_count >= tenant.user_quota:
                 raise HTTPException(status_code=400, detail="User quota exceeded1")
+            if request.status == UserStatus.ACTIVE:
+                user.status = UserStatus.ACTIVE
+
 
         user.licenses = request.licenses
         await self._engine.save(user)

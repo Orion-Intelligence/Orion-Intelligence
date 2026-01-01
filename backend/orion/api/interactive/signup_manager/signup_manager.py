@@ -77,7 +77,9 @@ class SignupManager:
             postal_code="",
             user_quota=2,
             licenses=["maintainer", "free"],
-            status=TenantStatus.ONBOARDING)
+            status=TenantStatus.ONBOARDING,
+            email=email
+            )
         await TenantManager.get_instance().create_tenant(tenant)
 
         user = db_user_account(

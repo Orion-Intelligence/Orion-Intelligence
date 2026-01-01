@@ -33,6 +33,7 @@ class db_tenant_model(Model):
     user_quota: int = 0
     status: TenantStatus = TenantStatus.DISABLE
     licenses: List[str] = []
+    email: Optional[str] = ""
 
     @model_validator(mode="before")
     @classmethod

@@ -91,9 +91,31 @@
 .selected-filter-bar__entity-filter-wrap {
   display: flex;
   gap: 16px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   flex: 1;
+}
+
+.selected-filter-bar__entity-filter-wrap::-webkit-scrollbar {
+  height: 6px;
+}
+
+.selected-filter-bar__entity-filter-wrap::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 6px;
+}
+
+.selected-filter-bar__entity-filter-wrap::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+.selected-filter-bar__entity-filter-wrap::-webkit-scrollbar {
+  height: 0;
+}
+
+.selected-filter-bar__entity-filter-wrap:hover::-webkit-scrollbar {
+  height: 6px;
 }
 
 .selected-filter-bar__no-filters-text {
@@ -123,6 +145,7 @@
   align-items: center;
   justify-content: center;
   align-self: flex-start;
+  margin-bottom: 5px;
 }
 
 .selected-filter-bar__filter-type {

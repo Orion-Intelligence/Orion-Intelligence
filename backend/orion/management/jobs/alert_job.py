@@ -273,7 +273,6 @@ class alert_job:
                 ParamModel = search_general_param_model
                 search_func = self._search_model.search_general_result
             elif category == "discussion":
-                search_data_category = ''
                 base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
                 ParamModel = search_leak_param_model
                 search_func = self._search_model.search_consolidated_ranked_result
