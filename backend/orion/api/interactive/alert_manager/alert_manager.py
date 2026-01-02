@@ -62,7 +62,7 @@ class AlertManager:
 
         if existing_doc and existing_doc.alerts:
             for alert in existing_doc.alerts:
-                if (alert.data_hash or "") == data_hash:
+                if (alert.data_hash or "") == data_hash and (alert.type or"")==category and (alert.ioc_value or"")==ioc_value:
                     alert.last_seen = datetime.now(timezone.utc)
 
                     alert_updated = True
