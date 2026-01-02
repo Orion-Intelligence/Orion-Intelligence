@@ -9,21 +9,23 @@
         </div>
         <div class="category_report_flex">
             <div class="btn-group report-menu-option-container mr-0">
-                <button (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option">
+                <button *ngIf="licenseService.isMaintainer()" (click)="showAlertPopup('add','')" appTooltip="add alert"
+                    class="p-0 report-menu-option">
                     <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
                 </button>
-                <div class="vr report-menu-divider"></div>
-                <button *ngIf="canExportstix()" type="button" (click)="fileInput.click()" appTooltip="import alert"
-                    class="p-0 report-menu-option">
+                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
+                <button *ngIf="canExportstix()&& licenseService.isMaintainer()" type="button"
+                    (click)="fileInput.click()" appTooltip="import alert" class="p-0 report-menu-option">
                     <img alt="add" height="30" width="30" src="/assets/images/shared/theme/print.svg"
                         class="rotate-180" />
                 </button>
                 <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
-                <div *ngIf="canExportstix()" class="vr report-menu-divider"></div>
-                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="this.alerts.length>0">
+                <div *ngIf="canExportstix() && licenseService.isMaintainer()" class="vr report-menu-divider"></div>
+                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option"
+                    *ngIf="this.alerts.length>0 &&licenseService.isMaintainer()">
                     <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" />
                 </button>
-                <div class="vr report-menu-divider"></div>
+                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
                 <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option">
                     <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" />
                 </button>
@@ -89,26 +91,27 @@
                         {{ item.risk }} Risk
                     </span>
                 </div>
-                <div class="dropdown">
+                <div class="dropdown" *ngIf="canExportstix()||licenseService.isMaintainer()">
                     <span class="category_report_burger-icon" role="button" id="dropdownMenu" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <img src="/assets/images/shared/theme/burger_icon.svg" alt="menu">
                     </span>
 
                     <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownMenu">
-                        <li *ngIf="item.custom">
+                        <li *ngIf="item.custom&&licenseService.isMaintainer()">
                             <a class="dropdown-item" (click)="showAlertPopup('edit', item.id)">Edit Alert</a>
                         </li>
-                        <li *ngIf="item.custom">
+                        <li *ngIf="item.custom &&licenseService.isMaintainer()">
                             <hr class="dropdown-divider mx-3" />
                         </li>
                         <li *ngIf="canExportstix()"><a class="dropdown-item" (click)="exportAlert(item.hash)">Export
                                 Alert</a></li>
-                        <li *ngIf="canExportstix()">
+                        <li *ngIf="canExportstix()&&licenseService.isMaintainer()">
                             <hr class="dropdown-divider mx-3" />
                         </li>
                         <li>
-                            <a class="dropdown-item" (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
+                            <a *ngIf="licenseService.isMaintainer()" class="dropdown-item"
+                                (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
                         </li>
                     </ul>
                 </div>

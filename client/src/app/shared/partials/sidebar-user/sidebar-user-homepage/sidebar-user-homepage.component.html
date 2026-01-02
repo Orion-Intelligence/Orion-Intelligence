@@ -14,12 +14,14 @@
                             appTooltip="Print Alerts" class="p-0 report-menu-option">
                             <img src="assets/images/shared/theme/print.svg" height="25" alt="print" />
                         </button>
-                        <div class="vr report-menu-divider"></div>
-                        <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0">
+                        <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
+                        <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option"
+                            *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()">
                             <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" />
                         </button>
-                        <div class="vr report-menu-divider"></div>
-                        <button (click)="scanIOCs()" appTooltip="scan all" class="p-0 report-menu-option">
+                        <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
+                        <button *ngIf="licenseService.isMaintainer()" (click)="scanIOCs()" appTooltip="scan all"
+                            class="p-0 report-menu-option">
                             <img alt="scan" height="20" ngSrc="assets/images/sidebar/theme/scanner.svg" width="20" />
                         </button>
                     </div>
