@@ -4,7 +4,7 @@ import { DashboardService } from '../../../../../services/dashboard/dashboard.se
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
-import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
+import { NgForOf, NgIf, TitleCasePipe, CommonModule } from '@angular/common';
 import { ResultComponent } from '../../../result/result.component';
 import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
 import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
@@ -32,7 +32,7 @@ import { AuthService } from '../../../../../services/authetication/auth.service'
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent, NgbAccordionModule],
+  imports: [CommonModule, NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent, NgbAccordionModule],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -55,6 +55,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
   firstTrigger = true;
+  isScanningExpanded = true;
   result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
@@ -103,7 +104,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.firstTrigger = false;
     });
   }
-
   fetchSearchResults(_ = false): void {
     if (this.licenseService.canUseScanning()) {
       this.liveApiSearchComponent.runSearch(this.dashboardService.consolidatedParamModel.q)
@@ -376,4 +376,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!isLoading && !isStealerLogLoading && !hasDefacementModel && !hasStealerLogModel) return false;
     return false;
   });
+  toggleScanningCollapse(): void {
+    this.isScanningExpanded = !this.isScanningExpanded;
+    console.log(this.isScanningExpanded)
+  }
 }
