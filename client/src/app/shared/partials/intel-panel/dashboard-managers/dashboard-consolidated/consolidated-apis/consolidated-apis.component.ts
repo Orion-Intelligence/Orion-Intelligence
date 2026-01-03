@@ -6,7 +6,7 @@ import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-consolidated-apis',
-  imports: [NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass],
+  imports: [NgIf, NgSwitch, NgSwitchCase, NgFor],
   templateUrl: './consolidated-apis.component.html'
 })
 export class ConsolidatedApisComponent {
