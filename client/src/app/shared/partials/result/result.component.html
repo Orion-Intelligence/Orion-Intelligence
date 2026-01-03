@@ -13,7 +13,7 @@
               priority width="16">
           </button>
           <input #searchInput class="search-trigger form-control default-input dashboard-general-input"
-            [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="350" name="q"
+            data-cy="dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="350" name="q"
             placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
           <input type="hidden" value="1">
           <button type="button" class="btn input-cross" aria-label="Clear"

@@ -1,24 +1,54 @@
-<app-pro-subscription *ngIf="dashboardService.showSubscription()" (close)="hideSubscription()"></app-pro-subscription>
-<div *ngIf="!isCtiGraph()">
-  <div id="top"></div>
-  <div class="row dashboard_sidebar-main" id="dashboard__sidebar-main">
-    <input class="dashboard_menu-toggle" id="dashboard__menu-toggle" name="menu-input" type="radio">
+<app-pro-subscription
+  *ngIf="dashboardService.showSubscription()"
+  (close)="hideSubscription()"
+  data-cy="pro-subscription">
+</app-pro-subscription>
 
-    <div [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }" class="dashboard_sidebar" *ngIf="!authService.getIsMobileDemo()">
-      <app-dashboard-sidebar (menuToggle)="toggleNavigation()"></app-dashboard-sidebar>
+<div *ngIf="!isCtiGraph()" data-cy="dashboard-main-container">
+  <div id="top" data-cy="top"></div>
+
+  <div class="row dashboard_sidebar-main" id="dashboard__sidebar-main" data-cy="dashboard-sidebar-main">
+
+    <input
+      class="dashboard_menu-toggle"
+      id="dashboard__menu-toggle"
+      name="menu-input"
+      type="radio"
+      data-cy="menu-toggle">
+
+    <div
+      [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }"
+      class="dashboard_sidebar"
+      *ngIf="!authService.getIsMobileDemo()"
+      data-cy="dashboard-sidebar">
+
+      <app-dashboard-sidebar
+        (menuToggle)="toggleNavigation()"
+        data-cy="dashboard-sidebar-component">
+      </app-dashboard-sidebar>
     </div>
 
-    <div class="dashboard_container">
-      <div class="dashboard_sub-container dashboard_content-scroll" id="dashboard-container">
-        <app-dashboard-header></app-dashboard-header>
-        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard_body">
-          <router-outlet #routerOutlet="outlet"></router-outlet>
+    <div class="dashboard_container" data-cy="dashboard-container">
+      <div
+        class="dashboard_sub-container dashboard_content-scroll"
+        id="dashboard-container"
+        data-cy="dashboard-sub-container">
+
+        <app-dashboard-header data-cy="dashboard-header"></app-dashboard-header>
+
+        <span
+          [@dashboard-global-animation]="prepareRoute(routerOutlet)"
+          class="dashboard_body"
+          data-cy="dashboard-body">
+
+          <router-outlet #routerOutlet="outlet" data-cy="router-outlet"></router-outlet>
         </span>
       </div>
     </div>
+
   </div>
 </div>
 
-<div *ngIf="isCtiGraph()">
-  <router-outlet></router-outlet>
+<div *ngIf="isCtiGraph()" data-cy="cti-graph-container">
+  <router-outlet data-cy="cti-router-outlet"></router-outlet>
 </div>

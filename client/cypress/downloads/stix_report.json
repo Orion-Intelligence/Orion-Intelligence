@@ -1,0 +1,273 @@
+{
+  "type": "bundle",
+  "id": "bundle--918ca044-e242-59d7-bf17-bb7da56bba0f",
+  "spec_version": "2.1",
+  "objects": [
+    {
+      "type": "marking-definition",
+      "spec_version": "2.1",
+      "id": "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd",
+      "created": "2025-11-26T18:15:16.619Z",
+      "definition_type": "tlp",
+      "definition": {
+        "tlp": "amber"
+      }
+    },
+    {
+      "type": "marking-definition",
+      "spec_version": "2.1",
+      "id": "marking-definition--2676b2c3-1d57-5b0f-9ca4-0cf2ceaa9eb2",
+      "created": "2025-11-26T18:15:16.619Z",
+      "definition_type": "tlp",
+      "definition": {
+        "tlp": "red"
+      }
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--451904b6-df13-551e-822b-71b58da7cbd5",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "Ireland",
+      "country": "Ireland",
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--411f710e-b6c7-5e2b-a66d-7d2da7c9b5d6",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "Isle of Man",
+      "country": "Isle of Man",
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--e2bbd509-ee96-5747-ae9d-5cf22f31badd",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "Guernsey",
+      "country": "Guernsey",
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--7a657e1f-6d87-5ffe-914e-baa7946143be",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "Ukraine",
+      "country": "Ukraine",
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--0ef77be0-d84d-56f9-a90c-46b21fa9a2f6",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "Israel",
+      "country": "Israel",
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--6ea79b8f-a338-5562-a4cf-4af3efcf4711",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "Jersey",
+      "country": "Jersey",
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "infrastructure",
+      "spec_version": "2.1",
+      "id": "infrastructure--a2d5ab4e-0321-5d4c-b988-681f01fe5cbf",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "uk latest & updates | bbc news",
+      "description": "you are now following uk updates from your news topics will appear in the chancellor says she's taking \"direct action to tackle cost of living\" by saving households 150 on their energy bills and scrapping the two-child benefit cap 'we make 100,000 the cut to cash isa limit is a big blow' electric vehicle owners to face pay-per-mile tax giant deer's christmas adventure to be shown in irish welsh tax, benefits and minimum wage what does the budget mean for scotland sudanese family says racist graffiti will not force them to leave home terror group palestine action like the suffragettes, court hears 'we work hard, you want to get the best out of it' - budget minimum wage rise welcomed arrests at farmers' central london tractor protest child benefit change will create a 'little buffer' how the",
+      "infrastructure_types": [
+        "anonymization"
+      ],
+      "first_seen": "2025-11-26T18:15:16.619Z",
+      "last_seen": "2025-11-26T18:15:16.619Z",
+      "labels": [
+        "adult",
+        "news",
+        "onion",
+        "orion:general"
+      ],
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ],
+      "x_orion_network": "onion"
+    },
+    {
+      "type": "url",
+      "id": "url--c729bb55-5de3-511c-b5bd-a5ef5769ba4f",
+      "value": "http://bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion/news/uk"
+    },
+    {
+      "type": "domain-name",
+      "id": "domain-name--a6f35a98-7db2-5300-bb09-6bd1947d96b3",
+      "value": "bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion"
+    },
+    {
+      "type": "domain-name",
+      "id": "domain-name--f65662b3-fbcf-59e5-8514-0bc7f850b9c7",
+      "value": "facebook.com"
+    },
+    {
+      "type": "domain-name",
+      "id": "domain-name--2e2053d5-e914-5bf1-88ec-cd01bf019fd0",
+      "value": "instagram.com"
+    },
+    {
+      "type": "domain-name",
+      "id": "domain-name--3899f36a-c39b-5113-a726-ee4a66300ded",
+      "value": "tiktok.com"
+    },
+    {
+      "type": "domain-name",
+      "id": "domain-name--2ff758ec-90c3-5312-8433-51401dc3c539",
+      "value": "twitter.com"
+    },
+    {
+      "type": "observed-data",
+      "spec_version": "2.1",
+      "id": "observed-data--37fe2ba2-e4f7-5883-84a6-bcb7c49d6e80",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "first_observed": "2025-11-26T18:15:16.619Z",
+      "last_observed": "2025-11-26T18:15:16.619Z",
+      "number_observed": 1,
+      "object_refs": [
+        "domain-name--2e2053d5-e914-5bf1-88ec-cd01bf019fd0",
+        "domain-name--2ff758ec-90c3-5312-8433-51401dc3c539",
+        "domain-name--3899f36a-c39b-5113-a726-ee4a66300ded",
+        "domain-name--a6f35a98-7db2-5300-bb09-6bd1947d96b3",
+        "domain-name--f65662b3-fbcf-59e5-8514-0bc7f850b9c7",
+        "url--c729bb55-5de3-511c-b5bd-a5ef5769ba4f"
+      ],
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--d7f031b8-cbe6-5eec-8f4e-e520d2afeeca",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "Domains",
+      "description": "you are now following uk updates from your news topics will appear in the chancellor says she's taking \"direct action to tackle cost of living\" by saving households 150 on their energy bills and scrapping the two-child benefit cap 'we make 100,000 the cut to cash isa limit is a big blow' electric vehicle owners to face pay-per-mile tax giant deer's christmas adventure to be shown in irish welsh tax, benefits and minimum wage what does the budget mean for scotland sudanese family says racist graffiti will not force them to leave home terror group palestine action like the suffragettes, court hears 'we work hard, you want to get the best out of it' - budget minimum wage rise welcomed arrests at farmers' central london tractor protest child benefit change will create a 'little buffer' how the",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern_type": "stix",
+      "pattern": "[domain-name:value IN ('bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion', 'facebook.com', 'instagram.com', 'tiktok.com', 'twitter.com')]",
+      "valid_from": "2025-11-26T18:15:16.619Z",
+      "labels": [
+        "adult",
+        "news",
+        "onion",
+        "orion:general"
+      ],
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--fe3bd9b3-ba82-5553-b438-b1eae738acec",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "URLs",
+      "description": "you are now following uk updates from your news topics will appear in the chancellor says she's taking \"direct action to tackle cost of living\" by saving households 150 on their energy bills and scrapping the two-child benefit cap 'we make 100,000 the cut to cash isa limit is a big blow' electric vehicle owners to face pay-per-mile tax giant deer's christmas adventure to be shown in irish welsh tax, benefits and minimum wage what does the budget mean for scotland sudanese family says racist graffiti will not force them to leave home terror group palestine action like the suffragettes, court hears 'we work hard, you want to get the best out of it' - budget minimum wage rise welcomed arrests at farmers' central london tractor protest child benefit change will create a 'little buffer' how the",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern_type": "stix",
+      "pattern": "[url:value IN ('http://bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion/news/uk')]",
+      "valid_from": "2025-11-26T18:15:16.619Z",
+      "labels": [
+        "adult",
+        "news",
+        "onion",
+        "orion:general"
+      ],
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "report",
+      "spec_version": "2.1",
+      "id": "report--df99cd92-f83e-5dda-8a71-02bfad542b75",
+      "created": "2025-11-26T18:15:16.619Z",
+      "modified": "2025-11-26T18:15:16.619Z",
+      "name": "uk latest & updates | bbc news",
+      "description": "you are now following uk updates from your news topics will appear in the chancellor says she's taking \"direct action to tackle cost of living\" by saving households 150 on their energy bills and scrapping the two-child benefit cap 'we make 100,000 the cut to cash isa limit is a big blow' electric vehicle owners to face pay-per-mile tax giant deer's christmas adventure to be shown in irish welsh tax, benefits and minimum wage what does the budget mean for scotland sudanese family says racist graffiti will not force them to leave home terror group palestine action like the suffragettes, court hears 'we work hard, you want to get the best out of it' - budget minimum wage rise welcomed arrests at farmers' central london tractor protest child benefit change will create a 'little buffer' how the",
+      "report_types": [
+        "threat-report"
+      ],
+      "published": "2025-11-26T18:15:16.619Z",
+      "labels": [
+        "adult",
+        "news",
+        "onion",
+        "orion:general"
+      ],
+      "lang": "en",
+      "external_references": [
+        {
+          "source_name": "source",
+          "url": "http://bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion/news/uk"
+        },
+        {
+          "source_name": "base_url",
+          "url": "http://bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion"
+        },
+        {
+          "source_name": "content-hash",
+          "external_id": "75ae48812031215e0f7662e5fbfc8c8f64ee93bb51ba7669eb7d10acca349a9d"
+        }
+      ],
+      "object_refs": [
+        "indicator--d7f031b8-cbe6-5eec-8f4e-e520d2afeeca",
+        "indicator--fe3bd9b3-ba82-5553-b438-b1eae738acec",
+        "infrastructure--a2d5ab4e-0321-5d4c-b988-681f01fe5cbf",
+        "location--0ef77be0-d84d-56f9-a90c-46b21fa9a2f6",
+        "location--411f710e-b6c7-5e2b-a66d-7d2da7c9b5d6",
+        "location--451904b6-df13-551e-822b-71b58da7cbd5",
+        "location--6ea79b8f-a338-5562-a4cf-4af3efcf4711",
+        "location--7a657e1f-6d87-5ffe-914e-baa7946143be",
+        "location--e2bbd509-ee96-5747-ae9d-5cf22f31badd",
+        "observed-data--37fe2ba2-e4f7-5883-84a6-bcb7c49d6e80"
+      ],
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ],
+      "x_orion_doc_id": "75ae48812031215e0f7662e5fbfc8c8f64ee93bb51ba7669eb7d10acca349a9d",
+      "x_orion_network": "onion"
+    }
+  ]
+}
