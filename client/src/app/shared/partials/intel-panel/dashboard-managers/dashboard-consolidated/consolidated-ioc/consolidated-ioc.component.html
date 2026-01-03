@@ -1,0 +1,62 @@
+<div class="consolidated-ioc-container">
+    <div class="consolidated-ioc-stats">
+        <div class="consolidated-ioc-stat-card">
+            <img class="consolidated-ioc-icon" src="assets/images/shared/theme/alert-categories-icon.svg" alt="icon" />
+            <div>
+                <div class="consolidated-ioc-stat-value">481 ms</div>
+                <div class="consolidated-ioc-stat-label"> Search Elapsed Time </div>
+            </div>
+        </div>
+        <div class="consolidated-ioc-stat-card">
+            <img class="consolidated-ioc-icon" src="assets/images/shared/theme/alert-categories-icon.svg" alt="icon" />
+            <div>
+                <div class="consolidated-ioc-stat-value">192</div>
+                <div class="consolidated-ioc-stat-label">Results Found</div>
+            </div>
+        </div>
+        <div class="consolidated-ioc-stat-card">
+            <img class="consolidated-ioc-icon" src="assets/images/shared/theme/alert-categories-icon.svg" alt="icon" />
+            <div>
+                <div class="consolidated-ioc-stat-value">23,326,854,280</div>
+                <div class="consolidated-ioc-stat-label">Assets Searched</div>
+            </div>
+        </div>
+        <div class="consolidated-ioc-stat-card">
+            <img class="consolidated-ioc-icon" src="assets/images/shared/theme/alert-categories-icon.svg" alt="icon" />
+            <div>
+                <div class="consolidated-ioc-stat-value">23,995</div>
+                <div class="consolidated-ioc-stat-label">Aggregated Data Wells</div>
+            </div>
+        </div>
+    </div>
+    <div class="consolidated-ioc-table">
+
+        <div class="consolidated-ioc-header">
+            <div>Email / Domain</div>
+            <div>Category</div>
+            <div></div>
+        </div>
+
+        <ng-container *ngFor="let row of rows">
+            <div class="consolidated-ioc-row">
+                <div>{{ row.email }}</div>
+                <div>{{ row.category }}</div>
+                <div class="consolidated-ioc-expand" (click)="toggleRow(row)">
+                    <img [src]="row.expanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/plus.svg'"
+                        alt="toggle" />
+                </div>
+            </div>
+            <div class="consolidated-ioc-expanded" *ngIf="row.expanded">
+                <p><strong>Description:</strong> {{ row.details.description }}</p>
+
+                <div class="consolidated-ioc-tags">
+                    <span *ngFor="let src of row.details.sources">
+                        {{ src }}
+                    </span>
+                </div>
+            </div>
+
+        </ng-container>
+
+    </div>
+</div>
