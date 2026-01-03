@@ -116,3 +116,72 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+
+
+
+
+
+
+
+.scan-card {
+  background: var(--color-border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.scan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #cfd6e4;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #a8c7ff;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: #5aa8ff;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #2f3b4d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #63ff8f, #2ecc71);
+  transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: #b7c1d6;
+  text-align: right;
+}

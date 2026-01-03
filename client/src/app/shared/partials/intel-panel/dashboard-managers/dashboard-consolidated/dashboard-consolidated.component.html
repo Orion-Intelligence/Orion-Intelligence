@@ -5,10 +5,24 @@
   (resetFilter)="resetFilters($event)" [showSelectedFilters]="true"></app-result>
 
 <br>
-<ng-container *ngIf="licenseService.canUseScanning()">
-  <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
-  <app-consolidated-apis [isLoading]="isLoading()" #liveApiSearch></app-consolidated-apis>
-</ng-container>
+<div class="consolidated_scanning" *ngIf="licenseService.canUseScanning()">
+  <div class="scan_loading-header">
+    <div class="scan_section-title">
+      Threats Scans Report: {{ query }}
+    </div>
+    <button class="expand-collapse-btn" (click)="toggleScanningCollapse()">
+      <img src="assets/images/shared/theme/cheveron-right.svg" [class.rotated]="isScanningExpanded" />
+    </button>
+  </div>
+  <ng-container *ngIf="licenseService.canUseScanning()">
+    <div [hidden]="!isScanningExpanded" class="consolidated_scanning-layout">
+      <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
+      <app-consolidated-apis [isLoading]="isLoading()" #liveApiSearch></app-consolidated-apis>
+    </div>
+  </ng-container>
+</div>
+
+
 
 <div *ngIf="!isLoading()" @fadeInDashboardItem>
   <ng-container>
@@ -43,7 +57,8 @@
                   <div>{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
                   <div class="left-text-small">Result count {{ pageCounts[index.key] || 0 }}</div>
                 </span>
-                <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content" *ngIf="!this.licenseService.isMaintainer()">
+                <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content"
+                  *ngIf="!this.licenseService.isMaintainer()">
                   Explore
                   <button appTooltip="Open Page" class="p-0 expand-toggle-btn" [disabled]="!(index.value.length > 0)">
                     <img alt="background" height="20" src="/assets/images/shared/theme/explore_icon.svg" width="20">

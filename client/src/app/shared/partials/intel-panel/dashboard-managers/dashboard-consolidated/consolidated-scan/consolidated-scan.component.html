@@ -1,32 +1,37 @@
 <div class="domain-scan-container" *ngIf="showComponent && !isLoading">
-  <div class="scan_report-section-main" [ngClass]="{
-      'scan_report-section-collapsed': !isExpanded,
-      'scan_report-section-loading': isProcessing,
-      'scan_report-section-loaded': !isProcessing && (scanResult$ | async)?.length
-    }">
-    <div class="scan_loading-header">
-      <div class="loading-circle" *ngIf="isProcessing"></div>
-      <div class="scan_section-title">
-        Scan Results for: {{ query }}
-      </div>
-      <button class="expand-collapse-btn" [ngClass]="{ 'is-disabled': isProcessing }" [disabled]="isProcessing"
-              (click)="toggleCollapse()">
-        <img src="assets/images/shared/theme/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
-      </button>
+  <div class="scan-card" *ngIf="isProcessing">
+    <div class="scan-header">
+      <span class="title">Threats scans</span>
+      <span class="status">
+        <span class="dot"></span>
+        Collecting intelligence...
+      </span>
     </div>
 
-    <ng-container *ngIf="isProcessing">
-      <div class="wait-message">Scanning in progress... Please wait.</div>
-    </ng-container>
+    <div class="progress-wrapper">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progress">
+        </div>
+      </div>
+
+      <div class="progress-text">
+        {{ progress }}% complete
+      </div>
+    </div>
+  </div>
+  <div class="scan-card" *ngIf="!isProcessing">
+    <div class="scan_loading-header">
+      <div class="scan_section-title">
+        Open Web Presence Scan
+      </div>
+    </div>
 
     <ng-container *ngIf="!isProcessing && isExpanded && (scanResult$ | async) as results">
       <div class="scan_content-wrapper" @fadeInDashboardItem>
 
         <ng-container *ngFor="let result of results; let first = first">
-          <div class="right-content color-text1 cursor-pointer explore"
-               *ngIf="!result.hasError && result.meta"
-               @fadeInDashboardItem
-               [routerLink]="[
+          <div class="right-content color-text1 cursor-pointer explore" *ngIf="!result.hasError && result.meta"
+            @fadeInDashboardItem [routerLink]="[
                    result.scanType === 'seo'
                      ? '/dashboard/scanner/seo-scan'
                      : result.scanType === 'basic'
@@ -34,19 +39,17 @@
                        : result.scanType === 'repo'
                          ? '/dashboard/scanner/repository-scan'
                          : '/dashboard/scanner/' + result.scanType
-                 ]"
-               [queryParams]="{
+                 ]" [queryParams]="{
                    q: '',
                    page: 1,
                    matchtype: 'or',
                    domain: result.domain,
                    scanType: result.scanType
-                 }"
-               target="_blank">
+                 }" target="_blank">
             Explore {{ result.scanType | uppercase }}
             <button appTooltip="Open Page" class="ml-2 p-0 mt-0 expand-toggle-btn">
               <img alt="background" class="scan_explore-icon" height="20"
-                   src="/assets/images/shared/theme/explore_icon.svg" width="20">
+                src="/assets/images/shared/theme/explore_icon.svg" width="20">
             </button>
           </div>
 

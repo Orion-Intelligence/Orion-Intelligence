@@ -114,6 +114,24 @@
   margin-top: 35px;
 }
 
+.consolidated_scanning {
+  background: var(--color-consolidated-primary);
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid var(--color-border);
+  transition: opacity 0.3s ease, height 0.5s ease;
+  overflow: hidden;
+  margin-left: 35px;
+  margin-right: 50px;
+}
+
+.consolidated_scanning-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
 @media (width <=1299px) {
   .dashboard__layout-wrapper {
     flex-direction: column;

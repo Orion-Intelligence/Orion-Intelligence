@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { NgIf, NgFor, NgClass, AsyncPipe, CommonModule } from '@angular/common';
 import { ConsolidatedApiService } from '../../../../../services/consolidated.api.service';
 import { ConsolidatedScanResults } from '../../../../../model/results/consolidated/consolidated.callback.model';
@@ -15,16 +15,29 @@ import { parse } from 'tldts';
   templateUrl: './consolidated-scan.component.html',
   animations: [fadeInDashboardItem]
 })
-export class ConsolidatedScanComponent {
+export class ConsolidatedScanComponent implements OnInit {
   query: string = '';
   scanResult$: Observable<ConsolidatedScanResults[] | null> = of(null);
   isProcessing: boolean = false;
   isExpanded: boolean = false;
   showComponent: boolean = false;
+  progress = 0;
   @Input() isLoading!: boolean;
 
   constructor(private liveApiService: ConsolidatedApiService) { }
+  ngOnInit(): void {
+    this.startFakeScan();
+  }
 
+  startFakeScan() {
+    const interval = setInterval(() => {
+      if (this.progress >= 97) {
+        clearInterval(interval);
+      } else {
+        this.progress += 1;
+      }
+    }, 1000);
+  }
   private getQueryType(q: string): 'repo' | 'domain' | 'invalid' {
     const trimmed = q.trim().toLowerCase();
     if (!trimmed) return 'invalid';
