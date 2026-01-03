@@ -41,7 +41,6 @@ export class ReportHeaderComponent {
     let ci = tree.queryParams['ci'];
     if (ci === 'general') ci = 'strategic';
     if (ci === 'leak' || ci ==="feed") ci = 'breach';
-
     this.api.get<any>(`search/${ci}/stix/${id}`).subscribe((res) => {
       this.helperService.downloadstixJson(res);
     });

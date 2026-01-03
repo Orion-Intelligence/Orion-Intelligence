@@ -300,6 +300,14 @@ class AlertManager:
             return {"scan_running": alerts_data.scan_running}
         return {"scan_running": False}
 
+    async def get_scan_status_by_tenant_id(self, tenant_id):
+        alerts_data = await self._engine.find_one(
+            db_alert_model, db_alert_model.tenant_id == str(tenant_id))
+
+        if alerts_data:
+            return {"scan_running": alerts_data.scan_running}
+        return {"scan_running": False}
+
     @staticmethod
     def get_allowed_alert_types(user) -> set[str]:
         permissions = get_user_permissions(user)

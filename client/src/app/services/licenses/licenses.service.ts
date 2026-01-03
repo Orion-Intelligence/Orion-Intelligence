@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LicenseName } from '../../shared/model/licenses/license.rules';
 import { license_rules } from '../../shared/constants/shared-enums';
-import { AuthService } from '../authetication/auth.service';
-import { map, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { SubscriptionService } from '../dashboard/subscription.service';
 import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/dashboard.service';
@@ -49,6 +48,7 @@ export class LicenseService {
             if (!rule) continue;
 
             if (rule.modules === 'all') {
+                console.log("c2")
                 combined.modules = 'all';
             } else if (combined.modules !== 'all') {
                 for (const m of rule.modules) {
@@ -87,8 +87,9 @@ export class LicenseService {
         const rule = this.getCombinedRule();
         if (this.subscriptionService.isDemo() || this.appService.userSessionData().user.role == "admin") {
             return true
-        } else
+        } else{
             return (rule.modules === 'all' || rule.modules.has(moduleName))
+        }
     }
 
     canUseCtiGraph(): boolean {

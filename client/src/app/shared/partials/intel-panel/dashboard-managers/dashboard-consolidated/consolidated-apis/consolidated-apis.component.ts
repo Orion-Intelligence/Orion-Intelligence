@@ -6,7 +6,7 @@ import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-consolidated-apis',
-  imports: [NgIf, NgSwitch, NgSwitchCase, NgFor],
+  imports: [NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass],
   templateUrl: './consolidated-apis.component.html'
 })
 export class ConsolidatedApisComponent {
@@ -17,23 +17,14 @@ export class ConsolidatedApisComponent {
   isProcessing: boolean = false;
   showComponent: boolean = false;
   isExpanded: boolean = true;
-  progress = 0;
   @Input() isLoading!: boolean;
 
   constructor(private liveApiService: ConsolidatedApiService) { }
 
   ngOnInit(): void {
-    this.startFakeScan()
+
   }
-  startFakeScan() {
-    const interval = setInterval(() => {
-      if (this.progress >= 97) {
-        clearInterval(interval);
-      } else {
-        this.progress += 1;
-      }
-    }, 1200);
-  }
+
   public toggleCollapse(): void {
     if (!this.isProcessing) {
       this.isExpanded = !this.isExpanded;

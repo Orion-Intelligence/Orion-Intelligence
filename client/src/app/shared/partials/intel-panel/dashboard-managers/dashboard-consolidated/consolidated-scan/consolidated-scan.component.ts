@@ -1,200 +1,231 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { NgIf, NgFor, NgClass, AsyncPipe, CommonModule } from '@angular/common';
-import { ConsolidatedApiService } from '../../../../../services/consolidated.api.service';
-import { ConsolidatedScanResults } from '../../../../../model/results/consolidated/consolidated.callback.model';
-import { finalize, forkJoin, Observable, of } from 'rxjs';
-import { TooltipDirective } from '../../../../../directive/tooltip-directive.directive';
-import { fadeInDashboardItem } from '../../../../../animations/dashboard.item.animation';
-import { RouterLink } from '@angular/router';
-import { parse } from 'tldts';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Observable, merge} from 'rxjs';
+import {finalize, map} from 'rxjs/operators';
+import {ConsolidatedApiService} from '../../../../../services/consolidated.api.service';
+import {
+  ConsolidatedScanResults,
+  ConsolidatedLiveApiResults,
+  ConsolidatedLiveApis
+} from '../../../../../model/results/consolidated/consolidated.callback.model';
+import {trigger, transition, style, animate} from '@angular/animations';
+
+type ScanKey = 'basic' | 'seo' | 'repo' | 'liveapi';
+type PendingMsg = { status: 'pending'; progress?: number; step?: string };
+
+export const scanAnimation = trigger('scanAnimation', [
+  transition(':enter', [
+    style({opacity: 0, transform: 'translateY(10px) scale(0.985)'}),
+    animate('260ms cubic-bezier(0.16, 1, 0.3, 1)', style({opacity: 1, transform: 'translateY(0) scale(1)'}))
+  ]),
+  transition(':leave', [
+    animate('220ms cubic-bezier(0.4, 0, 0.2, 1)', style({opacity: 0, transform: 'translateY(6px) scale(0.985)'}))
+  ])
+]);
 
 @Component({
   selector: 'app-consolidated-scan',
   standalone: true,
-  imports: [CommonModule, NgIf, NgFor, NgClass, AsyncPipe, TooltipDirective, RouterLink],
+  imports: [CommonModule],
   templateUrl: './consolidated-scan.component.html',
-  animations: [fadeInDashboardItem]
+  styleUrls: ['./consolidated-scan.component.css'],
+  animations: [scanAnimation]
 })
-export class ConsolidatedScanComponent implements OnInit {
-  query: string = '';
-  scanResult$: Observable<ConsolidatedScanResults[] | null> = of(null);
-  isProcessing: boolean = false;
-  isExpanded: boolean = false;
-  showComponent: boolean = false;
-  progress = 0;
+export class ConsolidatedScanComponent {
   @Input() isLoading!: boolean;
+  isProcessing = false;
+  isCollapsed = false;
+  targetLabel = '';
+  expectedTypes: ScanKey[] = [];
 
-  constructor(private liveApiService: ConsolidatedApiService) { }
-  ngOnInit(): void {
-    this.startFakeScan();
+  private resultsByType: Partial<Record<Exclude<ScanKey, 'liveapi'>, ConsolidatedScanResults>> = {};
+  private progressByType: Partial<Record<ScanKey, number>> = {};
+
+  private liveApiEntities: ConsolidatedLiveApis[] = [];
+  liveApiResults: ConsolidatedLiveApiResults[] = [];
+
+  constructor(private api: ConsolidatedApiService) {
   }
 
-  startFakeScan() {
-    const interval = setInterval(() => {
-      if (this.progress >= 97) {
-        clearInterval(interval);
-      } else {
-        this.progress += 1;
-      }
-    }, 1000);
-  }
-  private getQueryType(q: string): 'repo' | 'domain' | 'invalid' {
-    const trimmed = q.trim().toLowerCase();
-    if (!trimmed) return 'invalid';
-    if (trimmed.includes('github.com/') && trimmed.includes('/', trimmed.indexOf('github.com/') + 12)) {
-      return 'repo';
-    }
-    if (this.validateAndExtractDomain(q)) {
-      return 'domain';
-    }
-
-    return 'invalid';
-  }
-  private extractRepoPath(q: string): string {
-    const trimmed = q.trim();
-    if (trimmed.includes('github.com/')) {
-      const parts = trimmed.split('github.com/')[1]?.split('/');
-      if (parts && parts.length >= 2 && parts[0] && parts[1]) {
-        return `${parts[0]}/${parts[1]}`;
-      }
-    }
-    return '';
-  }
-  public runScan(newQuery: string): void {
-    this.query = newQuery;
-    let queryType = this.getQueryType(newQuery);
-
-    let target: string | null = null;
-    if (queryType === 'repo') {
-      target = newQuery.trim();
-      if (!this.extractRepoPath(target)) {
-        queryType = 'invalid';
-      }
-
-    } else if (queryType === 'domain') {
-      target = this.validateAndExtractDomain(newQuery);
-    }
-
-    if (queryType === 'invalid' || !target) {
-      this.showComponent = false;
-      this.isExpanded = false;
-      this.isProcessing = false;
-      this.scanResult$ = of(null);
-      return;
-    }
-
-    this.isExpanded = false;
-    this.showComponent = true;
-    this.initAndScan(target, queryType);
+  toggleCollapse(): void {
+    this.isCollapsed = !this.isCollapsed
   }
 
-  private validateAndExtractDomain(q: string): string {
-    if (!q) return '';
-    let trimmed = q.trim().toLowerCase();
+  runScan(q: string): void {
+    const input = (q || '').trim();
+    if (!input) return;
 
-    const isURL = trimmed.startsWith('http://') || trimmed.startsWith('https://');
-    if (isURL) {
-      trimmed = trimmed.replace(/^https?:\/\//, '');
-      if (trimmed.includes('/')) {
-        trimmed = trimmed.split('/')[0];
-      }
-    }
+    this.targetLabel = input;
 
-    if (trimmed.startsWith('www.')) {
-      trimmed = trimmed.slice(4);
-    }
+    const isRepo = input.includes('github.com/');
+    this.expectedTypes = (isRepo ? ['repo', 'liveapi'] : ['basic', 'seo', 'liveapi']) as ScanKey[];
 
-    if (!trimmed || /\s/.test(trimmed)) {
-      return '';
-    }
+    this.resultsByType = {};
+    this.progressByType = {};
+    this.liveApiResults = [];
 
-    const atIdx = trimmed.lastIndexOf('@');
-    if (atIdx !== -1) {
-      trimmed = trimmed.slice(atIdx + 1);
-    }
+    for (const t of this.expectedTypes) this.progressByType[t] = 0;
 
-    const parsed = parse(trimmed);
-    if (!parsed.domain) return '';
-
-    const blockedDomains = new Set([
-      'google.com', 'bing.com', 'yahoo.com', 'duckduckgo.com', 'baidu.com', 'yandex.ru', 'ask.com',
-      'facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'linkedin.com', 'reddit.com', 'tiktok.com',
-      'snapchat.com', 'pinterest.com', 'threads.net', 'wechat.com', 'weibo.com', 'discord.com', 'twitch.tv',
-      'gmail.com', 'hotmail.com', 'outlook.com', 'protonmail.com', 'icloud.com', 'aol.com', 'zoho.com',
-      'apple.com', 'microsoft.com', 'amazon.com', 'netflix.com', 'youtube.com', 'spotify.com', 'adobe.com',
-      'openai.com', 'github.com', 'gitlab.com', 'bitbucket.org', 'notion.so', 'slack.com', 'dropbox.com',
-      'salesforce.com', 'zoom.us', 'skype.com', 'trello.com', 'asana.com', 'airtable.com', 'figma.com',
-      'ebay.com', 'etsy.com', 'shopify.com', 'alibaba.com', 'aliexpress.com', 'shein.com', 'temu.com',
-      'walmart.com', 'target.com', 'bestbuy.com', 'costco.com', 'nike.com', 'adidas.com', 'h&m.com', 'zara.com',
-      'cnn.com', 'nytimes.com', 'washingtonpost.com', 'forbes.com', 'bloomberg.com', 'reuters.com',
-      'foxnews.com', 'nbcnews.com', 'cnbc.com', 'abcnews.com', 'theguardian.com', 'usatoday.com',
-      'disney.com', 'hulu.com', 'hbomax.com', 'max.com', 'paramountplus.com', 'peacocktv.com', 'crunchyroll.com',
-      'imdb.com', 'rottentomatoes.com', 'metacritic.com',
-      'paypal.com', 'chase.com', 'bankofamerica.com', 'wellsfargo.com', 'citibank.com', 'americanexpress.com',
-      'discover.com', 'revolut.com', 'wise.com', 'venmo.com', 'robinhood.com', 'coinbase.com', 'binance.com',
-      'aws.amazon.com', 'azure.com', 'googlecloud.com', 'digitalocean.com', 'vercel.com', 'cloudflare.com',
-      'firebase.google.com', 'supabase.com', 'heroku.com', 'render.com', 'netlify.com',
-      'booking.com', 'expedia.com', 'airbnb.com', 'tripadvisor.com', 'uber.com', 'lyft.com',
-      'maps.google.com', 'waze.com',
-      'wordpress.com', 'medium.com', 'substack.com', 'quora.com', 'stackoverflow.com', 'stackoverflow.co',
-      'wikipedia.org', 'wikimedia.org', 'tumblr.com', 'fandom.com', 'soundcloud.com', 'bandcamp.com',
-      'deviantart.com', 'behance.net', 'dribbble.com'
-    ]);
-
-    if (blockedDomains.has(parsed.domain)) {
-      return '';
-    }
-
-    return parsed.domain;
-  }
-
-  public initAndScan(target: string, type: 'repo' | 'domain'): void {
-    this.scanResult$ = of(null);
     this.isProcessing = true;
 
-    let scanObservables: Observable<ConsolidatedScanResults>[];
+    this.liveApiEntities = this.extractLiveApiEntities(input);
 
-    if (type === 'repo') {
-      scanObservables = [this.liveApiService.scanForRepo(target, 'repo')];
-    } else {
-      scanObservables = [
-        this.liveApiService.scanDomain(target, 'basic'),
-        this.liveApiService.scanDomain(target, 'seo'),
+    const scans: Array<{ t: ScanKey; o: Observable<any> }> = isRepo
+      ? [{t: 'repo', o: this.api.scanForRepo(input, 'repo') as any}]
+      : [
+        {t: 'basic', o: this.api.scanDomain(input, 'basic') as any},
+        {t: 'seo', o: this.api.scanDomain(input, 'seo') as any}
       ];
+
+    if (this.liveApiEntities.length) {
+      scans.push({t: 'liveapi', o: this.api.runLiveApiSearch(this.liveApiEntities) as any});
+    } else {
+      this.progressByType.liveapi = 100;
     }
 
-    forkJoin(scanObservables)
-      .pipe(finalize(() => { this.isProcessing = false; }))
+    merge(
+      ...scans.map(({t, o}) => o.pipe(map(v => ({t, v}))))
+    )
+      .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({
-        next: (results) => {
-          this.scanResult$ = of(results);
-          this.isExpanded = true;
+        next: ({t, v}: { t: ScanKey; v: any }) => {
+          if (this.isPending(v)) {
+            this.progressByType[t] = this.clamp(Number(v.progress ?? 0), 0, 100);
+            return;
+          }
+
+          this.progressByType[t] = 100;
+
+          if (t === 'liveapi') {
+            this.liveApiResults = Array.isArray(v) ? v : [];
+            return;
+          }
+
+          this.resultsByType[t as Exclude<ScanKey, 'liveapi'>] = {
+            ...(v as ConsolidatedScanResults),
+            scanType: (v as any)?.scanType || t
+          } as ConsolidatedScanResults;
         },
-        error: (err) => {
-          console.error('Scan failed:', err);
+        error: () => {
           this.isProcessing = false;
-          this.scanResult$ = of(null);
+          this.expectedTypes = [];
+          this.resultsByType = {};
+          this.progressByType = {};
+          this.liveApiResults = [];
         }
       });
   }
 
-  extractHost(url: string): string {
+  private isPending(v: any): v is PendingMsg {
+    return !!v && typeof v === 'object' && String(v.status || '').toLowerCase() === 'pending';
+  }
+
+  private clamp(n: number, min: number, max: number): number {
+    if (!Number.isFinite(n)) return min;
+    if (n < min) return min;
+    if (n > max) return max;
+    return n;
+  }
+
+  private extractLiveApiEntities(q: string): ConsolidatedLiveApis[] {
+    const trimmed = (q || '').trim();
+    if (!trimmed || /\s/.test(trimmed)) return [];
+
+    const entities: ConsolidatedLiveApis[] = [];
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+
+    if (isEmail) {
+      const username = trimmed.split('@')[0];
+      entities.push({type: 'user', q1: username, q2: trimmed} as ConsolidatedLiveApis);
+      entities.push({type: 'social', q1: username} as ConsolidatedLiveApis);
+      return entities;
+    }
+
+    if (trimmed.includes('play.google.com/store/apps')) {
+      entities.push({type: 'cracked', q1: trimmed} as ConsolidatedLiveApis);
+    }
+
     try {
-      return new URL(url).hostname;
+      const url = new URL(trimmed);
+      const hostname = url.hostname.replace('www.', '');
+      const name = hostname.split('.')[0];
+      if (name) entities.push({type: 'social', q1: name} as ConsolidatedLiveApis);
     } catch {
-      return url;
+      let name = trimmed;
+      if (name.includes('.')) name = name.split('.')[0];
+      if (name) entities.push({type: 'social', q1: name} as ConsolidatedLiveApis);
     }
+
+    return entities;
   }
 
-  getGradeClass(grade: string): string {
-    if (['D', 'F'].includes(grade)) return 'scan_report-section-danger';
-    if (grade === 'C') return 'scan_report-section-warning';
-    return '';
+  get showUi(): boolean {
+    return this.isProcessing || this.domainResults.length > 0 || this.liveApiRows.length > 0;
   }
 
-  toggleCollapse(): void {
-    if (!this.isProcessing) {
-      this.isExpanded = !this.isExpanded;
+  get runningTypes(): ScanKey[] {
+    return this.expectedTypes.filter(t => {
+      if (t === 'liveapi') return (this.progressByType.liveapi ?? 0) < 100;
+      return !this.resultsByType[t as Exclude<ScanKey, 'liveapi'>];
+    });
+  }
+
+  get completedCount(): number {
+    return this.expectedTypes.length - this.runningTypes.length;
+  }
+
+  get totalCount(): number {
+    return this.expectedTypes.length;
+  }
+
+  get mergedProgress(): number {
+    if (!this.totalCount) return 0;
+    let sum = 0;
+    for (const t of this.expectedTypes) sum += Number(this.progressByType[t] ?? 0);
+    return Math.round(sum / this.totalCount);
+  }
+
+  get domainResults(): ConsolidatedScanResults[] {
+    const out: ConsolidatedScanResults[] = [];
+    const b = this.resultsByType.basic;
+    const s = this.resultsByType.seo;
+    if (b) out.push(b);
+    if (s) out.push(s);
+    return out;
+  }
+
+  get liveApiRows(): { platform: string; profile: string; url: string }[] {
+    const rows: { platform: string; profile: string; url: string }[] = [];
+
+    for (const r of this.liveApiResults || []) {
+      const input = (r as any)?.input || {};
+      const data = (r as any)?.resultData?.cards_data || [];
+
+      for (const item of data) {
+        const url = item?.m_url || item?.m_app_url || '';
+        if (!url) continue;
+
+        rows.push({
+          platform: item?.m_base_url || item?.m_title || input?.type || 'N/A',
+          profile: input?.q1 || '',
+          url
+        });
+      }
     }
+
+    return rows.slice(0, 25);
+  }
+
+  gradeBadgeClass(grade?: string): string {
+    const g = (grade || '').toUpperCase();
+    if (g === 'C' || g === 'D' || g === 'F') {
+      return 'consolidated-scans-badge consolidated-scans-badge-warning';
+    }
+    return 'consolidated-scans-badge';
+  }
+
+  gradeText(grade?: string): string {
+    const g = (grade || '—').toUpperCase();
+    return `${g} Grade`;
   }
 }

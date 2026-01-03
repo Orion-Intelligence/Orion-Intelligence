@@ -68,19 +68,6 @@ class cronjob_manager:
 
     @staticmethod
     async def iocs_alert_loop():
-        while True:
-            try:
-                if len(allowed_keys) > 0:
-                    await alert_job.get_instance().run_all_categories()
-                else:
-                    await asyncio.sleep(10)
-                    continue
-
-            except Exception as e:
-                print(f"[{datetime.now(timezone.utc)}] ALERT JOB ERROR: {e}")
-
-            await asyncio.sleep(300)
-
         tz = ZoneInfo("Australia/Sydney")
         while True:
             if len(allowed_keys) <= 0:
@@ -89,18 +76,19 @@ class cronjob_manager:
 
             now_local = datetime.now(tz)
 
-            next_midnight = datetime.combine(now_local.date(), datetime.min.time()).replace(tzinfo=tz)
-            if now_local >= next_midnight:
-                next_midnight += timedelta(days=1)
+            next_run = datetime.combine(now_local.date(), datetime.min.time()).replace(
+                hour=2, minute=0, second=0, microsecond=0, tzinfo=tz)
+            if now_local >= next_run:
+                next_run += timedelta(days=1)
 
-            seconds_until_next = (next_midnight - now_local).total_seconds()
+            seconds_until_next = (next_run - now_local).total_seconds()
 
             print(f"[{datetime.now(timezone.utc)}] Next alert run scheduled in {seconds_until_next / 3600:.2f} hours")
 
             await asyncio.sleep(seconds_until_next)
 
             try:
-                print(f"[{datetime.now(timezone.utc)}] Running all category alert jobs for {next_midnight.date()}")
+                print(f"[{datetime.now(timezone.utc)}] Running all category alert jobs for {next_run.date()}")
                 await alert_job.get_instance().run_all_categories()
             except Exception as e:
                 print(f"[{datetime.now(timezone.utc)}] ALERT JOB ERROR: {e}")

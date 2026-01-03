@@ -392,6 +392,10 @@ class alert_job:
             if tenant.is_default:
                 continue
 
+            status = await self._alert_manager.getInstance().get_scan_status_by_tenant_id(tenant.id)
+            if status.get("scan_running"):
+                continue
+
             await self._alert_manager.getInstance().set_scan_running(tenant.id, True)
             try:
                 for category in ALERT_CATEGORIES:

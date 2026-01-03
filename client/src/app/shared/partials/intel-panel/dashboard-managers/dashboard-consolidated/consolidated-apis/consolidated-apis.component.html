@@ -1,31 +1,27 @@
-<div class="live-api-results-container" *ngIf="showComponent" [class.is-loading]="isProcessing">
-  <div class="scan-card" *ngIf="isProcessing">
-    <div class="scan-header">
-      <span class="title">Threats scans</span>
-      <span class="status">
-        <span class="dot"></span>
-        Collecting intelligence...
-      </span>
+<div class="live-api-results-container mt-2" *ngIf="showComponent" [class.is-loading]="isProcessing">
+
+  <div class="live-api_report-section-main" *ngIf="!isLoading" [ngClass]="{
+                'scan_report-section-collapsed': !isExpanded,
+                'scan_report-section-loading': isProcessing,
+                'scan_report-section-loaded': !isProcessing && searchResults.length > 0
+            }">
+    <div class="scan_loading-header" *ngIf="!isLoading">
+
+      <div class="loading-circle" *ngIf="isProcessing"></div>
+
+      <h3 class="scan_section-title">
+        Live API Data: {{ query }}
+      </h3>
+
+      <button class="expand-collapse-btn" [ngClass]="{'is-disabled': isProcessing}" [disabled]="isProcessing"
+        (click)="toggleCollapse()">
+        <img src="assets/images/shared/theme/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
+      </button>
     </div>
 
-    <div class="progress-wrapper">
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="progress">
-        </div>
-      </div>
-
-      <div class="progress-text">
-        {{ progress }}% complete
-      </div>
-    </div>
-  </div>
-
-  <div class="scan-card" *ngIf="!isProcessing">
-    <div class="scan_loading-header">
-      <div class="scan_section-title">
-        Active Threat Discovery/Live Api
-      </div>
-    </div>
+    <ng-container *ngIf="isProcessing && !isLoading">
+      <p class="wait-message mt-2 mb-0">Getting data for {{ liveApiEntities.length }} items... Please wait.</p>
+    </ng-container>
 
     <ng-container *ngIf="!isProcessing && isExpanded && !isLoading">
 
@@ -34,8 +30,7 @@
       </div>
 
       <div class="results-list">
-        <div *ngFor="let result of searchResults; let i = index"
-          class="bulk-result-item dashboard-result-card mt-3 p-3">
+        <div *ngFor="let result of searchResults; let i = index" class="bulk-result-item dashboard-result-card mt-3 p-3">
 
           <div class="report__defacement-detail-header-url dashboard-header-header">
             Search {{ i + 1 }} ({{ result.input.type }}) - Input: {{ result.input.q1 }}

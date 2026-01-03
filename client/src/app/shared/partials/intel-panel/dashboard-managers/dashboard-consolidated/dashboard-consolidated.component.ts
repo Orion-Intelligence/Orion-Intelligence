@@ -21,10 +21,9 @@ import { ALLOWED_CONSOLIDATED_RANKED_SINGLETON } from '../../../../constants/sha
 import { ThreatResultsComponent } from "./defacement-results/threat-results.component";
 import { RankedCallbackModel } from '../../../../model/results/consolidated/ranked.callback.model';
 import { HttpClient } from '@angular/common/http';
-import { ConsolidatedApisComponent } from './consolidated-apis/consolidated-apis.component';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
 import { StealerLogCallbackModel } from '../../../../model/results/credentials/credential.callback.model';
-import { NgbAccordionModule, NgbSlide } from "@ng-bootstrap/ng-bootstrap";
+import { NgbAccordionModule } from "@ng-bootstrap/ng-bootstrap";
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
@@ -33,7 +32,7 @@ import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.co
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent, NgbAccordionModule, ConsolidatedIocComponent],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, NgbAccordionModule, ConsolidatedIocComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -67,7 +66,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   defacementCategories = Object.values(DefacementSubCategory);
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
 
-  @ViewChild('liveApiSearch') liveApiSearchComponent!: ConsolidatedApisComponent;
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
 
   constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute,
@@ -108,7 +106,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   fetchSearchResults(_ = false): void {
     if (this.licenseService.canUseScanning()) {
-      this.liveApiSearchComponent.runSearch(this.dashboardService.consolidatedParamModel.q)
       this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
 
