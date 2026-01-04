@@ -1,0 +1,6 @@
+engines:
+  duplication:
+    enabled: true
+    exclude_paths:
+      - backend/orion/services/elastic_manager/elastic_request_generator.py
+      - backend/routes/api_routes.py
