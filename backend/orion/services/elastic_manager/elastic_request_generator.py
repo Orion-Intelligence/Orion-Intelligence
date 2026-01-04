@@ -343,15 +343,9 @@ class elastic_request_generator:
         blocked_categories,
         allowed_categories,
     ):
-        if p_query_model.matchtype:
-            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+        raw_query = elastic_helper.prepare_search_query(p_query_model)
 
         channel_q = p_query_model.q if p_query_model.q and p_query_model.q != "*" else None
-        raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else "*"
-        raw_query = helper_controller.remove_stopwords_from_string(raw_query) if raw_query != "*" else "*"
-        if raw_query == "":
-            raw_query = "*"
-
         m_date_range = p_query_model.daterange
         m_network = p_query_model.network
         m_page_number = getattr(p_query_model, "page", 1)
@@ -622,16 +616,7 @@ class elastic_request_generator:
         return indices, queries, labels
 
     def on_search_leakdata(self, p_query_model, pfilter=None):
-        if p_query_model.matchtype:
-            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
-
-        if p_query_model.q != "*":
-            raw_query = p_query_model.q
-            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
-        else:
-            raw_query = "*"
-        if raw_query == "":
-            raw_query = "*"
+        raw_query = elastic_helper.prepare_search_query(p_query_model)
 
         if not raw_query:
             return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
@@ -694,15 +679,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     def on_search_exploitdata(self, p_query_model, pfilter=None):
-        if p_query_model.matchtype:
-            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
-
-        if p_query_model.q != "*":
-            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
-        else:
-            raw_query = "*"
-        if raw_query == "":
-            raw_query = "*"
+        raw_query = elastic_helper.prepare_search_query(p_query_model)
 
         if not raw_query:
             return ELASTIC_INDEX.S_EXPLOIT_INDEX, {"query": {"match_none": {}}, "size": 0}
@@ -767,16 +744,7 @@ class elastic_request_generator:
         if p_query_model.matchtype == "semantic" and p_query_model.platform == "pastebin":
             p_query_model.matchtype = "or"
 
-        if p_query_model.matchtype:
-            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
-
-        if p_query_model.q != "*":
-            raw_query = p_query_model.q
-            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
-        else:
-            raw_query = "*"
-        if raw_query == "":
-            raw_query = "*"
+        raw_query = elastic_helper.prepare_search_query(p_query_model)
 
         if p_query_model.q and p_query_model.q != "*" and (not raw_query or raw_query == "*"):
             return ELASTIC_INDEX.S_SOCIAL_INDEX, {"query": {"match_none": {}}, "size": 0}
@@ -836,9 +804,6 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_telegram_data(p_query_model, pfilter=None):
-        if p_query_model.matchtype:
-            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
-
         raw_query = ""
         if p_query_model.q == "":
             raw_query = "*"
@@ -1175,17 +1140,11 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     def on_search_general_data(self, p_query_model, pfilter=None):
-        if p_query_model.matchtype:
-            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+        raw_query = elastic_helper.prepare_search_query(p_query_model)
 
-        if p_query_model.q != "*":
-            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
-        else:
-            raw_query = "*"
-        if p_query_model.q == "":
-            raw_query = "*"
         if not raw_query or raw_query == "":
             raw_query = "*"
+
         if not raw_query:
             return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -1385,43 +1344,11 @@ class elastic_request_generator:
 
     @staticmethod
     def index_query_leak(p_index_data):
-        contact_link = p_index_data.get("contact_link", "")
-        index_entries = []
-        current_timestamp = datetime.now(timezone.utc).isoformat()
-
-        for card in p_index_data.get("cards_data", []):
-            if not card["m_url"] or not card["m_title"]:
-                continue
-
-            card["m_hash"] = helper_controller.generate_data_hash(card["m_base_url"] + "_" + card["m_title"])
-            card["m_update_date"] = current_timestamp
-            card["m_contact_link"] = contact_link
-
-            cleaned_card = {k: v for k, v in card.items() if v is not None}
-
-            index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card})
-
-        return index_entries
+        return elastic_helper.index_cards_common(p_index_data, ELASTIC_INDEX.S_LEAK_INDEX, hash_key="m_base_url")
 
     @staticmethod
     def index_query_exploit(p_index_data):
-        contact_link = p_index_data.get("contact_link", "")
-        index_entries = []
-        current_timestamp = datetime.now(timezone.utc).isoformat()
-
-        for card in p_index_data.get("cards_data", []):
-            if not card["m_url"] or not card["m_title"]:
-                continue
-
-            card["m_hash"] = helper_controller.generate_data_hash(card["m_url"] + "_" + card["m_title"])
-            card["m_update_date"] = current_timestamp
-            card["m_contact_link"] = contact_link
-
-            cleaned_card = {k: v for k, v in card.items() if v is not None}
-
-            index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card})
-
-        return index_entries
+        return elastic_helper.index_cards_common(p_index_data, ELASTIC_INDEX.S_EXPLOIT_INDEX, hash_key="m_url")
 
     @staticmethod
     def generate_graph_queries():

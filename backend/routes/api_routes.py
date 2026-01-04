@@ -100,7 +100,7 @@ async def get_directory(param: directory_param_model = Depends()):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:dumps")), ], )
-async def get_directory(param: dump_param_model = Depends()):
+async def get_dumps(param: dump_param_model = Depends()):
     return await dump_model.getInstance().invoke_dump(param)
 
 
@@ -158,7 +158,7 @@ async def search_general(param: search_general_param_model = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:stealer_logs")), ], )
-async def search_consolidated(param: search_credential_param_model = Body(...)):
+async def search_stealerlog(param: search_credential_param_model = Body(...)):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
 
@@ -223,7 +223,7 @@ async def search_telegram(param: search_chat_param_model = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:discussion")), ], )
-async def search_leak(param: search_leak_param_model = Body(...)):
+async def search_discussion(param: search_leak_param_model = Body(...)):
     base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX, ]
     return await search_model.getInstance().search_consolidated_ranked_result(
         param, base_index, [], [])
@@ -263,7 +263,7 @@ async def search_discussion(param: search_general_param_model = Body(...)):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:social")), ], )
-async def search_discussion(param: search_general_param_model = Body(...)):
+async def search_social_all(param: search_general_param_model = Body(...)):
     base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX, ]
     return await search_model.getInstance().search_consolidated_ranked_result(
         param, base_index, [], [])
@@ -330,7 +330,7 @@ async def search_news(param: search_news_param_model = Body(...)):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:exploit")), ], )
-async def search_leak(param: search_exploit_param_model = Body(...)):
+async def search_exploit(param: search_exploit_param_model = Body(...)):
     return await search_model.getInstance().search_exploit_result(param)
 
 
@@ -392,7 +392,7 @@ async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:news"))], )
-async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
+async def get_news_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
@@ -408,7 +408,7 @@ async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:exploit"))], )
-async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
+async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
 
@@ -440,7 +440,7 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),  Depends(license_required("module:chat"))], )
-async def get_general_document(doc_id: str, lang: Optional[str] = Query(
+async def get_chat_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
@@ -502,7 +502,7 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
+async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "cracked")
 
 
@@ -517,7 +517,7 @@ async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
+async def search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "software")
 
 
@@ -548,7 +548,7 @@ async def parse_text(payload: DomainScanRequest):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
+async def search_dynamic_social(param: search_dynamic_social_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "social")
 
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 
 from orion.helper_manager.helper_controller import helper_controller
@@ -90,3 +90,31 @@ class elastic_helper:
         if query is not None:
             body["query"] = query
         return {ELASTIC_KEYS.S_DOCUMENT: index, ELASTIC_KEYS.S_FILTER: body}
+
+    @staticmethod
+    def prepare_search_query(p_query_model):
+        if hasattr(p_query_model, "matchtype") and p_query_model.matchtype:
+            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+        raw_query = "*"
+        if getattr(p_query_model, "q", None) and p_query_model.q != "*":
+            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q or "")
+        if raw_query == "":
+            raw_query = "*"
+        return raw_query
+
+    @staticmethod
+    def index_cards_common(p_index_data, index, hash_key="m_url"):
+        index_entries = []
+        utc_now = datetime.now(timezone.utc)
+        current_timestamp = utc_now.isoformat()
+        contact_link = p_index_data.get("contact_link", "")
+        for card in p_index_data.get("cards_data", []):
+            if not card.get("m_url") or not card.get("m_title"):
+                continue
+            hash_str = card.get(hash_key, "") + "_" + card.get("m_title", "")
+            card["m_hash"] = helper_controller.generate_data_hash(hash_str)
+            card["m_update_date"] = current_timestamp
+            card["m_contact_link"] = contact_link
+            cleaned_card = {k: v for k, v in card.items() if v is not None}
+            index_entries.append({ELASTIC_KEYS.S_DOCUMENT: index, ELASTIC_KEYS.S_VALUE: cleaned_card})
+        return index_entries
