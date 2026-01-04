@@ -2,9 +2,10 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from elastic_transport import ApiError
 import motor.motor_asyncio
 from odmantic import ObjectId
-from elasticsearch import AsyncElasticsearch, helpers as es_helpers
+from elasticsearch import AsyncElasticsearch, helpers as es_helpers, NotFoundError
 
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
@@ -95,7 +96,7 @@ class test_manager:
             return
 
         es_host = ELASTIC_CONNECTIONS.S_DATABASE_IP or "localhost"
-        es_port = ELASTIC_CONNECTIONS.S_DATABASE_PORT or 9400
+        es_port = int(ELASTIC_CONNECTIONS.S_DATABASE_PORT or 9400)
         es_user = ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME
         es_pass = ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD
 
@@ -103,69 +104,102 @@ class test_manager:
             es = AsyncElasticsearch(
                 hosts=[{"host": es_host, "port": es_port, "scheme": "http"}], basic_auth=(es_user, es_pass), )
         else:
-            es = AsyncElasticsearch(
-                hosts=[{"host": es_host, "port": es_port, "scheme": "http"}])
+            es = AsyncElasticsearch(hosts=[{"host": es_host, "port": es_port, "scheme": "http"}])
 
-        indices = await es.indices.get(index="*", ignore_unavailable=True)
-        for idx in list(indices.keys()):
-            if idx.startswith("."):
-                continue
-            await es.indices.delete(index=idx, ignore_unavailable=True)
+        try:
+            indices = await es.indices.get(index="*", ignore_unavailable=True)
+            for idx in list(indices.keys()):
+                if idx.startswith("."):
+                    continue
+                try:
+                    await es.indices.delete(index=idx, ignore_unavailable=True)
+                except NotFoundError:
+                    continue
+                except ApiError as e:
+                    if getattr(e, "status_code", None) == 404:
+                        continue
+                    raise
 
-        await es.cluster.put_settings(
-            persistent={"action.destructive_requires_name": False, "cluster.blocks.read_only_allow_delete": None, })
+            await es.cluster.put_settings(
+                persistent={"action.destructive_requires_name": False, "cluster.blocks.read_only_allow_delete": None, })
 
-        ds = await es.indices.get_data_stream(name="*")
-        for d in ds.get("data_streams", []):
-            await es.indices.delete_data_stream(name=d["name"])
+            try:
+                ds = await es.indices.get_data_stream(name="*")
+            except NotFoundError:
+                ds = {"data_streams": []}
+            except ApiError as e:
+                if getattr(e, "status_code", None) == 404:
+                    ds = {"data_streams": []}
+                else:
+                    raise
 
-        indices = await es.indices.get(index="*", expand_wildcards="all", ignore_unavailable=True)
-        for idx in list(indices.keys()):
-            if idx.startswith("."):
-                continue
-            await es.indices.delete(index=idx, ignore_unavailable=True)
+            for d in ds.get("data_streams", []):
+                try:
+                    await es.indices.delete_data_stream(name=d["name"])
+                except NotFoundError:
+                    continue
+                except ApiError as e:
+                    if getattr(e, "status_code", None) == 404:
+                        continue
+                    raise
 
-        await es.indices.refresh(index="*", ignore_unavailable=True)
+            indices = await es.indices.get(index="*", expand_wildcards="all", ignore_unavailable=True)
+            for idx in list(indices.keys()):
+                if idx.startswith("."):
+                    continue
+                try:
+                    await es.indices.delete(index=idx, ignore_unavailable=True)
+                except NotFoundError:
+                    continue
+                except ApiError as e:
+                    if getattr(e, "status_code", None) == 404:
+                        continue
+                    raise
 
-        await es.cluster.put_settings(
-            persistent={"action.destructive_requires_name": True})
+            try:
+                await es.indices.refresh(index="*", ignore_unavailable=True)
+            except ApiError as e:
+                if getattr(e, "status_code", None) != 404:
+                    raise
 
-        mocks_dir = (Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "elastic")
-        if not mocks_dir.exists():
-            await es.close()
-            return
+            await es.cluster.put_settings(persistent={"action.destructive_requires_name": True})
 
-        def _has_data(p: Path) -> bool:
-            with p.open("r", encoding="utf-8") as f:
-                for line in f:
-                    if line.strip():
-                        return True
-            return False
+            mocks_dir = (Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "elastic")
+            if not mocks_dir.exists():
+                return
 
-        for data_fp in sorted(mocks_dir.glob("*.data.ndjson")):
-            if data_fp.stat().st_size == 0:
-                continue
-            if not _has_data(data_fp):
-                continue
-
-            idx = data_fp.name.replace(".data.ndjson", "")
-
-            async def gen(fp=data_fp, default_index=idx):
-                with fp.open("r", encoding="utf-8") as f:
+            def _has_data(p: Path) -> bool:
+                with p.open("r", encoding="utf-8") as f:
                     for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        d = json.loads(line)
-                        _id = d.get("_id")
-                        _index = d.get("_index") or default_index
-                        src = d.get("_source", d)
-                        a = {"_op_type": "index", "_index": _index, "_source": src}
-                        if _id is not None:
-                            a["_id"] = _id
-                        yield a
+                        if line.strip():
+                            return True
+                return False
 
-            await es_helpers.async_bulk(
-                es, gen(), chunk_size=2000, request_timeout=120, raise_on_error=False, raise_on_exception=False, )
+            for data_fp in sorted(mocks_dir.glob("*.data.ndjson")):
+                if data_fp.stat().st_size == 0:
+                    continue
+                if not _has_data(data_fp):
+                    continue
 
-        await es.close()
+                idx = data_fp.name.replace(".data.ndjson", "")
+
+                async def gen(fp=data_fp, default_index=idx):
+                    with fp.open("r", encoding="utf-8") as f:
+                        for line in f:
+                            line = line.strip()
+                            if not line:
+                                continue
+                            d = json.loads(line)
+                            _id = d.get("_id")
+                            _index = d.get("_index") or default_index
+                            src = d.get("_source", d)
+                            a = {"_op_type": "index", "_index": _index, "_source": src}
+                            if _id is not None:
+                                a["_id"] = _id
+                            yield a
+
+                await es_helpers.async_bulk(
+                    es, gen(), chunk_size=2000, request_timeout=120, raise_on_error=False, raise_on_exception=False, )
+
+        finally:
+            await es.close()
