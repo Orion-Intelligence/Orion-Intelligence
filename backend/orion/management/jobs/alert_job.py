@@ -18,6 +18,7 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_par
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+from orion.helper_manager.helper_controller import helper_controller
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, IocCategory
@@ -296,8 +297,10 @@ class alert_job:
                         if category == "stealerlogs":
                             if ioc_type_name == "m_domain":
                                 search_param.url = ioc_value
+                                search_param.entity_filter.pop("m_domain", None)
                             elif ioc_type_name == "m_user":
                                 search_param.user = ioc_value
+                                search_param.entity_filter.pop("m_user", None)
                             es_response = await search_func(search_param, True)
                         elif category == "social":
                             es_response = await search_func(search_param, base_index, [], [])
@@ -326,7 +329,12 @@ class alert_job:
                                 m_description = result.get("m_content") or result.get("m_important_content")
                                 _description = ""
                                 _title = ""
+                                if category == "defacement":
+                                    m_title = result.get("m_team")
+
                                 if category == "stealerlogs":
+                                    hash = helper_controller.extract_stealer_hash(result)
+
                                     if result.get("username") and result.get("password"):
                                         _title = result.get("username")[0]
                                         _description = result.get("password")

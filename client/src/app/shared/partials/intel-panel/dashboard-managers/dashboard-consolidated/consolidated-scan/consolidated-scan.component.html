@@ -25,22 +25,23 @@
           </span>
         </div>
       </div>
-        <button type="button"
-                (click)="toggleCollapse()"
-                class="consolidated-scans-chevron-btn text-toggle"
-                [attr.aria-expanded]="!isCollapsed">
-          <span class="toggle-label">
-            {{ isCollapsed ? 'Show details' : 'Hide details' }}
-          </span>
 
-          <svg class="consolidated-scans-chevron-icon"
-               width="16" height="16" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round"
-               [class.is-expanded]="!isCollapsed">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
+      <button type="button"
+              (click)="toggleCollapse()"
+              class="consolidated-scans-chevron-btn text-toggle"
+              [attr.aria-expanded]="!isCollapsed">
+        <span class="toggle-label">
+          {{ isCollapsed ? 'Show details' : 'Hide details' }}
+        </span>
+
+        <svg class="consolidated-scans-chevron-icon"
+             width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"
+             [class.is-expanded]="!isCollapsed">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
     </div>
 
     <div *ngIf="isCollapsed">
@@ -66,12 +67,28 @@
 
           <div class="consolidated-scans-table-row" *ngFor="let r of domainResults">
             <div class="consolidated-scans-col-scan">{{ r.scanType | titlecase }} Scan</div>
-            <div class="consolidated-scans-col-date">{{ r.meta?.Scanned_on_date || '' }}</div>
+            <div class="consolidated-scans-col-date">{{ today | date:'MMMM dd, yyyy' }}</div>
             <div class="consolidated-scans-col-risk">
               <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
             </div>
             <div class="consolidated-scans-col-action">
-              <a class="consolidated-scans-link" href="javascript:void(0)">Details</a>
+              <a class="consolidated-scans-link"
+                 [routerLink]="{
+                   seo: '/dashboard/scanner/seo-scan',
+                   basic: '/dashboard/scanner/basic-scan',
+                   repo: '/dashboard/scanner/repository-scan'
+                 }[r.scanType] || '/dashboard/scanner/' + r.scanType"
+                 [queryParams]="{
+                   q: '',
+                   page: 1,
+                   matchtype: 'or',
+                   domain: r.domain,
+                   scanType: r.scanType
+                 }"
+                 target="_blank"
+                 rel="noopener">
+                Details
+              </a>
             </div>
           </div>
         </div>
@@ -84,19 +101,19 @@
 
         <div class="consolidated-scans-table-wrapper">
           <div class="consolidated-scans-table-header">
-            <div class="consolidated-scans-col-platform">Platform</div>
+            <div class="consolidated-scans-col-platform consolidated-scans-col-platform-extended">Platform</div>
             <div class="consolidated-scans-col-profile">Profile</div>
-            <div class="consolidated-scans-col-url">Url</div>
+            <div class="consolidated-scans-col-url">Action</div>
           </div>
 
           <div class="consolidated-scans-table-row" *ngFor="let row of liveApiRows">
-            <div class="consolidated-scans-col-platform">
-              {{ (row.platform || '').replace('https://','').replace('http://','').replace('www.','') }}
+            <div class="consolidated-scans-col-platform consolidated-scans-col-platform-extended">
+              {{ (row.url || 'Details').replace('https://', '').replace('http://', '').replace('www.', '') }}
             </div>
             <div class="consolidated-scans-col-profile">{{ row.profile }}</div>
             <div class="consolidated-scans-col-url">
               <a class="consolidated-scans-link" [href]="row.url || '#'" target="_blank">
-                {{ (row.url || 'Details').replace('https://','').replace('http://','').replace('www.','') }}
+                Detail
               </a>
             </div>
           </div>
@@ -104,33 +121,35 @@
       </div>
     </div>
 
-    <div class="consolidated-scans-card consolidated-scans-card-progress"
-         *ngIf="isProcessing || runningTypes.length"
-         @scanAnimation>
-      <div class="consolidated-scans-card-content consolidated-scans-card-content-progress">
-        <div class="consolidated-scans-progress-header">
-          <h2 class="consolidated-scans-progress-title">Threats scans</h2>
-          <div class="consolidated-scans-status-indicator">
-            <div class="consolidated-scans-status-dot"></div>
-            <div class="consolidated-scans-status-text">Collecting intelligence…</div>
-          </div>
-        </div>
-
-        <div class="consolidated-scans-running-list consolidated-scans-mt-10 h-scroll">
-          <span class="consolidated-scans-running-pill" *ngFor="let t of runningTypes">
-            {{ t | uppercase }}
-          </span>
-        </div>
-
-        <div class="consolidated-scans-progress-section">
-          <div class="consolidated-scans-progress-bar-wrapper">
-            <div class="consolidated-scans-progress-bar">
-              <div class="consolidated-scans-progress-fill" [style.width.%]="mergedProgress || 6"></div>
+    <ng-container *ngIf="isProcessing || runningTypes.length">
+      <div class="consolidated-scans-card consolidated-scans-card-progress"
+           @scanAnimation>
+        <div class="consolidated-scans-card-content consolidated-scans-card-content-progress">
+          <div class="consolidated-scans-progress-header">
+            <h2 class="consolidated-scans-progress-title">Threats scans</h2>
+            <div class="consolidated-scans-status-indicator">
+              <div class="consolidated-scans-status-dot"></div>
+              <div class="consolidated-scans-status-text">Collecting intelligence…</div>
             </div>
           </div>
-          <div class="consolidated-scans-progress-label">{{ completedCount }}/{{ totalCount }} scans completed</div>
+
+          <div class="consolidated-scans-running-list consolidated-scans-mt-10 h-scroll">
+        <span class="consolidated-scans-running-pill" *ngFor="let t of runningTypes">
+          {{ t | uppercase }}
+        </span>
+          </div>
+
+          <div class="consolidated-scans-progress-section">
+            <div class="consolidated-scans-progress-bar-wrapper">
+              <div class="consolidated-scans-progress-bar">
+                <div class="consolidated-scans-progress-fill" [style.width.%]="mergedProgress || 6"></div>
+              </div>
+            </div>
+            <div class="consolidated-scans-progress-label">{{ completedCount }}/{{ totalCount }} scans completed</div>
+          </div>
         </div>
       </div>
-    </div>
+    </ng-container>
+
   </div>
 </section>

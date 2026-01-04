@@ -6,6 +6,8 @@ import { HelperService } from '../../../../../services/helper.service';
 import { StealerLogCallbackModel, StealerLogResultItem } from '../../../../../model/results/credentials/credential.callback.model';
 import { DashboardService } from '../../../../../../services/dashboard/dashboard.service';
 
+type DefGroup = { type: string; items: DefacementResultItem[] };
+
 @Component({
   selector: 'app-defacement-results',
   imports: [CommonModule, TooltipDirective],
@@ -17,17 +19,20 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   @Input() isExpandable = false;
 
   showLimitDefacement = 10;
-  showLimitStealer = 0;
+  showLimitStealer = 10;
 
   threatTypeCounts: { [key: string]: number } = {};
+  groupedDefacement: DefGroup[] = [];
 
   constructor(protected helperService: HelperService, private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     if (this.results_defacement?.Result?.length) {
       this.updateThreatTypeCounts(this.results_defacement.Result);
-    } else if (this.results_stealerlog?.Result?.length) {
-      this.updateStealerTypeCounts(this.results_stealerlog.Result);
+      this.buildGroupedDefacement();
+    }
+    if (this.results_stealerlog?.Result?.length) {
+      this.showLimitStealer = 10;
     }
   }
 
@@ -35,8 +40,9 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     if (changes['results_defacement'] && this.results_defacement?.Result?.length) {
       this.updateThreatTypeCounts(this.results_defacement.Result);
       this.showLimitDefacement = 10;
-    } else if (changes['results_stealerlog'] && this.results_stealerlog?.Result?.length) {
-      this.updateStealerTypeCounts(this.results_stealerlog.Result);
+      this.buildGroupedDefacement();
+    }
+    if (changes['results_stealerlog'] && this.results_stealerlog?.Result?.length) {
       this.showLimitStealer = 10;
     }
   }
@@ -49,9 +55,16 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     });
   }
 
-  updateStealerTypeCounts(results: StealerLogResultItem[]) {
-    this.threatTypeCounts = {};
-    this.threatTypeCounts['stealerlog'] = results.length;
+  buildGroupedDefacement() {
+    const list = (this.results_defacement?.Result ?? []).slice(0, this.showLimitDefacement);
+    const map = new Map<string, DefacementResultItem[]>();
+    for (const item of list) {
+      const type = item.m_ioc_type?.[0] || 'Unknown';
+      const arr = map.get(type);
+      if (arr) arr.push(item);
+      else map.set(type, [item]);
+    }
+    this.groupedDefacement = Array.from(map.entries()).map(([type, items]) => ({ type, items }));
   }
 
   explore(route: string, q: string) {
@@ -59,8 +72,8 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     if (query.length > 0) {
       q = `"${query}"`;
     }
-    if (route !== "phishing" && route !== "hacked") {
-      route = "databases";
+    if (route !== 'phishing' && route !== 'hacked') {
+      route = 'databases';
     }
     const url = `/dashboard/defacement/${route}?q=${encodeURIComponent(q)}`;
     window.open(url, '_blank');
@@ -80,23 +93,36 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   onShowMore(category: 'defacement' | 'stealerlog', event: MouseEvent): void {
     event.stopPropagation();
     if (category === 'defacement') {
-      this.showLimitDefacement = Math.min(this.showLimitDefacement + 10, this.results_defacement?.Result?.length ?? this.showLimitDefacement);
-      this.onFilterTypeClick('databases', event);
+      this.showLimitDefacement = Math.min(
+        this.showLimitDefacement + 10,
+        this.results_defacement?.Result?.length ?? this.showLimitDefacement
+      );
+      this.buildGroupedDefacement();
     } else {
-      this.showLimitStealer = Math.min(this.showLimitStealer + 10, this.results_stealerlog?.Result?.length ?? this.showLimitStealer);
-      this.onFilterTypeClick('stealerlog', event);
+      this.showLimitStealer = Math.min(
+        this.showLimitStealer + 10,
+        this.results_stealerlog?.Result?.length ?? this.showLimitStealer
+      );
     }
   }
 
   onFilterTypeClick(type: string, event: MouseEvent): void {
     event.stopPropagation();
-    if (type === "phishing" || type === "hacked" || type === "databases" || type === "scam" || type === "crack") {
-      if (type === "scam") type = "database";
-      else if (type === "crack") type = "hacked";
+
+    if (type === 'defacement_all') {
+      let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
+      const url = `/dashboard/defacement/databases?q=${encodeURIComponent(query)}`;
+      window.open(url, '_blank');
+      return;
+    }
+
+    if (type === 'phishing' || type === 'hacked' || type === 'databases' || type === 'scam' || type === 'crack') {
+      if (type === 'scam') type = 'database';
+      else if (type === 'crack') type = 'hacked';
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/${type}?q=${encodeURIComponent(query)}`;
       window.open(url, '_blank');
-    } else if (type === "stealerlog") {
+    } else if (type === 'stealerlog') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const finalUrl = `/dashboard/stealerlogs?url=${encodeURIComponent(query)}&user=${''}`;
       window.open(finalUrl, '_blank');

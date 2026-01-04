@@ -160,6 +160,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     });
     if (this.isEmailOrUrl(this.dashboardService.consolidatedParamModel.q)) {
       this.isStealerLogLoading.set(true);
+      this.dashboardService.consolidatedParamModel.url = this.dashboardService.consolidatedParamModel.q
+      this.dashboardService.consolidatedParamModel.category = "credential"
       this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.dashboardService.consolidatedParamModel)
         .pipe(switchMap(response => timer(300).pipe(map(() => response))))
         .subscribe(response => {

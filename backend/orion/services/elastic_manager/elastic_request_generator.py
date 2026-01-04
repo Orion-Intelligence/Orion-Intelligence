@@ -185,6 +185,12 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     def on_search_defacement_data(self, p_query_model: search_defacement_param_model, pfilter=None):
+        if not p_query_model.q and pfilter and pfilter.get("entity_filter", {}).get("m_domain"):
+            p_query_model.q = pfilter.get("domain", [None])[0]
+
+        if isinstance(pfilter, dict):
+            pfilter = {k: v for k, v in pfilter.items() if v is not None}
+
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
@@ -222,8 +228,6 @@ class elastic_request_generator:
             must_clauses.append({"terms": {"m_ioc_type": ["hacked"]}})
         elif m_content_type == "databases":
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
-        elif m_content_type != "":
-            must_clauses.append({"terms": {"m_ioc_type": ['none']}})
 
         quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
         quoted_value = quoted_value_match.group(1) if quoted_value_match else None
@@ -417,9 +421,10 @@ class elastic_request_generator:
         indices.append(i6)
         labels.append("social_model")
 
-        domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
-        queries.append(domain_query)
-        indices.append(domain_query_index)
+        m1.category = 'all'
+        i7, q7 = self.on_search_defacement_data(m1, pFilter)
+        queries.append(helper_controller.strip_query(q7))
+        indices.append(i7)
         labels.append("defacement_model")
 
         m1.category = 'tracking'
@@ -781,6 +786,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model,pFilter, consolidated=False, alert=False):
+        p_query_model.q = ""
 
         extra_user_terms = []
         extra_domains = []

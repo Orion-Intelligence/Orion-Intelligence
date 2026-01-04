@@ -8,31 +8,24 @@ import {
   ConsolidatedLiveApiResults,
   ConsolidatedLiveApis
 } from '../../../../../model/results/consolidated/consolidated.callback.model';
-import {trigger, transition, style, animate} from '@angular/animations';
+import {RouterLink} from '@angular/router';
+import {scanAnimation} from '../../../../../animations/scan.animations';
 
 type ScanKey = 'basic' | 'seo' | 'repo' | 'liveapi';
 type PendingMsg = { status: 'pending'; progress?: number; step?: string };
 
-export const scanAnimation = trigger('scanAnimation', [
-  transition(':enter', [
-    style({opacity: 0, transform: 'translateY(10px) scale(0.985)'}),
-    animate('260ms cubic-bezier(0.16, 1, 0.3, 1)', style({opacity: 1, transform: 'translateY(0) scale(1)'}))
-  ]),
-  transition(':leave', [
-    animate('220ms cubic-bezier(0.4, 0, 0.2, 1)', style({opacity: 0, transform: 'translateY(6px) scale(0.985)'}))
-  ])
-]);
 
 @Component({
   selector: 'app-consolidated-scan',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './consolidated-scan.component.html',
   styleUrls: ['./consolidated-scan.component.css'],
   animations: [scanAnimation]
 })
 export class ConsolidatedScanComponent {
   @Input() isLoading!: boolean;
+  today = new Date();
   isProcessing = false;
   isCollapsed = false;
   targetLabel = '';
@@ -55,6 +48,8 @@ export class ConsolidatedScanComponent {
     const input = (q || '').trim();
     if (!input) return;
 
+    this.today = new Date(); // add
+
     this.targetLabel = input;
 
     const isRepo = input.includes('github.com/');
@@ -63,6 +58,7 @@ export class ConsolidatedScanComponent {
     this.resultsByType = {};
     this.progressByType = {};
     this.liveApiResults = [];
+    this.isCollapsed = false; // add
 
     for (const t of this.expectedTypes) this.progressByType[t] = 0;
 
@@ -83,9 +79,7 @@ export class ConsolidatedScanComponent {
       this.progressByType.liveapi = 100;
     }
 
-    merge(
-      ...scans.map(({t, o}) => o.pipe(map(v => ({t, v}))))
-    )
+    merge(...scans.map(({t, o}) => o.pipe(map(v => ({t, v})))))
       .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({
         next: ({t, v}: { t: ScanKey; v: any }) => {
@@ -115,6 +109,7 @@ export class ConsolidatedScanComponent {
         }
       });
   }
+
 
   private isPending(v: any): v is PendingMsg {
     return !!v && typeof v === 'object' && String(v.status || '').toLowerCase() === 'pending';

@@ -32,6 +32,26 @@ class helper_controller:
         return {"request": request, "vars": response_data}
 
     @staticmethod
+    def extract_stealer_hash(log):
+        email = log["email"][0] if log.get("email") else None
+        username = log["username"][0] if log.get("username") else None
+        domain = log["domain"][0] if log.get("domain") else None
+        ip = log["ip"][0] if log.get("ip") else None
+        channel = log.get("channel")
+
+        if log.get("type") in ("c", "credential"):
+            if not email and not username:
+                return None
+            val = email or username
+        else:
+            if not any([email, username, domain, ip, channel]):
+                return None
+            val = email or username or domain or ip or channel
+
+        seed = f"{val}|{channel or ''}"
+        return hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
+
+    @staticmethod
     def get_base_url(url):
         parsed_url = urlparse(url)
         netloc = parsed_url.netloc.replace('www.', '') if parsed_url.netloc.startswith('www.') else parsed_url.netloc
