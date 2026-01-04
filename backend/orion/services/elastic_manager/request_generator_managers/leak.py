@@ -1,0 +1,74 @@
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
+from orion.services.elastic_manager.helper.elastic_helper import elastic_helper
+
+from .base import ElasticBaseMixin
+
+
+class ElasticLeakMixin(ElasticBaseMixin):
+    @staticmethod
+    def on_search_leakdata(p_query_model, pfilter=None):
+        raw_query = elastic_helper.prepare_search_query(p_query_model)
+
+        if not raw_query:
+            return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
+
+        exact_phrases, loose_terms, quoted_value = elastic_helper.extract_phrases_terms_quoted(raw_query)
+
+        m_safe_search = p_query_model.safe
+        m_page_number = p_query_model.page
+        m_network = p_query_model.network
+        m_search_type = p_query_model.category
+        m_date_range = p_query_model.daterange
+        m_content_type = p_query_model.content
+
+        must_clauses = []
+        must_not_clause = []
+
+        if m_search_type == "all":
+            pass
+        elif m_search_type == "databases":
+            must_clauses.append({"term": {"m_content_type": "leaks"}})
+        else:
+            must_clauses.append({"term": {"m_content_type": m_search_type}})
+
+        if m_date_range:
+            from_date, to_date = elastic_helper.daterange_to_strs(
+                m_date_range, start_suffix="T00:00:00.000000+00:00", end_suffix="T23:59:59.999999+00:00"
+            )
+            if from_date and to_date:
+                must_clauses.append({"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}})
+
+        if m_content_type and m_content_type.lower() not in ("", "all"):
+            must_clauses.append({"term": {"content_type": m_content_type.lower()}})
+
+        if m_search_type == "databases":
+            m_search_type = "leaks"
+            must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
+        if m_search_type and m_search_type != "all":
+            must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
+        if m_safe_search == "True":
+            must_not_clause.append({"term": {"m_content_type": "adult"}})
+        if m_network and m_network.lower() not in ("", "all"):
+            must_clauses.append({"term": {"m_network": m_network.lower()}})
+
+        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_important_content", 4), ("m_ref_html", 2)]
+
+        query_statement = ElasticBaseMixin._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=m_page_number,
+            date_field="m_leak_date",
+        )
+
+        return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
+
+    @staticmethod
+    def index_query_leak(p_index_data):
+        return elastic_helper.index_cards_common(p_index_data, ELASTIC_INDEX.S_LEAK_INDEX, hash_key="m_base_url")
