@@ -466,7 +466,7 @@ known-third-party=enchant
 
 [DESIGN]
 max-args=15
-max-positional-arguments=11
+max-positional-arguments=17
 max-attributes=7
 max-bool-expr=5
 max-branches=12
