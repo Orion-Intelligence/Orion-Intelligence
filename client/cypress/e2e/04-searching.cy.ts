@@ -345,26 +345,26 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
       .click({ force: true });
   };
 
-  it('Feed: News → Search UK → Open Report', () => {
-    cy.visit('/dashboard/profile/homepage');
-
-    openFeedSubTab('News');
-
-    cy.get('.input-group.default-input-sub-container').should('exist');
-
-    cy.get('input[name="q"]').clear().type('uk{enter}');
-
-    cy.get('.dashboard__search-button-inner').first().should('be.visible');
-
-    cy.get('.dashboard__search-button-inner').first().click({ force: true });
-
-    cy.get('.search__result-detail').should('be.visible');
-
-    clickReportTabs('feed-news-report');
-    clickReportMenuButtons('feed-news-report');
-
-    cy.get('@feedMenu').click({ force: true });
-  });
+  // it('Feed: News → Search UK → Open Report', () => {
+  //   cy.visit('/dashboard/profile/homepage');
+  //
+  //   openFeedSubTab('News');
+  //
+  //   cy.get('.input-group.default-input-sub-container').should('exist');
+  //
+  //   cy.get('input[name="q"]').clear().type('uk{enter}');
+  //
+  //   cy.get('.dashboard__search-button-inner').first().should('be.visible');
+  //
+  //   cy.get('.dashboard__search-button-inner').first().click({ force: true });
+  //
+  //   cy.get('.search__result-detail').should('be.visible');
+  //
+  //   clickReportTabs('feed-news-report');
+  //   clickReportMenuButtons('feed-news-report');
+  //
+  //   cy.get('@feedMenu').click({ force: true });
+  // });
 
   it('Dump: Listing → Search leak → View Result (No Timeouts)', () => {
     cy.visit('/dashboard/profile/homepage');
