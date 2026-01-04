@@ -12,10 +12,10 @@
               ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
           </button>
 
+
           <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
-            class="form-control default-input dashboard-general-input" maxlength="350" name="q" placeholder="Search ..."
-            type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)"> <input type="hidden"
-            value="1">
+            class="form-control default-input dashboard-general-input" data-cy="dashboard-general-input" maxlength="350"
+            name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)"><input type="hidden" value="1">
 
           <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()"
             [disabled]="!searchQuery">
