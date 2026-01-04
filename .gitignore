@@ -2,6 +2,7 @@ CrawlerInstance/applicationController/predictions.csv
 TrustlySearchServices/raw/classifier_output/training_data.csv
 */.dll
 */.pyc
+client/cypress/downloads/*
 **/_pycache_/
 bloom_data/*
 .idea/*
