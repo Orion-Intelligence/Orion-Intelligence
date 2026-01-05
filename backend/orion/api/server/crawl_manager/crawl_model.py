@@ -8,19 +8,7 @@ import requests
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 
-from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
-from orion.api.server.crawl_manager.class_model.credential_model import credential_data_model
-from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
-from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
-from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
-from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
-from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
-from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
-from orion.api.server.crawl_manager.class_model.log_model import LogModel, LogBatchModel
-from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
-from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
-from orion.api.server.crawl_manager.class_model.social_model import social_data_model
-from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
+from orion.api.server.crawl_manager.class_model.__init__ import *
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX

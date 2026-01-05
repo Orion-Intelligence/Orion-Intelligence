@@ -5,18 +5,8 @@ from fastapi import Request
 
 from configs.app_dependency import role_required
 from configs.limiter_dependency import limiter_dependency
-from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
+from orion.api.server.crawl_manager.class_model.__init__ import *
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
-from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
-from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
-from orion.api.server.crawl_manager.class_model.credential_model import credential_data_model
-from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
-from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
-from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
-from orion.api.server.crawl_manager.class_model.social_model import social_data_model
-from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
-from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
-from orion.api.server.crawl_manager.class_model.log_model import LogBatchModel
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
