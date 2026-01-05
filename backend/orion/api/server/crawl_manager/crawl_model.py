@@ -209,8 +209,8 @@ class crawl_model:
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
-            new_content_type=['leaks'],
-            new_index_type=['leak'],
+            new_content_type=['stealer'],
+            new_index_type=['stealer'],
             network_type=leak_index.m_network,
             is_leak_update=True)
 
