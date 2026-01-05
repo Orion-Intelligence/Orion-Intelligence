@@ -1,4 +1,6 @@
 import {Suggestion} from '../shared/common-result';
+import {initCallbackModel} from '../callback.init';
+import {SocialResultItem} from '../social/social.callback.model';
 
 export class LeakResultItem {
   m_ref_html?: string | null;
@@ -16,7 +18,6 @@ export class LeakResultItem {
   m_weblink: string[] = [];
   m_dumplink: string[] = [];
   m_email: string[] = [];
-  m_phone_numbers: string[] = [];
   m_websites: string[] = [];
   m_company_name?: string | null;
   m_logo_or_images: string[] = [];
@@ -40,9 +41,7 @@ export class LeakCallbackModel {
 
   constructor(init?: Partial<LeakCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new LeakResultItem(r)) ?? [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
-      this.Page_Count = init.Page_Count ?? 0;
+      initCallbackModel(this, init, r => new LeakResultItem(r));
     }
   }
 }

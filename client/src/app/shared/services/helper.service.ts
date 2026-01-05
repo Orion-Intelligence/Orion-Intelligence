@@ -1,16 +1,18 @@
-import { Injectable } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { franc } from 'franc-min';
-import { LANGUAGE_MAP } from '../constants/shared-enums';
-import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
+import {Injectable} from '@angular/core';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {franc} from 'franc-min';
+import {LANGUAGE_MAP} from '../constants/shared-enums';
+import {ConsolidatedParamModel} from '../model/results/consolidated/consolidated.param.model';
 import {AppService} from '../../services/core/app/app.service';
+
+type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
 
-  constructor(private sanitizer: DomSanitizer, private appService:AppService) {
+  constructor(private sanitizer: DomSanitizer, private appService: AppService) {
   }
 
   detectLanguageName(text: string): string {
@@ -21,6 +23,14 @@ export class HelperService {
     }
     const match = LANGUAGE_MAP[iso639_3];
     return match ? match.iso1 : "fr";
+  }
+
+  riskClass(risk: string | null | undefined): RiskClass {
+    const r = String(risk || '').toLowerCase();
+    if (r === 'high' || r === 'critical') return 'risk-high';
+    if (r === 'medium') return 'risk-medium';
+    if (r === 'low') return 'risk-low';
+    return 'risk-info';
   }
 
   extractDomain(url: string): string {
@@ -56,7 +66,7 @@ export class HelperService {
 
   downloadAsCSV(data: any) {
     const csvContent = this.convertToCSV(data);
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
@@ -68,7 +78,7 @@ export class HelperService {
 
   downloadstixJson(data: any) {
     const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([jsonString], {type: 'application/json'});
     const url = window.URL.createObjectURL(blob);
 
     const a = document.createElement('a');
@@ -78,6 +88,7 @@ export class HelperService {
 
     window.URL.revokeObjectURL(url);
   }
+
   removeEmptyOrNullValues<T extends Record<string, any>>(params: T): Partial<T> {
     const defaultParams = new ConsolidatedParamModel();
     const cleanedParams: Partial<T> = {};
@@ -108,7 +119,9 @@ export class HelperService {
   shareResult(url: string) {
     if (navigator.share) {
       navigator.share({
-        title: this.appService.getConfig().appSettings.app_name, text: 'Sharing a relevant CTI resource for review.', url: url
+        title: this.appService.getConfig().appSettings.app_name,
+        text: 'Sharing a relevant CTI resource for review.',
+        url: url
       }).catch(error => console.error('Error sharing:', error));
     } else {
       alert('Sharing is not supported on this browser.');
@@ -202,7 +215,7 @@ export class HelperService {
 
       const strA = aVal.toString();
       const strB = bVal.toString();
-      const comparison = strA.localeCompare(strB, undefined, { sensitivity: 'base' });
+      const comparison = strA.localeCompare(strB, undefined, {sensitivity: 'base'});
 
       return order === 'asc' ? comparison : -comparison;
     });

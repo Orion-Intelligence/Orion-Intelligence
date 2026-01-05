@@ -1,4 +1,6 @@
 import {Suggestion} from "../shared/common-result";
+import {initCallbackModel} from '../callback.init';
+import {ExploitResultItem} from '../exploit/exploit.callback.model';
 
 export class DefacementResultItem {
   q = ""
@@ -29,9 +31,7 @@ export class DefacementCallbackModel {
 
   constructor(init?: Partial<DefacementCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new DefacementResultItem(r)) ?? [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
-      this.Page_Count = init.Page_Count ?? 0;
+      initCallbackModel(this, init, r => new DefacementResultItem(r));
     }
   }
 }

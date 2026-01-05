@@ -1,4 +1,6 @@
 import { Suggestion } from '../shared/common-result';
+import {initCallbackModel} from '../callback.init';
+import {LeakResultItem} from '../leak/leak.callback.model';
 
 export class GeneralResultItem {
   m_title = "";
@@ -13,7 +15,6 @@ export class GeneralResultItem {
   m_meta_description?: string;
   m_content_type: string[] = [];
   m_section: string[] = [];
-  m_phone_numbers: string[] = [];
   m_clearnet_links: string[] = [];
   m_weblink: string[] = [];
   m_leak_date?: string | null;
@@ -34,9 +35,7 @@ export class GeneralCallbackModel {
 
   constructor(init?: Partial<GeneralCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new GeneralResultItem(r)) ?? [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
-      this.Page_Count = init.Page_Count ?? 0;
+      initCallbackModel(this, init, r => new GeneralResultItem(r));
     }
   }
 }

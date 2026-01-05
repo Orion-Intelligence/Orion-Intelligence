@@ -1,4 +1,6 @@
 import { Suggestion } from "../shared/common-result";
+import {initCallbackModel} from '../callback.init';
+import {DefacementResultItem} from '../defacement/defacement.callback.model';
 
 export class StealerLogResultItem {
   type?: string;
@@ -21,9 +23,7 @@ export class StealerLogCallbackModel {
 
   constructor(init?: Partial<StealerLogCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new StealerLogResultItem(r)) ?? [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
-      this.Page_Count = init.Page_Count ?? 0;
+      initCallbackModel(this, init, r => new StealerLogResultItem(r));
     }
   }
 }

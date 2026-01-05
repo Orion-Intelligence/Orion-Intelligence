@@ -1,4 +1,5 @@
 import {Suggestion} from '../shared/common-result';
+import {initCallbackModel} from '../callback.init';
 
 export class ChatResultItem {
   m_content?: string;
@@ -44,9 +45,7 @@ export class ChatCallbackModel {
 
   constructor(init?: Partial<ChatCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new ChatResultItem(r)) ?? [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
-      this.Page_Count = init.Page_Count ?? 0;
+      initCallbackModel(this, init, r => new ChatResultItem(r));
     }
   }
 }

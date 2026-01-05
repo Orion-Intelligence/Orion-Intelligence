@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { UrlScanMeta, UrlScanThreatItem } from '../../../model/security-scan/security.scan.results.model';
+import {HelperService} from '../../../services/helper.service';
 
-type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 
 interface FindingRow {
   n: number;
@@ -25,6 +25,9 @@ export class SecurityScanExportComponentComponent implements OnChanges {
   @Input() meta!: UrlScanMeta;
   @Input() categories!: { name: string; total: number; items: UrlScanThreatItem[] }[];
 
+  constructor(private helperService:HelperService) {
+  }
+
   viewFindings: FindingRow[] = [];
 
   ngOnChanges(_c: SimpleChanges): void {
@@ -35,12 +38,8 @@ export class SecurityScanExportComponentComponent implements OnChanges {
     return new Date().toLocaleString();
   }
 
-  riskClass(risk: string | null | undefined): RiskClass {
-    const r = String(risk || '').toLowerCase();
-    if (r === 'high' || r === 'critical') return 'risk-high';
-    if (r === 'medium') return 'risk-medium';
-    if (r === 'low') return 'risk-low';
-    return 'risk-info';
+  riskClass(risk: string | null | undefined) {
+    return this.helperService.riskClass(risk)
   }
 
   trimProof(p?: string | null): string {
