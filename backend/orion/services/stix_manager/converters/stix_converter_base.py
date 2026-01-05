@@ -56,29 +56,37 @@ class stix_converter_base:
     def _extract_values(self, c, raw: Any, key: str) -> List[str]:
         return [str(x).strip() for x in c.as_list(c.safe_get(raw, key)) if str(x).strip()]
 
-    def process_iocs(self, c, raw: Any, main_url: Optional[str] = None, extra_urls: Optional[List[str]] = None) -> tuple[List[str], List[str], List[str], List[str], List[str], List[str]]:
-        domain_vals = c.dedupe_keep(self._extract_values(c, raw, "m_domain"))
-        url_vals = c.dedupe_keep(self._extract_values(c, raw, "m_url"))
+    def _extract_deduped(self, c, raw: Any, key: str) -> List[str]:
+        return c.dedupe_keep(self._extract_values(c, raw, key))
+
+    def _extract_asns_deduped(self, c, raw: Any) -> List[str]:
+        values = c.as_list(c.safe_get(raw, "m_asns"))
+        cleaned = [str(x).strip().upper().lstrip("AS") for x in values if str(x).strip()]
+        digits_only = [a for a in cleaned if a.isdigit()]
+        return c.dedupe_keep(digits_only)
+
+    def _collect_urls(self, c, raw: Any, main_url: Optional[str], extra_urls: Optional[List[str]]) -> List[str]:
+        url_vals = self._extract_deduped(c, raw, "m_url")
 
         if main_url:
             url_vals.append(str(main_url))
 
         encoded_urls = self._extract_values(c, raw, "m_encoded_urls")
-        url_vals.extend(u for u in encoded_urls if u.startswith(("http://", "https://")))
+        url_vals.extend([u for u in encoded_urls if u.startswith(("http://", "https://"))])
 
         if extra_urls:
-            url_vals.extend(u for u in [str(x).strip() for x in extra_urls if str(x).strip()]
-                            if u.startswith(("http://", "https://")))
+            extra_clean = [str(x).strip() for x in extra_urls if str(x).strip()]
+            url_vals.extend([u for u in extra_clean if u.startswith(("http://", "https://"))])
 
-        url_vals = c.dedupe_keep(url_vals)
-        ip_vals = c.dedupe_keep(self._extract_values(c, raw, "m_ip"))
-        email_vals = c.dedupe_keep(self._extract_values(c, raw, "m_email"))
+        return c.dedupe_keep(url_vals)
 
-        asn_vals = c.dedupe_keep([a for a in [str(x).strip().upper().lstrip("AS")
-                                              for x in c.as_list(c.safe_get(raw, "m_asns")) if str(x).strip()]
-                                  if a.isdigit()])
-
-        file_paths = c.dedupe_keep(self._extract_values(c, raw, "m_file_paths"))
+    def process_iocs(self, c, raw: Any, main_url: Optional[str] = None, extra_urls: Optional[List[str]] = None) -> tuple[List[str], List[str], List[str], List[str], List[str], List[str]]:
+        domain_vals = self._extract_deduped(c, raw, "m_domain")
+        url_vals = self._collect_urls(c, raw, main_url, extra_urls)
+        ip_vals = self._extract_deduped(c, raw, "m_ip")
+        email_vals = self._extract_deduped(c, raw, "m_email")
+        asn_vals = self._extract_asns_deduped(c, raw)
+        file_paths = self._extract_deduped(c, raw, "m_file_paths")
 
         return domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths
 
@@ -139,6 +147,24 @@ class stix_converter_base:
         obj = {k: v for k, v in obj.items() if v is not None}
         return c.add_obj(obj, (obj_type, seed))
 
+    def _create_relationship(
+            self, c, created: str, modified: str, tlp_amber_id: str,
+            source_ref: str, target_ref: str, relationship_type: str
+            ) -> None:
+        seed = f"{source_ref}|{relationship_type}|{target_ref}"
+        rel = {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": c.stix_id("relationship", seed),
+            "created": created,
+            "modified": modified,
+            "relationship_type": relationship_type,
+            "source_ref": source_ref,
+            "target_ref": target_ref,
+            "object_marking_refs": [tlp_amber_id]
+        }
+        c.add_obj(rel, ("relationship", seed))
+
     def add_actor(
             self, c, raw: Any, created: str, modified: str, tlp_amber_id: str,
             summary: Optional[str], keys: List[str]
@@ -170,6 +196,24 @@ class stix_converter_base:
             identity_class="individual"
         )
 
+    def _create_victim_identity(
+            self, c, created: str, modified: str, tlp_amber_id: str,
+            name: str, sectors: Optional[List[str]]
+            ) -> str:
+        ident = {
+            "type": "identity",
+            "spec_version": "2.1",
+            "id": c.stix_id("identity", f"victim:{name}"),
+            "created": created,
+            "modified": modified,
+            "name": name,
+            "identity_class": "organization",
+            "sectors": sectors,
+            "object_marking_refs": [tlp_amber_id]
+        }
+        ident = {k: v for k, v in ident.items() if v is not None}
+        return c.add_obj(ident, ("identity", f"victim:{name}"))
+
     def add_victims(
             self, c, raw: Any, created: str, modified: str, tlp_amber_id: str,
             location_refs: List[str], sectors: Optional[List[str]] = None
@@ -182,34 +226,11 @@ class stix_converter_base:
             if not name:
                 continue
 
-            ident = {
-                "type": "identity",
-                "spec_version": "2.1",
-                "id": c.stix_id("identity", f"victim:{name}"),
-                "created": created,
-                "modified": modified,
-                "name": name,
-                "identity_class": "organization",
-                "sectors": sectors,
-                "object_marking_refs": [tlp_amber_id]
-            }
-            ident = {k: v for k, v in ident.items() if v is not None}
-            vref = c.add_obj(ident, ("identity", f"victim:{name}"))
+            vref = self._create_victim_identity(c, created, modified, tlp_amber_id, name, sectors)
             victim_refs.append(vref)
 
             for lref in location_refs:
-                rel = {
-                    "type": "relationship",
-                    "spec_version": "2.1",
-                    "id": c.stix_id("relationship", f"{vref}|located-at|{lref}"),
-                    "created": created,
-                    "modified": modified,
-                    "relationship_type": "located-at",
-                    "source_ref": vref,
-                    "target_ref": lref,
-                    "object_marking_refs": [tlp_amber_id]
-                }
-                c.add_obj(rel, ("relationship", f"{vref}|located-at|{lref}"))
+                self._create_relationship(c, created, modified, tlp_amber_id, vref, lref, "located-at")
 
         return victim_refs
 
@@ -220,18 +241,7 @@ class stix_converter_base:
         if not (actor_ref and infra_ref):
             return
 
-        rel = {
-            "type": "relationship",
-            "spec_version": "2.1",
-            "id": c.stix_id("relationship", f"{actor_ref}|uses|{infra_ref}"),
-            "created": created,
-            "modified": modified,
-            "relationship_type": "uses",
-            "source_ref": actor_ref,
-            "target_ref": infra_ref,
-            "object_marking_refs": [tlp_amber_id]
-        }
-        c.add_obj(rel, ("relationship", f"{actor_ref}|uses|{infra_ref}"))
+        self._create_relationship(c, created, modified, tlp_amber_id, actor_ref, infra_ref, "uses")
 
     def add_infrastructure(
             self, c, created: str, modified: str, tlp_amber_id: str, labels: List[str],
@@ -266,6 +276,24 @@ class stix_converter_base:
         infra = {k: v for k, v in infra.items() if v is not None}
         return c.add_obj(infra, ("infrastructure", f"{id_prefix}:{infra_seed}"))
 
+    def _build_extra_external_refs(self, c, raw: Any, include_screenshot: bool) -> List[dict]:
+        extra = []
+        if include_screenshot and c.safe_get(raw, "m_screenshot"):
+            extra.append({"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))})
+        return extra
+
+    def _build_custom_properties(self, c, raw: Any, platform: Optional[Any], dumplink_key: Optional[str]) -> Dict[str, Any]:
+        custom = {}
+        if network := c.safe_get(raw, "m_network"):
+            custom["x_orion_network"] = str(network)
+        if platform is not None:
+            custom["x_orion_platform"] = str(platform) if platform else None
+        if dumplink_key:
+            dumplinks = c.as_list(c.safe_get(raw, dumplink_key))
+            if dumplinks:
+                custom["x_orion_dumplink_count"] = str(len(dumplinks))
+        return custom
+
     def post_infra_processing(
             self, c, raw: Any, created: str, modified: str, tlp_amber_id: str,
             actor_ref: Optional[str], infra_ref: Optional[str], url: Optional[str],
@@ -278,9 +306,7 @@ class stix_converter_base:
 
         self.add_actor_uses_infra_rel(c, created, modified, tlp_amber_id, actor_ref, infra_ref)
 
-        extra_ext = []
-        if include_screenshot and c.safe_get(raw, "m_screenshot"):
-            extra_ext.append({"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))})
+        extra_ext = self._build_extra_external_refs(c, raw, include_screenshot)
 
         external_refs = self.build_external_refs(c, raw, url, base_url, extra_ext or None)
         object_refs = self.collect_object_refs(
@@ -289,15 +315,7 @@ class stix_converter_base:
             vuln_refs=vuln_refs, attack_refs=attack_refs
         )
 
-        custom = {}
-        if network := c.safe_get(raw, "m_network"):
-            custom["x_orion_network"] = str(network)
-        if platform is not None:
-            custom["x_orion_platform"] = str(platform) if platform else None
-        if dumplink_key:
-            dumplinks = c.as_list(c.safe_get(raw, dumplink_key))
-            if dumplinks:
-                custom["x_orion_dumplink_count"] = str(len(dumplinks))
+        custom = self._build_custom_properties(c, raw, platform, dumplink_key)
 
         return external_refs, object_refs, custom
 
@@ -352,10 +370,10 @@ class stix_converter_base:
             refs.append({"source_name": "source", "url": str(main_url)})
         if base_url and base_url != main_url:
             refs.append({"source_name": "base_url", "url": str(base_url)})
-        if c.safe_get(raw, "m_hash"):
-            refs.append({"source_name": "content-hash", "external_id": str(c.safe_get(raw, "m_hash"))})
-        if c.safe_get(raw, "m_scrap_file"):
-            refs.append({"source_name": "scraper", "external_id": str(c.safe_get(raw, "m_scrap_file"))})
+        if hash_val := c.safe_get(raw, "m_hash"):
+            refs.append({"source_name": "content-hash", "external_id": str(hash_val)})
+        if scrap_val := c.safe_get(raw, "m_scrap_file"):
+            refs.append({"source_name": "scraper", "external_id": str(scrap_val)})
         if extra:
             refs.extend(extra)
 

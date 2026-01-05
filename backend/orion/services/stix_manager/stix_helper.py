@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Optional
 from datetime import datetime, timezone
 import re
 import uuid
@@ -127,8 +127,28 @@ class stix_helper:
     def add_tlp(self, created: str) -> tuple[str, str]:
         amber = self.stix_id("marking-definition", "tlp:amber")
         red = self.stix_id("marking-definition", "tlp:red")
-        self.add_obj({"type": "marking-definition", "spec_version": "2.1", "id": amber, "created": created, "definition_type": "tlp", "definition": {"tlp": "amber"}}, ("marking-definition", "tlp:amber"))
-        self.add_obj({"type": "marking-definition", "spec_version": "2.1", "id": red, "created": created, "definition_type": "tlp", "definition": {"tlp": "red"}}, ("marking-definition", "tlp:red"))
+        self.add_obj(
+            {
+                "type": "marking-definition",
+                "spec_version": "2.1",
+                "id": amber,
+                "created": created,
+                "definition_type": "tlp",
+                "definition": {"tlp": "amber"},
+            },
+            ("marking-definition", "tlp:amber"),
+        )
+        self.add_obj(
+            {
+                "type": "marking-definition",
+                "spec_version": "2.1",
+                "id": red,
+                "created": created,
+                "definition_type": "tlp",
+                "definition": {"tlp": "red"},
+            },
+            ("marking-definition", "tlp:red"),
+        )
         return amber, red
 
     def add_locations(self, *, raw: Any, created: str, modified: str, tlp_amber_id: str, keys: list[str]) -> list[str]:
@@ -140,75 +160,266 @@ class stix_helper:
             cc = str(c).strip()
             if not cc:
                 continue
-            loc = {"type": "location", "spec_version": "2.1", "id": self.stix_id("location", f"country:{cc}"), "created": created, "modified": modified, "name": cc, "country": cc, "object_marking_refs": [tlp_amber_id]}
+            loc = {
+                "type": "location",
+                "spec_version": "2.1",
+                "id": self.stix_id("location", f"country:{cc}"),
+                "created": created,
+                "modified": modified,
+                "name": cc,
+                "country": cc,
+                "object_marking_refs": [tlp_amber_id],
+            }
             out.append(self.add_obj(loc, ("location", f"country:{cc}")))
         return out
 
-    def add_scos(self, *, tlp_amber_id: str, url_vals: list[str], domain_vals: list[str], ip_vals: list[str], email_vals: list[str], asn_vals: list[str], dir_vals: list[str], extra_scos: list[dict[str, Any]] | None = None) -> list[str]:
+    def _add_url_scos(self, url_vals: list[str]) -> list[str]:
         out: list[str] = []
         for u in url_vals:
             out.append(self.add_obj({"type": "url", "id": self.sco_id("url", u), "value": u}, ("url", u)))
+        return out
+
+    def _add_domain_scos(self, domain_vals: list[str]) -> list[str]:
+        out: list[str] = []
         for d in domain_vals:
             out.append(self.add_obj({"type": "domain-name", "id": self.sco_id("domain-name", d), "value": d}, ("domain-name", d)))
+        return out
+
+    def _add_ip_scos(self, ip_vals: list[str]) -> list[str]:
+        out: list[str] = []
         for ip in ip_vals:
             if ":" in ip:
-                out.append(self.add_obj({"type": "ipv6-addr", "id": self.sco_id("ipv6-addr", ip), "value": ip}, ("ipv6-addr", ip)))
+                sco_type = "ipv6-addr"
             else:
-                out.append(self.add_obj({"type": "ipv4-addr", "id": self.sco_id("ipv4-addr", ip), "value": ip}, ("ipv4-addr", ip)))
+                sco_type = "ipv4-addr"
+            out.append(self.add_obj({"type": sco_type, "id": self.sco_id(sco_type, ip), "value": ip}, (sco_type, ip)))
+        return out
+
+    def _add_email_scos(self, email_vals: list[str]) -> list[str]:
+        out: list[str] = []
         for e in email_vals:
             el = e.lower()
             out.append(self.add_obj({"type": "email-addr", "id": self.sco_id("email-addr", el), "value": e}, ("email-addr", el)))
+        return out
+
+    def _add_asn_scos(self, asn_vals: list[str]) -> list[str]:
+        out: list[str] = []
         for a in asn_vals:
             try:
                 num = int(a)
             except Exception:
                 continue
             out.append(self.add_obj({"type": "autonomous-system", "id": self.sco_id("autonomous-system", a), "number": num}, ("autonomous-system", a)))
+        return out
+
+    def _add_directory_scos(self, dir_vals: list[str]) -> list[str]:
+        out: list[str] = []
         for p in dir_vals:
             out.append(self.add_obj({"type": "directory", "id": self.sco_id("directory", p), "path": p}, ("directory", p)))
+        return out
+
+    def _add_extra_scos(self, extra_scos: list[dict[str, Any]] | None) -> list[str]:
+        out: list[str] = []
         if extra_scos:
             for sco in extra_scos:
                 out.append(self.add_obj(sco, (sco["type"], sco["id"])))
         return out
 
+    def add_scos(
+        self,
+        *,
+        tlp_amber_id: str,
+        url_vals: list[str],
+        domain_vals: list[str],
+        ip_vals: list[str],
+        email_vals: list[str],
+        asn_vals: list[str],
+        dir_vals: list[str],
+        extra_scos: list[dict[str, Any]] | None = None,
+    ) -> list[str]:
+        out: list[str] = []
+        out.extend(self._add_url_scos(url_vals))
+        out.extend(self._add_domain_scos(domain_vals))
+        out.extend(self._add_ip_scos(ip_vals))
+        out.extend(self._add_email_scos(email_vals))
+        out.extend(self._add_asn_scos(asn_vals))
+        out.extend(self._add_directory_scos(dir_vals))
+        out.extend(self._add_extra_scos(extra_scos))
+        return out
+
     def add_observed(self, *, doc_id: str, created: str, modified: str, tlp_amber_id: str, sco_refs: list[str]) -> str | None:
         if not sco_refs:
             return None
-        obs = {"type": "observed-data", "spec_version": "2.1", "id": self.stix_id("observed-data", f"{doc_id}|{created}"), "created": created, "modified": modified, "first_observed": created, "last_observed": modified, "number_observed": 1, "object_refs": self.dedupe_keep(sco_refs), "object_marking_refs": [tlp_amber_id]}
+        obs = {
+            "type": "observed-data",
+            "spec_version": "2.1",
+            "id": self.stix_id("observed-data", f"{doc_id}|{created}"),
+            "created": created,
+            "modified": modified,
+            "first_observed": created,
+            "last_observed": modified,
+            "number_observed": 1,
+            "object_refs": self.dedupe_keep(sco_refs),
+            "object_marking_refs": [tlp_amber_id],
+        }
         return self.add_obj(obs, ("observed-data", obs["id"]))
 
-    def add_indicator_obj(self, *, created: str, modified: str, tlp_amber_id: str, labels: list[str], summary: str | None, name: str, pattern: str, types: list[str], pattern_type: str = "stix") -> str:
-        ind = {"type": "indicator", "spec_version": "2.1", "id": self.stix_id("indicator", f"{name}|{pattern}"), "created": created, "modified": modified, "name": name, "description": summary if summary else None, "indicator_types": types, "pattern_type": pattern_type, "pattern": pattern, "valid_from": created, "labels": labels, "object_marking_refs": [tlp_amber_id]}
+    def add_indicator_obj(
+        self,
+        *,
+        created: str,
+        modified: str,
+        tlp_amber_id: str,
+        labels: list[str],
+        summary: str | None,
+        name: str,
+        pattern: str,
+        types: list[str],
+        pattern_type: str = "stix",
+    ) -> str:
+        ind = {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": self.stix_id("indicator", f"{name}|{pattern}"),
+            "created": created,
+            "modified": modified,
+            "name": name,
+            "description": summary if summary else None,
+            "indicator_types": types,
+            "pattern_type": pattern_type,
+            "pattern": pattern,
+            "valid_from": created,
+            "labels": labels,
+            "object_marking_refs": [tlp_amber_id],
+        }
         ind = {k: v for k, v in ind.items() if v is not None}
         return self.add_obj(ind, ("indicator", ind["id"]))
 
-    def add_indicators(self, *, created: str, modified: str, tlp_amber_id: str, labels: list[str], summary: str | None, domain_vals: list[str], url_vals: list[str], ip_vals: list[str], email_vals: list[str], indicator_types_default: str) -> list[str]:
+    def _add_batch_indicator(
+        self,
+        name: str,
+        sco_type: str,
+        values: list[str],
+        created: str,
+        modified: str,
+        tlp_amber_id: str,
+        labels: list[str],
+        summary: Optional[str],
+        indicator_types: list[str],
+    ) -> Optional[str]:
+        if not values:
+            return None
+        escaped = [self.escape_pat(v) for v in values]
+        vals_str = ", ".join(f"'{ev}'" for ev in escaped)
+        pattern = f"[{sco_type}:value IN ({vals_str})]"
+        return self.add_indicator_obj(
+            created=created,
+            modified=modified,
+            tlp_amber_id=tlp_amber_id,
+            labels=labels,
+            summary=summary,
+            name=name,
+            pattern=pattern,
+            types=indicator_types,
+            pattern_type="stix",
+        )
+
+    def add_indicators(
+        self,
+        *,
+        created: str,
+        modified: str,
+        tlp_amber_id: str,
+        labels: list[str],
+        summary: str | None,
+        domain_vals: list[str],
+        url_vals: list[str],
+        ip_vals: list[str],
+        email_vals: list[str],
+        indicator_types_default: str,
+    ) -> list[str]:
         out: list[str] = []
+
         if domain_vals:
-            vals = ", ".join(f"'{self.escape_pat(v)}'" for v in domain_vals)
-            out.append(self.add_indicator_obj(created=created, modified=modified, tlp_amber_id=tlp_amber_id, labels=labels, summary=summary, name="Domains", pattern=f"[domain-name:value IN ({vals})]", types=[indicator_types_default]))
+            ref = self._add_batch_indicator(
+                "Domains",
+                "domain-name",
+                domain_vals,
+                created,
+                modified,
+                tlp_amber_id,
+                labels,
+                summary,
+                [indicator_types_default],
+            )
+            if ref:
+                out.append(ref)
+
         if url_vals:
-            vals = ", ".join(f"'{self.escape_pat(v)}'" for v in url_vals)
-            out.append(self.add_indicator_obj(created=created, modified=modified, tlp_amber_id=tlp_amber_id, labels=labels, summary=summary, name="URLs", pattern=f"[url:value IN ({vals})]", types=[indicator_types_default]))
-        if ip_vals:
-            v4: list[str] = []
-            v6: list[str] = []
-            for v in ip_vals:
-                if ":" in v:
-                    v6.append(v)
-                else:
-                    v4.append(v)
-            v4 = self.dedupe_keep(v4)
-            v6 = self.dedupe_keep(v6)
-            if v4:
-                vals = ", ".join(f"'{self.escape_pat(v)}'" for v in v4)
-                out.append(self.add_indicator_obj(created=created, modified=modified, tlp_amber_id=tlp_amber_id, labels=labels, summary=summary, name="IPv4", pattern=f"[ipv4-addr:value IN ({vals})]", types=[indicator_types_default]))
-            if v6:
-                vals = ", ".join(f"'{self.escape_pat(v)}'" for v in v6)
-                out.append(self.add_indicator_obj(created=created, modified=modified, tlp_amber_id=tlp_amber_id, labels=labels, summary=summary, name="IPv6", pattern=f"[ipv6-addr:value IN ({vals})]", types=[indicator_types_default]))
+            ref = self._add_batch_indicator(
+                "URLs",
+                "url",
+                url_vals,
+                created,
+                modified,
+                tlp_amber_id,
+                labels,
+                summary,
+                [indicator_types_default],
+            )
+            if ref:
+                out.append(ref)
+
+        v4 = [v for v in ip_vals if ":" not in v]
+        v6 = [v for v in ip_vals if ":" in v]
+        v4 = self.dedupe_keep(v4)
+        v6 = self.dedupe_keep(v6)
+
+        if v4:
+            ref = self._add_batch_indicator(
+                "IPv4",
+                "ipv4-addr",
+                v4,
+                created,
+                modified,
+                tlp_amber_id,
+                labels,
+                summary,
+                [indicator_types_default],
+            )
+            if ref:
+                out.append(ref)
+
+        if v6:
+            ref = self._add_batch_indicator(
+                "IPv6",
+                "ipv6-addr",
+                v6,
+                created,
+                modified,
+                tlp_amber_id,
+                labels,
+                summary,
+                [indicator_types_default],
+            )
+            if ref:
+                out.append(ref)
+
         if email_vals:
-            vals = ", ".join(f"'{self.escape_pat(v)}'" for v in email_vals)
-            out.append(self.add_indicator_obj(created=created, modified=modified, tlp_amber_id=tlp_amber_id, labels=labels, summary=summary, name="Emails", pattern=f"[email-addr:value IN ({vals})]", types=[indicator_types_default]))
+            ref = self._add_batch_indicator(
+                "Emails",
+                "email-addr",
+                email_vals,
+                created,
+                modified,
+                tlp_amber_id,
+                labels,
+                summary,
+                [indicator_types_default],
+            )
+            if ref:
+                out.append(ref)
+
         return out
 
     def add_yara_indicators(self, *, created: str, modified: str, tlp_amber_id: str, labels: list[str], yara_rules: list[Any]) -> list[str]:
@@ -217,7 +428,19 @@ class stix_helper:
             rule = str(yr).strip()
             if not rule:
                 continue
-            out.append(self.add_indicator_obj(created=created, modified=modified, tlp_amber_id=tlp_amber_id, labels=labels, summary=None, name="YARA Rule", pattern=rule, types=labels, pattern_type="yara"))
+            out.append(
+                self.add_indicator_obj(
+                    created=created,
+                    modified=modified,
+                    tlp_amber_id=tlp_amber_id,
+                    labels=labels,
+                    summary=None,
+                    name="YARA Rule",
+                    pattern=rule,
+                    types=labels,
+                    pattern_type="yara",
+                )
+            )
         return out
 
     def add_vulns(self, *, created: str, modified: str, tlp_amber_id: str, cves: list[Any]) -> list[str]:
@@ -227,12 +450,34 @@ class stix_helper:
             if not token:
                 continue
             if token.startswith("CVE-"):
-                v = {"type": "vulnerability", "spec_version": "2.1", "id": self.stix_id("vulnerability", token), "created": created, "modified": modified, "name": token, "external_references": [{"source_name": "nvd", "external_id": token, "url": f"https://nvd.nist.gov/vuln/detail/{token}"}], "object_marking_refs": [tlp_amber_id]}
+                v = {
+                    "type": "vulnerability",
+                    "spec_version": "2.1",
+                    "id": self.stix_id("vulnerability", token),
+                    "created": created,
+                    "modified": modified,
+                    "name": token,
+                    "external_references": [
+                        {"source_name": "nvd", "external_id": token, "url": f"https://nvd.nist.gov/vuln/detail/{token}"}
+                    ],
+                    "object_marking_refs": [tlp_amber_id],
+                }
                 out.append(self.add_obj(v, ("vulnerability", token)))
             elif token.startswith("CWE-"):
                 cwe_num = token.replace("CWE-", "")
                 if cwe_num.isdigit():
-                    v = {"type": "vulnerability", "spec_version": "2.1", "id": self.stix_id("vulnerability", token), "created": created, "modified": modified, "name": token, "external_references": [{"source_name": "cwe", "external_id": token, "url": f"https://cwe.mitre.org/data/definitions/{cwe_num}.html"}], "object_marking_refs": [tlp_amber_id]}
+                    v = {
+                        "type": "vulnerability",
+                        "spec_version": "2.1",
+                        "id": self.stix_id("vulnerability", token),
+                        "created": created,
+                        "modified": modified,
+                        "name": token,
+                        "external_references": [
+                            {"source_name": "cwe", "external_id": token, "url": f"https://cwe.mitre.org/data/definitions/{cwe_num}.html"}
+                        ],
+                        "object_marking_refs": [tlp_amber_id],
+                    }
                     out.append(self.add_obj(v, ("vulnerability", token)))
         return out
 
@@ -244,17 +489,31 @@ class stix_helper:
             if s:
                 tacts.append(s)
         tacts = self.dedupe_keep(tacts)
+
         techs: list[str] = []
         for x in techniques:
             s = str(x).strip().upper()
             if s:
                 techs.append(s)
         techs = self.dedupe_keep(techs)
+
         for tech in techs:
             if not re.match(r"^(T\d{4})(\.\d{3})?$", tech):
                 continue
             base = tech.split(".")[0]
-            ap = {"type": "attack-pattern", "spec_version": "2.1", "id": self.stix_id("attack-pattern", tech), "created": created, "modified": modified, "name": tech, "external_references": [{"source_name": "mitre-attack", "external_id": tech, "url": f"https://attack.mitre.org/techniques/{base}/"}], "kill_chain_phases": [{"kill_chain_name": "mitre-attack", "phase_name": t} for t in tacts] if tacts else None, "object_marking_refs": [tlp_amber_id]}
+            ap = {
+                "type": "attack-pattern",
+                "spec_version": "2.1",
+                "id": self.stix_id("attack-pattern", tech),
+                "created": created,
+                "modified": modified,
+                "name": tech,
+                "external_references": [
+                    {"source_name": "mitre-attack", "external_id": tech, "url": f"https://attack.mitre.org/techniques/{base}/"}
+                ],
+                "kill_chain_phases": [{"kill_chain_name": "mitre-attack", "phase_name": t} for t in tacts] if tacts else None,
+                "object_marking_refs": [tlp_amber_id],
+            }
             ap = {k: v for k, v in ap.items() if v is not None}
             out.append(self.add_obj(ap, ("attack-pattern", tech)))
         return out
@@ -277,4 +536,3 @@ class stix_helper:
             last4 = v[-4:] if len(v) >= 4 else v
             out.append({"sha256": self.sha256(v), "last4": last4})
         sensitive[cat] = out
-
