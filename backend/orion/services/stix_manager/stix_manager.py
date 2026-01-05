@@ -130,6 +130,29 @@ class StixManager:
         file_paths = c.dedupe_keep([str(x).strip() for x in c.as_list(c.safe_get(raw, "m_file_paths")) if str(x).strip()])
         return domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths
 
+    def _prepare_common_iocs_refs(
+            self, c, raw: Any, created: str, modified: str, tlp_amber_id: str, labels: List[str], summary: str, doc_id: str, url: Optional[str],
+            extra_urls: List[Any] = [], actor_keys: List[str] = [],
+    ) -> tuple[Optional[str], str, Optional[str], List[str], List[str], List[str]]:
+        actor_ref = self._add_actor(c, raw, created, modified, tlp_amber_id, summary, actor_keys)
+        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._process_iocs(c, raw, main_url=url, extra_urls=extra_urls)
+        observed_ref, indicator_refs, vuln_refs, attack_refs = self._add_common_objects(c, created, modified, tlp_amber_id, labels, summary, doc_id, raw,
+                                                                                        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
+        note_ref = self._add_sensitive_note(c, created, modified, tlp_amber_id, c.add_tlp(created)[1], doc_id, raw)
+        return actor_ref, observed_ref, note_ref, indicator_refs, vuln_refs, attack_refs
+
+    def _determine_infra_types(self, content_types: set[str], network: Optional[Any], special_condition: Optional[str] = None, special_target: Optional[str] = None) -> List[str]:
+        types = ["unknown"]
+        if special_condition and special_condition in content_types:
+            types = [special_target or "unknown"]
+        if str(network or "").lower() == "onion":
+            types = ["anonymization"]
+        return types
+
+    def _get_infra_name(self, c, raw: Any, title: str, default: str, priority_keys: List[str] = []) -> str:
+        priority = c.first_nonempty(*(c.safe_get(raw, k) for k in priority_keys))
+        return str(c.first_nonempty(priority, title, default))
+
     def _add_actor(self, c, raw: Any, created: str, modified: str, tlp_amber_id: str, summary: Optional[str], keys: List[str]) -> Optional[str]:
         team = c.first_nonempty(*(c.safe_get(raw, k) for k in keys))
         if team and str(team).strip():
@@ -216,16 +239,16 @@ class StixManager:
             }
             c.add_obj(rel, ("relationship", f"{actor_ref}|uses|{infra_ref}"))
 
-    def _add_infrastructure(self, c, created: str, modified: str, tlp_amber_id: str, labels: List[str], summary: Optional[str],
-                            network: Optional[Any], platform: Optional[Any], infra_seed: Optional[str], name: str,
-                            infra_types: List[str], id_prefix: str = "infra", extra_fields: Optional[Dict[str, Any]] = None) -> Optional[str]:
+    def _add_infrastructure(
+            self, c, created: str, modified: str, tlp_amber_id: str, labels: List[str], summary: Optional[str],
+            network: Optional[Any], infra_seed: Optional[str], name: str,
+            infra_types: List[str], id_prefix: str = "infra",
+    ) -> Optional[str]:
         if not infra_seed:
             return None
-        extra = extra_fields or {}
+        extra = {}
         if network:
             extra["x_orion_network"] = str(network)
-        if platform:
-            extra["x_orion_platform"] = str(platform)
         infra = {
             "type": "infrastructure",
             "spec_version": "2.1",
@@ -244,14 +267,32 @@ class StixManager:
         infra = {k: v for k, v in infra.items() if v is not None}
         return c.add_obj(infra, ("infrastructure", f"{id_prefix}:{infra_seed}"))
 
-    def _get_hashtags_mentions(self, c, raw: Any, mention_lstrip: str = "@") -> tuple[List[str], List[str]]:
-        hashtags = c.dedupe_keep([str(x).strip().lstrip("#") for x in c.as_list(c.safe_get(raw, "m_hashtag")) if str(x).strip()])
-        mentions = c.dedupe_keep([str(x).strip().lstrip(mention_lstrip) for x in c.as_list(c.safe_get(raw, "m_mention")) if str(x).strip()])
-        return hashtags, mentions
+    def _post_infra_processing(
+            self, c, raw: Any, created: str, modified: str, tlp_amber_id: str, actor_ref: Optional[str], infra_ref: Optional[str],
+            url: Optional[str], base_url: Optional[str], observed_ref: str, note_ref: Optional[str], location_refs: List[str],
+            indicator_refs: List[str], vuln_refs: List[str], attack_refs: List[str], victim_refs: List[str] = [],
+            include_screenshot: bool = False, platform: Optional[Any] = None, dumplink_key: Optional[str] = None,
+    ) -> tuple[Optional[List[dict]], List[str], Dict[str, Any]]:
+        self._add_actor_uses_infra_rel(c, created, modified, tlp_amber_id, actor_ref, infra_ref)
+        extra_ext = []
+        if include_screenshot and c.safe_get(raw, "m_screenshot"):
+            extra_ext.append({"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))})
+        external_refs = self._build_external_refs(c, raw, main_url=url, base_url=base_url, extra=extra_ext or None)
+        object_refs = self._collect_object_refs(actor_ref=actor_ref, infra_ref=infra_ref, observed_ref=observed_ref, note_ref=note_ref,
+                                                victim_refs=victim_refs, location_refs=location_refs, indicator_refs=indicator_refs,
+                                                vuln_refs=vuln_refs, attack_refs=attack_refs)
+        custom: Dict[str, Any] = {"x_orion_network": str(c.safe_get(raw, "m_network")) if c.safe_get(raw, "m_network") else None}
+        if platform is not None:
+            custom["x_orion_platform"] = str(platform) if platform else None
+        if dumplink_key:
+            custom["x_orion_dumplink_count"] = str(len(c.as_list(c.safe_get(raw, dumplink_key)))) if c.as_list(c.safe_get(raw, dumplink_key)) else None
+        return external_refs, object_refs, custom
 
-    def _add_common_objects(self, c, created: str, modified: str, tlp_amber_id: str, labels: List[str], summary: Optional[str], doc_id: str, raw: Any,
-                            domain_vals: List[str], url_vals: List[str], ip_vals: List[str], email_vals: List[str], asn_vals: List[str], file_paths: List[str],
-                            extra_scos: Optional[List[dict]] = None, custom_cves: Optional[List[str]] = None) -> tuple[str, List[str], List[str], List[str]]:
+    def _add_common_objects(
+            self, c, created: str, modified: str, tlp_amber_id: str, labels: List[str], summary: Optional[str], doc_id: str, raw: Any,
+            domain_vals: List[str], url_vals: List[str], ip_vals: List[str], email_vals: List[str], asn_vals: List[str], file_paths: List[str],
+            extra_scos: Optional[List[dict]] = None, custom_cves: Optional[List[str]] = None,
+    ) -> tuple[str, List[str], List[str], List[str]]:
         sco_refs = c.add_scos(tlp_amber_id=tlp_amber_id, url_vals=url_vals, domain_vals=domain_vals, ip_vals=ip_vals, email_vals=email_vals, asn_vals=asn_vals, dir_vals=file_paths, extra_scos=extra_scos)
         observed_ref = c.add_observed(doc_id=str(doc_id), created=created, modified=modified, tlp_amber_id=tlp_amber_id, sco_refs=sco_refs)
         indicator_refs = c.add_indicators(created=created, modified=modified, tlp_amber_id=tlp_amber_id, labels=labels, summary=summary, domain_vals=domain_vals, url_vals=url_vals, ip_vals=ip_vals, email_vals=email_vals, indicator_types_default="malicious-activity")
@@ -275,8 +316,10 @@ class StixManager:
             refs.extend(extra)
         return refs or None
 
-    def _add_sensitive_note(self, c, created: str, modified: str, tlp_amber_id: str, tlp_red_id: str, doc_id: str, raw: Any,
-                            extra_content: Optional[dict] = None, base_abstract: str = "Sensitive artifacts") -> Optional[str]:
+    def _add_sensitive_note(
+            self, c, created: str, modified: str, tlp_amber_id: str, tlp_red_id: str, doc_id: str, raw: Any,
+            extra_content: Optional[dict] = None, base_abstract: str = "Sensitive artifacts",
+    ) -> Optional[str]:
         sensitive: dict[str, List[dict]] = {}
         c.sensitive_add(sensitive=sensitive, cat="credit_cards", values=c.as_list(c.safe_get(raw, "m_credit_card")))
         c.sensitive_add(sensitive=sensitive, cat="us_passport", values=c.as_list(c.safe_get(raw, "m_us_passport")))
@@ -304,16 +347,24 @@ class StixManager:
         }
         return c.add_obj(note, ("note", note["id"]))
 
-    def _collect_object_refs(self, **refs: Optional[Any]) -> List[str]:
-        object_refs = [r for r in refs.values() if r and isinstance(r, str)]
-        list_refs = [r for r in refs.values() if r and isinstance(r, list)]
-        for lst in list_refs:
-            object_refs.extend(lst)
-        return c.dedupe_keep(object_refs)
+    def _collect_object_refs(
+            self, actor_ref: Optional[str] = None, infra_ref: Optional[str] = None, observed_ref: Optional[str] = None,
+            note_ref: Optional[str] = None, created_by_ref: Optional[str] = None, victim_refs: List[str] = [],
+            location_refs: List[str] = [], indicator_refs: List[str] = [], vuln_refs: List[str] = [], attack_refs: List[str] = [],
+    ) -> List[str]:
+        object_refs: List[str] = [r for r in [actor_ref, infra_ref, observed_ref, note_ref, created_by_ref] if r]
+        object_refs.extend(victim_refs)
+        object_refs.extend(location_refs)
+        object_refs.extend(indicator_refs)
+        object_refs.extend(vuln_refs)
+        object_refs.extend(attack_refs)
+        return object_refs
 
-    def _finalize_bundle(self, c, created: str, modified: str, title: str, summary: Optional[str], labels: List[str], lang: Optional[str],
-                         external_refs: Optional[List[dict]], object_refs: List[str], doc_id: str, type_str: str, tlp_amber_id: str,
-                         created_by_ref: Optional[str] = None, **custom) -> Dict[str, Any]:
+    def _finalize_bundle(
+            self, c, created: str, modified: str, title: str, summary: Optional[str], labels: List[str], lang: Optional[str],
+            external_refs: Optional[List[dict]], object_refs: List[str], doc_id: str, type_str: str, tlp_amber_id: str,
+            created_by_ref: Optional[str] = None, **custom,
+    ) -> Dict[str, Any]:
         object_refs = c.dedupe_keep(object_refs)
         report = {
             "type": "report",
@@ -342,8 +393,8 @@ class StixManager:
         c = stix_helper()
         created, modified = self._get_timestamps(c, raw, ["m_leak_date", "m_creation_date", "m_update_date"])
         title = str(c.first_nonempty(c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"),
-                                    c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None,
-                                    str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None, "Defacement - unknown title"))
+                                     c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None,
+                                     str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None, "Defacement - unknown title"))
         url = c.first_nonempty(c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), c.as_list(c.safe_get(raw, "m_source_url"))[0] if c.as_list(c.safe_get(raw, "m_source_url")) else None,
                                c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None)
         base_url = c.safe_get(raw, "m_base_url")
@@ -360,13 +411,13 @@ class StixManager:
                                                                                         domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
         infra_seed = c.first_nonempty(base_url, url, domain_vals[0] if domain_vals else None)
         name = title
-        infra_types = ["unknown"]
-        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, None, infra_seed, name, infra_types)
+        infra_types = self._determine_infra_types(content_types, network)
+        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, infra_seed, name, infra_types)
         attack_vector = c.first_nonempty(c.as_list(c.safe_get(raw, "m_ioc_type"))[0] if c.as_list(c.safe_get(raw, "m_ioc_type")) else None,
                                          c.as_list(c.safe_get(raw, "m_web_server"))[0] if c.as_list(c.safe_get(raw, "m_web_server")) else None, "Unknown")
         external_refs = self._build_external_refs(c, raw, main_url=url, base_url=base_url)
         object_refs = self._collect_object_refs(infra_ref=infra_ref, observed_ref=observed_ref, location_refs=location_refs,
-                                               indicator_refs=indicator_refs, vuln_refs=vuln_refs, attack_refs=attack_refs)
+                                                indicator_refs=indicator_refs, vuln_refs=vuln_refs, attack_refs=attack_refs)
         custom = {
             "x_orion_network": str(network) if network else None,
             "x_orion_attack_vector": str(attack_vector),
@@ -388,24 +439,14 @@ class StixManager:
         labels = self._standard_labels(c, raw, content_types, "orion:exploit")
         lang = self._get_lang(c, raw)
         location_refs = c.add_locations(raw=raw, created=created, modified=modified, tlp_amber_id=tlp_amber_id, keys=["m_country", "m_location"])
-        actor_ref = self._add_actor(c, raw, created, modified, tlp_amber_id, summary, ["m_team", "m_author", "m_name"])
-        extra_urls = c.as_list(c.safe_get(raw, "m_weblink"))
-        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._process_iocs(c, raw, main_url=url, extra_urls=extra_urls)
-        observed_ref, indicator_refs, vuln_refs, attack_refs = self._add_common_objects(c, created, modified, tlp_amber_id, labels, summary, doc_id, raw,
-                                                                                        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
-        note_ref = self._add_sensitive_note(c, created, modified, tlp_amber_id, tlp_red_id, doc_id, raw)
-        infra_seed = c.first_nonempty(base_url, url, domain_vals[0] if domain_vals else None)
-        name = str(c.first_nonempty(title, c.safe_get(raw, "m_name"), "Exploit infrastructure"))
-        infra_types = ["unknown"]
-        if "c2" in content_types:
-            infra_types = ["command-and-control"]
-        elif str(network or "").lower() == "onion":
-            infra_types = ["anonymization"]
-        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, None, infra_seed, name, infra_types)
-        external_refs = self._build_external_refs(c, raw, main_url=url, base_url=base_url)
-        object_refs = self._collect_object_refs(actor_ref=actor_ref, infra_ref=infra_ref, observed_ref=observed_ref, note_ref=note_ref,
-                                               location_refs=location_refs, indicator_refs=indicator_refs, vuln_refs=vuln_refs, attack_refs=attack_refs)
-        custom = {"x_orion_network": str(network) if network else None, "x_orion_platform": str(platform) if platform else None}
+        actor_ref, observed_ref, note_ref, indicator_refs, vuln_refs, attack_refs = self._prepare_common_iocs_refs(c, raw, created, modified, tlp_amber_id, labels, summary, doc_id, url,
+                                                                                                                   extra_urls=c.as_list(c.safe_get(raw, "m_weblink")), actor_keys=["m_team", "m_author", "m_name"])
+        infra_seed = c.first_nonempty(base_url, url, domain_vals[0] if 'domain_vals' in locals() else None)
+        name = self._get_infra_name(c, raw, title, "Exploit infrastructure", ["m_name"])
+        infra_types = self._determine_infra_types(content_types, network, "c2", "command-and-control")
+        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, infra_seed, name, infra_types)
+        external_refs, object_refs, custom = self._post_infra_processing(c, raw, created, modified, tlp_amber_id, actor_ref, infra_ref, url, base_url, observed_ref, note_ref, location_refs,
+                                                                         indicator_refs, vuln_refs, attack_refs, victim_refs=[], include_screenshot=False, platform=platform)
         return self._finalize_bundle(c, created, modified, title, summary, labels, lang, external_refs, object_refs, doc_id, "exploit", tlp_amber_id, **custom)
 
     def _convert_leak(self, raw: LeakResultItem) -> Dict[str, Any]:
@@ -423,31 +464,14 @@ class StixManager:
         lang = self._get_lang(c, raw)
         location_refs = c.add_locations(raw=raw, created=created, modified=modified, tlp_amber_id=tlp_amber_id, keys=["m_country", "m_location"])
         victim_refs = self._add_victims(c, raw, created, modified, tlp_amber_id, location_refs)
-        actor_ref = self._add_actor(c, raw, created, modified, tlp_amber_id, summary, ["m_team", "m_author"])
-        extra_urls = c.as_list(c.safe_get(raw, "m_dumplink")) + c.as_list(c.safe_get(raw, "m_websites"))
-        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._process_iocs(c, raw, main_url=url, extra_urls=extra_urls)
-        observed_ref, indicator_refs, vuln_refs, attack_refs = self._add_common_objects(c, created, modified, tlp_amber_id, labels, summary, doc_id, raw,
-                                                                                        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
-        note_ref = self._add_sensitive_note(c, created, modified, tlp_amber_id, tlp_red_id, doc_id, raw)
-        infra_seed = c.first_nonempty(base_url, url, domain_vals[0] if domain_vals else None)
-        name = str(c.first_nonempty(c.safe_get(raw, "m_team"), title, "Leak infrastructure"))
-        infra_types = ["unknown"]
-        if "ransomware" in content_types:
-            infra_types = ["command-and-control"]
-        elif str(network or "").lower() == "onion":
-            infra_types = ["anonymization"]
-        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, None, infra_seed, name, infra_types)
-        self._add_actor_uses_infra_rel(c, created, modified, tlp_amber_id, actor_ref, infra_ref)
-        extra_ext = [{"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))}] if c.safe_get(raw, "m_screenshot") else []
-        external_refs = self._build_external_refs(c, raw, main_url=url, base_url=base_url, extra=extra_ext)
-        object_refs = self._collect_object_refs(actor_ref=actor_ref, infra_ref=infra_ref, observed_ref=observed_ref, note_ref=note_ref,
-                                               victim_refs=victim_refs, location_refs=location_refs, indicator_refs=indicator_refs,
-                                               vuln_refs=vuln_refs, attack_refs=attack_refs)
-        custom = {
-            "x_orion_network": str(network) if network else None,
-            "x_orion_platform": str(platform) if platform else None,
-            "x_orion_dumplink_count": str(len(c.as_list(c.safe_get(raw, "m_dumplink")))) if c.as_list(c.safe_get(raw, "m_dumplink")) else None
-        }
+        actor_ref, observed_ref, note_ref, indicator_refs, vuln_refs, attack_refs = self._prepare_common_iocs_refs(c, raw, created, modified, tlp_amber_id, labels, summary, doc_id, url,
+                                                                                                                   extra_urls=c.as_list(c.safe_get(raw, "m_dumplink")) + c.as_list(c.safe_get(raw, "m_websites")), actor_keys=["m_team", "m_author"])
+        infra_seed = c.first_nonempty(base_url, url, domain_vals[0] if 'domain_vals' in locals() else None)
+        name = self._get_infra_name(c, raw, title, "Leak infrastructure", ["m_team"])
+        infra_types = self._determine_infra_types(content_types, network, "ransomware", "command-and-control")
+        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, infra_seed, name, infra_types)
+        external_refs, object_refs, custom = self._post_infra_processing(c, raw, created, modified, tlp_amber_id, actor_ref, infra_ref, url, base_url, observed_ref, note_ref, location_refs,
+                                                                         indicator_refs, vuln_refs, attack_refs, victim_refs=victim_refs, include_screenshot=True, platform=platform, dumplink_key="m_dumplink")
         return self._finalize_bundle(c, created, modified, title, summary, labels, lang, external_refs, object_refs, doc_id, "leak", tlp_amber_id, **custom)
 
     def _convert_social(self, raw: SocialResultItem) -> Dict[str, Any]:
@@ -476,19 +500,18 @@ class StixManager:
             extra_scos.append({"type": "user-agent", "id": c.sco_id("user-agent", ua), "string": ua})
         observed_ref, indicator_refs, vuln_refs, attack_refs = self._add_common_objects(c, created, modified, tlp_amber_id, labels, summary, doc_id, raw,
                                                                                         domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths, extra_scos=extra_scos)
-        hashtags, mentions = self._get_hashtags_mentions(c, raw, "@")
+        hashtags = c.dedupe_keep([str(x).strip().lstrip("#") for x in c.as_list(c.safe_get(raw, "m_hashtag")) if str(x).strip()])
+        mentions = c.dedupe_keep([str(x).strip().lstrip("@") for x in c.as_list(c.safe_get(raw, "m_mention")) if str(x).strip()])
         extra_content = {k: v for k, v in {"hashtags": hashtags, "mentions": mentions}.items() if v}
         note_ref = self._add_sensitive_note(c, created, modified, tlp_amber_id, tlp_red_id, doc_id, raw, extra_content=extra_content or None, base_abstract="Social metadata")
         infra_seed = c.first_nonempty(base_url, url, domain_vals[0] if domain_vals else None)
-        name = str(c.first_nonempty(platform, title, "Social infrastructure"))
-        infra_types = ["unknown"]
-        if str(network or "").lower() == "onion":
-            infra_types = ["anonymization"]
-        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, platform, infra_seed, name, infra_types)
+        name = self._get_infra_name(c, raw, title, "Social infrastructure", priority_value=platform)
+        infra_types = self._determine_infra_types(content_types, network)
+        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, infra_seed, name, infra_types)
         extra_ext = [{"source_name": "share_link", "url": str(c.safe_get(raw, "m_message_sharable_link"))}] if c.safe_get(raw, "m_message_sharable_link") else []
         external_refs = self._build_external_refs(c, raw, main_url=url, base_url=base_url, extra=extra_ext)
         object_refs = self._collect_object_refs(infra_ref=infra_ref, observed_ref=observed_ref, note_ref=note_ref, created_by_ref=created_by_ref,
-                                               location_refs=location_refs, indicator_refs=indicator_refs, vuln_refs=vuln_refs, attack_refs=attack_refs)
+                                                location_refs=location_refs, indicator_refs=indicator_refs, vuln_refs=vuln_refs, attack_refs=attack_refs)
         custom = {
             "x_orion_network": str(network) if network else None,
             "x_orion_platform": str(platform) if platform else None,
@@ -520,31 +543,19 @@ class StixManager:
         labels_set.add("orion:general")
         labels = list(labels_set)
         lang = self._get_lang(c, raw)
+        location_refs = c.add_locations(raw=raw, created=created, modified=modified, tlp_amber_id=tlp_amber_id, keys=["m_country", "m_location"])
         industries = [str(x).strip() for x in c.as_list(c.safe_get(raw, "m_industry")) if str(x).strip()]
         sector = industries[0] if industries else None
         sectors = [sector] if sector else None
-        location_refs = c.add_locations(raw=raw, created=created, modified=modified, tlp_amber_id=tlp_amber_id, keys=["m_country", "m_location"])
         victim_refs = self._add_victims(c, raw, created, modified, tlp_amber_id, location_refs, sectors)
-        actor_ref = self._add_actor(c, raw, created, modified, tlp_amber_id, summary, ["m_team", "m_author"])
-        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._process_iocs(c, raw, main_url=url)
-        observed_ref, indicator_refs, vuln_refs, attack_refs = self._add_common_objects(c, created, modified, tlp_amber_id, labels, summary, doc_id, raw,
-                                                                                        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
-        note_ref = self._add_sensitive_note(c, created, modified, tlp_amber_id, tlp_red_id, doc_id, raw)
-        infra_seed = c.first_nonempty(url, base_url, domain_vals[0] if domain_vals else None)
-        name = str(c.first_nonempty(c.safe_get(raw, "m_team"), title, "Observed infrastructure"))
-        infra_types = ["unknown"]
-        if str(network or "").lower() == "onion":
-            infra_types = ["anonymization"]
-        elif "darkweb" in content_types:
-            infra_types = ["hosting-malware"]
-        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, None, infra_seed, name, infra_types)
-        self._add_actor_uses_infra_rel(c, created, modified, tlp_amber_id, actor_ref, infra_ref)
-        extra_ext = [{"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))}] if c.safe_get(raw, "m_screenshot") else []
-        external_refs = self._build_external_refs(c, raw, main_url=url, base_url=base_url, extra=extra_ext)
-        object_refs = self._collect_object_refs(actor_ref=actor_ref, infra_ref=infra_ref, observed_ref=observed_ref, note_ref=note_ref,
-                                               victim_refs=victim_refs, location_refs=location_refs, indicator_refs=indicator_refs,
-                                               vuln_refs=vuln_refs, attack_refs=attack_refs)
-        custom = {"x_orion_network": str(network) if network else None}
+        actor_ref, observed_ref, note_ref, indicator_refs, vuln_refs, attack_refs = self._prepare_common_iocs_refs(c, raw, created, modified, tlp_amber_id, labels, summary, doc_id, url,
+                                                                                                                   extra_urls=[], actor_keys=["m_team", "m_author"])
+        infra_seed = c.first_nonempty(url, base_url, domain_vals[0] if 'domain_vals' in locals() else None)
+        name = self._get_infra_name(c, raw, title, "Observed infrastructure", ["m_team"])
+        infra_types = self._determine_infra_types(content_types, network, "darkweb", "hosting-malware")
+        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, infra_seed, name, infra_types)
+        external_refs, object_refs, custom = self._post_infra_processing(c, raw, created, modified, tlp_amber_id, actor_ref, infra_ref, url, base_url, observed_ref, note_ref, location_refs,
+                                                                         indicator_refs, vuln_refs, attack_refs, victim_refs=victim_refs, include_screenshot=True)
         return self._finalize_bundle(c, created, modified, title, summary, labels, lang, external_refs, object_refs, doc_id, "general", tlp_amber_id, **custom)
 
     def _convert_chat(self, raw: ChatResultItem) -> Dict[str, Any]:
@@ -582,18 +593,20 @@ class StixManager:
         observed_ref, indicator_refs, vuln_refs, attack_refs = self._add_common_objects(c, created, modified, tlp_amber_id, labels, summary, doc_id, raw,
                                                                                         domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths,
                                                                                         extra_scos=extra_scos, custom_cves=custom_cves)
-        hashtags, mentions = self._get_hashtags_mentions(c, raw, "")
+        hashtags = c.dedupe_keep([str(x).strip().lstrip("#") for x in c.as_list(c.safe_get(raw, "m_hashtag")) if str(x).strip()])
+        mentions = c.dedupe_keep([str(x).strip() for x in c.as_list(c.safe_get(raw, "m_mention")) if str(x).strip()])
         extra_content = {k: v for k, v in {"hashtags": hashtags, "mentions": mentions}.items() if v}
         note_ref = self._add_sensitive_note(c, created, modified, tlp_amber_id, tlp_red_id, doc_id, raw, extra_content=extra_content or None, base_abstract="Chat metadata")
         infra_types = ["unknown"]
         if str(platform or "").lower() in {"telegram", "t.me"} or (channel_url and "t.me" in str(channel_url)):
             infra_types = ["communications"]
+        name = self._get_infra_name(c, raw, caption, None, priority_value=channel_name)
         extra_fields = {"x_orion_channel_id": str(channel_id)} if channel_id else {}
-        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, None, infra_seed, channel_name, infra_types, "channel", extra_fields)
+        infra_ref = self._add_infrastructure(c, created, modified, tlp_amber_id, labels, summary, network, infra_seed, name, infra_types, "channel", extra_fields)
         extra_ext = [{"source_name": "message_id", "external_id": str(c.safe_get(raw, "m_message_id"))}] if c.safe_get(raw, "m_message_id") else []
         external_refs = self._build_external_refs(c, raw, main_url=url, base_url=channel_url, extra=extra_ext)
         object_refs = self._collect_object_refs(infra_ref=infra_ref, observed_ref=observed_ref, note_ref=note_ref, created_by_ref=created_by_ref,
-                                               indicator_refs=indicator_refs, vuln_refs=vuln_refs, attack_refs=attack_refs)
+                                                indicator_refs=indicator_refs, vuln_refs=vuln_refs, attack_refs=attack_refs)
         custom = {
             "x_orion_network": str(network) if network else None,
             "x_orion_platform": str(platform) if platform else None,
