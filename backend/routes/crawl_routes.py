@@ -23,6 +23,10 @@ from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 crawl_routes = APIRouter()
 
+_leak_deps = [
+    Depends(role_required([user_role.ADMIN, user_role.CRAWLER])),
+    Depends(limiter_dependency),
+]
 
 @crawl_routes.get(
     "/api/feeder/{index_type}",
@@ -38,37 +42,33 @@ async def parser():
     return await crawl_model.getInstance().invoke_fetch_parser()
 
 
-@crawl_routes.post(
-    "/api/index/leak",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+async def _index(request: Request, model_cls, invoke_fn):
+    body = await request.json()
+    return await invoke_fn(model_cls(**body))
+
+
+@crawl_routes.post("/api/index/leak", dependencies=_leak_deps)
 async def index_leak_data(request: Request):
-    body = await request.json()
-    return await crawl_model.getInstance().invoke_leak_index(LeakDataModel(**body))
+    instance = crawl_model.getInstance()
+    return await _index(request, LeakDataModel, instance.invoke_leak_index)
 
 
-@crawl_routes.post(
-    "/api/index/news",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+@crawl_routes.post("/api/index/news", dependencies=_leak_deps)
 async def index_news_data(request: Request):
-    body = await request.json()
-    return await crawl_model.getInstance().invoke_news_index(LeakDataModel(**body))
+    instance = crawl_model.getInstance()
+    return await _index(request, LeakDataModel, instance.invoke_news_index)
 
 
-@crawl_routes.post(
-    "/api/index/tracking",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+@crawl_routes.post("/api/index/tracking", dependencies=_leak_deps)
 async def index_tracking_data(request: Request):
-    body = await request.json()
-    return await crawl_model.getInstance().invoke_tracking_index(LeakDataModel(**body))
+    instance = crawl_model.getInstance()
+    return await _index(request, LeakDataModel, instance.invoke_tracking_index)
 
 
-@crawl_routes.post(
-    "/api/index/exploit",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+@crawl_routes.post("/api/index/exploit", dependencies=_leak_deps)
 async def index_exploit_data(request: Request):
-    body = await request.json()
-    return await crawl_model.getInstance().invoke_exploit_index(ExploitDataModel(**body))
-
+    instance = crawl_model.getInstance()
+    return await _index(request, ExploitDataModel, instance.invoke_exploit_index)
 
 @crawl_routes.post(
     "/api/index/defacement",
