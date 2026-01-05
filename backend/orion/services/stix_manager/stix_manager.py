@@ -110,13 +110,9 @@ class StixManager:
                     url_vals.append(s)
         return url_vals
 
-    def _collect_sco_lists(self, c: stix_helper, raw: Any, domain_key: str = "m_domain", url_key: str = "m_url", ip_key: str = "m_ip", email_key: str = "m_email", asn_key: str = "m_asns", dir_key: str = "m_file_paths") -> Tuple[List[str], List[str], List[str], List[str], List[str], List[str]]:
-        domain_vals = self._collect_str_list(c, raw, domain_key)
-        url_vals = self._collect_str_list(c, raw, url_key)
-        ip_vals = self._collect_str_list(c, raw, ip_key)
-        email_vals = self._collect_str_list(c, raw, email_key)
-        asn_vals = [str(x).strip().upper().lstrip("AS") for x in c.as_list(c.safe_get(raw, asn_key)) if str(x).strip()]
-        dir_vals = self._collect_str_list(c, raw, dir_key)
+    def _append_url_and_dedupe_scos(self, c: stix_helper, url_vals: List[str], url: Any, domain_vals: List[str], ip_vals: List[str], email_vals: List[str], asn_vals: List[str], dir_vals: List[str]) -> Tuple[List[str], List[str], List[str], List[str], List[str], List[str]]:
+        if url:
+            url_vals.append(str(url))
         domain_vals = c.dedupe_keep(domain_vals)
         url_vals = c.dedupe_keep(url_vals)
         ip_vals = c.dedupe_keep(ip_vals)
@@ -124,6 +120,15 @@ class StixManager:
         asn_vals = c.dedupe_keep([a for a in asn_vals if a.isdigit()])
         dir_vals = c.dedupe_keep(dir_vals)
         return domain_vals, url_vals, ip_vals, email_vals, asn_vals, dir_vals
+
+    def _collect_sco_lists(self, c: stix_helper, raw: Any, domain_key: str = "m_domain", url_key: str = "m_url", ip_key: str = "m_ip", email_key: str = "m_email", asn_key: str = "m_asns", dir_key: str = "m_file_paths") -> Tuple[List[str], List[str], List[str], List[str], List[str], List[str]]:
+        domain_vals = self._collect_str_list(c, raw, domain_key)
+        url_vals = self._collect_str_list(c, raw, url_key)
+        ip_vals = self._collect_str_list(c, raw, ip_key)
+        email_vals = self._collect_str_list(c, raw, email_key)
+        asn_vals = [str(x).strip().upper().lstrip("AS") for x in c.as_list(c.safe_get(raw, asn_key)) if str(x).strip()]
+        dir_vals = self._collect_str_list(c, raw, dir_key)
+        return self._append_url_and_dedupe_scos(c, url_vals, None, domain_vals, ip_vals, email_vals, asn_vals, dir_vals)
 
     def _sensitive(self, c: stix_helper, raw: Any) -> Dict[str, List[Dict[str, str]]]:
         sensitive: Dict[str, List[Dict[str, str]]] = {}
@@ -137,7 +142,19 @@ class StixManager:
         note = {"type": "note", "spec_version": "2.1", "id": c.stix_id("note", note_id_seed), "created": created, "modified": modified, "abstract": abstract, "content": str(content), "object_marking_refs": marking_refs}
         return c.add_obj(note, ("note", note["id"]))
 
-    def _sensitive_note(self, c: stix_helper, raw: Any, doc_id: str, created: str, modified: str, tlp_red_id: str) -> Optional[str]:
+    def _meta_note(self, c: stix_helper, note_id_seed: str, created: str, modified: str, tlp_amber_id: str, tlp_red_id: str, abstract: str, sensitive: Dict[str, List[Dict[str, str]]], hashtags: List[str], mentions: List[str]) -> Optional[str]:
+        if not sensitive and not hashtags and not mentions:
+            return None
+        content_note: Dict[str, Any] = {}
+        if sensitive:
+            content_note["sensitive_hashed"] = sensitive
+        if hashtags:
+            content_note["hashtags"] = hashtags
+        if mentions:
+            content_note["mentions"] = mentions
+        return self._note(c, note_id_seed, created, modified, abstract, content_note, [tlp_red_id] if sensitive else [tlp_amber_id])
+
+    def _sensitive_note_only(self, c: stix_helper, raw: Any, doc_id: str, created: str, modified: str, tlp_red_id: str) -> Optional[str]:
         sensitive = self._sensitive(c, raw)
         if not sensitive:
             return None
@@ -207,6 +224,21 @@ class StixManager:
         attack_refs = c.add_attack_patterns(created=created, modified=modified, tlp_amber_id=tlp_amber_id, tactics=c.as_list(c.safe_get(raw, "m_enterprise_attack_tactics")), techniques=c.as_list(c.safe_get(raw, "m_enterprise_attack_techniques")))
         return vuln_refs, attack_refs
 
+    def _chat_vulns_and_attack(self, c: stix_helper, raw: Any, created: str, modified: str, tlp_amber_id: str, cves: List[str]) -> Tuple[List[str], List[str]]:
+        vuln_only = [x for x in cves if x.startswith("CVE-")]
+        vuln_refs = c.add_vulns(created=created, modified=modified, tlp_amber_id=tlp_amber_id, cves=c.dedupe_keep(vuln_only))
+        attack_refs = c.add_attack_patterns(created=created, modified=modified, tlp_amber_id=tlp_amber_id, tactics=c.as_list(c.safe_get(raw, "m_enterprise_attack_tactics")), techniques=c.as_list(c.safe_get(raw, "m_enterprise_attack_techniques")))
+        return vuln_refs, attack_refs
+
+    def _build_report_object_refs(self, c: stix_helper, base_refs: Sequence[Optional[str]], *ref_lists: Sequence[str]) -> List[str]:
+        out: List[str] = []
+        for r in base_refs:
+            if r:
+                out.append(r)
+        for xs in ref_lists:
+            out.extend(list(xs))
+        return c.dedupe_keep(out)
+
     def _bundle_with_report(self, c: stix_helper, report: Dict[str, Any]) -> Dict[str, Any]:
         report = {k: v for k, v in report.items() if v is not None}
         c.add_obj(report, ("report", report["id"]))
@@ -247,32 +279,14 @@ class StixManager:
         for su in source_urls:
             if su.startswith(("http://", "https://")):
                 url_vals.append(su)
-        if url:
-            url_vals.append(str(url))
-        domain_vals = c.dedupe_keep(domain_vals)
-        url_vals = c.dedupe_keep(url_vals)
-        ip_vals = c.dedupe_keep(ip_vals)
-        email_vals = c.dedupe_keep(email_vals)
-        asn_vals = c.dedupe_keep([a for a in asn_vals if a.isdigit()])
-        file_paths = c.dedupe_keep(file_paths)
+        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._append_url_and_dedupe_scos(c, url_vals, url, domain_vals, ip_vals, email_vals, asn_vals, file_paths)
         infra_seed = c.first_nonempty(base_url, url, (domain_vals[0] if domain_vals else None))
-        infra_ref = None
-        if infra_seed:
-            infra_ref = self._infra(c, f"infra:{infra_seed}", created, modified, title, summary if summary else None, ["unknown"], labels, tlp_amber_id, network)
+        infra_ref = self._infra(c, f"infra:{infra_seed}", created, modified, title, summary if summary else None, ["unknown"], labels, tlp_amber_id, network) if infra_seed else None
         observed_ref, indicator_refs = self._observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
         vuln_refs, attack_refs = self._vulns_and_attack(c, raw, created, modified, tlp_amber_id)
         external_refs = self._external_refs_common(c, raw, url, base_url)
-        report_object_refs: List[str] = []
-        if infra_ref:
-            report_object_refs.append(infra_ref)
-        if observed_ref:
-            report_object_refs.append(observed_ref)
-        report_object_refs.extend(location_refs)
-        report_object_refs.extend(indicator_refs)
-        report_object_refs.extend(vuln_refs)
-        report_object_refs.extend(attack_refs)
-        report_object_refs = c.dedupe_keep(report_object_refs)
         attack_vector = c.first_nonempty((c.as_list(c.safe_get(raw, "m_ioc_type"))[0] if c.as_list(c.safe_get(raw, "m_ioc_type")) else None), (c.as_list(c.safe_get(raw, "m_web_server"))[0] if c.as_list(c.safe_get(raw, "m_web_server")) else None), "Unknown")
+        report_object_refs = self._build_report_object_refs(c, [infra_ref, observed_ref], location_refs, indicator_refs, vuln_refs, attack_refs)
         report = {"type": "report", "spec_version": "2.1", "id": c.stix_id("report", f"defacement:{doc_id}"), "created": created, "modified": modified, "name": title, "description": summary if summary else None, "report_types": ["threat-report"], "published": created, "labels": labels, "lang": lang, "external_references": external_refs or None, "object_refs": report_object_refs, "object_marking_refs": [tlp_amber_id], "x_orion_doc_id": str(doc_id), "x_orion_network": str(network) if network else None, "x_orion_attack_vector": str(attack_vector), "x_orion_mirror_links_count": str(len(mirror_links)) if mirror_links else None}
         return self._bundle_with_report(c, report)
 
@@ -306,9 +320,7 @@ class StixManager:
         actor_ref = self._actor_intrusion_set(c, str(team).strip(), created, modified, summary, tlp_amber_id) if team and str(team).strip() else None
         domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._collect_sco_lists(c, raw)
         self._extend_urls_from_fields(c, raw, url_vals, ["m_encoded_urls", "m_weblink"])
-        if url:
-            url_vals.append(str(url))
-        url_vals = c.dedupe_keep(url_vals)
+        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._append_url_and_dedupe_scos(c, url_vals, url, domain_vals, ip_vals, email_vals, asn_vals, file_paths)
         infra_seed = c.first_nonempty(base_url, url, (domain_vals[0] if domain_vals else None))
         infra_ref = None
         if infra_seed:
@@ -320,17 +332,9 @@ class StixManager:
             infra_ref = self._infra(c, f"infra:{infra_seed}", created, modified, str(c.first_nonempty(title, c.safe_get(raw, "m_name"), "Exploit infrastructure")), summary if summary else None, infra_types, labels, tlp_amber_id, network)
         observed_ref, indicator_refs = self._observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
         vuln_refs, attack_refs = self._vulns_and_attack(c, raw, created, modified, tlp_amber_id)
-        note_ref = self._sensitive_note(c, raw, str(doc_id), created, modified, tlp_red_id)
+        note_ref = self._sensitive_note_only(c, raw, str(doc_id), created, modified, tlp_red_id)
         external_refs = self._external_refs_common(c, raw, url, base_url)
-        report_object_refs: List[str] = []
-        for r in [actor_ref, infra_ref, observed_ref, note_ref]:
-            if r:
-                report_object_refs.append(r)
-        report_object_refs.extend(location_refs)
-        report_object_refs.extend(indicator_refs)
-        report_object_refs.extend(vuln_refs)
-        report_object_refs.extend(attack_refs)
-        report_object_refs = c.dedupe_keep(report_object_refs)
+        report_object_refs = self._build_report_object_refs(c, [actor_ref, infra_ref, observed_ref, note_ref], location_refs, indicator_refs, vuln_refs, attack_refs)
         report = {"type": "report", "spec_version": "2.1", "id": c.stix_id("report", f"exploit:{doc_id}"), "created": created, "modified": modified, "name": title, "description": summary if summary else None, "report_types": ["threat-report"], "published": created, "labels": labels, "lang": lang, "external_references": external_refs or None, "object_refs": report_object_refs, "object_marking_refs": [tlp_amber_id], "x_orion_doc_id": str(doc_id), "x_orion_network": str(network) if network else None, "x_orion_platform": str(platform) if platform else None}
         return self._bundle_with_report(c, report)
 
@@ -373,21 +377,13 @@ class StixManager:
         domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._collect_sco_lists(c, raw)
         self._extend_urls_from_fields(c, raw, url_vals, ["m_encoded_urls", "m_dumplink", "m_websites"])
         dump_links = self._collect_str_list(c, raw, "m_dumplink")
-        observed_ref, indicator_refs = self._observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, c.dedupe_keep(url_vals), ip_vals, email_vals, asn_vals, file_paths)
+        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._append_url_and_dedupe_scos(c, url_vals, url, domain_vals, ip_vals, email_vals, asn_vals, file_paths)
+        observed_ref, indicator_refs = self._observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
         vuln_refs, attack_refs = self._vulns_and_attack(c, raw, created, modified, tlp_amber_id)
-        note_ref = self._sensitive_note(c, raw, str(doc_id), created, modified, tlp_red_id)
-        extra_external: List[dict[str, Any]] = [{"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))}] if c.safe_get(raw, "m_screenshot") else []
+        note_ref = self._sensitive_note_only(c, raw, str(doc_id), created, modified, tlp_red_id)
+        extra_external = [{"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))}] if c.safe_get(raw, "m_screenshot") else []
         external_refs = self._external_refs_common(c, raw, url, base_url, extra=extra_external)
-        report_object_refs: List[str] = []
-        for r in [actor_ref, infra_ref, observed_ref, note_ref]:
-            if r:
-                report_object_refs.append(r)
-        report_object_refs.extend(victim_refs)
-        report_object_refs.extend(location_refs)
-        report_object_refs.extend(indicator_refs)
-        report_object_refs.extend(vuln_refs)
-        report_object_refs.extend(attack_refs)
-        report_object_refs = c.dedupe_keep(report_object_refs)
+        report_object_refs = self._build_report_object_refs(c, [actor_ref, infra_ref, observed_ref, note_ref], victim_refs, location_refs, indicator_refs, vuln_refs, attack_refs)
         report = {"type": "report", "spec_version": "2.1", "id": c.stix_id("report", f"leak:{doc_id}"), "created": created, "modified": modified, "name": title, "description": summary if summary else None, "report_types": ["threat-report"], "published": created, "labels": labels, "lang": lang, "external_references": external_refs or None, "object_refs": report_object_refs, "object_marking_refs": [tlp_amber_id], "x_orion_doc_id": str(doc_id), "x_orion_network": str(network) if network else None, "x_orion_platform": str(platform) if platform else None, "x_orion_dumplink_count": str(len(dump_links)) if dump_links else None}
         return self._bundle_with_report(c, report)
 
@@ -425,15 +421,13 @@ class StixManager:
         user_agents = self._dedup_strs(c, self._collect_str_list(c, raw, "m_user_agents"))
         hashtags = self._dedup_strs(c, [str(x).strip().lstrip("#") for x in c.as_list(c.safe_get(raw, "m_hashtag")) if str(x).strip()])
         mentions = self._dedup_strs(c, [str(x).strip().lstrip("@") for x in c.as_list(c.safe_get(raw, "m_mention")) if str(x).strip()])
-        if url:
-            url_vals.append(str(url))
         for eu in encoded_urls:
             if eu.startswith(("http://", "https://")):
                 url_vals.append(eu)
         for sp in social_profiles:
             if sp.startswith(("http://", "https://")):
                 url_vals.append(sp)
-        url_vals = c.dedupe_keep(url_vals)
+        domain_vals, url_vals, ip_vals, email_vals, asn_vals, path_vals = self._append_url_and_dedupe_scos(c, url_vals, url, domain_vals, ip_vals, email_vals, asn_vals, path_vals)
         infra_seed = c.first_nonempty(base_url, url, (domain_vals[0] if domain_vals else None))
         infra_ref = None
         if infra_seed:
@@ -451,29 +445,10 @@ class StixManager:
         observed_ref, indicator_refs = self._observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, path_vals, extra_scos=extra_scos)
         vuln_refs, attack_refs = self._vulns_and_attack(c, raw, created, modified, tlp_amber_id)
         sensitive = self._sensitive(c, raw)
-        note_ref = None
-        if sensitive or hashtags or mentions:
-            content_note: Dict[str, Any] = {}
-            if sensitive:
-                content_note["sensitive_hashed"] = sensitive
-            if hashtags:
-                content_note["hashtags"] = hashtags
-            if mentions:
-                content_note["mentions"] = mentions
-            note_ref = self._note(c, f"social-meta|{doc_id}|{created}", created, modified, "Social metadata (and sensitive hashed)", content_note, [tlp_red_id] if sensitive else [tlp_amber_id])
-        extra_external: List[dict[str, Any]] = []
-        if c.safe_get(raw, "m_message_sharable_link"):
-            extra_external.append({"source_name": "share_link", "url": str(c.safe_get(raw, "m_message_sharable_link"))})
+        note_ref = self._meta_note(c, f"social-meta|{doc_id}|{created}", created, modified, tlp_amber_id, tlp_red_id, "Social metadata (and sensitive hashed)", sensitive, hashtags, mentions)
+        extra_external: List[dict[str, Any]] = [{"source_name": "share_link", "url": str(c.safe_get(raw, "m_message_sharable_link"))}] if c.safe_get(raw, "m_message_sharable_link") else []
         external_refs = self._external_refs_common(c, raw, url, base_url, base_url_name="channel_url", extra=extra_external)
-        report_object_refs: List[str] = []
-        for r in [infra_ref, observed_ref, note_ref, created_by_ref]:
-            if r:
-                report_object_refs.append(r)
-        report_object_refs.extend(location_refs)
-        report_object_refs.extend(indicator_refs)
-        report_object_refs.extend(vuln_refs)
-        report_object_refs.extend(attack_refs)
-        report_object_refs = c.dedupe_keep(report_object_refs)
+        report_object_refs = self._build_report_object_refs(c, [infra_ref, observed_ref, note_ref, created_by_ref], location_refs, indicator_refs, vuln_refs, attack_refs)
         report = {"type": "report", "spec_version": "2.1", "id": c.stix_id("report", f"social:{doc_id}"), "created": created, "modified": modified, "name": title, "description": summary if summary else None, "report_types": ["threat-report"], "published": created, "labels": labels, "lang": lang, "created_by_ref": created_by_ref, "external_references": external_refs or None, "object_refs": report_object_refs, "object_marking_refs": [tlp_amber_id], "x_orion_doc_id": str(doc_id), "x_orion_network": str(network) if network else None, "x_orion_platform": str(platform) if platform else None, "x_orion_post_comments_count": str(c.safe_get(raw, "m_post_comments_count")) if c.safe_get(raw, "m_post_comments_count") else None}
         return self._bundle_with_report(c, report)
 
@@ -519,7 +494,7 @@ class StixManager:
         actor_ref = self._actor_intrusion_set(c, str(team).strip(), created, modified, summary, tlp_amber_id) if team and str(team).strip() else None
         domain_vals, url_vals, ip_vals, email_vals, asn_vals, path_vals = self._collect_sco_lists(c, raw)
         self._extend_urls_from_fields(c, raw, url_vals, ["m_encoded_urls"])
-        url_vals = c.dedupe_keep(url_vals)
+        domain_vals, url_vals, ip_vals, email_vals, asn_vals, path_vals = self._append_url_and_dedupe_scos(c, url_vals, url, domain_vals, ip_vals, email_vals, asn_vals, path_vals)
         infra_seed = c.first_nonempty(url, base_url, (domain_vals[0] if domain_vals else None))
         infra_ref = None
         if infra_seed:
@@ -532,19 +507,10 @@ class StixManager:
         self._link_uses(c, created, modified, tlp_amber_id, actor_ref, infra_ref)
         observed_ref, indicator_refs = self._observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, path_vals)
         vuln_refs, attack_refs = self._vulns_and_attack(c, raw, created, modified, tlp_amber_id)
-        note_ref = self._sensitive_note(c, raw, str(doc_id), created, modified, tlp_red_id)
-        extra_external: List[dict[str, Any]] = [{"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))}] if c.safe_get(raw, "m_screenshot") else []
+        note_ref = self._sensitive_note_only(c, raw, str(doc_id), created, modified, tlp_red_id)
+        extra_external = [{"source_name": "screenshot", "external_id": str(c.safe_get(raw, "m_screenshot"))}] if c.safe_get(raw, "m_screenshot") else []
         external_refs = self._external_refs_common(c, raw, url, base_url, extra=extra_external)
-        report_object_refs: List[str] = []
-        for r in [actor_ref, infra_ref, observed_ref, note_ref]:
-            if r:
-                report_object_refs.append(r)
-        report_object_refs.extend(victim_refs)
-        report_object_refs.extend(location_refs)
-        report_object_refs.extend(indicator_refs)
-        report_object_refs.extend(vuln_refs)
-        report_object_refs.extend(attack_refs)
-        report_object_refs = c.dedupe_keep(report_object_refs)
+        report_object_refs = self._build_report_object_refs(c, [actor_ref, infra_ref, observed_ref, note_ref], victim_refs, location_refs, indicator_refs, vuln_refs, attack_refs)
         report = {"type": "report", "spec_version": "2.1", "id": c.stix_id("report", str(doc_id)), "created": created, "modified": modified, "name": title, "description": summary if summary else None, "report_types": ["threat-report"], "published": created, "labels": labels, "lang": lang, "external_references": external_refs or None, "object_refs": report_object_refs, "object_marking_refs": [tlp_amber_id], "x_orion_doc_id": str(doc_id), "x_orion_network": str(network) if network else None}
         return self._bundle_with_report(c, report)
 
@@ -590,43 +556,22 @@ class StixManager:
             infra_types = ["unknown"]
             if str(platform).strip().lower() in {"telegram", "t.me"} or (channel_url and "t.me" in str(channel_url)):
                 infra_types = ["communications"]
-            extras = {"x_orion_channel_id": str(channel_id) if channel_id else None}
-            infra_ref = self._infra(c, f"channel:{infra_seed}", created, modified, str(channel_name), summary if summary else None, infra_types, labels, tlp_amber_id, network, None, extras=extras)
+            infra_ref = self._infra(c, f"channel:{infra_seed}", created, modified, str(channel_name), summary if summary else None, infra_types, labels, tlp_amber_id, network, extras={"x_orion_channel_id": str(channel_id) if channel_id else None})
         domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._collect_sco_lists(c, raw)
         mentions = self._dedup_strs(c, self._collect_str_list(c, raw, "m_mention"))
         hashtags = self._dedup_strs(c, [str(x).strip().lstrip("#") for x in c.as_list(c.safe_get(raw, "m_hashtag")) if str(x).strip()])
         user_agents = self._dedup_strs(c, self._collect_str_list(c, raw, "m_user_agents"))
         cves = [str(x).strip().upper() for x in c.as_list(c.safe_get(raw, "m_cve")) if str(x).strip()]
         self._extend_urls_from_fields(c, raw, url_vals, ["m_encoded_urls", "m_weblink"])
-        if url:
-            url_vals.append(str(url))
         if channel_url:
             url_vals.append(str(channel_url))
-        url_vals = c.dedupe_keep(url_vals)
+        domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths = self._append_url_and_dedupe_scos(c, url_vals, url, domain_vals, ip_vals, email_vals, asn_vals, file_paths)
         extra_scos: List[dict[str, Any]] = [{"type": "user-agent", "id": c.sco_id("user-agent", ua), "string": ua} for ua in user_agents]
         observed_ref, indicator_refs = self._observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths, extra_scos=extra_scos)
-        vuln_only: List[str] = [x for x in cves if x.startswith("CVE-")]
-        vuln_refs = c.add_vulns(created=created, modified=modified, tlp_amber_id=tlp_amber_id, cves=c.dedupe_keep(vuln_only))
-        attack_refs = c.add_attack_patterns(created=created, modified=modified, tlp_amber_id=tlp_amber_id, tactics=c.as_list(c.safe_get(raw, "m_enterprise_attack_tactics")), techniques=c.as_list(c.safe_get(raw, "m_enterprise_attack_techniques")))
+        vuln_refs, attack_refs = self._chat_vulns_and_attack(c, raw, created, modified, tlp_amber_id, cves)
         sensitive = self._sensitive(c, raw)
-        note_ref = None
-        if sensitive or hashtags or mentions:
-            content_note: Dict[str, Any] = {}
-            if sensitive:
-                content_note["sensitive_hashed"] = sensitive
-            if hashtags:
-                content_note["hashtags"] = hashtags
-            if mentions:
-                content_note["mentions"] = mentions
-            note_ref = self._note(c, f"chat-meta|{doc_id}|{created}", created, modified, "Chat metadata (and sensitive hashed)", content_note, [tlp_red_id] if sensitive else [tlp_amber_id])
+        note_ref = self._meta_note(c, f"chat-meta|{doc_id}|{created}", created, modified, tlp_amber_id, tlp_red_id, "Chat metadata (and sensitive hashed)", sensitive, hashtags, mentions)
         external_refs = self._external_refs_common(c, raw, url, channel_url, base_url_name="channel_url", extra=[{"source_name": "message_id", "external_id": str(c.safe_get(raw, "m_message_id"))}] if c.safe_get(raw, "m_message_id") else None)
-        report_object_refs: List[str] = []
-        for r in [infra_ref, observed_ref, note_ref, created_by_ref]:
-            if r:
-                report_object_refs.append(r)
-        report_object_refs.extend(vuln_refs)
-        report_object_refs.extend(indicator_refs)
-        report_object_refs.extend(attack_refs)
-        report_object_refs = c.dedupe_keep(report_object_refs)
+        report_object_refs = self._build_report_object_refs(c, [infra_ref, observed_ref, note_ref, created_by_ref], vuln_refs, indicator_refs, attack_refs)
         report = {"type": "report", "spec_version": "2.1", "id": c.stix_id("report", f"chat:{doc_id}"), "created": created, "modified": modified, "name": caption, "description": summary if summary else None, "report_types": ["threat-report"], "published": created, "labels": labels, "lang": lang, "created_by_ref": created_by_ref, "external_references": external_refs or None, "object_refs": report_object_refs, "object_marking_refs": [tlp_amber_id], "x_orion_doc_id": str(doc_id), "x_orion_network": str(network) if network else None, "x_orion_platform": str(platform) if platform else None, "x_orion_channel_id": str(channel_id) if channel_id else None, "x_orion_channel_name": str(c.safe_get(raw, "m_channel_name")) if c.safe_get(raw, "m_channel_name") else None, "x_orion_views": str(c.safe_get(raw, "m_views")) if c.safe_get(raw, "m_views") else None, "x_orion_sender_is_bot": bool(c.safe_get(raw, "m_sender_is_bot")) if c.safe_get(raw, "m_sender_is_bot") is not None else None, "x_orion_is_forwarded": bool(c.safe_get(raw, "m_is_forwarded")) if c.safe_get(raw, "m_is_forwarded") is not None else None, "x_orion_is_reply": bool(c.safe_get(raw, "m_is_reply")) if c.safe_get(raw, "m_is_reply") is not None else None, "x_orion_pinned": bool(c.safe_get(raw, "m_pinned")) if c.safe_get(raw, "m_pinned") is not None else None}
         return self._bundle_with_report(c, report)
