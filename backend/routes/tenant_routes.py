@@ -82,12 +82,6 @@ async def get_all_tenants():
 
 @tenant_routes.post(
     "/api/update/user",
-    summary="Update user",
-    description="Update user profile and access details within the tenant.",
-    tags=["Users"],
-    operation_id="updateUser",
-    response_description="Updated user information.",
-    status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
 async def update_user(user: tenant_param_model, current_user=Depends(get_current_user)):
@@ -96,12 +90,6 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
 
 @tenant_routes.post(
     "/api/update/current/user",
-    summary="Update user",
-    description="Update user profile and access details within the tenant.",
-    tags=["Users"],
-    operation_id="updateUser",
-    response_description="Updated user information.",
-    status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def update_user(user: user_meta_model, current_user=Depends(get_current_user)):
@@ -161,12 +149,6 @@ async def upload_profile_image(file: UploadFile, current_user=Depends(get_curren
 
 @tenant_routes.post(
     "/api/delete/user",
-    summary="Update user",
-    description="Update user profile and access details within the tenant.",
-    tags=["Users"],
-    operation_id="updateUser",
-    response_description="Updated user information.",
-    status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
 async def delete_user(user: user_param_model, current_user=Depends(get_current_user)):
@@ -317,12 +299,6 @@ async def cancel_user_ioc_alerts(current_user=Depends(get_current_user)):
 
 @tenant_routes.post(
     "/api/profile/alerts/delete/all",
-    summary="Delete all alerts",
-    description="Delete all alerts associated with the current user profile.",
-    tags=["Alerts"],
-    operation_id="deleteAllAlerts",
-    response_description="Result of the delete-all operation.",
-    status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")), ], )
@@ -332,15 +308,9 @@ async def delete_all_alerts(current_user=Depends(get_current_user)):
 
 @tenant_routes.post(
     "/api/profile/alerts/delete/{_type}",
-    summary="Delete all alerts",
-    description="Delete all alerts associated with the current user profile.",
-    tags=["Alerts"],
-    operation_id="deleteAllAlerts",
-    response_description="Result of the delete-all operation.",
-    status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
-async def delete_all_alerts(_type: str, current_user=Depends(get_current_user)):
+async def delete_typed_alerts(_type: str, current_user=Depends(get_current_user)):
     return await AlertManager.getInstance().delete_alerts_by_type(current_user, _type)
 
 
