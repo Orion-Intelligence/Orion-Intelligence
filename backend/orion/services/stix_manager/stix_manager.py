@@ -69,6 +69,18 @@ class StixManager:
             s = s[:4000] + "…"
         return s
 
+    def _content_types_from_raw(self, c: stix_helper, raw: Any) -> Set[str]:
+        content_types: Set[str] = set()
+        for x in (c.as_list(c.safe_get(raw, "m_content_type")) + c.as_list(c.safe_get(raw, "content_type"))):
+            s = str(x).strip().lower()
+            if s:
+                content_types.add(s)
+        return content_types
+
+    def _lang_single_or_none(self, c: stix_helper, raw: Any) -> Optional[str]:
+        langs = [str(x).strip() for x in c.as_list(c.safe_get(raw, "m_language")) if str(x).strip()]
+        return langs[0] if len(langs) == 1 else None
+
     def _labels_from_content_types(self, c: stix_helper, raw: Any, content_types: Set[str], network: Any, platform: Any, base_labels: Iterable[str]) -> List[str]:
         labels_set: Set[str] = set()
         for ct in content_types:
@@ -85,18 +97,6 @@ class StixManager:
             if s:
                 labels_set.add(s)
         return list(labels_set)
-
-    def _content_types_from_raw(self, c: stix_helper, raw: Any) -> Set[str]:
-        content_types: Set[str] = set()
-        for x in (c.as_list(c.safe_get(raw, "m_content_type")) + c.as_list(c.safe_get(raw, "content_type"))):
-            s = str(x).strip().lower()
-            if s:
-                content_types.add(s)
-        return content_types
-
-    def _lang_single_or_none(self, c: stix_helper, raw: Any) -> Optional[str]:
-        langs = [str(x).strip() for x in c.as_list(c.safe_get(raw, "m_language")) if str(x).strip()]
-        return langs[0] if len(langs) == 1 else None
 
     def _collect_sco_lists(self, c: stix_helper, raw: Any, url_extra: Sequence[str] = (), domain_key: str = "m_domain", url_key: str = "m_url", ip_key: str = "m_ip", email_key: str = "m_email", asn_key: str = "m_asns", dir_key: str = "m_file_paths") -> Tuple[List[str], List[str], List[str], List[str], List[str], List[str]]:
         domain_vals = [str(x).strip() for x in c.as_list(c.safe_get(raw, domain_key)) if str(x).strip()]
@@ -125,15 +125,23 @@ class StixManager:
                     url_vals.append(s)
         return url_vals
 
-    def _sensitive_note(self, c: stix_helper, raw: Any, doc_id: str, created: str, modified: str, tlp_red_id: str) -> Optional[str]:
-        sensitive: dict[str, list[dict[str, str]]] = {}
+    def _collect_sensitive(self, c: stix_helper, raw: Any) -> Dict[str, List[Dict[str, str]]]:
+        sensitive: Dict[str, List[Dict[str, str]]] = {}
         c.sensitive_add(sensitive=sensitive, cat="credit_cards", values=c.as_list(c.safe_get(raw, "m_credit_card")))
         c.sensitive_add(sensitive=sensitive, cat="us_passport", values=c.as_list(c.safe_get(raw, "m_us_passport")))
         c.sensitive_add(sensitive=sensitive, cat="au_abn", values=c.as_list(c.safe_get(raw, "m_au_abn")))
         c.sensitive_add(sensitive=sensitive, cat="us_bank_number", values=c.as_list(c.safe_get(raw, "m_us_bank_number")))
+        return sensitive
+
+    def _sensitive_note(self, c: stix_helper, raw: Any, doc_id: str, created: str, modified: str, tlp_red_id: str) -> Optional[str]:
+        sensitive = self._collect_sensitive(c, raw)
         if not sensitive:
             return None
         note = {"type": "note", "spec_version": "2.1", "id": c.stix_id("note", f"sensitive|{doc_id}|{created}"), "created": created, "modified": modified, "abstract": "Sensitive artifacts (hashed)", "content": str(sensitive), "object_marking_refs": [tlp_red_id]}
+        return c.add_obj(note, ("note", note["id"]))
+
+    def _meta_note(self, c: stix_helper, note_id_seed: str, created: str, modified: str, abstract: str, content: Dict[str, Any], marking_refs: List[str]) -> str:
+        note = {"type": "note", "spec_version": "2.1", "id": c.stix_id("note", note_id_seed), "created": created, "modified": modified, "abstract": abstract, "content": str(content), "object_marking_refs": marking_refs}
         return c.add_obj(note, ("note", note["id"]))
 
     def _external_refs_common(self, c: stix_helper, raw: Any, url: Any, base_url: Any, extra: Optional[List[dict[str, Any]]] = None) -> List[dict[str, Any]]:
@@ -173,28 +181,16 @@ class StixManager:
         modified = c.parse_ts(c.safe_get(raw, "m_update_date")) or created
         if modified < created:
             modified = created
-        title = c.first_nonempty(
-            c.safe_get(raw, "m_title"),
-            c.safe_get(raw, "m_url"),
-            c.safe_get(raw, "m_base_url"),
-            (c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None),
-            (str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None),
-            "Defacement - unknown title",
-        )
+        title = c.first_nonempty(c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), (c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None), (str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None), "Defacement - unknown title")
         title = str(title)
-        url = c.first_nonempty(
-            c.safe_get(raw, "m_url"),
-            c.safe_get(raw, "m_base_url"),
-            (c.as_list(c.safe_get(raw, "m_source_url"))[0] if c.as_list(c.safe_get(raw, "m_source_url")) else None),
-            (c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None),
-        )
+        url = c.first_nonempty(c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), (c.as_list(c.safe_get(raw, "m_source_url"))[0] if c.as_list(c.safe_get(raw, "m_source_url")) else None), (c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None))
         base_url = c.safe_get(raw, "m_base_url")
         network = c.safe_get(raw, "m_network")
         platform = c.safe_get(raw, "m_platform")
         doc_id = c.first_nonempty(c.safe_get(raw, "m_document_id"), c.safe_get(raw, "m_hash"), url, base_url, title)
         content_src = c.first_nonempty(c.safe_get(raw, "m_content"), c.safe_get(raw, "m_important_content"), "")
         summary = self._normalize_summary(c, content_src)
-        tlp_amber_id, tlp_red_id = c.add_tlp(created)
+        tlp_amber_id, _ = c.add_tlp(created)
         content_types = self._content_types_from_raw(c, raw)
         if not content_types:
             content_types.add("defacement")
@@ -230,7 +226,7 @@ class StixManager:
             infra_ref = c.add_obj(infra, ("infrastructure", f"infra:{infra_seed}"))
         observed_ref, indicator_refs = self._common_observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths)
         vuln_refs, attack_refs = self._common_vulns_and_attack(c, raw, created, modified, tlp_amber_id)
-        external_refs = []
+        external_refs: list[dict[str, Any]] = []
         if url:
             external_refs.append({"source_name": "source", "url": str(url)})
         if base_url and base_url != url:
@@ -424,13 +420,11 @@ class StixManager:
         content_types = self._content_types_from_raw(c, raw)
         labels = self._labels_from_content_types(c, raw, content_types, network, platform, ["orion:social"])
         lang = self._lang_single_or_none(c, raw)
-        industries = [str(x).strip() for x in c.as_list(c.safe_get(raw, "m_industry")) if str(x).strip()]
-        sector = industries[0] if industries else "Social Media"
         location_refs = c.add_locations(raw=raw, created=created, modified=modified, tlp_amber_id=tlp_amber_id, keys=["m_country", "m_location"])
         author = c.first_nonempty(c.safe_get(raw, "m_author"), c.safe_get(raw, "m_username"))
         created_by_ref = None
         if author:
-            author_name = str(author[0]).strip() if type(author) is list and author else str(author).strip()
+            author_name = str(author[0]).strip() if isinstance(author, list) and author else str(author).strip()
             if author_name:
                 ident = {"type": "identity", "spec_version": "2.1", "id": c.stix_id("identity", f"author:{author_name}"), "created": created, "modified": modified, "name": author_name, "identity_class": "individual", "object_marking_refs": [tlp_amber_id]}
                 created_by_ref = c.add_obj(ident, ("identity", f"author:{author_name}"))
@@ -479,25 +473,17 @@ class StixManager:
             extra_scos.append({"type": "user-agent", "id": c.sco_id("user-agent", ua), "string": ua})
         observed_ref, indicator_refs = self._common_observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, path_vals, extra_scos=extra_scos)
         vuln_refs, attack_refs = self._common_vulns_and_attack(c, raw, created, modified, tlp_amber_id)
-        sensitive: dict[str, list[dict[str, str]]] = {}
-        c.sensitive_add(sensitive=sensitive, cat="credit_cards", values=c.as_list(c.safe_get(raw, "m_credit_card")))
-        c.sensitive_add(sensitive=sensitive, cat="us_passport", values=c.as_list(c.safe_get(raw, "m_us_passport")))
-        c.sensitive_add(sensitive=sensitive, cat="au_abn", values=c.as_list(c.safe_get(raw, "m_au_abn")))
-        c.sensitive_add(sensitive=sensitive, cat="us_bank_number", values=c.as_list(c.safe_get(raw, "m_us_bank_number")))
+        sensitive = self._collect_sensitive(c, raw)
         note_ref = None
         if sensitive or hashtags or mentions:
-            content_note: dict[str, Any] = {}
+            content_note: Dict[str, Any] = {}
             if sensitive:
                 content_note["sensitive_hashed"] = sensitive
             if hashtags:
                 content_note["hashtags"] = hashtags
             if mentions:
                 content_note["mentions"] = mentions
-            note = {"type": "note", "spec_version": "2.1", "id": c.stix_id("note", f"social-meta|{doc_id}|{created}"), "created": created, "modified": modified, "abstract": "Social metadata (and sensitive hashed)", "content": str(content_note), "object_marking_refs": [tlp_red_id] if sensitive else [tlp_amber_id]}
-            note_ref = c.add_obj(note, ("note", note["id"]))
-        extra_external: List[dict[str, Any]] = []
-        if c.safe_get(raw, "m_message_sharable_link"):
-            extra_external.append({"source_name": "share_link", "url": str(c.safe_get(raw, "m_message_sharable_link"))})
+            note_ref = self._meta_note(c, f"social-meta|{doc_id}|{created}", created, modified, "Social metadata (and sensitive hashed)", content_note, [tlp_red_id] if sensitive else [tlp_amber_id])
         external_refs: list[dict[str, Any]] = []
         if url:
             external_refs.append({"source_name": "source", "url": str(url)})
@@ -507,7 +493,8 @@ class StixManager:
             external_refs.append({"source_name": "content-hash", "external_id": str(c.safe_get(raw, "m_hash"))})
         if c.safe_get(raw, "m_scrap_file"):
             external_refs.append({"source_name": "scraper", "external_id": str(c.safe_get(raw, "m_scrap_file"))})
-        external_refs.extend(extra_external)
+        if c.safe_get(raw, "m_message_sharable_link"):
+            external_refs.append({"source_name": "share_link", "url": str(c.safe_get(raw, "m_message_sharable_link"))})
         report_object_refs: list[str] = []
         for r in [infra_ref, observed_ref, note_ref, created_by_ref]:
             if r:
@@ -647,7 +634,7 @@ class StixManager:
         sender = c.first_nonempty(c.safe_get(raw, "m_sender_username"), c.safe_get(raw, "m_users"), c.safe_get(raw, "m_author"))
         created_by_ref = None
         if sender:
-            sender_name = str(sender[0]).strip() if type(sender) is list and sender else str(sender).strip()
+            sender_name = str(sender[0]).strip() if isinstance(sender, list) and sender else str(sender).strip()
             if sender_name:
                 ident = {"type": "identity", "spec_version": "2.1", "id": c.stix_id("identity", f"sender:{sender_name}"), "created": created, "modified": modified, "name": sender_name, "identity_class": "individual", "object_marking_refs": [tlp_amber_id]}
                 created_by_ref = c.add_obj(ident, ("identity", f"sender:{sender_name}"))
@@ -691,29 +678,23 @@ class StixManager:
         for ua in user_agents:
             extra_scos.append({"type": "user-agent", "id": c.sco_id("user-agent", ua), "string": ua})
         observed_ref, indicator_refs = self._common_observed_and_indicators(c, raw, str(doc_id), created, modified, tlp_amber_id, labels, summary, domain_vals, url_vals, ip_vals, email_vals, asn_vals, file_paths, extra_scos=extra_scos)
-        indicator_refs = indicator_refs
         vuln_only: List[str] = []
         for x in cves:
             if x.startswith("CVE-"):
                 vuln_only.append(x)
         vuln_refs = c.add_vulns(created=created, modified=modified, tlp_amber_id=tlp_amber_id, cves=c.dedupe_keep(vuln_only))
         attack_refs = c.add_attack_patterns(created=created, modified=modified, tlp_amber_id=tlp_amber_id, tactics=c.as_list(c.safe_get(raw, "m_enterprise_attack_tactics")), techniques=c.as_list(c.safe_get(raw, "m_enterprise_attack_techniques")))
-        sensitive: dict[str, list[dict[str, str]]] = {}
-        c.sensitive_add(sensitive=sensitive, cat="credit_cards", values=c.as_list(c.safe_get(raw, "m_credit_card")))
-        c.sensitive_add(sensitive=sensitive, cat="us_passport", values=c.as_list(c.safe_get(raw, "m_us_passport")))
-        c.sensitive_add(sensitive=sensitive, cat="au_abn", values=c.as_list(c.safe_get(raw, "m_au_abn")))
-        c.sensitive_add(sensitive=sensitive, cat="us_bank_number", values=c.as_list(c.safe_get(raw, "m_us_bank_number")))
+        sensitive = self._collect_sensitive(c, raw)
         note_ref = None
         if sensitive or hashtags or mentions:
-            content_note: dict[str, Any] = {}
+            content_note: Dict[str, Any] = {}
             if sensitive:
                 content_note["sensitive_hashed"] = sensitive
             if hashtags:
                 content_note["hashtags"] = hashtags
             if mentions:
                 content_note["mentions"] = mentions
-            note = {"type": "note", "spec_version": "2.1", "id": c.stix_id("note", f"chat-meta|{doc_id}|{created}"), "created": created, "modified": modified, "abstract": "Chat metadata (and sensitive hashed)", "content": str(content_note), "object_marking_refs": [tlp_red_id] if sensitive else [tlp_amber_id]}
-            note_ref = c.add_obj(note, ("note", note["id"]))
+            note_ref = self._meta_note(c, f"chat-meta|{doc_id}|{created}", created, modified, "Chat metadata (and sensitive hashed)", content_note, [tlp_red_id] if sensitive else [tlp_amber_id])
         external_refs: list[dict[str, Any]] = []
         if url:
             external_refs.append({"source_name": "source", "url": str(url)})
