@@ -49,7 +49,7 @@ async def index_leak_data(request: Request):
 @crawl_routes.post(
     "/api/index/news",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def index_leak_data(request: Request):
+async def index_news_data(request: Request):
     body = await request.json()
     return await crawl_model.getInstance().invoke_news_index(LeakDataModel(**body))
 
@@ -57,7 +57,7 @@ async def index_leak_data(request: Request):
 @crawl_routes.post(
     "/api/index/tracking",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def index_leak_data(request: Request):
+async def index_tracking_data(request: Request):
     body = await request.json()
     return await crawl_model.getInstance().invoke_tracking_index(LeakDataModel(**body))
 
@@ -65,7 +65,7 @@ async def index_leak_data(request: Request):
 @crawl_routes.post(
     "/api/index/exploit",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def index_leak_data(request: Request):
+async def index_exploit_data(request: Request):
     body = await request.json()
     return await crawl_model.getInstance().invoke_exploit_index(ExploitDataModel(**body))
 
