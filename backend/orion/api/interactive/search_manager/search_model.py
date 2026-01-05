@@ -63,61 +63,34 @@ class search_model:
             return JSONResponse(
                 status_code=500, content={"detail": "Something happened while calling parse/" + api})
 
-    async def request_defacement_doc(self, doc_id) -> Optional[result_item]:
-        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)
+    async def _request_doc(self, index, doc_id, lang: Optional[str] = None, translate_fields: Optional[List[str]] = None):
+        if translate_fields is None:
+            translate_fields = []
+        result = await elastic_controller.get_instance().get_doc(index, doc_id)
         if not result:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        if lang:
+            for field in translate_fields:
+                result[0][field] = helper_controller.detect_and_translate(result[0][field], target_lang=lang)
         return await self.__search_callback.get_doc(result)
+
+    async def request_defacement_doc(self, doc_id) -> Optional[result_item]:
+        return await self._request_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)
 
     async def request_exploit_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_EXPLOIT_INDEX, doc_id)
-        if not result:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-
-        if lang:
-            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-            result[0]["m_important_content"] = helper_controller.detect_and_translate(
-                result[0]["m_important_content"], target_lang=lang)
-
-        return await self.__search_callback.get_doc(result)
+        return await self._request_doc(ELASTIC_INDEX.S_EXPLOIT_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
     async def request_leak_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id)
-        if not result:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-
-        if lang:
-            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-            result[0]["m_important_content"] = helper_controller.detect_and_translate(
-                result[0]["m_important_content"], target_lang=lang)
-
-        return await self.__search_callback.get_doc(result)
+        return await self._request_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
     async def request_chat_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_CHATS_INDEX, doc_id)
-        if not result:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-        if lang:
-            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-        return await self.__search_callback.get_doc(result)
+        return await self._request_doc(ELASTIC_INDEX.S_CHATS_INDEX, doc_id, lang, ["m_content"])
 
     async def request_social_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_SOCIAL_INDEX, doc_id)
-        if not result:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-        if lang:
-            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-        return await self.__search_callback.get_doc(result)
+        return await self._request_doc(ELASTIC_INDEX.S_SOCIAL_INDEX, doc_id, lang, ["m_content"])
 
     async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id)
-        if not result:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-        if lang:
-            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-            result[0]["m_important_content"] = helper_controller.detect_and_translate(
-                result[0]["m_important_content"], target_lang=lang)
-        return await self.__search_callback.get_doc(result)
+        return await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
     async def search_general_result(self, param):
         document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
