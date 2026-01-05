@@ -60,10 +60,15 @@ def status_required(status_required: list[UserStatus], bypass_roles: Optional[li
     return verify_status
 
 
-def license_required(feature: str, bypass_roles: Optional[list[user_role]] = None):
+def license_required(feature: str, bypass_roles: Optional[list[user_role]] = None, bypass_licenses: Optional[list[str]] = None,):
     async def checker(user=Depends(get_current_user), role: user_role = Depends(get_current_role)):
         if bypass_roles and role in bypass_roles:
             return True
+
+        user_licenses = set(getattr(user, "licenses", []) or [])
+        if bypass_licenses and user_licenses.intersection(bypass_licenses):
+            return True
+
         permissions = get_user_permissions(user)
         if feature.startswith("module:"):
             module_name = feature.split(":", 1)[1]

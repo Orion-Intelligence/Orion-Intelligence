@@ -156,8 +156,8 @@ async def search_general(param: search_general_param_model = Body(...)):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),
-        Depends(license_required("module:stealer_logs")), ], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("module:stealer_logs", bypass_roles=[], bypass_licenses=["maintainer"])), ], )
 async def search_stealerlog(param: search_credential_param_model = Body(...)):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
