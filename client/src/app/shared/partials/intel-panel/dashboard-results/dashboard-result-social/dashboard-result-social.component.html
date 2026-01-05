@@ -14,16 +14,12 @@
         </div>
 
         <div class="dashboard__buttons">
-          <div *ngIf="!this.licenseService.isMaintainer()" (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph"
+          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph"
             class="dashboard__search-button" data-cy="open-report">
             <div class="dashboard__search-button-inner">
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
-
-
-
-
           <div (click)="scrollService.saveSession(item.m_message_id ?? '')" [queryParams]="queryParams"
             appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button" data-cy="open-report">>
             <div class="dashboard__search-button-inner">

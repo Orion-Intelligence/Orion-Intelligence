@@ -28,7 +28,7 @@
 
           <ng-template #elseBlock>
             <div
-              *ngIf="!licenseService.isMaintainer() && type !== 'Strategic' && type !== 'general'"
+              *ngIf="type !== 'Strategic' && type !== 'general'"
               (click)="scrollService.openCTI($event, item.m_hash)"
               appTooltip="Open CTI Graph"
               class="dashboard__search-button">
