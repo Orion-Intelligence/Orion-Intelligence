@@ -8,7 +8,7 @@ import requests
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 
-from orion.api.server.crawl_manager.class_model.__init__ import *
+from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
