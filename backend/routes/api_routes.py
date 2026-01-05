@@ -28,7 +28,7 @@ from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
-from orion.services.stix_manager.stix_manager import StixManager
+from orion.services.stix_manager.stix_manager import stix_manager
 
 _DOCS_DIR = Path(__file__).resolve().parent / "docs" / "api_docs"
 
@@ -565,7 +565,7 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...)):
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER])), ], )
 async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
-    return await StixManager.get_instance().get_leak_stix(doc_id, lang)
+    return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
 
 
 @api_routes.get(
@@ -581,7 +581,7 @@ async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER])), ], )
 async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
-    return await StixManager.get_instance().get_general_stix(doc_id, lang)
+    return await stix_manager.get_instance().get_general_stix(doc_id, lang)
 
 
 @api_routes.get(
@@ -596,7 +596,7 @@ async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER])), ], )
 async def get_defacement_stix_document(doc_id: str, ):
-    return await StixManager.get_instance().get_defacement_stix(doc_id)
+    return await stix_manager.get_instance().get_defacement_stix(doc_id)
 
 
 @api_routes.get(
@@ -612,7 +612,7 @@ async def get_defacement_stix_document(doc_id: str, ):
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER])), ], )
 async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
-    return await StixManager.get_instance().get_exploit_stix(doc_id, lang)
+    return await stix_manager.get_instance().get_exploit_stix(doc_id, lang)
 
 
 @api_routes.get(
@@ -628,7 +628,7 @@ async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER])), ], )
 async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
-    return await StixManager.get_instance().get_social_stix(doc_id, lang)
+    return await stix_manager.get_instance().get_social_stix(doc_id, lang)
 
 
 @api_routes.get(
@@ -659,4 +659,4 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER])), ], )
 async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
-    return await StixManager.get_instance().get_leak_stix(doc_id, lang)
+    return await stix_manager.get_instance().get_leak_stix(doc_id, lang)

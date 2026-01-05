@@ -1,9 +1,9 @@
 from __future__ import annotations
 from typing import Any
+from datetime import datetime, timezone
 import re
 import uuid
 import hashlib
-from datetime import datetime, timezone
 
 
 class stix_helper:
@@ -284,3 +284,4 @@ class stix_helper:
             last4 = v[-4:] if len(v) >= 4 else v
             out.append({"sha256": self.sha256(v), "last4": last4})
         sensitive[cat] = out
+
