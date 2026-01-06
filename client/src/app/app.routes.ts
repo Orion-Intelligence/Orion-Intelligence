@@ -89,7 +89,20 @@ const consolidatedChildren = [
     component: ReportDefacementComponent,
     resolve: { reportdata: ReportConsolidatedResolver },
     data: { type: 'consolidated', animation: 'HashPage' }
+  },
+  {
+    path: 'tracking/:m_hash',
+    component: ReportDefacementComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
+  },
+  {
+    path: 'news/:m_hash',
+    component: ReportDefacementComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
   }
+
 ];
 
 

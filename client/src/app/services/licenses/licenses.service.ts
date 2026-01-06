@@ -48,7 +48,6 @@ export class LicenseService {
             if (!rule) continue;
 
             if (rule.modules === 'all') {
-                console.log("c2")
                 combined.modules = 'all';
             } else if (combined.modules !== 'all') {
                 for (const m of rule.modules) {
@@ -87,7 +86,7 @@ export class LicenseService {
         const rule = this.getCombinedRule();
         if (this.subscriptionService.isDemo() || this.appService.userSessionData().user.role == "admin") {
             return true
-        } else{
+        } else {
             return (rule.modules === 'all' || rule.modules.has(moduleName))
         }
     }
