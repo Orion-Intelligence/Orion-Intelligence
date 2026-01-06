@@ -347,7 +347,7 @@ async def search_defacement(param: search_defacement_param_model = Body(...)):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement"))], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement",bypass_licenses=["maintainer"]))], )
 async def get_defacement_document(doc_id: str):
     return await search_model.getInstance().request_defacement_doc(doc_id)
 
@@ -362,7 +362,7 @@ async def get_defacement_document(doc_id: str):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach"))], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach",bypass_licenses=["maintainer"]))], )
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
@@ -378,7 +378,7 @@ async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:news"))], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:news",bypass_licenses=["maintainer"]))], )
 async def get_news_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
@@ -394,7 +394,7 @@ async def get_news_document(doc_id: str, lang: Optional[str] = Query(
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:exploit"))], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:exploit",bypass_licenses=["maintainer"]))], )
 async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
@@ -410,7 +410,7 @@ async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:strategic"))], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:strategic",bypass_licenses=["maintainer"]))], )
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_general_doc(doc_id, lang)
@@ -426,7 +426,7 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),  Depends(license_required("module:chat"))], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),  Depends(license_required("module:chat",bypass_licenses=["maintainer"]))], )
 async def get_chat_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
@@ -442,7 +442,7 @@ async def get_chat_document(doc_id: str, lang: Optional[str] = Query(
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),  Depends(license_required("module:social"))], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),  Depends(license_required("module:social",bypass_licenses=["maintainer"]))], )
 async def get_social_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_social_doc(doc_id, lang)
@@ -458,7 +458,7 @@ async def get_social_document(doc_id: str, lang: Optional[str] = Query(
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach")), ], )
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach",bypass_licenses=["maintainer"])), ], )
 async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 

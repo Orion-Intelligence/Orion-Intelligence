@@ -5,43 +5,37 @@
     class="dashboard__search-card">
 
     <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div"
-         (click)="isMobileMode() && item?.m_url ? window.open(item.m_url, '_blank') : null">
+      (click)="isMobileMode() && item?.m_url ? window.open(item.m_url, '_blank') : null">
       <div class="dashboard__search-tags">
         <div class="dashboard__search-tags dashboard__search-tag-item">
           <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
         </div>
 
         <div class="dashboard__buttons" *ngIf="!isMobileMode()">
-          <div
-            *ngIf="!licenseService.isMaintainer() &&
+          <div *ngIf="!licenseService.isMaintainer() &&
              (type === 'strategic' || type === 'general') &&
              item && item.m_url &&
              (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/'));
-             else elseBlock"
-            (click)="scrollService.openCTI($event, item.m_hash)"
-            appTooltip="Open CTI Graph"
+             else elseBlock" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph"
             class="dashboard__search-button">
             <div class="dashboard__search-button-inner">
-              <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph"/>
+              <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
 
           <ng-template #elseBlock>
-            <div
-              *ngIf="type !== 'Strategic' && type !== 'general'"
-              (click)="scrollService.openCTI($event, item.m_hash)"
-              appTooltip="Open CTI Graph"
-              class="dashboard__search-button">
+            <div *ngIf="type !== 'Strategic' && type !== 'general'" (click)="scrollService.openCTI($event, item.m_hash)"
+              appTooltip="Open CTI Graph" class="dashboard__search-button">
               <div class="dashboard__search-button-inner">
-                <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph"/>
+                <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
               </div>
             </div>
           </ng-template>
 
           <div (click)="scrollService.saveSession(item.m_hash)" [queryParams]="queryParams" appTooltip="Open Report"
-               [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+            [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
             <div class="dashboard__search-button-inner">
-              <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect"/>
+              <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
             </div>
           </div>
         </div>
@@ -57,7 +51,7 @@
 
       <ng-container *ngIf="item?.m_important_content as content; else noDescription">
         <p *ngIf="content.trim().length > 1; else noDescription" [innerHTML]="content.slice(0, 600)"
-           class="dashboard__search-description"></p>
+          class="dashboard__search-description"></p>
       </ng-container>
       <ng-template #noDescription>
         <p class="dashboard__search-description">Description not available</p>
@@ -66,7 +60,7 @@
       <ng-container *ngIf="item.m_ref_html && item.m_ref_html.length>0">
         <span class="dashboard__search-title dashboard__search-title-secondary highlight">Webpage Content</span>
         <div [innerHTML]="highlightWords(item.m_ref_html)"
-             class="dashboard__search-description dashboard__search-description-light"></div>
+          class="dashboard__search-description dashboard__search-description-light"></div>
       </ng-container>
 
       <ng-container *ngIf="item?.m_url as url; else noUrl">
@@ -82,33 +76,31 @@
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Published on:</span> <span class="dashboard__info-value">{{
             item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-'
-          }}</span>
+            }}</span>
         </div>
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Network:</span> <span class="dashboard__info-value">{{
             item.m_network
-          }}</span>
+            }}</span>
         </div>
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Last checked:</span> <span class="dashboard__info-value">{{
             item?.m_creation_date | date: 'mediumDate'
-          }}</span>
+            }}</span>
         </div>
         <div class="dashboard__search-status">
           <span class="dashboard__info-label">Status</span>
-            <div class="d-flex align-items-center">
-              <span
-                [ngClass]="{
+          <div class="d-flex align-items-center">
+            <span [ngClass]="{
                   'bg-success': isWithinDays(item.m_creation_date, 5),
                   'bg-warning': isWithinDays(item.m_creation_date, 10) && !isWithinDays(item.m_creation_date, 5),
                   'bg-danger': !isWithinDays(item.m_creation_date, 10)
-                }"
-                class="rounded-circle d-inline-block me-2 dashboard__status-dot">
-              </span>
-              <span class="dashboard__status-text">
-                {{ isWithinDays(item.m_creation_date, 5) ? 'active' : 'inactive' }}
-              </span>
-            </div>
+                }" class="rounded-circle d-inline-block me-2 dashboard__status-dot">
+            </span>
+            <span class="dashboard__status-text">
+              {{ isWithinDays(item.m_creation_date, 5) ? 'active' : 'inactive' }}
+            </span>
+          </div>
         </div>
       </div>
 
