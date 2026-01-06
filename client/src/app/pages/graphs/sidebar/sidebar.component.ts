@@ -38,6 +38,25 @@ export class SidebarComponent implements OnInit {
   constructor(protected appService: AppService, private router: Router, private route: ActivatedRoute) {
   }
 
+  private buildFilterPayload() {
+    return {
+      selectedType: this.selectedType,
+      singleInput: this.singleInput,
+      propertyType: this.propertyType,
+      propertyValue: this.propertyValue,
+      maxEdge: this.maxNodes,
+      maxDepth: this.maxDepth
+    };
+  }
+
+  private navigateWithFilters() {
+    this.router.navigate([], { queryParams: this.buildFilterPayload() }).then();
+  }
+
+  private emitFilters() {
+    this.filtersApplied.emit(this.buildFilterPayload());
+  }
+
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.selectedType = params['selectedType'] || 'cluster';
@@ -47,37 +66,13 @@ export class SidebarComponent implements OnInit {
       this.maxNodes = (+params['maxEdge'] > 800 || +params['maxEdge'] < 0) ? '25' : (params['maxEdge'] || '25');
       this.maxDepth = (+params['maxDepth'] > 5 || +params['maxDepth'] < 0) ? '1' : (params['maxDepth'] || '1');
 
-      this.filtersApplied.emit({
-        selectedType: this.selectedType,
-        singleInput: this.singleInput,
-        propertyType: this.propertyType,
-        propertyValue: this.propertyValue,
-        maxEdge: this.maxNodes,
-        maxDepth: this.maxDepth
-      });
+      this.emitFilters();
     });
   }
 
   applyFilters() {
-    this.router.navigate([], {
-      queryParams: {
-        selectedType: this.selectedType,
-        singleInput: this.singleInput,
-        propertyType: this.propertyType,
-        propertyValue: this.propertyValue,
-        maxEdge: this.maxNodes,
-        maxDepth: this.maxDepth
-      }
-    }).then();
-
-    this.filtersApplied.emit({
-      selectedType: this.selectedType,
-      singleInput: this.singleInput,
-      propertyType: this.propertyType,
-      propertyValue: this.propertyValue,
-      maxEdge: this.maxNodes,
-      maxDepth: this.maxDepth
-    });
+    this.navigateWithFilters();
+    this.emitFilters();
   }
 
   resetFilters() {
@@ -86,25 +81,8 @@ export class SidebarComponent implements OnInit {
     this.propertyType = 'all';
     this.propertyValue = '';
 
-    this.router.navigate([], {
-      queryParams: {
-        selectedType: this.selectedType,
-        singleInput: this.singleInput,
-        propertyType: this.propertyType,
-        propertyValue: this.propertyValue,
-        maxEdge: this.maxNodes,
-        maxDepth: this.maxDepth
-      }
-    }).then();
-
-    this.filtersApplied.emit({
-      selectedType: this.selectedType,
-      singleInput: this.singleInput,
-      propertyType: this.propertyType,
-      propertyValue: this.propertyValue,
-      maxEdge: this.maxNodes,
-      maxDepth: this.maxDepth
-    });
+    this.navigateWithFilters();
+    this.emitFilters();
   }
 
   onFormatPropertyType(type: string) {

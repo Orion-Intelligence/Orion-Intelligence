@@ -21,43 +21,55 @@ export class AppService {
 
   private entitiesCache: any[] | null = null;
 
-  public userSessionData = signal<userSessionData>({
-    user: {
-      email: '',
-      twofa_enabled: false,
-      username: '',
-      role: '',
-      status: '',
-      subscription: false,
-      verificationDate: '',
-      license: []
-    },
-    tenant: {
-      id: '',
-      name: '',
-      phone: '',
-      isDefault: false,
-      hasOnboarding: false,
-      country: '',
-      city: '',
-      postalCode: '',
-      taxId: '',
-      userId: '',
-      licenses: [],
-      assignedQuota: '0',
-      quotaExceeded: false
-    },
-    alerts: []
-  });
+  private createEmptyUserSessionData(): userSessionData {
+    return {
+      user: {
+        email: '',
+        twofa_enabled: false,
+        username: '',
+        role: '',
+        status: '',
+        subscription: false,
+        verificationDate: '',
+        license: []
+      },
+      tenant: {
+        id: '',
+        name: '',
+        phone: '',
+        isDefault: false,
+        hasOnboarding: false,
+        country: '',
+        city: '',
+        postalCode: '',
+        taxId: '',
+        userId: '',
+        licenses: [],
+        assignedQuota: '0',
+        quotaExceeded: false
+      },
+      alerts: []
+    };
+  }
+
+  public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
+
   public tenantData = signal<TenantModel>({
     name: '',
     iocs: []
   });
   public userImageUrl = signal<string | null>(null);
 
-  constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
-    this.loadEntities()
-    this.loadLicenseRules()
+  constructor(
+    private title: Title,
+    private apiService: ApiService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
+    private appStorageService: AppStorageService,
+    private http: HttpClient
+  ) {
+    this.loadEntities();
+    this.loadLicenseRules();
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) this.updatePage(pageParam);
@@ -69,39 +81,12 @@ export class AppService {
 
   async loadSession(forced = false): Promise<void> {
     let token = localStorage.getItem('token');
-    if(token || forced){
+    if (token || forced) {
       try {
         const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
         if (session) this.userSessionData.set(session);
       } catch {
-        this.userSessionData.set({
-          user: {
-            email: '',
-            twofa_enabled: false,
-            username: '',
-            role: '',
-            status: '',
-            subscription: false,
-            verificationDate: '',
-            license: []
-          },
-          tenant: {
-            id: '',
-            name: '',
-            isDefault: false,
-            phone: '',
-            hasOnboarding: false,
-            country: '',
-            city: '',
-            postalCode: '',
-            taxId: '',
-            userId: '',
-            licenses: [],
-            assignedQuota: '0',
-            quotaExceeded: false
-          },
-          alerts: []
-        });
+        this.userSessionData.set(this.createEmptyUserSessionData());
       }
     }
   }
@@ -119,7 +104,6 @@ export class AppService {
     const current = this.configData();
     const newConfig = this.appStorageService.getStaticConfig(current.appSettings);
     this.configData.set(newConfig);
-
   }
 
   getConfig(): ConfigSettings {
@@ -138,11 +122,13 @@ export class AppService {
 
   updatePage(newPage: number): void {
     this.page.set(newPage);
-    this.router.navigate([], {
-      relativeTo: this.activatedRoute,
-      queryParams: { ...this.activatedRoute.snapshot.queryParams, page: newPage },
-      replaceUrl: true
-    }).then();
+    this.router
+      .navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { ...this.activatedRoute.snapshot.queryParams, page: newPage },
+        replaceUrl: true
+      })
+      .then();
   }
 
   loadEntities(): void {
@@ -151,60 +137,39 @@ export class AppService {
       return;
     }
 
-    this.http.get<any[]>('assets/data/entities_data/entities.json').pipe(
-      tap(data => {
-        this.entitiesCache = data;
-        this.entities.set(data);
-        for (const e of data) {
-          const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
-          search_filter_labels[key] = e.title;
-        }
-      })
-    ).subscribe();
+    this.http
+      .get<any[]>('assets/data/entities_data/entities.json')
+      .pipe(
+        tap(data => {
+          this.entitiesCache = data;
+          this.entities.set(data);
+          for (const e of data) {
+            const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
+            search_filter_labels[key] = e.title;
+          }
+        })
+      )
+      .subscribe();
   }
 
   loadLicenseRules(): void {
-    this.http.get<any>('assets/data/licenses/license_rules.json').pipe(
-      tap(data => {
-        for (const key in data) {
-          license_rules[key] = data[key];
-        }
-      })
-    ).subscribe();
+    this.http
+      .get<any>('assets/data/licenses/license_rules.json')
+      .pipe(
+        tap(data => {
+          for (const key in data) {
+            license_rules[key] = data[key];
+          }
+        })
+      )
+      .subscribe();
   }
 
   clearAll(): void {
     this.appStorageService.clearStorage();
     this.configData.set(new ConfigSettings());
     this.userImageUrl.set(null);
-    this.userSessionData.set({
-      user: {
-        email: '',
-        twofa_enabled: false,
-        username: '',
-        role: '',
-        status: '',
-        subscription: false,
-        verificationDate: '',
-        license: []
-      },
-      tenant: {
-        id: '',
-        name: '',
-        isDefault: false,
-        phone: '',
-        hasOnboarding: false,
-        country: '',
-        city: '',
-        postalCode: '',
-        taxId: '',
-        userId: '',
-        licenses: [],
-        assignedQuota: '0',
-        quotaExceeded: false
-      },
-      alerts: []
-    });
+    this.userSessionData.set(this.createEmptyUserSessionData());
   }
 
   isMobileMode(): boolean {
@@ -224,5 +189,4 @@ export class AppService {
       };
     });
   }
-
 }
