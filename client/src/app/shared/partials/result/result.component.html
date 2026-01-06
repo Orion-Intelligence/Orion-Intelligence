@@ -13,8 +13,9 @@
               priority width="16">
           </button>
           <input #searchInput class="search-trigger form-control default-input dashboard-general-input"
-            data-cy="dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="350" name="q"
-            placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
+            data-cy="dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off"
+            maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"
+            (input)="onSearchInput($event)" />
           <input type="hidden" value="1">
           <button type="button" class="btn input-cross" aria-label="Clear"
             (click)="local_query=''; searchInput.focus();onFormSubmit()" [disabled]="!searchQuery"><img
@@ -186,9 +187,9 @@
   <li class="nav-item" *ngIf="!list_grid && consolidated">
     <a class="nav-link cursor-pointer">Ranked</a>
   </li>
-<!--  <li class="nav-item" *ngIf="!list_grid && consolidated">-->
-<!--    <a class="nav-link cursor-pointer">IOCs</a>-->
-<!--  </li>-->
+  <li class="nav-item" *ngIf="!list_grid && consolidated">
+    <a class="nav-link cursor-pointer">IOCs</a>
+  </li>
   <!--  <li class="nav-item" *ngIf="!list_grid && domain">-->
   <!--    <a class="nav-link cursor-pointer active">Fast Search</a>-->
   <!--  </li>-->

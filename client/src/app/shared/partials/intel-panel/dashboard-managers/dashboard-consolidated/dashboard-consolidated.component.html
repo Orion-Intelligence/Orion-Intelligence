@@ -102,13 +102,13 @@
   </div>
 </ng-container>
 <ng-template #IOCBlock>
-  <!-- <app-consolidated-ioc [rankedResult]="rankedResult"></app-consolidated-ioc> -->
   <ng-container *ngIf="isLoading(); else showIOC">
 
   </ng-container>
 
   <ng-template #showIOC>
-    <app-consolidated-ioc [rankedResult]="rankedResult">
+    <app-consolidated-ioc [rankedResult]="rankedResult" [apiElapsedTime]="rankedApiTime"
+      [resultsFound]="getTotalResultCount()">
     </app-consolidated-ioc>
   </ng-template>
 </ng-template>
