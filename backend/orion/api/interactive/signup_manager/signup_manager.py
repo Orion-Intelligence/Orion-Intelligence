@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.constants.constant import CONSTANTS
+from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, LicenseName
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
@@ -23,9 +24,7 @@ class SignupManager:
     @staticmethod
     async def signup_user(data: SignupRequest):
         engine = mongo_controller.get_instance().get_engine()
-        username = (data.username or "").strip()
-        email = (data.email or "").strip().lower()
-        password = data.password
+        username, email, password = helper_controller.extract_user_mail_fields(data)
 
         username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
         if not re.match(username_pattern, username):
@@ -93,8 +92,13 @@ class SignupManager:
             tenant_uuid=str(tenant.id))
         await engine.save(user)
 
+        await SignupManager._send_verification_email(user, _verification_token)
+        return {"message": "Signup successful. Your account is under verification.", "status": "pending", "email": email}
+
+    @staticmethod
+    async def _send_verification_email(user, token: str):
         APP_URL = env_handler.get_instance().env("APP_URL")
-        verify_url = f"{APP_URL}/welcome/{_verification_token}"
+        verify_url = f"{APP_URL}/welcome/{token}"
         html_content = constant.mail_template.render(
             username=user.username,
             email=user.email,
@@ -104,16 +108,12 @@ class SignupManager:
         await mail_manager.get_instance().send_verification_mail(
             to=user.email, subject=MailSubject.VERIFICATION.value, body=html_content)
 
-        return {"message": "Signup successful. Your account is under verification.", "status": "pending", "email": email}
-
     @staticmethod
     async def resend_verification_email(data: SignupRequest):
         try:
             engine = mongo_controller.get_instance().get_engine()
 
-            username = (data.username or "").strip()
-            email = (data.email or "").strip().lower()
-            password = (data.password or "").strip()
+            username, email, password = helper_controller.extract_user_mail_fields(data)
 
             mail = email or username
             user = await auth_manager.get_instance().authenticate_user(mail, password)
@@ -135,17 +135,7 @@ class SignupManager:
 
             await engine.save(user)
 
-            APP_URL = env_handler.get_instance().env("APP_URL")
-            verify_url = f"{APP_URL}/welcome/{token}"
-            html_content = constant.mail_template.render(
-                username=user.username,
-                email=user.email,
-                subject=MailSubject.VERIFICATION.value,
-                lurlHeading=MailUrlHeading.VERIFICATION.value,
-                url=verify_url)
-            await mail_manager.get_instance().send_verification_mail(
-                to=user.email, subject=MailSubject.VERIFICATION.value, body=html_content)
-
+            await SignupManager._send_verification_email(user, token)
             return {"message": "Verification email resent.", "email": user.email}
 
         except HTTPException as e:

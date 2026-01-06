@@ -9,12 +9,12 @@ class leak_converter(stix_converter_base):
     def convert(self, raw: LeakResultItem) -> Dict[str, Any]:
         c = stix_helper()
         created, modified = self.get_timestamps(c, raw, ["m_creation_date", "m_update_date"])
-        title = str(c.first_nonempty(c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), "Leak - unknown title"))
-        url = c.first_nonempty(c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"))
-        base_url = c.safe_get(raw, "m_base_url")
-        network = c.safe_get(raw, "m_network")
-        platform = c.safe_get(raw, "m_platform")
-        doc_id = c.first_nonempty(c.safe_get(raw, "m_document_id"), c.safe_get(raw, "m_hash"), url, base_url, title)
+
+
+        title, url, base_url, network, platform, doc_id = stix_converter_base.extract_common(c, raw, [
+            c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")], [
+            c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")], "m_base_url", "Leak - unknown title", include_platform=True)
+
         summary = self.process_summary(c, raw, ["m_important_content", "m_content"])
         tlp_amber_id, content_types = self.setup_marking_and_types(c, created, raw)
         labels = self.standard_labels(c, raw, content_types, "orion:leak")

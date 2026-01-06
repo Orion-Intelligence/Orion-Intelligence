@@ -118,6 +118,14 @@ class helper_controller:
         return normalized_url
 
     @staticmethod
+    def extract_user_mail_fields(data):
+        return (
+            (data.username or "").strip(),
+            (data.email or "").strip().lower(),
+            data.password,
+        )
+
+    @staticmethod
     def clone_model(model):
         return copy.deepcopy(model)
 

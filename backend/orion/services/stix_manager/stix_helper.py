@@ -45,38 +45,29 @@ class stix_helper:
         s = re.sub(r"\n{3,}", "\n\n", s)
         return s.strip()
 
-    def parse_ts(self, value: str | None) -> str | None:
+    def _parse_dt(self, value: str | None, allow_date_only: bool) -> str | None:
         if not value:
             return None
         try:
             v = str(value).strip()
-            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
+            if allow_date_only and re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
                 dt = datetime.fromisoformat(v).replace(tzinfo=timezone.utc)
-                return dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-            if v.endswith("Z"):
-                v = v[:-1] + "+00:00"
-            dt = datetime.fromisoformat(v)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            dt = dt.astimezone(timezone.utc)
+            else:
+                if v.endswith("Z"):
+                    v = v[:-1] + "+00:00"
+                dt = datetime.fromisoformat(v)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                dt = dt.astimezone(timezone.utc)
             return dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
         except Exception:
             return None
 
+    def parse_ts(self, value: str | None) -> str | None:
+        return self._parse_dt(value, allow_date_only=True)
+
     def parse_ts_iso(self, value: str | None) -> str | None:
-        if not value:
-            return None
-        try:
-            v = str(value).strip()
-            if v.endswith("Z"):
-                v = v[:-1] + "+00:00"
-            dt = datetime.fromisoformat(v)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            dt = dt.astimezone(timezone.utc)
-            return dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-        except Exception:
-            return None
+        return self._parse_dt(value, allow_date_only=False)
 
     def now_ts(self) -> str:
         return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")

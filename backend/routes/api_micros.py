@@ -5,7 +5,7 @@ from configs.limiter_dependency import limiter_dependency
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
+from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
 
 micro_routes = APIRouter()
 

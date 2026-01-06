@@ -230,9 +230,7 @@ class TenantManager:
         try:
             engine = mongo_controller.get_instance().get_engine()
 
-            username = (data.username or "").strip()
-            email = (data.email or "").strip().lower()
-            password = (data.password or "").strip()
+            username, email, password = helper_controller.extract_user_mail_fields(data)
 
             username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
             if not re.match(username_pattern, username):

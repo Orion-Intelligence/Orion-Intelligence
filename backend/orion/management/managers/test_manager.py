@@ -107,18 +107,21 @@ class test_manager:
             es = AsyncElasticsearch(hosts=[{"host": es_host, "port": es_port, "scheme": "http"}])
 
         try:
-            indices = await es.indices.get(index="*", ignore_unavailable=True)
-            for idx in list(indices.keys()):
-                if idx.startswith("."):
-                    continue
-                try:
-                    await es.indices.delete(index=idx, ignore_unavailable=True)
-                except NotFoundError:
-                    continue
-                except ApiError as e:
-                    if getattr(e, "status_code", None) == 404:
+            async def _delete_indices(indices):
+                for idx in list(indices.keys()):
+                    if idx.startswith("."):
                         continue
-                    raise
+                    try:
+                        await es.indices.delete(index=idx, ignore_unavailable=True)
+                    except NotFoundError:
+                        continue
+                    except ApiError as e:
+                        if getattr(e, "status_code", None) == 404:
+                            continue
+                        raise
+
+            indices = await es.indices.get(index="*", ignore_unavailable=True)
+            await _delete_indices(indices)
 
             await es.cluster.put_settings(
                 persistent={"action.destructive_requires_name": False, "cluster.blocks.read_only_allow_delete": None, })
@@ -144,17 +147,7 @@ class test_manager:
                     raise
 
             indices = await es.indices.get(index="*", expand_wildcards="all", ignore_unavailable=True)
-            for idx in list(indices.keys()):
-                if idx.startswith("."):
-                    continue
-                try:
-                    await es.indices.delete(index=idx, ignore_unavailable=True)
-                except NotFoundError:
-                    continue
-                except ApiError as e:
-                    if getattr(e, "status_code", None) == 404:
-                        continue
-                    raise
+            await _delete_indices(indices)
 
             try:
                 await es.indices.refresh(index="*", ignore_unavailable=True)

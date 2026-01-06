@@ -9,12 +9,13 @@ class general_converter(stix_converter_base):
     def convert(self, raw: GeneralResultItem) -> Dict[str, Any]:
         c = stix_helper()
         created, modified = self.get_timestamps(c, raw, ["m_creation_date", "m_update_date"])
-        title = str(c.first_nonempty(c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), "General - unknown title"))
-        url = c.first_nonempty(c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"))
-        base_url = c.safe_get(raw, "m_base_url")
-        network = c.safe_get(raw, "m_network")
-        doc_id = c.first_nonempty(c.safe_get(raw, "m_document_id"), c.safe_get(raw, "m_hash"), url, base_url, title)
+
+        title, url, base_url, network, doc_id = stix_converter_base.extract_common(c, raw, [
+            c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")], [
+            c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")], "m_base_url", "General - unknown title")
+
         summary = self.process_summary(c, raw, ["m_important_content", "m_meta_description", "m_content"])
+
         tlp_amber_id, content_types = self.setup_marking_and_types(c, created, raw)
         labels_set: set[str] = set(content_types)
         if network:

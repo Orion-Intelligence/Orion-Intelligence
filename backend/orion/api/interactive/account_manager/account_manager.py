@@ -14,6 +14,7 @@ from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
+from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, UserStatus, LicenseName, user_role
@@ -67,9 +68,7 @@ class AccountManager:
             else:
                 raise HTTPException(status_code=403, detail="Not allowed")
 
-            username = (data.username or "").strip()
-            email = (data.email or "").strip().lower()
-            password = (data.password or "").strip()
+            username, email, password = helper_controller.extract_user_mail_fields(data)
 
             username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
             if not re.match(username_pattern, username):
@@ -102,8 +101,6 @@ class AccountManager:
                 licenses=data.licenses, )
 
             await engine.save(user)
-            await KeyManager.get_instance().create_user_dek(user.id)
-
             return {"message": "User created successfully", "username": username, "email": email}
 
         except Exception as e:

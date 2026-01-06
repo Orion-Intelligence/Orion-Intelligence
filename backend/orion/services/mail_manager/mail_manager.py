@@ -33,7 +33,7 @@ class mail_manager:
 
         return subject, body
 
-    async def send_verification_mail(self, to: str, subject: str, body: str):
+    async def _prepare_verification_message(self, to_header: str, subject: str, body: str):
         subject, body = await self.process_app_variables(subject, body)
         ACCOUNTS_MAIL_PASSWORD = env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD")
         sender_email = env_handler.get_instance().env("ACCOUNTS_MAIL")
@@ -41,25 +41,18 @@ class mail_manager:
         smtp_port = 465
         msg = MIMEMultipart("alternative")
         msg["From"] = sender_email
-        msg["To"] = to
+        msg["To"] = to_header
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "html"))
-        await asyncio.to_thread(
-            self._send_sync_email, sender_email, ACCOUNTS_MAIL_PASSWORD, to, msg, smtp_server, smtp_port)
+        return sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg
+
+    async def send_verification_mail(self, to: str, subject: str, body: str):
+        sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg = await self._prepare_verification_message(to, subject, body)
+        await asyncio.to_thread(self._send_sync_email, sender_email, ACCOUNTS_MAIL_PASSWORD, to, msg, smtp_server, smtp_port)
 
     async def send_verification_mail_list(self, to_list, subject: str, body: str):
-        subject, body = await self.process_app_variables(subject, body)
-        ACCOUNTS_MAIL_PASSWORD = env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD")
-        sender_email = env_handler.get_instance().env("ACCOUNTS_MAIL")
-        smtp_server = env_handler.get_instance().env("ACCOUNTS_SMTP_SERVER")
-        smtp_port = 465
-        msg = MIMEMultipart("alternative")
-        msg["From"] = sender_email
-        msg["To"] = ", ".join(to_list)
-        msg["Subject"] = subject
-        msg.attach(MIMEText(body, "html"))
-        await asyncio.to_thread(
-            self._send_sync_email_list, sender_email, ACCOUNTS_MAIL_PASSWORD, to_list, msg, smtp_server, smtp_port)
+        sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg = await self._prepare_verification_message(", ".join(to_list), subject, body)
+        await asyncio.to_thread(self._send_sync_email_list, sender_email, ACCOUNTS_MAIL_PASSWORD, to_list, msg, smtp_server, smtp_port)
 
     @staticmethod
     def _send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):

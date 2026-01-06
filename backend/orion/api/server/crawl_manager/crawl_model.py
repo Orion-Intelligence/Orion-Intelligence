@@ -16,7 +16,7 @@ from orion.services.elastic_manager.elastic_request_generator import elastic_req
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
-from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
+from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
 
 
 class crawl_model:

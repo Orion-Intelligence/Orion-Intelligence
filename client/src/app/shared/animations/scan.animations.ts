@@ -9,9 +9,3 @@ export const scanAnimation = trigger('scanAnimation', [
     animate('220ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 0, transform: 'translateY(6px) scale(0.985)' })),
   ]),
 ]);
-
-export const scanParentAnimation = trigger('scanParentAnimation', [
-  transition('* => *', [
-    query('@scanAnimation', animateChild(), { optional: true }),
-  ]),
-]);

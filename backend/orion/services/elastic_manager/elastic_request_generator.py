@@ -387,7 +387,7 @@ class elastic_request_generator:
         labels = []
 
         m1 = helper_controller.clone_model(p_query_model)
-        m1.category = 'databases'
+        m1.category = "databases"
         i1, q1 = self.on_search_leakdata(m1, pFilter)
         queries.append(helper_controller.strip_query(q1))
         indices.append(i1)
@@ -417,18 +417,20 @@ class elastic_request_generator:
         indices.append(i6)
         labels.append("social_model")
 
-        domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
+        domain_query_index, domain_query = self.on_bulk_domain_lookup(
+            p_query_model, pFilter
+        )
         queries.append(domain_query)
         indices.append(domain_query_index)
         labels.append("defacement_model")
 
-        m1.category = 'tracking'
+        m1.category = "tracking"
         i9, q9 = self.on_search_leakdata(m1, pFilter)
         queries.append(helper_controller.strip_query(q9))
         indices.append(i9)
         labels.append("tracking_model")
 
-        m1.category = 'news'
+        m1.category = "news"
         i10, q10 = self.on_search_leakdata(m1, pFilter)
         queries.append(helper_controller.strip_query(q10))
         indices.append(i10)

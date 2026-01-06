@@ -48,6 +48,11 @@ import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 
+const HASH_CONSOLIDATED_ROUTE = {
+  resolve: { reportdata: ReportConsolidatedResolver },
+  data: { type: 'consolidated', animation: 'HashPage' }
+};
+
 const consolidatedChildren = [
   {
     path: 'all',
@@ -57,41 +62,34 @@ const consolidatedChildren = [
   {
     path: 'chat/:m_hash',
     component: ReportChatComponent,
-    resolve: { reportdata: ReportConsolidatedResolver },
-    data: { type: 'consolidated', animation: 'HashPage' }
+    ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'social/:m_hash',
     component: ReportChatComponent,
-    resolve: { reportdata: ReportConsolidatedResolver },
-    data: { type: 'consolidated', animation: 'HashPage' }
+    ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'general/:m_hash',
     component: ReportComponent,
-    resolve: { reportdata: ReportConsolidatedResolver },
-    data: { type: 'consolidated', animation: 'HashPage' }
+    ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'leak/:m_hash',
     component: ReportComponent,
-    resolve: { reportdata: ReportConsolidatedResolver },
-    data: { type: 'consolidated', animation: 'HashPage' }
+    ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'exploit/:m_hash',
     component: ReportComponent,
-    resolve: { reportdata: ReportConsolidatedResolver },
-    data: { type: 'consolidated', animation: 'HashPage' }
+    ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'defacement/:m_hash',
     component: ReportDefacementComponent,
-    resolve: { reportdata: ReportConsolidatedResolver },
-    data: { type: 'consolidated', animation: 'HashPage' }
+    ...HASH_CONSOLIDATED_ROUTE
   }
 ];
-
 
 export const routes: Routes = [
 

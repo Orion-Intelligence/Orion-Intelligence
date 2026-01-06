@@ -9,15 +9,14 @@ class defacement_converter(stix_converter_base):
     def convert(self, raw: DefacementResultItem) -> Dict[str, Any]:
         c = stix_helper()
         created, modified = self.get_timestamps(c, raw, ["m_leak_date", "m_creation_date", "m_update_date"])
-        title = str(c.first_nonempty(c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"),
+        title, url, base_url, network, doc_id = stix_converter_base.extract_common(c, raw, [
+                                    c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"),
                                     c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None,
-                                    str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None, "Defacement - unknown title"))
-        url = c.first_nonempty(c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), c.as_list(c.safe_get(raw, "m_source_url"))[0] if c.as_list(c.safe_get(raw, "m_source_url")) else None,
-                               c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None)
-        base_url = c.safe_get(raw, "m_base_url")
-        network = c.safe_get(raw, "m_network")
-        doc_id = c.first_nonempty(c.safe_get(raw, "m_document_id"), c.safe_get(raw, "m_hash"), url, base_url, title)
+                                    str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None], [
+                               c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), c.as_list(c.safe_get(raw, "m_source_url"))[0] if c.as_list(c.safe_get(raw, "m_source_url")) else None,
+                               c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None], "m_base_url", "Defacement - unknown title")
         summary = self.process_summary(c, raw, ["m_content", "m_important_content"])
+
         tlp_amber_id, content_types = self.setup_marking_and_types(c, created, raw, "defacement")
         labels = self.standard_labels(c, raw, content_types, "orion:defacement")
         lang = self.get_lang(c, raw)

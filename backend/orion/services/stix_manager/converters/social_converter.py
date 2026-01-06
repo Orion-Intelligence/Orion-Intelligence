@@ -10,12 +10,11 @@ class social_converter(stix_converter_base):
     def convert(self, raw: SocialResultItem) -> Dict[str, Any]:
         c = stix_helper()
         created, modified = self.get_timestamps(c, raw, ["m_creation_date", "m_update_date", "m_message_date"])
-        title = str(c.first_nonempty(c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_channel_url"), "Social - unknown title"))
-        url = c.first_nonempty(c.safe_get(raw, "m_message_sharable_link"), c.safe_get(raw, "m_channel_url"), c.safe_get(raw, "m_url"))
-        base_url = c.safe_get(raw, "m_channel_url")
-        network = c.safe_get(raw, "m_network")
-        platform = c.safe_get(raw, "m_platform")
-        doc_id = c.first_nonempty(c.safe_get(raw, "m_document_id"), c.safe_get(raw, "m_hash"), url, base_url, title)
+
+        title, url, base_url, network, platform, doc_id = stix_converter_base.extract_common(c, raw, [
+            c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_channel_url")], [
+            c.safe_get(raw, "m_message_sharable_link"), c.safe_get(raw, "m_channel_url"), c.safe_get(raw, "m_url")], "m_channel_url", "Social - unknown title", include_platform=True)
+
         summary = self.process_summary(c, raw, ["m_content", "m_important_content", "m_meta_description"])
         tlp_amber_id, content_types = self.setup_marking_and_types(c, created, raw)
         labels = self.standard_labels(c, raw, content_types, "orion:social")

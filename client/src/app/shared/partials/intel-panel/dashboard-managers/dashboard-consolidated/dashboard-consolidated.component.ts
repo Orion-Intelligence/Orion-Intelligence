@@ -27,6 +27,7 @@ import { NgbAccordionModule } from "@ng-bootstrap/ng-bootstrap";
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
+import {scanAnimation} from '../../../../animations/scan.animations';
 
 
 @Component({
@@ -35,7 +36,7 @@ import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.co
   imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, NgbAccordionModule, ConsolidatedIocComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
-  animations: [fadeInDashboardItem]
+  animations: [scanAnimation, fadeInDashboardItem],
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 

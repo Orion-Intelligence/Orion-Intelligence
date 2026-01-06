@@ -29,10 +29,3 @@ class migration_1_0_3_0:
             existing_version_entry.value = str(version)
             await engine.save(existing_version_entry)
 
-        users = await engine.find(db_user_account)
-        for user in users:
-            user_id = str(user.id)
-            existing_key = await engine.find_one(
-                db_keys, db_keys.auth_id == user_id, )
-            if not existing_key:
-                await KeyManager.get_instance().create_user_dek(user_id)

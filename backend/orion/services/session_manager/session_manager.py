@@ -63,7 +63,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
             session_id = payload.get("sid")
-            if user.role in (user_role.CRAWLER):
+            if user.role in user_role.CRAWLER:
                 return user
 
             if not session_id:
@@ -126,13 +126,13 @@ class session_manager:
         if username:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
 
-        if not free and user and user.role not in (user_role.CRAWLER) and expires_delta > timedelta(minutes=30):
+        if not free and user and user.role not in user_role.CRAWLER and expires_delta > timedelta(minutes=30):
             expires_delta = timedelta(minutes=30)
 
         expire = datetime.now(timezone.utc) + expires_delta if not free else None
 
         session_id = None
-        if user and user.role not in (user_role.CRAWLER) and not free:
+        if user and user.role not in user_role.CRAWLER and not free:
             session_id = secrets.token_urlsafe(32)
             user.current_session_id = session_id
             await self._engine.save(user)
@@ -190,21 +190,30 @@ class session_manager:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
-            if user.role not in (user_role.CRAWLER) and access_ttl > timedelta(minutes=30):
+            if user.role not in user_role.CRAWLER and access_ttl > timedelta(minutes=30):
                 access_ttl = timedelta(minutes=30)
 
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
             onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
-            session = {"username": user.username, "role": user.role.value if hasattr(user.role, "value") else str(
-                user.role), "status": user.status.value if hasattr(user.status, "value") else str(
-                user.status), "hasOnboarding": onboarding_exists, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "licenses": [
-                license.value for license in user.licenses], }
+
+            session = self._build_session(user, onboarding_exists)
             return {"access_token": access_token, "token_type": "bearer", "session": session}
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="2FA token expired")
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid 2FA token")
+
+    async def _build_session(self, user, onboarding_exists: bool):
+        return {
+            "username": user.username,
+            "role": user.role.value if hasattr(user.role, "value") else str(user.role),
+            "status": user.status.value if hasattr(user.status, "value") else str(user.status),
+            "hasOnboarding": onboarding_exists,
+            "subscription": user.subscription,
+            "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
+            "licenses": [user_license.value for user_license in user.licenses],
+        }
 
     async def refresh_token(self, token: str):
         try:
@@ -225,7 +234,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="User not found")
 
             session_id = payload.get("sid")
-            if user.role not in (user_role.CRAWLER):
+            if user.role not in user_role.CRAWLER:
                 if not session_id:
                     raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -256,21 +265,17 @@ class session_manager:
             onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))
 
             base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
-            if user.role not in (user_role.CRAWLER):
+            if user.role not in user_role.CRAWLER:
                 base_expiry = time.time() + 3 * 60
 
-            if user.role in (user_role.CRAWLER):
+            if user.role in user_role.CRAWLER:
                 new_token_payload = {"sub": username, "exp": base_expiry}
             else:
                 new_token_payload = {"sub": username, "exp": base_expiry, "sid": session_id}
 
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
-            session = {"username": user.username, "role": user.role.value if hasattr(user.role, "value") else str(
-                user.role), "status": user.status.value if hasattr(user.status, "value") else str(
-                user.status), "hasOnboarding": onboarding_exists, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "licenses": [
-                license.value for license in user.licenses], }
-
+            session = self._build_session(user, onboarding_exists)
             return {"access_token": new_token, "token_type": "bearer", "session": session}
 
         except jwt.ExpiredSignatureError:

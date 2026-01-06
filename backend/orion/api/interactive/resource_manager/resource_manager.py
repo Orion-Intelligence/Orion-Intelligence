@@ -61,9 +61,10 @@ class ResourceManager:
         image_path = self.SYSTEM_DIR / f"{'logo'}.png"
         return FileResponse(image_path if image_path.is_file() else default_path)
 
-    async def update_system_image(self, file: UploadFile, current_user):
+    async def _save_image(self, file: UploadFile, file_path, check_admin: bool = False, current_user=None):
         contents = await file.read()
-        if current_user.role not in ["admin"]:
+
+        if check_admin and current_user.role not in ["admin"]:
             return
 
         if len(contents) > 50 * 1024:
@@ -72,23 +73,16 @@ class ResourceManager:
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type")
 
-        file_path = self.SYSTEM_DIR / f"logo.png"
         with open(file_path, "wb") as f:
             f.write(contents)
+
+    async def update_system_image(self, file: UploadFile, current_user):
+        file_path = self.SYSTEM_DIR / "logo.png"
+        await self._save_image(file, file_path, check_admin=True, current_user=current_user)
 
     async def update_user_image(self, file: UploadFile, current_user):
-        contents = await file.read()
-
-        if len(contents) > 50 * 1024:
-            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 50 KB")
-
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(status_code=415, detail="Invalid file type")
-
         file_path = self.USER_DIR / f"{current_user.id}.png"
-        with open(file_path, "wb") as f:
-            f.write(contents)
-
+        await self._save_image(file, file_path)
         return {"user_image": "upload complete"}
 
     async def delete_user_image(self, current_user):

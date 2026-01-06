@@ -438,3 +438,18 @@
 .consolidated-scans-chevron-icon.is-expanded {
   transform: rotate(180deg);
 }
+
+.expand-collapse-btn.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.expand-collapse-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 10px;
+  margin-left: 10px;
+}

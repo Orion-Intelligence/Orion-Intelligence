@@ -2,6 +2,16 @@ from __future__ import annotations
 from typing import Any, Dict, Optional, List
 
 class stix_converter_base:
+
+    def extract_common(self, c, raw, title_values, url_values, base_url_field, default_title, include_platform=False):
+        title = str(c.first_nonempty(*title_values, default_title))
+        url = c.first_nonempty(*url_values)
+        base_url = c.safe_get(raw, base_url_field)
+        network = c.safe_get(raw, "m_network")
+        platform = c.safe_get(raw, "m_platform") if include_platform else None
+        doc_id = c.first_nonempty(c.safe_get(raw, "m_document_id"), c.safe_get(raw, "m_hash"), url, base_url, title)
+        return title, url, base_url, network, platform, doc_id
+
     def get_timestamps(self, c, raw: Any, priority_keys: List[str]) -> tuple[str, str]:
         created = c.now_ts()
         for key in priority_keys:
