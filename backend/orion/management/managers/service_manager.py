@@ -1,18 +1,13 @@
 import asyncio
-import json
 from asyncio import sleep
-
-from jinja2 import Environment, FileSystemLoader
-
 from orion.api.server.config_manager.config_controller import config_controller
+from orion.helper_manager.helper_controller import helper_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
 from orion.management.managers.test_manager import test_manager
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
-from orion.constants.constant import allowed_keys
-from orion.constants import constant
 
 
 class service_manager:
@@ -73,21 +68,4 @@ class service_manager:
 
     @staticmethod
     async def build_assets(build_dir):
-        entities_file = build_dir / "assets" / "data" / "entities_data" / "entities.json"
-        if not entities_file.exists():
-            raise FileNotFoundError(f"entities.json not found at {entities_file}")
-
-        with open(entities_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        allowed_keys.clear()
-        for item in data:
-            if "key" in item:
-                allowed_keys.add(item["key"])
-
-        mail_templete_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"))
-        constant.mail_template = mail_templete_env.get_template("mail_template.html")
-        license_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"))
-        license_rules_template = license_rules_env.get_template("license_rules.json")
-        license_rules_json_str = license_rules_template.render()
-        constant.license_rules = json.loads(license_rules_json_str)
+        helper_controller.build_assets(build_dir)

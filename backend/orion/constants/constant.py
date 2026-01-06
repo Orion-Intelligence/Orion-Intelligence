@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
@@ -25,6 +27,8 @@ class CONSTANTS:
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
     S_ENCRYPTION_KEY = env_handler.get_instance().env("ENCRYPTION_KEY")
 
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
+    IMAGE_DIR = BASE_DIR / "static" / "resource" / "tenant"
 
 allowed_keys: set[str] = set()
 mail_template = None

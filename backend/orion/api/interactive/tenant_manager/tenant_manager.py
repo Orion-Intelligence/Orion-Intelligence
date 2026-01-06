@@ -10,6 +10,7 @@ from cryptography.fernet import Fernet
 
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
@@ -44,23 +45,28 @@ class TenantManager:
     async def _dek(tenant_id: str) -> bytes:
         return await KeyManager.get_instance().get_or_create_dek(tenant_id)
 
+
+    @staticmethod
+    async def encrypt_tenant(data):
+        dek = await KeyManager.get_instance().create_dek(str(data.id))
+        enc = Fernet(dek)
+        data.name = enc.encrypt((data.name or "").encode()).decode()
+        data.phone = enc.encrypt((data.phone or "").encode()).decode()
+        data.country = enc.encrypt((data.country or "").encode()).decode()
+        data.city = enc.encrypt((data.city or "").encode()).decode()
+        data.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
+        data.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
+        data.email = enc.encrypt((data.email or "").encode()).decode()
+
+        data.iocs = [IocCategory(
+            ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
+            name=enc.encrypt(ioc.name.encode()).decode(),
+            values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (data.iocs or [])]
+        return enc
+
     async def create_tenant(self, data: db_tenant_model):
         try:
-            dek = await KeyManager.get_instance().create_dek(str(data.id))
-            enc = Fernet(dek)
-            data.name = enc.encrypt((data.name or "").encode()).decode()
-            data.phone = enc.encrypt((data.phone or "").encode()).decode()
-            data.country = enc.encrypt((data.country or "").encode()).decode()
-            data.city = enc.encrypt((data.city or "").encode()).decode()
-            data.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
-            data.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
-            data.email = enc.encrypt((data.email or "").encode()).decode()
-
-            data.iocs = [IocCategory(
-                ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
-                name=enc.encrypt(ioc.name.encode()).decode(),
-                values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (data.iocs or [])]
-
+            await self.encrypt_tenant(data)
             data.status = TenantStatus.ONBOARDING
             await self._engine.save(data)
         except Exception as _:

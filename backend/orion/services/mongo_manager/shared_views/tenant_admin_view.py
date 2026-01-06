@@ -5,6 +5,7 @@ from starlette.requests import Request
 from starlette_admin.contrib.odmantic import ModelView
 from starlette_admin.exceptions import ActionFailed, FormValidationError
 
+from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
@@ -15,8 +16,6 @@ class TenantAdminView(ModelView):
     def __init__(self, model, engine, **kwargs):
         super().__init__(model, **kwargs)
         self._engine = engine
-        self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "tenant"
 
     async def before_create(self, request: Request, data: dict, obj: Any):
         if data.get("is_default") is True:
@@ -51,7 +50,7 @@ class TenantAdminView(ModelView):
                 if str(tenant.id) != str(user.tenant_uuid):
                     continue
 
-                image_path = self.IMAGE_DIR / f"{user.id}.enc"
+                image_path = CONSTANTS.IMAGE_DIR / f"{user.id}.enc"
                 if image_path.exists():
                     image_path.unlink()
 

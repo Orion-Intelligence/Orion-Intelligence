@@ -1,17 +1,14 @@
 from bson import ObjectId
-from cryptography.fernet import Fernet
 from odmantic.exceptions import DuplicateKeyError
-
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_auth_models import (db_user_account, user_role, UserStatus, LicenseName, )
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
-from orion.services.mongo_manager.shared_model.db_tenant_model import (IocCategory, TenantStatus, db_tenant_model, )
+from orion.services.mongo_manager.shared_model.db_tenant_model import (TenantStatus, db_tenant_model, )
 from orion.services.session_manager.session_enums import admin_mock, crawler_mock
 
 
 async def create_default_tenant(engine):
-    from orion.services.encryption_manager.key_manager import KeyManager
-
     data = db_tenant_model(
         id=ObjectId(),
         name="default",
@@ -27,21 +24,7 @@ async def create_default_tenant(engine):
         user_quota=-1,
         iocs=[], )
 
-    dek = await KeyManager.get_instance().create_dek(str(data.id))
-    enc = Fernet(dek)
-
-    data.name = enc.encrypt((data.name or "").encode()).decode()
-    data.phone = enc.encrypt((data.phone or "").encode()).decode()
-    data.country = enc.encrypt((data.country or "").encode()).decode()
-    data.city = enc.encrypt((data.city or "").encode()).decode()
-    data.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
-    data.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
-
-    data.iocs = [IocCategory(
-        ioc_id=enc.encrypt((ioc.ioc_id or "").encode()).decode(),
-        name=enc.encrypt((ioc.name or "").encode()).decode(),
-        values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])], ) for ioc in (data.iocs or [])]
-
+    enc = await TenantManager.encrypt_tenant(data)
     data.status = TenantStatus.ACTIVE
     data.user_quota = -1
     data.verified = True
