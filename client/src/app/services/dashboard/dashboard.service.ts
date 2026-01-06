@@ -1,20 +1,20 @@
-import {Injectable, signal} from '@angular/core';
-import {Observable, of, Subject} from 'rxjs';
-import {catchError, map, takeUntil} from 'rxjs/operators';
-import {ApiService} from '../../shared/services/api.service';
-import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
-import {GeneralCallbackModel} from '../../shared/model/results/general/general.callback.model';
-import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.model';
-import {ExploitCallbackModel} from '../../shared/model/results/exploit/exploit.callback.model';
-import {ConsolidatedCallbackModel} from '../../shared/model/results/consolidated/consolidated.callback.model';
-import {StealerLogCallbackModel} from '../../shared/model/results/credentials/credential.callback.model';
-import {SocialCallbackModel} from '../../shared/model/results/social/social.callback.model';
-import {ConsolidatedParamModel} from '../../shared/model/results/consolidated/consolidated.param.model';
-import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.callback.model';
-import {HelperService} from '../../shared/services/helper.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AppService} from '../core/app/app.service';
-import {RankedCallbackModel} from '../../shared/model/results/consolidated/ranked.callback.model';
+import { Injectable, signal } from '@angular/core';
+import { Observable, of, Subject } from 'rxjs';
+import { catchError, map, takeUntil } from 'rxjs/operators';
+import { ApiService } from '../../shared/services/api.service';
+import { LeakCallbackModel } from '../../shared/model/results/leak/leak.callback.model';
+import { GeneralCallbackModel } from '../../shared/model/results/general/general.callback.model';
+import { ChatCallbackModel } from '../../shared/model/results/chat/chat.callback.model';
+import { ExploitCallbackModel } from '../../shared/model/results/exploit/exploit.callback.model';
+import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
+import { StealerLogCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
+import { SocialCallbackModel } from '../../shared/model/results/social/social.callback.model';
+import { ConsolidatedParamModel } from '../../shared/model/results/consolidated/consolidated.param.model';
+import { DefacementCallbackModel } from '../../shared/model/results/defacement/defacement.callback.model';
+import { HelperService } from '../../shared/services/helper.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AppService } from '../core/app/app.service';
+import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
 
 @Injectable({
   providedIn: 'root'
@@ -53,7 +53,7 @@ export class DashboardService {
     this.cancelOngoingRequest();
 
     paramModel.page = this.consolidatedParamModel.page
-    let baseParams: any = {...paramModel, ...this.selectedFilters()};
+    let baseParams: any = { ...paramModel, ...this.selectedFilters() };
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -70,7 +70,7 @@ export class DashboardService {
 
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    const queryParamsForNav = {...baseParams};
+    const queryParamsForNav = { ...baseParams };
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: queryParamsForNav,
@@ -91,7 +91,7 @@ export class DashboardService {
       })),
       catchError((error) => {
         console.error('Search API call failed:', error);
-        return of({success: false, isEmpty: false, data: null});
+        return of({ success: false, isEmpty: false, data: null });
       })
     );
   }
@@ -106,7 +106,7 @@ export class DashboardService {
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
 
-    let baseParams: any = {...paramModel, ...this.selectedFilters()};
+    let baseParams: any = { ...paramModel, ...this.selectedFilters() };
     if (entityCategories) {
       baseParams['entity_filter'] = Object.fromEntries(
         Object.entries(entityCategories).filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : true))
@@ -118,7 +118,7 @@ export class DashboardService {
     let match_type = this.app_service.configData().localSettings.matchType;
     baseParams['matchtype'] = match_type ? match_type : this.app_service.configData().localSettings.matchType;
 
-    const queryParamsForNav = {...baseParams};
+    const queryParamsForNav = { ...baseParams };
     delete queryParamsForNav['entity_filter'];
     this.router.navigate([], {
       relativeTo: this.route,
@@ -135,11 +135,12 @@ export class DashboardService {
           isEmpty: !hasAnyResults,
           data: hasAnyResults ? new RankedCallbackModel({
             result: response.Result,
-            pageCount: response.Page_Count
+            pageCount: response.Page_Count,
+            totalHits: response.Total_Hits
           }) : null
         };
       }),
-      catchError(() => of({success: false, isEmpty: false, data: null}))
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
     );
   }
 
@@ -153,7 +154,7 @@ export class DashboardService {
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
 
-    let payload: any = {...paramModel, ...this.selectedFilters()};
+    let payload: any = { ...paramModel, ...this.selectedFilters() };
 
     if (entityCategories) {
       payload['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
@@ -161,7 +162,7 @@ export class DashboardService {
     payload = this.helperService.removeEmptyOrNullValues(payload);
 
     payload['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    const queryParamsForNav = {...payload};
+    const queryParamsForNav = { ...payload };
     delete queryParamsForNav['entity_filter'];
 
 
@@ -188,7 +189,7 @@ export class DashboardService {
           data: response
         };
       }),
-      catchError(() => of({success: false, isEmpty: false, data: null}))
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
     );
   }
 

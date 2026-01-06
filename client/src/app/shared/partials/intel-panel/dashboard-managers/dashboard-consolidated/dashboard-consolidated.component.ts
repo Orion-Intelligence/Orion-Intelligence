@@ -65,6 +65,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
+  rankedApiTime: any;
 
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
 
@@ -198,10 +199,13 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     this.isLoading.set(true);
     this.rankedResult = new RankedCallbackModel();
+    const startTime = performance.now();
     this.dashboardService
       .fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(500).pipe(map(() => response))))
       .subscribe(response => {
+        const endTime = performance.now();
+        this.rankedApiTime = Math.round(endTime - startTime);
         if (response.success && response.data) {
           this.rankedResult = response.data;
         }

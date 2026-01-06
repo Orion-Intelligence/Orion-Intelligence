@@ -8,7 +8,10 @@ import { RankedCallbackModel } from '../../../../../model/results/consolidated/r
   templateUrl: './consolidated-ioc.component.html'
 })
 export class ConsolidatedIocComponent implements OnInit {
+  expandedRows = new Set<number>();
   @Input() rankedResult: RankedCallbackModel = new RankedCallbackModel();
+  @Input() apiElapsedTime: any;
+  @Input() resultsFound: number = 0;
 
 
   @Output() onToggleSwitch = new EventEmitter<null>();
@@ -44,7 +47,22 @@ export class ConsolidatedIocComponent implements OnInit {
   ngOnInit(): void {
     console.log(this.rankedResult.pageCount);
   }
-  toggleRow(row: any) {
-    row.expanded = !row.expanded;
+  toggleRow(index: number) {
+    if (this.expandedRows.has(index)) {
+      this.expandedRows.delete(index);
+    } else {
+      this.expandedRows.add(index);
+    }
+  }
+
+  isExpanded(index: number): boolean {
+    return this.expandedRows.has(index);
+  }
+
+  sliceText(text: string, maxLength: number = 30): string {
+    if (!text) return '';
+    return text.length > maxLength
+      ? text.slice(0, maxLength) + '...'
+      : text;
   }
 }

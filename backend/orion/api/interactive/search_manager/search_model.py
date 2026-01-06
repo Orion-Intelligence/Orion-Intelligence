@@ -137,7 +137,7 @@ class search_model:
         size = int(query.get("size", 10))
         total_pages = (total + size - 1) // size if size > 0 else 0
 
-        return {"Result": ranked_results, "Page_Count": total_pages}
+        return {"Result": ranked_results, "Page_Count": total_pages,"Total_Hits": total}
 
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
