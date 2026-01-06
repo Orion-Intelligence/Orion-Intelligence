@@ -44,11 +44,7 @@ class KeyManager:
         if not existing:
             raise Exception("Tenant does not exist.")
 
-        dek = self._new_dek()
-        wrapped = self._wrap(dek)
-        now = datetime.now(timezone.utc)
-        await self._engine.save(db_keys(auth_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
-        return dek
+        return await self.create_dek(tenant_id)
 
     async def create_dek(self, tenant_id: str) -> bytes:
         dek = self._new_dek()

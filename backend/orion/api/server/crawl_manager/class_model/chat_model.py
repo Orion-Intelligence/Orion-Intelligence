@@ -4,7 +4,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
-class telegram_chat_model(BaseModel):
+class chat_model(BaseModel):
     m_content: Optional[str] = None
     m_caption: Optional[str] = None
     m_message_date: Optional[date] = None
@@ -37,7 +37,7 @@ class telegram_chat_model(BaseModel):
 
 
 class chat_data_model(BaseModel):
-    m_chat_data: List[telegram_chat_model] = Field(default_factory=list)
+    m_chat_data: List[chat_model] = Field(default_factory=list)
     m_network: str = "telegram"
     m_channel_name: str = None
     m_source_channel_url: Optional[str] = None

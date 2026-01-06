@@ -253,13 +253,6 @@ async def search_discussion(param: search_general_param_model = Body(...)):
 
 @api_routes.post(
     "/api/social/all",
-    summary="Search all social and chat reports",
-    description=SEARCH_DOCS["social"]["description"],
-    tags=["Search"],
-    operation_id="searchAllSocialChatReports",
-    include_in_schema=False,
-    response_description=SEARCH_DOCS["social"]["response_description"],
-    status_code=200,
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:social")), ], )
@@ -271,12 +264,6 @@ async def search_social_all(param: search_general_param_model = Body(...)):
 
 @api_routes.post(
     "/api/social",
-    summary="Search social media reports",
-    description=SEARCH_DOCS["social"]["description"],
-    tags=["Search"],
-    operation_id="searchSocialMediaReports",
-    response_description=SEARCH_DOCS["social"]["response_description"],
-    status_code=200,
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:social")), ], )

@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from starlette import status
 from cryptography.fernet import Fernet
 
+from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.helper_manager.helper_controller import helper_controller
@@ -17,7 +18,6 @@ from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
 from orion.services.encryption_manager.key_manager import KeyManager
-from orion.constants.constant import CONSTANTS
 
 
 class TenantManager:
@@ -246,22 +246,10 @@ class TenantManager:
             if not re.match(email_pattern, email) and not data.role in ["demo"]:
                 raise HTTPException(status_code=400, detail="Invalid email format")
 
-            existing_user = await engine.find_one(
-                db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
+            existing_user = await engine.find_one(db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
             existing_mail = await engine.find_one(db_user_account, (db_user_account.email == email))
 
-            if (existing_user or existing_mail) and data.role != "demo":
-                raise HTTPException(status_code=400, detail="Username or email already exists")
-
-            if password.startswith("$2b$") and len(password) >= 60:
-                hashed_password = password
-            else:
-                if len(password) > 256:
-                    raise HTTPException(status_code=400, detail="Password too long")
-                try:
-                    hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
-                except Exception:
-                    raise HTTPException(status_code=400, detail="Invalid password")
+            hashed_password = AccountManager.get_instance().create_tenant_user(existing_user, existing_mail, password)
 
             tenant_uuid = getattr(current_user, "tenant_uuid", None)
             if not tenant_uuid:

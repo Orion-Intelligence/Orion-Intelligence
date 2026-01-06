@@ -55,6 +55,21 @@ class AccountManager:
             return [user_param_model(**u.dict()) for u in users]
         return []
 
+    async def create_tenant_user(self, existing_user, existing_mail, password):
+        if existing_user or existing_mail:
+            raise HTTPException(status_code=400, detail="Username or email already exists")
+
+        if password.startswith("$2b$") and len(password) >= 60:
+            hashed_password = password
+        else:
+            if len(password) > 256:
+                raise HTTPException(status_code=400, detail="Password too long")
+            try:
+                hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+            except Exception:
+                raise HTTPException(status_code=400, detail="Invalid password")
+        return hashed_password
+
     async def create_user(self, data: user_model, current_user):
         try:
             engine = mongo_controller.get_instance().get_engine()
@@ -80,15 +95,7 @@ class AccountManager:
 
             existing_user = await engine.find_one(db_user_account, db_user_account.username == username)
             existing_mail = await engine.find_one(db_user_account, db_user_account.email == email)
-            if existing_user or existing_mail:
-                raise HTTPException(status_code=400, detail="Username or email already exists")
-
-            if password.startswith("$2b$") and len(password) >= 60:
-                hashed_password = password
-            else:
-                if len(password) > 256:
-                    raise HTTPException(status_code=400, detail="Password too long")
-                hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+            hashed_password = self.create_tenant_user(existing_user, existing_mail, password)
 
             user = db_user_account(
                 username=username,

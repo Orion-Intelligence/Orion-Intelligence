@@ -252,14 +252,13 @@ class elastic_controller:
 
     async def generate_graph(self):
         try:
-            queries = self.__m_elastic_request_generator.generate_graph_queries()
+            graph_queries = self.__m_elastic_request_generator.generate_graph_queries()
             all_bucket_data = []
 
-            for query in queries:
-                result = await self.__conn_for_index(query[ELASTIC_KEYS.S_DOCUMENT]).search(
-                    index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER], request_timeout=220)
-
+            for query in graph_queries:
+                result = await self.__conn_for_index(query[ELASTIC_KEYS.S_DOCUMENT]).search(index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER], request_timeout=220)
                 aggs = result.get("aggregations", {})
+
                 for agg_name, agg_result in aggs.items():
                     buckets = agg_result.get("buckets", [])
                     data = {"aggregation_name": agg_name, "index": query[ELASTIC_KEYS.S_DOCUMENT], "buckets": []}
@@ -275,14 +274,13 @@ class elastic_controller:
 
     async def get_insight(self):
         try:
-            queries = self.__m_elastic_request_generator.generate_insight_queries()
+            insight_queries = self.__m_elastic_request_generator.generate_insight_queries()
             insight_data = InsightData()
 
-            for query in queries:
-                result = await self.__conn_for_index(query[ELASTIC_KEYS.S_DOCUMENT]).search(
-                    index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER], request_timeout=220)
-
+            for query in insight_queries:
+                result = await self.__conn_for_index(query[ELASTIC_KEYS.S_DOCUMENT]).search(index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER], request_timeout=220)
                 aggs = result.get("aggregations", {})
+
                 m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
 
                 for key in aggs:
