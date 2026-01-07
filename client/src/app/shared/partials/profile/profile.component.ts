@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, computed } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect } from '@angular/core';
 import { NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -133,17 +133,17 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   auditlog() {
-    this.router.navigate(['/dashboard/profile/auditlog']);
+    this.router.navigate(['/dashboard/profile/auditlog']).then();
   }
   manageIocs() {
-    this.router.navigate(['/dashboard/profile/ioc']);
+    this.router.navigate(['/dashboard/profile/ioc']).then();
   }
   openAccountSettings() {
-    this.router.navigate(['/dashboard/profile/account']);
+    this.router.navigate(['/dashboard/profile/account']).then();
   }
   changePassword() {
     this.logout();
-    this.router.navigate(['/reset']);
+    this.router.navigate(['/reset']).then();
   }
 
   logout() {
