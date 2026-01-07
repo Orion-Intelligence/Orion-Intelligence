@@ -2,21 +2,16 @@ from __future__ import annotations
 from typing import Any, Dict
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import result_item as LeakResultItem
 from orion.services.stix_manager.converters.stix_converter_base import stix_converter_base
-from orion.services.stix_manager.stix_helper import stix_helper
 
 class leak_converter(stix_converter_base):
 
     def convert(self, raw: LeakResultItem) -> Dict[str, Any]:
-        c = stix_helper()
-        created, modified = self.get_timestamps(c, raw, ["m_creation_date", "m_update_date"])
-
-        title, url, base_url, network, platform, doc_id = self.extract_common(
-            c, raw,
-            [c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")],
-            [c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")],
-            "m_base_url",
-            "m_network",
-            "Leak - unknown title",
+        c, created, modified, title, url, base_url, network, platform, doc_id = self._init_common(
+            raw,
+            ["m_creation_date", "m_update_date"],
+            "General - unknown title",
+            lambda c, raw: [c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")],
+            lambda c, raw: [c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")],
         )
 
         summary = self.process_summary(c, raw, ["m_important_content", "m_content"])

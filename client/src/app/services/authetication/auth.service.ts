@@ -20,7 +20,11 @@ export class AuthService {
     private tokenRefreshService: TokenRefreshService
   ) {
     if (this.isAuthenticated()) {
-      const needsSession = !this.appService.userSessionData().user.username && !this.appService.userSessionData().user.role && !this.appService.userSessionData().user.verificationDate;
+      const needsSession =
+        !this.appService.userSessionData().user.username &&
+        !this.appService.userSessionData().user.role &&
+        !this.appService.userSessionData().user.verificationDate;
+
       if (needsSession) this.refreshToken().subscribe();
       this.startTokenRefresh();
     }
@@ -38,6 +42,7 @@ export class AuthService {
     const body = new URLSearchParams();
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
     let route = 'token';
+
     if (isDemo) {
       route = 'token/demo';
     } else {
@@ -49,33 +54,18 @@ export class AuthService {
       tap({
         next: (response) => {
           if (response.twofa_required) {
-            this.authState.next({
-              token: null,
-              isAuthenticated: false,
-              isValidated: true,
-              error: '2FA required'
-            });
+            this.denyAccess('2FA required');
             return response.provisioning_uri || null;
           }
 
           if (!response?.access_token) {
-            this.authState.next({
-              token: null,
-              isAuthenticated: false,
-              isValidated: true,
-              error: 'Access denied!'
-            });
+            this.denyAccess('Access denied!');
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({
-              token: null,
-              isAuthenticated: false,
-              isValidated: true,
-              error: 'Access denied!'
-            });
+            this.denyAccess('Access denied!');
             return;
           }
 
@@ -94,14 +84,9 @@ export class AuthService {
               error: 'Access denied!',
             });
           } else {
-            this.authState.next({
-              token: null,
-              isAuthenticated: false,
-              isValidated: true,
-              error: 'Access denied!',
-            });
+            this.denyAccess('Access denied!');
           }
-        }
+        },
       })
     );
   }
@@ -113,28 +98,22 @@ export class AuthService {
         observer.complete();
       });
 
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json', Authorization: `Bearer ${tempToken}` });
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${tempToken}`,
+    });
+
     return this.apiService.post<any>('token/2fa/verify', { code }, { headers }).pipe(
       tap({
         next: (response) => {
           if (!response?.access_token) {
-            this.authState.next({
-              token: null,
-              isAuthenticated: false,
-              isValidated: true,
-              error: 'Invalid 2FA code'
-            });
+            this.denyAccess('Invalid 2FA code');
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({
-              token: null,
-              isAuthenticated: false,
-              isValidated: true,
-              error: 'Access denied!'
-            });
+            this.denyAccess('Access denied!');
             return;
           }
 
@@ -142,13 +121,8 @@ export class AuthService {
           this.startTokenRefresh();
         },
         error: () => {
-          this.authState.next({
-            token: null,
-            isAuthenticated: false,
-            isValidated: true,
-            error: 'Invalid 2FA code'
-          });
-        }
+          this.denyAccess('Invalid 2FA code');
+        },
       })
     );
   }
@@ -160,7 +134,7 @@ export class AuthService {
       isValidated: true,
       error: null,
     });
-    this.router.navigate(['/login']).then();
+
     this.router.navigate(['/login']).then(() => {
       this.apiService.post('logout', {}).subscribe();
 
@@ -175,7 +149,7 @@ export class AuthService {
   }
 
   demoLogin(): void {
-    this.login('_', '_', true).subscribe(async (_) => { });
+    this.login('_', '_', true).subscribe(async (_) => {});
   }
 
   signup(username: string, email: string, password: string): Observable<any> {
@@ -204,10 +178,21 @@ export class AuthService {
 
   getSessionStatus(): { isAuthenticated: boolean; hasSession: boolean } {
     const isAuthenticated = !!this.getStoredToken();
-    const hasSession = !!this.appService.userSessionData().user.username && !!this.appService.userSessionData().user.role && !!this.appService.userSessionData().user.verificationDate;
+    const hasSession =
+      !!this.appService.userSessionData().user.username &&
+      !!this.appService.userSessionData().user.role &&
+      !!this.appService.userSessionData().user.verificationDate;
     return { isAuthenticated, hasSession };
   }
 
+  private denyAccess(error: string): void {
+    this.authState.next({
+      token: null,
+      isAuthenticated: false,
+      isValidated: true,
+      error,
+    });
+  }
 
   private setToken(token: string): void {
     localStorage.setItem('token', token);
@@ -246,7 +231,11 @@ export class AuthService {
       });
 
     return this.apiService
-      .post<{ access_token: string; session?: any }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ Authorization: `Bearer ${currentToken}` }) })
+      .post<{ access_token: string; session?: any }>(
+        'token/refresh',
+        { token: currentToken },
+        { headers: new HttpHeaders({ Authorization: `Bearer ${currentToken}` }) }
+      )
       .pipe(
         tap((response) => {
           if (response?.access_token) this.setToken(response.access_token);

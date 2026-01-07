@@ -1,7 +1,17 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional, List
+from typing import Optional
+from typing import Any, Callable, Dict, List, Tuple
+from orion.services.stix_manager.stix_helper import stix_helper
+
 
 class stix_converter_base:
+
+    def _init_common(self, raw: Any, ts_fields: List[str], unknown_title: str, title_values_fn: Callable[[Any, Any], List[Any]], url_values_fn: Callable[[Any, Any], List[Any]], base_url_field: str = "m_base_url", network_field: str = "m_network") -> Tuple[
+        Any, Any, Any, Any, Any, Any, Any, Any, Any]:
+        c = stix_helper()
+        created, modified = self.get_timestamps(c, raw, ts_fields)
+        title, url, base_url, network, platform, doc_id = self.extract_common(c, raw, title_values_fn(c, raw), url_values_fn(c, raw), base_url_field, network_field, unknown_title)
+        return c, created, modified, title, url, base_url, network, platform, doc_id
 
     def extract_common(self, c, raw, title_values, url_values, base_url_field, default_title, include_platform=False):
         title = str(c.first_nonempty(*title_values, default_title))
