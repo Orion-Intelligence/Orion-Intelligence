@@ -27,7 +27,7 @@ import { NgbAccordionModule } from "@ng-bootstrap/ng-bootstrap";
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
-import {scanAnimation} from '../../../../animations/scan.animations';
+import { scanAnimation } from '../../../../animations/scan.animations';
 
 
 @Component({
@@ -107,13 +107,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(_ = false): void {
-    if (this.licenseService.canUseScanning()) {
-      this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
-    }
-
     if (!this.isGrouped) {
       this.fetchRanked()
       return
+    }
+    if (this.licenseService.canUseScanning()) {
+      this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
 
     if (this.isLoading()) return;

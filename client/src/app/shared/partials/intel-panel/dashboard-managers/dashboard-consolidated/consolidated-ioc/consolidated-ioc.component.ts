@@ -12,40 +12,15 @@ export class ConsolidatedIocComponent implements OnInit {
   @Input() rankedResult: RankedCallbackModel = new RankedCallbackModel();
   @Input() apiElapsedTime: any;
   @Input() resultsFound: number = 0;
+  aggregatedDataWells: number = 0;
 
 
   @Output() onToggleSwitch = new EventEmitter<null>();
 
-  rows = [
-    {
-      email: 'bbc.com',
-      category: 'news',
-      expanded: false,
-      details: {
-        description: 'Leaked intelligence documents and media coverage.',
-        sources: [
-          'bbc.com',
-          'nytimes.com',
-          'reuters.com'
-        ]
-      }
-    },
-    {
-      email: 'ddosecrets.com',
-      category: 'leak',
-      expanded: false,
-      details: {
-        description: 'Confidential data exposed by threat actors.',
-        sources: [
-          'ddosecrets.com',
-          'archive.org'
-        ]
-      }
-    }
-  ];
+
 
   ngOnInit(): void {
-    console.log(this.rankedResult.pageCount);
+
   }
   toggleRow(index: number) {
     if (this.expandedRows.has(index)) {
@@ -64,5 +39,9 @@ export class ConsolidatedIocComponent implements OnInit {
     return text.length > maxLength
       ? text.slice(0, maxLength) + '...'
       : text;
+  }
+  getAggregatedDataWells() {
+    return new Set(this.rankedResult.result.map(item => item.rank_index)).size;
+
   }
 }
