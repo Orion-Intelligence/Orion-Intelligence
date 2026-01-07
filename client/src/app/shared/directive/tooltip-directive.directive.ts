@@ -1,4 +1,4 @@
-import {Directive, ElementRef, HostListener, Input, OnDestroy, AfterViewInit, Renderer2, NgZone} from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, OnDestroy, AfterViewInit, Renderer2, NgZone } from '@angular/core';
 
 @Directive({
   selector: '[appTooltip]'
@@ -10,7 +10,7 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
   private removeContainerScroll?: () => void;
   private rafHideScheduled = false;
 
-  constructor(private el: ElementRef, private renderer: Renderer2, private zone: NgZone) {}
+  constructor(private el: ElementRef, private renderer: Renderer2, private zone: NgZone) { }
 
   ngAfterViewInit(): void {
     const container = document.getElementById('dashboard-container');

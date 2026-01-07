@@ -9,6 +9,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { HomeInsightComponent } from "../home-insight/home-insight.component";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { HomeSearchService } from '../../../services/home_search/home.search.service';
 
 @Component({
   selector: 'app-home-search',
@@ -20,13 +21,11 @@ export class HomeSearchComponent implements OnInit {
   @Input() isRoleAdmin: boolean = true;
   searchQuery = '';
   selectedSearchBy = 'Match any term';
-
-  showFiltersOverlay: boolean = false;
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService,
-    protected authService: AuthService, protected licenseService: LicenseService) {
+    protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
   }
 
   ngOnInit(): void {
@@ -39,11 +38,7 @@ export class HomeSearchComponent implements OnInit {
   }
 
   onSetMatchType(type: string) {
-    this.dashboardService.selectedFilters.set({
-      ...this.dashboardService.selectedFilters(),
-      matchtype: type
-    });
-    this.app_service.set('matchType', type);
+    this.homeSearchService.setMatchType(type);
   }
 
   onSearchSubmit(): void {
@@ -53,18 +48,10 @@ export class HomeSearchComponent implements OnInit {
       ...this.route.snapshot.queryParams,
       q: this.searchQuery || null
     };
-
-    // if (this.isRoleAdmin) {
-    //   this.router.navigate(['/dashboard/consolidated/all'], {
-    //     queryParams,
-    //     queryParamsHandling: 'merge'
-    //   }).then();
-    // } else {
     this.router.navigate(['/dashboard/profile/consolidated/all'], {
       queryParams,
       queryParamsHandling: 'merge'
     }).then();
-    // }
   }
 
   getMatchType() {
@@ -81,42 +68,27 @@ export class HomeSearchComponent implements OnInit {
     }
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-
-    const clickedInsideFilter =
-      this.filtersWrapperRef?.nativeElement.contains(target);
-    const clickedInput =
-      this.searchInputRef?.nativeElement.contains(target);
-
-    if (!clickedInsideFilter && !clickedInput) {
-      this.setFilterOverlay(false);
-    }
-  }
 
   setFilterOverlay(newValue: boolean) {
-    this.showFiltersOverlay = newValue;
+    this.homeSearchService.showFiltersOverlay = newValue;
   }
+
 
   onAdvanceSettingToggle() {
-    this.app_service.set('advance_setting_toggle', !this.app_service.configData().localSettings.advance_setting_toggle);
-    this.showFiltersOverlay = true;
+    this.homeSearchService.toggleAdvanceSettings();
   }
-
-  onToolToggle(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    const cfg = this.app_service.configData();
-    cfg.localSettings.enable_advanced_tools = !cfg.localSettings.enable_advanced_tools;
-    this.app_service.set('enable_advanced_tools', this.app_service.configData().localSettings.enable_advanced_tools);
-    this.app_service.configData.set(cfg);
+  onToolToggle(event: Event) {
+    this.homeSearchService.toggleAdvancedTools(event);
   }
-  onSearchInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const value = input.value?.trim();
-    if (value && window.innerWidth < 460) {
-      this.setFilterOverlay(false);
-    }
+  onSearchInput(event: Event) {
+    this.homeSearchService.handleSearchInput(event);
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.homeSearchService.handleDocumentClick(
+      event,
+      this.filtersWrapperRef,
+      this.searchInputRef
+    );
   }
 }

@@ -2,11 +2,11 @@
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
 
     <div class="col-md-12 col-sm-12 col-xs-12 default-input-container-mobile">
-      <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
+      <div class="mobile-backdrop" *ngIf="homeSearchService.showFiltersOverlay"></div>
       <ng-container
         *ngIf="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')">
         <div class="input-group default-input-sub-container"
-          [ngClass]="{'mobile-overlay-active': showFiltersOverlay,'mobile-overlay-inactive': !showFiltersOverlay }">
+          [ngClass]="{'mobile-overlay-active': homeSearchService.showFiltersOverlay,'mobile-overlay-inactive': !homeSearchService.showFiltersOverlay }">
           <button class="btn btn-primary default-input-button" (click)="onSearchSubmit()" type="submit">
             <img alt="Search" height="16" class="search-icon"
               ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
@@ -15,7 +15,8 @@
 
           <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
             class="form-control default-input dashboard-general-input" data-cy="dashboard-general-input" maxlength="350"
-            name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)"><input type="hidden" value="1">
+            name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)"
+            (input)="onSearchInput($event)"><input type="hidden" value="1">
 
           <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()"
             [disabled]="!searchQuery">
@@ -48,7 +49,7 @@
         <div class="overlay-placeholder"></div>
 
         <div #filtersWrapper class="filters-overlay search-trigger"
-          *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+          *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
           <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
             [homePage]="true"></app-search-filters>
         </div>
