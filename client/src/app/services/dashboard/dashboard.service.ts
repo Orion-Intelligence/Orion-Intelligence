@@ -38,7 +38,13 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private router: Router, private route: ActivatedRoute, private helperService: HelperService, private apiService: ApiService, private app_service: AppService) {
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private helperService: HelperService,
+    private apiService: ApiService,
+    private app_service: AppService
+  ) {
     this.initializeSideFilters()
   }
 
@@ -55,11 +61,8 @@ export class DashboardService {
     paramModel.page = this.consolidatedParamModel.page
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
 
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: baseParams,
-      replaceUrl: true
-    }).then();
+    // EXACT SAME navigate behavior, now via shared helper
+    this.syncQueryParamsToUrl(baseParams);
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     if (semantic) {
@@ -70,15 +73,14 @@ export class DashboardService {
 
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    const queryParamsForNav = { ...baseParams };
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: queryParamsForNav,
-      replaceUrl: true
-    }).then();
+
+    // EXACT SAME navigate behavior, now via shared helper
+    this.syncQueryParamsToUrl(baseParams);
 
     if (entityCategories) {
-      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
+      baseParams['entity_filter'] = Object.fromEntries(
+        Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true)
+      );
     }
 
     return this.apiService.post<T>(apiEndpoint, baseParams).pipe(
@@ -100,31 +102,17 @@ export class DashboardService {
     apiEndpoint: string,
     paramModel: any
   ): Observable<{ success: boolean; isEmpty: boolean; data: RankedCallbackModel | null }> {
-    this.cancelOngoingRequest();
-    const route: string = this.router.url.split('?')[0];
-    this.m_current_route = String(route);
+    const { entityCategories, mergedParams } = this.beginRequestWithMergedParams(paramModel);
 
-    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
-
-    let baseParams: any = { ...paramModel, ...this.selectedFilters() };
-    if (entityCategories) {
-      baseParams['entity_filter'] = Object.fromEntries(
-        Object.entries(entityCategories).filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : true))
-      );
-    }
+    let baseParams: any = mergedParams;
+    baseParams = this.applyEntityFilter(baseParams, entityCategories);
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
 
     let match_type = this.app_service.configData().localSettings.matchType;
     baseParams['matchtype'] = match_type ? match_type : this.app_service.configData().localSettings.matchType;
 
-    const queryParamsForNav = { ...baseParams };
-    delete queryParamsForNav['entity_filter'];
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: queryParamsForNav,
-      replaceUrl: true
-    }).then();
+    this.syncQueryParamsToUrl(baseParams);
 
     return this.apiService.post<any>(apiEndpoint, baseParams).pipe(
       takeUntil(this.cancelRequest$),
@@ -148,29 +136,15 @@ export class DashboardService {
     apiEndpoint: string,
     paramModel: any
   ): Observable<{ success: boolean; isEmpty: boolean; data: ConsolidatedCallbackModel | null }> {
-    this.cancelOngoingRequest();
-    const route: string = this.router.url.split('?')[0];
-    this.m_current_route = String(route);
+    const { entityCategories, mergedParams } = this.beginRequestWithMergedParams(paramModel);
 
-    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
-
-    let payload: any = { ...paramModel, ...this.selectedFilters() };
-
-    if (entityCategories) {
-      payload['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
-    }
+    let payload: any = mergedParams;
+    payload = this.applyEntityFilter(payload, entityCategories);
     payload = this.helperService.removeEmptyOrNullValues(payload);
 
     payload['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    const queryParamsForNav = { ...payload };
-    delete queryParamsForNav['entity_filter'];
 
-
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: queryParamsForNav,
-      replaceUrl: true
-    }).then();
+    this.syncQueryParamsToUrl(payload);
 
     return this.apiService.post<ConsolidatedCallbackModel>(apiEndpoint, payload).pipe(
       takeUntil(this.cancelRequest$),
@@ -261,6 +235,37 @@ export class DashboardService {
   }
 
   private cancelOngoingRequest() {
+  }
+
+  private beginRequestWithMergedParams(paramModel: any): { entityCategories: any; mergedParams: any } {
+    this.cancelOngoingRequest();
+    const route: string = this.router.url.split('?')[0];
+    this.m_current_route = String(route);
+
+    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
+    const mergedParams: any = { ...paramModel, ...this.selectedFilters() };
+
+    return { entityCategories, mergedParams };
+  }
+
+  private applyEntityFilter(params: any, entityCategories: any): any {
+    if (entityCategories) {
+      params['entity_filter'] = Object.fromEntries(
+        Object.entries(entityCategories).filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : true))
+      );
+    }
+    return params;
+  }
+
+  private syncQueryParamsToUrl(params: any): void {
+    const queryParamsForNav = { ...params };
+    delete queryParamsForNav['entity_filter'];
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: queryParamsForNav,
+      replaceUrl: true
+    }).then();
   }
 
   clearCallback(): void {
