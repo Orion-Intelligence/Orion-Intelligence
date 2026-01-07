@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import sleep
 from orion.api.server.config_manager.config_controller import config_controller
+from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
 from orion.management.managers.test_manager import test_manager
@@ -59,9 +60,10 @@ class service_manager:
         return False
 
     async def init_cronjobs(self):
-        while not self._is_available:
-            await sleep(5)
-        await cronjob_manager.get_instance().init_jobs()
+        if env_handler.get_instance().env("TESTING_ENABLED", "0") == "0":
+            while not self._is_available:
+                await sleep(5)
+            await cronjob_manager.get_instance().init_jobs()
 
     def check_status(self):
         return self._is_available
