@@ -1,9 +1,10 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
-from pydantic.v1 import Extra
+from pydantic import BaseModel
 
 from orion.api.server.crawl_manager.class_model.chat_model import chat_model
+
+result_item = chat_model
 
 
 class suggestion(BaseModel):
@@ -11,6 +12,7 @@ class suggestion(BaseModel):
     offset: int
     length: int
     options: List[dict]
+
 
 class search_chat_callback_model(BaseModel):
     Result: Optional[List[chat_model]] = None

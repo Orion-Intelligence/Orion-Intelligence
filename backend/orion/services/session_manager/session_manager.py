@@ -10,7 +10,6 @@ from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
-from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -33,6 +32,7 @@ class session_manager:
         if session_manager.__instance is not None:
             raise Exception("This class is a singleton!")
         session_manager.__instance = self
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         self._engine = mongo_controller.get_instance().get_engine()
         self._redis = redis_controller.getInstance()
         self._session_ttl = 30 * 60
@@ -196,7 +196,7 @@ class session_manager:
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
             onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
 
-            session = self._build_session(user, onboarding_exists)
+            session = await self._build_session(user, onboarding_exists)
             return {"access_token": access_token, "token_type": "bearer", "session": session}
 
         except jwt.ExpiredSignatureError:
@@ -275,7 +275,7 @@ class session_manager:
 
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
-            session = self._build_session(user, onboarding_exists)
+            session = await self._build_session(user, onboarding_exists)
             return {"access_token": new_token, "token_type": "bearer", "session": session}
 
         except jwt.ExpiredSignatureError:

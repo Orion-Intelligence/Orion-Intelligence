@@ -12,10 +12,8 @@ from orion.api.interactive.account_manager.models.user_meta_model import user_me
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
-from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, UserStatus, LicenseName, user_role
 from orion.services.encryption_manager.key_manager import KeyManager
@@ -28,6 +26,7 @@ class AccountManager:
     __instance = None
 
     def __init__(self):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
         self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "profile"
         self._engine = mongo_controller.get_instance().get_engine()
@@ -71,6 +70,7 @@ class AccountManager:
         return hashed_password
 
     async def create_user(self, data: user_model, current_user):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         try:
             engine = mongo_controller.get_instance().get_engine()
 
@@ -114,6 +114,8 @@ class AccountManager:
             raise HTTPException(status_code=400, detail=str(e) or "Error creating user")
 
     async def delete_user(self, user, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+
         user = await self._engine.find_one(db_user_account, db_user_account.username == user.username)
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
@@ -141,6 +143,7 @@ class AccountManager:
         return {"message": "User deleted successfully"}
 
     async def update_user(self, request: tenant_param_model, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
         user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
         if not user:
             await AuditLogManager.get_instance().register(
@@ -189,6 +192,7 @@ class AccountManager:
         return {"message": "User updated successfully", "id": str(user.id)}
 
     async def update_current_user(self, request: user_meta_model, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
         user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
         if not user:
             raise HTTPException(status_code=401, detail="User not found")

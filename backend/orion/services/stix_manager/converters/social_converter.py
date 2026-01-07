@@ -11,9 +11,22 @@ class social_converter(stix_converter_base):
         c = stix_helper()
         created, modified = self.get_timestamps(c, raw, ["m_creation_date", "m_update_date", "m_message_date"])
 
-        title, url, base_url, network, platform, doc_id = stix_converter_base.extract_common(c, raw, [
-            c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_channel_url")], [
-            c.safe_get(raw, "m_message_sharable_link"), c.safe_get(raw, "m_channel_url"), c.safe_get(raw, "m_url")], "m_channel_url", "Social - unknown title", include_platform=True)
+        title, url, base_url, network, platform, doc_id = self.extract_common(
+            c, raw,
+            [
+                c.safe_get(raw, "m_title"),
+                c.safe_get(raw, "m_url"),
+                c.safe_get(raw, "m_channel_url"),
+            ],
+            [
+                c.safe_get(raw, "m_message_sharable_link"),
+                c.safe_get(raw, "m_channel_url"),
+                c.safe_get(raw, "m_url"),
+            ],
+            "m_channel_url",
+            "m_network",
+            "Social - unknown title",
+        )
 
         summary = self.process_summary(c, raw, ["m_content", "m_important_content", "m_meta_description"])
         tlp_amber_id, content_types = self.setup_marking_and_types(c, created, raw)

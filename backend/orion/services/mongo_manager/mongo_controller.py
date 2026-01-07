@@ -4,7 +4,6 @@ from odmantic import AIOEngine
 from orion.api.interactive.tenant_manager.tenant_bootstrap import tenant_boostrap
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager import *
 

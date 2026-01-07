@@ -10,9 +10,7 @@ from cryptography.fernet import Fernet
 
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.models.user_model import user_model
-from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
@@ -33,6 +31,7 @@ class TenantManager:
         return TenantManager.__instance
 
     def __init__(self):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
         self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "profile"
         self._engine = mongo_controller.get_instance().get_engine()
@@ -76,6 +75,7 @@ class TenantManager:
             raise
 
     async def get_tenant(self, current_user) -> TenantRequest:
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.tenant_uuid))
         if not tenant:
             await AuditLogManager.get_instance().register(
@@ -96,6 +96,7 @@ class TenantManager:
         return tenant_request
 
     async def update_tenant(self, data: TenantRequest, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 
         if current_user.role in ["admin"]:
             tenant_id = data.id
@@ -233,6 +234,8 @@ class TenantManager:
         return result
 
     async def create_tenant_user(self, data: user_model, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         try:
             engine = mongo_controller.get_instance().get_engine()
 
@@ -249,7 +252,7 @@ class TenantManager:
             existing_user = await engine.find_one(db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
             existing_mail = await engine.find_one(db_user_account, (db_user_account.email == email))
 
-            hashed_password = AccountManager.get_instance().create_tenant_user(existing_user, existing_mail, password)
+            hashed_password = await AccountManager.get_instance().create_tenant_user(existing_user, existing_mail, password)
 
             tenant_uuid = getattr(current_user, "tenant_uuid", None)
             if not tenant_uuid:

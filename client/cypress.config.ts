@@ -56,7 +56,7 @@ export default defineConfig({
       return config;
     },
     baseUrl: "http://127.0.0.1:4200",
-    viewportWidth: 1280,
+    viewportWidth: 1780,
     viewportHeight: 720,
   },
 

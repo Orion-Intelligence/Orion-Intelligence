@@ -4,5 +4,6 @@ describe('Orion Intelligence – Login', () => {
 
     cy.visit('/dashboard');
     cy.get('.dashboard_container').should('be.visible');
+    cy.logout();
   });
 });

@@ -20,7 +20,6 @@ class elastic_insight_generator:
             {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True, "collapse": {"field": "m_domain"}}
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
-
     @staticmethod
     def on_shared_data_query():
         from_ = 0
@@ -30,11 +29,13 @@ class elastic_insight_generator:
             {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
         return query_statement
 
-    def on_insight_general_data(self):
-        return ELASTIC_INDEX.S_GENERIC_INDEX, self.on_shared_data_query()
+    @staticmethod
+    def on_insight_general_data():
+        return ELASTIC_INDEX.S_GENERIC_INDEX, elastic_insight_generator.on_shared_data_query()
 
-    def on_insight_exploitdata(self):
-        return ELASTIC_INDEX.S_GENERIC_INDEX, self.on_shared_data_query()
+    @staticmethod
+    def on_insight_exploitdata():
+        return ELASTIC_INDEX.S_GENERIC_INDEX, elastic_insight_generator.on_shared_data_query()
 
     @staticmethod
     def on_insight_defacement_data():
@@ -56,8 +57,7 @@ class elastic_insight_generator:
 
         return ELASTIC_INDEX.S_CHATS_INDEX, query_statement
 
-    @staticmethod
-    def on_insight_consolidated_data():
+    def on_insight_consolidated_data(self):
         queries = []
         indices = []
 

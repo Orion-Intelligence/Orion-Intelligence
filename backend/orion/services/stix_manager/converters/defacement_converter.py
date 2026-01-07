@@ -9,12 +9,25 @@ class defacement_converter(stix_converter_base):
     def convert(self, raw: DefacementResultItem) -> Dict[str, Any]:
         c = stix_helper()
         created, modified = self.get_timestamps(c, raw, ["m_leak_date", "m_creation_date", "m_update_date"])
-        title, url, base_url, network, doc_id = stix_converter_base.extract_common(c, raw, [
-                                    c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"),
-                                    c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None,
-                                    str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None], [
-                               c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url"), c.as_list(c.safe_get(raw, "m_source_url"))[0] if c.as_list(c.safe_get(raw, "m_source_url")) else None,
-                               c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None], "m_base_url", "Defacement - unknown title")
+        title, url, base_url, network, platform, doc_id = self.extract_common(
+            c, raw,
+            [
+                c.safe_get(raw, "m_title"),
+                c.safe_get(raw, "m_url"),
+                c.safe_get(raw, "m_base_url"),
+                c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None,
+                str(c.safe_get(raw, "m_content")).splitlines()[0] if c.safe_get(raw, "m_content") else None,
+            ],
+            [
+                c.safe_get(raw, "m_url"),
+                c.safe_get(raw, "m_base_url"),
+                c.as_list(c.safe_get(raw, "m_source_url"))[0] if c.as_list(c.safe_get(raw, "m_source_url")) else None,
+                c.as_list(c.safe_get(raw, "m_mirror_links"))[0] if c.as_list(c.safe_get(raw, "m_mirror_links")) else None,
+            ],
+            "m_base_url",
+            "m_network",
+            "Defacement - unknown title",
+        )
         summary = self.process_summary(c, raw, ["m_content", "m_important_content"])
 
         tlp_amber_id, content_types = self.setup_marking_and_types(c, created, raw, "defacement")

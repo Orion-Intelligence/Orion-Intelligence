@@ -10,10 +10,14 @@ class leak_converter(stix_converter_base):
         c = stix_helper()
         created, modified = self.get_timestamps(c, raw, ["m_creation_date", "m_update_date"])
 
-
-        title, url, base_url, network, platform, doc_id = stix_converter_base.extract_common(c, raw, [
-            c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")], [
-            c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")], "m_base_url", "Leak - unknown title", include_platform=True)
+        title, url, base_url, network, platform, doc_id = self.extract_common(
+            c, raw,
+            [c.safe_get(raw, "m_title"), c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")],
+            [c.safe_get(raw, "m_url"), c.safe_get(raw, "m_base_url")],
+            "m_base_url",
+            "m_network",
+            "Leak - unknown title",
+        )
 
         summary = self.process_summary(c, raw, ["m_important_content", "m_content"])
         tlp_amber_id, content_types = self.setup_marking_and_types(c, created, raw)

@@ -4,7 +4,6 @@ from cryptography.fernet import Fernet
 from odmantic import AIOEngine
 
 from orion.constants.constant import CONSTANTS
-from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.encryption_manager.encryption_manager import encryption_manager
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
@@ -20,6 +19,7 @@ class KeyManager:
         return KeyManager._instance
 
     def __init__(self):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         self._engine: AIOEngine = mongo_controller.get_instance().get_engine()
         mk = CONSTANTS.S_ENCRYPTION_KEY
         self._master = encryption_manager.create(mk)

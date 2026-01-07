@@ -6,7 +6,7 @@ from typing import List
 from fastapi import HTTPException
 
 from orion.api.interactive.alert_manager.function_map.function_maping import MODULE_ALERT_TYPE_MAP, SCANNING_ALERT_TYPES
-from orion.services.mongo_manager.mongo_controller import mongo_controller
+
 from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
 from configs.app_dependency import get_user_permissions
 
@@ -24,6 +24,7 @@ class AlertManager:
         return AlertManager.__instance
 
     def __init__(self):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         self._engine = mongo_controller.get_instance().get_engine()
         if AlertManager.__instance is not None:
             raise Exception("This class is a singleton!")
