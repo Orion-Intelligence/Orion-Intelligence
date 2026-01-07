@@ -3,10 +3,10 @@
     class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
     <div class="search-filter-d-flex search-filter-row">
       <div class="search-bar-wrapper default-input-container-mobile">
-        <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
+        <div class="mobile-backdrop" *ngIf="homeSearchService.showFiltersOverlay"></div>
         <div class="input-group default-input-sub-container" [ngClass]="{
-    'mobile-overlay-active': showFiltersOverlay,
-    'mobile-overlay-inactive': !showFiltersOverlay
+    'mobile-overlay-active': homeSearchService.showFiltersOverlay,
+    'mobile-overlay-inactive': !homeSearchService.showFiltersOverlay
   }">
           <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
             <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg"
@@ -73,7 +73,7 @@
         </div>
         <div class="col-md-12 col-sm-12 col-xs-12">
           <div #filtersWrapper class="filters-overlay search-trigger"
-            *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+            *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
             <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
               (checkDomain)="init_domains()"></app-search-filters>
           </div>

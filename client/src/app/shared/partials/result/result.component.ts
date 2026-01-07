@@ -26,6 +26,7 @@ import { HelperService } from '../../services/helper.service';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { HomeSearchService } from '../../../services/home_search/home.search.service';
 
 @Component({
   selector: 'app-result',
@@ -76,11 +77,11 @@ export class ResultComponent implements OnInit, OnChanges {
   protected readonly query = query;
   protected readonly Category = Category;
 
-  showFiltersOverlay: boolean = false;
+  // showFiltersOverlay: boolean = false;
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
-  constructor(protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService) {
+  constructor(protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -96,11 +97,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
 
   onSetMatchType(type: string) {
-    this.dashboardService.selectedFilters.set({
-      ...this.dashboardService.selectedFilters(),
-      matchtype: type
-    });
-    this.app_service.set('matchType', type);
+    this.homeSearchService.setMatchType(type);
   }
 
   matchTypeLabel = computed(() => {
@@ -195,12 +192,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onToolToggle(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    const cfg = this.app_service.configData();
-    cfg.localSettings.enable_advanced_tools = !cfg.localSettings.enable_advanced_tools;
-    this.app_service.set('enable_advanced_tools', this.app_service.configData().localSettings.enable_advanced_tools);
-    this.app_service.configData.set(cfg);
+    this.homeSearchService.toggleAdvancedTools(event);
   }
 
   sidebarFilterCount(): number {
@@ -216,8 +208,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onAdvanceSettingToggle() {
-    this.app_service.set('advance_setting_toggle', !this.app_service.configData().localSettings.advance_setting_toggle);
-    this.showFiltersOverlay = true;
+    this.homeSearchService.toggleAdvanceSettings();
   }
 
   onSortChange(type: SortType): void {
@@ -225,21 +216,9 @@ export class ResultComponent implements OnInit, OnChanges {
     this.onToggleSort.emit(type);
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    const clickedInsideFilter = this.filtersWrapperRef?.nativeElement.contains(target);
-    const clickedInput = this.searchInputRef?.nativeElement.contains(target);
-    const clickedInsideScan = target.closest('.dashboard-general-scan');
-
-    if (!clickedInsideFilter && !clickedInput) this.setFilterOverlay(false);
-
-    this.showScans = !!(clickedInsideScan && this.showScans);
-  }
-
   setFilterOverlay(newValue: boolean) {
     if (!this.authService.getIsMobileDemo()) {
-      this.showFiltersOverlay = newValue;
+      this.homeSearchService.showFiltersOverlay = newValue;
     }
   }
 
@@ -283,10 +262,14 @@ export class ResultComponent implements OnInit, OnChanges {
     );
   }
   onSearchInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const value = input.value?.trim();
-    if (value && window.innerWidth < 460) {
-      this.setFilterOverlay(false);
-    }
+    this.homeSearchService.handleSearchInput(event);
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.homeSearchService.handleDocumentClick(
+      event,
+      this.filtersWrapperRef,
+      this.searchInputRef
+    );
   }
 }

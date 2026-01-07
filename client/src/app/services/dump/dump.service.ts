@@ -1,10 +1,11 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {ApiService} from '../../shared/services/api.service';
-import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { ApiService } from '../../shared/services/api.service';
+import { DumpCallbackModel } from '../../shared/model/dump/dump.mode';
+import { ListService } from '../../shared/directive/base.listing.directive';
 
-@Injectable({providedIn: 'root'})
-export class DumpService {
+@Injectable({ providedIn: 'root' })
+export class DumpService implements ListService<DumpCallbackModel> {
   filterModel = {
     source: 'all',
     group: 'all',
@@ -26,7 +27,7 @@ export class DumpService {
   }
 
   reloadDumpData(params?: any): void {
-    this.apiService.get<DumpCallbackModel>('dumps', {params}).subscribe((data) => {
+    this.apiService.get<DumpCallbackModel>('dumps', { params }).subscribe((data) => {
       this.dumpDataSubject.next(data);
     });
   }
@@ -39,5 +40,10 @@ export class DumpService {
 
   toggleFilter(open: boolean): void {
     this.filterOpenSubject.next(open);
+  }
+  reload(params?: any): void {
+    this.apiService.get<DumpCallbackModel>('dumps', { params }).subscribe(data => {
+      this.dumpDataSubject.next(data);
+    });
   }
 }
