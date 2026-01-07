@@ -128,7 +128,6 @@ if [ "$COMMAND" = "build" ]; then
             exit 1
             ;;
     esac
-
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
 elif [ "$COMMAND" = "production" ]; then
     use_compose_file "production"
