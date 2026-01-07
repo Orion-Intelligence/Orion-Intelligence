@@ -68,9 +68,10 @@
                       </td>
 
                       <td class="text-center col-action">
-                        <img (click)="tenant._expanded = !tenant._expanded" class="cursor-pointer"
-                          src="assets/images/shared/edit.svg" width="20" alt="edit" />
-
+                        <button id="edit-tenant" type="button" class="cursor-pointer bg-transparent border-0 p-0"
+                          (click)="tenant._expanded = !tenant._expanded">
+                          <img src="assets/images/shared/edit.svg" width="20" alt="edit" />
+                        </button>
                       </td>
                     </tr>
 

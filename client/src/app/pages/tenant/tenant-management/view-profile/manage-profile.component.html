@@ -74,9 +74,11 @@
                           *ngIf="(user.role === 'admin' || user.licenses?.includes('maintainer'))"
                           src="assets/images/shared/view.svg" width="20" alt="view" />
 
-                        <img (click)="toggleExpandedUser(i)" class="cursor-pointer"
-                          *ngIf="!(user.role === 'admin' || user.licenses?.includes('maintainer'))"
-                          src="assets/images/shared/edit.svg" width="20" alt="edit" />
+                        <button id="edit-profile" type="button" class="cursor-pointer bg-transparent border-0 p-0"
+                          (click)="toggleExpandedUser(i)"
+                          *ngIf="!(user.role === 'admin' || user.licenses?.includes('maintainer'))">
+                          <img src="assets/images/shared/edit.svg" width="20" alt="edit" />
+                        </button>
                       </td>
                     </tr>
 
