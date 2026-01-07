@@ -38,6 +38,22 @@ class SignupManager:
             db_user_account, (db_user_account.username == username))
         if existing_user:
             raise HTTPException(status_code=400, detail="Username or email already exists")
+        
+        existing_mail = await engine.find_one(
+            db_user_account, (db_user_account.email == email))
+        if existing_mail:
+            raise HTTPException(status_code=400, detail="Username or email already exists")
+        
+        new_email_domain = SignupManager.get_email_domain(email)
+        maintainers = await engine.find(
+            db_user_account, db_user_account.licenses == LicenseName.MAINTAINER)
+        domain_exists = any(
+            user.email and SignupManager.get_email_domain(user.email) == new_email_domain
+            for user in maintainers
+        )
+        if domain_exists:
+            raise HTTPException(status_code=400, detail="This domain tenant already exists")
+            
 
         domain = email.split("@")[-1].lower()
         PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
@@ -142,3 +158,7 @@ class SignupManager:
             raise e
         except Exception:
             raise HTTPException(status_code=422, detail="Invalid data")
+        
+    @staticmethod
+    def get_email_domain(email: str) -> str:
+        return email.split("@")[1].lower()
