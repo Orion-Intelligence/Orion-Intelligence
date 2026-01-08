@@ -5,9 +5,11 @@ declare global {
     interface Chainable {
       loginAsAdmin(): Chainable<void>;
       logout(): Chainable<void>;
+      openTenantsPage(): Chainable<void>; // ✅ Add the new command here
     }
   }
 }
+
 
 Cypress.Commands.add("loginAsAdmin", () => {
   cy.visit("/login");
@@ -16,6 +18,7 @@ Cypress.Commands.add("loginAsAdmin", () => {
   cy.get("input.login-button").click();
   cy.get(".dashboard_container").should("be.visible");
 });
+
 
 Cypress.Commands.add("logout", () => {
   cy.get('div.profile_category.profile_logout_icon', { timeout: 10000 })
@@ -29,4 +32,12 @@ Cypress.Commands.add("logout", () => {
 
   cy.get('input[name="username"]', { timeout: 10000 })
     .should('exist');
+});
+
+
+Cypress.Commands.add("openTenantsPage", () => {
+  cy.contains('div.sidebar__subitem-content', 'Tenant')
+    .should('be.visible')
+    .click({ force: true });
+  cy.url().should('include', '/dashboard/profile/tenant');
 });
