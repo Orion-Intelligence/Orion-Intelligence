@@ -1,7 +1,9 @@
 exclude_paths:
-  - "client/cypress/**"
+  - client/cypress/**
+  - backend/.static/**
 
 engines:
   duplication:
     exclude_paths:
-      - "client/cypress/**"
+      - client/cypress/**
+      - backend/.static/**
