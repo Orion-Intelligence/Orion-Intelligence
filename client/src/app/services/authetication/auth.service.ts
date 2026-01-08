@@ -58,19 +58,8 @@ export class AuthService {
             return response.provisioning_uri || null;
           }
 
-          if (!response?.access_token) {
-            this.denyAccess('Access denied!');
-            return;
-          }
+          if (!this.applyLoginResponse(response)) return;
 
-          const sessionData = response?.session || {};
-          if (sessionData?.role === 'crawler') {
-            this.denyAccess('Access denied!');
-            return;
-          }
-
-          this.setToken(response.access_token);
-          this.startTokenRefresh();
           this.appService.loadSession(true).then(() => {
             this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
           });
@@ -106,19 +95,7 @@ export class AuthService {
     return this.apiService.post<any>('token/2fa/verify', { code }, { headers }).pipe(
       tap({
         next: (response) => {
-          if (!response?.access_token) {
-            this.denyAccess('Invalid 2FA code');
-            return;
-          }
-
-          const sessionData = response?.session || {};
-          if (sessionData?.role === 'crawler') {
-            this.denyAccess('Access denied!');
-            return;
-          }
-
-          this.setToken(response.access_token);
-          this.startTokenRefresh();
+          if (!this.applyLoginResponse(response, 'Invalid 2FA code')) return;
         },
         error: () => {
           this.denyAccess('Invalid 2FA code');
@@ -242,6 +219,23 @@ export class AuthService {
         }),
         map((response) => response?.access_token || null)
       );
+  }
+
+  private applyLoginResponse(response: any, deniedMessage: string = 'Access denied!'): boolean {
+    if (!response?.access_token) {
+      this.denyAccess(deniedMessage);
+      return false;
+    }
+
+    const sessionData = response?.session || {};
+    if (sessionData?.role === 'crawler') {
+      this.denyAccess(deniedMessage);
+      return false;
+    }
+
+    this.setToken(response.access_token);
+    this.startTokenRefresh();
+    return true;
   }
 
   private toBool(v: any): boolean {
