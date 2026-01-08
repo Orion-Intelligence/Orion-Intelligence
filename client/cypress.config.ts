@@ -57,7 +57,7 @@ export default defineConfig({
     },
     baseUrl: "http://127.0.0.1:4200",
     viewportWidth: 1780,
-    viewportHeight: 720,
+    viewportHeight: 1720,
   },
 
   defaultCommandTimeout: 20000,

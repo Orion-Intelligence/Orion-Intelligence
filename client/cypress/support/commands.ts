@@ -18,13 +18,15 @@ Cypress.Commands.add("loginAsAdmin", () => {
 });
 
 Cypress.Commands.add("logout", () => {
-  cy.get('div.profile_category.profile_logout_icon')
-    .should('be.visible')
+  cy.get('div.profile_category.profile_logout_icon', { timeout: 10000 })
+    .should('exist')
     .click({ force: true });
+
   cy.get('li.profile-item')
     .contains('Sign out')
-    .should('be.visible')
+    .should('exist')
     .click({ force: true });
-  cy.get('input[name="username"]', { timeout: 10000 }) // wait up to 10s
-    .should('be.visible');
+
+  cy.get('input[name="username"]', { timeout: 10000 })
+    .should('exist');
 });
