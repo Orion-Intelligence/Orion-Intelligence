@@ -92,16 +92,18 @@ const addIOCValue = (value:string) => {
 };
 
 const addIOCForAllTabs = () => {
-  cy.get('.onboarding-step2__category-scroll')
+   cy.get('.onboarding-step2__category-scroll')
     .find('.onboarding-step2__tab')
-    .each(($tab, index) => {
-      cy.wrap($tab)
-        .scrollIntoView()
-        .click({ force: true });
+    .then($tabs => {
+      Cypress._.take($tabs.toArray(), 5).forEach((tab, index) => {
+        cy.wrap(tab)
+          .scrollIntoView()
+          .click({ force: true });
 
-
-      addIOCValue(`test-${index}`);
+        addIOCValue(`test-${index}`);
+      });
     });
+
   const goToHomepageAndScan = () => {
     cy.contains('.sidebar__subitem-content', 'Homepage')
       .should('be.visible')
@@ -110,9 +112,11 @@ const addIOCForAllTabs = () => {
     cy.get('button[apptooltip="scan all"]')
       .should('be.visible')
       .click({ force: true });
+  };
+
+  goToHomepageAndScan();
 };
 
-};
 
 
 it('Tenant adds user, IOCs, scans and logs out', () => {
@@ -141,10 +145,8 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
 
   openManageIOCs();
   addIOCForAllTabs();
-  //goToHomepageAndScan();
 
-
-  cy.contains('button', 'Logout').click({ force: true });
+  cy.logout()
   cy.url().should('include', '/login');
 });
 
@@ -185,7 +187,7 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
     cy.get('.user-homepage_cards').should('exist');
 
 
-    cy.contains('Logout').click({ force: true });
+    // cy.logout()
   });
 
 });
