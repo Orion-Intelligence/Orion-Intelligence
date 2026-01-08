@@ -1,11 +1,10 @@
 .consolidated_container {
   background-color: var(--color-consolidated-primary);
-  max-width: 800px;
   min-width: 150px;
   border-radius: 15px;
   border: 1px solid var(--color-border);
-  margin: 35px;
   padding: 0 20px 5px;
+  margin: 15px 15px 0 35px;
 }
 
 .consolidated_no-data-message {
@@ -37,7 +36,7 @@
 .consolidated-defacement-card__loader {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgb(255 255 255 / 20%);
   border-top-color: #007bff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -107,7 +106,7 @@
   flex: 1;
   max-width: 500px;
   width: 100%;
-  padding-top: 35px;
+  padding-top: 15px;
 }
 
 .dashboard__ranked-layout {
