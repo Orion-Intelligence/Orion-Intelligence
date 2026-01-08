@@ -24,7 +24,6 @@ export class NodeResolver implements Resolve<userSessionData> {
       tap(sessionData => {
         if (sessionData) {
           this.appService.userSessionData.set(sessionData);
-          console.log(this.appService.userSessionData().user.preferences?.['userId']);
         }
       }),
       shareReplay(1)

@@ -80,7 +80,7 @@ set_testing_enabled() {
 stop_docker
 
 if [ "$1" = "stop" ]; then
-    echo "Crawler service stopped"
+    echo "Orion Intelligence service stopped"
     exit 0
 fi
 

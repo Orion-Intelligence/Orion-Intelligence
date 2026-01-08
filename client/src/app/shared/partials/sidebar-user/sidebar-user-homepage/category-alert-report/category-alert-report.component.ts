@@ -197,7 +197,6 @@ export class CategoryAlertReportComponent implements OnInit {
         ?.find(a => a.alert_id === alertId) || null;
 
     if (!this.alertToShowReport) return;
-    console.log(this.alertToShowReport)
     if (this.alertToShowReport) {
       this.alertToShowReport.report_seen = true;
       this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
@@ -504,10 +503,8 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   onFileUpload(event: any) {
-    console.log("enter");
     const file = event.target.files[0];
     if (!file) return;
-    console.log("not null");
 
     const reader = new FileReader();
 
