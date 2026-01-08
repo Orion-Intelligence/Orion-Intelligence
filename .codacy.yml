@@ -1,2 +1,7 @@
 exclude_paths:
-  - client/cypress/**
+  - "client/cypress/**"
+
+engines:
+  duplication:
+    exclude_paths:
+      - "client/cypress/**"
