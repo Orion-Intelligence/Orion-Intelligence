@@ -1,6 +1,7 @@
 exclude_paths:
   - client/cypress/**
   - backend/static/**
+  - backend/migrations/**
   - backend/orion/services/elastic_manager/elastic_request_generator.py
 
 engines:
@@ -8,4 +9,5 @@ engines:
     exclude_paths:
       - client/cypress/**
       - backend/static/**
+      - backend/migrations/**
       - backend/orion/services/elastic_manager/elastic_request_generator.py
