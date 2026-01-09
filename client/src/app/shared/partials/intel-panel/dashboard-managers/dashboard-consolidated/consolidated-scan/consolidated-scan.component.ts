@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Observable, merge} from 'rxjs';
+import {Observable, merge, Subscription} from 'rxjs';
 import {finalize, map} from 'rxjs/operators';
 import {ConsolidatedApiService} from '../../../../../services/consolidated.api.service';
 import {
@@ -13,7 +13,6 @@ import {scanAnimation} from '../../../../../animations/scan.animations';
 
 type ScanKey = 'basic' | 'seo' | 'repo' | 'liveapi';
 type PendingMsg = { status: 'pending'; progress?: number; step?: string };
-
 
 @Component({
   selector: 'app-consolidated-scan',
@@ -37,20 +36,44 @@ export class ConsolidatedScanComponent {
   private liveApiEntities: ConsolidatedLiveApis[] = [];
   liveApiResults: ConsolidatedLiveApiResults[] = [];
 
-  constructor(private api: ConsolidatedApiService) {
-  }
+  private scanSub?: Subscription;
+
+  constructor(private api: ConsolidatedApiService) {}
 
   toggleCollapse(): void {
-    this.isCollapsed = !this.isCollapsed
+    this.isCollapsed = !this.isCollapsed;
+  }
+
+  clearResults(options?: { keepTargetLabel?: boolean; keepExpectedTypes?: boolean }): void {
+    if (this.isProcessing && this.scanSub) {
+      this.scanSub.unsubscribe();
+      this.scanSub = undefined;
+    }
+
+    const keepTargetLabel = options?.keepTargetLabel ?? false;
+    const keepExpectedTypes = options?.keepExpectedTypes ?? false;
+
+    this.isProcessing = false;
+    this.isCollapsed = false;
+
+    this.resultsByType = {};
+    this.progressByType = {};
+    this.liveApiResults = [];
+    this.liveApiEntities = [];
+
+    if (!keepExpectedTypes) this.expectedTypes = [];
+    if (!keepTargetLabel) this.targetLabel = '';
   }
 
   runScan(q: string): void {
     const input = (q || '').trim();
     if (!input) return;
 
-    this.today = new Date(); // add
-
+    this.today = new Date();
     this.targetLabel = input;
+
+    const isDomain = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}$/i.test(input);
+    if (!isDomain) return;
 
     const isRepo = input.includes('github.com/');
     this.expectedTypes = (isRepo ? ['repo', 'liveapi'] : ['basic', 'seo', 'liveapi']) as ScanKey[];
@@ -58,31 +81,30 @@ export class ConsolidatedScanComponent {
     this.resultsByType = {};
     this.progressByType = {};
     this.liveApiResults = [];
-    this.isCollapsed = false; // add
+    this.isCollapsed = false;
 
     for (const t of this.expectedTypes) this.progressByType[t] = 0;
 
     this.isProcessing = true;
-
     this.liveApiEntities = this.extractLiveApiEntities(input);
 
     const scans: Array<{ t: ScanKey; o: Observable<any> }> = isRepo
-      ? [{t: 'repo', o: this.api.scanForRepo(input, 'repo') as any}]
+      ? [{ t: 'repo', o: this.api.scanForRepo(input, 'repo') as any }]
       : [
-        {t: 'basic', o: this.api.scanDomain(input, 'basic') as any},
-        {t: 'seo', o: this.api.scanDomain(input, 'seo') as any}
-      ];
+          { t: 'basic', o: this.api.scanDomain(input, 'basic') as any },
+          { t: 'seo', o: this.api.scanDomain(input, 'seo') as any }
+        ];
 
     if (this.liveApiEntities.length) {
-      scans.push({t: 'liveapi', o: this.api.runLiveApiSearch(this.liveApiEntities) as any});
+      scans.push({ t: 'liveapi', o: this.api.runLiveApiSearch(this.liveApiEntities) as any });
     } else {
       this.progressByType.liveapi = 100;
     }
 
-    merge(...scans.map(({t, o}) => o.pipe(map(v => ({t, v})))))
+    this.scanSub = merge(...scans.map(({ t, o }) => o.pipe(map(v => ({ t, v })))))
       .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({
-        next: ({t, v}: { t: ScanKey; v: any }) => {
+        next: ({ t, v }: { t: ScanKey; v: any }) => {
           if (this.isPending(v)) {
             this.progressByType[t] = this.clamp(Number(v.progress ?? 0), 0, 100);
             return;
@@ -109,7 +131,6 @@ export class ConsolidatedScanComponent {
         }
       });
   }
-
 
   private isPending(v: any): v is PendingMsg {
     return !!v && typeof v === 'object' && String(v.status || '').toLowerCase() === 'pending';

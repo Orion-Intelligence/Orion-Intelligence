@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<div class="insight-card">
+<div class="insight-card"  *ngIf="result_count>0">
   <div class="card_header" (click)="toggleSection('isThreatExpanded')">
     <span>Search in Threat Actor</span>
     <div [attr.aria-label]="isSectionExpanded('isThreatExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
@@ -77,7 +77,7 @@
   </div>
 </div>
 
-<div class="insight-card">
+<div class="insight-card"  *ngIf="result_count>0">
   <div class="card_header" (click)="toggleSection('isUrlsExpanded')">
     <span>Unique URLs</span>
     <div [attr.aria-label]="isSectionExpanded('isUrlsExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">

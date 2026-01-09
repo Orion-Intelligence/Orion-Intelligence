@@ -101,6 +101,7 @@ export class ConsolidatedApiService {
     }
 
     public scan(target: string, scanType: 'basic' | 'seo' | 'repo'): Observable<ConsolidatedScanResults> {
+
         const endpoint = 'urlscan/domain';
         const payloadKey = 'domain';
         const payload = { [payloadKey]: target, scanType };

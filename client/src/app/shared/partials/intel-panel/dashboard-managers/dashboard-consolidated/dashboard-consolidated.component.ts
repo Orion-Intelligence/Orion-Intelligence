@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, 
 import { AppService } from '../../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import {combineLatest, map, switchMap, take, timer} from 'rxjs';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { ResultComponent } from '../../../result/result.component';
@@ -90,29 +90,35 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
     this.populateGroupedResults();
 
-    combineLatest([this.route.queryParams, this.route.url]).pipe(distinctUntilChanged()).subscribe(([params, urlSegments]) => {
-      this.query = params['q'];
-      this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-      this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
+    combineLatest([this.route.queryParams, this.route.url])
+      .pipe(take(1))
+      .subscribe(([params, urlSegments]) => {
+        this.query = params['q'];
+        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
+        this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
 
-      this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        this.dashboardService.consolidatedParamModel.category = urlSegments.length
+          ? urlSegments[urlSegments.length - 1].path
+          : 'all';
 
-      if (this.firstTrigger && Object.keys(this.groupedResults).length > 0) {
-        this.query = this.dashboardService.consolidatedParamModel.q;
-      } else {
-        this.cdr.detectChanges();
-        this.fetchSearchResults();
-      }
-      this.firstTrigger = false;
-    });
+        if (this.firstTrigger && Object.keys(this.groupedResults).length > 0) {
+          this.query = this.dashboardService.consolidatedParamModel.q;
+        } else {
+          this.cdr.detectChanges();
+          this.fetchSearchResults();
+        }
+        this.firstTrigger = false;
+      });
   }
 
   fetchSearchResults(_ = false): void {
+    this.domainScanComponent.clearResults()
     if (!this.isGrouped) {
       this.fetchRanked()
       return
     }
     if (this.licenseService.canUseScanning()) {
+        console.log("xxxxx2")
       this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
 

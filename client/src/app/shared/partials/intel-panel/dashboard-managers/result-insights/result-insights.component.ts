@@ -16,6 +16,7 @@ export class ResultInsightsComponent implements OnInit {
   @Input() results: any;
   @Input() rankedResults: any;
   @Input() isGrouped!: boolean;
+  @Input() result_count!: number;
 
   sectionStates: Record<string, boolean> = {};
 
