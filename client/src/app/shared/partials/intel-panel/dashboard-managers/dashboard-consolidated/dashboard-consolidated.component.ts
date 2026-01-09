@@ -28,6 +28,7 @@ import { LicenseService } from '../../../../../services/licenses/licenses.servic
 import { AuthService } from '../../../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
 import { scanAnimation } from '../../../../animations/scan.animations';
+import {DefacementCallbackModel} from '../../../../model/results/defacement/defacement.callback.model';
 
 
 @Component({
@@ -146,6 +147,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
 
     this.isLoading.set(true);
+    this.consolidatedCallbackModel.defacement_model = new DefacementCallbackModel();
+    this.stealerlogCallbackModel = new StealerLogCallbackModel();
+
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(0).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.response = response.data
@@ -200,6 +204,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.isLoading.set(true);
     this.rankedResult = new RankedCallbackModel();
     const startTime = performance.now();
+    this.defacementCategories = Object.values(DefacementSubCategory);
+    this.consolidatedCallbackModel.defacement_model = new DefacementCallbackModel();
+    this.stealerlogCallbackModel = new StealerLogCallbackModel();
+
     this.dashboardService
       .fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(500).pipe(map(() => response))))
