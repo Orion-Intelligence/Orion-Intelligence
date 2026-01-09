@@ -124,11 +124,7 @@
   min-height: 190px;
   height: auto;
   flex-direction: column;
-  background: linear-gradient(
-    180deg,
-    rgb(255 255 255 / 6%),
-    rgb(255 255 255 / 3%)
-  );
+  background: var(--color-consolidated-secondary);
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 10px;
   box-shadow: 0 8px 18px rgb(0 0 0 / 16%);
@@ -137,13 +133,7 @@
 }
 
 .home-defacement-result-card-container:hover {
-  background: linear-gradient(
-    180deg,
-    rgb(255 255 255 / 9%),
-    rgb(255 255 255 / 5%)
-  );
   border-color: rgb(255 255 255 / 20%);
-  transform: translateY(-2px);
   box-shadow: 0 14px 28px rgb(0 0 0 / 22%);
 }
 

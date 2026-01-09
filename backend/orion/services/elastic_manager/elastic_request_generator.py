@@ -185,6 +185,13 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     def on_search_defacement_data(self, p_query_model: search_defacement_param_model, pfilter=None):
+
+        print(":::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(p_query_model, flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(pfilter, flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
@@ -417,8 +424,10 @@ class elastic_request_generator:
         indices.append(i6)
         labels.append("social_model")
 
-        domain_query_index, domain_query = self.on_bulk_domain_lookup(
-            p_query_model, pFilter
+        m11 = helper_controller.clone_model(p_query_model)
+        m11.content = ""
+        domain_query_index, domain_query = self.on_search_defacement_data(
+            m11, pFilter
         )
         queries.append(domain_query)
         indices.append(domain_query_index)
