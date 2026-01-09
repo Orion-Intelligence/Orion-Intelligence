@@ -28,7 +28,7 @@ import { LicenseService } from '../../../../../services/licenses/licenses.servic
 import { AuthService } from '../../../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
 import { scanAnimation } from '../../../../animations/scan.animations';
-import {DefacementCallbackModel} from '../../../../model/results/defacement/defacement.callback.model';
+import { DefacementCallbackModel } from '../../../../model/results/defacement/defacement.callback.model';
 
 
 @Component({

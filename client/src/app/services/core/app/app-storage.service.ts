@@ -30,7 +30,7 @@ export class AppStorageService {
       enable_advanced_tools: this.getFromStorage<boolean>('enable_advanced_tools'),
       advance_setting_toggle: this.getFromStorage<boolean>('advance_setting_toggle') || true,
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
-      entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
+      entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition') || true,
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
       isSidebarOpen: this.getFromStorage('isSidebarOpen', true),
       matchType: this.getFromStorage<string>('matchType') || 'or',

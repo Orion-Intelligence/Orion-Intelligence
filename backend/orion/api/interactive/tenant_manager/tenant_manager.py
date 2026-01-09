@@ -16,6 +16,7 @@ from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
 from orion.services.encryption_manager.key_manager import KeyManager
+from orion.helper_manager.env_handler import env_handler
 
 
 class TenantManager:
@@ -248,6 +249,17 @@ class TenantManager:
             email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
             if not re.match(email_pattern, email) and not data.role in ["demo"]:
                 raise HTTPException(status_code=400, detail="Invalid email format")
+            
+            domain = email.split("@")[-1].lower()
+            PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
+            if PRODUCTION == "1":
+                non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me",
+                    "protonmail.com", "mail.ru", "aol.com", "icloud.com", "msn.com", "live.com", "zoho.com", "gmx.com",
+                    "gmx.net", "yandex.com", "yandex.ru", "fastmail.com", "pm.me", "me.com", "mail.com", "inbox.com"]
+
+                if domain in non_company_domains:
+                    raise HTTPException(
+                        status_code=400, detail="Please enter user company email (Gmail, Yahoo, etc. not allowed).")
 
             existing_user = await engine.find_one(db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
             existing_mail = await engine.find_one(db_user_account, (db_user_account.email == email))
