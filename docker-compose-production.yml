@@ -77,7 +77,6 @@ services:
       - node.store.allow_mmap=true
       - indices.memory.index_buffer_size=25%
       - ES_JAVA_OPTS=-Xms8512m -Xmx8512m
-    cpuset: "7-15"
     mem_limit: 36g
     networks:
       backend:
