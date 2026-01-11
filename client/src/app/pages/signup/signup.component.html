@@ -9,7 +9,7 @@
 
     <div class="center-content-wrapper">
       <div class="login-content">
-        <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="logo" class="orion-logo" />
+        <img [src]="appService.getConfig().appSettings.logo_wide_light" alt="logo" class="orion-logo" />
         <div class="login-heading">Sign Up to get started!</div>
 
         <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="login-form">

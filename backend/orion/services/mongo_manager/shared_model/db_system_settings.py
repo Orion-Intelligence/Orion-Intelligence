@@ -5,15 +5,15 @@ from typing import Any
 from odmantic import Model, Field
 from pydantic import field_validator
 
-
 class AllowedKeys(str, Enum):
     VERSION = "version"
     API_ALLOWED = "api_allowed"
     APP_NAME = "app_name"
     LANGUAGE_ALLOWED = "language_allowed"
-    LOGO_URL = "logo_url"
     AI_ENDPOINT = "ai_endpoint"
-
+    LOGO_URL = "logo_url"
+    LOGO_WIDE_LIGHT = "logo_wide_light"
+    LOGO_WIDE_DARK = "logo_wide_dark"
 
 VALID_LANGUAGE_CODES = {"en", "fr", "es", "de", "it", "pt", "ru", "zh", "ja", "ko", "ar", "hi", "bn", "tr", "nl", "sv",
     "pl", "cs"}

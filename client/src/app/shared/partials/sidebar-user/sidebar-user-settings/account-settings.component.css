@@ -7,6 +7,14 @@
     font-family: Inter, sans-serif;
 }
 
+@media only screen and (width <=570px) {
+  .user-settings_section {
+    padding: 10px;
+    margin: 10px;
+    min-width: 408px;
+  }
+}
+
 .user-settings_section-header {
     display: flex;
     justify-content: space-between;
@@ -291,3 +299,4 @@
 .avatar-wrapper:hover .delete-img-btn {
     opacity: 1;
 }
+

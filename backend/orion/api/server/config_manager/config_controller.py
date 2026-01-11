@@ -53,15 +53,30 @@ class config_controller:
             self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
             records = await self._engine.find(db_system_model)
             fresh_config = {record.key.value: record.value for record in records}
-            logo_name = "logo.png"
-            logo_file = self.SYSTEM_DIR / logo_name
+
+            def asset(base: str) -> str:
+                custom = self.SYSTEM_DIR / f"{base}_custom.png"
+                if custom.is_file():
+                    return f"/api/s/static/system/{base}_custom.png"
+                return f"/api/s/static/system/{base}_default.png"
+
             fresh_config["ai_endpoint"] = "1"
-            fresh_config["logo_url"] = (
-                f"/api/s/static/system/{logo_name}" if logo_name and logo_file.is_file() else "")
+            fresh_config["logo_url"] = asset("logo_url")
+            fresh_config["logo_wide_light"] = asset("logo_wide_light")
+            fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
+
+            print(asset, flush=True)
+
             return config_data(settings=fresh_config)
+
         except Exception as ex:
             log.g().e(f"Error fetching config: {ex}")
-            return config_data(settings={})
+            return config_data(settings={
+                "ai_endpoint": "1",
+                "logo_url": "/api/s/static/system/logo_url_default.png",
+                "logo_wide_light": "/api/s/static/system/logo_wide_dark_default.png",
+                "logo_wide_dark": "/api/s/static/system/logo_wide_light_default.png",
+            })
 
     async def update_public_config(self, data: config_data):
         for key_str, value in data.settings.items():
@@ -102,30 +117,39 @@ class config_controller:
 
         return Response(content=data, media_type="image/png")
 
-    async def uploadSystemResource(self, file: UploadFile, current_user):
+    async def uploadSystemResource(self, file: UploadFile, current_user, key: str):
         contents = await file.read()
-        MAX_FILE_SIZE = 50 * 1024
+        MAX_FILE_SIZE = 100 * 1024
 
         if len(contents) > MAX_FILE_SIZE:
-            raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 50 KB.")
+            raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 100 KB.")
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
 
-        file_path = self.SYSTEM_DIR / "logo.png"
+        file_name = f"{key}_custom.png"
+        file_path = self.SYSTEM_DIR / file_name
         with open(file_path, "wb") as f:
             f.write(contents)
 
-        record = await self._engine.find_one(db_system_model, db_system_model.key == AllowedKeys.LOGO_URL)
+        record = await self._engine.find_one(db_system_model, db_system_model.key == key)
         if record:
-            record.value = "logo"
+            record.value = file_name
             await self._engine.save(record)
         else:
-            new_record = db_system_model(key=AllowedKeys.LOGO_URL, value="logo")
-            await self._engine.save(new_record)
+            record = db_system_model(key=key, value=file_name)
+            await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid),
             str(current_user.id),
-            "upload_image")
-        return {"Profile image": "upload complete"}
+            "upload_image"
+        )
+
+        prefix = "/api/s/static/system/"
+
+        return {
+            AllowedKeys.LOGO_URL: prefix + record.value if key == AllowedKeys.LOGO_URL else None,
+            AllowedKeys.LOGO_WIDE_LIGHT: prefix + record.value if key == AllowedKeys.LOGO_WIDE_LIGHT else None,
+            AllowedKeys.LOGO_WIDE_DARK: prefix + record.value if key == AllowedKeys.LOGO_WIDE_DARK else None,
+        }

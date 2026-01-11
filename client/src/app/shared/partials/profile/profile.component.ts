@@ -172,4 +172,5 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.appService.userSessionData().alerts.filter(alert => !alert.report_seen).length;
   }
 
+  protected readonly Date = Date;
 }

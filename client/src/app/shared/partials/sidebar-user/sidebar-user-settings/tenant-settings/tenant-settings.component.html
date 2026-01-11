@@ -10,13 +10,12 @@
     <span class="user-settings_section-description">
         {{'Manage and edit your company details, including phone, address, and profile information.' }}
     </span>
-
     <div *ngIf="isAccountSectionOpen">
         <div class="user-settings_card">
             <div class="user-settings_info">
                 <div class="user-avatar">
                     <div class="avatar-wrapper">
-                        <app-user-image-picker [imageUrl]="userSessionData.tenant.image || ''"
+                        <app-user-image-picker [imageUrl]="this.appService.userSessionData().tenant.image || ''" [defaultImage]="'/api/s/static/tenant/logo_url_default.png'"
                             (onImageSelected)="updateUserResource($event)" (onClear)="deleteUserResource()">
                         </app-user-image-picker>
                     </div>

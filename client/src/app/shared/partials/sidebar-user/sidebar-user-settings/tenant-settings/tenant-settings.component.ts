@@ -1,14 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../../services/api.service';
-import { AppService } from '../../../../../services/core/app/app.service';
-import { AuthService } from '../../../../../services/authetication/auth.service';
-import { LicenseService } from '../../../../../services/licenses/licenses.service';
-import { userSessionData } from '../../../../model/company-profile/node.model';
-import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
-import { TenantModel } from '../../../../model/tenant/tenant.model';
-import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule, NgIf} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {ApiService} from '../../../../services/api.service';
+import {AppService} from '../../../../../services/core/app/app.service';
+import {AuthService} from '../../../../../services/authetication/auth.service';
+import {LicenseService} from '../../../../../services/licenses/licenses.service';
+import {userSessionData} from '../../../../model/company-profile/node.model';
+import {UserImagePickerComponent} from '../user-image-picker/user-image-picker.component';
+import {TenantModel} from '../../../../model/tenant/tenant.model';
+import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-tenant-settings',
@@ -23,9 +23,11 @@ export class TenantSettingsComponent implements OnInit {
   isEditing = false;
   userSessionData: userSessionData;
   userId: string = '';
+
   constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
     this.userSessionData = this.appService.userSessionData();
   }
+
   ngOnInit(): void {
     this.userId = this.userSessionData?.user.preferences?.["userId"]
   }
@@ -51,7 +53,7 @@ export class TenantSettingsComponent implements OnInit {
     const tenant = this.userSessionData.tenant;
     if (!tenant) return '';
 
-    const { city, country } = tenant;
+    const {city, country} = tenant;
     if (city && country) return `${city}, ${country}`;
     if (city) return city;
     if (country) return country;
@@ -78,6 +80,7 @@ export class TenantSettingsComponent implements OnInit {
       },
     });
   }
+
   cancelEdit(event: Event) {
     event.stopPropagation();
     this.isEditing = false;
@@ -86,11 +89,19 @@ export class TenantSettingsComponent implements OnInit {
   updateUserResource(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.apiService.put('tenant/image', formData).subscribe();
+
+    return this.apiService.put<any>('tenant/image', formData).subscribe(res => {
+      if (res?.image) {
+        this.appService.userSessionData().tenant.image =
+          `/api/s/static/tenant/${res.image}`;
+      }
+    });
   }
 
   deleteUserResource() {
-    return this.apiService.delete('tenant/image').subscribe();
+    return this.apiService.delete<any>('tenant/image').subscribe(() => {
+      this.appService.userSessionData().tenant.image =
+        'assets/images/tenant/default.png';
+    });
   }
-
 }

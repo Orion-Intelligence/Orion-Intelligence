@@ -19,7 +19,7 @@
 
     <li class="profile-section">
       <div class="profile-avatar">
-        <img [src]="profile_image" alt="" />
+        <img [src]="this.appService.userSessionData().user.image" alt="" />
       </div>
       <div class="profile-name-mail-container">
         <div class="profile-name">{{ username()}}</div>

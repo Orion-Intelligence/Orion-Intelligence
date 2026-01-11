@@ -19,6 +19,7 @@ export class ConfigResolver implements Resolve<boolean> {
             new ConfigSettings(response.settings, current.localSettings)
           );
         }
+        this.appService.updateFavicon(this.appService.configData().appSettings.logo_url)
         return true;
       }),
       catchError(() => of(false))

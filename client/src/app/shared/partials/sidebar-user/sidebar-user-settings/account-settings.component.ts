@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
-import { ApiService } from '../../../services/api.service';
-import { userMetaData, userSessionData } from '../../../model/company-profile/node.model';
-import { UserImagePickerComponent } from "./user-image-picker/user-image-picker.component";
-import { AppStorageService } from '../../../../services/core/app/app-storage.service';
-import { AppService } from '../../../../services/core/app/app.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
-import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {NgIf} from '@angular/common';
+import {ApiService} from '../../../services/api.service';
+import {userMetaData, userSessionData} from '../../../model/company-profile/node.model';
+import {UserImagePickerComponent} from "./user-image-picker/user-image-picker.component";
+import {AppStorageService} from '../../../../services/core/app/app-storage.service';
+import {AppService} from '../../../../services/core/app/app.service';
+import {AuthService} from '../../../../services/authetication/auth.service';
+import {LicenseService} from '../../../../services/licenses/licenses.service';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
@@ -26,15 +26,18 @@ export class AccountSettingsComponent implements OnInit {
   twoFactorEnabled = true;
   isDarkMode = true;
   userId: string = '';
+
   constructor(protected apiService: ApiService, protected appStorage: AppStorageService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
     this.userSessionData = this.appService.userSessionData();
   }
+
   ngOnInit(): void {
     if (this.userSessionData) {
       this.setItemsFromPreferences();
       this.twoFactorEnabled = this.userSessionData.user.twofa_enabled
     }
   }
+
   setItemsFromPreferences() {
     if (this.userSessionData?.user.preferences?.["theme"]) {
       this.isDarkMode = this.userSessionData?.user.preferences?.["theme"] === 'dark-theme';
@@ -48,17 +51,21 @@ export class AccountSettingsComponent implements OnInit {
     }
     this.userId = this.userSessionData?.user.preferences?.["userId"]
   }
+
   isAdmin(): boolean {
     return this.appService.userSessionData().user.role === 'admin';
   }
+
   isMember(): boolean {
     return this.appService.userSessionData().user.role == 'member';
   }
+
   applyTheme() {
     const body = document.body;
     body.classList.remove('light-theme', 'dark-theme');
     body.classList.add(this.isDarkMode ? 'dark-theme' : 'light-theme');
   }
+
   toggleSection(section: string) {
     if (section === 'profile') this.isAccountSectionOpen = !this.isAccountSectionOpen;
     if (section === 'twoFA') this.is2FAOpen = !this.is2FAOpen;
@@ -105,7 +112,7 @@ export class AccountSettingsComponent implements OnInit {
     const tenant = this.userSessionData.tenant;
     if (!tenant) return '';
 
-    const { city, country } = tenant;
+    const {city, country} = tenant;
     if (city && country) return `${city}, ${country}`;
     if (city) return city;
     if (country) return country;
@@ -132,11 +139,19 @@ export class AccountSettingsComponent implements OnInit {
   updateUserResource(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.apiService.put('user/image', formData).subscribe();
+
+    return this.apiService.put<any>('user/image', formData).subscribe(res => {
+      if (res?.image) {
+        this.appService.userSessionData().user.image =
+          `/api/s/static/user/${res.image}`;
+      }
+    });
   }
 
   deleteUserResource() {
-    return this.apiService.delete('user/image').subscribe();
+    return this.apiService.delete<any>('user/image').subscribe(() => {
+      this.appService.userSessionData().user.image = `/api/s/static/user/default.png`
+    });
   }
 
   protected readonly JSON = JSON;

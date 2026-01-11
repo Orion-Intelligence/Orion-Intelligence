@@ -1,17 +1,9 @@
-<div class="user-image-container" (click)="fileInput.click()">
-  <img [src]="selectedImage || imageUrl" class="user-image" alt="" />
-
+<div class="user-image-container" [class.wide]="wide" (click)="fileInput.click()">
+  <img [src]="imageUrl" class="user-image" [class.wide]="wide" alt="" />
   <div class="user-image-overlay">
     <img src="assets/images/shared/mask.svg" alt="" class="user-mask-svg" />
     <img src="assets/images/shared/image_pick_icon.svg" alt="Upload Icon" class="user-image-camera-icon" />
   </div>
-
   <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" hidden />
 </div>
-
-<button
-  class="delete-img-btn"
-  *ngIf="!!(selectedImage || imageUrl) && !(selectedImage || imageUrl).endsWith('default') && !(selectedImage || imageUrl).endsWith('default.png')"
-  (click)="deleteImage($event)">
-  ✕
-</button>
+<button class="delete-img-btn" *ngIf="!!imageUrl && !imageUrl.endsWith('default.png') && !imageUrl.endsWith('default') && !imageUrl.endsWith('logo_url_default.png')" (click)="deleteImage($event)">✕</button>

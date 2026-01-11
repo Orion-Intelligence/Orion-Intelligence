@@ -214,7 +214,7 @@ class AccountManager:
 
     async def getProfileImage(self, userId: str):
         file_path = Path(self.TENANT_DIR) / f"{userId}.png"
-        default_path = Path(self.TENANT_DIR) / "default.png"
+        default_path = Path(self.TENANT_DIR) / "logo_url_default.png"
 
         is_default = not file_path.is_file()
         target_path = default_path if is_default else file_path

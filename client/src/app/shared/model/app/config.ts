@@ -3,6 +3,8 @@ export class AppSettingsModel {
   version: string = '1.0.0';
   language_allowed: string = 'en';
   logo_url: string = '';
+  logo_wide_light: string = '';
+  logo_wide_dark: string = '';
   app_name: string = '';
   api_allowed: string = '0';
 
@@ -12,6 +14,8 @@ export class AppSettingsModel {
       this.version = (data.version as string) || this.version;
       this.language_allowed = (data.language_allowed as string) || this.language_allowed;
       this.logo_url = (data.logo_url as string) || this.logo_url;
+      this.logo_wide_light = (data.logo_wide_light as string) || this.logo_wide_light;
+      this.logo_wide_dark = (data.logo_wide_dark as string) || this.logo_wide_dark;
       this.api_allowed = (data.api_allowed as string) || this.api_allowed;
       this.app_name = (data.app_name as string) || this.app_name;
     }

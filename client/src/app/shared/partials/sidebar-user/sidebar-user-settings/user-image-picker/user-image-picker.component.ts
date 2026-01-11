@@ -9,7 +9,8 @@ import { NgIf } from '@angular/common';
 export class UserImagePickerComponent implements OnInit {
   @Input() id!: string;
   @Input() imageUrl!: string;
-  @Input() defaultImage: string = 'assets/images/tenant/default.png';
+  @Input() defaultImage: string = 'assets/images/tenant/logo_url_default.png';
+  @Input() wide = false;
 
   @Output() onImageSelected = new EventEmitter<File>();
   @Output() onClear = new EventEmitter<string>();

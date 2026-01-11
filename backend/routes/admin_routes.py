@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 
 from configs.app_dependency import status_required, role_required, get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
@@ -37,8 +38,19 @@ async def custom_edit_api_trailing(id: str, request: Request):
 async def update_public_config(param: config_data):
     return await config_controller.getInstance().update_public_config(param)
 
+@admin_routes.delete(
+    "/api/system/image",
+    summary="Update system",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
+async def update_user(key: str, current_user=Depends(get_current_user)):
+    return await ResourceManager.get_instance().delete_system_image(current_user, key)
 
-@admin_routes.post(
-    "/api/upload/system", summary="Upload system logo", dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def upload_system_image(file: UploadFile, current_user=Depends(get_current_user)):
-    return await config_controller.getInstance().uploadSystemResource(file, current_user)
+@admin_routes.put(
+    "/api/system/image",
+    summary="Upload system image",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def upload_system_image(file: UploadFile,key: str = "logo_url",current_user=Depends(get_current_user),
+):
+    return await config_controller.getInstance().uploadSystemResource(file, current_user, key)

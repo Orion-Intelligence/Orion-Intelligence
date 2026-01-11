@@ -1,57 +1,88 @@
 .user-image-container {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 1px solid #1D2939;
-    background-color: #1D2939;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px solid #1D2939;
+  background-color: #1D2939;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
 }
 
 .user-avatar .user-image-container:hover .user-image {
-    opacity: 0;
-    visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .user-avatar .user-image {
-    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 }
 
 .user-image-container:hover {
-    transform: scale(1.02);
+  transform: scale(1.02);
 }
 
 .user-image-container:hover .user-image-overlay {
-    opacity: 1;
+  opacity: 1;
 }
 
 .user-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .user-image-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
 }
 
 .user-mask-svg {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    pointer-events: none;
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  pointer-events: none;
+  background: #000;
+}
+
+.wide .user-mask-svg{
+  width: 250px;
 }
 
 .user-image-camera-icon {
-    position: relative;
-    width: 24px;
-    height: 24px;
-    z-index: 1;
+  position: relative;
+  width: 24px;
+  height: 24px;
+  z-index: 1;
+}
+
+.user-image-container {
+  border-radius: 50%;
+}
+
+.user-image-container.wide {
+  border-radius: 8px;
+  width: 250px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 1px solid #ffffff10;
+}
+
+.user-image-container {
+  position: relative;
+}
+
+.delete-img-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.user-image-container.wide + .delete-img-btn {
+  right: 6px;
 }

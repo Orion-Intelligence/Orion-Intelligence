@@ -1,15 +1,15 @@
-import { Injectable, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
-import { AppStorageService } from './app-storage.service';
-import { ApiService } from '../../../shared/services/api.service';
-import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
-import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
-import { userSessionData } from '../../../shared/model/company-profile/node.model';
-import { TenantModel } from '../../../shared/model/tenant/tenant.model';
-import { Title } from '@angular/platform-browser';
-import { firstValueFrom } from 'rxjs';
+import {Injectable, signal} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AppSettingsModel, ConfigSettings, LocalSettingsModel} from '../../../shared/model/app/config';
+import {AppStorageService} from './app-storage.service';
+import {ApiService} from '../../../shared/services/api.service';
+import {HttpClient} from '@angular/common/http';
+import {tap} from 'rxjs/operators';
+import {license_rules, search_filter_labels} from '../../../shared/constants/shared-enums';
+import {userSessionData} from '../../../shared/model/company-profile/node.model';
+import {TenantModel} from '../../../shared/model/tenant/tenant.model';
+import {Title} from '@angular/platform-browser';
+import {firstValueFrom} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -113,11 +113,19 @@ export class AppService {
   set<T extends keyof (AppSettingsModel & LocalSettingsModel)>(key: T, value: (AppSettingsModel & LocalSettingsModel)[T]): void {
     this.configData.update(current => {
       const isAppSetting = key in current.appSettings;
-      const updatedAppSettings = isAppSetting ? { ...current.appSettings, [key]: value } : current.appSettings;
-      const updatedLocalSettings = !isAppSetting ? { ...current.localSettings, [key]: value } : current.localSettings;
+      const updatedAppSettings = isAppSetting ? {...current.appSettings, [key]: value} : current.appSettings;
+      const updatedLocalSettings = !isAppSetting ? {...current.localSettings, [key]: value} : current.localSettings;
+      this.updateFavicon(current.appSettings.logo_url)
       return new ConfigSettings(updatedAppSettings, updatedLocalSettings);
     });
-    this.title.setTitle(this.getConfig().appSettings.app_name);
+  }
+
+  public updateFavicon(url: string = '/api/s/static/system/logo.png'): void {
+    (document.querySelector<HTMLLinkElement>('link[rel="icon"]') ??
+      document.head.appendChild(
+        Object.assign(document.createElement('link'), { rel: 'icon' })
+      )
+    ).href = url;
   }
 
   updatePage(newPage: number): void {
@@ -125,7 +133,7 @@ export class AppService {
     this.router
       .navigate([], {
         relativeTo: this.activatedRoute,
-        queryParams: { ...this.activatedRoute.snapshot.queryParams, page: newPage },
+        queryParams: {...this.activatedRoute.snapshot.queryParams, page: newPage},
         replaceUrl: true
       })
       .then();
