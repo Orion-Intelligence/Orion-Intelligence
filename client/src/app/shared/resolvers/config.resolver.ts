@@ -20,6 +20,7 @@ export class ConfigResolver implements Resolve<boolean> {
           );
         }
         this.appService.updateFavicon(this.appService.configData().appSettings.logo_url)
+        document.title = this.appService.configData().appSettings.app_name
         return true;
       }),
       catchError(() => of(false))
