@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict
 
 class LogModel(BaseModel):
     type: Optional[str] = None
-    raw: Optional[str] = None
     channel: Optional[str] = None
     filename: Optional[str] = None
 
