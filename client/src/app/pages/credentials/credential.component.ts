@@ -4,7 +4,7 @@ import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs
 import { ResultComponent } from '../../shared/partials/result/result.component';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
-import { NgIf, NgOptimizedImage } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { CredentialListComponent } from './credential-list/credential-list.component';
 import { StealerLogCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
 import { SortType } from '../../shared/constants/shared-enums';
@@ -13,11 +13,24 @@ import { stealer_filters } from '../../shared/constants/filters';
 import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { PaginationComponent } from "../../shared/partials/pagination/pagination.component";
+import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
+import { CredentialsSearchBarComponent } from "./credentials-search-bar/credentials-search-bar.component";
+import { finalize } from 'rxjs/operators';
+import {ConsolidatedIocComponent} from './consolidated-ioc/consolidated-ioc.component';
 
 @Component({
   selector: 'app-credential',
   standalone: true,
-  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage, EmptyQueryComponent, NgIf, PaginationComponent],
+  imports: [
+    ResultComponent,
+    CredentialListComponent,
+    FormsModule,
+    EmptyQueryComponent,
+    NgIf,
+    PaginationComponent,
+    ConsolidatedIocComponent,
+    CredentialsSearchBarComponent
+  ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -25,16 +38,33 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   protected readonly filters = stealer_filters;
 
+  tags = { m_search_all: 'All', m_domain: 'Domain', m_username: 'Username', m_url: 'URL' };
+  searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
   user: any;
-  url: any;
+  url: string = '';
   type: string;
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
-  searchQuery: any;
+  rankedResult: RankedCallbackModel = new RankedCallbackModel();
+  breachesApiTime: any = 0;
+  allSearchApiTime: any = 0;
 
-  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService) {
+  private pendingRequests = 0;
+  private setLoading(delta: 1 | -1) {
+    this.pendingRequests += delta;
+    if (this.pendingRequests < 0) this.pendingRequests = 0;
+    this.isLoading = this.pendingRequests > 0;
+  }
+
+  constructor(
+    protected helperService: HelperService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    protected dashboardService: DashboardService
+  ) {
     this.type = this.route.snapshot.data['type'];
   }
 
@@ -54,64 +84,75 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
         this.dashboardService.consolidatedParamModel.url = params['url'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
+
         if (this.dashboardService.consolidatedParamModel.url || this.dashboardService.consolidatedParamModel.user) {
-          this.fetchSearchResults(false)
+          this.fetchSearchResults(false);
+          this.fetchRanked();
         }
       });
   }
 
-  ngAfterViewInit(): void {
-  }
+  ngAfterViewInit(): void {}
 
-  triggerSearch(): void {
-    this.dashboardService.consolidatedParamModel.page = 1
-    this.fetchSearchResults()
+  triggerSearch(searchQuery: string): void {
+    this.searchQuery = searchQuery;
+    this.dashboardService.consolidatedParamModel.page = 1;
+    this.fetchSearchResults();
+    this.fetchRanked();
   }
 
   fetchSearchResults(reset = true): void {
-    this.dashboardService.consolidatedParamModel.url = this.url
-    this.dashboardService.consolidatedParamModel.user = this.user
-    this.dashboardService.consolidatedParamModel.category = this.type
-    this.firstTrigger = false
-    if (this.isLoading) return;
+    this.dashboardService.consolidatedParamModel.category = this.type;
+    this.firstTrigger = false;
 
-    this.isLoading = true;
+    if (this.isLoading) return;
 
     const cleanedParams: any = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        cleanedParams[key] = value;
-      }
+      cleanedParams[key] = value;
     });
+
     this.router.navigate([], {
       queryParams: cleanedParams,
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-    if (!this.dashboardService.consolidatedParamModel.user) {
-      this.dashboardService.consolidatedParamModel.user = ""
-    }
-    if (!this.dashboardService.consolidatedParamModel.url) {
-      this.dashboardService.consolidatedParamModel.url = ""
-    }
+    this.dashboardService.consolidatedParamModel.user ??= '';
+    this.dashboardService.consolidatedParamModel.url ??= '';
+    this.dashboardService.consolidatedParamModel.q = this.searchQuery;
 
-    this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.dashboardService.consolidatedParamModel)
-      .pipe(switchMap(response => timer(300).pipe(map(() => response))))
+    const startTime = performance.now();
+
+    this.setLoading(1);
+    this.dashboardService
+      .fetchSearchResults<StealerLogCallbackModel>(
+        'search/stealerlogsWithOperator',
+        this.dashboardService.consolidatedParamModel
+      )
+      .pipe(
+        switchMap(response => timer(300).pipe(map(() => response))),
+        finalize(() => this.setLoading(-1))
+      )
       .subscribe(response => {
-        if (response.success && response.data) {
+        const endTime = performance.now();
+        this.breachesApiTime = Math.round(endTime - startTime);
+
+        if (response?.success && response?.data && Array.isArray(response.data.Result)) {
           const seen = new Set<string>();
-          response.data.Result = response.data.Result.filter((item: any) => {
-            const raw = item?.raw;
-            if (!raw) return true;
-            if (seen.has(raw)) return false;
-            seen.add(raw);
+          response.data.Result = response.data.Result.filter(item => {
+            if (!item?.raw) return true;
+            if (seen.has(item.raw)) return false;
+            seen.add(item.raw);
             return true;
           });
 
           this.stealerlogCallbackModel = response.data;
           this.dashboardService.stealerlogCallbackModel = response.data;
+        } else if (response?.success && response?.data) {
+          response.data.Result = [];
+          this.stealerlogCallbackModel = response.data;
+          this.dashboardService.stealerlogCallbackModel = response.data;
         }
-        this.isLoading = false;
       });
   }
 
@@ -127,6 +168,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       order = 'asc';
     } else if (sort === SortType.DEFAULT) {
       this.fetchSearchResults();
+      this.fetchRanked();
       return;
     }
 
@@ -140,19 +182,65 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   reloadFilters(_: Record<string, string | null>) {
     this.fetchSearchResults();
+    this.fetchRanked();
   }
 
   resetFilters(_: void) {
     this.fetchSearchResults(true);
+    this.fetchRanked();
   }
 
-  onToggleAnalyticsTrigger($event: string) {
-    this.dashboardService.consolidatedParamModel.fullsearch = $event == "Full Search";
-    this.fetchSearchResults(true);
+  fetchRanked() {
+    this.rankedResult = new RankedCallbackModel();
+    const startTime = performance.now();
+
+    this.dashboardService.consolidatedParamModel.category = "";
+    this.dashboardService.consolidatedParamModel.user ??= '';
+    this.dashboardService.consolidatedParamModel.url ??= '';
+    this.dashboardService.consolidatedParamModel.q = this.searchQuery;
+
+    this.setLoading(1);
+    this.dashboardService
+      .fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel)
+      .pipe(
+        switchMap(response => timer(500).pipe(map(() => response))),
+        finalize(() => this.setLoading(-1))
+      )
+      .subscribe(response => {
+        const endTime = performance.now();
+        this.allSearchApiTime = Math.round(endTime - startTime);
+        if (response.success && response.data) {
+          this.rankedResult = response.data;
+        }
+      });
   }
+
+  getTotalResultCount(): number {
+    const breachCount = this.stealerlogCallbackModel?.Result?.length ?? 0;
+    const allSearchCount = this.rankedResult.pageCount;
+    return breachCount + allSearchCount;
+  }
+
+  getApiTime(): number {
+    return (this.breachesApiTime || 0) + (this.allSearchApiTime || 0);
+  }
+
+  getAssetSearched(): any {
+    const a = this.stealerlogCallbackModel.Total_Hits ?? 0;
+    const b = this.rankedResult.totalHits ?? 0;
+    return a + b;
+  }
+
   onPageChange(step: number) {
     this.dashboardService.consolidatedParamModel.page = step;
     this.fetchSearchResults();
+    this.fetchRanked();
+  }
+
+  getAggregatedDataWells(): any {
+    const stealer = new Set((this.stealerlogCallbackModel?.Result ?? []).map(item => item['m_index'])).size;
+    const ranked = new Set((this.rankedResult?.result ?? []).map(item => item.rank_index)).size;
+    return stealer + ranked;
   }
 
   protected readonly length = length;

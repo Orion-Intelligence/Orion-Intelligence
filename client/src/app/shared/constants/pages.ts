@@ -107,8 +107,7 @@ export enum DumpSubCategory {
 }
 
 export enum StealerlogsSubCategory {
-  CREDENTIAL = 'Credential',
-  LOGS = 'Logs',
+  IOC = 'IOCS'
 }
 export enum TenantSubCategory {
   VIEW_PROFILE = 'View-Profiles',

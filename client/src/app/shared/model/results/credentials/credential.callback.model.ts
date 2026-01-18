@@ -1,6 +1,6 @@
 import { Suggestion } from "../shared/common-result";
-import {initCallbackModel} from '../callback.init';
-import {DefacementResultItem} from '../defacement/defacement.callback.model';
+import { initCallbackModel } from '../callback.init';
+import { DefacementResultItem } from '../defacement/defacement.callback.model';
 
 export class StealerLogResultItem {
   type?: string;
@@ -20,6 +20,7 @@ export class StealerLogCallbackModel {
   Result: StealerLogResultItem[] = [];
   Page_Count: number = 0;
   Suggestions: Suggestion[] = [];
+  Total_Hits: number = 0;
 
   constructor(init?: Partial<StealerLogCallbackModel>) {
     if (init) {

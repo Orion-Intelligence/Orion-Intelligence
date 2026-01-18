@@ -1,15 +1,15 @@
 import { Component, Input } from '@angular/core';
-import {KeyValuePipe, NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@angular/common';
+import { NgForOf, NgIf, NgClass } from '@angular/common';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
+import { expandFadeRow } from '../../../shared/animations/row.animations';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-credential-list',
   standalone: true,
   templateUrl: './credential-list.component.html',
-  animations: [fadeInDashboardItem],
-  imports: [NgForOf, NgIf, KeyValuePipe, TitleCasePipe, NgOptimizedImage, TooltipDirective]
+  animations: [fadeInDashboardItem, expandFadeRow],
+  imports: [NgForOf, NgIf, NgClass]
 })
 export class CredentialListComponent {
   @Input() stealerData$!: StealerLogCallbackModel;
@@ -20,9 +20,28 @@ export class CredentialListComponent {
   expandedIndex: number | null = null;
   pageSize: number = 500;
 
+  expandedRows = new Set<number>();
+  passwordVisible = true;
+
+  _toggleRow(index: number) {
+    if (this.expandedRows.has(index)) {
+      this.expandedRows.clear();
+      return;
+    }
+    this.expandedRows.clear();
+    this.expandedRows.add(index);
+  }
+
+  isExpanded(index: number): boolean {
+    return this.expandedRows.has(index);
+  }
+
+  togglePassword() {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
   copyRowData(data: string): void {
-    navigator.clipboard.writeText(data).catch(() => {
-    });
+    navigator.clipboard.writeText(data).catch(() => {});
   }
 
   toggleRow(i: number): void {
@@ -59,5 +78,18 @@ export class CredentialListComponent {
     const parts = this.splitRaw(item['raw'], item['delimiter']);
     if (idx < 0 || idx >= parts.length) return null;
     return parts[idx] || null;
+  }
+
+  getExposureLevel(item: any): 'critical' | 'warning' | 'info' {
+    if (item['email']?.[0]) return 'critical';
+    if (item['username']?.[0] || item['ip']?.[0]) return 'warning';
+    return 'info';
+  }
+
+  getExposureLabel(item: any): string {
+    const level = this.getExposureLevel(item);
+    if (level === 'critical') return 'Critical Exposure Profile Identified';
+    if (level === 'warning') return 'Warning Exposure Profile Identified';
+    return 'Info Exposure Profile Identified';
   }
 }
