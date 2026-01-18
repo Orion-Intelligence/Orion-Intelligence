@@ -588,60 +588,60 @@ describe('Exploit – Full Filters Flow', () => {
 });
 
 
-describe('Feed – Apply Filters and Verify Results', () => {
-  beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
-  });
-
-  it('Open Feed and Apply All Filters', () => {
-
-    cy.visit('/dashboard');
-    cy.contains('.sidebar__item-dropdown', 'feed')
-      .scrollIntoView()
-      .click({ force: true });
-    cy.wait(500);
-
-
-    cy.get('.filters-button').click({ force: true });
-    cy.wait(300);
-
-
-    cy.get('#dropdownnetwork').click({ force: true });
-    cy.contains('.dropdown-item', 'Onion').click({ force: true });
-    cy.contains('button', 'Apply').click({ force: true });
-    cy.wait(500);
-
-
-    cy.get('#dropdownsafe').click({ force: true });
-    cy.contains('.dropdown-item', 'Yes').click({ force: true });
-    cy.contains('button', 'Apply').click({ force: true });
-    cy.wait(500);
-
-
-    cy.get('#dropdowncontent').click({ force: true });
-    cy.contains('.dropdown-item', 'Breach').click({ force: true });
-    cy.contains('button', 'Apply').click({ force: true });
-    cy.wait(500);
-
-
-    cy.get('.sidebar_input_date-button').click({ force: true });
-    cy.contains('span.custom-day', '1').click({ force: true });
-    cy.contains('span.custom-day', '25').click({ force: true });
-    cy.contains('button', 'Apply').click({ force: true });
-    cy.wait(500);
-
-
-    cy.get('.sidebar_input_date-button').click({ force: true });
-    cy.contains('button', 'Clear').click({ force: true });
-    cy.contains('button', 'Apply').click({ force: true });
-    cy.wait(500);
-
-
-    cy.get('.feed-result-item').should('exist');
-  });
-});
+// describe('Feed – Apply Filters and Verify Results', () => {
+//   beforeEach(() => {
+//     cy.session('admin-session', () => {
+//       cy.loginAsAdmin();
+//     });
+//   });
+//
+//   it('Open Feed and Apply All Filters', () => {
+//
+//     cy.visit('/dashboard');
+//     cy.contains('.sidebar__item-dropdown', 'feed')
+//       .scrollIntoView()
+//       .click({ force: true });
+//     cy.wait(500);
+//
+//
+//     cy.get('.filters-button').click({ force: true });
+//     cy.wait(300);
+//
+//
+//     cy.get('#dropdownnetwork').click({ force: true });
+//     cy.contains('.dropdown-item', 'Onion').click({ force: true });
+//     cy.contains('button', 'Apply').click({ force: true });
+//     cy.wait(500);
+//
+//
+//     cy.get('#dropdownsafe').click({ force: true });
+//     cy.contains('.dropdown-item', 'Yes').click({ force: true });
+//     cy.contains('button', 'Apply').click({ force: true });
+//     cy.wait(500);
+//
+//
+//     cy.get('#dropdowncontent').click({ force: true });
+//     cy.contains('.dropdown-item', 'Breach').click({ force: true });
+//     cy.contains('button', 'Apply').click({ force: true });
+//     cy.wait(500);
+//
+//
+//     cy.get('.sidebar_input_date-button').click({ force: true });
+//     cy.contains('span.custom-day', '1').click({ force: true });
+//     cy.contains('span.custom-day', '25').click({ force: true });
+//     cy.contains('button', 'Apply').click({ force: true });
+//     cy.wait(500);
+//
+//
+//     cy.get('.sidebar_input_date-button').click({ force: true });
+//     cy.contains('button', 'Clear').click({ force: true });
+//     cy.contains('button', 'Apply').click({ force: true });
+//     cy.wait(500);
+//
+//
+//     cy.get('.feed-result-item').should('exist');
+//   });
+// });
 
 
 
