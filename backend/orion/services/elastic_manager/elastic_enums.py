@@ -91,3 +91,12 @@ class ELASTIC_ENUMS:
 
     mapping_social_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1_000_000, "codec": "best_compression", "blocks": {"read_only_allow_delete": False}}, "mappings": {"dynamic": True, "dynamic_templates": [
         {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_sender_name": {"type": "keyword"}, "m_message_sharable_link": {"type": "keyword"}, "m_weblink": {"type": "keyword"}, "m_code_snippet": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 600}}}, "m_title": {"type": "text"}, "m_content": {"type": "text"}, "m_content_type": {"type": "keyword"}, "m_message_date": {"type": "date"}, "m_network": {"type": "keyword"}, "m_message_id": {"type": "keyword"}, "m_platform": {"type": "keyword"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
+
+    mapping_stealer_log_field = {
+        "m_domain": "domain.keyword",
+        "m_url": "url.keyword",
+        "m_username": "username.keyword",
+        "m_email": "email.keyword",
+        "m_ip": "ip.keyword",
+        "m_search_all": ["domain.keyword", "url.keyword", "username.keyword", "email.keyword"]
+    }

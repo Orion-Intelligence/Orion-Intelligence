@@ -16,7 +16,7 @@ import { PaginationComponent } from "../../shared/partials/pagination/pagination
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
 import { CredentialsSearchBarComponent } from "./credentials-search-bar/credentials-search-bar.component";
 import { finalize } from 'rxjs/operators';
-import {ConsolidatedIocComponent} from './consolidated-ioc/consolidated-ioc.component';
+import { ConsolidatedIocComponent } from './consolidated-ioc/consolidated-ioc.component';
 
 @Component({
   selector: 'app-credential',
@@ -38,7 +38,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   protected readonly filters = stealer_filters;
 
-  tags = { m_search_all: 'All', m_domain: 'Domain', m_username: 'Username', m_url: 'URL' };
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
@@ -92,7 +91,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       });
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
 
   triggerSearch(searchQuery: string): void {
     this.searchQuery = searchQuery;
@@ -242,6 +241,21 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     const ranked = new Set((this.rankedResult?.result ?? []).map(item => item.rank_index)).size;
     return stealer + ranked;
   }
-
+  onDownload() {
+    const combinedData = {
+      stealerLog: this.stealerlogCallbackModel,
+      rankedResult: this.rankedResult
+    };
+    const json = JSON.stringify(combinedData, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stealerLog.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
   protected readonly length = length;
 }

@@ -1,37 +1,10 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { NgFor, KeyValuePipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 
 
-export enum SearchTag {
-  ALL = 'm_search_all',
-  DOMAIN = 'm_domain',
-  USERNAME = 'm_username',
-  URL = 'm_url',
-  IP = 'm_ip',
-  CHANNEL = 'm_channel',
-  FILE = 'm_file',
-  EMAIL = 'm_email'
-}
-
-export const TAG_LABELS: Record<SearchTag, string> = {
-  [SearchTag.ALL]: 'All',
-  [SearchTag.DOMAIN]: 'Domain',
-  [SearchTag.USERNAME]: 'Username',
-  [SearchTag.URL]: 'URL',
-  [SearchTag.IP]: 'IP Address',
-  [SearchTag.CHANNEL]: 'Channel',
-  [SearchTag.FILE]: 'File Name',
-  [SearchTag.EMAIL]: 'Email',
-};
-
-export interface AdvancedFilter {
-  id: string;
-  tag: SearchTag;
-  value: string;
-  operator: '&&' | '||';
-}
 
 @Component({
   selector: 'app-credentials-search-bar',
@@ -41,15 +14,15 @@ export interface AdvancedFilter {
   animations: [fadeInDashboardItem],
 })
 export class CredentialsSearchBarComponent {
-  SearchTag = SearchTag;
-  TAG_LABELS = TAG_LABELS;
+  SearchTag = StealerlogsSearchFilters;
+  FILTER_LABELS = StealerlogsSearchFilterLabels;
 
   isAdvanced = false;
-  selectedTag = SearchTag.ALL;
+  selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
 
-  advancedFilters: AdvancedFilter[] = [
-    { id: this.generateId(), tag: SearchTag.DOMAIN, value: '', operator: '&&' }
+  advancedFilters: StealerlogsAdvancedFilter[] = [
+    { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
   ];
 
   @Output() searchTriggered = new EventEmitter<string>();
@@ -58,14 +31,14 @@ export class CredentialsSearchBarComponent {
     this.isAdvanced = !this.isAdvanced;
   }
 
-  selectBasicTag(tag: SearchTag): void {
+  selectBasicTag(tag: StealerlogsSearchFilters): void {
     this.selectedTag = tag;
   }
 
   addFilter(): void {
     this.advancedFilters.push({
       id: this.generateId(),
-      tag: SearchTag.DOMAIN,
+      tag: StealerlogsSearchFilters.DOMAIN,
       value: '',
       operator: '&&'
     });

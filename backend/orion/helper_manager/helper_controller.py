@@ -220,3 +220,43 @@ class helper_controller:
 
         result_parts = ['"{}"'.format(p) for p in quoted_phrases] + filtered_tokens
         return ' '.join(result_parts)
+    
+    @staticmethod
+    def parse_tagged_logic_query_for_stealer_log(query: str):
+        query = query.replace("&&", " AND ").replace("||", " OR ")
+        tokens = query.split()
+
+        output = []
+        current = []
+        op = None
+
+        for token in tokens:
+            t = token.upper()
+            if t in ("AND", "OR"):
+                op = t
+                continue
+
+            if ":" not in token:
+                continue
+
+            tag, value = token.split(":", 1)
+            node = {"tag": tag.strip(), "value": value.strip()}
+
+            if op == "AND":
+                if current:
+                    last = current.pop()
+                    current.append({"AND": [last, node]})
+                else:
+                    current.append(node)
+            elif op == "OR":
+                if current:
+                    output.append(current)
+                current = [node]
+            else:
+                current.append(node)
+
+            op = None
+
+        if output:
+            return {"OR": [item for sub in output for item in sub] + current}
+        return current[0] if len(current) == 1 else current
