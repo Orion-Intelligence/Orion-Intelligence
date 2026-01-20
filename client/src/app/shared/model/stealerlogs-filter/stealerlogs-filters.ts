@@ -27,3 +27,11 @@ export interface StealerlogsAdvancedFilter {
     value: string;
     operator: '&&' | '||';
 }
+
+export interface PasswordSchemaFilter {
+    minLength: number | null;
+    maxLength: number | null;
+    hasAlphabets: boolean;
+    hasNumbers: boolean;
+    hasSpecialChars: boolean;
+}

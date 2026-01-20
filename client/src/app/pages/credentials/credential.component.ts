@@ -17,6 +17,8 @@ import { RankedCallbackModel } from '../../shared/model/results/consolidated/ran
 import { CredentialsSearchBarComponent } from "./credentials-search-bar/credentials-search-bar.component";
 import { finalize } from 'rxjs/operators';
 import { ConsolidatedIocComponent } from './consolidated-ioc/consolidated-ioc.component';
+import { PasswordSchemeComponent } from './password-scheme/password-schema.component';
+import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
 
 @Component({
   selector: 'app-credential',
@@ -29,7 +31,8 @@ import { ConsolidatedIocComponent } from './consolidated-ioc/consolidated-ioc.co
     NgIf,
     PaginationComponent,
     ConsolidatedIocComponent,
-    CredentialsSearchBarComponent
+    CredentialsSearchBarComponent,
+    PasswordSchemeComponent
   ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
@@ -49,6 +52,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
   breachesApiTime: any = 0;
   allSearchApiTime: any = 0;
+  showPasswordscheme = false;
 
   private pendingRequests = 0;
   private setLoading(delta: 1 | -1) {
@@ -256,6 +260,30 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+  openScheme() {
+    this.showPasswordscheme = true;
+  }
+
+  closeScheme() {
+    this.showPasswordscheme = false;
+  }
+
+  onPasswordSearch(filter: PasswordSchemaFilter) {
+    const isEmpty =
+      !filter.minLength &&
+      !filter.maxLength &&
+      !filter.hasAlphabets &&
+      !filter.hasNumbers &&
+      !filter.hasSpecialChars;
+
+    if (isEmpty) {
+      this.dashboardService.passwordSchemeFilter = filter;
+    } else {
+      this.dashboardService.passwordSchemeFilter = filter;
+    }
+
+    this.fetchSearchResults(true);
   }
   protected readonly length = length;
 }
