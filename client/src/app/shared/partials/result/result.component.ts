@@ -73,6 +73,7 @@ export class ResultComponent implements OnInit, OnChanges {
   local_query = ""
   showScans = false;
   scandomains: string[] = [];
+  tab: string = '';
 
   protected readonly query = query;
   protected readonly Category = Category;
@@ -187,8 +188,9 @@ export class ResultComponent implements OnInit, OnChanges {
     this.onToggleAnalytics(target.textContent?.trim() || '');
   }
 
-  onToggleAnalytics(tab: string) {
-    this.onToggleSwitch.emit(tab);
+  onToggleAnalytics(_tab: string) {
+    this.tab = _tab;
+    this.onToggleSwitch.emit(_tab);
   }
 
   onToolToggle(event: Event): void {

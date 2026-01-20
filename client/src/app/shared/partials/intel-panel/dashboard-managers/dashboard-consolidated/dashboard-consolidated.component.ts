@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, 
 import { AppService } from '../../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import {combineLatest, map, switchMap, take, timer} from 'rxjs';
+import { combineLatest, map, switchMap, take, timer } from 'rxjs';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { ResultComponent } from '../../../result/result.component';
@@ -118,7 +118,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       return
     }
     if (this.licenseService.canUseScanning()) {
-        console.log("xxxxx2")
+      console.log("xxxxx2")
       this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
 
@@ -347,7 +347,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     } else if (tab == "IOCs") {
       this.isIOC = true;
       this.isGrouped = false
-      this.fetchRanked()
     }
   }
 
