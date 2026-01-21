@@ -109,7 +109,8 @@ class search_model:
     async def search_consolidated_ranked_result(param: search_consolidated_param_model,
             base_index,
             blocked_categories,
-            allowed_categories):
+            allowed_categories
+    ):
         filter_dict = param.entity_filter if param.entity_filter else {}
 
         indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
@@ -137,7 +138,7 @@ class search_model:
         size = int(query.get("size", 10))
         total_pages = (total + size - 1) // size if size > 0 else 0
 
-        return {"Result": ranked_results, "Page_Count": total_pages,"Total_Hits": total}
+        return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
         document, data_filter = elastic_request_generator().on_search_persona(param)
@@ -265,7 +266,8 @@ class search_model:
 
     async def search_credential_result(self,
             param: search_credential_param_model,
-            search_credential_callback_model=None):
+            search_credential_callback_model=None
+    ):
         document, data_filter = elastic_request_generator().on_search_credentials_data(param)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
@@ -274,7 +276,7 @@ class search_model:
 
     async def search_stealerlogs_result(self, param: search_credential_param_model, alert=False):
 
-        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, param.entity_filter, alert = alert)
+        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, param.entity_filter, alert=alert)
 
         if not data_filter:
             return False, []
@@ -291,6 +293,56 @@ class search_model:
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
 
+    async def search_stealerlogs_result_with_operator(self, param: search_credential_param_model, alert=False):
+
+        document, data_filter = elastic_request_generator().on_search_stealerlogs_data_with_operators(param, alert=alert)
+
+        if not data_filter:
+            return False, []
+
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        hits = m_documents.get("hits", {}).get("hits", [])
+        for h in hits:
+            src = h.get("_source", {})
+            src["_id"] = h.get("_id")
+            if param.category != "credential" and "mapping" in src:
+                src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
+
+        return await self.__search_callback.search_handler(
+            m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
+
+    async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
+        document, data_filter = elastic_request_generator().on_search_persona(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        body = m_documents.body if hasattr(m_documents, "body") else m_documents
+        aggs = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        ch = aggs.get("channels", {}).get("buckets", [])
+        ty = aggs.get("types", {}).get("buckets", [])
+
+        total_exposures = sum(b.get("doc_count", 0) for b in ch)
+        primary_channel = ch[0] if ch else {}
+        primary_type = ty[0] if ty else {}
+
+        risk_score = min(100, (total_exposures * 20) + (len(ch) * 10))
+        severity = "NONE" if total_exposures == 0 else ("LOW" if risk_score < 30 else "MEDIUM" if risk_score < 70 else "HIGH")
+
+        m_documents = {
+            "breach_found": total_exposures > 0,
+            "total_exposures": total_exposures,
+            "unique_channels": len(ch),
+            "unique_types": len(ty),
+            "primary_channel": primary_channel.get("key"),
+            "primary_channel_hits": primary_channel.get("doc_count", 0),
+            "primary_type": primary_type.get("key"),
+            "primary_type_hits": primary_type.get("doc_count", 0),
+            "risk_score": risk_score,
+            "severity": severity
+        }
+
+        return m_documents
+
     async def search_defacement_result(self, param: search_defacement_param_model):
         document, data_filter = elastic_request_generator().on_search_defacement_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
@@ -299,7 +351,8 @@ class search_model:
 
     @staticmethod
     def _process_entity_filters_generic(filters: Optional[List[entity_filter_param_model]],
-            field_mapping: Dict[str, str]) -> List[Dict[str, Any]]:
+            field_mapping: Dict[str, str]
+    ) -> List[Dict[str, Any]]:
         es_clauses = []
 
         if not filters:

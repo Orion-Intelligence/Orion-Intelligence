@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Body, Query
 from fastapi import Request, HTTPException
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model

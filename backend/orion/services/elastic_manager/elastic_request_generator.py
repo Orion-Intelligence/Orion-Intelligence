@@ -11,11 +11,56 @@ from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.bloom_manager.bloom_controller import bloom_controller
-from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC
+from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC,ELASTIC_ENUMS
 from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
 
 
 class elastic_request_generator:
+
+    @staticmethod
+    def build_es_from_tagged_for_stealer_log(parsed):
+        if isinstance(parsed, dict):
+            if "AND" in parsed:
+                must_clauses = [
+                    elastic_request_generator.build_es_from_tagged_for_stealer_log(x) for x in parsed["AND"]
+                ]
+                if len(must_clauses) == 1:
+                    return must_clauses[0]
+                return {"bool": {"must": must_clauses}}
+
+            if "OR" in parsed:
+                should_clauses = [
+                    elastic_request_generator.build_es_from_tagged_for_stealer_log(x) for x in parsed["OR"]
+                ]
+                if len(should_clauses) == 1:
+                    return should_clauses[0]
+                return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
+
+        if isinstance(parsed, list):
+            should_clauses = [elastic_request_generator.build_es_from_tagged_for_stealer_log(x) for x in parsed]
+            if len(should_clauses) == 1:
+                return should_clauses[0]
+            return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
+
+        tag = parsed["tag"]
+        value = parsed["value"]
+
+
+        fields = ELASTIC_ENUMS.mapping_stealer_log_field.get(tag)
+        if not fields:
+            return {"match_none": {}}
+
+        if isinstance(fields, list):
+            if len(fields) == 1:
+                return {"term": {fields[0]: value}}
+            return {
+                "bool": {
+                    "should": [{"term": {f: value}} for f in fields],
+                    "minimum_should_match": 1
+                }
+            }
+
+        return {"term": {fields: value}}
 
     @staticmethod
     def _build_query_block(p_query_model,
@@ -946,6 +991,71 @@ class elastic_request_generator:
         query = {"query": {"bool": bool_query}, "from": frm, "size": size, "sort": [
             {"_shard_doc": "asc"}], "track_total_hits": False, "track_scores": False, "_source": ["url", "username",
             "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
+
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
+    @staticmethod
+    def on_search_stealerlogs_data_with_operators(p_query_model, alert=False):
+        is_match_all = not p_query_model.q
+
+        if is_match_all:
+            es_bool = {"match_all": {}}
+        else:
+            parsed = helper_controller.parse_tagged_logic_query_for_stealer_log(p_query_model.q)
+            es_bool = elastic_request_generator.build_es_from_tagged_for_stealer_log(parsed)
+
+        page = getattr(p_query_model, "page", 1) or 1
+        size = 100 if is_match_all else (getattr(p_query_model, "size", 500) or 500)
+        frm = max((page - 1) * size, 0)
+
+        query = {
+            "query": es_bool,
+            "from": frm,
+            "size": size,
+            "sort": [{"_shard_doc": "asc"}],
+            "track_total_hits": False,
+            "_source": [
+                "url", "username", "domain", "email",
+                "password", "ip", "channel", "type", "raw", "_id", "file"
+            ]
+        }
+
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
+    @staticmethod
+    def on_search_persona(p_query_model):
+        q = (p_query_model.q or "").strip()
+        if not q: return None, None
+
+        query = {
+            "query": {
+                "term": {
+                    "email.keyword": q
+                }
+            },
+            "size": 0,
+            "track_total_hits": False,
+            "terminate_after": 1000,
+            "timeout": "200ms",
+            "aggs": {
+                "channels": {
+                    "terms": {
+                        "field": "channel.keyword",
+                        "size": 3,
+                        "order": {"_count": "desc"}
+                    }
+                },
+                "types": {
+                    "terms": {
+                        "field": "type.keyword",
+                        "size": 3,
+                        "order": {"_count": "desc"}
+                    }
+                }
+            },
+            "_source": False,
+            "stored_fields": []
+        }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
