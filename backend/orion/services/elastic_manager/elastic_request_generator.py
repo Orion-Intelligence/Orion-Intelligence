@@ -304,6 +304,43 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
+    @staticmethod
+    def on_search_persona(p_query_model):
+        q = (p_query_model.q or "").strip()
+        if not q: return None, None
+
+        query = {
+            "query": {
+                "term": {
+                    "email.keyword": q
+                }
+            },
+            "size": 0,
+            "track_total_hits": False,
+            "terminate_after": 1000,
+            "timeout": "200ms",
+            "aggs": {
+                "channels": {
+                    "terms": {
+                        "field": "channel.keyword",
+                        "size": 3,
+                        "order": {"_count": "desc"}
+                    }
+                },
+                "types": {
+                    "terms": {
+                        "field": "type.keyword",
+                        "size": 3,
+                        "order": {"_count": "desc"}
+                    }
+                }
+            },
+            "_source": False,
+            "stored_fields": []
+        }
+
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
     def on_search_consolidated_ranked_data(self,
             p_query_model: search_consolidated_param_model,
             pfilter,

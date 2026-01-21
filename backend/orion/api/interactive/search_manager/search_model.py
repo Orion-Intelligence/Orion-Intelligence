@@ -140,6 +140,37 @@ class search_model:
 
         return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
 
+    async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
+        document, data_filter = elastic_request_generator().on_search_persona(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        body = m_documents.body if hasattr(m_documents, "body") else m_documents
+        aggs = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        ch = aggs.get("channels", {}).get("buckets", [])
+        ty = aggs.get("types", {}).get("buckets", [])
+
+        total_exposures = sum(b.get("doc_count", 0) for b in ch)
+        primary_channel = ch[0] if ch else {}
+        primary_type = ty[0] if ty else {}
+
+        risk_score = min(100, (total_exposures * 20) + (len(ch) * 10))
+        severity = "NONE" if total_exposures == 0 else ("LOW" if risk_score < 30 else "MEDIUM" if risk_score < 70 else "HIGH")
+
+        m_documents = {
+            "breach_found": total_exposures > 0,
+            "total_exposures": total_exposures,
+            "unique_channels": len(ch),
+            "unique_types": len(ty),
+            "primary_channel": primary_channel.get("key"),
+            "primary_channel_hits": primary_channel.get("doc_count", 0),
+            "primary_type": primary_type.get("key"),
+            "primary_type_hits": primary_type.get("doc_count", 0),
+            "risk_score": risk_score,
+            "severity": severity
+        }
+
+        return m_documents
+
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
 
