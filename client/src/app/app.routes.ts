@@ -555,11 +555,11 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'IOCS',
+            redirectTo: 'iocs',
             pathMatch: 'full'
           },
           {
-            path: 'IOCS',
+            path: 'iocs',
             component: CredentialComponent,
             data: { type: 'credential', animation: 'CategoryPage' }
           }

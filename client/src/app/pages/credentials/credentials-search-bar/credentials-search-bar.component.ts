@@ -3,6 +3,7 @@ import { NgFor, KeyValuePipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 
 
 
@@ -20,6 +21,8 @@ export class CredentialsSearchBarComponent {
   isAdvanced = false;
   selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
+
+  constructor(private messageNotification: MessageNotificationService) { }
 
   advancedFilters: StealerlogsAdvancedFilter[] = [
     { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
@@ -51,23 +54,54 @@ export class CredentialsSearchBarComponent {
   }
 
   triggerSearch(): void {
-    let finalQuery;
+    let finalQuery = '';
 
     if (this.isAdvanced) {
+      const invalidFilter = this.advancedFilters.find(
+        f => f.value && !this.validateValue(f.tag, f.value)
+      );
+
+      if (invalidFilter) {
+        return; // stop search
+      }
+
       finalQuery = this.advancedFilters
         .filter(f => f.value.trim() !== '')
         .map((f, index) => {
-          const prefix = `${f.tag}:`;
           const op = index === 0 ? '' : ` ${this.advancedFilters[index - 1].operator} `;
-          return `${op}${prefix}${f.value.trim()}`;
+          return `${op}${f.tag}:${f.value.trim()}`;
         })
         .join('');
+
     } else {
+      if (!this.validateValue(this.selectedTag, this.basicQuery)) {
+        this.messageNotification.show(`Invalid ${this.FILTER_LABELS[this.selectedTag]} format`);
+        return;
+      }
+
       finalQuery = this.normalizeBasicQuery(this.selectedTag, this.basicQuery);
     }
 
     this.searchTriggered.emit(finalQuery);
   }
+
+  isAdvancedInvalid(filter: StealerlogsAdvancedFilter): boolean {
+    return !!filter.value && !this.validateValue(filter.tag, filter.value);
+  }
+  validateValue(tag: StealerlogsSearchFilters, value: string): boolean {
+    if (!value?.trim()) return false;
+
+    const validator = this.TAG_VALIDATORS[tag];
+    if (!validator) return true; // ALL or unsupported tags
+
+    return validator.test(value.trim());
+  }
+  private TAG_VALIDATORS: Record<string, RegExp> = {
+    [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
+    [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/
+  };
+
 
   private normalizeBasicQuery(tag: string, input: string): string {
     if (!input.trim()) return '';
