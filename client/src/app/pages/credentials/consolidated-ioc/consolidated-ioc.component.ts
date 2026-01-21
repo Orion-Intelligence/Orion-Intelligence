@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-consolidated-ioc',
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, TooltipDirective],
   templateUrl: './consolidated-ioc.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -19,7 +20,7 @@ export class ConsolidatedIocComponent implements OnInit {
 
   @Output() onToggleSwitch = new EventEmitter<null>();
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   toggleRow(index: number) {
     if (this.expandedRows.has(index)) {
@@ -38,4 +39,28 @@ export class ConsolidatedIocComponent implements OnInit {
     if (!text) return '';
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   }
+  getTagEntries(result: any): { key: string; values: any[] }[] {
+    if (!result) return [];
+
+    return Object.keys(result)
+      .filter(
+        key =>
+          key.startsWith('m_') &&
+          Array.isArray(result[key]) &&
+          result[key].length > 0
+      )
+      .map(key => ({
+        key,
+        values: result[key]
+      }));
+  }
+  formatKeyLabel(key: string): string {
+    const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
+    return cleaned.length < 4
+      ? cleaned.toUpperCase()
+      : cleaned
+        .toLowerCase()
+        .replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
+  }
+
 }

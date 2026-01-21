@@ -1,8 +1,7 @@
 <nav *ngIf="this.sidebar_default" class="sidebar">
   <div class="sidebar__header">
-    <a href=""> <img alt="Logo" height="35"
-        [src]="appService.getConfig().appSettings.logo_wide_dark"
-        width="197" /> </a>
+    <a href=""> <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
+    </a>
     <button (click)="onToggleSidebar(false)" class="sidebar__header-menu">
       <img alt="Menu" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
     </button>
@@ -10,11 +9,18 @@
 
 
   <ul class="sidebar__items">
+    <div class="sidebar_heading">Profile</div>
+    <div class="sidebar__item_break_light_color"></div>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" *ngIf="!isDemo()"
       (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
       [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
       [title]="this.appService.userSessionData().user.username">
     </app-dashboard-sidebar-items>
+    <ng-container
+      *ngIf=" licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced')|| licenseService.canUseModule('enterprise')">
+      <div class="sidebar_heading">Threat Intelligence</div>
+      <div class="sidebar__item_break_light_color"></div>
+    </ng-container>
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('general')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
@@ -57,6 +63,12 @@
         [icon]="'assets/images/sidebar/news.svg'" [items]="newsCategories" [routePrefix]="'feed'"
         [title]="'Feed'"></app-dashboard-sidebar-items>
     </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseScanning()|| licenseService.canUseModule('stealer_logs')">
+      <div class="sidebar_heading">Data Collection</div>
+      <div class="sidebar__item_break_light_color"></div>
+    </ng-container>
+
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('stealer_logs')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS"
@@ -90,7 +102,8 @@
     </ng-container>
     <ng-container>
       <div class="sidebar__item">
-        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/" target="_blank">
+        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/"
+          target="_blank">
           <img alt="Links" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/whistle.svg" width="20">
           Whistle Blowing
         </a>
@@ -232,9 +245,9 @@
           width="19"> </a>
     </div>
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
-      <a appTooltip="Whistle Blowing" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/"
-        target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/whistle.svg"
-          width="19"> </a>
+      <a appTooltip="Whistle Blowing" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+        href="https://orionleaks.com/#/" target="_blank"> <img alt="Links" class="sidebar__icon" height="19"
+          ngSrc="assets/images/sidebar/whistle.svg" width="19"> </a>
     </div>
 
     <hr class="sidebar__item_break">

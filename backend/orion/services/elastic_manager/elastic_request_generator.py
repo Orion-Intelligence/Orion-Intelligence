@@ -2,6 +2,7 @@ import hashlib
 import re
 from datetime import timedelta, timezone
 from datetime import datetime
+import json
 
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
@@ -993,23 +994,48 @@ class elastic_request_generator:
             "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+    
 
     @staticmethod
     def on_search_stealerlogs_data_with_operators(p_query_model, alert=False):
         is_match_all = not p_query_model.q
-
+        
         if is_match_all:
-            es_bool = {"match_all": {}}
+            inner_query = {"match_all": {}}
         else:
             parsed = helper_controller.parse_tagged_logic_query_for_stealer_log(p_query_model.q)
-            es_bool = elastic_request_generator.build_es_from_tagged_for_stealer_log(parsed)
+            inner_query = elastic_request_generator.build_es_from_tagged_for_stealer_log(parsed)
+
+        es_query = {
+            "bool": {
+                "must": [inner_query],
+                "filter": []
+            }
+        }
+
+        password_filter = getattr(p_query_model, "password_scheme", None)
+        if password_filter:
+            min_l = password_filter.minLength or 0
+            max_l = password_filter.maxLength or 1000
+            es_query["bool"]["filter"].append({
+                "regexp": {"password.keyword": f".{{{min_l},{max_l}}}"}
+            })
+
+            if getattr(password_filter, "hasAlphabets", False):
+                es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[a-zA-Z].*"}})
+
+            if getattr(password_filter, "hasNumbers", False):
+                es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[0-9].*"}})
+
+            if getattr(password_filter, "hasSpecialChars", False):
+                es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[^a-zA-Z0-9].*"}})
 
         page = getattr(p_query_model, "page", 1) or 1
         size = 100 if is_match_all else (getattr(p_query_model, "size", 500) or 500)
         frm = max((page - 1) * size, 0)
 
-        query = {
-            "query": es_bool,
+        query_body = {
+            "query": es_query,
             "from": frm,
             "size": size,
             "sort": [{"_shard_doc": "asc"}],
@@ -1020,7 +1046,9 @@ class elastic_request_generator:
             ]
         }
 
-        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
+
+
 
     @staticmethod
     def on_search_persona(p_query_model):

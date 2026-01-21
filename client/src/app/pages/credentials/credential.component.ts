@@ -16,7 +16,9 @@ import { PaginationComponent } from "../../shared/partials/pagination/pagination
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
 import { CredentialsSearchBarComponent } from "./credentials-search-bar/credentials-search-bar.component";
 import { finalize } from 'rxjs/operators';
-import {ConsolidatedIocComponent} from './consolidated-ioc/consolidated-ioc.component';
+import { ConsolidatedIocComponent } from './consolidated-ioc/consolidated-ioc.component';
+import { PasswordSchemeComponent } from './password-scheme/password-schema.component';
+import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
 
 @Component({
   selector: 'app-credential',
@@ -29,7 +31,8 @@ import {ConsolidatedIocComponent} from './consolidated-ioc/consolidated-ioc.comp
     NgIf,
     PaginationComponent,
     ConsolidatedIocComponent,
-    CredentialsSearchBarComponent
+    CredentialsSearchBarComponent,
+    PasswordSchemeComponent
   ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
@@ -38,7 +41,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   protected readonly filters = stealer_filters;
 
-  tags = { m_search_all: 'All', m_domain: 'Domain', m_username: 'Username', m_url: 'URL' };
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
@@ -50,6 +52,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
   breachesApiTime: any = 0;
   allSearchApiTime: any = 0;
+  showPasswordscheme = false;
 
   private pendingRequests = 0;
   private setLoading(delta: 1 | -1) {
@@ -92,7 +95,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       });
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
 
   triggerSearch(searchQuery: string): void {
     this.searchQuery = searchQuery;
@@ -242,6 +245,45 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     const ranked = new Set((this.rankedResult?.result ?? []).map(item => item.rank_index)).size;
     return stealer + ranked;
   }
+  onDownload() {
+    const combinedData = {
+      stealerLog: this.stealerlogCallbackModel,
+      rankedResult: this.rankedResult
+    };
+    const json = JSON.stringify(combinedData, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stealerLog.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+  openScheme() {
+    this.showPasswordscheme = true;
+  }
 
+  closeScheme() {
+    this.showPasswordscheme = false;
+  }
+
+  onPasswordSearch(filter: PasswordSchemaFilter) {
+    const isEmpty =
+      !filter.minLength &&
+      !filter.maxLength &&
+      !filter.hasAlphabets &&
+      !filter.hasNumbers &&
+      !filter.hasSpecialChars;
+
+    if (isEmpty) {
+      this.dashboardService.passwordSchemeFilter = filter;
+    } else {
+      this.dashboardService.passwordSchemeFilter = filter;
+    }
+
+    this.fetchSearchResults(true);
+  }
   protected readonly length = length;
 }

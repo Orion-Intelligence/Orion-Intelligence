@@ -2,6 +2,13 @@ from typing import Optional, Annotated, Dict, List
 
 from pydantic import BaseModel, StringConstraints, Field
 
+class PasswordFilterModel(BaseModel):
+    minLength: Optional[int] = None
+    maxLength: Optional[int] = None
+    hasAlphabets: Optional[bool] = None
+    hasNumbers: Optional[bool] = None
+    hasSpecialChars: Optional[bool] = None
+
 
 class search_credential_param_model(BaseModel):
     daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
@@ -16,3 +23,4 @@ class search_credential_param_model(BaseModel):
 
     entity_filter: Optional[Dict[str, List[str]]] = Field(
         default=None, examples=[{"m_country": ["pakistan"]}])
+    password_scheme: Optional[PasswordFilterModel] = None

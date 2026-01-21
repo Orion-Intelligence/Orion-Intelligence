@@ -1,37 +1,11 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { NgFor, KeyValuePipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 
 
-export enum SearchTag {
-  ALL = 'm_search_all',
-  DOMAIN = 'm_domain',
-  USERNAME = 'm_username',
-  URL = 'm_url',
-  IP = 'm_ip',
-  CHANNEL = 'm_channel',
-  FILE = 'm_file',
-  EMAIL = 'm_email'
-}
-
-export const TAG_LABELS: Record<SearchTag, string> = {
-  [SearchTag.ALL]: 'All',
-  [SearchTag.DOMAIN]: 'Domain',
-  [SearchTag.USERNAME]: 'Username',
-  [SearchTag.URL]: 'URL',
-  [SearchTag.IP]: 'IP Address',
-  [SearchTag.CHANNEL]: 'Channel',
-  [SearchTag.FILE]: 'File Name',
-  [SearchTag.EMAIL]: 'Email',
-};
-
-export interface AdvancedFilter {
-  id: string;
-  tag: SearchTag;
-  value: string;
-  operator: '&&' | '||';
-}
 
 @Component({
   selector: 'app-credentials-search-bar',
@@ -41,15 +15,17 @@ export interface AdvancedFilter {
   animations: [fadeInDashboardItem],
 })
 export class CredentialsSearchBarComponent {
-  SearchTag = SearchTag;
-  TAG_LABELS = TAG_LABELS;
+  SearchTag = StealerlogsSearchFilters;
+  FILTER_LABELS = StealerlogsSearchFilterLabels;
 
   isAdvanced = false;
-  selectedTag = SearchTag.ALL;
+  selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
 
-  advancedFilters: AdvancedFilter[] = [
-    { id: this.generateId(), tag: SearchTag.DOMAIN, value: '', operator: '&&' }
+  constructor(private messageNotification: MessageNotificationService) { }
+
+  advancedFilters: StealerlogsAdvancedFilter[] = [
+    { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
   ];
 
   @Output() searchTriggered = new EventEmitter<string>();
@@ -58,14 +34,14 @@ export class CredentialsSearchBarComponent {
     this.isAdvanced = !this.isAdvanced;
   }
 
-  selectBasicTag(tag: SearchTag): void {
+  selectBasicTag(tag: StealerlogsSearchFilters): void {
     this.selectedTag = tag;
   }
 
   addFilter(): void {
     this.advancedFilters.push({
       id: this.generateId(),
-      tag: SearchTag.DOMAIN,
+      tag: StealerlogsSearchFilters.DOMAIN,
       value: '',
       operator: '&&'
     });
@@ -78,23 +54,54 @@ export class CredentialsSearchBarComponent {
   }
 
   triggerSearch(): void {
-    let finalQuery;
+    let finalQuery = '';
 
     if (this.isAdvanced) {
+      const invalidFilter = this.advancedFilters.find(
+        f => f.value && !this.validateValue(f.tag, f.value)
+      );
+
+      if (invalidFilter) {
+        return; // stop search
+      }
+
       finalQuery = this.advancedFilters
         .filter(f => f.value.trim() !== '')
         .map((f, index) => {
-          const prefix = `${f.tag}:`;
           const op = index === 0 ? '' : ` ${this.advancedFilters[index - 1].operator} `;
-          return `${op}${prefix}${f.value.trim()}`;
+          return `${op}${f.tag}:${f.value.trim()}`;
         })
         .join('');
+
     } else {
+      if (!this.validateValue(this.selectedTag, this.basicQuery)) {
+        this.messageNotification.show(`Invalid ${this.FILTER_LABELS[this.selectedTag]} format`);
+        return;
+      }
+
       finalQuery = this.normalizeBasicQuery(this.selectedTag, this.basicQuery);
     }
 
     this.searchTriggered.emit(finalQuery);
   }
+
+  isAdvancedInvalid(filter: StealerlogsAdvancedFilter): boolean {
+    return !!filter.value && !this.validateValue(filter.tag, filter.value);
+  }
+  validateValue(tag: StealerlogsSearchFilters, value: string): boolean {
+    if (!value?.trim()) return false;
+
+    const validator = this.TAG_VALIDATORS[tag];
+    if (!validator) return true; // ALL or unsupported tags
+
+    return validator.test(value.trim());
+  }
+  private TAG_VALIDATORS: Record<string, RegExp> = {
+    [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
+    [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/
+  };
+
 
   private normalizeBasicQuery(tag: string, input: string): string {
     if (!input.trim()) return '';
