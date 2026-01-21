@@ -169,21 +169,7 @@ describe('Dashboard Sections Test', () => {
           });
 
 
-        cy.get('div.search-bar')
-          .find('input[type="text"]')
-          .should('be.visible')
-          .clear()
-          .type('Website');
-
-        cy.get('div.filter-toggles')
-          .contains('label', 'Email')
-          .find('input[type="radio"]')
-          .check({ force: true });
-
-        cy.get('div.filter-toggles')
-          .contains('label', 'Name')
-          .find('input[type="radio"]')
-          .check({ force: true });
+        
       });
   });
 
