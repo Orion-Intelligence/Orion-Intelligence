@@ -93,8 +93,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(take(1))
       .subscribe(([params, urlSegments]) => {
-        this.query = params['q'];
-        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
+        if (!params['q'].includes(':')) {
+          this.query = params['q'];
+          this.dashboardService.consolidatedParamModel.q = params['q'] || '';
+        }
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
 
         this.dashboardService.consolidatedParamModel.category = urlSegments.length

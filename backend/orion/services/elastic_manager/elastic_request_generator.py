@@ -999,7 +999,7 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealerlogs_data_with_operators(p_query_model, alert=False):
         is_match_all = not p_query_model.q
-        
+
         if is_match_all:
             inner_query = {"match_all": {}}
         else:
@@ -1020,15 +1020,25 @@ class elastic_request_generator:
             es_query["bool"]["filter"].append({
                 "regexp": {"password.keyword": f".{{{min_l},{max_l}}}"}
             })
-
             if getattr(password_filter, "hasAlphabets", False):
                 es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[a-zA-Z].*"}})
-
             if getattr(password_filter, "hasNumbers", False):
                 es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[0-9].*"}})
-
             if getattr(password_filter, "hasSpecialChars", False):
                 es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[^a-zA-Z0-9].*"}})
+
+        date_field = "date.keyword"
+        date_range = getattr(p_query_model, "daterange", None)
+
+        if date_range:
+            parts = date_range.split(',')
+            if len(parts) == 2:
+                try:
+                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00.000000+00:00")
+                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59.999999+00:00")
+                    es_query["bool"]["filter"].append({"range": {date_field: {"gte": from_date, "lte": to_date}}})
+                except ValueError:
+                    pass
 
         page = getattr(p_query_model, "page", 1) or 1
         size = 100 if is_match_all else (getattr(p_query_model, "size", 500) or 500)
@@ -1042,12 +1052,12 @@ class elastic_request_generator:
             "track_total_hits": False,
             "_source": [
                 "url", "username", "domain", "email",
-                "password", "ip", "channel", "type", "raw", "_id", "file"
+                "password", "ip", "channel", "type", "raw", "_id", "file", "date" 
             ]
         }
 
-        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
 
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
 
 
     @staticmethod

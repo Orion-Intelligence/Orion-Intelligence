@@ -3,7 +3,7 @@ import { NgFor, KeyValuePipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
-import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
+import { SidebarService } from '../../../shared/services/sidebar.service';
 
 
 
@@ -22,7 +22,7 @@ export class CredentialsSearchBarComponent {
   selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
 
-  constructor(private messageNotification: MessageNotificationService) { }
+  constructor(protected sidebarService: SidebarService) { }
 
   advancedFilters: StealerlogsAdvancedFilter[] = [
     { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
@@ -62,7 +62,7 @@ export class CredentialsSearchBarComponent {
       );
 
       if (invalidFilter) {
-        return; // stop search
+        return;
       }
 
       finalQuery = this.advancedFilters
@@ -75,7 +75,6 @@ export class CredentialsSearchBarComponent {
 
     } else {
       if (!this.validateValue(this.selectedTag, this.basicQuery)) {
-        this.messageNotification.show(`Invalid ${this.FILTER_LABELS[this.selectedTag]} format`);
         return;
       }
 
@@ -84,15 +83,17 @@ export class CredentialsSearchBarComponent {
 
     this.searchTriggered.emit(finalQuery);
   }
+  isBasicInvalid(): boolean {
+    if (!this.basicQuery?.trim()) return false;
 
+    return !this.validateValue(this.selectedTag, this.basicQuery);
+  }
   isAdvancedInvalid(filter: StealerlogsAdvancedFilter): boolean {
     return !!filter.value && !this.validateValue(filter.tag, filter.value);
   }
   validateValue(tag: StealerlogsSearchFilters, value: string): boolean {
-    if (!value?.trim()) return false;
-
     const validator = this.TAG_VALIDATORS[tag];
-    if (!validator) return true; // ALL or unsupported tags
+    if (!validator) return true;
 
     return validator.test(value.trim());
   }

@@ -37,7 +37,8 @@
 <ng-container *ngIf="tab!='IOCs'">
 
   <form (submit)="onFormSubmit()" @fadeInDashboardItem
-    class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
+    class="default-input-container default-input-sub-container-padded w-90"
+    [ngClass]="{ 'mt-0': tab != 'IOCs' && consolidated }" *ngIf="!domain">
     <div class="search-filter-d-flex search-filter-row">
       <div class="search-bar-wrapper default-input-container-mobile">
         <div class="mobile-backdrop" *ngIf="homeSearchService.showFiltersOverlay"></div>
