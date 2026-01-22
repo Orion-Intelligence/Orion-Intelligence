@@ -70,7 +70,6 @@ export class DashboardService {
     paramModel.page = this.consolidatedParamModel.page
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
 
-    // EXACT SAME navigate behavior, now via shared helper
     this.syncQueryParamsToUrl(baseParams);
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
@@ -83,7 +82,6 @@ export class DashboardService {
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
 
-    // EXACT SAME navigate behavior, now via shared helper
     this.syncQueryParamsToUrl(baseParams);
 
     if (entityCategories) {
