@@ -42,7 +42,8 @@ describe('Homepage – Consolidated Checker Full Flow', () => {
     openCategoryAndReturn('databases');
     openCategoryAndReturn('hacked');
     openCategoryAndReturn('phishing');
-   
+    openCategoryAndReturn('stealer');
+
 
   });
 });
