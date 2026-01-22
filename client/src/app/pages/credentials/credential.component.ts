@@ -16,8 +16,7 @@ import { PaginationComponent } from "../../shared/partials/pagination/pagination
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
 import { CredentialsSearchBarComponent } from "./credentials-search-bar/credentials-search-bar.component";
 import { finalize } from 'rxjs/operators';
-import { ConsolidatedIocComponent } from './consolidated-ioc/consolidated-ioc.component';
-import { PasswordSchemeComponent } from './password-scheme/password-schema.component';
+import { PasswordSchemaComponent } from './password-schema/password-schema.component';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
 
 @Component({
@@ -30,9 +29,8 @@ import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stea
     EmptyQueryComponent,
     NgIf,
     PaginationComponent,
-    ConsolidatedIocComponent,
     CredentialsSearchBarComponent,
-    PasswordSchemeComponent
+    PasswordSchemaComponent
   ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],

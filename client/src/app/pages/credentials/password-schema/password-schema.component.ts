@@ -11,7 +11,7 @@ import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/s
   imports: [FormsModule, NgIf],
   templateUrl: './password-schema.component.html'
 })
-export class PasswordSchemeComponent {
+export class PasswordSchemaComponent {
   @Input() isOpen = false;
 
   @Output() close = new EventEmitter<void>();

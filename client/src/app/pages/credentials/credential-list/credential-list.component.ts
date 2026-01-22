@@ -3,37 +3,40 @@ import { NgForOf, NgIf, NgClass } from '@angular/common';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../shared/animations/row.animations';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-credential-list',
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem, expandFadeRow],
-  imports: [NgForOf, NgIf, NgClass]
+  imports: [NgForOf, NgIf, NgClass, TooltipDirective]
 })
 export class CredentialListComponent {
   @Input() stealerData$!: StealerLogCallbackModel;
   @Input() currentPage: number = 1;
   @Input() type: string = 'credential';
   @Input() isLoading!: boolean;
+  @Input() rankedResult: RankedCallbackModel = new RankedCallbackModel();
 
-  expandedIndex: number | null = null;
   pageSize: number = 500;
-
-  expandedRows = new Set<number>();
+  thretsExpandedRows = new Set<number>();
+  stealersExpandedRows = new Set<number>();
   passwordVisible = true;
 
-  _toggleRow(index: number) {
-    if (this.expandedRows.has(index)) {
-      this.expandedRows.clear();
+  toggleRow(index: number, expandedSet: Set<number>) {
+    if (expandedSet.has(index)) {
+      expandedSet.clear();
       return;
     }
-    this.expandedRows.clear();
-    this.expandedRows.add(index);
+
+    expandedSet.clear();
+    expandedSet.add(index);
   }
 
-  isExpanded(index: number): boolean {
-    return this.expandedRows.has(index);
+  isExpanded(index: number, expandedSet: Set<number>): boolean {
+    return expandedSet.has(index);
   }
 
   togglePassword() {
@@ -41,11 +44,7 @@ export class CredentialListComponent {
   }
 
   copyRowData(data: string): void {
-    navigator.clipboard.writeText(data).catch(() => {});
-  }
-
-  toggleRow(i: number): void {
-    this.expandedIndex = this.expandedIndex === i ? null : i;
+    navigator.clipboard.writeText(data).catch(() => { });
   }
 
   onDownload() {
@@ -91,5 +90,32 @@ export class CredentialListComponent {
     if (level === 'critical') return 'Critical Exposure Profile Identified';
     if (level === 'warning') return 'Warning Exposure Profile Identified';
     return 'Info Exposure Profile Identified';
+  }
+  sliceText(text: string, maxLength: number = 30): string {
+    if (!text) return '';
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  }
+  getTagEntries(result: any): { key: string; values: any[] }[] {
+    if (!result) return [];
+
+    return Object.keys(result)
+      .filter(
+        key =>
+          key.startsWith('m_') &&
+          Array.isArray(result[key]) &&
+          result[key].length > 0
+      )
+      .map(key => ({
+        key,
+        values: result[key]
+      }));
+  }
+  formatKeyLabel(key: string): string {
+    const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
+    return cleaned.length < 4
+      ? cleaned.toUpperCase()
+      : cleaned
+        .toLowerCase()
+        .replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
   }
 }
