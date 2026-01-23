@@ -273,7 +273,7 @@
 }
 
 .consolidated-search_tag-header {
-  padding: 15px 30px 15px 30px;
+  padding: 15px 30px;
   display: flex;
 }
 
@@ -283,13 +283,12 @@
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  background: transparent;
   color: #fff;
   background-color: #172235;
 }
 
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
   .search-filter-d-flex {
     display: block !important;
   }

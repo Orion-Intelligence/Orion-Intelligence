@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DefacementCallbackModel, DefacementResultItem } from '../../../../../model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../../directive/tooltip-directive.directive';
 import { HelperService } from '../../../../../services/helper.service';
-import { StealerLogCallbackModel, StealerLogResultItem } from '../../../../../model/results/credentials/credential.callback.model';
+import { StealerLogCallbackModel } from '../../../../../model/results/credentials/credential.callback.model';
 import { DashboardService } from '../../../../../../services/dashboard/dashboard.service';
 
 type DefGroup = { type: string; items: DefacementResultItem[] };
@@ -23,6 +23,9 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   threatTypeCounts: { [key: string]: number } = {};
   groupedDefacement: DefGroup[] = [];
+
+  copiedKey: string | null = null;
+  private copiedTimer: any = null;
 
   constructor(protected helperService: HelperService, private dashboardService: DashboardService) {}
 
@@ -44,6 +47,10 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     }
     if (changes['results_stealerlog'] && this.results_stealerlog?.Result?.length) {
       this.showLimitStealer = 10;
+    }
+    if (changes['results_defacement'] || changes['results_stealerlog'] || changes['isExpandable']) {
+      this.copiedKey = null;
+      if (this.copiedTimer) clearTimeout(this.copiedTimer);
     }
   }
 
@@ -69,12 +76,8 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   explore(route: string, q: string) {
     let query = this.helperService.extractDomain(q);
-    if (query.length > 0) {
-      q = `"${query}"`;
-    }
-    if (route !== 'phishing' && route !== 'hacked') {
-      route = 'databases';
-    }
+    if (query.length > 0) q = `"${query}"`;
+    if (route !== 'phishing' && route !== 'hacked') route = 'databases';
     const url = `/dashboard/defacement/${route}?q=${encodeURIComponent(q)}`;
     window.open(url, '_blank');
   }
@@ -127,5 +130,120 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
       const finalUrl = `/dashboard/stealerlogs?url=${encodeURIComponent(query)}&user=${''}`;
       window.open(finalUrl, '_blank');
     }
+  }
+
+  isCopied(key: string): boolean {
+    return this.copiedKey === key;
+  }
+
+  async copyText(text: any, key: string, e?: MouseEvent) {
+    if (e) e.stopPropagation();
+    const value = text == null ? '' : String(text);
+    if (!value || value === '-') return;
+
+    const ok = await this.tryClipboard(value);
+    if (!ok) return;
+
+    this.setCopied(key);
+  }
+
+  private setCopied(key: string) {
+    this.copiedKey = key;
+    if (this.copiedTimer) clearTimeout(this.copiedTimer);
+    this.copiedTimer = setTimeout(() => (this.copiedKey = null), 1200);
+  }
+
+  private async tryClipboard(value: string): Promise<boolean> {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+    } catch {}
+
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = value;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      ta.setAttribute('readonly', '');
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+
+  webServerValue(item: any): string {
+    if (item?.m_web_server?.length) return item.m_web_server.join(', ');
+    return '-';
+  }
+
+  attackerValue(item: any): string {
+    if (item?.m_attacker?.length) return item.m_attacker.join(', ');
+    return '-';
+  }
+
+  teamValue(item: any): string {
+    const v = item?.m_team;
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  ipValue(item: any): string {
+    if (item?.m_ip?.length) return item.m_ip.join(', ');
+    return '-';
+  }
+
+  urlValue(item: any): string {
+    const v = item?.m_url;
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  dateValue(item: any): string {
+    const v = item?.m_leak_date;
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  usernameValue(item: any): string {
+    const v = item?.['username'];
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  passwordValue(item: any): string {
+    const v = item?.['password'];
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  domainValue(item: any): string {
+    const v = item?.['domain'];
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  hashValue(item: any): string {
+    const v = item?.['m_hash'];
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  stealerUrlValue(item: any): string {
+    const v = item?.['url'];
+    if (v == null || v === '') return '-';
+    return String(v);
+  }
+
+  truncate(v: any, n: number = 30): string {
+    const s = v == null ? '' : String(v);
+    if (!s) return '-';
+    return s.length > n ? s.slice(0, n) + '...' : s;
   }
 }

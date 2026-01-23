@@ -85,15 +85,14 @@
 .sidebar__item_break_light_color {
   border: none;
   height: 1px;
-  background-color: #ffffff05;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  background: linear-gradient(90deg, #ffffff15 0%, #ffffff15 70%, transparent 100%);
+  margin: 10px 0;
 }
 
 .sidebar_heading {
-  margin-top: 10px;
-  font-weight: 500px;
-  font-size: 14px;
+  margin-top: 20px;
+  font-weight: bold;
+  font-size: 13px;
   color: white;
 }
 

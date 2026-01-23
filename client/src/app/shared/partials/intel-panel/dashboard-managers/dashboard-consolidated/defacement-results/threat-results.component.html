@@ -1,4 +1,4 @@
-<div class="home-defacement-result home-consolidated-result">
+<div class="home-defacement-result home-consolidated-result ">
   <div class="home-defacement-result__top-row" (click)="toggleResultsBarCollapse()">
     <div class="home-defacement-result__title">
       {{ results_defacement ? 'IP Threat Report' : 'Stealer Log Report' }}
@@ -35,7 +35,7 @@
   </div>
 
   <ng-container *ngIf="isExpandable && results_defacement?.Result as defResults">
-    <ng-container *ngFor="let item of defResults.slice(0, showLimitDefacement); let last = last">
+    <ng-container *ngFor="let item of defResults.slice(0, showLimitDefacement); let i = index; let last = last">
       <div class="home_defacement_result__container mt-4 mr-0">
         <div class="home-defacement-result-card-container">
           <div class="d-flex justify-content-between w-100 mb-2">
@@ -52,15 +52,35 @@
           <div class="home-defacement-result-card-header-section mt-3">
             <div class="home-defacement-result-card-company-info">
               <div class="home-defacement-result-card-label">Web Server</div>
-              <div class="home-defacement-result-card-value">
-                {{ item.m_web_server ? item.m_web_server.join(', ') : '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="webServerValue(item)">
+                  {{ webServerValue(item) }}
+                </div>
+                <button
+                  *ngIf="webServerValue(item) && webServerValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(webServerValue(item), 'copy-webserver-' + i, $event)"
+                  [appTooltip]="isCopied('copy-webserver-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-webserver-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
 
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">Attacker</div>
-              <div class="home-defacement-result-card-value">
-                {{ item.m_attacker ? item.m_attacker.join(', ') : '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="attackerValue(item)">
+                  {{ attackerValue(item) }}
+                </div>
+                <button
+                  *ngIf="attackerValue(item) && attackerValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(attackerValue(item), 'copy-attacker-' + i, $event)"
+                  [appTooltip]="isCopied('copy-attacker-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-attacker-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -68,15 +88,35 @@
           <div class="home-defacement-result-card-header-section">
             <div class="home-defacement-result-card-company-info">
               <div class="home-defacement-result-card-label">Team</div>
-              <div class="home-defacement-result-card-value">
-                {{ item.m_team || '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="teamValue(item)">
+                  {{ teamValue(item) }}
+                </div>
+                <button
+                  *ngIf="teamValue(item) && teamValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(teamValue(item), 'copy-team-' + i, $event)"
+                  [appTooltip]="isCopied('copy-team-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-team-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
 
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">IP(s)</div>
-              <div class="home-defacement-result-card-value">
-                {{ item.m_ip ? item.m_ip.join(', ').slice(0, 30) : '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="ipValue(item)">
+                  {{ truncate(ipValue(item), 30) }}
+                </div>
+                <button
+                  *ngIf="ipValue(item) && ipValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(ipValue(item), 'copy-ips-' + i, $event)"
+                  [appTooltip]="isCopied('copy-ips-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-ips-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -84,8 +124,18 @@
           <div class="home-defacement-result-detail-row" *ngIf="item.m_url">
             <div class="home-defacement-result-card-country-info">
               <div class="home-defacement-result-card-label">URL</div>
-              <div class="home-defacement-result-card-value">
-                {{ item.m_url.length > 24 ? (item.m_url | slice : 0 : 30) + '...' : item.m_url }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="urlValue(item)">
+                  {{ truncate(urlValue(item), 30) }}
+                </div>
+                <button
+                  *ngIf="urlValue(item) && urlValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(urlValue(item), 'copy-url-' + i, $event)"
+                  [appTooltip]="isCopied('copy-url-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -93,8 +143,18 @@
           <div class="home-defacement-result-detail-row">
             <div class="home-defacement-result-card-date-time-info">
               <div class="home-defacement-result-card-label">Date</div>
-              <div class="home-defacement-result-card-value">
-                {{ item.m_leak_date || '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="dateValue(item)">
+                  {{ dateValue(item) }}
+                </div>
+                <button
+                  *ngIf="dateValue(item) && dateValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(dateValue(item), 'copy-date-' + i, $event)"
+                  [appTooltip]="isCopied('copy-date-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-date-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -105,7 +165,7 @@
     <ng-container *ngIf="defResults.length > showLimitDefacement">
       <div class="see-more-wrapper ng-star-inserted p-0 mt-4" appTooltip="list more results"
         (click)="onShowMore('defacement', $event)">
-        <span class="see-more" >
+        <span class="see-more">
           See More
         </span>
       </div>
@@ -115,7 +175,7 @@
   <ng-container *ngIf="isExpandable && results_stealerlog?.Result as stResults">
     <hr class="dashboard-header-divider mt-4" *ngIf="results_defacement?.Result?.length" />
 
-    <ng-container *ngFor="let item of stResults.slice(0, showLimitStealer)">
+    <ng-container *ngFor="let item of stResults.slice(0, showLimitStealer); let i = index">
       <div class="home_defacement_result__container mt-4 mr-0">
         <div class="home-defacement-result-card-container">
           <div class="d-flex justify-content-between w-100 mb-2">
@@ -132,15 +192,35 @@
           <div class="home-defacement-result-card-header-section">
             <div class="home-defacement-result-card-company-info">
               <div class="home-defacement-result-card-label">Username</div>
-              <div class="home-defacement-result-card-value">
-                {{ item['username'] || '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="usernameValue(item)">
+                  {{ usernameValue(item) }}
+                </div>
+                <button
+                  *ngIf="usernameValue(item) && usernameValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(usernameValue(item), 'copy-username-' + i, $event)"
+                  [appTooltip]="isCopied('copy-username-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-username-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
 
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">Password</div>
-              <div class="home-defacement-result-card-value">
-                {{ item['password'] || '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="passwordValue(item)">
+                  {{ passwordValue(item) }}
+                </div>
+                <button
+                  *ngIf="passwordValue(item) && passwordValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(passwordValue(item), 'copy-password-' + i, $event)"
+                  [appTooltip]="isCopied('copy-password-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-password-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -148,15 +228,35 @@
           <div class="home-defacement-result-card-header-section">
             <div class="home-defacement-result-card-company-info">
               <div class="home-defacement-result-card-label">Domain</div>
-              <div class="home-defacement-result-card-value">
-                {{ item['domain'] || '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="domainValue(item)">
+                  {{ domainValue(item) }}
+                </div>
+                <button
+                  *ngIf="domainValue(item) && domainValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(domainValue(item), 'copy-domain-' + i, $event)"
+                  [appTooltip]="isCopied('copy-domain-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-domain-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
 
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">Hash</div>
-              <div class="home-defacement-result-card-value">
-                {{ item['m_hash'] || '-' }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="hashValue(item)">
+                  {{ hashValue(item) }}
+                </div>
+                <button
+                  *ngIf="hashValue(item) && hashValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(hashValue(item), 'copy-hash-' + i, $event)"
+                  [appTooltip]="isCopied('copy-hash-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-hash-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -164,8 +264,18 @@
           <div class="home-defacement-result-detail-row" *ngIf="item['url']">
             <div class="home-defacement-result-card-country-info">
               <div class="home-defacement-result-card-label">URL</div>
-              <div class="home-defacement-result-card-value">
-                {{ item['url'].length > 24 ? (item['url'] | slice : 0 : 30) + '...' : item['url'] }}
+              <div class="home-defacement-result-card-value-row">
+                <div class="home-defacement-result-card-value" [appTooltip]="stealerUrlValue(item)">
+                  {{ truncate(stealerUrlValue(item), 30) }}
+                </div>
+                <button
+                  *ngIf="stealerUrlValue(item) && stealerUrlValue(item) !== '-'"
+                  type="button"
+                  class="copy-ico"
+                  (click)="copyText(stealerUrlValue(item), 'copy-stealer-url-' + i, $event)"
+                  [appTooltip]="isCopied('copy-stealer-url-' + i) ? 'Copied' : 'Copy'">
+                  <i class="bi" [ngClass]="isCopied('copy-stealer-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -175,7 +285,7 @@
 
     <ng-container *ngIf="stResults.length > showLimitStealer">
       <div class="see-more-wrapper">
-        <span class="see-more" >
+        <span class="see-more">
           See More
         </span>
       </div>
