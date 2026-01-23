@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
+import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
 
 
 
 @Component({
   selector: 'app-credentials-search-bar',
-  imports: [NgFor, NgIf, KeyValuePipe, FormsModule],
+  imports: [NgFor, NgIf, KeyValuePipe, FormsModule, TooltipDirective],
   templateUrl: './credentials-search-bar.component.html',
   styleUrl: './credentials-search-bar.component.css',
   animations: [fadeInDashboardItem],
