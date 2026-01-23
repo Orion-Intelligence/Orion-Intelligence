@@ -47,6 +47,7 @@ import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
+import { SocialMapperComponent } from './shared/partials/intel-panel/dashboard-managers/social-mapper/social-mapper.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
@@ -184,6 +185,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/graphs/graphs.component').then(m => m.GraphComponent),
         data: { animation: 'ctigraph' }
+      },
+      {
+        path: 'social-mapper',
+        component: SocialMapperComponent,
+        data: { animation: 'SocialMapper' }
       },
       {
         path: 'directory',
