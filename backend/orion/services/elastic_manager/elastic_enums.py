@@ -100,3 +100,80 @@ class ELASTIC_ENUMS:
         "m_ip": "ip.keyword",
         "m_search_all": ["domain.keyword", "url.keyword", "username.keyword", "email.keyword"]
     }
+
+    mapping_consolidated_fields_for_operator = {
+        "m_domain": [
+            "m_base_url",
+            "m_websites",
+
+            "m_domain",
+
+            "m_base_url",
+            "m_websites",
+
+            "m_weblink",
+            "m_channel_url",
+        ],
+        "m_email": [
+            "m_email",
+
+            "m_users",
+
+            "m_content",
+        ],
+
+        "m_channel": [
+            "m_channel_name.keyword",
+            "m_channel_name",
+            "channel",
+            "m_channel",
+            "source_channel",
+            "m_source_channel",
+            "source_channel",
+            "m_source_channel",
+
+            "m_sender_name",
+        ],
+
+        "m_ip": [
+            "m_ip",
+
+            "m_ip",
+        ],
+
+        "m_username": [
+            "m_sender_username",
+            "m_sender_name",
+            "m_users",
+
+            "m_sender_name",
+
+            "m_username",
+        ],
+        "m_search_all": [
+            "m_title",
+            "m_title.keyword",
+
+            "m_content",
+            "m_important_content",
+
+            "m_url",
+            "m_base_url",
+            "m_web_url",
+            "m_weblink",
+
+            "m_caption",
+            "m_media_caption",
+            "m_ref_html",
+
+            "m_sender_name",
+            "m_channel_name",
+            "m_attacker",
+            "m_team",
+
+            "m_email",
+            "m_users",
+            "m_ip",
+            "m_domain",
+        ],
+    }
