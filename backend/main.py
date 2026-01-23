@@ -20,6 +20,7 @@ from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 from routes.public_api_routes import public_routes
 from routes.tenant_routes import tenant_routes
+from routes.test_routes import test_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
@@ -56,6 +57,7 @@ app.include_router(admin_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
 app.include_router(micro_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
+app.include_router(test_routes, include_in_schema=False)
 app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)

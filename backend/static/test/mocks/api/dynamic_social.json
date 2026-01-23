@@ -1,0 +1,40 @@
+{
+  "result": [
+    {
+      "m_title": "User bitcoin found on https://twitter.com",
+      "m_url": "https://twitter.com/bitcoin",
+      "m_base_url": "https://twitter.com",
+      "m_content": "",
+      "m_important_content": "Found on: https://twitter.com/bitcoin",
+      "m_network": "clearnet",
+      "m_section": [],
+      "m_content_type": ["stolen"],
+      "m_screenshot": "",
+      "m_weblink": ["https://twitter.com/bitcoin"],
+      "m_dumplink": ["https://twitter.com/bitcoin"],
+      "m_websites": [],
+      "m_logo_or_images": [],
+      "m_leak_date": null,
+      "m_data_size": null,
+      "m_revenue": null
+    },
+    {
+      "m_title": "User bitcoin found on https://clubhouse.com",
+      "m_url": "https://clubhouse.com/@bitcoin",
+      "m_base_url": "https://clubhouse.com",
+      "m_content": "",
+      "m_important_content": "Found on: https://clubhouse.com/@bitcoin",
+      "m_network": "clearnet",
+      "m_section": [],
+      "m_content_type": ["stolen"],
+      "m_screenshot": "",
+      "m_weblink": ["https://clubhouse.com/@bitcoin"],
+      "m_dumplink": ["https://clubhouse.com/@bitcoin"],
+      "m_websites": [],
+      "m_logo_or_images": [],
+      "m_leak_date": null,
+      "m_data_size": null,
+      "m_revenue": null
+    }
+  ]
+}
