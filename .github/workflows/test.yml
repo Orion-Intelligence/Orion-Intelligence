@@ -126,7 +126,13 @@ jobs:
 
       - run: |
           set -euo pipefail
-          docker exec trusted-web-main coverage xml -o /app/backend-coverage.xml
+          docker exec trusted-web-main sh -lc 'ls -la /app && ls -la /app/.coverage* || true'
+          docker exec trusted-web-main sh -lc 'coverage combine || true'
+          docker exec trusted-web-main sh -lc 'coverage xml -o /app/backend-coverage.xml || true'
+          docker exec trusted-web-main sh -lc 'test -f /app/backend-coverage.xml'
+
+      - run: |
+          set -euo pipefail
           docker cp trusted-web-main:/app/backend-coverage.xml backend-coverage.xml
 
       - name: Upload coverage to Codacy
