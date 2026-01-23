@@ -211,6 +211,34 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
     return await search_model.getInstance().search_consolidated_ranked_result(
         param, base_index, [], [])
 
+@api_routes.post(
+    "/api/search/consolidated/rankedWithOperators",
+    summary="Search consolidated reports (ranked with operators)",
+    tags=["Search"],
+    operation_id="searchConsolidatedRankedLogic",
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
+        )
+    )],
+)
+async def search_consolidated_ranked_with_operators(
+    param: search_consolidated_param_model = Body(...)
+):
+    base_index = [
+        ELASTIC_INDEX.S_LEAK_INDEX,
+        ELASTIC_INDEX.S_GENERIC_INDEX,
+        ELASTIC_INDEX.S_EXPLOIT_INDEX,
+        ELASTIC_INDEX.S_CHATS_INDEX,
+        ELASTIC_INDEX.S_SOCIAL_INDEX,
+        ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+    ]
+
+    return await search_model.getInstance().search_consolidated_ranked_with_operators(
+        param, base_index, [], []
+    )
+
 
 @api_routes.post(
     "/api/chat/telegram",

@@ -64,6 +64,40 @@ class elastic_request_generator:
         return {"term": {fields: value}}
 
     @staticmethod
+    def build_es_from_tagged_for_consolidated(parsed):
+        if isinstance(parsed, dict):
+            if "AND" in parsed:
+                must = [
+                    elastic_request_generator.build_es_from_tagged_for_consolidated(x)
+                    for x in parsed["AND"]
+                ]
+                return {"bool": {"must": must}}
+
+            if "OR" in parsed:
+                should = [
+                    elastic_request_generator.build_es_from_tagged_for_consolidated(x)
+                    for x in parsed["OR"]
+                ]
+                return {"bool": {"should": should, "minimum_should_match": 1}}
+
+        tag = parsed["tag"]
+        value = parsed["value"]
+        fields = ELASTIC_ENUMS.mapping_consolidated_fields_for_operator.get(tag)
+        if not fields:
+            return {"match_none": {}}
+
+        if len(fields) == 1:
+            return {"term": {fields[0]: value}}
+
+        return {
+            "bool": {
+                "should": [{"term": {f: value}} for f in fields],
+                "minimum_should_match": 1
+            }
+        }
+
+
+    @staticmethod
     def _build_query_block(p_query_model,
             pfilter,
             raw_query,
@@ -470,6 +504,71 @@ class elastic_request_generator:
             next(iter(b)) in base_index]
 
         return query
+
+    def on_search_consolidated_ranked_with_operator(self,
+        p_query_model,
+        pfilter,
+        base_index,
+        blocked_categories,
+        allowed_categories,
+    ):
+        must_clauses = []
+        must_not_clause = []
+
+        # 🔹 Parse tagged logic
+        if p_query_model.user and p_query_model.user != "*":
+            parsed = helper_controller.parse_tagged_logic_query_for_stealer_log(p_query_model.user)
+            logic_query = self.build_es_from_tagged_for_consolidated(parsed)
+            must_clauses.append(logic_query)
+
+        # 🔹 Date range (same as your current logic)
+        if p_query_model.daterange:
+            parts = p_query_model.daterange.split(",")
+            if len(parts) == 2:
+                from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
+                to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+
+                must_clauses.append({
+                    "bool": {
+                        "should": [
+                            {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}},
+                            {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}},
+                            {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}},
+                        ],
+                        "minimum_should_match": 1,
+                    }
+                })
+
+        unified_query = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query="*", 
+            quoted_value=False,
+            exact_phrases=[],
+            loose_terms=[],
+            phrase_fields=[],
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=getattr(p_query_model, "page", 1),
+            date_field="m_creation_date",
+        )
+
+        unified_query["size"] = 15
+        unified_query["from"] = max(0, (getattr(p_query_model, "page", 1) - 1) * 15)
+
+        return (
+            base_index,
+            unified_query,
+            [
+                {ELASTIC_INDEX.S_LEAK_INDEX: 2},
+                {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
+                {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4},
+                {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
+                {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4},
+                {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.4},
+            ],
+        )
+
 
     def on_search_consolidated_data(self, p_query_model, pFilter=None):
         queries = []

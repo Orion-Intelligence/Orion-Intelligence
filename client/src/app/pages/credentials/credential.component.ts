@@ -198,17 +198,16 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     const startTime = performance.now();
 
     this.dashboardService.consolidatedParamModel.category = "";
-    this.dashboardService.consolidatedParamModel.user = '';
+    this.dashboardService.consolidatedParamModel.user = this.searchQuery;
     this.dashboardService.consolidatedParamModel.url ??= '';
-    this.dashboardService.consolidatedParamModel.q = this.searchQuery;
 
     this.setLoading(1);
     this.isRankedLoading = true
     this.dashboardService
-      .fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel)
+      .fetchConsolidatedRankededResults('search/consolidated/rankedWithOperators', this.dashboardService.consolidatedParamModel)
       .pipe(
         switchMap(response => timer(500).pipe(map(() => response))),
-        finalize(() => { this.setLoading(-1), this.isRankedLoading = false })
+        finalize(() => { this.setLoading(-1), this.isRankedLoading = false, this.dashboardService.consolidatedParamModel.user = '' })
       )
       .subscribe(response => {
         const endTime = performance.now();
@@ -285,6 +284,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     }
 
     this.fetchSearchResults(true);
+  }
+  get maxPages(): number {
+    const stealerPages = this.stealerlogCallbackModel.Result.length || 0;
+    const rankedPages = this.rankedResult.result.length || 0;
+    return Math.max(stealerPages, rankedPages);
   }
   protected readonly length = length;
 }
