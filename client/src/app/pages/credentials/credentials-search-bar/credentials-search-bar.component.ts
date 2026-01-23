@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { NgFor, KeyValuePipe, NgIf } from '@angular/common';
+import {NgFor, KeyValuePipe, NgIf, NgClass} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
@@ -10,7 +10,7 @@ import {TooltipDirective} from '../../../shared/directive/tooltip-directive.dire
 
 @Component({
   selector: 'app-credentials-search-bar',
-  imports: [NgFor, NgIf, KeyValuePipe, FormsModule, TooltipDirective],
+  imports: [NgFor, NgIf, KeyValuePipe, FormsModule, TooltipDirective, NgClass],
   templateUrl: './credentials-search-bar.component.html',
   styleUrl: './credentials-search-bar.component.css',
   animations: [fadeInDashboardItem],

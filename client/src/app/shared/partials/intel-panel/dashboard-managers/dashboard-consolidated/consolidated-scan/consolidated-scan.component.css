@@ -16,14 +16,14 @@
   margin-left: 35px;
   margin-right: 50px;
   padding: 16px;
-  background-color: rgb(23 34 53 / 100%);
-  border: 1px solid rgb(252 252 252 / 7%);
+  background-color: var(--color-consolidated-primary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   margin-bottom: 20px;
 }
 
 .consolidated-scans-header {
-  width: 100%
+  width: 100%;
 }
 
 .consolidated-scans-header-content {
@@ -36,7 +36,7 @@
 .consolidated-scans-title {
   font-family: Inter, sans-serif;
   font-weight: 500;
-  color: rgb(87 165 235 / 100%);
+  color: var(--color-text5);
   font-size: 20px;
   line-height: 1.2;
   white-space: nowrap;
@@ -45,7 +45,7 @@
 .consolidated-scans-chevron-icon {
   width: 24px;
   height: 24px;
-  color: rgb(87 165 235 / 100%);
+  color: var(--color-text5);
   flex-shrink: 0;
 }
 
@@ -58,10 +58,10 @@
 
 .consolidated-scans-card {
   flex: 1;
-  background-color: rgb(252 252 252 / 5%);
+  background-color: var(--color-blue-890);
   border-radius: 12px;
   max-width: 462px;
-  border: 1px solid rgb(252 252 252 / 7%);
+  border: 1px solid var(--color-border);
 }
 
 .consolidated-scans-card-progress {
@@ -84,7 +84,7 @@
 .consolidated-scans-card-title {
   font-family: Inter, sans-serif;
   font-weight: 500;
-  color: rgb(255 255 255 / 100%);
+  color: var(--color-text1);
   font-size: 14px;
   line-height: 1.2;
 }
@@ -110,7 +110,7 @@
   justify-content: space-between;
   width: 100%;
   padding-top: 6px;
-  border-top: 1px solid rgb(252 252 252 / 7%);
+  border-top: 1px solid var(--color-divider);
 }
 
 .consolidated-scans-col-scan,
@@ -166,18 +166,18 @@
 .consolidated-scans-table-header .consolidated-scans-col-platform,
 .consolidated-scans-table-header .consolidated-scans-col-profile,
 .consolidated-scans-table-header .consolidated-scans-col-url {
-  color: rgb(160 184 209 / 100%);
+  color: var(--color-text4);
 }
 
 .consolidated-scans-table-row .consolidated-scans-col-scan,
 .consolidated-scans-table-row .consolidated-scans-col-platform,
 .consolidated-scans-table-row .consolidated-scans-col-action {
-  color: rgb(255 255 255 / 100%);
+  color: var(--color-text1);
 }
 
 .consolidated-scans-table-row .consolidated-scans-col-date,
 .consolidated-scans-table-row .consolidated-scans-col-profile {
-  color: rgb(208 208 208 / 100%);
+  color: var(--color-text2);
 }
 
 .consolidated-scans-badge {
@@ -186,22 +186,22 @@
   justify-content: center;
   padding: 4px 8px;
   border-radius: 100px;
-  border: 1px solid rgb(252 252 252 / 7%);
+  border: 1px solid var(--color-border);
   font-family: Inter, sans-serif;
   font-weight: 400;
   font-size: 12px;
   line-height: 12px;
   white-space: nowrap;
-  color: rgb(255 255 255 / 100%);
+  color: var(--color-text1);
 }
 
 .consolidated-scans-badge-warning {
-  background-color: rgb(255 217 102 / 10%);
-  color: rgb(255 217 102 / 100%);
+  background-color: var(--color-banner);
+  color: var(--color-text5);
 }
 
 .consolidated-scans-link {
-  color: rgb(255 255 255 / 100%);
+  color: var(--color-text1);
   text-decoration: underline;
   font-family: Inter, sans-serif;
   font-weight: 400;
@@ -219,7 +219,7 @@
 .consolidated-scans-progress-title {
   font-family: Inter, sans-serif;
   font-weight: 500;
-  color: rgb(87 165 235 / 100%);
+  color: var(--color-text5);
   font-size: 16px;
   line-height: 1.2;
   white-space: nowrap;
@@ -234,14 +234,14 @@
 .consolidated-scans-status-dot {
   width: 8px;
   height: 8px;
-  background-color: rgb(87 165 235 / 100%);
+  background-color: var(--color-text5);
   border-radius: 50%;
 }
 
 .consolidated-scans-status-text {
   font-family: Inter, sans-serif;
   font-weight: 400;
-  color: rgb(255 255 255 / 100%);
+  color: var(--color-text1);
   font-size: 13px;
   line-height: 16.9px;
   white-space: nowrap;
@@ -259,8 +259,8 @@
   justify-content: center;
   padding: 4px 10px;
   border-radius: 100px;
-  border: 1px solid rgb(252 252 252 / 7%);
-  color: rgb(160 184 209 / 100%);
+  border: 1px solid var(--color-border);
+  color: var(--color-text4);
   font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 12px;
@@ -280,7 +280,7 @@
 .consolidated-scans-progress-bar {
   width: 100%;
   height: 6px;
-  background-color: #ffffff15;
+  background-color: var(--color-divider);
   border-radius: 100px;
   overflow: hidden;
 }
@@ -294,13 +294,12 @@
 .consolidated-scans-progress-label {
   font-family: Inter, sans-serif;
   font-weight: 400;
-  color: rgb(160 184 209 / 100%);
+  color: var(--color-text4);
   font-size: 14px;
   line-height: 18.2px;
   white-space: nowrap;
 }
 
-/* moved inline styles */
 .consolidated-scans-mt-6 {
   margin-top: 6px;
 }
@@ -331,11 +330,11 @@
   height: 8px;
   border-radius: 999px;
   background: currentcolor;
-  opacity: .85;
+  opacity: 0.85;
 }
 
 .consolidated-scans-status-muted {
-  opacity: .9;
+  opacity: 0.9;
 }
 
 .consolidated-scans-chevron-btn {
@@ -350,18 +349,18 @@
 
 @media (width <= 1200px) {
   .consolidated-scans-cards-grid {
-    flex-direction: column
+    flex-direction: column;
   }
 
   .consolidated-scans-card-progress {
-    min-width: auto
+    min-width: auto;
   }
 }
 
 @media (width <= 768px) {
   .consolidated-scans-title {
     font-size: 16px;
-    white-space: normal
+    white-space: normal;
   }
 
   .consolidated-scans-container {
@@ -372,11 +371,11 @@
   .consolidated-scans-progress-section {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px
+    gap: 12px;
   }
 
   .consolidated-scans-progress-bar-wrapper {
-    width: 100%
+    width: 100%;
   }
 }
 
@@ -396,7 +395,7 @@
 
 :host ::ng-deep .ng-animating .consolidated-scans-card,
 :host ::ng-deep .ng-animating .consolidated-scans-table-row {
-  transition-timing-function: cubic-bezier(.2, .8, .2, 1);
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .consolidated-scans-chevron-btn.text-toggle {
@@ -408,12 +407,12 @@
   font-family: Inter, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: rgb(160 184 209 / 100%);
+  color: var(--color-text4);
   transition: color 160ms ease, opacity 160ms ease;
 }
 
 .consolidated-scans-chevron-btn.text-toggle:hover {
-  color: rgb(87 165 235 / 100%);
+  color: var(--color-text5);
 }
 
 .consolidated-scans-chevron-btn.text-toggle:active {
@@ -431,8 +430,7 @@
 }
 
 .consolidated-scans-chevron-icon {
-  transition: transform 160ms cubic-bezier(.2, .8, .2, 1),
-  color 160ms ease;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), color 160ms ease;
 }
 
 .consolidated-scans-chevron-icon.is-expanded {
@@ -447,9 +445,107 @@
 .expand-collapse-btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-text1);
   cursor: pointer;
   font-size: 14px;
   padding: 0 10px;
   margin-left: 10px;
+}
+
+:host-context(.dark-theme) .consolidated-scans-container {
+  background-color: rgb(23 34 53 / 100%);
+  border: 1px solid rgb(252 252 252 / 7%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-card {
+  background-color: rgb(252 252 252 / 5%);
+  border: 1px solid rgb(252 252 252 / 7%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-title {
+  color: rgb(87 165 235 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-chevron-icon {
+  color: rgb(87 165 235 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-card-title {
+  color: rgb(255 255 255 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-table-row {
+  border-top: 1px solid rgb(252 252 252 / 7%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-table-header .consolidated-scans-col-scan,
+:host-context(.dark-theme) .consolidated-scans-table-header .consolidated-scans-col-date,
+:host-context(.dark-theme) .consolidated-scans-table-header .consolidated-scans-col-risk,
+:host-context(.dark-theme) .consolidated-scans-table-header .consolidated-scans-col-action,
+:host-context(.dark-theme) .consolidated-scans-table-header .consolidated-scans-col-platform,
+:host-context(.dark-theme) .consolidated-scans-table-header .consolidated-scans-col-profile,
+:host-context(.dark-theme) .consolidated-scans-table-header .consolidated-scans-col-url {
+  color: rgb(160 184 209 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-table-row .consolidated-scans-col-scan,
+:host-context(.dark-theme) .consolidated-scans-table-row .consolidated-scans-col-platform,
+:host-context(.dark-theme) .consolidated-scans-table-row .consolidated-scans-col-action {
+  color: rgb(255 255 255 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-table-row .consolidated-scans-col-date,
+:host-context(.dark-theme) .consolidated-scans-table-row .consolidated-scans-col-profile {
+  color: rgb(208 208 208 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-badge {
+  border: 1px solid rgb(252 252 252 / 7%);
+  color: rgb(255 255 255 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-badge-warning {
+  background-color: rgb(255 217 102 / 10%);
+  color: rgb(255 217 102 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-link {
+  color: rgb(255 255 255 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-progress-title {
+  color: rgb(87 165 235 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-status-dot {
+  background-color: rgb(87 165 235 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-status-text {
+  color: rgb(255 255 255 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-running-pill {
+  border: 1px solid rgb(252 252 252 / 7%);
+  color: rgb(160 184 209 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-progress-bar {
+  background-color: #ffffff15;
+}
+
+:host-context(.dark-theme) .consolidated-scans-progress-label {
+  color: rgb(160 184 209 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-chevron-btn.text-toggle {
+  color: rgb(160 184 209 / 100%);
+}
+
+:host-context(.dark-theme) .consolidated-scans-chevron-btn.text-toggle:hover {
+  color: rgb(87 165 235 / 100%);
+}
+
+:host-context(.dark-theme) .expand-collapse-btn {
+  color: white;
 }

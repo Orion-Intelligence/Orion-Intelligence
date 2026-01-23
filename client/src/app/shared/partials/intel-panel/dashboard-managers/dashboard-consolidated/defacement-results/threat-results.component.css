@@ -4,7 +4,7 @@
   border-radius: 8px;
   padding: 17px 24px 17px 17px;
   font-family: Inter, sans-serif;
-  color: white;
+  color: var(--color-text1);
   min-width: 150px;
   max-height: 850px;
   margin-left: 35px;
@@ -36,27 +36,28 @@
 
 .home-defacement-result__filter-type {
   display: flex;
-  background-color: rgb(255 255 255 / 8%);
-  border: 1px solid rgb(255 255 255 / 14%);
+  background-color: var(--color-tags);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   height: 30px;
   padding: 0 10px;
   font-size: 12px;
   font-weight: 500;
-  color: #8fc7ff;
+  color: var(--color-text5);
   align-items: center;
   justify-content: center;
   align-self: flex-start;
   margin-top: 1px;
   cursor: pointer;
   gap: 6px;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
 }
 
 .home-defacement-result__filter-type:hover {
-  background: rgb(87 165 235 / 18%);
-  border-color: rgb(87 165 235 / 35%);
+  background: var(--color-blue-820);
+  border-color: var(--color-blue-640);
   transform: translateY(-1px);
+  filter: brightness(1.02);
 }
 
 .home-defacement-result__filter-type__filter-icon {
@@ -101,11 +102,11 @@
 
 .home-defacement-result-card-container {
   border-radius: 10px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  background: rgb(255 255 255 / 2%);
+  border: 1px solid var(--color-border);
+  background: var(--color-blue-890);
   padding: 14px;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 14%);
-  transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+  transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease, filter 140ms ease;
   color: var(--color-text1);
   display: flex;
   justify-content: space-between;
@@ -116,25 +117,17 @@
 }
 
 .home-defacement-result-card-container:hover {
-  border-color: rgb(255 255 255 / 16%);
-  box-shadow: 0 14px 34px rgb(0 0 0 / 22%);
+  border-color: color-mix(in srgb, var(--color-border) 60%, var(--color-text1) 10%);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
   transform: translateY(-1px);
+  filter: brightness(1.01);
 }
 
-.home-defacement-result-card-company-info:hover {
-  border: 1px solid #ffffff40 !important;
-}
-
-.home-defacement-result-card-country-info:hover {
-  border: 1px solid #ffffff40 !important;
-}
-
-.home-defacement-result-card-date-time-info:hover{
-  border: 1px solid #ffffff40 !important;
-}
-
-.home-defacement-result-card-attacker-info:hover{
-  border: 1px solid #ffffff40 !important;
+.home-defacement-result-card-company-info:hover,
+.home-defacement-result-card-country-info:hover,
+.home-defacement-result-card-date-time-info:hover,
+.home-defacement-result-card-attacker-info:hover {
+  border-color: var(--color-blue-640) !important;
 }
 
 .home-defacement-result-card-container::before {
@@ -161,7 +154,7 @@
   right: 0;
   bottom: 0;
   height: 1px;
-  background: rgb(255 255 255 / 10%);
+  background: var(--color-divider);
 }
 
 .home-defacement-result-card-container .d-flex.justify-content-between.w-100.mb-2 > div:first-child {
@@ -183,7 +176,7 @@
   font-size: 14px;
   letter-spacing: 0.35px;
   text-transform: uppercase;
-  color: rgb(255 255 255 / 94%);
+  color: var(--color-text1);
 }
 
 .home-defacement-explore {
@@ -193,22 +186,23 @@
   height: 32px;
   padding: 0 12px;
   border-radius: 10px;
-  border: 1px solid rgb(255 255 255 / 14%);
+  border: 1px solid var(--color-border);
   background: transparent;
-  color: rgb(255 255 255 / 90%);
+  color: var(--color-text1);
   font-family: Inter, sans-serif;
   font-weight: 800;
   font-size: 12px;
   letter-spacing: 0.2px;
   cursor: pointer;
   user-select: none;
-  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease, filter 140ms ease;
 }
 
 .home-defacement-explore:hover {
-  background: rgb(255 255 255 / 6%);
-  border-color: rgb(255 255 255 / 22%);
+  background: var(--color-blue-820);
+  border-color: var(--color-blue-640);
   transform: translateY(-1px);
+  filter: brightness(1.02);
 }
 
 .home-defacement-explore:active {
@@ -231,17 +225,18 @@
   min-width: 0;
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgb(0 0 0 / 12%);
-  border: 1px solid rgb(255 255 255 / 8%);
-  transition: background 140ms ease, border-color 140ms ease;
+  background: var(--color-blue-820);
+  border: 1px solid var(--color-border);
+  transition: background 140ms ease, border-color 140ms ease, filter 140ms ease;
 }
 
 .home-defacement-result-card-container:hover .home-defacement-result-card-company-info,
 .home-defacement-result-card-container:hover .home-defacement-result-card-attacker-info,
 .home-defacement-result-card-container:hover .home-defacement-result-card-date-time-info,
 .home-defacement-result-card-container:hover .home-defacement-result-card-country-info {
-  background: rgb(0 0 0 / 16%);
-  border-color: rgb(255 255 255 / 10%);
+  background: var(--color-blue-820);
+  border-color: var(--color-border);
+  filter: brightness(1.01);
 }
 
 .home-defacement-result-card-attacker-info {
@@ -253,7 +248,7 @@
   font-family: Inter, sans-serif;
   font-size: 11px;
   font-weight: 700;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-text6);
   margin-bottom: 6px;
 }
 
@@ -261,14 +256,14 @@
   font-family: Inter, sans-serif;
   font-size: 13.5px;
   font-weight: 750;
-  color: rgb(255 255 255 / 92%);
+  color: var(--color-text1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .home-defacement-result-card-country-info .home-defacement-result-card-value {
-  color: rgb(143 199 255 / 92%);
+  color: var(--color-text5);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 12.6px;
 }
@@ -299,14 +294,10 @@
   }
 }
 
-.home-defacement-result-card-company-info:hover {
-  border-color: rgb(143 199 255 / 45%);
-}
-
 .home-defacement-result-card-value-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -322,20 +313,24 @@
   width: 30px;
   height: 30px;
   border-radius: 10px;
-  border: 1px solid rgb(255 255 255 / 14%);
+  border: 1px solid var(--color-border);
   background: transparent;
-  color: rgb(255 255 255 / 90%);
+  color: var(--color-text1);
   cursor: pointer;
   user-select: none;
   padding: 0;
-  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease, filter 140ms ease, opacity 140ms ease;
   flex: 0 0 auto;
+  opacity: 0;
+  pointer-events: none;
+  margin-top: -25px !important;
 }
 
 .copy-ico:hover {
-  background: rgb(255 255 255 / 6%);
-  border-color: rgb(255 255 255 / 22%);
+  background: var(--color-blue-820);
+  border-color: var(--color-blue-640);
   transform: translateY(-1px);
+  filter: brightness(1.02);
 }
 
 .copy-ico:active {
@@ -345,22 +340,6 @@
 .copy-ico .bi {
   font-size: 14px;
   line-height: 1;
-}
-
-.home-defacement-result-card-company-info:hover {
-  border-color: rgb(143 199 255 / 45%);
-}
-
-.home-defacement-result-card-value-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.copy-ico {
-  opacity: 0;
-  pointer-events: none;
-  margin-top: -25px !important;
 }
 
 .home-defacement-result-card-value-row {
@@ -376,4 +355,3 @@
   opacity: 1;
   pointer-events: auto;
 }
-
