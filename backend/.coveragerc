@@ -1,6 +1,7 @@
 [run]
 branch = True
 parallel = True
+sigterm = True
 source =
     /app
 omit =
@@ -15,8 +16,8 @@ omit =
 
 [paths]
 source =
-    backend
-    /app
+    backend/
+    /app/
 
 [report]
 show_missing = True
