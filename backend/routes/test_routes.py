@@ -41,7 +41,7 @@ test_routes = APIRouter(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
+async def test_search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     step = _mock_step("dynamic_user")
     if step:
         return step
@@ -53,7 +53,7 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...)):
+async def test_search_dynamic_cracked(param: search_dynamic_crack_model = Body(...)):
     step = _mock_step("dynamic_cracked")
     if step:
         return step
@@ -65,7 +65,7 @@ async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...)):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
+async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
     step = _mock_step("dynamic_software")
     if step:
         return step
@@ -77,7 +77,7 @@ async def search_dynamic_software(param: search_dynamic_crack_model = Body(...))
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_social(param: search_dynamic_social_model = Body(...)):
+async def test_search_dynamic_social(param: search_dynamic_social_model = Body(...)):
     step = _mock_step("dynamic_social")
     if step:
         return step
@@ -89,7 +89,7 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
         Depends(license_required("scanning")), ], )
-async def parse_text(payload: DomainScanRequest):
+async def test_parse_text(payload: DomainScanRequest):
     step = _mock_step(f"urlscan_domain_{payload.scanType}")
     if step:
         return step
