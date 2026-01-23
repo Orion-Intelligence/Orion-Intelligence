@@ -22,13 +22,13 @@ export class CredentialsSearchBarComponent {
   selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
 
-  constructor(protected sidebarService: SidebarService) { }
+  @Output() searchTriggered = new EventEmitter<string>();
 
   advancedFilters: StealerlogsAdvancedFilter[] = [
     { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
   ];
 
-  @Output() searchTriggered = new EventEmitter<string>();
+  constructor(protected sidebarService: SidebarService) { }
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;

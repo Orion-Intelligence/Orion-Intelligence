@@ -998,12 +998,12 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data_with_operators(p_query_model, alert=False):
-        is_match_all = not p_query_model.q
+        is_match_all = not p_query_model.user
 
         if is_match_all:
             inner_query = {"match_all": {}}
         else:
-            parsed = helper_controller.parse_tagged_logic_query_for_stealer_log(p_query_model.q)
+            parsed = helper_controller.parse_tagged_logic_query_for_stealer_log(p_query_model.user)
             inner_query = elastic_request_generator.build_es_from_tagged_for_stealer_log(parsed)
 
         es_query = {

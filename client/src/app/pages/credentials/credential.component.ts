@@ -53,6 +53,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   showPasswordscheme = false;
 
   private pendingRequests = 0;
+  private isSearchLoading = false;
+  private isRankedLoading = false;
   private setLoading(delta: 1 | -1) {
     this.pendingRequests += delta;
     if (this.pendingRequests < 0) this.pendingRequests = 0;
@@ -105,7 +107,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.dashboardService.consolidatedParamModel.category = this.type;
     this.firstTrigger = false;
 
-    if (this.isLoading) return;
+    if (this.isSearchLoading) return;
 
     const cleanedParams: any = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
@@ -117,13 +119,14 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-    this.dashboardService.consolidatedParamModel.user ??= '';
+    this.dashboardService.consolidatedParamModel.user = this.searchQuery;
     this.dashboardService.consolidatedParamModel.url ??= '';
-    this.dashboardService.consolidatedParamModel.q = this.searchQuery;
+    this.dashboardService.consolidatedParamModel.q = '';
 
     const startTime = performance.now();
 
     this.setLoading(1);
+    this.isSearchLoading = true
     this.dashboardService
       .fetchSearchResults<StealerLogCallbackModel>(
         'search/stealerlogsWithOperator',
@@ -131,7 +134,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       )
       .pipe(
         switchMap(response => timer(300).pipe(map(() => response))),
-        finalize(() => this.setLoading(-1))
+        finalize(() => { this.setLoading(-1), this.isSearchLoading = false })
       )
       .subscribe(response => {
         const endTime = performance.now();
@@ -171,7 +174,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       this.fetchRanked();
       return;
     }
-
     this.stealerlogCallbackModel.Result = this.helperService.sortByKey<any>(
       this.stealerlogCallbackModel.Result,
       key,
@@ -192,19 +194,21 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   fetchRanked() {
     this.rankedResult = new RankedCallbackModel();
+    if (this.isRankedLoading) return;
     const startTime = performance.now();
 
     this.dashboardService.consolidatedParamModel.category = "";
-    this.dashboardService.consolidatedParamModel.user ??= '';
+    this.dashboardService.consolidatedParamModel.user = '';
     this.dashboardService.consolidatedParamModel.url ??= '';
     this.dashboardService.consolidatedParamModel.q = this.searchQuery;
 
     this.setLoading(1);
+    this.isRankedLoading = true
     this.dashboardService
       .fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel)
       .pipe(
         switchMap(response => timer(500).pipe(map(() => response))),
-        finalize(() => this.setLoading(-1))
+        finalize(() => { this.setLoading(-1), this.isRankedLoading = false })
       )
       .subscribe(response => {
         const endTime = performance.now();

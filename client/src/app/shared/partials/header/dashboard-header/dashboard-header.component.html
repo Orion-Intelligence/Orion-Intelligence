@@ -1,7 +1,7 @@
 <div class="header-bar">
   <ng-container *ngIf="!authService.getIsMobileDemo()">
     <div class="header-bar_title-container">
-      <img (click)="goBack()" [class.inactive]="breadcrumb.length <= 2" alt="Back" class="header-bar_left-arrow"
+      <img (click)="goBack()" [class.disabled]="breadcrumb.length <= 2" alt="Back" class="header-bar_left-arrow"
         height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
 
       <span *ngFor="let crumb of breadcrumb; let i = index; let last = last">
