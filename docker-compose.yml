@@ -16,6 +16,8 @@ services:
       - mongo
       - arangodb
     volumes:
+      - ./backend/.coveragerc:/app/.coveragerc:ro
+      - ./backend/sitecustomize.py:/app/sitecustomize.py:ro
       - ./backend/orion:/app/orion:cached
       - ./backend/routes:/app/routes:cached
       - ./backend/static:/app/static:cached
@@ -34,7 +36,7 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+      sh -c "python3 /app/cronjobs.py & exec gunicorn --preload -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
 
   arangodb:
     container_name: trusted-web-arangodb
@@ -209,3 +211,5 @@ volumes:
   static_volume:
   media_volume:
   arangodb:
+
+

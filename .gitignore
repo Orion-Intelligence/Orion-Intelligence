@@ -1,6 +1,7 @@
 .env
 .DS_Store
 **/.DS_Store
+backend/backend_cov_app/*
 *.bak
 *.log
 *.py[cod]
@@ -17,7 +18,7 @@ env/
 backend/env/
 client/node_modules/
 client/.angular/cache/
-
+backend_cov_app/*
 backend/build/
 backend/build/*
 client/build/
