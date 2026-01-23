@@ -131,17 +131,25 @@ jobs:
           docker cp trusted-web-main:/app/. backend_cov_app
           python3 -m pip install --no-cache-dir --upgrade pip coverage
           cp backend_cov_app/.coveragerc .coveragerc
-          find backend_cov_app -maxdepth 1 -name ".coverage*" -print
-          test "$(find backend_cov_app -maxdepth 1 -name ".coverage*" | wc -l)" -gt 0
-          python3 -m coverage combine backend_cov_app/.coverage*
+          find backend_cov_app -maxdepth 1 -name ".coverage.*" -print
+          test "$(find backend_cov_app -maxdepth 1 -name ".coverage.*" | wc -l)" -gt 0
+          python3 -m coverage combine backend_cov_app/.coverage.*
           python3 -m coverage xml -o backend-coverage.xml
           test -s backend-coverage.xml
 
-      - name: Upload coverage to Codacy
+      - name: Upload frontend coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: client/coverage/lcov.info,backend-coverage.xml
+          coverage-reports: client/coverage/lcov.info
+          language: TypeScript
+
+      - name: Upload backend coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: backend-coverage.xml
+          language: Python
 
       - if: always()
         uses: actions/upload-artifact@v4
