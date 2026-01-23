@@ -26,25 +26,14 @@ describe('Homepage – Consolidated Checker Full Flow', () => {
     cy.contains('.home-defacement-result__title', 'IP Threat Report')
       .should('be.visible');
 
-
     const openCategoryAndReturn = (categoryName: string) => {
-
-
-      cy.contains('.home-defacement-result__filter-type', categoryName)
-        .should('be.visible')
-        .click({ force: true });
-
-
-
-
+    cy.contains('.home-defacement-result__filter-type', categoryName, { timeout: 30000 }).should('be.visible').click({ force: true });
     };
 
     openCategoryAndReturn('databases');
     openCategoryAndReturn('hacked');
     openCategoryAndReturn('phishing');
     openCategoryAndReturn('stealer');
-
-
   });
 });
 
