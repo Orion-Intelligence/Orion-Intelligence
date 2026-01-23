@@ -211,7 +211,7 @@ describe('Dashboard Sections Test', () => {
 
 
 
-  cy.get('div.credentials-search_toggle-wrapper')
+  cy.get('div.credentials-search_mode-toggle')
     .find('span.credentials-search_slider')
     .click({ force: true });
 
