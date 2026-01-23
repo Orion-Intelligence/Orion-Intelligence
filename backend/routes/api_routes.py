@@ -32,7 +32,6 @@ from orion.services.stix_manager.stix_manager import stix_manager
 
 _DOCS_DIR = Path(__file__).resolve().parent / "docs" / "api_docs"
 
-
 def _read_md(rel_path: str) -> str:
     p = _DOCS_DIR / rel_path
     try:
