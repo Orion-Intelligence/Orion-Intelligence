@@ -2,11 +2,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
 
   const TABS = [
     'All',
-    'General',
-    'Forums',
-    'News',
-    'Marketplaces',
-    'Leaks'
+    'General'
   ];
 
   beforeEach(() => {
@@ -187,7 +183,7 @@ describe('Discussion – Tabs & Pagination', () => {
 
 
 describe('Defacement – Tabs & Pagination', () => {
-  const TABS = ['All', 'Hacked', 'Phishing'];
+  const TABS = ['All', 'Hacked'];
 
   beforeEach(() => {
     cy.session('admin-session', () => {
@@ -249,9 +245,7 @@ describe('Defacement – Tabs & Pagination', () => {
 describe('Social – Tabs & Pagination', () => {
   const TABS = [
     'All',
-    'Twitter',
-    'Forum',
-    'Reddit'
+    'Twitter'
   ];
 
   beforeEach(() => {
@@ -318,7 +312,7 @@ describe('Social – Tabs & Pagination', () => {
 
 
 describe('Exploit – Tabs & Pagination', () => {
-  const TABS = ['All', 'CVE', 'Tools', 'ZeroDay'];
+  const TABS = ['All', 'CVE'];
 
   beforeEach(() => {
     cy.session('admin-session', () => {

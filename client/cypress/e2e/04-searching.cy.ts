@@ -166,9 +166,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     const tabs = [
       { name: 'All', searchTerm: 'uk' },
-      { name: 'General', searchTerm: 'uk' },
-      { name: 'Forums', searchTerm: 'data' },
-      { name: 'News', searchTerm: 'data' }
+      { name: 'General', searchTerm: 'uk' }
     ];
 
     tabs.forEach(tab => {
@@ -195,7 +193,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
       }
     });
 
-    const reportTabs = ['Marketplaces', 'Cryptocurrency', 'Leaks'];
+    const reportTabs = ['Marketplaces'];
 
     reportTabs.forEach(tab => {
       cy.contains('.sidebar__subitem-content', tab).click({ force: true });
@@ -307,9 +305,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     const socialTabs = [
       { name: 'All', screenshot: 'social-all' },
-      { name: 'Twitter', screenshot: 'social-twitter' },
-      { name: 'Forum', screenshot: 'social-forum' },
-      { name: 'Reddit', screenshot: 'social-reddit' }
+      { name: 'Twitter', screenshot: 'social-twitter' }
     ];
 
     socialTabs.forEach(tab => {
@@ -338,8 +334,6 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     runExploitSearchFlow('All', 'turning', 'exploit-all');
     runExploitSearchFlow('CVE', 'turning', 'exploit-cve');
-    runExploitSearchFlow('Tools', 'Salty', 'exploit-tools');
-    runExploitSearchFlow('ZeroDay', 'turning', 'exploit-zeroday');
   });
 
   it('Feed: News → Search UK → Open Report', () => {

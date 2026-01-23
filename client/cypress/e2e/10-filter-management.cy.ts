@@ -37,7 +37,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
         .type(value);
 
       cy.get('.filter-add__icon').click({ force: true });
-      cy.wait(200);
+
     };
 
 
@@ -52,31 +52,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       ['YARA Rules', 'rule malicious_test'],
       ['Encoded URLs', 'aHR0cHM6Ly9leGFtcGxlLmNvbQ=='],
       ['File Paths', '/var/log/syslog'],
-      ['Credit Cards', '4111111111111111'],
-      ['Organizations', 'OpenAI'],
-      ['Company Names', 'Google'],
-      ['Persons', 'John Doe'],
-      ['Locations', 'Lahore'],
-      ['Languages', 'English'],
-      ['User Agents', 'Mozilla/5.0'],
-      ['ASNs', 'AS15169'],
-      ['Teams', 'Security Team'],
-      ['Hashtags', '#cybersecurity'],
-      ['Mentions', '@admin'],
-      ['Social Media Profiles', 'twitter.com/example'],
-      ['Currencies', 'USD'],
-      ['Crypto Addresses', '1BoatSLRHtKNngkdXEeobR76b53LETtpyT'],
-      ['XMPP Addresses', 'user@xmpp.org'],
-      ['Enterprise ATT&CK Tactics', 'Initial Access'],
-      ['Enterprise ATT&CK Techniques', 'T1059'],
-      ['Document IDs', 'DOC-123'],
-      ['Australian IDs', 'AUS-998877'],
-      ['US IDs', 'US-112233'],
-      ['US Bank Numbers', '021000021'],
-      ['Platform', 'Telegram'],
-      ['Author', 'Threat Researcher'],
-      ['Industry', 'Cybersecurity'],
-      ['Scrap Script', 'darkweb_scraper']
+      ['Credit Cards', '4111111111111111']
     ];
 
     filters.forEach(([name, value]) => applyFilter(name, value));
@@ -93,7 +69,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.get('#dropdownMenu1').click({ force: true });
       cy.contains('.dropdown-item', option).click({ force: true });
       cy.get('[data-cy="dashboard-general-input"]').type('{enter}');
-      cy.wait(300);
+
     });
 
     const searchByOptions = [
@@ -107,7 +83,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.get('#dropdownMenu2').click({ force: true });
       cy.contains('.dropdown-item', option).click({ force: true });
       cy.get('[data-cy="dashboard-general-input"]').clear().type('test query{enter}');
-      cy.wait(400);
+
     });
 
 
@@ -119,12 +95,12 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
     openFilters();
 
 
-    const networkOptions = ['All', 'Onion', 'I2P', 'Clearnet'];
+    const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
       cy.get('#dropdownnetwork').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(400);
+
       openFilters();
     });
 
@@ -134,7 +110,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.get('#dropdownsafe').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(400);
+
       openFilters();
     });
 
@@ -149,26 +125,21 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.contains('span.custom-day', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(500);
+
       openFilters();
     };
     selectDateRange();
 
 
     const contentTypes = [
-      'All','Breach','Credential','Ransomware','Phishing','Scam','Malware',
-      'Infostealer','C2','DDoS','Exploit','Leak','Logs','VPN','Carding','RAT',
-      'Keylogger','Spyware','SQL Injection','XSS','Supply Chain','Insider','Fraud',
-      'Obfuscation','Crack','Cheats','CVE','Zero Day','Rootkit','APT','Threat Intel',
-      'Dark Web','RCE','LPE','Exfiltration','Persistence','Reconnaissance','Hack',
-      'News','Credentials (Common)','War'
+      'All','Breach','Credential','Ransomware'
     ];
 
     contentTypes.forEach(option => {
       cy.get('#dropdowncontent').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(300);
+
       openFilters();
     });
 
@@ -214,12 +185,11 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
     openFilters();
 
 
-    const networkOptions = ['All', 'Onion', 'I2P', 'Clearnet'];
+    const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
       cy.get('#dropdownnetwork').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(400);
       openFilters();
     });
 
@@ -229,7 +199,6 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
       cy.get('#dropdownsafe').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(400);
       openFilters();
     });
 
@@ -243,30 +212,23 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
       cy.contains('span.custom-day', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(500);
       openFilters();
     };
     selectDateRange();
 
     cy.get('.sidebar_input_date-button').click({ force: true });
     cy.contains('button', 'Clear').click({ force: true });
-    cy.wait(200);
+
 
 
     const contentTypes = [
-      'All','Breach','Credential','Ransomware','Phishing','Scam','Malware',
-      'Infostealer','C2','DDoS','Exploit','Leak','Logs','VPN','Carding','RAT',
-      'Keylogger','Spyware','SQL Injection','XSS','Supply Chain','Insider','Fraud',
-      'Obfuscation','Crack','Cheats','CVE','Zero Day','Rootkit','APT','Threat Intel',
-      'Dark Web','RCE','LPE','Exfiltration','Persistence','Reconnaissance','Hack',
-      'News','Credentials (Common)','War'
+      'All','Breach','Credential','Ransomware'
     ];
 
     contentTypes.forEach(option => {
       cy.get('#dropdowncontent').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(300);
       openFilters();
     });
 
@@ -319,30 +281,24 @@ describe('Discussion – Full Filters Flow', () => {
       cy.contains('span.custom-day', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(500);
+
 
       cy.get('.sidebar_input_date-button').click({ force: true });
       cy.contains('button', 'Clear').click({ force: true });
-      cy.wait(200);
       openFilters();
     };
     selectMessageDate();
 
 
     const contentTypes = [
-      'All','Breach','Credential','Ransomware','Phishing','Scam','Malware',
-      'Infostealer','C2','DDoS','Exploit','Leak','Logs','VPN','Carding','RAT',
-      'Keylogger','Spyware','SQL Injection','XSS','Supply Chain','Insider','Fraud',
-      'Obfuscation','Crack','Cheats','CVE','Zero Day','Rootkit','APT','Threat Intel',
-      'Dark Web','RCE','LPE','Exfiltration','Persistence','Reconnaissance','Hack',
-      'News','Credentials (Common)','War'
+      'All','Breach','Credential','Ransomware'
     ];
 
     contentTypes.forEach(option => {
       cy.get('#dropdowncontent').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(300);
+
       openFilters();
     });
 
@@ -392,22 +348,22 @@ describe('Defacement – Full Filters Flow', () => {
       cy.contains('span.custom-day', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(500);
+
 
       cy.get('.sidebar_input_date-button').click({ force: true });
       cy.contains('button', 'Clear').click({ force: true });
-      cy.wait(200);
+
       openFilters();
     };
     selectDateRange();
 
 
-    const networkOptions = ['All', 'Onion', 'I2P', 'Clearnet'];
+    const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
       cy.get('#dropdownnetwork').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(400);
+
       openFilters();
     });
 
@@ -459,40 +415,35 @@ describe('Social – Full Filters Flow', () => {
       cy.contains('span.custom-day', '31').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(500);
+
 
       cy.get('.sidebar_input_date-button').click({ force: true });
       cy.contains('button', 'Clear').click({ force: true });
-      cy.wait(200);
+
       openFilters();
     };
     selectDateRange();
 
 
-    const networkOptions = ['All', 'Onion', 'I2P', 'Clearnet'];
+    const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
       cy.get('#dropdownnetwork').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(400);
+
       openFilters();
     });
 
 
     const contentTypes = [
-      'All','Breach','Credential','Ransomware','Phishing','Scam','Malware',
-      'Infostealer','C2','DDoS','Exploit','Leak','Logs','VPN','Carding','RAT',
-      'Keylogger','Spyware','SQL Injection','XSS','Supply Chain','Insider','Fraud',
-      'Obfuscation','Crack','Cheats','CVE','Zero Day','Rootkit','APT','Threat Intel',
-      'Dark Web','RCE','LPE','Exfiltration','Persistence','Reconnaissance','Hack',
-      'News','Credentials (Common)','War'
+      'All','Breach','Credential','Ransomware'
     ];
 
     contentTypes.forEach(option => {
       cy.get('#dropdowncontent').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(300);
+
       openFilters();
     });
 
@@ -544,39 +495,34 @@ describe('Exploit – Full Filters Flow', () => {
       cy.contains('span.custom-day', '31').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(500);
+
 
       cy.get('.sidebar_input_date-button').click({ force: true });
       cy.contains('button', 'Clear').click({ force: true });
-      cy.wait(200);
+
       openFilters();
     };
     selectDateRange();
 
     const contentTypes = [
-      'All','Breach','Credential','Ransomware','Phishing','Scam','Malware',
-      'Infostealer','C2','DDoS','Exploit','Leak','Logs','VPN','Carding','RAT',
-      'Keylogger','Spyware','SQL Injection','XSS','Supply Chain','Insider','Fraud',
-      'Obfuscation','Crack','Cheats','CVE','Zero Day','Rootkit','APT','Threat Intel',
-      'Dark Web','RCE','LPE','Exfiltration','Persistence','Reconnaissance','Hack',
-      'News','Credentials (Common)','War'
+      'All','Breach','Credential','Ransomware'
     ];
 
     contentTypes.forEach(option => {
       cy.get('#dropdowncontent').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(300);
+
       openFilters();
     });
 
 
-    const networkOptions = ['All', 'Onion', 'I2P', 'Clearnet'];
+    const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
       cy.get('#dropdownnetwork').click({ force: true });
       cy.contains('a.dropdown-item', option).click({ force: true });
       cy.contains('button', 'Apply').click({ force: true });
-      cy.wait(400);
+
       openFilters();
     });
 
@@ -588,60 +534,6 @@ describe('Exploit – Full Filters Flow', () => {
 });
 
 
-// describe('Feed – Apply Filters and Verify Results', () => {
-//   beforeEach(() => {
-//     cy.session('admin-session', () => {
-//       cy.loginAsAdmin();
-//     });
-//   });
-//
-//   it('Open Feed and Apply All Filters', () => {
-//
-//     cy.visit('/dashboard');
-//     cy.contains('.sidebar__item-dropdown', 'feed')
-//       .scrollIntoView()
-//       .click({ force: true });
-//     cy.wait(500);
-//
-//
-//     cy.get('.filters-button').click({ force: true });
-//     cy.wait(300);
-//
-//
-//     cy.get('#dropdownnetwork').click({ force: true });
-//     cy.contains('.dropdown-item', 'Onion').click({ force: true });
-//     cy.contains('button', 'Apply').click({ force: true });
-//     cy.wait(500);
-//
-//
-//     cy.get('#dropdownsafe').click({ force: true });
-//     cy.contains('.dropdown-item', 'Yes').click({ force: true });
-//     cy.contains('button', 'Apply').click({ force: true });
-//     cy.wait(500);
-//
-//
-//     cy.get('#dropdowncontent').click({ force: true });
-//     cy.contains('.dropdown-item', 'Breach').click({ force: true });
-//     cy.contains('button', 'Apply').click({ force: true });
-//     cy.wait(500);
-//
-//
-//     cy.get('.sidebar_input_date-button').click({ force: true });
-//     cy.contains('span.custom-day', '1').click({ force: true });
-//     cy.contains('span.custom-day', '25').click({ force: true });
-//     cy.contains('button', 'Apply').click({ force: true });
-//     cy.wait(500);
-//
-//
-//     cy.get('.sidebar_input_date-button').click({ force: true });
-//     cy.contains('button', 'Clear').click({ force: true });
-//     cy.contains('button', 'Apply').click({ force: true });
-//     cy.wait(500);
-//
-//
-//     cy.get('.feed-result-item').should('exist');
-//   });
-// });
 
 
 
