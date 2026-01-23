@@ -8,6 +8,8 @@ services:
       - .env
     environment:
       BLOOM_DIR: /app
+      COVERAGE_PROCESS_START: /app/.coveragerc
+      PYTHONPATH: /app
     working_dir: /app
     depends_on:
       - elasticsearch
@@ -32,16 +34,7 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c '
-      set -e
-      python3 /app/cronjobs.py &
-      coverage run --parallel-mode --source=/app -m gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 &
-      pid=$!
-      trap "kill -TERM $pid 2>/dev/null || true; wait $pid || true; coverage combine || true; coverage xml -o /app/backend-coverage.xml || true" TERM INT
-      wait $pid || true
-      coverage combine || true
-      coverage xml -o /app/backend-coverage.xml || true
-      '
+      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
 
   arangodb:
     container_name: trusted-web-arangodb
@@ -127,7 +120,6 @@ services:
       resources:
         limits:
           memory: 5G
-
 
   redis_server:
     container_name: trusted-web-redis
