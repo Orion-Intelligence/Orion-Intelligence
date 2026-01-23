@@ -124,11 +124,18 @@ jobs:
           set -euo pipefail
           test -f client/coverage/lcov.info
 
+      - run: |
+          set -euo pipefail
+          docker exec trusted-web-main coverage xml -o /app/backend-coverage.xml
+          docker cp trusted-web-main:/app/backend-coverage.xml backend-coverage.xml
+
       - name: Upload coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: client/coverage/lcov.info
+          coverage-reports: |
+            client/coverage/lcov.info
+            backend-coverage.xml
 
       - if: always()
         uses: actions/upload-artifact@v4
