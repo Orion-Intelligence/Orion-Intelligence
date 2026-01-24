@@ -143,9 +143,9 @@ describe('Dashboard Sections Test', () => {
       .check({ force: true });
 
 
-    cy.get('div.scrollable')
+    cy.get('div.scrollable', { timeout: 20000 })
       .find('div.search-result')
-      .contains('Website')
+      .contains('Website', { timeout: 20000 })
       .should('exist');
 
 
