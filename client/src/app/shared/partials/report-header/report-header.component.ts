@@ -93,7 +93,6 @@ export class ReportHeaderComponent {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Summarization failed', err);
       }
     });
   }

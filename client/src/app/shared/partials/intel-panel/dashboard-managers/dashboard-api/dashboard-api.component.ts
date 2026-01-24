@@ -182,7 +182,6 @@ export class DashboardApiComponent implements OnInit {
         return isPending && !isFailedPending;
       }, true),
       catchError(error => {
-        console.error('Search API call failed:', error);
         return of(null);
       })
     );

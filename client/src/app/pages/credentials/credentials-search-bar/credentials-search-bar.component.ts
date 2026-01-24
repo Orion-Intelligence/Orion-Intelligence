@@ -35,10 +35,6 @@ export class CredentialsSearchBarComponent {
     this.isAdvanced = !this.isAdvanced;
   }
 
-  selectBasicTag(tag: StealerlogsSearchFilters): void {
-    this.selectedTag = tag;
-  }
-
   addFilter(): void {
     this.advancedFilters.push({
       id: this.generateId(),

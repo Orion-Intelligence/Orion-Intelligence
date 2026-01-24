@@ -189,7 +189,6 @@ export class AlertNotificationComponent implements OnChanges {
           next: () => {
           },
           error: (err) => {
-            console.error(err);
           },
         });
       } else {

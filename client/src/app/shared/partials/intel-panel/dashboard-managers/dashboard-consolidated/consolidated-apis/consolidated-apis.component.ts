@@ -128,7 +128,6 @@ export class ConsolidatedApisComponent {
           this.isExpanded = true;
         },
         error: (err) => {
-          console.error("Live API Batch Search failed:", err);
           this.isProcessing = false;
         }
       });

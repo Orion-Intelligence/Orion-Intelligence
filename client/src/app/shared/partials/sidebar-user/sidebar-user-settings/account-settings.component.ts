@@ -131,7 +131,6 @@ export class AccountSettingsComponent implements OnInit {
       next: () => {
       },
       error: (err) => {
-        console.error(err);
       },
     });
   }

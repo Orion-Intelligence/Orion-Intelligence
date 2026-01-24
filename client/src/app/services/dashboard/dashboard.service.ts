@@ -110,7 +110,6 @@ export class DashboardService {
         data: response
       })),
       catchError((error) => {
-        console.error('Search API call failed:', error);
         return of({ success: false, isEmpty: false, data: null });
       })
     );

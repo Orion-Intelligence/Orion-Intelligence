@@ -25,13 +25,11 @@ export class AlertService {
             }
           },
           error: (err) => {
-            console.error('Status check failed with an error:', err);
             this.isAlertScanLoading.set(false);
           }
         });
       },
       error: (err) => {
-        console.error('Scan failed with an error:', err);
         this.isAlertScanLoading.set(false);
       },
     });
@@ -43,7 +41,6 @@ export class AlertService {
         this.isAlertScanLoading.set(false);
       },
       error: (err) => {
-        console.error('Cancel scan failed with an error:', err);
       },
     });
   }

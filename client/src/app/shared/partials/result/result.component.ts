@@ -250,10 +250,7 @@ export class ResultComponent implements OnInit, OnChanges {
     );
     window.open(url, '_blank');
   }
-  onEntityFilterToggle(newValue: boolean): void {
-    this.app_service.set('entityFilterCondition', newValue);
-    this.onFormSubmit();
-  }
+
   checkMember(): boolean {
     return this.app_service.userSessionData().user.role === 'member';
   }

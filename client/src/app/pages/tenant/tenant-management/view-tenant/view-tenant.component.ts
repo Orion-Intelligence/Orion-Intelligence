@@ -48,7 +48,6 @@ export class ViewTenantComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to load tenants', err);
         this.isLoading = false;
       },
     });
@@ -89,7 +88,6 @@ export class ViewTenantComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to update tenant', err);
         this.isLoading = false;
       },
     });

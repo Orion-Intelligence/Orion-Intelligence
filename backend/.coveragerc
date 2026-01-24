@@ -22,3 +22,6 @@ source =
 [report]
 show_missing = True
 skip_empty = True
+exclude_lines =
+    logger\.error
+    logger\.exception
