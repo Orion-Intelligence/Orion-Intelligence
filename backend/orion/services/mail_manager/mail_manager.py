@@ -38,7 +38,7 @@ class mail_manager:
         ACCOUNTS_MAIL_PASSWORD = env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD")
         sender_email = env_handler.get_instance().env("ACCOUNTS_MAIL")
         smtp_server = env_handler.get_instance().env("ACCOUNTS_SMTP_SERVER")
-        smtp_port = 465
+        smtp_port = int(env_handler.get_instance().env("ACCOUNTS_SMTP_PORT"))
         msg = MIMEMultipart("alternative")
         msg["From"] = sender_email
         msg["To"] = to_header
@@ -57,13 +57,21 @@ class mail_manager:
     @staticmethod
     def _send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):
         recipients = [to, sender_email]
-        with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, recipients, msg.as_string())
+        if env_handler.get_instance().env("PRODUCTION", "0") == "1":
+            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+                server.login(sender_email, password)
+                server.sendmail(sender_email, recipients, msg.as_string())
+        else:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.sendmail(sender_email, recipients, msg.as_string())
 
     @staticmethod
     def _send_sync_email_list(sender_email, password, to_list, msg, smtp_server, smtp_port):
         recipients = list(to_list) + [sender_email]
-        with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, recipients, msg.as_string())
+        if env_handler.get_instance().env("PRODUCTION", "0") == "1":
+            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+                server.login(sender_email, password)
+                server.sendmail(sender_email, recipients, msg.as_string())
+        else:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.sendmail(sender_email, recipients, msg.as_string())

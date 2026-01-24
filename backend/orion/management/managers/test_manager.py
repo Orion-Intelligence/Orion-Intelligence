@@ -36,6 +36,7 @@ class test_manager:
 
         MONGO_CONNECTIONS.S_MONGO_DATABASE_NAME = "orion-web_test"
         ELASTIC_CONNECTIONS.S_DATABASE_NAME = "orion-elastic-search_test"
+        ARANGO_CONNECTIONS.ARANGO_DATABASE_NAME = "orion-web_test"
 
         admin_mock["username"] = "admin_test_username"
         admin_user["password"] = db_user_account.hash_password(
@@ -68,12 +69,17 @@ class test_manager:
             MONGO_CONNECTIONS.S_MONGO_DATABASE_IP,
             MONGO_CONNECTIONS.S_MONGO_DATABASE_PORT,
             username=MONGO_CONNECTIONS.S_MONGO_USERNAME,
-            password=MONGO_CONNECTIONS.S_MONGO_PASSWORD, )
+            password=MONGO_CONNECTIONS.S_MONGO_PASSWORD,
+            authSource="admin",
+        )
         db = mongo_client[MONGO_CONNECTIONS.S_MONGO_DATABASE_NAME]
 
         cols = await db.list_collection_names()
         for c in cols:
-            await db[c].delete_many({})
+            try:
+                await db[c].delete_many({})
+            except Exception:
+                pass
 
         mocks_dir = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "mongo"
         if mocks_dir.exists():
@@ -82,14 +88,17 @@ class test_manager:
                 if len(parts) < 3:
                     continue
                 collection = parts[-2]
+
                 with fp.open("r", encoding="utf-8") as f:
                     payload = json.load(f)
+
                 if isinstance(payload, list):
                     docs = payload
                 elif isinstance(payload, dict) and isinstance(payload.get("data"), list):
                     docs = payload["data"]
                 else:
                     docs = [payload]
+
                 if docs:
                     await db[collection].insert_many(self._fix(docs), ordered=False)
 
