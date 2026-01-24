@@ -1,12 +1,14 @@
+import gzip
 import json
+import motor.motor_asyncio
+
+from arango import ArangoClient
+from orion.services.arango_manager.arango_enums import ARANGO_CONNECTIONS
 from datetime import datetime, timezone
 from pathlib import Path
-
 from elastic_transport import ApiError
-import motor.motor_asyncio
 from odmantic import ObjectId
 from elasticsearch import AsyncElasticsearch, helpers as es_helpers, NotFoundError
-
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
@@ -196,3 +198,87 @@ class test_manager:
 
         finally:
             await es.close()
+
+    async def reset_test_arango_and_import_mocks(self):
+        if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
+            return
+
+        dumps_root = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "arango" / "arango_dump"
+        if not dumps_root.exists():
+            return
+
+        base = dumps_root / "arango_dump" if (dumps_root / "arango_dump").exists() else dumps_root
+
+        db_name = ARANGO_CONNECTIONS.ARANGO_DATABASE_NAME
+        candidates = sorted(base.glob(f"**/{db_name}/dump.json"))
+        if not candidates:
+            candidates = sorted(dumps_root.glob(f"**/{db_name}/dump.json"))
+            if not candidates:
+                return
+        target_dir = candidates[0].parent
+
+        client = ArangoClient(hosts=ARANGO_CONNECTIONS.ARANGO_URL)
+
+        sys_db = client.db(
+            "_system",
+            username=ARANGO_CONNECTIONS.ARANGO_USERNAME,
+            password=ARANGO_CONNECTIONS.ARANGO_PASSWORD,
+        )
+        if not sys_db.has_database(db_name):
+            sys_db.create_database(db_name)
+
+        db = client.db(
+            db_name,
+            username=ARANGO_CONNECTIONS.ARANGO_USERNAME,
+            password=ARANGO_CONNECTIONS.ARANGO_PASSWORD,
+        )
+
+        if not db.has_collection("cti_vertices"):
+            db.create_collection("cti_vertices")
+        if not db.has_collection("cti_edges"):
+            db.create_collection("cti_edges", edge=True)
+
+        vcol = db.collection("cti_vertices")
+        ecol = db.collection("cti_edges")
+
+        try:
+            vcol.truncate()
+        except Exception:
+            pass
+        try:
+            ecol.truncate()
+        except Exception:
+            pass
+
+        def load_docs(fp: Path):
+            with gzip.open(fp, "rt", encoding="utf-8") as f:
+                first = f.readline()
+                if not first:
+                    return []
+                first = first.strip()
+
+                if first.startswith("{") and '"data"' in first:
+                    rest = f.read()
+                    data = json.loads(first + rest)
+                    if isinstance(data, dict) and isinstance(data.get("data"), list):
+                        return data["data"]
+                    return []
+
+                docs = []
+                if first:
+                    docs.append(json.loads(first))
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        docs.append(json.loads(line))
+                return docs
+
+        for fp in sorted(target_dir.glob("cti_vertices_*.data.json.gz")):
+            docs = load_docs(fp)
+            if docs:
+                vcol.insert_many(docs, silent=True)
+
+        for fp in sorted(target_dir.glob("cti_edges_*.data.json.gz")):
+            docs = load_docs(fp)
+            if docs:
+                ecol.insert_many(docs, silent=True)

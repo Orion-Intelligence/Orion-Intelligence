@@ -49,8 +49,9 @@ class service_manager:
                 await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)
 
-                arango_controller.get_instance().link_connection()
-                arango_controller.get_instance().initialize()
+                await arango_controller.get_instance().link_connection()
+                await arango_controller.get_instance().initialize()
+                await test_manager.get_instance().reset_test_arango_and_import_mocks()
 
                 self._is_available = True
                 return True
