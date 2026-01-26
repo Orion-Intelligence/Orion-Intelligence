@@ -203,10 +203,10 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
 
-    cy.wait(1000)
+    cy.wait(2000)
     cy.get('button[apptooltip="scan all"]', { timeout: 10000 })
       .click({ force: true })
-    cy.wait(1000)
+    cy.wait(2000)
 
     cy.get('div.loading-content', { timeout: 40000 })
       .should('not.exist')

@@ -165,7 +165,7 @@ async def search_stealerlog(param: search_credential_param_model = Body(...)):
 
 
 @api_routes.post(
-    "/api/search/stealerIOCs",
+    "/api/search/stealer/ioc",
     summary="Search stealer log reports",
     description=SEARCH_DOCS["stealerlogs"]["description"],
     tags=["Search"],
@@ -213,7 +213,7 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
         param, base_index, [], [])
 
 @api_routes.post(
-    "/api/search/consolidatedIOCs",
+    "/api/search/consolidated/ioc",
     summary="Search consolidated reports (ranked with operators)",
     tags=["Search"],
     operation_id="searchConsolidatedRankedLogic",

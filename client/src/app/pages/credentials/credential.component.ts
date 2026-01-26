@@ -130,7 +130,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.isSearchLoading = true
     this.dashboardService
       .fetchSearchResults<StealerLogCallbackModel>(
-        'search/stealerIOCs',
+        'search/stealer/ioc',
         this.dashboardService.consolidatedParamModel
       )
       .pipe(
@@ -205,7 +205,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.setLoading(1);
     this.isRankedLoading = true
     this.dashboardService
-      .fetchConsolidatedRankededResults('search/consolidatedIOCs', this.dashboardService.consolidatedParamModel)
+      .fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(
         switchMap(response => timer(500).pipe(map(() => response))),
         finalize(() => { this.setLoading(-1), this.isRankedLoading = false, this.dashboardService.consolidatedParamModel.ioc = '' })
