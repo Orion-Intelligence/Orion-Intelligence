@@ -1,4 +1,4 @@
-a# Use a minimal Python image as the base
+# Use a minimal Python image as the base
 FROM python:3.11-slim AS base
 
 # Set the working directory inside the container
