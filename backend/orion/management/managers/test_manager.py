@@ -1,4 +1,3 @@
-import gzip
 import json
 import motor.motor_asyncio
 
@@ -77,7 +76,7 @@ class test_manager:
         cols = await db.list_collection_names()
         for c in cols:
             try:
-                await db[c].delete_many({})
+                await db.drop_collection(c)
             except Exception:
                 pass
 
@@ -100,7 +99,37 @@ class test_manager:
                     docs = [payload]
 
                 if docs:
-                    await db[collection].insert_many(self._fix(docs), ordered=False)
+                    fixed = self._fix(docs)
+                    if collection == "db_tenant_model":
+                        fixed = [d for d in fixed if d.get("is_default") is True]
+                        if fixed:
+                            await db[collection].insert_many(fixed, ordered=False)
+                    else:
+                        await db[collection].insert_many(fixed, ordered=False)
+
+        admin_src = await db["db_user_account"].find_one({"role": "admin"})
+        crawler_src = await db["db_user_account"].find_one({"role": crawler_user["role"]})
+
+        await db["db_user_account"].delete_many({})
+
+        docs = []
+
+        if admin_src:
+            admin_src = dict(admin_src)
+            admin_src.pop("_id", None)
+            admin_src["username"] = admin_mock["username"]
+            admin_src["password"] = admin_user["password"]
+            docs.append(admin_src)
+
+        if crawler_src:
+            crawler_src = dict(crawler_src)
+            crawler_src.pop("_id", None)
+            crawler_src["username"] = crawler_mock["username"]
+            crawler_src["password"] = crawler_user["password"]
+            docs.append(crawler_src)
+
+        if docs:
+            await db["db_user_account"].insert_many(docs, ordered=False)
 
     async def reset_test_elastic_and_import_mocks(self):
         if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
@@ -212,29 +241,13 @@ class test_manager:
         if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
             return
 
-        dumps_root = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "arango" / "arango_dump"
+        dumps_root = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "arango"
         if not dumps_root.exists():
             return
 
-        base = dumps_root / "arango_dump" if (dumps_root / "arango_dump").exists() else dumps_root
-
         db_name = ARANGO_CONNECTIONS.ARANGO_DATABASE_NAME
-        candidates = sorted(base.glob(f"**/{db_name}/dump.json"))
-        if not candidates:
-            candidates = sorted(dumps_root.glob(f"**/{db_name}/dump.json"))
-            if not candidates:
-                return
-        target_dir = candidates[0].parent
 
         client = ArangoClient(hosts=ARANGO_CONNECTIONS.ARANGO_URL)
-
-        sys_db = client.db(
-            "_system",
-            username=ARANGO_CONNECTIONS.ARANGO_USERNAME,
-            password=ARANGO_CONNECTIONS.ARANGO_PASSWORD,
-        )
-        if not sys_db.has_database(db_name):
-            sys_db.create_database(db_name)
 
         db = client.db(
             db_name,
@@ -260,34 +273,28 @@ class test_manager:
             pass
 
         def load_docs(fp: Path):
-            with gzip.open(fp, "rt", encoding="utf-8") as f:
-                first = f.readline()
-                if not first:
-                    return []
-                first = first.strip()
-
-                if first.startswith("{") and '"data"' in first:
-                    rest = f.read()
-                    data = json.loads(first + rest)
-                    if isinstance(data, dict) and isinstance(data.get("data"), list):
-                        return data["data"]
-                    return []
-
-                docs = []
-                if first:
-                    docs.append(json.loads(first))
+            docs = []
+            with fp.open("r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
-                    if line:
-                        docs.append(json.loads(line))
-                return docs
+                    if not line:
+                        continue
+                    d = json.loads(line)
+                    if isinstance(d, dict):
+                        d.pop("_rev", None)
+                        d.pop("_id", None)
+                    docs.append(d)
+            return docs
 
-        for fp in sorted(target_dir.glob("cti_vertices_*.data.json.gz")):
+        v_files = sorted(dumps_root.rglob("cti_vertices_*.data.json"))
+        e_files = sorted(dumps_root.rglob("cti_edges_*.data.json"))
+
+        for fp in v_files:
             docs = load_docs(fp)
             if docs:
-                vcol.insert_many(docs, silent=True)
+                vcol.import_bulk(docs, on_duplicate="ignore")
 
-        for fp in sorted(target_dir.glob("cti_edges_*.data.json.gz")):
+        for fp in e_files:
             docs = load_docs(fp)
             if docs:
-                ecol.insert_many(docs, silent=True)
+                ecol.import_bulk(docs, on_duplicate="replace")

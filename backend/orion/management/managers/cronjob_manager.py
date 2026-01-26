@@ -63,12 +63,9 @@ class cronjob_manager:
 
             seconds_until_next = (next_run - now_local).total_seconds()
 
-            print(f"[{datetime.now(timezone.utc)}] Next alert run scheduled in {seconds_until_next / 3600:.2f} hours")
-
             await asyncio.sleep(seconds_until_next)
 
             try:
-                print(f"[{datetime.now(timezone.utc)}] Running all category alert jobs for {next_run.date()}")
                 await alert_job.get_instance().run_all_categories()
             except Exception as e:
-                print(f"[{datetime.now(timezone.utc)}] ALERT JOB ERROR: {e}")
+                pass

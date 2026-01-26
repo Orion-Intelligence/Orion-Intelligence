@@ -1,1 +1,1 @@
-"{\"generic_model\":{\"settings\":{\"index\":{\"routing\":{\"allocation\":{\"include\":{\"_tier_preference\":\"data_content\"}}},\"number_of_shards\":\"1\",\"max_result_window\":\"1000000\",\"number_of_replicas\":\"0\"}}}}"
+{"generic_model":{"settings":{"index":{"routing":{"allocation":{"include":{"_tier_preference":"data_content"}}},"number_of_shards":"1","provided_name":"generic_model","creation_date":"1769294975407","number_of_replicas":"1","uuid":"vLQuhkuwQw6XK-Tul4Ae5A","version":{"created":"8536000"}}}}}

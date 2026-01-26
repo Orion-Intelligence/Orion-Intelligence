@@ -2,7 +2,7 @@
   width: 100vw;
   height: 100vh;
   padding-left: 251px;
-  background-color: #051320;
+  background-color: var(--color-blue-850);
 }
 
 .graph_container-empty {

@@ -12,9 +12,8 @@
             ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
         </span>
 
-        <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
-          {{ crumb.label.replace('-', ' ') | titlecase }}
-        </span>
+            <a href=""><img alt="Logo" height="35" width="197" [src]="appService.getConfig().appSettings.logo_wide_dark" /></a>
+
       </span>
     </div>
   </ng-container>

@@ -10,14 +10,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
       .filter(':visible')
       .should('have.length.at.least', 2)
       .eq(1)
-      .click({ force: true });
-  };
-
-  const clickLastVisibleSearchInner = () => {
-    cy.get('.dashboard__search-button-inner')
-      .filter(':visible')
-      .last()
-      .click({ force: true });
+      .click({force: true});
   };
 
   const clickSecondSearchButtonContainerInner = () => {
@@ -29,11 +22,11 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
         cy.get('.dashboard__search-button-inner')
           .filter(':visible')
           .last()
-          .click({ force: true });
+          .click({force: true});
       });
   };
 
-  function clickReportTabs(reportName: string) {
+  function clickReportTabs(_: string) {
     cy.get('.search__result-detail-container').should('exist');
 
     cy.get('button.search__result-tabs').then($tabs => {
@@ -43,12 +36,12 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
         cy.contains('button.search__result-tabs', tabName)
           .scrollIntoView()
           .should('be.visible')
-          .click({ force: true });
+          .click({force: true});
       });
     });
   }
 
-  function clickReportMenuButtons(reportName: string) {
+  function clickReportMenuButtons(_: string) {
     cy.get('.report-menu-option-container')
       .should('exist')
       .within(() => {
@@ -60,7 +53,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
             cy.wrap($btn)
               .scrollIntoView()
               .should('be.visible')
-              .click({ force: true });
+              .click({force: true});
           });
       });
   }
@@ -69,39 +62,39 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     cy.contains('.sidebar__item-dropdown', 'Defacement')
       .scrollIntoView()
       .as('defacementMenu')
-      .click({ force: true });
+      .click({force: true});
 
     cy.get('@defacementMenu')
       .parent()
       .find('.sidebar__subitem-content')
       .contains(tabText)
-      .click({ force: true });
+      .click({force: true});
   };
 
   const openSocialSubTab = (tabText: string) => {
     cy.contains('.sidebar__item-dropdown', 'Social')
       .scrollIntoView()
       .as('socialMenu')
-      .click({ force: true });
+      .click({force: true});
 
     cy.get('@socialMenu')
       .parent()
       .find('.sidebar__subitem-content')
       .contains(tabText)
-      .click({ force: true });
+      .click({force: true});
   };
 
   const openFeedSubTab = (tabText: string) => {
     cy.contains('.sidebar__item-dropdown', 'Feed')
       .scrollIntoView()
       .as('feedMenu')
-      .click({ force: true });
+      .click({force: true});
 
     cy.get('@feedMenu')
       .parent()
       .find('.sidebar__subitem-content')
       .contains(tabText)
-      .click({ force: true });
+      .click({force: true});
   };
 
   const runExploitSearchFlow = (tab: string, term: string, shot: string) => {
@@ -111,7 +104,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
       .within(() => {
         cy.contains('.sidebar__subitem-content', tab)
           .scrollIntoView()
-          .click({ force: true });
+          .click({force: true});
       });
 
     cy.get('input[name="q"]').clear().type(`${term}{enter}`);
@@ -127,7 +120,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
             cy.get('.dashboard__search-button-inner')
               .filter(':visible')
               .last()
-              .click({ force: true });
+              .click({force: true});
           });
       });
 
@@ -142,7 +135,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
             cy.get('.dashboard__search-button-inner')
               .filter(':visible')
               .last()
-              .click({ force: true });
+              .click({force: true});
           });
       });
 
@@ -154,7 +147,37 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
       clickReportMenuButtons(`${shot}-report`);
     }
 
-    cy.get('@exploitMenu').click({ force: true });
+    cy.get('@exploitMenu').click({force: true});
+  };
+
+  const jsom_relation_maping = () => {
+    cy.get('app-json-api-viewer .search__result__section__heading .toggle-btn')
+      .first()
+      .click({force: true});
+
+    cy.get('app-json-api-viewer .content .json-tree_toggle img').then(($toggles) => {
+      const imgs = [...$toggles].slice(0, 2);
+      imgs.forEach((img) => {
+        cy.get('app-json-api-viewer .content .json-tree_toggle img').eq(imgs.indexOf(img)).click({force: true});
+      });
+      imgs.forEach((img) => {
+        cy.get('app-json-api-viewer .content .json-tree_toggle img').eq(imgs.indexOf(img)).click({force: true});
+      });
+    });
+
+    cy.get('app-report-mapping .search__result__section__heading .toggle-btn')
+      .first()
+      .click({force: true});
+
+    cy.get('app-report-mapping tbody tr').then(($rows) => {
+      const idx = Math.floor(Math.random() * $rows.length);
+
+      cy.get('app-report-mapping tbody tr')
+        .eq(idx)
+        .click({force: true});
+
+      cy.get('app-report-mapping tbody tr').should('exist');
+    });
   };
 
   it('Search across tabs → Open Report → Click Tabs (Menu Buttons only in ALL)', () => {
@@ -162,15 +185,15 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     cy.contains('.sidebar__item-dropdown', 'General Intelligence')
       .scrollIntoView()
-      .click({ force: true });
+      .click({force: true});
 
     const tabs = [
-      { name: 'All', searchTerm: 'uk' },
-      { name: 'General', searchTerm: 'uk' }
+      {name: 'All', searchTerm: 'uk'},
+      {name: 'General', searchTerm: 'uk'}
     ];
 
     tabs.forEach(tab => {
-      cy.contains('.sidebar__subitem-content', tab.name).click({ force: true });
+      cy.contains('.sidebar__subitem-content', tab.name).click({force: true});
 
       const isButtonContainer = tab.name === 'Forums' || tab.name === 'News';
 
@@ -181,7 +204,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
           .first()
           .find('[apptooltip="Open Report"]')
           .should('be.visible')
-          .click({ force: true });
+          .click({force: true});
       }
 
       cy.get('.search__result-detail').should('exist').and('be.visible');
@@ -196,7 +219,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     const reportTabs = ['Marketplaces'];
 
     reportTabs.forEach(tab => {
-      cy.contains('.sidebar__subitem-content', tab).click({ force: true });
+      cy.contains('.sidebar__subitem-content', tab).click({force: true});
 
       cy.get('.dashboard__search-button')
         .filter(':visible')
@@ -215,9 +238,9 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     cy.contains('.sidebar__item-dropdown', 'General Intelligence')
       .scrollIntoView()
-      .click({ force: true });
+      .click({force: true});
 
-    cy.get('div[ng-reflect-router-link="breach"]').click({ force: true });
+    cy.get('div[ng-reflect-router-link="breach"]').click({force: true});
 
     clickSecondVisibleSearchInner();
 
@@ -225,8 +248,9 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     clickReportTabs('04-data-breach-report');
     clickReportMenuButtons('04-data-breach-report');
+    jsom_relation_maping();
 
-    cy.contains('.sidebar__subitem-content', 'Databases').click({ force: true });
+    cy.contains('.sidebar__subitem-content', 'Databases').click({force: true});
 
     clickSecondVisibleSearchInner();
 
@@ -234,8 +258,9 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     clickReportTabs('04-data-breach-databases-report');
     clickReportMenuButtons('04-data-breach-databases-report');
+    jsom_relation_maping();
 
-    cy.contains('.sidebar__subitem-content', 'Tracking').click({ force: true });
+    cy.contains('.sidebar__subitem-content', 'Tracking').click({force: true});
 
     clickSecondVisibleSearchInner();
 
@@ -243,6 +268,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     clickReportTabs('04-data-breach-tracking-report');
     clickReportMenuButtons('04-data-breach-tracking-report');
+    jsom_relation_maping();
   });
 
   it('Discussion: All → Search → Open Report → Click Tabs', () => {
@@ -250,16 +276,16 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     cy.contains('.sidebar__item-dropdown', 'Discussion')
       .scrollIntoView()
-      .click({ force: true });
+      .click({force: true});
 
-    cy.contains('.sidebar__subitem-content', 'All').click({ force: true });
+    cy.contains('.sidebar__subitem-content', 'All').click({force: true});
 
     cy.get('.dashboard__search-main-div')
       .first()
       .should('exist')
       .and('be.visible')
       .within(() => {
-        cy.get('[apptooltip="Open Report"]').should('be.visible').click({ force: true });
+        cy.get('[apptooltip="Open Report"]').should('be.visible').click({force: true});
       });
 
     cy.get('.search__result-detail').should('exist').and('be.visible');
@@ -273,8 +299,8 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     openDefacementSubTab('Hacked');
 
-    cy.get('input[name="q"]').clear().type('128.201.75.82{enter}');
-    cy.get('tr[id^="item-"]').first().click({ force: true });
+    cy.get('input[name="q"]').clear().type('102.212.246.99{enter}');
+    cy.get('tr[id^="item-"]').first().click({force: true});
 
     cy.get('.search__result-detail').should('be.visible');
 
@@ -283,8 +309,8 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     openDefacementSubTab('Phishing');
 
-    cy.get('input[name="q"]').clear().type('masaomi346{enter}');
-    cy.get('tr[id^="item-"]').first().click({ force: true });
+    cy.get('input[name="q"]').clear().type('phishunt{enter}');
+    cy.get('tr[id^="item-"]').first().click({force: true});
 
     cy.get('.search__result-detail').should('be.visible');
 
@@ -293,7 +319,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     openDefacementSubTab('Databases');
 
     cy.get('input[name="q"]').clear().type('urldna_bot{enter}');
-    cy.get('tr[id^="item-"]').first().click({ force: true });
+    cy.get('tr[id^="item-"]').first().click({force: true});
 
     cy.get('.search__result-detail').should('be.visible');
 
@@ -304,8 +330,8 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     cy.visit('/dashboard/profile/homepage');
 
     const socialTabs = [
-      { name: 'All', screenshot: 'social-all' },
-      { name: 'Twitter', screenshot: 'social-twitter' }
+      {name: 'All', screenshot: 'social-all'},
+      {name: 'Twitter', screenshot: 'social-twitter'}
     ];
 
     socialTabs.forEach(tab => {
@@ -321,7 +347,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
         clickReportMenuButtons(`${tab.screenshot}-report`);
       }
 
-      cy.get('@socialMenu').click({ force: true });
+      cy.get('@socialMenu').click({force: true});
     });
   });
 
@@ -330,7 +356,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     cy.contains('.sidebar__item-dropdown', 'Exploit')
       .scrollIntoView()
-      .click({ force: true });
+      .click({force: true});
 
     runExploitSearchFlow('All', 'turning', 'exploit-all');
     runExploitSearchFlow('CVE', 'turning', 'exploit-cve');
@@ -350,7 +376,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     clickReportTabs('feed-news-report');
     clickReportMenuButtons('feed-news-report');
 
-    cy.get('@feedMenu').click({ force: true });
+    cy.get('@feedMenu').click({force: true});
   });
 
   it('Dump: Listing → Search leak → View Result (No Timeouts)', () => {
@@ -359,20 +385,21 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     cy.contains('.sidebar__item-dropdown', 'Dump')
       .scrollIntoView()
       .as('dumpMenu')
-      .click({ force: true });
+      .click({force: true});
 
     cy.get('@dumpMenu')
       .parent()
       .within(() => {
-        cy.contains('.sidebar__subitem-content', 'Listing').click({ force: true });
+        cy.contains('.sidebar__subitem-content', 'Listing').click({force: true});
       });
 
     cy.get('form.directory-listing-search').should('exist');
 
     cy.get('input[name="username"]').clear().type('leak');
 
-    cy.contains('button', 'Search').click({ force: true });
+    cy.contains('button', 'Search').click({force: true});
 
     cy.get('.dashboard_container, .list__table, .search__result-detail').should('exist');
+    cy.logout();
   });
 });

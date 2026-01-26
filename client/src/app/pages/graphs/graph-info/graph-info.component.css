@@ -1,6 +1,16 @@
+.graph-top-header {
+  position: fixed;
+  top: 0;
+  left: 300px;
+  right: 0;
+  height: 60px;
+  background: var(--color-blue-850);
+  z-index: 1000;
+}
+
 .graph-filters_container {
   position: absolute;
-  top: 20px;
+  top: 85px;
   right: 20px;
   z-index: 10;
 }
@@ -22,7 +32,7 @@
 .graph-filters_details {
   width: 240px;
   color: #fff;
-  background: #08203a;
+  background: var(--color-blue-900);
   padding: 20px;
   border-radius: 8px;
   border: 1px solid #ffffff15;
@@ -120,7 +130,7 @@
   border-radius: 50px;
 }
 
-@media (width <=799px) {
+@media (width <= 799px) {
   .graph-filters_container {
     display: none;
   }

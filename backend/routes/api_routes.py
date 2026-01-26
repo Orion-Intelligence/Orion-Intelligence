@@ -662,6 +662,20 @@ async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await stix_manager.get_instance().get_social_stix(doc_id, lang)
 
+@api_routes.get(
+    "/api/search/chat/stix/{doc_id}",
+    summary="Get social media intelligence report in stix format",
+    description=REPORT_DOCS["stix"]["description"],
+    tags=["Stix"],
+    operation_id="getSocialStixReport",
+    response_description=REPORT_DOCS["stix"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER])), ], )
+async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(
+    None, alias="lang", description="Optional language code for localized report content.", ), ):
+    return await stix_manager.get_instance().get_chat_stix(doc_id, lang)
 
 @api_routes.get(
     "/api/graph",

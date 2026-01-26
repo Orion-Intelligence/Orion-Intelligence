@@ -266,12 +266,6 @@ class elastic_request_generator:
 
     def on_search_defacement_data(self, p_query_model: search_defacement_param_model, pfilter=None):
 
-        print(":::::::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(p_query_model, flush=True)
-        print(":::::::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(pfilter, flush=True)
-        print(":::::::::::::::::::::::::::::::::::::::::::::", flush=True)
-
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"

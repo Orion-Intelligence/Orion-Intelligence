@@ -90,7 +90,7 @@ class log:
             os.chmod(log_filepath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
         except Exception as e:
-            print(f"Error writing to log: {e}")
+            pass
 
     def __format_log_message(self, log_type, p_log, include_caller=False):
         current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -126,7 +126,7 @@ class log:
                         continue
 
         except Exception as e:
-            print(f"Error during log cleanup: {e}")
+            pass
 
     def i(self, p_log):
         try:

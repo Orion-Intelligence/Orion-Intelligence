@@ -24,7 +24,6 @@ services:
       - ./backend/static:/app/static:cached
       - ./backend/migrations:/app/migrations:cached
       - ./client/build:/app/build:delegated
-      - ./bloom_data:/app/bloom_data
     expose:
       - "8070"
     networks:
@@ -49,7 +48,7 @@ services:
     ports:
       - "8529:8529"
     volumes:
-      - arangodb:/var/lib/arangodbx
+      - arangodb:/var/lib/arangodb3
     networks:
       backend:
         ipv4_address: 172.20.1.15

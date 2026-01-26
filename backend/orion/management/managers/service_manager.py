@@ -39,10 +39,12 @@ class service_manager:
 
                 await elastic_controller.get_instance().initialize()
                 await mongo_controller.get_instance().link_connection()
+
+                await test_manager.get_instance().reset_test_mongo_and_import_mocks()
+
                 await mongo_controller.get_instance().ensure_indexes()
                 await mongo_controller.get_instance().initialize()
 
-                await test_manager.get_instance().reset_test_mongo_and_import_mocks()
                 await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
                 await redis_controller.getInstance().initialize()

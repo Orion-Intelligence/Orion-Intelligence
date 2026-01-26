@@ -114,7 +114,6 @@ class alert_job:
             return True
 
         except Exception as e:
-            print(f"[{datetime.now()}] -> SCAN ERROR for {ioc_value} ({scan_type}): {e}")
             return False
 
     async def _handle_dynamic_scanning_alert(self,
@@ -177,7 +176,6 @@ class alert_job:
             return True
 
         except Exception as e:
-            print(f"[{datetime.now()}] -> DYNAMIC SCAN ERROR for {ioc_value} ({scan_type}): {e}")
             return False
 
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
@@ -247,9 +245,7 @@ class alert_job:
                                     str(tenant.id), ioc_type_name, ioc_value, scan_type, result_list)
 
                         except Exception as dynamic_e:
-                            print(
-                                f"Dynamic scan failed | "f"Type: {scan_type} | "f"Value: {ioc_value} | "f"Error: {dynamic_e}",
-                                flush=True)
+                            pass
                 return
 
             search_data_category = 'all'
@@ -386,11 +382,9 @@ class alert_job:
                                     data_hash=hash)
                                 total_alerts_processed += 1
                     except Exception as sub_e:
-                        print(
-                            f"[{datetime.now().strftime('%H:%M:%S')}] -> CRITICAL SEARCH ERROR for {category}:{ioc_type_name}:{ioc_value}. Error: {sub_e}")
+                        pass
         except Exception as e:
-            print(
-                f"[{datetime.now().strftime('%H:%M:%S')}] -> CRONJOB FATAL ERROR for tenant {tenant.id} in category {category}. Error: {e}")
+            pass
 
     async def run_all_categories(self):
         all_tenants = await self._tenant_manager.get_all_tenant()
@@ -494,9 +488,7 @@ class alert_job:
 
                 except Exception as e:
                     overall_success = False
-                    print(f"[ERROR] Category {category} failed for tenant {tenant_id}: {e}")
-                    category_status = {"category": category, "status": "completed_with_errors", "tenant_count": 1, "duration_seconds": (
-                            datetime.now(timezone.utc) - category_start_time).total_seconds(), "error_count": 1}
+                    pass
 
                 category_statuses.append(category_status)
 

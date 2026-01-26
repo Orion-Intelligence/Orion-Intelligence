@@ -18,7 +18,9 @@
 
 .twofaextend .login_box {
   width: 700px;
-  margin-top: -15vh;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: min(500px, 50vh);
 }
 
 .login_container {

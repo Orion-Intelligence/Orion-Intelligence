@@ -41,7 +41,7 @@ async def get_system_resource():
 
 @public_routes.get("/api/s/static/system/{id}", include_in_schema=False)
 async def get_system_resource(request: Request, id: str):
-    if not id.lower().endswith("logo_wide_light_default.png") and not id.lower().endswith("logo_url_default.png") and not id.lower().endswith("logo_url_custom.png"):
+    if not id.lower().endswith("logo_wide_dark_default.png") and not id.lower().endswith("logo_wide_light_default.png") and not id.lower().endswith("logo_url_default.png") and not id.lower().endswith("logo_url_custom.png"):
         cookie_required(request)
     return await ResourceManager.get_instance().get_system_image(id)
 

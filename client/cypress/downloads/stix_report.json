@@ -1,13 +1,13 @@
 {
   "type": "bundle",
-  "id": "bundle--7b947aa9-3ce9-5617-baaa-e121600bd6c4",
+  "id": "bundle--f32a8be7-da76-5bc6-945c-f9e7f78d8d7d",
   "spec_version": "2.1",
   "objects": [
     {
       "type": "marking-definition",
       "spec_version": "2.1",
       "id": "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd",
-      "created": "2025-12-23T10:34:13.099Z",
+      "created": "2026-01-24T19:38:18.808Z",
       "definition_type": "tlp",
       "definition": {
         "tlp": "amber"
@@ -17,64 +17,28 @@
       "type": "marking-definition",
       "spec_version": "2.1",
       "id": "marking-definition--2676b2c3-1d57-5b0f-9ca4-0cf2ceaa9eb2",
-      "created": "2025-12-23T10:34:13.099Z",
+      "created": "2026-01-24T19:38:18.808Z",
       "definition_type": "tlp",
       "definition": {
         "tlp": "red"
       }
     },
     {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--718d77ad-8cf3-5abc-8850-0ba2ad6636eb",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
-      "name": "China",
-      "country": "China",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--6b67916d-9ef7-5133-b7dc-dfee52afdc97",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
-      "name": "Japan",
-      "country": "Japan",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--505004fc-2324-5887-afb1-4df9739b47ca",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
-      "name": "Southeast Asia",
-      "country": "Southeast Asia",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
       "type": "intrusion-set",
       "spec_version": "2.1",
       "id": "intrusion-set--b9f42695-6eac-5c52-b6cb-d02ae971dc3d",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "name": "hackernews live",
-      "description": "A previously undocumented China-aligned threat cluster dubbed LongNosedGoblin has been attributed to a series of cyber attacks targeting governmental entities in Southeast Asia and Japan. The end goal of these attacks is cyber espionage, Slovak cybersecurity company ESET said in a report published today.",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
       ]
     },
     {
       "type": "url",
-      "id": "url--78a7c456-2ced-580b-a642-574cd00b4373",
-      "value": "https://thehackernews.com/2025/12/china-aligned-threat-group-uses-windows.html"
+      "id": "url--056bec6b-9ac4-599a-b02f-8324f29735f4",
+      "value": "https://thehackernews.com/2026/01/certcc-warns-binary-parser-bug-allows.html"
     },
     {
       "type": "domain-name",
@@ -84,14 +48,14 @@
     {
       "type": "observed-data",
       "spec_version": "2.1",
-      "id": "observed-data--ff9b1789-265d-56f2-b0e8-7a0e3dfc63ad",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
-      "first_observed": "2025-12-23T10:34:13.099Z",
-      "last_observed": "2025-12-23T10:34:13.099Z",
+      "id": "observed-data--b9db7979-cf3f-5338-bca8-fe7ecf5b5735",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "first_observed": "2026-01-24T19:38:18.808Z",
+      "last_observed": "2026-01-24T19:38:18.808Z",
       "number_observed": 1,
       "object_refs": [
-        "url--78a7c456-2ced-580b-a642-574cd00b4373",
+        "url--056bec6b-9ac4-599a-b02f-8324f29735f4",
         "domain-name--d3d3b775-f929-5892-9795-bbf55bb6d359"
       ],
       "object_marking_refs": [
@@ -102,44 +66,37 @@
       "type": "indicator",
       "spec_version": "2.1",
       "id": "indicator--d363b6bd-ef7f-558d-8fb4-a59f048ae7c0",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "name": "Domains",
-      "description": "A previously undocumented China-aligned threat cluster dubbed LongNosedGoblin has been attributed to a series of cyber attacks targeting governmental entities in Southeast Asia and Japan. The end goal of these attacks is cyber espionage, Slovak cybersecurity company ESET said in a report published today.",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "indicator_types": [
         "malicious-activity"
       ],
       "pattern_type": "stix",
       "pattern": "[domain-name:value IN ('thehackernews.com')]",
-      "valid_from": "2025-12-23T10:34:13.099Z",
+      "valid_from": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "ransomware",
-        "credentials_common",
-        "insider",
-        "crack",
-        "xss",
-        "logs",
-        "ddos",
         "hack",
-        "spyware",
-        "sqlinjection",
-        "c2",
-        "data",
-        "orion:leak",
-        "exploit",
-        "keylogger",
-        "vpn",
         "rce",
-        "news",
-        "rat",
-        "war",
-        "infostealer",
-        "malware",
-        "phishing",
-        "leak",
-        "threat_intel",
+        "data",
+        "supplychain",
+        "c2",
+        "credentials_common",
         "clearnet",
-        "apt"
+        "war",
+        "ddos",
+        "obfuscation",
+        "keylogger",
+        "orion:leak",
+        "news",
+        "cve",
+        "ransomware",
+        "exploit",
+        "carding",
+        "threat_intel",
+        "lpe",
+        "crack"
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
@@ -148,45 +105,56 @@
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--4af570d2-bd16-5fed-8d6d-aa2d47b79137",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
+      "id": "indicator--0cd20c98-abe9-51c3-ab7c-e3a7e6f68be6",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "name": "URLs",
-      "description": "A previously undocumented China-aligned threat cluster dubbed LongNosedGoblin has been attributed to a series of cyber attacks targeting governmental entities in Southeast Asia and Japan. The end goal of these attacks is cyber espionage, Slovak cybersecurity company ESET said in a report published today.",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "indicator_types": [
         "malicious-activity"
       ],
       "pattern_type": "stix",
-      "pattern": "[url:value IN ('https://thehackernews.com/2025/12/china-aligned-threat-group-uses-windows.html')]",
-      "valid_from": "2025-12-23T10:34:13.099Z",
+      "pattern": "[url:value IN ('https://thehackernews.com/2026/01/certcc-warns-binary-parser-bug-allows.html')]",
+      "valid_from": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "ransomware",
-        "credentials_common",
-        "insider",
-        "crack",
-        "xss",
-        "logs",
-        "ddos",
         "hack",
-        "spyware",
-        "sqlinjection",
-        "c2",
-        "data",
-        "orion:leak",
-        "exploit",
-        "keylogger",
-        "vpn",
         "rce",
-        "news",
-        "rat",
-        "war",
-        "infostealer",
-        "malware",
-        "phishing",
-        "leak",
-        "threat_intel",
+        "data",
+        "supplychain",
+        "c2",
+        "credentials_common",
         "clearnet",
-        "apt"
+        "war",
+        "ddos",
+        "obfuscation",
+        "keylogger",
+        "orion:leak",
+        "news",
+        "cve",
+        "ransomware",
+        "exploit",
+        "carding",
+        "threat_intel",
+        "lpe",
+        "crack"
+      ],
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--8a8b640e-ae05-5f70-a98f-f4e7fe1ae635",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "name": "CVE-2026-1245",
+      "external_references": [
+        {
+          "source_name": "nvd",
+          "external_id": "CVE-2026-1245",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-1245"
+        }
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
@@ -196,43 +164,36 @@
       "type": "infrastructure",
       "spec_version": "2.1",
       "id": "infrastructure--cfa6ca6b-8843-539e-bf17-df1b9547232c",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "name": "hackernews live",
-      "description": "A previously undocumented China-aligned threat cluster dubbed LongNosedGoblin has been attributed to a series of cyber attacks targeting governmental entities in Southeast Asia and Japan. The end goal of these attacks is cyber espionage, Slovak cybersecurity company ESET said in a report published today.",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "infrastructure_types": [
         "command-and-control"
       ],
-      "first_seen": "2025-12-23T10:34:13.099Z",
-      "last_seen": "2025-12-23T10:34:13.099Z",
+      "first_seen": "2026-01-24T19:38:18.808Z",
+      "last_seen": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "ransomware",
-        "credentials_common",
-        "insider",
-        "crack",
-        "xss",
-        "logs",
-        "ddos",
         "hack",
-        "spyware",
-        "sqlinjection",
-        "c2",
-        "data",
-        "orion:leak",
-        "exploit",
-        "keylogger",
-        "vpn",
         "rce",
-        "news",
-        "rat",
-        "war",
-        "infostealer",
-        "malware",
-        "phishing",
-        "leak",
-        "threat_intel",
+        "data",
+        "supplychain",
+        "c2",
+        "credentials_common",
         "clearnet",
-        "apt"
+        "war",
+        "ddos",
+        "obfuscation",
+        "keylogger",
+        "orion:leak",
+        "news",
+        "cve",
+        "ransomware",
+        "exploit",
+        "carding",
+        "threat_intel",
+        "lpe",
+        "crack"
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
@@ -243,8 +204,8 @@
       "type": "relationship",
       "spec_version": "2.1",
       "id": "relationship--148b6baa-3cf4-534b-8df6-4c10265eddf1",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "relationship_type": "uses",
       "source_ref": "intrusion-set--b9f42695-6eac-5c52-b6cb-d02ae971dc3d",
       "target_ref": "infrastructure--cfa6ca6b-8843-539e-bf17-df1b9547232c",
@@ -255,49 +216,42 @@
     {
       "type": "report",
       "spec_version": "2.1",
-      "id": "report--42c1aaf7-c1a6-5aa8-ab82-8ff1db3267dd",
-      "created": "2025-12-23T10:34:13.099Z",
-      "modified": "2025-12-23T10:34:13.099Z",
-      "name": "China-Aligned Threat Group Uses Windows Group Policy to Deploy Espionage Malware",
-      "description": "A previously undocumented China-aligned threat cluster dubbed LongNosedGoblin has been attributed to a series of cyber attacks targeting governmental entities in Southeast Asia and Japan. The end goal of these attacks is cyber espionage, Slovak cybersecurity company ESET said in a report published today.",
+      "id": "report--96ba415b-5769-51b1-94ed-7cce0f2a6b20",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "name": "CERT/CC Warns binary-parser Bug Allows Node.js Privilege-Level Code Execution",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "report_types": [
         "threat-report"
       ],
-      "published": "2025-12-23T10:34:13.099Z",
+      "published": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "ransomware",
-        "credentials_common",
-        "insider",
-        "crack",
-        "xss",
-        "logs",
-        "ddos",
         "hack",
-        "spyware",
-        "sqlinjection",
-        "c2",
-        "data",
-        "orion:leak",
-        "exploit",
-        "keylogger",
-        "vpn",
         "rce",
-        "news",
-        "rat",
-        "war",
-        "infostealer",
-        "malware",
-        "phishing",
-        "leak",
-        "threat_intel",
+        "data",
+        "supplychain",
+        "c2",
+        "credentials_common",
         "clearnet",
-        "apt"
+        "war",
+        "ddos",
+        "obfuscation",
+        "keylogger",
+        "orion:leak",
+        "news",
+        "cve",
+        "ransomware",
+        "exploit",
+        "carding",
+        "threat_intel",
+        "lpe",
+        "crack"
       ],
       "lang": "en",
       "external_references": [
         {
           "source_name": "source",
-          "url": "https://thehackernews.com/2025/12/china-aligned-threat-group-uses-windows.html"
+          "url": "https://thehackernews.com/2026/01/certcc-warns-binary-parser-bug-allows.html"
         },
         {
           "source_name": "base_url",
@@ -305,7 +259,7 @@
         },
         {
           "source_name": "content-hash",
-          "external_id": "cf5f3b2f56a84f9196d950fec14849ccbbf2f019a02e92fbbec145cdd4890c37"
+          "external_id": "fdaf872029176c70c794196e03f9e5faa6042d30d6c95721497db9b554c9a542"
         },
         {
           "source_name": "scraper",
@@ -315,17 +269,15 @@
       "object_refs": [
         "intrusion-set--b9f42695-6eac-5c52-b6cb-d02ae971dc3d",
         "infrastructure--cfa6ca6b-8843-539e-bf17-df1b9547232c",
-        "observed-data--ff9b1789-265d-56f2-b0e8-7a0e3dfc63ad",
-        "location--718d77ad-8cf3-5abc-8850-0ba2ad6636eb",
-        "location--6b67916d-9ef7-5133-b7dc-dfee52afdc97",
-        "location--505004fc-2324-5887-afb1-4df9739b47ca",
+        "observed-data--b9db7979-cf3f-5338-bca8-fe7ecf5b5735",
         "indicator--d363b6bd-ef7f-558d-8fb4-a59f048ae7c0",
-        "indicator--4af570d2-bd16-5fed-8d6d-aa2d47b79137"
+        "indicator--0cd20c98-abe9-51c3-ab7c-e3a7e6f68be6",
+        "vulnerability--8a8b640e-ae05-5f70-a98f-f4e7fe1ae635"
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
       ],
-      "x_orion_doc_id": "cf5f3b2f56a84f9196d950fec14849ccbbf2f019a02e92fbbec145cdd4890c37",
+      "x_orion_doc_id": "fdaf872029176c70c794196e03f9e5faa6042d30d6c95721497db9b554c9a542",
       "x_orion_network": "clearnet",
       "x_orion_dumplink_count": "1"
     }

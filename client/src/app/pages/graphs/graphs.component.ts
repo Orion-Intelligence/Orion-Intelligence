@@ -10,6 +10,7 @@ import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.anim
 import { Clipboard } from '@angular/cdk/clipboard';
 import { getDefaultRuleSet, RuleSet } from '../../shared/model/graph/ruleset_model';
 import { ActivatedRoute } from '@angular/router';
+import {DashboardHeaderComponent} from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -27,7 +28,7 @@ type GraphResultItem = {
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf]
+  imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf, DashboardHeaderComponent]
 })
 export class GraphComponent implements OnInit {
   @ViewChild('networkContainer', { static: true }) networkContainer!: ElementRef;

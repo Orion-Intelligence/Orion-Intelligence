@@ -7,11 +7,12 @@ import { Subscription } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 
 import QRCode from 'qrcode';
+import {DashboardHeaderComponent} from '../../../shared/partials/header/dashboard-header/dashboard-header.component';
 
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, NgIf, CommonModule],
+  imports: [FormsModule, NgIf, CommonModule, DashboardHeaderComponent],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {

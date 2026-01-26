@@ -81,6 +81,20 @@
   margin: 0;
 }
 
+.graph-sidebar__container .sidebar_input{
+  background: var(--color-blue-880);
+}
+
+.graph-sidebar__container .sidebar_input:hover {
+  color: var(--color-blue-870);
+  background-color: var(--color-blue-600);
+  border-color: var(--color-white);
+}
+
+.graph-sidebar__container .sidebar_form .dropdown-select:focus {
+  background-color: var(--color-blue-600) !important;
+}
+
 .sidebar_input {
   display: block;
   color: var(--color-gray-900) !important;
@@ -225,8 +239,8 @@
 .sidebar_form .dropdown-select::after {
   content: "";
   display: inline-block;
-  width: 15px;
-  height: 15px;
+  width: 11px;
+  height: 11px;
   margin-left: 4px;
   vertical-align: 4px;
   background-image: var(--filter-dropdown-icon);

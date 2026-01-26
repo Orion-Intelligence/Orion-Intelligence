@@ -1,0 +1,1 @@
+{"_key":"cti_graph","_id":"_graphs/cti_graph","_rev":"_k9DZphS---","edgeDefinitions":[{"collection":"cti_edges","from":["cti_vertices"],"to":["cti_vertices"]}],"orphanCollections":[]}

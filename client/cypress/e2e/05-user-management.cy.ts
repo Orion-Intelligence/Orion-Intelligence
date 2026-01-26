@@ -191,7 +191,7 @@ describe('Users Page – Delete Users Sequentially', () => {
     cy.visit('/dashboard/profile/users');
 
     cy.get('button[id="edit-profile"]').then($btns => {
-      const total = $btns.length;
+      const total = Math.max($btns.length - 2, 0);
       if (total === 0) return;
 
       cy.wrap($btns[0])
@@ -211,8 +211,8 @@ describe('Users Page – Delete Users Sequentially', () => {
 
         cy.wait(1000);
       }
-        cy.logout();
+
+      cy.logout();
     });
   });
 });
-``
