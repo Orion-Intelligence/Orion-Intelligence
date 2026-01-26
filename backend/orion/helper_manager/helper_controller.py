@@ -222,7 +222,7 @@ class helper_controller:
         return ' '.join(result_parts)
     
     @staticmethod
-    def parse_tagged_logic_query_for_stealer_log(query: str):
+    def parse_tagged_logic_query_for_iocs(query: str):
         query = query.replace("&&", " AND ").replace("||", " OR ")
         tokens = query.split()
 

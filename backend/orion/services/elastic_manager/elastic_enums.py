@@ -101,7 +101,7 @@ class ELASTIC_ENUMS:
         "m_search_all": ["domain.keyword", "url.keyword", "username.keyword", "email.keyword"]
     }
 
-    mapping_consolidated_fields_for_operator = {
+    mapping_consolidated_iocs = {
         "m_domain": [
             "m_base_url",
             "m_websites",

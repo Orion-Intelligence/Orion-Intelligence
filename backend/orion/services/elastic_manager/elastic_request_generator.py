@@ -19,82 +19,42 @@ from orion.services.elastic_manager.elastic_semantic_controller import elastic_s
 class elastic_request_generator:
 
     @staticmethod
-    def build_es_from_tagged_for_stealer_log(parsed):
+    def build_es_from_tagged(parsed, mapping):
         if isinstance(parsed, dict):
             if "AND" in parsed:
-                must_clauses = [
-                    elastic_request_generator.build_es_from_tagged_for_stealer_log(x) for x in parsed["AND"]
-                ]
+                must_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
+                                for x in parsed["AND"]]
                 if len(must_clauses) == 1:
                     return must_clauses[0]
                 return {"bool": {"must": must_clauses}}
 
             if "OR" in parsed:
-                should_clauses = [
-                    elastic_request_generator.build_es_from_tagged_for_stealer_log(x) for x in parsed["OR"]
-                ]
+                should_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
+                                for x in parsed["OR"]]
                 if len(should_clauses) == 1:
                     return should_clauses[0]
                 return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
         if isinstance(parsed, list):
-            should_clauses = [elastic_request_generator.build_es_from_tagged_for_stealer_log(x) for x in parsed]
+            should_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
+                            for x in parsed]
             if len(should_clauses) == 1:
                 return should_clauses[0]
             return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
-        tag = parsed["tag"]
-        value = parsed["value"]
+        tag = parsed.get("tag")
+        value = parsed.get("value")
+        fields = mapping.get(tag)
 
-
-        fields = ELASTIC_ENUMS.mapping_stealer_log_field.get(tag)
         if not fields:
             return {"match_none": {}}
 
         if isinstance(fields, list):
             if len(fields) == 1:
                 return {"term": {fields[0]: value}}
-            return {
-                "bool": {
-                    "should": [{"term": {f: value}} for f in fields],
-                    "minimum_should_match": 1
-                }
-            }
+            return {"bool": {"should": [{"term": {f: value}} for f in fields], "minimum_should_match": 1}}
 
         return {"term": {fields: value}}
-
-    @staticmethod
-    def build_es_from_tagged_for_consolidated(parsed):
-        if isinstance(parsed, dict):
-            if "AND" in parsed:
-                must = [
-                    elastic_request_generator.build_es_from_tagged_for_consolidated(x)
-                    for x in parsed["AND"]
-                ]
-                return {"bool": {"must": must}}
-
-            if "OR" in parsed:
-                should = [
-                    elastic_request_generator.build_es_from_tagged_for_consolidated(x)
-                    for x in parsed["OR"]
-                ]
-                return {"bool": {"should": should, "minimum_should_match": 1}}
-
-        tag = parsed["tag"]
-        value = parsed["value"]
-        fields = ELASTIC_ENUMS.mapping_consolidated_fields_for_operator.get(tag)
-        if not fields:
-            return {"match_none": {}}
-
-        if len(fields) == 1:
-            return {"term": {fields[0]: value}}
-
-        return {
-            "bool": {
-                "should": [{"term": {f: value}} for f in fields],
-                "minimum_should_match": 1
-            }
-        }
 
 
     @staticmethod
@@ -499,7 +459,7 @@ class elastic_request_generator:
 
         return query
 
-    def on_search_consolidated_ranked_with_operator(self,
+    def on_search_consolidated_iocs(self,
         p_query_model,
         pfilter,
         base_index,
@@ -509,13 +469,11 @@ class elastic_request_generator:
         must_clauses = []
         must_not_clause = []
 
-        # 🔹 Parse tagged logic
-        if p_query_model.user and p_query_model.user != "*":
-            parsed = helper_controller.parse_tagged_logic_query_for_stealer_log(p_query_model.user)
-            logic_query = self.build_es_from_tagged_for_consolidated(parsed)
+        if p_query_model.ioc and p_query_model.ioc != "*":
+            parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
+            logic_query = self.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_consolidated_iocs)
             must_clauses.append(logic_query)
 
-        # 🔹 Date range (same as your current logic)
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")
             if len(parts) == 2:
@@ -1090,14 +1048,14 @@ class elastic_request_generator:
     
 
     @staticmethod
-    def on_search_stealerlogs_data_with_operators(p_query_model, alert=False):
-        is_match_all = not p_query_model.user
+    def on_search_stealer_iocs(p_query_model, alert=False):
+        is_match_all = not p_query_model.ioc
 
         if is_match_all:
             inner_query = {"match_all": {}}
         else:
-            parsed = helper_controller.parse_tagged_logic_query_for_stealer_log(p_query_model.user)
-            inner_query = elastic_request_generator.build_es_from_tagged_for_stealer_log(parsed)
+            parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
+            inner_query = elastic_request_generator.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_stealer_log_field)
 
         es_query = {
             "bool": {

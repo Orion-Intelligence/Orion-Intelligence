@@ -153,6 +153,7 @@ async def search_general(param: search_general_param_model = Body(...)):
     tags=["Search"],
     operation_id="searchStealerLogReports",
     response_description=SEARCH_DOCS["stealerlogs"]["response_description"],
+    include_in_schema=False,
     status_code=200,
     dependencies=[Depends(
         role_required(
@@ -164,19 +165,19 @@ async def search_stealerlog(param: search_credential_param_model = Body(...)):
 
 
 @api_routes.post(
-    "/api/search/stealerlogsWithOperator",
+    "/api/search/stealerIOCs",
     summary="Search stealer log reports",
     description=SEARCH_DOCS["stealerlogs"]["description"],
     tags=["Search"],
-    operation_id="searchStealerLogReports",
+    operation_id="searchStealerLogAndConsolidatedReports",
     response_description=SEARCH_DOCS["stealerlogs"]["response_description"],
     status_code=200,
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:stealer_logs", bypass_roles=[], bypass_licenses=["maintainer"])), ], )
-async def search_stealerlog(param: search_credential_param_model = Body(...)):
-    return await search_model.getInstance().search_stealerlogs_result_with_operator(param)
+async def search_stealer_iocs(param: search_credential_param_model = Body(...)):
+    return await search_model.getInstance().search_stealer_iocs(param)
 
 
 @api_routes.post(
@@ -212,7 +213,7 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
         param, base_index, [], [])
 
 @api_routes.post(
-    "/api/search/consolidated/rankedWithOperators",
+    "/api/search/consolidatedIOCs",
     summary="Search consolidated reports (ranked with operators)",
     tags=["Search"],
     operation_id="searchConsolidatedRankedLogic",
@@ -223,7 +224,7 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
         )
     )],
 )
-async def search_consolidated_ranked_with_operators(
+async def search_consolidated_iocs(
     param: search_consolidated_param_model = Body(...)
 ):
     base_index = [
@@ -235,7 +236,7 @@ async def search_consolidated_ranked_with_operators(
         ELASTIC_INDEX.S_DEFACEMENT_INDEX,
     ]
 
-    return await search_model.getInstance().search_consolidated_ranked_with_operators(
+    return await search_model.getInstance().search_consolidated_iocs(
         param, base_index, [], []
     )
 

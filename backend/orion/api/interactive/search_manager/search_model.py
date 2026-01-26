@@ -141,7 +141,7 @@ class search_model:
         return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
     
     @staticmethod
-    async def search_consolidated_ranked_with_operators(
+    async def search_consolidated_iocs(
         param: search_consolidated_param_model,
         base_index,
         blocked_categories,
@@ -151,7 +151,7 @@ class search_model:
 
         indices, query, indices_boost = (
             elastic_request_generator()
-            .on_search_consolidated_ranked_with_operator(
+            .on_search_consolidated_iocs(
                 param, filter_dict, base_index, blocked_categories, allowed_categories
             )
         )
@@ -338,21 +338,21 @@ class search_model:
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
 
-    async def search_stealerlogs_result_with_operator(self, param: search_credential_param_model, alert=False):
+    async def search_stealer_iocs(self, param: search_credential_param_model, alert=False):
 
-        document, data_filter = elastic_request_generator().on_search_stealerlogs_data_with_operators(param, alert=alert)
+        document, data_filter = elastic_request_generator().on_search_stealer_iocs(param, alert=alert)
 
         if not data_filter:
             return False, []
 
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
-        hits = m_documents.get("hits", {}).get("hits", [])
-        for h in hits:
-            src = h.get("_source", {})
-            src["_id"] = h.get("_id")
-            if param.category != "credential" and "mapping" in src:
-                src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
+        # hits = m_documents.get("hits", {}).get("hits", [])
+        # for h in hits:
+        #     src = h.get("_source", {})
+        #     src["_id"] = h.get("_id")
+        #     if param.category != "credential" and "mapping" in src:
+        #         src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
 
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)

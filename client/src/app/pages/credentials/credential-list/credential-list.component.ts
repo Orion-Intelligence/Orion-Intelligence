@@ -42,7 +42,6 @@ export class CredentialListComponent {
   }
 
   onRowKeydown(event: KeyboardEvent, index: number, expandedSet: Set<number>) {
-    // Enter/Space toggles row expansion for keyboard users
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.toggleRow(index, expandedSet);

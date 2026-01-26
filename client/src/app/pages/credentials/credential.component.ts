@@ -44,6 +44,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   firstTrigger: boolean = true;
   user: any;
   url: string = '';
+  ioc: any;
   type: string;
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
@@ -119,7 +120,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-    this.dashboardService.consolidatedParamModel.user = this.searchQuery;
+    this.dashboardService.consolidatedParamModel.ioc = this.searchQuery;
     this.dashboardService.consolidatedParamModel.url ??= '';
     this.dashboardService.consolidatedParamModel.q = '';
 
@@ -129,7 +130,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.isSearchLoading = true
     this.dashboardService
       .fetchSearchResults<StealerLogCallbackModel>(
-        'search/stealerlogsWithOperator',
+        'search/stealerIOCs',
         this.dashboardService.consolidatedParamModel
       )
       .pipe(
@@ -198,16 +199,16 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     const startTime = performance.now();
 
     this.dashboardService.consolidatedParamModel.category = "";
-    this.dashboardService.consolidatedParamModel.user = this.searchQuery;
+    this.dashboardService.consolidatedParamModel.ioc = this.searchQuery;
     this.dashboardService.consolidatedParamModel.url ??= '';
 
     this.setLoading(1);
     this.isRankedLoading = true
     this.dashboardService
-      .fetchConsolidatedRankededResults('search/consolidated/rankedWithOperators', this.dashboardService.consolidatedParamModel)
+      .fetchConsolidatedRankededResults('search/consolidatedIOCs', this.dashboardService.consolidatedParamModel)
       .pipe(
         switchMap(response => timer(500).pipe(map(() => response))),
-        finalize(() => { this.setLoading(-1), this.isRankedLoading = false, this.dashboardService.consolidatedParamModel.user = '' })
+        finalize(() => { this.setLoading(-1), this.isRankedLoading = false, this.dashboardService.consolidatedParamModel.ioc = '' })
       )
       .subscribe(response => {
         const endTime = performance.now();
