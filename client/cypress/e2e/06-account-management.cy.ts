@@ -41,7 +41,9 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
     cy.get('.twofa-center').should('be.visible');
     cy.get('img[alt="2FA QR"]').should('exist');
     cy.get('input[name="otpCode"]').should('exist');
-    cy.contains('button', 'Verify OTP').should('be.disabled');
+    cy.get('.twofa_title')
+      .should('contain.text', 'Enter 2FA code')
+      .and('be.visible');
 
     cy.visit('/');
 

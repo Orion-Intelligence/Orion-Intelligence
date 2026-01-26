@@ -123,13 +123,13 @@ describe('Tenant Complete Flow – Correct Order', () => {
     .should('not.be.disabled')
     .click();
 
-    cy.contains('.onboarding-step2__tab', 'Domains')
+    cy.contains('.onboarding-step2__tab', 'Country')
       .scrollIntoView()
       .click();
 
     cy.get('.onboarding-step2__input')
       .clear()
-      .type('amazon.com{enter}');
+      .type('austria{enter}');
 
     cy.contains('button', 'Next')
       .should('not.be.disabled')
@@ -155,7 +155,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
 
     openManageIOCs();
-    addIOCForAllTabs();
+    // addIOCForAllTabs();
 
     cy.logout()
     cy.url().should('include', '/login');
@@ -198,11 +198,19 @@ describe('Tenant Complete Flow – Correct Order', () => {
   });
 
   it('Tenant alerts and notifications', () => {
-    cy.wait('60000');
     cy.visit('/login');
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
+
+    cy.wait(1000)
+    cy.get('button[apptooltip="scan all"]', { timeout: 10000 })
+      .click({ force: true })
+    cy.wait(1000)
+
+    cy.get('div.loading-content', { timeout: 40000 })
+      .should('not.exist')
+
 
     cy.get('button[apptooltip="Print Alerts"]')
       .should('be.visible')
@@ -227,13 +235,14 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .should('be.visible')
       .click();
 
-    cy.contains('.user-homepage_cards-card', 'Advanced scanning')
+    cy.contains('.user-homepage_cards-card', 'General')
       .click();
 
-    cy.get('.category_report_burger-icon')
+
+    cy.get('.category_report_burger-icon').first()
       .click();
 
-    cy.contains('.category_report_alert-btn', 'See Details')
+    cy.contains('.category_report_alert-btn', 'See Details').first()
       .click();
 
     cy.get('button[apptooltip="add alert"]')

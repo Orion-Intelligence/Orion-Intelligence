@@ -3,10 +3,10 @@ import registerCodeCoverageTasks from "@cypress/code-coverage/task";
 
 export default defineConfig({
   env: {
-    coverage: false,
+    coverage: true,
     language: "en",
     codeCoverage: {
-      enabled: false,
+      enabled: true,
     },
     pgp: false,
     ADMIN_USERNAME:"admin_test_username",

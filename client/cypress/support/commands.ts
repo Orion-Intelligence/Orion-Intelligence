@@ -30,14 +30,13 @@ Cypress.Commands.add("loginAsTest1", () => {
 });
 
 Cypress.Commands.add("logout", () => {
-  cy.get('div.profile_category.profile_logout_icon', { timeout: 10000 })
-    .should('exist')
-    .click({ force: true });
+  cy.get('img[alt="Logout"]', { timeout: 10000 })
+    .closest('a.profile-dropdown-toggle')
+    .click({ force: true })
 
-  cy.get('li.profile-item')
-    .contains('Sign out')
-    .should('exist')
-    .click({ force: true });
+  cy.contains('li.profile-item', 'Sign out')
+    .first()
+    .click({ force: true })
 
   cy.get('input[name="username"]', { timeout: 10000 })
     .should('exist');
