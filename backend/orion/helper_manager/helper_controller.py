@@ -64,11 +64,11 @@ class helper_controller:
         base_url = f"{parsed_url.scheme}://{netloc}"
         return base_url
 
+
     @staticmethod
     def getFilterClause(pfilter, p_query_model, allowed_keys):
         must_filter_clauses = []
         should_filter_clauses = []
-
         if pfilter:
             allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys or k == "m_search_all"}
             clauses = []
@@ -76,11 +76,11 @@ class helper_controller:
             for k, vals in allowed_filtered.items():
                 if k == "m_search_all":
                     for val in vals:
-                        search_all_clause = {"bool": {"should": [{"term": {field: val}} for field in
-                            allowed_keys], "minimum_should_match": 1}}
+                        search_all_clause = {"bool": {"should": [{"term": {f"{field}.keyword": val}} for field in
+                                                                 allowed_keys], "minimum_should_match": 1}}
                         clauses.append(search_all_clause)
                 else:
-                    clauses.extend([{"term": {k: val}} for val in vals])
+                    clauses.extend([{"term": {f"{k}.keyword": val}} for val in vals])
 
             if p_query_model.must:
                 must_filter_clauses = clauses
