@@ -114,6 +114,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
+    cy.get(".dashboard_container").should("be.visible");
 
     cy.get('#company', { timeout: 40000 })
       .clear()
@@ -190,6 +191,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
+    cy.get(".dashboard_container").should("be.visible");
 
 
     cy.get('.dashboard_container').should('exist');

@@ -16,9 +16,12 @@ omit =
     /app/bloom_data/*
     /app/cronjobs.py
     /app/client/*
+    client/*
     **/*.html
     **/*.css
+    **/*.scss
     **/*.js
+    **/*.ts
     **/*.json
     **/*.md
     **/*.sh
