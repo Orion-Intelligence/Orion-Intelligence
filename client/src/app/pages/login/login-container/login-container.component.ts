@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, NgClass, NgIf } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 
 import QRCode from 'qrcode';
-import {DashboardHeaderComponent} from '../../../shared/partials/header/dashboard-header/dashboard-header.component';
+import { DashboardHeaderComponent } from '../../../shared/partials/header/dashboard-header/dashboard-header.component';
 
 @Component({
   selector: 'app-login-container',
@@ -37,8 +37,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     private router: Router,
     protected appService: AppService,
     private route: ActivatedRoute
-  ) {
-  }
+  ) {}
 
   ngOnInit() {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
@@ -50,6 +49,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         this.authenticated = false;
       }
     });
+
     this.route.queryParams.subscribe(params => {
       const isScreenMobile = window.innerWidth <= 480;
       this.isMobile = isScreenMobile;
@@ -101,12 +101,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           if (!this.authService.isAuthenticated()) return;
-          this.otpUri = null;
-          this.otpDataUrl = null;
-          this.otpSecret = null;
-          this.otpCode = '';
-          this.tempToken = null;
-          this.pendingUsername = null;
+          // keep 2FA UI state intact to avoid flicker before redirect
         },
         error: (err) => {
           this.errorMessage =
