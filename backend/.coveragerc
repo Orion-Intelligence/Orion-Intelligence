@@ -6,13 +6,36 @@ source =
     /app
 omit =
     */site-packages/*
+    */__pycache__/*
+    */.venv/*
+    */venv/*
     /app/migrations/*
     /app/static/*
     /app/build/*
     /app/docs/*
     /app/bloom_data/*
-    /app/__pycache__/*
     /app/cronjobs.py
+    /app/client/*
+    **/*.html
+    **/*.css
+    **/*.js
+    **/*.json
+    **/*.md
+    **/*.sh
+    **/*.yaml
+    **/*.yml
+    */node_modules/*
+    */.nyc_output/*
+    */coverage/*
+    */cypress/*
+    */cypress.config.*
+    */angular.json
+    */package.json
+    */package-lock.json
+    */proxy.conf.json
+    */post-build.js
+    */webpack*.js
+    */tsconfig*.json
 
 [paths]
 source =
