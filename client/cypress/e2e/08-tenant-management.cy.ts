@@ -210,6 +210,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.get('div.loading-content', { timeout: 40000 })
       .should('not.exist')
+    cy.wait(2000)
 
 
     cy.get('button[apptooltip="Print Alerts"]')
