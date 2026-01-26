@@ -57,7 +57,7 @@ class auth_manager:
                 return {"twofa_required": True, "temp_token": temp_token, "username": mail}
             else:
                 secret = pyotp.random_base32()
-                provisioning_uri = pyotp.TOTP(secret).provisioning_uri(name=user.username, issuer_name="Orion")
+                provisioning_uri = pyotp.TOTP(secret).provisioning_uri(name=user.username, issuer_name="Orion Intelligence")
                 temp_token = await session_manager.get_instance().create_temp_token(
                     user.username, extra={"tfa_secret": secret})
                 return {"twofa_required": True, "temp_token": temp_token, "provisioning_uri": provisioning_uri, "twofa_secret": secret, "username": user.username}

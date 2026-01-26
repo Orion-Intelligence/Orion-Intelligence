@@ -12,7 +12,17 @@
             ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
         </span>
 
+        <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
+          <ng-container *ngIf="crumb.label.toLowerCase() !== 'login'; else loginLogo">
+            {{ crumb.label.replace('-', ' ') | titlecase }}
+          </ng-container>
+        </span>
+
+        <ng-template #loginLogo>
+          <div class="sidebar__header">
             <a href=""><img alt="Logo" height="35" width="197" [src]="appService.getConfig().appSettings.logo_wide_dark" /></a>
+          </div>
+        </ng-template>
 
       </span>
     </div>

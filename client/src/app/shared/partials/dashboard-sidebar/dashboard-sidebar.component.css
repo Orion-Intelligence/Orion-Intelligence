@@ -3,6 +3,10 @@
   height: 300px;
 }
 
+.login-header .sidebar__header{
+  margin-top: 0;
+}
+
 .sidebar__header {
   font-size: 24px;
   font-weight: 500;
