@@ -233,12 +233,12 @@
 
 .social-mapper__tab:hover {
   background: var(--color-blue-680);
-  color: var(--color-mono);
+  color: #ffffff;
 }
 
 .social-mapper__tab.active {
   background: var(--color-blue-640);
-  color: var(--color-mono);
+  color: #ffffff;
 }
 
 .social-mapper__tab-content {
@@ -316,7 +316,7 @@
 }
 
 .social-mapper__card-username {
-  color: var(--color-mono);
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -327,7 +327,7 @@
 .social-mapper__card-name {
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-mono);
+  color: #ffffff;
   margin-bottom: 4px;
 }
 
@@ -356,7 +356,7 @@
 .social-mapper__card-stat-value {
   font-size: 18px;
   font-weight: 600;
-  color: var(--color-mono);
+  color: #ffffff;
 }
 
 .social-mapper__card-stat-label {
@@ -371,7 +371,7 @@
 .social-mapper__card-mutuals h6 {
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-mono);
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
@@ -454,7 +454,7 @@
   justify-content: center;
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-mono);
+  color: #ffffff;
 }
 
 .social-mapper__influencer-info {
@@ -471,7 +471,7 @@
 .social-mapper__influencer-name {
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-mono);
+  color: #ffffff;
 }
 
 .social-mapper__influencer-score {
@@ -553,7 +553,7 @@
 .social-mapper__section-title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-mono);
+  color: #ffffff;
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -581,7 +581,7 @@
 }
 
 .social-mapper__bridge-name {
-  color: var(--color-mono);
+  color: #ffffff;
   font-weight: 500;
   font-size: 13px;
 }
@@ -616,7 +616,7 @@
   padding: 12px 16px;
   background: var(--color-blue-700);
   border-radius: 8px;
-  color: var(--color-mono);
+  color: #ffffff;
   font-size: 14px;
 }
 
@@ -643,7 +643,7 @@
 
 .social-mapper__group-id {
   font-weight: 600;
-  color: var(--color-mono);
+  color: #ffffff;
 }
 
 .social-mapper__group-count {
@@ -673,7 +673,7 @@
 
 .social-mapper__member-username {
   flex: 1;
-  color: var(--color-mono);
+  color: #ffffff;
   font-weight: 500;
 }
 

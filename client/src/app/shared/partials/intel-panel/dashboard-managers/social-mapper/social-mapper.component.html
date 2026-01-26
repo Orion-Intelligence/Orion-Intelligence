@@ -10,23 +10,23 @@
       <div class="social-mapper__form-content">
         <label class="sidebar_label mt-1">Mode</label>
         <div class="dropdown mb-3">
-          <button 
-            aria-expanded="false" 
-            class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" 
-            data-bs-toggle="dropdown" 
+          <button
+            aria-expanded="false"
+            class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+            data-bs-toggle="dropdown"
             type="button">
-            {{ queryMode === 'single' ? 'Single User' : 'Multi User' }}
+            {{ queryMode === 'single' ? 'Single Profile' : 'Multi Profile' }}
           </button>
           <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
             <li>
               <a (click)="onModeChange('single')" class="dropdown-item py-2 d-flex align-items-center">
-                <i class="bi bi-person me-2"></i> Single User
+                <i class="bi bi-person me-2"></i> Single Profile
               </a>
             </li>
             <li class="dropdown-divider m-0 mx-3"></li>
             <li>
               <a (click)="onModeChange('multi')" class="dropdown-item py-2 d-flex align-items-center">
-                <i class="bi bi-people me-2"></i> Multi User
+                <i class="bi bi-people me-2"></i> Multi Profile
               </a>
             </li>
           </ul>
@@ -34,19 +34,19 @@
 
         <ng-container *ngIf="queryMode === 'single'">
           <label class="sidebar_label mt-1">Username</label>
-          <input 
-            [(ngModel)]="username" 
-            class="form-control sidebar_input mb-3" 
-            name="username" 
-            placeholder="Enter username" 
+          <input
+            [(ngModel)]="username"
+            class="form-control sidebar_input mb-3"
+            name="username"
+            placeholder="Enter username"
             type="text"/>
 
           <label class="sidebar_label mt-1">Platform</label>
           <div class="dropdown mb-3">
-            <button 
-              aria-expanded="false" 
-              class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" 
-              data-bs-toggle="dropdown" 
+            <button
+              aria-expanded="false"
+              class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+              data-bs-toggle="dropdown"
               type="button">
               <span *ngIf="selectedPlatform" class="d-flex align-items-center">
                 <i [class]="'bi ' + getPlatformIcon(selectedPlatform) + ' me-2'"></i>
@@ -78,17 +78,17 @@
 
           <div class="social-mapper__targets-list">
             <div *ngFor="let target of multiTargets; let i = index" class="social-mapper__target-row mb-2">
-              <input 
-                [(ngModel)]="target.username" 
+              <input
+                [(ngModel)]="target.username"
                 [name]="'username_' + i"
-                class="form-control sidebar_input social-mapper__target-input" 
-                placeholder="Username" 
+                class="form-control sidebar_input social-mapper__target-input"
+                placeholder="Username"
                 type="text"/>
-              
+
               <div class="dropdown social-mapper__target-dropdown">
-                <button 
-                  class="btn dropdown-toggle sidebar_input d-flex justify-content-between align-items-center dropdown-select" 
-                  data-bs-toggle="dropdown" 
+                <button
+                  class="btn dropdown-toggle sidebar_input d-flex justify-content-between align-items-center dropdown-select"
+                  data-bs-toggle="dropdown"
                   type="button">
                   <span *ngIf="target.platform">
                     <i [class]="'bi ' + getPlatformIcon(target.platform)"></i>
@@ -110,8 +110,8 @@
                 </ul>
               </div>
 
-              <button 
-                class="btn social-mapper__remove-btn" 
+              <button
+                class="btn social-mapper__remove-btn"
                 type="button"
                 (click)="removeTarget(i)"
                 [disabled]="multiTargets.length === 1">
@@ -122,23 +122,23 @@
         </ng-container>
 
         <label class="sidebar_label mt-3">Max Followers</label>
-        <input 
-          [(ngModel)]="maxFollowers" 
-          class="form-control sidebar_input mb-3" 
-          name="maxFollowers" 
-          placeholder="Enter max followers" 
-          min="1" 
-          max="500" 
+        <input
+          [(ngModel)]="maxFollowers"
+          class="form-control sidebar_input mb-3"
+          name="maxFollowers"
+          placeholder="Enter max followers"
+          min="1"
+          max="500"
           type="number"/>
 
         <label class="sidebar_label mt-1">Max Following</label>
-        <input 
-          [(ngModel)]="maxFollowing" 
-          class="form-control sidebar_input mb-3" 
-          name="maxFollowing" 
-          placeholder="Enter max following" 
-          min="1" 
-          max="500" 
+        <input
+          [(ngModel)]="maxFollowing"
+          class="form-control sidebar_input mb-3"
+          name="maxFollowing"
+          placeholder="Enter max following"
+          min="1"
+          max="500"
           type="number"/>
 
         <div *ngIf="errorMessage" class="alert alert-danger py-2 px-3 mb-3">>
@@ -147,9 +147,9 @@
         </div>
 
         <div class="sidebar_submit">
-          <button 
-            (click)="showIntelligence()" 
-            class="btn btn-primary sidebar_submit-button" 
+          <button
+            (click)="showIntelligence()"
+            class="btn btn-primary sidebar_submit-button"
             type="button"
             [disabled]="isLoading">
             <span *ngIf="!isLoading">Apply</span>
@@ -157,9 +157,9 @@
               <i class="bi bi-arrow-repeat spin me-1"></i> Analyzing...
             </span>
           </button>
-          <button 
-            (click)="resetForm()" 
-            class="btn btn-secondary sidebar_submit-button" 
+          <button
+            (click)="resetForm()"
+            class="btn btn-secondary sidebar_submit-button"
             type="button"
             [disabled]="isLoading">
             Reset
@@ -213,26 +213,26 @@
 
     <div *ngIf="!isLoading && hasResults" class="social-mapper__results">
       <div class="social-mapper__tabs">
-        <button 
-          class="social-mapper__tab" 
+        <button
+          class="social-mapper__tab"
           [class.active]="activeTab === 'network'"
           (click)="setActiveTab('network')">
           <i class="bi bi-diagram-3"></i> Network Graph
         </button>
-        <button 
-          class="social-mapper__tab" 
+        <button
+          class="social-mapper__tab"
           [class.active]="activeTab === 'summary'"
           (click)="setActiveTab('summary')">
           <i class="bi bi-card-list"></i> Summary
         </button>
-        <button 
-          class="social-mapper__tab" 
+        <button
+          class="social-mapper__tab"
           [class.active]="activeTab === 'influencers'"
           (click)="setActiveTab('influencers')">
           <i class="bi bi-star"></i> Influencers
         </button>
-        <button 
-          class="social-mapper__tab" 
+        <button
+          class="social-mapper__tab"
           [class.active]="activeTab === 'identities'"
           (click)="setActiveTab('identities')">
           <i class="bi bi-people"></i> Identity Groups
@@ -240,17 +240,6 @@
       </div>
 
       <div *ngIf="activeTab === 'network'" class="social-mapper__tab-content">
-        <div class="social-mapper__network-controls">
-          <button class="social-mapper__control-btn" (click)="fitNetwork()" title="Fit to view">
-            <i class="bi bi-arrows-fullscreen"></i>
-          </button>
-          <button class="social-mapper__control-btn" (click)="togglePhysics(true)" title="Enable physics">
-            <i class="bi bi-lightning"></i>
-          </button>
-          <button class="social-mapper__control-btn" (click)="togglePhysics(false)" title="Disable physics">
-            <i class="bi bi-pause-circle"></i>
-          </button>
-        </div>
         <div #networkContainer class="social-mapper__network-container"></div>
       </div>
 
@@ -264,7 +253,7 @@
               </div>
               <span class="social-mapper__card-username">{{'@'}}{{ card.username }}</span>
             </div>
-            
+
             <div class="social-mapper__card-body">
               <div class="social-mapper__card-name" *ngIf="card.real_name">
                 {{ card.real_name }}
@@ -272,7 +261,7 @@
               <div class="social-mapper__card-bio" *ngIf="card.bio">
                 {{ card.bio }}
               </div>
-              
+
               <div class="social-mapper__card-stats">
                 <div class="social-mapper__card-stat">
                   <span class="social-mapper__card-stat-value">{{ card.total_posts || '0' }}</span>
@@ -324,8 +313,8 @@
         </ng-container>
 
         <div class="social-mapper__influencers-list">
-          <div 
-            *ngFor="let influencer of analysisData?.influence_analysis?.top_influencers; let i = index" 
+          <div
+            *ngFor="let influencer of analysisData?.influence_analysis?.top_influencers; let i = index"
             class="social-mapper__influencer-card">
             <div class="social-mapper__influencer-rank">
               <span class="social-mapper__rank-badge">{{ i + 1 }}</span>
@@ -346,7 +335,7 @@
                 </span>
               </div>
               <div class="social-mapper__influencer-connections">
-                <span *ngFor="let type of influencer.connection_types" 
+                <span *ngFor="let type of influencer.connection_types"
                       class="social-mapper__connection-badge"
                       [ngClass]="getConnectionTypeClass(type)">
                   {{ type }}
@@ -413,8 +402,8 @@
   </div>
 
   <!-- Context Menu -->
-  <div 
-    *ngIf="contextMenuVisible" 
+  <div
+    *ngIf="contextMenuVisible"
     class="social-mapper__context-menu"
     [style.left.px]="contextMenuX + 280"
     [style.top.px]="contextMenuY">

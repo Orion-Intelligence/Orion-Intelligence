@@ -1,10 +1,10 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { DataSet, Edge, Network, Node } from 'vis-network/standalone';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 import { AppService } from '../../../../../services/core/app/app.service';
+import { ApiService } from '../../../../services/api.service';
 
 interface SocialTarget {
   usernames: string[];
@@ -94,7 +94,7 @@ interface ExtendedNode extends Node {
   animations: [fadeInDashboardItem]
 })
 export class SocialMapperComponent implements OnInit {
-  @ViewChild('networkContainer', { static: true }) networkContainer!: ElementRef;
+  @ViewChild('networkContainer', { static: false }) networkContainer!: ElementRef;
 
   queryMode: 'single' | 'multi' = 'single';
   username = '';
@@ -112,13 +112,14 @@ export class SocialMapperComponent implements OnInit {
     { value: 'tiktok', label: 'TikTok', icon: 'bi-tiktok' },
     { value: 'youtube', label: 'YouTube', icon: 'bi-youtube' },
     { value: 'reddit', label: 'Reddit', icon: 'bi-reddit' },
-    { value: 'telegram', label: 'Telegram', icon: 'bi-telegram' }
+    { value: 'telegram', label: 'Telegram', icon: 'bi-telegram' },
+    { value: 'behance', label: 'Behance', icon: 'bi-behance' }
   ];
 
   isLoading = false;
   hasResults = false;
   errorMessage = '';
-  
+
   analysisData: AnalysisData | null = null;
   rawResults: any = null;
 
@@ -142,12 +143,10 @@ export class SocialMapperComponent implements OnInit {
     bridge: { background: '#26C6DA', border: '#00BCD4' }
   };
 
-  private readonly API_BASE_URL = 'http://0.0.0.0:8010';
-
-  constructor(private http: HttpClient, protected appService: AppService) {}
+  constructor(private apiService: ApiService, protected appService: AppService) {}
 
   ngOnInit(): void {
-    this.initializeNetwork();
+    // Network will be initialized when needed
   }
 
   private initializeNetwork(): void {
@@ -267,7 +266,7 @@ export class SocialMapperComponent implements OnInit {
 
     try {
       const request = this.buildRequest();
-      const response = await this.http.post<any>(`${this.API_BASE_URL}/social/scrape`, request).toPromise();
+      const response = await this.apiService.post<any>('social/scrape', request).toPromise();
 
       if (response?.result?.status === 'success') {
         this.rawResults = response.result;
@@ -295,7 +294,7 @@ export class SocialMapperComponent implements OnInit {
       };
     } else {
       const platformGroups: Record<string, string[]> = {};
-      
+
       this.multiTargets.forEach(target => {
         if (target.username.trim() && target.platform) {
           if (!platformGroups[target.platform]) {
@@ -321,6 +320,24 @@ export class SocialMapperComponent implements OnInit {
   private renderNetworkGraph(): void {
     if (!this.analysisData) return;
 
+    // Initialize network if not already done
+    if (!this.network) {
+      setTimeout(() => {
+        this.initializeNetwork();
+        this.doRenderNetwork();
+      }, 100);
+    } else {
+      this.doRenderNetwork();
+    }
+  }
+
+  private doRenderNetwork(): void {
+    if (!this.analysisData) return;
+    if (!this.nodeSet || !this.edgeSet) {
+      this.nodeSet = new DataSet<ExtendedNode>();
+      this.edgeSet = new DataSet<Edge>();
+    }
+
     this.nodeSet.clear();
     this.edgeSet.clear();
 
@@ -331,7 +348,7 @@ export class SocialMapperComponent implements OnInit {
 
     this.analysisData.summary.cards.forEach((card, cardIndex) => {
       const targetId = `target_${card.platform}_${card.username}`;
-      
+
       if (!addedNodes.has(targetId)) {
         nodes.push({
           id: targetId,
@@ -423,7 +440,7 @@ export class SocialMapperComponent implements OnInit {
     if (this.analysisData.influence_analysis?.top_influencers) {
       this.analysisData.influence_analysis.top_influencers.slice(0, 5).forEach(influencer => {
         influencer.username_variations.forEach(username => {
-          const matchingNodes = nodes.filter(n => 
+          const matchingNodes = nodes.filter(n =>
             n.label?.toLowerCase().includes(username.toLowerCase())
           );
           matchingNodes.forEach(node => {
@@ -438,7 +455,7 @@ export class SocialMapperComponent implements OnInit {
     if (this.analysisData.influence_analysis?.bridge_users) {
       this.analysisData.influence_analysis.bridge_users.forEach(bridge => {
         bridge.username_variations.forEach((username: string) => {
-          const matchingNodes = nodes.filter(n => 
+          const matchingNodes = nodes.filter(n =>
             n.label?.toLowerCase().includes(username.toLowerCase())
           );
           matchingNodes.forEach(node => {
@@ -453,9 +470,11 @@ export class SocialMapperComponent implements OnInit {
     this.nodeSet.add(nodes);
     this.edgeSet.add(edges);
 
-    this.network.once('stabilizationIterationsDone', () => {
-      this.network.fit({ animation: true });
-    });
+    if (this.network) {
+      this.network.once('stabilizationIterationsDone', () => {
+        this.network.fit({ animation: true });
+      });
+    }
   }
 
   private showContextMenu(x: number, y: number, node: ExtendedNode): void {
@@ -482,7 +501,7 @@ export class SocialMapperComponent implements OnInit {
     if (this.contextMenuNode?.label) {
       const username = this.contextMenuNode.label.split('\n')[0].replace('@', '');
       const platform = this.contextMenuNode.platform || 'instagram';
-      
+
       this.queryMode = 'single';
       this.username = username;
       this.selectedPlatform = platform;
@@ -493,9 +512,14 @@ export class SocialMapperComponent implements OnInit {
 
   setActiveTab(tab: 'network' | 'summary' | 'influencers' | 'identities'): void {
     this.activeTab = tab;
-    if (tab === 'network') {
+    if (tab === 'network' && this.analysisData) {
       setTimeout(() => {
-        this.network?.fit({ animation: true });
+        if (!this.network || !this.networkContainer?.nativeElement?.children?.length) {
+          this.initializeNetwork();
+          this.doRenderNetwork();
+        } else {
+          this.network.fit({ animation: true });
+        }
       }, 100);
     }
   }
