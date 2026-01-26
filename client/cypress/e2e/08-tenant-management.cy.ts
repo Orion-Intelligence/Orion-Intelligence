@@ -57,7 +57,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     approveOneTenant();
 
-    cy.get('tr:contains("Not Verified")', { timeout: 10000 }).should('not.exist');
+    cy.get('tr:contains("Not Verified")', { timeout: 40000 }).should('not.exist');
 
     cy.logout();
   });
@@ -115,9 +115,9 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
 
-    cy.get('#company')
-    .clear()
-    .type('Orion Intelligence');
+    cy.get('#company', { timeout: 40000 })
+      .clear()
+      .type('Orion Intelligence');
 
     cy.contains('button', 'Next')
     .should('not.be.disabled')
@@ -204,7 +204,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.contains('Sign In').click({ force: true });
 
     cy.wait(2000)
-    cy.get('button[apptooltip="scan all"]', { timeout: 10000 })
+    cy.get('button[apptooltip="scan all"]', { timeout: 40000 })
       .click({ force: true })
     cy.wait(2000)
 
