@@ -25,8 +25,42 @@ provide full control over the system's functionality, ensuring smooth and effici
 
 The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlinedaccess to its wide range of features. When we  log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
+<img width="1919" height="1079" alt="homepage" src="https://github.com/user-attachments/assets/022963ba-4c8e-41df-85aa-d719ca881edb" />
 
-<img width="1916" height="905" alt="adminlogin" src="https://github.com/user-attachments/assets/da0ef14f-10a1-455e-8835-979acc971f66" />
+### Homepage Menu
+![hompagemenu](https://github.com/user-attachments/assets/c1da6427-81d7-478d-9e1e-03e08214df40)
+
+
+**Account**
+<img width="1918" height="652" alt="account" src="https://github.com/user-attachments/assets/7915872b-5c3d-4f65-bcd7-a4b8727ee743" />
+
+**Users**
+   ![users](https://github.com/user-attachments/assets/c2ba3864-7d71-4b13-8cf9-36bc9375f1f3)
+
+   **Adduser**
+   <img width="1918" height="803" alt="add" src="https://github.com/user-attachments/assets/364b9515-25fa-4f66-83ae-de08162bcb33" />
+
+
+   **Viewuser**
+   ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
+
+   **Edituser**
+   <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
+
+
+
+   **Auditlog**
+   ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
+
+   **Tenant**
+   <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
+
+   
+
+**System Settings**
+![systemsetting](https://github.com/user-attachments/assets/aad4a8de-b8bf-4a78-85df-dcc60c4265b7)
+
+
 
 
 
