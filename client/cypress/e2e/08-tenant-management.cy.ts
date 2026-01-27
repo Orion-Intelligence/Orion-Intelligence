@@ -29,9 +29,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
   it('Admin verifies all tenants and assigns Enterprise license', () => {
     cy.loginAsAdmin();
 
-    cy.visit('/dashboard/profile/homepage');
     cy.openTenantsPage();
-    cy.reload()
 
     const approveAllTenants = (tries = 0) => {
       if (tries >= 5) return;
@@ -69,7 +67,6 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     approveAllTenants();
 
-    cy.reload();
     cy.openTenantsPage();
 
     cy.get('.badge-false', {timeout: 40000}).should('not.exist');
