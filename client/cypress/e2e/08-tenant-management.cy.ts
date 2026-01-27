@@ -39,8 +39,6 @@ describe('Tenant Complete Flow – Correct Order', () => {
           return Cypress.$(row).find('.badge-false').length > 0 && !Cypress.$(row).hasClass('table-active');
         });
 
-        if (!rows.length) return;
-
         cy.wrap(rows.eq(0)).within(() => {
           cy.get('#edit-tenant').click({force: true});
         });
@@ -138,6 +136,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
   it('Tenant adds user, IOCs, scans and logs out', () => {
     cy.visit('/login');
+    cy.reload()
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
