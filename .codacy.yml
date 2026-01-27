@@ -13,6 +13,10 @@ exclude_paths:
   - "backend/static/**"
   - "backend/migrations/**"
   - "backend/orion/services/elastic_manager/elastic_request_generator.py"
+  - client/cypress/**
+  - backend/static/**
+  - backend/migrations/**
+  - backend/orion/services/elastic_manager/elastic_request_generator.py
 
 engines:
   duplication:
@@ -25,3 +29,7 @@ engines:
       - "backend/static/**"
       - "backend/migrations/**"
       - "backend/orion/services/elastic_manager/elastic_request_generator.py"
+      - client/cypress/**
+      - backend/static/**
+      - backend/migrations/**
+      - backend/orion/services/elastic_manager/elastic_request_generator.py
