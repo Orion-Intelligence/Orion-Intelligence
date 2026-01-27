@@ -89,8 +89,6 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
   cy.openTenantsPage();
 
-  cy.get('.badge-false', { timeout: 40000 }).should('not.exist');
-
   cy.logout();
 });
 

@@ -1,7 +1,3 @@
-
-
-
-
 export interface IocItem {
   [key: string]: string;
 }
