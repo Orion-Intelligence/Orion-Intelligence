@@ -31,13 +31,18 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.openTenantsPage();
 
+    let verifiedCount = 0;
+
     const approveAllTenants = (tries = 0) => {
       if (tries >= 5) return;
 
       cy.get('tbody tr').then($rows => {
         const rows = $rows.filter((_: number, row: HTMLElement) => {
-          return Cypress.$(row).find('.badge-false').length > 0 && !Cypress.$(row).hasClass('table-active');
+          return Cypress.$(row).find('.badge-false').length > 0 &&
+            !Cypress.$(row).hasClass('table-active');
         });
+
+        verifiedCount++;
 
         cy.wrap(rows.eq(0)).within(() => {
           cy.get('#edit-tenant').click({force: true});
@@ -82,6 +87,10 @@ describe('Tenant Complete Flow – Correct Order', () => {
     };
 
     approveAllTenants();
+
+    cy.then(() => {
+      expect(verifiedCount).to.be.greaterThan(0);
+    });
 
     cy.openTenantsPage();
 
