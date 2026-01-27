@@ -32,7 +32,9 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.visit('/dashboard/profile/homepage');
     cy.openTenantsPage();
 
-    const approveAllTenants = () => {
+    const approveAllTenants = (tries = 0) => {
+      if (tries >= 5) return;
+
       cy.get('tbody tr').then($rows => {
         const rows = $rows.filter((_: number, row: HTMLElement) => {
           return Cypress.$(row).find('.badge-false').length > 0;
@@ -57,7 +59,10 @@ describe('Tenant Complete Flow – Correct Order', () => {
           .click();
 
         cy.openTenantsPage();
-        approveAllTenants();
+
+        cy.get('body').then(() => {
+          Cypress.$('.badge-false').length ? approveAllTenants(tries + 1) : null;
+        });
       });
     };
 
@@ -70,6 +75,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.logout();
   });
+
 
   const openManageIOCs = () => {
     cy.contains('.sidebar__subitem-content', 'IOC')
