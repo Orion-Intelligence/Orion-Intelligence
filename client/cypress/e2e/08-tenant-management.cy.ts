@@ -114,7 +114,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
-    cy.get(".dashboard_container").should("be.visible");
+    cy.get('.onboarding-box', { timeout: 10000 }).should('be.visible');
 
     cy.get('#company', { timeout: 40000 })
       .clear()
@@ -204,15 +204,17 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
+    cy.get(".dashboard_container").should("be.visible");
 
-    cy.wait(2000)
+    cy.wait(4000)
     cy.get('button[apptooltip="scan all"]', { timeout: 40000 })
-      .click({ force: true })
-    cy.wait(2000)
+      .should('be.visible')
+      .and('not.be.disabled')
+      .click();
+
 
     cy.get('div.loading-content', { timeout: 40000 })
       .should('not.exist')
-    cy.wait(2000)
 
 
     cy.get('button[apptooltip="Print Alerts"]')
@@ -238,7 +240,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .should('be.visible')
       .click();
 
-    cy.contains('.user-homepage_cards-card', 'General')
+    cy.contains('.user-homepage_cards-card', 'Breach')
       .click();
 
 
