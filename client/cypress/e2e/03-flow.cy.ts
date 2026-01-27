@@ -21,6 +21,14 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'System Settings'
     ];
 
+    cy.get('button.sidebar__header-menu')
+      .should('be.visible')
+      .click();
+
+    cy.get('img[src*="menu-mini"]')
+      .should('be.visible')
+      .click();
+
     adminSections.forEach((section) => {
       cy.contains('.sidebar__subitem-content', section)
         .scrollIntoView()

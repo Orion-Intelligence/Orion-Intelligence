@@ -31,7 +31,6 @@ import { SidebarUserStatisticsComponent } from './shared/partials/sidebar-user/s
 import { SidebarUserIocComponent } from './shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component';
 import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
 import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
-import { PaymentGatewayComponent } from './shared/partials/payment-gateway/payment-gateway.component';
 import { NotificationComponent } from './shared/partials/notification/notification.component';
 import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
 import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/account-settings.component';
@@ -40,7 +39,6 @@ import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dash
 import { SidebarUserHomepageComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component';
 import { CategoryAlertReportComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component';
 import { AddCustomAlertComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component';
-import { HomeAccessGuard } from './shared/guards/home-access.guard';
 import { ManageProfileComponent } from './pages/tenant/tenant-management/view-profile/manage-profile.component';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component';
@@ -143,11 +141,6 @@ export const routes: Routes = [
     data: { animation: 'PaymentGatewayComponent' }
   },
   {
-    path: 'payment',
-    component: PaymentGatewayComponent,
-    data: { animation: 'PaymentGatewayComponent' }
-  },
-  {
     path: 'reset/:token',
     component: ResetPasswordComponent,
     data: { animation: 'ForgotPasswordComponent' }
@@ -175,7 +168,6 @@ export const routes: Routes = [
       {
         path: 'home',
         component: HomepageComponent,
-        canActivate: [HomeAccessGuard],
         resolve: { insights: InsightResolver },
         data: { animation: 'HomePage' }
       },
