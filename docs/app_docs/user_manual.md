@@ -42,9 +42,11 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
 
 
    **Viewuser**
+   
    ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
 
    **Edituser**
+   
    <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
 
 
@@ -63,7 +65,7 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
 
 
 ### Navbar
-<img width="568" height="700" alt="menu" src="https://github.com/user-attachments/assets/a5e649d3-dd30-47e2-9fd7-45c842ba3a54" />
+
 
 
 ## Directory Page
@@ -74,8 +76,7 @@ Here’s an overview of the interface components
 
 The navigation bar has been moved to the left side of the page. This adjustment enhances accessibility for users. It also creates a cleaner and more efficient workflow.
 
-
-<img width="420" height="893" alt="sidebar" src="https://github.com/user-attachments/assets/2a7dd05b-8a34-4e87-b3de-42357f4663a2" />
+<img width="568" height="700" alt="menu" src="https://github.com/user-attachments/assets/a5e649d3-dd30-47e2-9fd7-45c842ba3a54" />
 
 
 It consists of the following main menu items:
