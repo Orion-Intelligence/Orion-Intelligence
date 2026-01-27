@@ -76,14 +76,12 @@ export class SubdomainsComponent {
   private startProgressSimulation(): void {
     this.progress = 0;
     this.progressTimer$ = new Subject<void>();
-
-    // Simulate progress: 0-90% over time, leave 10% for actual completion
+    
     interval(300)
       .pipe(
         takeUntil(this.progressTimer$),
         tap(() => {
           if (this.progress < 90) {
-            // Slow down as we approach 90%
             const increment = this.progress < 30 ? 3 : this.progress < 60 ? 2 : 1;
             this.progress = Math.min(90, this.progress + increment);
           }
@@ -116,26 +114,21 @@ export class SubdomainsComponent {
     const trimmed = this.domain.trim();
 
     if (!trimmed) {
-      this.isValidDomain = true; // Don't show error for empty
+      this.isValidDomain = true;
       return;
     }
 
-    // Remove protocol if present
     const domainOnly = trimmed.replace(/^https?:\/\//i, '').replace(/\/.*/,'');
 
-    // Basic domain validation regex
-    // Allows: example.com, subdomain.example.com, example.co.uk
     const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
 
     this.isValidDomain = domainRegex.test(domainOnly);
   }
 
   getSubdomainUrl(subdomain: string): string {
-    // Check if subdomain already has protocol
     if (subdomain.match(/^https?:\/\//i)) {
       return subdomain;
     }
-    // Add https:// protocol
     return `https://${subdomain}`;
   }
 
@@ -146,14 +139,12 @@ export class SubdomainsComponent {
       return;
     }
 
-    // Validate domain before searching
     this.validateDomain();
     if (!this.isValidDomain) {
       this.error = 'Please enter a valid domain (e.g., example.com)';
       return;
     }
 
-    // Normalize like SecurityScanResultsComponent
     const resolved = this.resolveRequestedUrl(raw);
 
     this.loading = true;
@@ -204,12 +195,10 @@ export class SubdomainsComponent {
         next: (res: SubdomainResponse) => {
           const status = res?.result?.status || res?.status;
 
-          // Still processing → update status message
           if (status === 'pending' || status === 'busy') {
             return;
           }
 
-          // Success → extract results
           if (status === 'success') {
             const list = res?.result?.subdomains || res?.subdomains || [];
             const count = res?.result?.count || res?.count || list.length;
@@ -220,7 +209,6 @@ export class SubdomainsComponent {
             this.search.emit(list);
             this.progress = 100;
           } else {
-            // Error or unknown status
             this.error = res?.result?.message || res?.message || 'Failed to fetch subdomains';
             this.statusMessage = 'Scan failed';
           }
