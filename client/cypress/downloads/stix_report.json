@@ -1,13 +1,13 @@
 {
   "type": "bundle",
-  "id": "bundle--162aead0-54f7-50f4-8369-4408c3b1767d",
+  "id": "bundle--f32a8be7-da76-5bc6-945c-f9e7f78d8d7d",
   "spec_version": "2.1",
   "objects": [
     {
       "type": "marking-definition",
       "spec_version": "2.1",
       "id": "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd",
-      "created": "2026-01-24T19:39:28.531Z",
+      "created": "2026-01-24T19:38:18.808Z",
       "definition_type": "tlp",
       "definition": {
         "tlp": "amber"
@@ -17,130 +17,46 @@
       "type": "marking-definition",
       "spec_version": "2.1",
       "id": "marking-definition--2676b2c3-1d57-5b0f-9ca4-0cf2ceaa9eb2",
-      "created": "2026-01-24T19:39:28.531Z",
+      "created": "2026-01-24T19:38:18.808Z",
       "definition_type": "tlp",
       "definition": {
         "tlp": "red"
       }
     },
     {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--8662c607-b4f8-5859-a67c-deee86f33ebc",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "Australia",
-      "country": "Australia",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--e3695bc2-e6a8-5e26-95c3-73fba33ca487",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "India",
-      "country": "India",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--7a657e1f-6d87-5ffe-914e-baa7946143be",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "Ukraine",
-      "country": "Ukraine",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--6b67916d-9ef7-5133-b7dc-dfee52afdc97",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "Japan",
-      "country": "Japan",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--19d47843-b26c-5b9c-af07-86382386dc2d",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "Europe",
-      "country": "Europe",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--ab369bba-c77f-5cab-bdd0-7f874adb8d67",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "Russia",
-      "country": "Russia",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
-      "type": "location",
-      "spec_version": "2.1",
-      "id": "location--4fc807d0-09e9-5dbf-a0b9-30c3b9dd5b80",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "South Korea",
-      "country": "South Korea",
-      "object_marking_refs": [
-        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
-      ]
-    },
-    {
       "type": "intrusion-set",
       "spec_version": "2.1",
-      "id": "intrusion-set--b00e3f72-aeee-5573-befc-dfa36df1b23a",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "bleeping computer",
-      "description": "The North Korean hacker group Konni (Opal Sleet, TA406) is using AI-generated PowerShell malware to target developers and engineers in the blockchain sector. Believed to be associated with APT37 and Kimsuky activity clusters, Konni has been active since at least 2014 and has been seen targeting organizations in South Korea , Russia , Ukraine , and various countries in Europe . Based on samples analyzed by Check Point researchers, the threat actor's latest campaign focuses on targets in the Asia-Pacific region, as the malware was submitted from Japan, Australia, and India. The attack begins with the victim receiving a Discord-hosted",
+      "id": "intrusion-set--b9f42695-6eac-5c52-b6cb-d02ae971dc3d",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "name": "hackernews live",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
       ]
     },
     {
       "type": "url",
-      "id": "url--e88ce711-1470-5582-84b9-e8d23cd8eb87",
-      "value": "https://www.bleepingcomputer.com/news/security/konni-hackers-target-blockchain-engineers-with-ai-built-malware/"
+      "id": "url--056bec6b-9ac4-599a-b02f-8324f29735f4",
+      "value": "https://thehackernews.com/2026/01/certcc-warns-binary-parser-bug-allows.html"
     },
     {
       "type": "domain-name",
-      "id": "domain-name--ff928d4b-7396-58b5-a69f-65ba3f482cd9",
-      "value": "bleepingcomputer.com"
+      "id": "domain-name--d3d3b775-f929-5892-9795-bbf55bb6d359",
+      "value": "thehackernews.com"
     },
     {
       "type": "observed-data",
       "spec_version": "2.1",
-      "id": "observed-data--1e00d075-2e64-5fd2-bfc9-06b8b7c0e17a",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "first_observed": "2026-01-24T19:39:28.531Z",
-      "last_observed": "2026-01-24T19:39:28.531Z",
+      "id": "observed-data--b9db7979-cf3f-5338-bca8-fe7ecf5b5735",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "first_observed": "2026-01-24T19:38:18.808Z",
+      "last_observed": "2026-01-24T19:38:18.808Z",
       "number_observed": 1,
       "object_refs": [
-        "url--e88ce711-1470-5582-84b9-e8d23cd8eb87",
-        "domain-name--ff928d4b-7396-58b5-a69f-65ba3f482cd9"
+        "url--056bec6b-9ac4-599a-b02f-8324f29735f4",
+        "domain-name--d3d3b775-f929-5892-9795-bbf55bb6d359"
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
@@ -149,49 +65,38 @@
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--5bfa1a44-84fb-5399-9510-91578b1a759b",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
+      "id": "indicator--d363b6bd-ef7f-558d-8fb4-a59f048ae7c0",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "name": "Domains",
-      "description": "The North Korean hacker group Konni (Opal Sleet, TA406) is using AI-generated PowerShell malware to target developers and engineers in the blockchain sector. Believed to be associated with APT37 and Kimsuky activity clusters, Konni has been active since at least 2014 and has been seen targeting organizations in South Korea , Russia , Ukraine , and various countries in Europe . Based on samples analyzed by Check Point researchers, the threat actor's latest campaign focuses on targets in the Asia-Pacific region, as the malware was submitted from Japan, Australia, and India. The attack begins with the victim receiving a Discord-hosted",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "indicator_types": [
         "malicious-activity"
       ],
       "pattern_type": "stix",
-      "pattern": "[domain-name:value IN ('bleepingcomputer.com')]",
-      "valid_from": "2026-01-24T19:39:28.531Z",
+      "pattern": "[domain-name:value IN ('thehackernews.com')]",
+      "valid_from": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "phishing",
-        "logs",
-        "clearnet",
-        "exploit",
-        "c2",
-        "exfiltration",
-        "ransomware",
-        "ddos",
-        "infostealer",
         "threat_intel",
+        "c2",
+        "obfuscation",
+        "carding",
+        "cve",
+        "war",
+        "ddos",
+        "keylogger",
+        "crack",
+        "orion:leak",
+        "ransomware",
+        "rce",
+        "data",
+        "clearnet",
+        "lpe",
+        "news",
+        "exploit",
         "credentials_common",
         "hack",
-        "persistence",
-        "leak",
-        "orion:leak",
-        "news",
-        "obfuscation",
-        "crack",
-        "lpe",
-        "xss",
-        "supplychain",
-        "cheats",
-        "scam",
-        "war",
-        "apt",
-        "credential",
-        "rce",
-        "fraud",
-        "malware",
-        "data",
-        "rat"
+        "supplychain"
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
@@ -200,49 +105,56 @@
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--640682ed-913d-54f0-a7d1-25f95c38c680",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
+      "id": "indicator--0cd20c98-abe9-51c3-ab7c-e3a7e6f68be6",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "name": "URLs",
-      "description": "The North Korean hacker group Konni (Opal Sleet, TA406) is using AI-generated PowerShell malware to target developers and engineers in the blockchain sector. Believed to be associated with APT37 and Kimsuky activity clusters, Konni has been active since at least 2014 and has been seen targeting organizations in South Korea , Russia , Ukraine , and various countries in Europe . Based on samples analyzed by Check Point researchers, the threat actor's latest campaign focuses on targets in the Asia-Pacific region, as the malware was submitted from Japan, Australia, and India. The attack begins with the victim receiving a Discord-hosted",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "indicator_types": [
         "malicious-activity"
       ],
       "pattern_type": "stix",
-      "pattern": "[url:value IN ('https://www.bleepingcomputer.com/news/security/konni-hackers-target-blockchain-engineers-with-ai-built-malware/')]",
-      "valid_from": "2026-01-24T19:39:28.531Z",
+      "pattern": "[url:value IN ('https://thehackernews.com/2026/01/certcc-warns-binary-parser-bug-allows.html')]",
+      "valid_from": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "phishing",
-        "logs",
-        "clearnet",
-        "exploit",
-        "c2",
-        "exfiltration",
-        "ransomware",
-        "ddos",
-        "infostealer",
         "threat_intel",
+        "c2",
+        "obfuscation",
+        "carding",
+        "cve",
+        "war",
+        "ddos",
+        "keylogger",
+        "crack",
+        "orion:leak",
+        "ransomware",
+        "rce",
+        "data",
+        "clearnet",
+        "lpe",
+        "news",
+        "exploit",
         "credentials_common",
         "hack",
-        "persistence",
-        "leak",
-        "orion:leak",
-        "news",
-        "obfuscation",
-        "crack",
-        "lpe",
-        "xss",
-        "supplychain",
-        "cheats",
-        "scam",
-        "war",
-        "apt",
-        "credential",
-        "rce",
-        "fraud",
-        "malware",
-        "data",
-        "rat"
+        "supplychain"
+      ],
+      "object_marking_refs": [
+        "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
+      ]
+    },
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--8a8b640e-ae05-5f70-a98f-f4e7fe1ae635",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "name": "CVE-2026-1245",
+      "external_references": [
+        {
+          "source_name": "nvd",
+          "external_id": "CVE-2026-1245",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-1245"
+        }
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
@@ -251,48 +163,37 @@
     {
       "type": "infrastructure",
       "spec_version": "2.1",
-      "id": "infrastructure--d6cf221c-9108-5440-a09c-2255517b5d48",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "bleeping computer",
-      "description": "The North Korean hacker group Konni (Opal Sleet, TA406) is using AI-generated PowerShell malware to target developers and engineers in the blockchain sector. Believed to be associated with APT37 and Kimsuky activity clusters, Konni has been active since at least 2014 and has been seen targeting organizations in South Korea , Russia , Ukraine , and various countries in Europe . Based on samples analyzed by Check Point researchers, the threat actor's latest campaign focuses on targets in the Asia-Pacific region, as the malware was submitted from Japan, Australia, and India. The attack begins with the victim receiving a Discord-hosted",
+      "id": "infrastructure--cfa6ca6b-8843-539e-bf17-df1b9547232c",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "name": "hackernews live",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "infrastructure_types": [
         "command-and-control"
       ],
-      "first_seen": "2026-01-24T19:39:28.531Z",
-      "last_seen": "2026-01-24T19:39:28.531Z",
+      "first_seen": "2026-01-24T19:38:18.808Z",
+      "last_seen": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "phishing",
-        "logs",
-        "clearnet",
-        "exploit",
-        "c2",
-        "exfiltration",
-        "ransomware",
-        "ddos",
-        "infostealer",
         "threat_intel",
+        "c2",
+        "obfuscation",
+        "carding",
+        "cve",
+        "war",
+        "ddos",
+        "keylogger",
+        "crack",
+        "orion:leak",
+        "ransomware",
+        "rce",
+        "data",
+        "clearnet",
+        "lpe",
+        "news",
+        "exploit",
         "credentials_common",
         "hack",
-        "persistence",
-        "leak",
-        "orion:leak",
-        "news",
-        "obfuscation",
-        "crack",
-        "lpe",
-        "xss",
-        "supplychain",
-        "cheats",
-        "scam",
-        "war",
-        "apt",
-        "credential",
-        "rce",
-        "fraud",
-        "malware",
-        "data",
-        "rat"
+        "supplychain"
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
@@ -302,12 +203,12 @@
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--cbd79667-d860-5670-ac51-95795fd0fd72",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
+      "id": "relationship--148b6baa-3cf4-534b-8df6-4c10265eddf1",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
       "relationship_type": "uses",
-      "source_ref": "intrusion-set--b00e3f72-aeee-5573-befc-dfa36df1b23a",
-      "target_ref": "infrastructure--d6cf221c-9108-5440-a09c-2255517b5d48",
+      "source_ref": "intrusion-set--b9f42695-6eac-5c52-b6cb-d02ae971dc3d",
+      "target_ref": "infrastructure--cfa6ca6b-8843-539e-bf17-df1b9547232c",
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
       ]
@@ -315,86 +216,70 @@
     {
       "type": "report",
       "spec_version": "2.1",
-      "id": "report--9c73145c-4301-52cc-9998-efc7e6fdc106",
-      "created": "2026-01-24T19:39:28.531Z",
-      "modified": "2026-01-24T19:39:28.531Z",
-      "name": "Konni hackers target blockchain engineers with AI-built malware",
-      "description": "The North Korean hacker group Konni (Opal Sleet, TA406) is using AI-generated PowerShell malware to target developers and engineers in the blockchain sector. Believed to be associated with APT37 and Kimsuky activity clusters, Konni has been active since at least 2014 and has been seen targeting organizations in South Korea , Russia , Ukraine , and various countries in Europe . Based on samples analyzed by Check Point researchers, the threat actor's latest campaign focuses on targets in the Asia-Pacific region, as the malware was submitted from Japan, Australia, and India. The attack begins with the victim receiving a Discord-hosted",
+      "id": "report--96ba415b-5769-51b1-94ed-7cce0f2a6b20",
+      "created": "2026-01-24T19:38:18.808Z",
+      "modified": "2026-01-24T19:38:18.808Z",
+      "name": "CERT/CC Warns binary-parser Bug Allows Node.js Privilege-Level Code Execution",
+      "description": "A security vulnerability has been disclosed in the popular binary-parser npm library that, if successfully exploited, could result in the execution of arbitrary JavaScript. The vulnerability, tracked as CVE-2026-1245 (CVSS score: 6.5), affects all versions of the module prior to version 2.3.0 , which addresses the issue.",
       "report_types": [
         "threat-report"
       ],
-      "published": "2026-01-24T19:39:28.531Z",
+      "published": "2026-01-24T19:38:18.808Z",
       "labels": [
-        "phishing",
-        "logs",
-        "clearnet",
-        "exploit",
-        "c2",
-        "exfiltration",
-        "ransomware",
-        "ddos",
-        "infostealer",
         "threat_intel",
+        "c2",
+        "obfuscation",
+        "carding",
+        "cve",
+        "war",
+        "ddos",
+        "keylogger",
+        "crack",
+        "orion:leak",
+        "ransomware",
+        "rce",
+        "data",
+        "clearnet",
+        "lpe",
+        "news",
+        "exploit",
         "credentials_common",
         "hack",
-        "persistence",
-        "leak",
-        "orion:leak",
-        "news",
-        "obfuscation",
-        "crack",
-        "lpe",
-        "xss",
-        "supplychain",
-        "cheats",
-        "scam",
-        "war",
-        "apt",
-        "credential",
-        "rce",
-        "fraud",
-        "malware",
-        "data",
-        "rat"
+        "supplychain"
       ],
       "lang": "en",
       "external_references": [
         {
           "source_name": "source",
-          "url": "https://www.bleepingcomputer.com/news/security/konni-hackers-target-blockchain-engineers-with-ai-built-malware/"
+          "url": "https://thehackernews.com/2026/01/certcc-warns-binary-parser-bug-allows.html"
         },
         {
           "source_name": "base_url",
-          "url": "https://www.bleepingcomputer.com/"
+          "url": "https://thehackernews.com/"
         },
         {
           "source_name": "content-hash",
-          "external_id": "ae1da9239426e94c5de16b868135d211b84ad52ed22de0d169967ebf6db11c8a"
+          "external_id": "fdaf872029176c70c794196e03f9e5faa6042d30d6c95721497db9b554c9a542"
         },
         {
           "source_name": "scraper",
-          "external_id": "_bleepingcomputer"
+          "external_id": "_thehackernews"
         }
       ],
       "object_refs": [
-        "intrusion-set--b00e3f72-aeee-5573-befc-dfa36df1b23a",
-        "infrastructure--d6cf221c-9108-5440-a09c-2255517b5d48",
-        "observed-data--1e00d075-2e64-5fd2-bfc9-06b8b7c0e17a",
-        "location--8662c607-b4f8-5859-a67c-deee86f33ebc",
-        "location--e3695bc2-e6a8-5e26-95c3-73fba33ca487",
-        "location--7a657e1f-6d87-5ffe-914e-baa7946143be",
-        "location--6b67916d-9ef7-5133-b7dc-dfee52afdc97",
-        "location--19d47843-b26c-5b9c-af07-86382386dc2d",
-        "location--ab369bba-c77f-5cab-bdd0-7f874adb8d67",
-        "location--4fc807d0-09e9-5dbf-a0b9-30c3b9dd5b80",
-        "indicator--5bfa1a44-84fb-5399-9510-91578b1a759b",
-        "indicator--640682ed-913d-54f0-a7d1-25f95c38c680"
+        "intrusion-set--b9f42695-6eac-5c52-b6cb-d02ae971dc3d",
+        "infrastructure--cfa6ca6b-8843-539e-bf17-df1b9547232c",
+        "observed-data--b9db7979-cf3f-5338-bca8-fe7ecf5b5735",
+        "indicator--d363b6bd-ef7f-558d-8fb4-a59f048ae7c0",
+        "indicator--0cd20c98-abe9-51c3-ab7c-e3a7e6f68be6",
+        "vulnerability--8a8b640e-ae05-5f70-a98f-f4e7fe1ae635"
       ],
       "object_marking_refs": [
         "marking-definition--f525b2b9-a23a-5af9-a502-60ff9b6dd5dd"
       ],
-      "x_orion_doc_id": "ae1da9239426e94c5de16b868135d211b84ad52ed22de0d169967ebf6db11c8a",
-      "x_orion_network": "clearnet"
+      "x_orion_doc_id": "fdaf872029176c70c794196e03f9e5faa6042d30d6c95721497db9b554c9a542",
+      "x_orion_network": "clearnet",
+      "x_orion_dumplink_count": "1"
     }
   ]
 }

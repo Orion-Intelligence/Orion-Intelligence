@@ -9,7 +9,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
   it('Tenant signs up', () => {
     cy.visit('/login');
 
-    cy.contains('Sign Up').click({ force: true });
+    cy.contains('Sign Up').click({force: true});
 
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="companymail"]').type(tenant.email);
@@ -17,10 +17,10 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.contains('input[type="submit"]', 'Sign Up')
       .should('be.visible')
-      .click({ force: true });
+      .click({force: true});
 
     cy.get('.welcome-page__card').should('exist');
-    cy.contains('Go to login').click({ force: true });
+    cy.contains('Go to login').click({force: true});
     cy.openLastMailAndGetUrl().then(url => {
       cy.visit(url);
     });
@@ -35,20 +35,30 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     const approveOneTenant = () => {
       cy.get('body').then($b => {
-        const $row = $b.find('tr:contains("Not Verified")').first();
+        const $row = $b.find('tr:contains("Not Verified")');
         if (!$row.length) return;
 
-        cy.wrap($row).within(() => {
-          cy.get('#edit-tenant').should('be.visible').click({ force: true });
+        cy.wrap($row.eq(0)).within(() => {
+          cy.get('#edit-tenant').should('be.visible').click({force: true});
         });
 
-        cy.get('button.pill-toggle').contains('Not Verified').should('be.visible').click({ force: true });
+        cy.get('button.pill-toggle')
+          .contains('Not Verified')
+          .should('be.visible')
+          .click({force: true});
 
-        cy.get('button.dropdown-toggle').contains(/disable/i).click({ force: true });
+        cy.get('button.dropdown-toggle')
+          .contains(/disable/i)
+          .click({force: true});
 
-        cy.contains('.license-label', 'Enterprise').closest('.license-card').find('input[type="checkbox"]').check({ force: true });
+        cy.contains('.license-label', 'Enterprise')
+          .closest('.license-card')
+          .find('input[type="checkbox"]')
+          .check({force: true});
 
-        cy.contains('Save changes').should('be.visible').click({ force: true });
+        cy.contains('Save changes')
+          .should('be.visible')
+          .click({force: true});
 
         cy.openTenantsPage();
         approveOneTenant();
@@ -57,21 +67,25 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     approveOneTenant();
 
-    cy.get('tr:contains("Not Verified")', { timeout: 40000 }).should('not.exist');
+    cy.reload();
+    cy.openTenantsPage();
+
+    cy.get('tr:contains("Not Verified")', {timeout: 40000}).should('not.exist');
 
     cy.logout();
   });
 
+
   const openManageIOCs = () => {
     cy.contains('.sidebar__subitem-content', 'IOC')
       .should('be.visible')
-      .click({ force: true });
+      .click({force: true});
 
     cy.get('.onboarding-step2__category-scroll')
       .should('exist');
   };
 
-  const addIOCValue = (value:string) => {
+  const addIOCValue = (value: string) => {
     cy.get('.onboarding-step2__input')
       .should('be.visible')
       .clear()
@@ -79,17 +93,17 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.get('button.onboarding-step2__add-btn')
       .should('be.visible')
-      .click({ force: true });
+      .click({force: true});
   };
 
   const addIOCForAllTabs = () => {
-     cy.get('.onboarding-step2__category-scroll')
+    cy.get('.onboarding-step2__category-scroll')
       .find('.onboarding-step2__tab')
       .then($tabs => {
         Cypress._.take($tabs.toArray(), 5).forEach((tab, index) => {
           cy.wrap(tab)
             .scrollIntoView()
-            .click({ force: true });
+            .click({force: true});
 
           addIOCValue(`test-${index}`);
         });
@@ -98,11 +112,11 @@ describe('Tenant Complete Flow – Correct Order', () => {
     const goToHomepageAndScan = () => {
       cy.contains('.sidebar__subitem-content', 'Homepage')
         .should('be.visible')
-        .click({ force: true });
+        .click({force: true});
 
       cy.get('button[apptooltip="scan all"]')
         .should('be.visible')
-        .click({ force: true });
+        .click({force: true});
     };
 
     goToHomepageAndScan();
@@ -112,17 +126,18 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.visit('/login');
     cy.get('input[name="username"]').type(tenant.username);
-    cy.get('input[name="password"]').type(tenant.password, { log: false });
-    cy.contains('Sign In').click({ force: true });
-    cy.get('.onboarding-box', { timeout: 40000 }).should('be.visible');
+    cy.get('input[name="password"]').type(tenant.password, {log: false});
+    cy.contains('Sign In').click({force: true});
+    cy.screenshot()
+    cy.get('.onboarding-box', {timeout: 40000}).should('be.visible');
 
-    cy.get('#company', { timeout: 40000 })
+    cy.get('#company', {timeout: 40000})
       .clear()
       .type('Orion Intelligence');
 
     cy.contains('button', 'Next')
-    .should('not.be.disabled')
-    .click();
+      .should('not.be.disabled')
+      .click();
 
     cy.contains('.onboarding-step2__tab', 'Country')
       .scrollIntoView()
@@ -137,22 +152,22 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .click();
 
     cy.contains('button', 'Confirm')
-    .should('be.visible')
-    .click();
+      .should('be.visible')
+      .click();
 
-    cy.contains('Users').click({ force: true });
-    cy.contains('button', 'Add User').click({ force: true });
+    cy.contains('Users').click({force: true});
+    cy.contains('button', 'Add User').click({force: true});
 
     cy.get('input[name="username"]').type('tenant_user_1');
     cy.get('input[name="email"]').type('tenant1@gmail.com');
-    cy.get('input[name="password"]').type('1qaz!QAZ', { log: false });
+    cy.get('input[name="password"]').type('1qaz!QAZ', {log: false});
 
     cy.contains('.license-card', 'Enterprise')
       .find('input.license-checkbox')
-      .check({ force: true });
+      .check({force: true});
 
     cy.contains('.add-tenant_footer button', 'Add User')
-      .click({ force: true });
+      .click({force: true});
 
 
     openManageIOCs();
@@ -173,14 +188,14 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .contains('Orion Intelligence')
       .closest('tr')
       .within(() => {
-        cy.get('#edit-tenant').click({ force: true });
+        cy.get('#edit-tenant').click({force: true});
       });
 
     cy.get('input.tenant-input')
       .clear()
       .type('1');
 
-    cy.contains('Save changes').click({ force: true });
+    cy.contains('Save changes').click({force: true});
     cy.logout();
   });
 
@@ -189,31 +204,31 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.visit('/login');
 
     cy.get('input[name="username"]').type(tenant.username);
-    cy.get('input[name="password"]').type(tenant.password, { log: false });
-    cy.contains('Sign In').click({ force: true });
+    cy.get('input[name="password"]').type(tenant.password, {log: false});
+    cy.contains('Sign In').click({force: true});
     cy.get(".dashboard_container").should("be.visible");
 
 
     cy.get('.dashboard_container').should('exist');
-    cy.contains('Homepage').click({ force: true });
+    cy.contains('Homepage').click({force: true});
     cy.get('.user-homepage_cards').should('exist');
   });
 
   it('Tenant alerts and notifications', () => {
     cy.visit('/login');
     cy.get('input[name="username"]').type(tenant.username);
-    cy.get('input[name="password"]').type(tenant.password, { log: false });
-    cy.contains('Sign In').click({ force: true });
+    cy.get('input[name="password"]').type(tenant.password, {log: false});
+    cy.contains('Sign In').click({force: true});
     cy.get(".dashboard_container").should("be.visible");
 
     cy.wait(4000)
-    cy.get('button[apptooltip="scan all"]', { timeout: 40000 })
+    cy.get('button[apptooltip="scan all"]', {timeout: 40000})
       .should('be.visible')
       .and('not.be.disabled')
       .click();
 
 
-    cy.get('div.loading-content', { timeout: 40000 })
+    cy.get('div.loading-content', {timeout: 40000})
       .should('not.exist')
 
 
@@ -225,7 +240,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .should('be.visible')
       .click();
 
-    cy.get('.notification_sidebar-item', { timeout: 40000 })
+    cy.get('.notification_sidebar-item', {timeout: 40000})
       .first()
       .within(() => {
         cy.contains('button', 'See Details')
