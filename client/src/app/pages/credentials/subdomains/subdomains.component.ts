@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, timer, interval } from 'rxjs';
 import { expand, switchMap, takeWhile, finalize, takeUntil, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -44,11 +43,7 @@ export class SubdomainsComponent {
   private destroy$ = new Subject<void>();
   private progressTimer$ = new Subject<void>();
 
-  constructor(
-    private router: Router,
-    private api: ApiService,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private api: ApiService) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -76,7 +71,7 @@ export class SubdomainsComponent {
   private startProgressSimulation(): void {
     this.progress = 0;
     this.progressTimer$ = new Subject<void>();
-    
+
     interval(300)
       .pipe(
         takeUntil(this.progressTimer$),
