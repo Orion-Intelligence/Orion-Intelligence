@@ -27,72 +27,68 @@ describe('Tenant Complete Flow – Correct Order', () => {
   });
 
   it('Admin verifies all tenants and assigns Enterprise license', () => {
-  cy.loginAsAdmin();
+    cy.loginAsAdmin();
 
-  cy.openTenantsPage();
+    cy.openTenantsPage();
 
-  const approveAllTenants = (tries = 0) => {
-    if (tries >= 5) return;
+    const approveAllTenants = (tries = 0) => {
+      if (tries >= 5) return;
 
-    cy.get('tbody tr').then($rows => {
-      const rows = $rows.filter((_: number, row: HTMLElement) => {
-        return Cypress.$(row).find('.badge-false').length > 0 && !Cypress.$(row).hasClass('table-active');
-      });
+      cy.get('tbody tr').then($rows => {
+        const rows = $rows.filter((_: number, row: HTMLElement) => {
+          return Cypress.$(row).find('.badge-false').length > 0 && !Cypress.$(row).hasClass('table-active');
+        });
 
-      if (!rows.length) return;
+        if (!rows.length) return;
 
-      cy.wrap(rows.eq(0)).within(() => {
-        cy.get('#edit-tenant').click({ force: true });
-      });
+        cy.wrap(rows.eq(0)).within(() => {
+          cy.get('#edit-tenant').click({force: true});
+        });
 
-      cy.wrap(false).as('changed');
+        cy.wrap(false).as('changed');
 
-      cy.get('tr.table-active')
-        .find('button.pill-toggle')
-        .then($btn => {
-          if ($btn.text().includes('Not Verified')) {
-            cy.wrap($btn).click({ force: true });
-            cy.wrap(true).as('changed');
+        cy.get('tr.table-active')
+          .find('button.pill-toggle')
+          .then($btn => {
+            if ($btn.text().includes('Not Verified')) {
+              cy.wrap($btn).click({force: true});
+              cy.wrap(true).as('changed');
+            }
+          });
+
+        cy.get('tr.table-active')
+          .find('.license-card')
+          .contains('.license-label', 'Enterprise')
+          .closest('.license-card')
+          .find('input[type="checkbox"]')
+          .then($cb => {
+            if (!$cb.is(':checked')) {
+              cy.wrap($cb).check({force: true});
+              cy.wrap(true).as('changed');
+            }
+          });
+
+        cy.get('@changed').then((changed: any) => {
+          if (changed) {
+            cy.contains('button', 'Save changes')
+              .should('be.visible')
+              .click({force: true});
           }
         });
 
-      cy.get('tr.table-active')
-        .find('.license-card')
-        .contains('.license-label', 'Enterprise')
-        .closest('.license-card')
-        .find('input[type="checkbox"]')
-        .then($cb => {
-          if (!$cb.is(':checked')) {
-            cy.wrap($cb).check({ force: true });
-            cy.wrap(true).as('changed');
-          }
+        cy.openTenantsPage();
+        cy.get('body').then($b => {
+          if ($b.find('.badge-false').length) approveAllTenants(tries + 1);
         });
-
-      cy.get('@changed').then((changed: any) => {
-        if (changed) {
-          cy.contains('button', 'Save changes')
-            .should('be.visible')
-            .click({ force: true });
-
-          cy.contains('button', 'Save changes').should('not.exist');
-        }
       });
+    };
 
-      cy.openTenantsPage();
-      cy.get('body').then($b => {
-        if ($b.find('.badge-false').length) approveAllTenants(tries + 1);
-      });
-    });
-  };
+    approveAllTenants();
 
-  approveAllTenants();
+    cy.openTenantsPage();
 
-  cy.openTenantsPage();
-
-  cy.logout();
-});
-
-
+    cy.logout();
+  });
 
   const openManageIOCs = () => {
     cy.contains('.sidebar__subitem-content', 'IOC')
@@ -145,7 +141,6 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
-    cy.get(".dashboard_container").should("be.visible");
 
     cy.get('.onboarding-box', {timeout: 40000}).should('be.visible');
 
@@ -234,6 +229,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.get('.dashboard_container').should('be.visible');
 
+    cy.wait(2000)
     cy.get('button[apptooltip="scan all"]', {timeout: 40000})
       .should('be.visible')
       .and('not.be.disabled')
