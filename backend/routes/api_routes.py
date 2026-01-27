@@ -2,9 +2,7 @@ import asyncio
 import re
 from pathlib import Path
 from typing import Optional
-
-from fastapi import APIRouter, Body, Depends, Query
-
+from fastapi import APIRouter, Body, Depends, Query, UploadFile,File
 from configs.app_dependency import license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
@@ -29,6 +27,7 @@ from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryMo
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
 from orion.services.stix_manager.stix_manager import stix_manager
+
 
 _DOCS_DIR = Path(__file__).resolve().parent / "docs" / "api_docs"
 
@@ -664,3 +663,45 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
 async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
+
+
+@api_routes.post(
+    "/api/ioc/extract",
+    summary="Extract IOCs from uploaded file",
+    description="Upload a file and extract Indicators of Compromise (IOCs) such as IPs, domains, URLs, hashes, etc.",
+    tags=["IOC Extraction"],
+    operation_id="extractIocFromFile",
+    response_description="Extracted IOC data from the uploaded file",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def extract_ioc(file: UploadFile = File(...)):
+    """
+    Extract IOCs fromioc_extract_ioc_extract_post uploaded file using trusted-micros-api service
+    """
+    file_content = await file.read()
+
+    # TEMPORARY: Mock response since trusted-micros-api is down
+    # TODO: Uncomment the line below when trusted-micros-api is available
+    result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename)
+
+    # return {
+    #     "status": "success",
+    #     "message": "File processed successfully",
+    #     "original_filename": file.filename,
+    #     "result": {
+    #         "ip_addresses": ["192.168.1.1", "10.0.0.1", "172.16.0.1"],
+    #         "domains": ["example.com", "malicious-site.net", "suspicious-domain.org"],
+    #         "urls": ["https://example.com/malware", "http://badsite.com/payload"],
+    #         "hashes": {
+    #             "md5": ["5d41402abc4b2a76b9719d911017c592", "e99a18c428cb38d5f260853678922e03"],
+    #             "sha256": ["2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"]
+    #         },
+    #         "email_addresses": ["attacker@malicious.com", "phishing@scam.net"]
+    #     },
+    #     "extraction_time": "1.23s",
+    #     "ioc_count": 10
+    # }
+    return result

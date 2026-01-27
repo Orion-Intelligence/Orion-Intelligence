@@ -1,10 +1,8 @@
 from typing import Any, Dict, List, Optional
-
 import httpx
 from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
-
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model as SearchChatCallbackModel, search_chat_callback_model
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
@@ -371,3 +369,25 @@ class search_model:
                     else:
                         es_clauses.append({"terms": {es_field_name: tags}})
         return es_clauses
+
+
+
+    async def extract_ioc_from_file(self, file_content: bytes, filename: str):
+
+        async with httpx.AsyncClient(timeout=120) as client:
+            files = {
+                "file": (filename, file_content)
+            }
+
+            response = await client.post(
+                "http://trusted-micros-api:8010/ioc/extract",
+                files=files
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+
+        return response.json()

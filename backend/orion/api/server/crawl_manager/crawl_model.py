@@ -2,12 +2,10 @@ import base64
 import hashlib
 import os
 from datetime import datetime, timezone
-
 import httpx
 import requests
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
-
 from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -116,6 +114,21 @@ class crawl_model:
         except Exception:
             return JSONResponse(
                 status_code=500, content={"detail": "Something happened while calling urlscan/domain"})
+
+    @staticmethod
+    async def ioc_extract(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/ioc/extract", json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling /ioc/extract"})
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling /ioc/extract"})
 
     @staticmethod
     async def parse_chat_ai(model: ReportChatRequest):

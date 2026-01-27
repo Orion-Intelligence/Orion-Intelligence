@@ -1,0 +1,227 @@
+<form #uploadForm="ngForm" (submit)="onUploadSubmit()"
+  class="default-input-container directory-listing-search security-scan-container"
+  enctype="multipart/form-data">
+
+  <div class="row dashboard__api-search-input-div">
+    <div class="col-xl-9 col-12 input-container">
+      <div class="input-group default-input-sub-container">
+
+        <div class="btn btn-primary default-input-button default-input-button-light" (click)="triggerFileInput()">
+          <img alt="File" height="20" ngSrc="assets/images/shared/domain.svg" priority width="20">
+        </div>
+
+        <input
+          type="text"
+          class="form-control default-input"
+          [value]="fileName || 'Click the icon to select a file (PDF, Images, TXT - Max 10MB)'"
+          readonly
+          (click)="triggerFileInput()"
+          placeholder="Select a file to extract IOCs"
+          style="cursor: pointer;">
+
+        <input
+          type="file"
+          #fileInput
+          id="fileInput"
+          class="file-input-hidden"
+          accept=".pdf,.txt,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.tif,.webp"
+          (change)="onFileSelected($event)">
+
+        <span class="input-group-text"></span>
+      </div>
+    </div>
+
+    <div class="col-2 mt-lg-0 mt-2">
+      <button type="submit" class="dash-search-button" [disabled]="!selectedFile || isLoading">
+        Extract
+      </button>
+    </div>
+  </div>
+</form>
+
+<app-empty-query *ngIf="!isFetched && !isLoading"></app-empty-query>
+
+<ng-container *ngIf="isFetched || isLoading">
+
+  <div class="scan_progress-top" *ngIf="!hasError && isLoading && progress() < 100">
+    <div class="scan_progress-text">{{ currentStep || 'Processing file...' }} ({{ progress() }}%)</div>
+    <div class="scan_progress-bar">
+      <div class="scan_progress-fill" [style.width.%]="progress()"></div>
+    </div>
+  </div>
+
+
+  <div class="d-flex justify-content-end" *ngIf="!hasError && !isLoading && extractionResult">
+    <div class="btn-group report-menu-option-container mr-2">
+      <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
+        <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" />
+      </button>
+      <div class="vr report-menu-divider"></div>
+
+      <button ngxPrint printSectionId="iocReport" [useExistingCss]="true" appTooltip="Print"
+        class="p-0 report-menu-option">
+        <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" />
+      </button>
+    </div>
+  </div>
+
+  <div class="security-scan scan_container">
+    <div class="scan_report-section" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
+      <div class="scan_alert">
+        <div class="scan_alert-title">Extraction Failed</div>
+        <div class="scan_alert-text">{{ errorMessage }}</div>
+
+        <ul class="scan_alert-reasons" *ngIf="isFileSizeError">
+          <li><strong>File size limit:</strong> Maximum 10MB</li>
+          <li>Please compress your file or select a smaller file</li>
+        </ul>
+
+
+        <ul class="scan_alert-reasons" *ngIf="isUnsupportedFileError">
+          <li><strong>Supported formats:</strong></li>
+          <li>PDF documents (.pdf)</li>
+          <li>Text files (.txt)</li>
+          <li>Images (.png, .jpg, .jpeg, .gif, .bmp, .tiff, .webp)</li>
+        </ul>
+
+
+        <ul class="scan_alert-reasons" *ngIf="!isUnsupportedFileError && !isFileSizeError">
+          <li>The file format may not be supported</li>
+          <li>The file may be corrupted or too large</li>
+          <li>An unexpected error occurred during processing</li>
+        </ul>
+        <br>
+
+        <button class="scan_btn scan_btn-primary" (click)="triggerFileInput()">Try Again</button>
+
+      </div>
+    </div>
+
+
+    <div class="scan_report-section" *ngIf="!hasError && extractionResult">
+      <h3 class="scan_section-title">
+        <ng-container *ngIf="!isLoading; else metaTitleSkeleton">
+          IOC Extraction Report for 〡 {{ extractionResult.original_filename }}
+        </ng-container>
+      </h3>
+      <div class="scan_divider"></div>
+
+      <ng-container *ngIf="!isLoading && extractionResult; else metaGridSkeleton">
+        <div class="scan_scan-meta-grid" @fadeInDashboardItem>
+          <div class="scan_meta-card">
+            <p class="scan_meta-value scan_meta-value-large">{{ getTotalIocCount() }} IOCs</p>
+          </div>
+          <div class="scan_meta-card">
+            <p class="scan_meta-label">Original Filename</p>
+            <p class="scan_meta-value">{{ extractionResult.original_filename }}</p>
+          </div>
+          <div class="scan_meta-card">
+            <p class="scan_meta-label">File Type</p>
+            <p class="scan_meta-value">{{ extractionResult.file_type?.toUpperCase() }}</p>
+          </div>
+          <div class="scan_meta-card">
+            <p class="scan_meta-label">Extracted Text Length</p>
+            <p class="scan_meta-value">{{ formatNumber(extractionResult.extracted_text_length) }} characters</p>
+          </div>
+
+          <div class="scan_meta-card">
+            <p class="scan_meta-label">Status</p>
+            <p class="scan_meta-value">
+              <span class="scan_ssl-tag" [style.background]="extractionResult.status === 'success' ? '#4caf50' : '#f44336'">
+                {{ extractionResult.status?.toUpperCase() }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <ng-container *ngIf="!isLoading && !hasError && extractionResult; else categoriesSkeleton">
+      <ng-container *ngIf="groupedIocs.length > 0">
+        <div class="scan_report-section" *ngFor="let category of groupedIocs; trackBy: trackByCategory" @fadeInDashboardItem>
+          <h3 class="scan_section-title">{{ category.name }} ({{ category.total }})</h3>
+          <div class="scan_divider"></div>
+          <div class="scan_findings-list">
+            <div class="scan_finding-card" *ngFor="let item of category.items; trackBy: trackByItem" @fadeInDashboardItem>
+              <div class="scan_finding-header">
+                <h4 class="scan_finding-title">
+                  <span class="scan_status-dot scan_info"></span>{{ item.display }}
+                </h4>
+              </div>
+
+              <p class="scan_finding-description">{{ item.description }}</p>
+              <div class="scan_finding-meta">
+                <span class="scan_severity-badge scan_info">
+                  {{ category.name }}
+                </span>
+              </div>
+              <app-code-block [code]="item.value" *ngIf="item.value"></app-code-block>
+              <div class="scan_divider-light"></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="scan_report-section" *ngIf="groupedIocs.length === 0 && extractionResult" @fadeInDashboardItem>
+        <div class="scan_empty">
+          <div class="scan_empty-title">No IOCs Found</div>
+          <div class="scan_empty-text">No indicators of compromise were detected in this file.</div>
+          <button class="scan_btn" (click)="retry()">Upload Another File</button>
+        </div>
+      </div>
+    </ng-container>
+
+
+    <ng-template #metaTitleSkeleton>
+      <div class="skeleton skeleton-title shimmer"></div>
+    </ng-template>
+
+    <ng-template #metaGridSkeleton>
+      <div class="scan_scan-meta-grid" *ngIf="isLoading">
+        <div class="scan_meta-card" *ngFor="let i of [1,2,3,4,5,6]">
+          <div class="skeleton skeleton-label shimmer"></div>
+          <div class="skeleton skeleton-text shimmer"></div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #categoriesSkeleton>
+      <ng-container *ngIf="isLoading">
+        <div class="scan_report-section" *ngFor="let i of skeletonCards" @fadeInDashboardItem>
+          <div class="skeleton skeleton-section-title shimmer"></div>
+          <div class="scan_divider"></div>
+          <div class="scan_findings-list">
+            <div class="scan_finding-card" *ngFor="let j of skeletonCards">
+              <div class="scan_finding-header">
+                <div class="skeleton skeleton-dot shimmer"></div>
+                <div class="skeleton skeleton-subtitle shimmer"></div>
+              </div>
+              <div class="skeleton skeleton-paragraph shimmer"></div>
+              <div class="skeleton skeleton-badge shimmer"></div>
+              <div class="scan_divider-light"></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-template>
+  </div>
+
+  <div id="iocReport" class="d-none">
+    <div *ngIf="extractionResult" style="padding: 20px;">
+      <h2>IOC Extraction Report</h2>
+      <hr>
+      <h3>File Information</h3>
+      <p><strong>Filename:</strong> {{ extractionResult.original_filename }}</p>
+      <p><strong>Type:</strong> {{ extractionResult.file_type }}</p>
+      <p><strong>Extracted Text Length:</strong> {{ extractionResult.extracted_text_length }}</p>
+      <p><strong>Total IOCs:</strong> {{ getTotalIocCount() }}</p>
+      <hr>
+      <div *ngFor="let category of groupedIocs">
+        <h3>{{ category.name }} ({{ category.total }})</h3>
+        <ul>
+          <li *ngFor="let item of category.items">{{ item.value }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</ng-container>

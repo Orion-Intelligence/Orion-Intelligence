@@ -47,6 +47,7 @@ import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
+import {IocExtractorComponent} from './shared/partials/intel-panel/ioc-extractor/ioc-extractor.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
@@ -166,6 +167,26 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'profile',
         pathMatch: 'full'
+      },
+      {
+        path: 'ioc-extractor',
+
+        data: { animation: 'HomePage' },
+
+        children:
+        [
+          {
+            path: '',
+            redirectTo: 'ioc-extractor',
+            pathMatch: 'full'
+          },
+
+          {
+            path: 'ioc-extractor',
+            component: IocExtractorComponent,
+            data: { animation: 'HomePage' },
+        }
+        ]
       },
       {
         path: 'scan',
