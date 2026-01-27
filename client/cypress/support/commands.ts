@@ -9,6 +9,7 @@ declare global {
       openTenantsPage(): Chainable<void>;
       openHomepage(): Chainable<void>;
       openLastMailAndGetUrl(): Chainable<string>;
+      clearAllEmails(): Chainable<void>;
     }
   }
 }
@@ -56,10 +57,15 @@ Cypress.Commands.add("openHomepage", () => {
     .click({ force: true });
 });
 
+Cypress.Commands.add("clearAllEmails", () => {
+  cy.request("DELETE", "http://localhost:8025/api/v1/messages");
+});
+
 Cypress.Commands.add("openLastMailAndGetUrl", () => {
   const timeoutMs = 20000;
   const intervalMs = 500;
   const startedAt = Date.now();
+  cy.wait(2000)
 
   const waitForUrl = (): Cypress.Chainable<string> => {
     return cy

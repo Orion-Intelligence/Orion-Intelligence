@@ -7,6 +7,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
   };
 
   it('Tenant signs up', () => {
+    cy.clearAllEmails()
     cy.visit('/login');
 
     cy.contains('Sign Up').click();
@@ -43,6 +44,11 @@ describe('Tenant Complete Flow – Correct Order', () => {
         });
 
         verifiedCount++;
+
+
+        if (rows.length !== 1) {
+          throw new Error(`Expected exactly 1 row, found ${rows.length}`);
+        }
 
         cy.wrap(rows.eq(0)).within(() => {
           cy.get('#edit-tenant').click({force: true});
