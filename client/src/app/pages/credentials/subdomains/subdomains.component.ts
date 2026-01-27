@@ -2,9 +2,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
-import { EMPTY, timer, interval } from 'rxjs';
+import { EMPTY, timer, interval, Subject } from 'rxjs';
 import { expand, switchMap, takeWhile, finalize, takeUntil, tap } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 
 interface SubdomainResponse {
   result?: {
@@ -39,6 +38,7 @@ export class SubdomainsComponent {
   progress = 0;
   statusMessage = 'Initializing...';
   isValidDomain = true;
+  submitted = false;
 
   private destroy$ = new Subject<void>();
   private progressTimer$ = new Subject<void>();
@@ -54,6 +54,7 @@ export class SubdomainsComponent {
 
   onClose(): void {
     this.stopProgressSimulation();
+    this.submitted = false;
     this.close.emit();
   }
 
@@ -113,9 +114,10 @@ export class SubdomainsComponent {
       return;
     }
 
-    const domainOnly = trimmed.replace(/^https?:\/\//i, '').replace(/\/.*/,'');
+    const domainOnly = trimmed.replace(/^https?:\/\//i, '').replace(/\/.*/, '');
 
-    const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
+    const domainRegex =
+      /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
 
     this.isValidDomain = domainRegex.test(domainOnly);
   }
@@ -128,6 +130,8 @@ export class SubdomainsComponent {
   }
 
   onSearch(): void {
+    this.submitted = true;
+
     const raw = (this.domain ?? '').trim();
     if (!raw) {
       this.error = 'Please enter a domain';
@@ -162,12 +166,12 @@ export class SubdomainsComponent {
           if (status === 'pending' || status === 'busy') {
             return timer(4000).pipe(
               switchMap(() =>
-                this.api.post<SubdomainResponse>('urlscan/domain', {
-                  domain: resolved,
-                  scanType: 'subdomains'
-                }).pipe(
-                  tap((newRes) => this.updateStatusMessage(newRes))
-                )
+                this.api
+                  .post<SubdomainResponse>('urlscan/domain', {
+                    domain: resolved,
+                    scanType: 'subdomains'
+                  })
+                  .pipe(tap((newRes) => this.updateStatusMessage(newRes)))
               )
             );
           }

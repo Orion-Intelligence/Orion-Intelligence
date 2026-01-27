@@ -65,13 +65,25 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
   const timeoutMs = 20000;
   const intervalMs = 500;
   const startedAt = Date.now();
-  cy.wait(2000)
+
+  const log = (msg: string, data?: any) => cy.task("log", data ? `${msg} ${JSON.stringify(data)}` : msg);
 
   const waitForUrl = (): Cypress.Chainable<string> => {
     return cy
       .request("GET", "http://localhost:8025/api/v1/messages")
       .then((r) => {
-        const id = r.body?.messages?.[0]?.ID as string | undefined;
+        const msgs = r.body?.messages ?? [];
+        const id = msgs?.[0]?.ID as string | undefined;
+
+        log("[mailhog] messages count:", { count: msgs.length });
+        if (msgs[0]) {
+          log("[mailhog] latest meta:", {
+            ID: msgs[0].ID,
+            Subject: msgs[0].Content?.Headers?.Subject?.[0],
+            To: msgs[0].Content?.Headers?.To?.[0],
+            From: msgs[0].Content?.Headers?.From?.[0],
+          });
+        }
 
         if (!id) {
           if (Date.now() - startedAt > timeoutMs) {
@@ -84,19 +96,22 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
       })
       .then((r: any) => {
         const text =
-          (r.body.Text as string) ||
-          (r.body.HTML as string) ||
-          (r.body.Snippet as string) ||
+          (r.body?.Text as string) ||
+          (r.body?.HTML as string) ||
+          (r.body?.Snippet as string) ||
           "";
 
-        const match = text.match(/https?:\/\/[^\s*]+/);
+        log("[mailhog] snippet:", { snippet: text.slice(0, 500) });
 
+        const match = text.match(/https?:\/\/[^\s<>"')\]]+/); // slightly safer than your regex
         if (!match) {
           if (Date.now() - startedAt > timeoutMs) {
             throw new Error(`Reset URL not found within ${timeoutMs}ms`);
           }
           return cy.wait(intervalMs).then(() => waitForUrl());
         }
+
+        log("[mailhog] raw url found:", { url: match[0] });
 
         const emailUrl = new URL(match[0]);
         const base = new URL(Cypress.config("baseUrl") as string);
@@ -105,7 +120,10 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
         emailUrl.hostname = base.hostname;
         emailUrl.port = base.port;
 
-        return cy.wrap(emailUrl.toString());
+        const finalUrl = emailUrl.toString();
+        log("[mailhog] final url used:", { url: finalUrl });
+
+        return cy.wrap(finalUrl);
       });
   };
 
