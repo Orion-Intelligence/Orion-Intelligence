@@ -18,6 +18,7 @@ import { CredentialsSearchBarComponent } from "./credentials-search-bar/credenti
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
+import { SubdomainsComponent } from './subdomains/subdomains.component';
 
 @Component({
   selector: 'app-credential',
@@ -30,7 +31,8 @@ import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stea
     NgIf,
     PaginationComponent,
     CredentialsSearchBarComponent,
-    PasswordSchemaComponent
+    PasswordSchemaComponent,
+    SubdomainsComponent
   ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
@@ -52,6 +54,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   breachesApiTime: any = 0;
   allSearchApiTime: any = 0;
   showPasswordscheme = false;
+  showSubdomains = false;
+
 
   private pendingRequests = 0;
   private isSearchLoading = false;
@@ -265,10 +269,16 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   openScheme() {
     this.showPasswordscheme = true;
   }
-
+  openSubdomains() {
+  this.showSubdomains = true;
+  }
+  onSubdomainSearch(domains: string[]) {
+  this.subdomainList = domains;
+}
   closeScheme() {
     this.showPasswordscheme = false;
   }
+  subdomainList: string[] = [];
 
   onPasswordSearch(filter: PasswordSchemaFilter) {
     const isEmpty =
@@ -293,3 +303,10 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
   protected readonly length = length;
 }
+
+
+
+
+
+
+
