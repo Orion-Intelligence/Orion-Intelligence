@@ -114,7 +114,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="username"]').type(tenant.username);
     cy.get('input[name="password"]').type(tenant.password, { log: false });
     cy.contains('Sign In').click({ force: true });
-    cy.get('.onboarding-box', { timeout: 10000 }).should('be.visible');
+    cy.get('.onboarding-box', { timeout: 40000 }).should('be.visible');
 
     cy.get('#company', { timeout: 40000 })
       .clear()

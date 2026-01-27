@@ -43,7 +43,6 @@ describe('Dashboard Sections Test', () => {
     });
   });
 
-
   const openReportAndCTI = (item: Cypress.Chainable) => {
 
     item
