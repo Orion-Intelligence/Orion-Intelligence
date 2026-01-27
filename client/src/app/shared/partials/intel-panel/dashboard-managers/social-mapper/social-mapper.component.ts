@@ -1,6 +1,9 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { finalize, expand, switchMap, takeWhile } from 'rxjs/operators';
+import { EMPTY, timer } from 'rxjs';
 import { DataSet, Edge, Network, Node } from 'vis-network/standalone';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 import { AppService } from '../../../../../services/core/app/app.service';
@@ -82,6 +85,21 @@ interface ExtendedNode extends Node {
   connectionType?: string;
 }
 
+interface SocialMapperResponse {
+  status?: string;
+  result?: {
+    status?: string;
+    progress?: number;
+    step?: string;
+    analysis?: AnalysisData;
+    message?: string;
+    scrape_results?: any[];
+    total_scraped?: number;
+  };
+  progress?: number;
+  step?: string;
+}
+
 @Component({
   selector: 'app-social-mapper',
   standalone: true,
@@ -118,7 +136,12 @@ export class SocialMapperComponent implements OnInit {
 
   isLoading = false;
   hasResults = false;
+  isFetched = false;
+  hasError = false;
   errorMessage = '';
+
+  progress = signal(0);
+  currentStep = '';
 
   analysisData: AnalysisData | null = null;
   rawResults: any = null;
@@ -143,10 +166,36 @@ export class SocialMapperComponent implements OnInit {
     bridge: { background: '#26C6DA', border: '#00BCD4' }
   };
 
-  constructor(private apiService: ApiService, protected appService: AppService) {}
+  constructor(
+    private apiService: ApiService,
+    protected appService: AppService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    // Network will be initialized when needed
+    const queryParams = this.route.snapshot.queryParams;
+    if (queryParams['mode']) {
+      this.queryMode = queryParams['mode'] as 'single' | 'multi';
+
+      if (this.queryMode === 'single' && queryParams['username']) {
+        this.username = queryParams['username'];
+        this.selectedPlatform = queryParams['platform'] || '';
+        this.maxFollowers = Number(queryParams['maxFollowers']) || 50;
+        this.maxFollowing = Number(queryParams['maxFollowing']) || 50;
+        this.load();
+      } else if (this.queryMode === 'multi' && queryParams['targets']) {
+        try {
+          this.multiTargets = JSON.parse(queryParams['targets']);
+          this.maxFollowers = Number(queryParams['maxFollowers']) || 50;
+          this.maxFollowing = Number(queryParams['maxFollowing']) || 50;
+          this.load();
+        } catch (e) {
+          console.error('Failed to parse targets from query params', e);
+          this.isLoading = false;
+        }
+      }
+    }
   }
 
   private initializeNetwork(): void {
@@ -241,7 +290,7 @@ export class SocialMapperComponent implements OnInit {
     return platform ? platform.icon : 'bi-globe';
   }
 
-  async showIntelligence(): Promise<void> {
+  showIntelligence(): void {
     this.errorMessage = '';
     this.hasResults = false;
 
@@ -262,26 +311,101 @@ export class SocialMapperComponent implements OnInit {
       }
     }
 
-    this.isLoading = true;
+    const queryParams: any = {
+      mode: this.queryMode,
+      maxFollowers: this.maxFollowers,
+      maxFollowing: this.maxFollowing
+    };
 
-    try {
-      const request = this.buildRequest();
-      const response = await this.apiService.post<any>('social/scrape', request).toPromise();
-
-      if (response?.result?.status === 'success') {
-        this.rawResults = response.result;
-        this.analysisData = response.result.analysis;
-        this.hasResults = true;
-        this.renderNetworkGraph();
-      } else {
-        this.errorMessage = response?.result?.message || 'Failed to fetch social intelligence';
-      }
-    } catch (error: any) {
-      console.error('API Error:', error);
-      this.errorMessage = error?.message || 'Failed to connect to the API. Please ensure the service is running.';
-    } finally {
-      this.isLoading = false;
+    if (this.queryMode === 'single') {
+      queryParams.username = this.username.trim();
+      queryParams.platform = this.selectedPlatform;
+    } else {
+      queryParams.targets = JSON.stringify(
+        this.multiTargets.filter(t => t.username.trim() && t.platform)
+      );
     }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge'
+    }).then(() => {
+      this.load();
+    });
+  }
+
+  private load(): void {
+    this.isLoading = true;
+    this.isFetched = false;
+    this.hasError = false;
+    this.errorMessage = '';
+    this.analysisData = null;
+    this.rawResults = null;
+    this.progress.set(0);
+    this.currentStep = '';
+
+    const request = this.buildRequest();
+
+    this.apiService.post<SocialMapperResponse>('social/scrape', request)
+      .pipe(
+        expand(res => (
+            res?.status === 'pending' ||
+            res?.result?.status === 'busy' ||
+            res?.result?.status === 'pending'
+          ) ? timer(5000).pipe(
+              switchMap(() => this.apiService.post<SocialMapperResponse>('social/scrape', request))
+            )
+            : EMPTY
+        ),
+        takeWhile(res =>
+            res?.status === 'pending' ||
+            res?.result?.status === 'busy' ||
+            res?.result?.status === 'pending',
+          true
+        ),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: (res: SocialMapperResponse) => {
+          if (res?.result?.status === 'busy' ||
+              res?.result?.status === 'pending' ||
+              res?.status === 'pending') {
+            const p = res?.result?.progress ?? res?.progress;
+            if (typeof p === 'number' && !Number.isNaN(p)) {
+              this.progress.set(p);
+            }
+            const st = res?.result?.step ?? res?.step;
+            if (typeof st === 'string' && st) {
+              this.currentStep = st;
+            }
+            return;
+          }
+
+          this.isFetched = true;
+
+          const safe = !!(res && res.result && res.result.analysis);
+          if (!safe) {
+            this.hasError = true;
+            this.errorMessage = res?.result?.message || 'No data received from social mapper.';
+            return;
+          }
+
+          this.rawResults = res.result!;
+          this.analysisData = res.result!.analysis || null;
+          this.hasResults = true;
+
+          this.renderNetworkGraph();
+        },
+        error: (err) => {
+          this.isFetched = true;
+          this.hasError = true;
+          this.errorMessage = (err && (err.error?.detail || err.message)) ||
+                             'Failed to fetch social intelligence.';
+        }
+      });
   }
 
   private buildRequest(): ScrapeRequest {
@@ -317,10 +441,17 @@ export class SocialMapperComponent implements OnInit {
     }
   }
 
+  retry(): void {
+    this.load();
+  }
+
+  onSearchSubmit(): void {
+    this.showIntelligence();
+  }
+
   private renderNetworkGraph(): void {
     if (!this.analysisData) return;
 
-    // Initialize network if not already done
     if (!this.network) {
       setTimeout(() => {
         this.initializeNetwork();
@@ -534,8 +665,17 @@ export class SocialMapperComponent implements OnInit {
     this.analysisData = null;
     this.rawResults = null;
     this.errorMessage = '';
+    this.hasError = false;
+    this.isFetched = false;
+    this.progress.set(0);
+    this.currentStep = '';
     this.nodeSet?.clear();
     this.edgeSet?.clear();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+    });
   }
 
   getConnectionTypeClass(type: string): string {
