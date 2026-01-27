@@ -57,32 +57,51 @@ Cypress.Commands.add("openHomepage", () => {
 });
 
 Cypress.Commands.add("openLastMailAndGetUrl", () => {
-  cy.wait(2000)
-  return cy
-    .request("GET", "http://localhost:8025/api/v1/messages")
-    .then((r) => {
-      const id = r.body.messages[0].ID;
-      return cy.request("GET", `http://localhost:8025/api/v1/message/${id}`);
-    })
-    .then((r) => {
-      const text =
-        (r.body.Text as string) ||
-        (r.body.HTML as string) ||
-        (r.body.Snippet as string) ||
-        "";
+  const timeoutMs = 20000;
+  const intervalMs = 500;
+  const startedAt = Date.now();
 
-      const match = text.match(/https?:\/\/[^\s*]+/);
-      if (!match) {
-        throw new Error("Reset URL not found");
-      }
+  const waitForUrl = (): Cypress.Chainable<string> => {
+    return cy
+      .request("GET", "http://localhost:8025/api/v1/messages")
+      .then((r) => {
+        const id = r.body?.messages?.[0]?.ID as string | undefined;
 
-      const emailUrl = new URL(match[0]);
-      const base = new URL(Cypress.config("baseUrl") as string);
+        if (!id) {
+          if (Date.now() - startedAt > timeoutMs) {
+            throw new Error(`No email received within ${timeoutMs}ms`);
+          }
+          return cy.wait(intervalMs).then(() => waitForUrl());
+        }
 
-      emailUrl.protocol = base.protocol;
-      emailUrl.hostname = base.hostname;
-      emailUrl.port = base.port;
+        return cy.request("GET", `http://localhost:8025/api/v1/message/${id}`);
+      })
+      .then((r: any) => {
+        const text =
+          (r.body.Text as string) ||
+          (r.body.HTML as string) ||
+          (r.body.Snippet as string) ||
+          "";
 
-      return emailUrl.toString();
-    });
+        const match = text.match(/https?:\/\/[^\s*]+/);
+
+        if (!match) {
+          if (Date.now() - startedAt > timeoutMs) {
+            throw new Error(`Reset URL not found within ${timeoutMs}ms`);
+          }
+          return cy.wait(intervalMs).then(() => waitForUrl());
+        }
+
+        const emailUrl = new URL(match[0]);
+        const base = new URL(Cypress.config("baseUrl") as string);
+
+        emailUrl.protocol = base.protocol;
+        emailUrl.hostname = base.hostname;
+        emailUrl.port = base.port;
+
+        return cy.wrap(emailUrl.toString());
+      });
+  };
+
+  return waitForUrl();
 });

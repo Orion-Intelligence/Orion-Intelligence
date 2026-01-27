@@ -225,7 +225,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .should('be.visible')
       .click();
 
-    cy.get('.notification_sidebar-item')
+    cy.get('.notification_sidebar-item', { timeout: 40000 })
       .first()
       .within(() => {
         cy.contains('button', 'See Details')

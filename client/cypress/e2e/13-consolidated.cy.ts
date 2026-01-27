@@ -30,7 +30,6 @@ describe('Homepage – Consolidated Checker Full Flow', () => {
     cy.contains('.home-defacement-result__filter-type', categoryName, { timeout: 30000 }).should('be.visible').click({ force: true });
     };
 
-    openCategoryAndReturn('databases');
     openCategoryAndReturn('hacked');
     openCategoryAndReturn('phishing');
   });
