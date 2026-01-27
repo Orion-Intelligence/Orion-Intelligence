@@ -57,6 +57,7 @@ Cypress.Commands.add("openHomepage", () => {
 });
 
 Cypress.Commands.add("openLastMailAndGetUrl", () => {
+  cy.wait(2000)
   return cy
     .request("GET", "http://localhost:8025/api/v1/messages")
     .then((r) => {
