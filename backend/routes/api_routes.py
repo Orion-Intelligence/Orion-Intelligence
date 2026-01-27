@@ -2,9 +2,7 @@ import asyncio
 import re
 from pathlib import Path
 from typing import Optional
-
-from fastapi import APIRouter, Body, Depends, Query
-
+from fastapi import APIRouter, Body, Depends, Query, UploadFile,File
 from configs.app_dependency import license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
@@ -29,6 +27,7 @@ from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryMo
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
 from orion.services.stix_manager.stix_manager import stix_manager
+
 
 _DOCS_DIR = Path(__file__).resolve().parent / "docs" / "api_docs"
 
@@ -707,3 +706,25 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
 async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
+
+
+@api_routes.post(
+    "/api/ioc/extract",
+    summary="Extract IOCs from uploaded file",
+    description="Upload a file and extract Indicators of Compromise (IOCs) such as IPs, domains, URLs, hashes, etc.",
+    tags=["IOC Extraction"],
+    operation_id="extractIocFromFile",
+    response_description="Extracted IOC data from the uploaded file",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+
+async def extract_ioc(file: UploadFile = File(...)):
+
+    file_content = await file.read()
+
+    result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename)
+
+    return result

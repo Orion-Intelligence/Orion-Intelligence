@@ -15,7 +15,8 @@ export enum Category {
   STEALERLOGS = 'Stealerlogs',
   SCANNER = 'Scanner',
   TENANT = 'Tenant',
-  PROFILE = 'Profile'
+  PROFILE = 'Profile',
+  EXTRACTOR = "IOC"
 }
 
 export enum GeneralSubCategory {
@@ -125,3 +126,6 @@ export enum ProfileSubCategory {
   TENANT = 'Tenant',
   SYSTEM_SETTINGS = 'System-Settings',
 }
+
+export enum ExtractorSubCategory {
+  IOC_EXTRACTOR = 'IOC-Extractor',}

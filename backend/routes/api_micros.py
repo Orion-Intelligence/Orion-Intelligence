@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-
 from configs.app_dependency import role_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest

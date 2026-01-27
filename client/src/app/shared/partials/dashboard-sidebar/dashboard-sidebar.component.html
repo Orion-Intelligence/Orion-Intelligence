@@ -96,6 +96,14 @@
         [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'"
         [title]="'Dump'"></app-dashboard-sidebar-items>
     </ng-container>
+
+    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
+      <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.EXTRACTOR"
+        [icon]="'assets/images/sidebar/theme/scanner.svg'" [items]="extractorCatagories" [routePrefix]="'ioc-extractor'"
+        [title]="'IOC Extractor'"></app-dashboard-sidebar-items>
+    </ng-container>
+
     <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <div class="sidebar__item">
         <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph" target="_blank">
@@ -248,7 +256,7 @@
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph"
         target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/graph.svg"
-          width="19"> </a>
+          width="19"> </a>SCANNER
     </div>
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <a appTooltip="Whistle Blowing" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"

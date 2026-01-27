@@ -9,7 +9,7 @@ import {
   GeneralSubCategory, FeedSubCategory,
   SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory,
   TenantSubCategory,
-  ProfileSubCategory, DiscussionSubCategory
+  ProfileSubCategory, DiscussionSubCategory, ExtractorSubCategory
 
 } from '../../constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -52,6 +52,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   scannerCategories = Object.values(ScannerSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   profileCategories = Object.values(ProfileSubCategory)
+  extractorCatagories:ExtractorSubCategory[] =Object.values(ExtractorSubCategory)
   category = Category;
 
   constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
