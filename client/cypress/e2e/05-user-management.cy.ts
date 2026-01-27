@@ -208,8 +208,6 @@ describe('Users Page – Delete Users Sequentially', () => {
           .should('exist')
           .scrollIntoView()
           .then($btn => $btn[0].click());
-
-        cy.wait(1000);
       }
 
       cy.logout();

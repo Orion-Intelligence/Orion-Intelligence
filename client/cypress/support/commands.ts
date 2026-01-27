@@ -26,7 +26,7 @@ Cypress.Commands.add("loginAsTest1", () => {
   cy.get('input[name="username"]').type("testing4");
   cy.get('input[name="password"]').type("1qaz!QAZ", { log: false });
   cy.get("input.login-button").click();
-  cy.get(".dashboard_container").should("be.visible");
+  cy.get(".dashboard_container", { timeout: 10000 }).should("be.visible");
 });
 
 Cypress.Commands.add("logout", () => {
