@@ -1,5 +1,4 @@
 exclude_paths:
-  - "client/**"
   - "**/*.html"
   - "**/*.css"
   - "**/*.scss"
@@ -18,7 +17,6 @@ exclude_paths:
 engines:
   duplication:
     exclude_paths:
-      - "client/**"
       - "**/*.html"
       - "**/*.css"
       - "**/*.scss"
