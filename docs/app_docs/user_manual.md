@@ -62,6 +62,8 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
 
 
 
+### Navbar
+<img width="568" height="700" alt="menu" src="https://github.com/user-attachments/assets/a5e649d3-dd30-47e2-9fd7-45c842ba3a54" />
 
 
 ## Directory Page
