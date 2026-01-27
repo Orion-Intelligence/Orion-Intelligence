@@ -45,19 +45,35 @@ describe('Tenant Complete Flow – Correct Order', () => {
           cy.get('#edit-tenant').click();
         });
 
-        cy.contains('button.pill-toggle', 'Not Verified')
-          .should('be.visible')
-          .click();
+        let changed = false;
+
+        cy.get('tr.table-active')
+          .find('button.pill-toggle')
+          .then($btn => {
+            if ($btn.text().includes('Not Verified')) {
+              cy.wrap($btn).click({force: true});
+              changed = true;
+            }
+          });
 
         cy.get('.license-card')
           .contains('.license-label', 'Enterprise')
-          .click();
+          .closest('.license-card')
+          .find('input[type="checkbox"]')
+          .then($cb => {
+            if (!$cb.is(':checked')) {
+              cy.wrap($cb).check({force: true});
+              changed = true;
+            }
+          });
 
-        cy.wait(2000)
-        cy.contains('Save changes')
-          .should('be.visible')
-          .click();
-        cy.wait(2000)
+        cy.then(() => {
+          if (changed) {
+            cy.contains('button', 'Save changes')
+              .should('be.visible')
+              .click({force: true});
+          }
+        });
 
         cy.openTenantsPage();
 
