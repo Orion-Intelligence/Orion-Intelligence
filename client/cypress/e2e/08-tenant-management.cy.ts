@@ -53,9 +53,11 @@ describe('Tenant Complete Flow – Correct Order', () => {
           .contains('.license-label', 'Enterprise')
           .click();
 
+        cy.wait(2000)
         cy.contains('Save changes')
           .should('be.visible')
           .click();
+        cy.wait(2000)
 
         cy.openTenantsPage();
 
