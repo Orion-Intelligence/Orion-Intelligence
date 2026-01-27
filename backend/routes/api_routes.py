@@ -677,31 +677,11 @@ async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
 )
+
 async def extract_ioc(file: UploadFile = File(...)):
-    """
-    Extract IOCs fromioc_extract_ioc_extract_post uploaded file using trusted-micros-api service
-    """
+
     file_content = await file.read()
 
-    # TEMPORARY: Mock response since trusted-micros-api is down
-    # TODO: Uncomment the line below when trusted-micros-api is available
     result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename)
 
-    # return {
-    #     "status": "success",
-    #     "message": "File processed successfully",
-    #     "original_filename": file.filename,
-    #     "result": {
-    #         "ip_addresses": ["192.168.1.1", "10.0.0.1", "172.16.0.1"],
-    #         "domains": ["example.com", "malicious-site.net", "suspicious-domain.org"],
-    #         "urls": ["https://example.com/malware", "http://badsite.com/payload"],
-    #         "hashes": {
-    #             "md5": ["5d41402abc4b2a76b9719d911017c592", "e99a18c428cb38d5f260853678922e03"],
-    #             "sha256": ["2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"]
-    #         },
-    #         "email_addresses": ["attacker@malicious.com", "phishing@scam.net"]
-    #     },
-    #     "extraction_time": "1.23s",
-    #     "ioc_count": 10
-    # }
     return result

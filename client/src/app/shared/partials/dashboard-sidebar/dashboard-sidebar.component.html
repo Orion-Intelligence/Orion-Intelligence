@@ -96,7 +96,7 @@
     <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.EXTRACTOR"
-        [icon]="'assets/images/sidebar/basketball-svgrepo-com.svg'" [items]="extractorCatagories" [routePrefix]="'ioc-extractor'"
+        [icon]="'assets/images/sidebar/theme/scanner.svg'" [items]="extractorCatagories" [routePrefix]="'ioc-extractor'"
         [title]="'IOC Extractor'"></app-dashboard-sidebar-items>
     </ng-container>
 

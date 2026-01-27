@@ -9,35 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent} from '../../empty-query/empty-query.component';
 import { finalize, expand, switchMap, takeWhile } from 'rxjs/operators';
 import { EMPTY, timer } from 'rxjs';
-
-interface IocItem {
-  [key: string]: string;
-}
-
-interface IocExtractionResult {
-  filename: string;
-  file_type: string;
-  extracted_text_length: number;
-  iocs: IocItem[];
-  status: string;
-  original_filename: string;
-  progress?: number;
-  step?: string;
-}
-
-interface ApiResponse {
-  result: IocExtractionResult;
-  status?: string;
-  progress?: number;
-  step?: string;
-}
-
-interface GroupedIoc {
-  name: string;
-  total: number;
-  items: { type: string; value: string; display: string; description: string }[];
-}
-
+import { IocExtractionResult, IocItem,GroupedIoc,IocExtractResponse } from '../../../model/ioc-extractor/ioc.extractor.model';
 @Component({
   selector: 'app-ioc-extractor',
   standalone: true,
@@ -248,7 +220,7 @@ export class IocExtractorComponent {
       'Authorization': `Bearer ${token}`
     });
 
-    this.http.post<ApiResponse>(this.IOC_EXTRACT_ENDPOINT, formData, { headers })
+    this.http.post<IocExtractResponse>(this.IOC_EXTRACT_ENDPOINT, formData, { headers })
       .pipe(
         expand(res => {
 
@@ -259,7 +231,7 @@ export class IocExtractorComponent {
 
           return isProcessing
             ? timer(3000).pipe(
-              switchMap(() => this.http.post<ApiResponse>(this.IOC_EXTRACT_ENDPOINT, formData, { headers }))
+              switchMap(() => this.http.post<IocExtractResponse>(this.IOC_EXTRACT_ENDPOINT, formData, { headers }))
             )
             : EMPTY;
         }),
@@ -275,7 +247,7 @@ export class IocExtractorComponent {
         })
       )
       .subscribe({
-        next: (res: ApiResponse) => {
+        next: (res: IocExtractResponse) => {
 
           if (res?.status === 'pending' || res?.status === 'processing' ||
             res?.result?.status === 'pending' || res?.result?.status === 'processing') {
