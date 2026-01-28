@@ -31,6 +31,9 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.loginAsAdmin();
 
     cy.openTenantsPage();
+    cy.contains("Not Verified", { timeout: 10000 }).should("exist");
+    cy.get('.directory-listing_upper-heading').find('.directory-listing_header').should('have.text', 'Tenants');
+    cy.get('tbody tr').its('length').should('be.gte', 1);
 
     let verifiedCount = 0;
 
