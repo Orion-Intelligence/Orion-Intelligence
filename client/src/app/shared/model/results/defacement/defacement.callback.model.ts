@@ -24,7 +24,7 @@ export class DefacementResultItem {
 }
 
 export class DefacementCallbackModel {
-  Result!: DefacementResultItem[];
+  Result: DefacementResultItem[] = [];
   Page_Count!: number;
   Suggestions!: Suggestion[];
 

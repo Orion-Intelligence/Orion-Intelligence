@@ -34,9 +34,9 @@ export class LeakResultItem {
 }
 
 export class LeakCallbackModel {
-  Result!: LeakResultItem[];
+  Result: LeakResultItem[] = [];
   Page_Count!: number;
-  Suggestions!: Suggestion[];
+  Suggestions: Suggestion[] = [];
 
   constructor(init?: Partial<LeakCallbackModel>) {
     if (init) {
