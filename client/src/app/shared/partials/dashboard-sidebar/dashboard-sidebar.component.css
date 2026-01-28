@@ -3,7 +3,7 @@
   height: 300px;
 }
 
-.login-header .sidebar__header{
+.login-header .sidebar__header {
   margin-top: 0;
 }
 
@@ -93,7 +93,7 @@
   margin: 10px 0;
 }
 
-.sidebar_heading {
+.dashboard_sidebar_heading {
   margin-top: 20px;
   font-weight: bold;
   font-size: 13px;

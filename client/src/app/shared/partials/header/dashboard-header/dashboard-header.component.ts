@@ -54,7 +54,10 @@ export class DashboardHeaderComponent implements OnInit {
       this.router.navigate(['/dashboard/consolidated/all'], { queryParams }).then();
       return;
     }
-
+    if (this.breadcrumb[0].label == 'ctigraph') {
+      this.router.navigate(['/dashboard'], { queryParams }).then();
+      return;
+    }
     if (this.breadcrumb.length > 2) {
       const secondLastPath = '/dashboard/' + this.breadcrumb.slice(0, -1).map(crumb => crumb.path).join('/');
       const secondLastUrlTree = this.router.createUrlTree([secondLastPath], { queryParams });
