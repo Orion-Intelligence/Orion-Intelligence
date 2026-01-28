@@ -48,7 +48,6 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
         verifiedCount++;
 
-
         if (rows.length !== 1) {
           throw new Error(`Expected exactly 1 row, found ${rows.length}`);
         }
