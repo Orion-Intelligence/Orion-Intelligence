@@ -414,21 +414,25 @@ company data, or proprietary tools that have been exposed.
 ## Data Breach
 The Data Breach section in the navigation bar includes six categories:
 
-<img width="1918" height="585" alt="data breach" src="https://github.com/user-attachments/assets/05a60160-0bd1-412e-98e5-b77b1cf19c4b" />
+<img width="1916" height="746" alt="databreach" src="https://github.com/user-attachments/assets/864f5b1c-7f61-433f-9824-0fe23fabff97" />
 
+1. ### Databases
 
-**Discussion** 
+This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
+
+<img width="1917" height="891" alt="database" src="https://github.com/user-attachments/assets/234263fe-87c8-44f9-b62b-14c31ac1632e" />
+
+## Discussion
 
 In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
 
 <img width="1917" height="630" alt="image" src="https://github.com/user-attachments/assets/aee08d43-1e09-4ec2-ab34-4fe201686255" />
 
 
-1. ### Databases
 
-This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
 
-2. ### Email
+
+2. ### Tracking
 This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
 
 3. ### Logs
