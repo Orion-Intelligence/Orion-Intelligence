@@ -5,6 +5,8 @@ from pydantic import BaseModel, ConfigDict
 class SocialTarget(BaseModel):
     usernames: List[str]
     platform: str
+    max_following: int
+    max_followers: int
 
 
 class SocialScrapeRequest(BaseModel):
@@ -14,13 +16,14 @@ class SocialScrapeRequest(BaseModel):
     max_following: Optional[int] = 50
     targets: Optional[List[SocialTarget]] = None
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "usernames": ["john_doe"],
-                "platform": "instagram",
-                "max_followers": 50,
-                "max_following": 50
-            }
-        }
-    )
+    # model_config = ConfigDict(
+    #     json_schema_extra={
+    #         "example": {
+    #             "usernames": ["john_doe"],
+    #             "platform": "instagram",
+    #             "max_followers": 50,
+    #             "max_following": 50,
+    #
+    #         }
+    #     }
+    # )

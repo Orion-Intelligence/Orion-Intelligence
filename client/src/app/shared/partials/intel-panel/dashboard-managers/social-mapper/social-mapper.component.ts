@@ -411,52 +411,38 @@ export class SocialMapperComponent implements OnInit {
   }
 
   private buildRequest(): ScrapeRequest {
-    const maxF = Number(this.maxFollowers);
-    const maxFl = Number(this.maxFollowing);
+  const maxF = Number(this.maxFollowers);
+  const maxFl = Number(this.maxFollowing);
 
-    if (this.queryMode === 'single') {
-      return {
-        usernames: [this.username.trim()],
-        platform: this.selectedPlatform,
-        max_followers: maxF,
-        max_following: maxFl
-      };
-    } else {
-      const platformGroups: Record<string, string[]> = {};
-      this.multiTargets.forEach(t => {
-        if (t.username.trim() && t.platform) {
-          if (!platformGroups[t.platform]) {
-            platformGroups[t.platform] = [];
-          }
-          platformGroups[t.platform].push(t.username.trim());
-        }
-      });
-
-      const platforms = Object.keys(platformGroups);
-      if (platforms.length === 0) return { usernames: [], platform: '' };
-
-      const rootPlatform = platforms[0];
-      const otherPlatforms = platforms.slice(1);
-
-      const req: ScrapeRequest = {
-        usernames: platformGroups[rootPlatform],
-        platform: rootPlatform,
-        max_followers: maxF,
-        max_following: maxFl
-      };
-
-      if (otherPlatforms.length > 0) {
-        req.targets = otherPlatforms.map(platform => ({
-          usernames: platformGroups[platform],
-          platform,
-          max_followers: maxF,
-          max_following: maxFl
-        }));
-      }
-
-      return req;
-    }
+  if (this.queryMode === 'single') {
+    return {
+      usernames: [this.username.trim()],
+      platform: this.selectedPlatform,
+      max_followers: maxF,
+      max_following: maxFl
+    };
   }
+
+  const platformGroups: Record<string, string[]> = {};
+
+  this.multiTargets.forEach(t => {
+    if (t.username.trim() && t.platform) {
+      if (!platformGroups[t.platform]) {
+        platformGroups[t.platform] = [];
+      }
+      platformGroups[t.platform].push(t.username.trim());
+    }
+  });
+
+  const targets: SocialTarget[] = Object.keys(platformGroups).map(platform => ({
+    platform,
+    usernames: platformGroups[platform],
+    max_followers: maxF,
+    max_following: maxFl
+  }));
+
+  return { targets };
+}
 
   retry(): void {
     this.load();
