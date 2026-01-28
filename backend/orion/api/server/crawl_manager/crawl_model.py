@@ -1,276 +1,358 @@
-import asyncio
+import base64
+import hashlib
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, List
-from playwright.sync_api import sync_playwright
-
-from api.social_manager.social_enums import SOCIAL_REQUEST_COMMANDS, SOCIAL_PLATFORMS
-from api.social_manager.cross_platform_mapping import cross_platform_mapper
-from api.social_manager.login_session.session_manager import SessionManager
-from api.social_manager.scrapers.instagram import InstagramScraper
-from api.social_manager.scrapers.facebook import FacebookScraper
-from api.social_manager.scrapers.behance_scraper import BehanceScraper
-from api.social_manager.scrapers.vimeo import VimeoScraper
-
-SESSION_DIR = os.path.dirname(os.path.abspath(__file__))
-SESSION_FILE_MAP = {
-    "InstagramScraper": "instagram_session.json.gz",
-    "FacebookScraper": "FacebookScraper_session.json.gz",
-}
-
-BROWSER_ARGS = [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-gpu',
-    '--disable-dev-shm-usage',
-    '--disable-software-rasterizer'
-]
-
-MAX_WORKERS = 4
-BLOCKED_RESOURCES = ['image', 'media', 'font', 'stylesheet']
+from datetime import datetime, timezone
+import httpx
+import requests
+from fastapi.responses import FileResponse
+from starlette.responses import JSONResponse
+from orion.api.server.crawl_manager.class_model import *
+from orion.helper_manager.helper_controller import helper_controller
+from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
+from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
+from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
+from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
+from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
 
 
-class social_controller:
+
+
+class crawl_model:
+    __instance = None
+
+    @staticmethod
+    def getInstance():
+        if crawl_model.__instance is None:
+            crawl_model()
+        return crawl_model.__instance
 
     def __init__(self):
-        self._browser = None
-        self._playwright = None
-
-    def _get_scraper(self, platform: str, username: str, max_followers: int, max_following: int):
-        if platform == SOCIAL_PLATFORMS.INSTAGRAM:
-            return InstagramScraper(username, max_followers, max_following)
-        elif platform == SOCIAL_PLATFORMS.FACEBOOK:
-            return FacebookScraper(username, max_following)
-        elif platform == SOCIAL_PLATFORMS.BEHANCE:
-            return BehanceScraper(username, max_followers, max_following)
-        elif platform == SOCIAL_PLATFORMS.VIMEO:
-            return VimeoScraper(username, max_followers, max_following)
-        return None
-
-    def _block_media(self, route):
-        """Block images, media, fonts to speed up page loading."""
-        if route.request.resource_type in BLOCKED_RESOURCES:
-            route.abort()
+        self._engine = mongo_controller.get_instance().get_engine()
+        if crawl_model.__instance is not None:
+            pass
         else:
-            route.continue_()
+            crawl_model.__instance = self
 
-    def _run_scraper(self, scraper, page) -> Dict[str, Any]:
-        if getattr(scraper, "requires_login", False):
-            session_filename = SESSION_FILE_MAP.get(
-                scraper.__class__.__name__,
-                f"{scraper.__class__.__name__}_session.json.gz"
-            )
-            session_file = os.path.join(SESSION_DIR, session_filename)
+    async def _update_or_create_model(self,
+            base_url: str,
+            new_content_type: list,
+            new_index_type: list,
+            network_type: str,
+            is_leak_update: bool,
+            name: str = None):
+        normalized_url = base_url
+        if network_type != "telegram":
+            normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
 
-            session = SessionManager(session_file)
-            loaded = session.load(page)
+        if base_url.__contains__("twitter") or base_url.__contains__("reddit") or base_url.__contains__("forum"):
+            normalized_url = base_url
 
-            if not loaded:
-                return {
-                    "status": "login_required",
-                    "platform": scraper.name,
-                    "message": "Manual login required. Please authenticate and retry."
-                }
+        general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)
+        if not new_content_type:
+            new_content_type = ["general"]
 
-            page.goto(scraper.seed_url, wait_until="domcontentloaded")
-            session.apply_storage(page)
-            page.reload(wait_until="domcontentloaded")
-            page.wait_for_timeout(2000)
+        if general_model:
+            general_model.content_type = list(set((general_model.content_type or []) + new_content_type))
+            general_model.index_type = list(set((general_model.index_type or []) + new_index_type))
+            if name:
+                general_model.name = name
+            if is_leak_update:
+                general_model.leak_model_last_update = datetime.now(timezone.utc)
+            else:
+                general_model.geneic_model_last_update = datetime.now(timezone.utc)
         else:
-            page.goto(scraper.seed_url, wait_until="domcontentloaded")
+            general_model = db_url_data_model(
+                url=normalized_url,
+                content_type=list(set(new_content_type)),
+                index_type=list(set(new_index_type)),
+                network_type=network_type,
+                name=name,
+                leak_model_last_update=datetime.now(timezone.utc) if is_leak_update else None,
+                geneic_model_last_update=datetime.now(timezone.utc) if not is_leak_update else None)
 
-        result = scraper.parse_page(page)
-        return {
-            "status": "success",
-            "platform": scraper.name,
-            "data": result
-        }
+        await self._engine.save(general_model)
+        return JSONResponse(content={"message": CRAWL_CALLBACK_RESPONSES.M_WEBSITE_INDEXED}, status_code=200)
 
-    def _scrape_single(self, platform: str, username: str, max_followers: int, max_following: int,
-                       block_media: bool = True) -> Dict[str, Any]:
-        """Scrape a single profile with optional media blocking."""
-        cross_platform_mapper.clear_cards()
+    @staticmethod
+    async def make_cti_request(text: str):
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "http://localhost:8000/cti_classifier/classify", json={"text": text})
+            return response.json()
 
-        scraper = self._get_scraper(platform, username, max_followers, max_following)
-        if not scraper:
-            return {
-                "status": "error",
-                "message": f"Unsupported platform: {platform}"
-            }
+    @staticmethod
+    async def parse_chat(model: nlp_data_model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/nlp/parse", json={"data": model.data}, timeout=10)
+                return response.json()
+        except Exception as ex:
+            return {"error": str(ex)}
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True, args=BROWSER_ARGS)
-            page = browser.new_page()
+    @staticmethod
+    async def parse_summarize_ai(model: nlp_data_model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/nlp/summarize/ai", json={"data": model.data}, timeout=200)
+                return response.json()
+        except Exception as ex:
+            return {"error": str(ex)}
 
-            if block_media:
-                page.route("**/*", self._block_media)
+    @staticmethod
+    async def scan_domain(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/urlscan/domain", json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling urlscan/domain"})
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling urlscan/domain"})
 
-            try:
-                result = self._run_scraper(scraper, page)
-            finally:
-                browser.close()
+    @staticmethod
+    async def scrape_social(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/social/scrape", json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling social/scrape"})
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling social/scrape"})
 
-        return result
+    @staticmethod
+    async def ioc_extract(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/ioc/extract", json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling /ioc/extract"})
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling /ioc/extract"})
 
-    def _scrape_single_task(self, task: Dict) -> Dict[str, Any]:
-        """Worker function for parallel scraping."""
-        platform = task["platform"]
-        username = task["username"]
-        max_followers = task.get("max_followers", 50)
-        max_following = task.get("max_following", 50)
+    @staticmethod
+    async def parse_chat_ai(model: ReportChatRequest):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/nlp/chat/report", json=model.model_dump(), timeout=200)
+                response.raise_for_status()
+                return response.json()
+        except Exception as ex:
+            return {"error": str(ex)}
 
-        scraper = self._get_scraper(platform, username, max_followers, max_following)
-        if not scraper:
-            return {
-                "status": "error",
-                "message": f"Unsupported platform: {platform}"
-            }
+    @staticmethod
+    async def invoke_credential_index(credential_index: credential_data_model):
+        m_data = elastic_request_generator().index_query_credential(credential_index.model_dump())
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True, args=BROWSER_ARGS)
-            page = browser.new_page()
-            page.route("**/*", self._block_media)
+        await elastic_controller.get_instance().index_dump(m_data)
+        return {"parsed": "true"}
 
-            try:
-                result = self._run_scraper(scraper, page)
-            finally:
-                browser.close()
+    @staticmethod
+    async def invoke_stealerlog_index(credential_index: LogBatchModel):
+        m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
+        if not m_data:
+            return {"parsed": "empty unqiue"}
 
-        return result
+        await elastic_controller.get_instance().index_dump(m_data)
+        return {"parsed": "true"}
 
-    def _scrape_multiple(self, targets: List[Dict], compare_results: bool, threshold: int, max_followers: int = 50,
-                         max_following: int = 50) -> Dict[str, Any]:
-        """Scrape multiple profiles concurrently."""
-        cross_platform_mapper.clear_cards()
+    async def invoke_social_index(self, social_index: social_data_model):
 
-        tasks = []
-        for target in targets:
-            platform = target.get("platform", "")
-            usernames = target.get("usernames", [])
-            # Use the root-level max_followers/max_following passed to this method
+        m_bybass_embedding = social_index.cards_data[0].m_platform == "pastebin"
+        m_data = elastic_request_generator().index_query_social(social_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data, m_bybass_embedding)
 
-            for username in usernames:
-                tasks.append({
-                    "platform": platform,
-                    "username": username,
-                    "max_followers": max_followers,
-                    "max_following": max_following
-                })
+        return await self._update_or_create_model(
+            base_url=social_index.seed_url,
+            new_content_type=["social"],
+            name=social_index.seed_url,
+            new_index_type=[helper_controller.get_base_url(social_index.seed_url).replace("https://", "").replace(
+                ".com",
+                "").rstrip('/')],
+            network_type=social_index.m_network,
+            is_leak_update=False)
 
-        results = []
+    async def invoke_chat_index(self, chat_index: chat_data_model):
+        m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
 
-        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            future_to_task = {
-                executor.submit(self._scrape_single_task, task): task
-                for task in tasks
-            }
+        return await self._update_or_create_model(
+            base_url=chat_index.m_source_channel_url,
+            new_content_type=["channel"],
+            name=chat_index.m_channel_name,
+            new_index_type=["chat"],
+            network_type=chat_index.m_network,
+            is_leak_update=False)
 
-            for future in as_completed(future_to_task):
-                task = future_to_task[future]
-                try:
-                    result = future.result()
-                    results.append(result)
-                except Exception as e:
-                    results.append({
-                        "status": "error",
-                        "platform": task["platform"],
-                        "username": task["username"],
-                        "message": str(e)
-                    })
+    async def invoke_generic_index(self, general_index: GeneralDataModel):
+        m_data = elastic_request_generator().index_query_general(general_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=general_index.m_base_url,
+            new_content_type=general_index.m_content_type,
+            new_index_type=['general'],
+            network_type=general_index.m_network,
+            is_leak_update=False)
 
-        response = {
-            "status": "success",
-            "scrape_results": results,
-            "total_scraped": len(results)
-        }
+    async def invoke_exploit_index(self, exploit_index: ExploitDataModel):
+        m_data = elastic_request_generator().index_query_exploit(exploit_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=exploit_index.base_url,
+            new_content_type=['exploit'],
+            new_index_type=['exploit'],
+            network_type=exploit_index.m_network,
+            is_leak_update=True)
 
-        if compare_results:
-            response["analysis"] = cross_platform_mapper.get_full_analysis(threshold)
+    async def init_stealerlogs(self, leak_index: LeakDataModel):
+        m_data = elastic_request_generator().index_query_stealerlog(leak_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=leak_index.base_url,
+            new_content_type=['stealer'],
+            new_index_type=['stealer'],
+            network_type=leak_index.m_network,
+            is_leak_update=True)
 
-        return response
+    async def invoke_leak_index(self, leak_index: LeakDataModel):
+        m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=leak_index.base_url,
+            new_content_type=['leaks'],
+            new_index_type=['leak'],
+            network_type=leak_index.m_network,
+            is_leak_update=True)
 
-    def _get_mapping_data(self, include_analysis: bool, threshold: int) -> Dict[str, Any]:
-        if include_analysis:
-            return cross_platform_mapper.get_full_analysis(threshold)
-        return cross_platform_mapper.get_summary()
+    async def invoke_news_index(self, leak_index: LeakDataModel):
+        m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=leak_index.base_url,
+            new_content_type=['news'],
+            new_index_type=['leak'],
+            network_type=leak_index.m_network,
+            is_leak_update=True)
 
-    def _compare_following(self, threshold: int) -> Dict[str, Any]:
-        return cross_platform_mapper.compare_following_across_platforms(threshold)
+    async def invoke_tracking_index(self, leak_index: LeakDataModel):
+        m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=leak_index.base_url,
+            new_content_type=['news', 'tracking'],
+            new_index_type=['leak'],
+            network_type=leak_index.m_network,
+            is_leak_update=True)
 
-    def _analyze_influence(self, threshold: int) -> Dict[str, Any]:
-        return cross_platform_mapper.analyze_cross_platform_influence(threshold)
+    async def invoke_defacement_index(self, defacement_index: DefacementDataModel):
+        m_data = elastic_request_generator().index_query_defacement(defacement_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data, True)
+        return await self._update_or_create_model(
+            base_url=defacement_index.base_url,
+            new_content_type=['defacement'],
+            new_index_type=['defacement'],
+            network_type=defacement_index.m_network,
+            is_leak_update=True)
 
-    def _clear_data(self) -> Dict[str, Any]:
-        cross_platform_mapper.clear_cards()
-        return {"status": "success", "message": "All social data cleared"}
+    @staticmethod
+    async def invoke_fetch_parser():
+        if os.path.exists(CRAWL_PATHS.M_PARSER_FILE_PATH):
+            return FileResponse(
+                CRAWL_PATHS.M_PARSER_FILE_PATH, media_type="application/zip", filename="parser_files.zip")
+        else:
+            return JSONResponse(content={"detail": "File not found"}, status_code=404)
 
-    async def invoke_trigger(self, command: int, data: Any = None) -> Any:
-        if command == SOCIAL_REQUEST_COMMANDS.S_INIT:
-            return {"status": "initialized"}
+    @staticmethod
+    async def invoke_fetch_feeder(index_type):
+        if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
+            return FileResponse(
+                CRAWL_PATHS.M_FEEDER_FILE_PATH + f"crawl_data_{index_type}.txt",
+                media_type="text/plain",
+                filename="crawl_data_leak.txt")
+        else:
+            return JSONResponse(content={"detail": "File not found"}, status_code=404)
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_SCRAPE_INSTAGRAM:
-            return await asyncio.to_thread(
-                self._scrape_single,
-                SOCIAL_PLATFORMS.INSTAGRAM,
-                data.get("username"),
-                data.get("max_followers", 50),
-                data.get("max_following", 50),
-                True
-            )
+    @staticmethod
+    async def get_screenshot_file(filename: str):
+        try:
+            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, filename)
+            if not os.path.exists(file_path):
+                return {"error": "File not found"}
+            return FileResponse(path=file_path, filename=filename, media_type="image/webp")
+        except Exception as e:
+            return {"error": f"Failed to retrieve screenshot: {str(e)}"}
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_SCRAPE_FACEBOOK:
-            return await asyncio.to_thread(
-                self._scrape_single,
-                SOCIAL_PLATFORMS.FACEBOOK,
-                data.get("username"),
-                data.get("max_followers", 50),
-                data.get("max_following", 50),
-                True
-            )
+    @staticmethod
+    async def invoke_file_upload(payload: ScreenshotPayload):
+        try:
+            os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
+            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, payload.filename)
+            with open(file_path, "wb") as f:
+                f.write(base64.b64decode(payload.data))
+            return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}
+        except Exception as e:
+            return {"error": f"Failed to save screenshot: {str(e)}"}
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_SCRAPE_BEHANCE:
-            return await asyncio.to_thread(
-                self._scrape_single,
-                SOCIAL_PLATFORMS.BEHANCE,
-                data.get("username"),
-                data.get("max_followers", 50),
-                data.get("max_following", 50),
-                True
-            )
+    async def index_log_record(self, log_model: LogModel):
+        timestamp = datetime.now(timezone.utc).isoformat()
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_SCRAPE_VIMEO:
-            return await asyncio.to_thread(
-                self._scrape_single,
-                SOCIAL_PLATFORMS.VIMEO,
-                data.get("username"),
-                data.get("max_followers", 50),
-                data.get("max_following", 50),
-                True
-            )
+        for log in log_model.logs:
+            log_hash = hashlib.sha256(log.encode("utf-8")).hexdigest()
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_SCRAPE_MULTIPLE:
-            return await asyncio.to_thread(
-                self._scrape_multiple,
-                data.get("targets", []),
-                data.get("compare_results", False),
-                data.get("similarity_threshold", 70),
-                data.get("max_followers", 50),
-                data.get("max_following", 50)
-            )
+            doc = {"log": log, "log_hash": log_hash, "timestamp": timestamp}
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_GET_MAPPING_DATA:
-            return self._get_mapping_data(
-                data.get("include_analysis", True),
-                data.get("similarity_threshold", 70)
-            )
+            await self._engine.save(
+                {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_STEALERLOGS_INDEX, ELASTIC_KEYS.S_VALUE: doc})
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_COMPARE_FOLLOWING:
-            return self._compare_following(data.get("similarity_threshold", 70))
+        return JSONResponse(content={"message": "Logs indexed successfully"}, status_code=200)
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_ANALYZE_INFLUENCE:
-            return self._analyze_influence(data.get("similarity_threshold", 70))
+    async def invoke_dump_index(self, dump_model: DumpModel):
+        try:
+            batch_id = dump_model.id
+            if not dump_model.status:
+                dump_model.status = False
 
-        if command == SOCIAL_REQUEST_COMMANDS.S_CLEAR_DATA:
-            return self._clear_data()
+            for index, url in enumerate(dump_model.leak_url):
+                record_id = f"{batch_id}_{index}"
 
-        return None
+                dump_record = db_dump_record_model(
+                    id=record_id,
+                    parsed_status=dump_model.status,
+                    leak_url=url,
+                    source=dump_model.source,
+                    group=dump_model.group,
+                    link=dump_model.link)
+                await self._engine.save(dump_record)
+
+            return JSONResponse(content={"message": "Dump records saved successfully"}, status_code=200)
+
+        except Exception as e:
+            return JSONResponse(content={"error": f"Failed to save dump records: {str(e)}"}, status_code=500)
+
+    @staticmethod
+    async def fetch_cti_label(payload: CTITextRequest):
+        url = "http://trusted-micros-api:8010/cti_classifier/classify"
+        payload = {"data": payload.data}
+
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+
+        return response.json()["result"]
