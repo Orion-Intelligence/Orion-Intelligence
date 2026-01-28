@@ -10,6 +10,7 @@ from configs.token_auth_provider import setup_admin
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from configs.swagger_config import configure_swagger
 from interface import interface
+from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.service_manager import service_manager
 from orion.middleware.middleware_setup import setup_middlewares
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -57,7 +58,8 @@ app.include_router(admin_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
 app.include_router(micro_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
-app.include_router(test_routes, include_in_schema=False)
+if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
+    app.include_router(test_routes, include_in_schema=False)
 app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)

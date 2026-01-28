@@ -1,0 +1,925 @@
+{
+  "result": {
+    "meta": {
+      "URL": "https://www.bbc.com",
+      "Host": "www.bbc.com",
+      "Port": "443 SSL",
+      "Scanned_on_date": "January 23, 2026",
+      "Scanned_by": "Orion Intelligence"
+    },
+    "summary": {
+      "Headers": 4,
+      "Caching Findings": 1,
+      "Caching": 2,
+      "CSP/Policy": 4,
+      "CORS": 56,
+      "General": 7,
+      "Informational": 2
+    },
+    "threats": {
+      "Headers": [
+        {
+          "header": "Permissions-Policy",
+          "description": "Missing Permissions-Policy",
+          "confidence": "High",
+          "risk": "Medium"
+        },
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "description": "Missing CORP",
+          "confidence": "High",
+          "risk": "Medium"
+        },
+        {
+          "header": "Cross-Origin-Opener-Policy",
+          "description": "Missing COOP",
+          "confidence": "High",
+          "risk": "Medium"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "description": "Missing COEP",
+          "confidence": "High",
+          "risk": "Medium"
+        }
+      ],
+      "Caching Findings": [
+        {
+          "header": "Re-examine Cache-control Directives",
+          "description": "The cache-control header has not been set properly or is missing.",
+          "confidence": "Low",
+          "risk": "Informational"
+        }
+      ],
+      "Caching": [
+        {
+          "header": "Re-examine Cache-control Directives",
+          "description": "The cache-control header has not been set properly or is missing, allowing the browser and proxies to cache content. For static assets like css, js, or image files this might be intended, however, the resources should be reviewed to ensure that no sensitive content will be cached.",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Re-examine Cache-control Directives",
+          "description": "The cache-control header has not been set properly or is missing, allowing the browser and proxies to cache content. For static assets like css, js, or image files this might be intended, however, the resources should be reviewed to ensure that no sensitive content will be cached.",
+          "confidence": "Low",
+          "risk": "Informational"
+        }
+      ],
+      "CSP/Policy": [
+        {
+          "header": "Content Security Policy (CSP) Header Not Set",
+          "description": "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.",
+          "confidence": "High",
+          "risk": "Medium"
+        },
+        {
+          "header": "Content Security Policy (CSP) Header Not Set",
+          "description": "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.",
+          "confidence": "High",
+          "risk": "Medium"
+        },
+        {
+          "header": "Content-Security-Policy",
+          "description": "CSP header missing",
+          "confidence": "High",
+          "risk": "Medium"
+        },
+        {
+          "header": "Permissions-Policy",
+          "description": "Permissions-Policy header missing",
+          "confidence": "High",
+          "risk": "Medium"
+        }
+      ],
+      "CORS": [
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "description": "The page includes one or more script files from a third-party domain.",
+          "confidence": "Medium",
+          "risk": "Low"
+        }
+      ],
+      "General": [
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "description": "The response appears to contain suspicious comments which may help an attacker.",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "description": "The response appears to contain suspicious comments which may help an attacker.",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Retrieved from Cache",
+          "description": "The content was retrieved from a shared cache. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.",
+          "confidence": "Medium",
+          "risk": "Informational"
+        },
+        {
+          "header": "Retrieved from Cache",
+          "description": "The content was retrieved from a shared cache. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.",
+          "confidence": "Medium",
+          "risk": "Informational"
+        },
+        {
+          "header": "ZAP is Out of Date",
+          "description": "The version of ZAP you are using to test your app is out of date and is no longer being updated.\nThe risk level is set based on how out of date your ZAP version is.",
+          "confidence": "High",
+          "risk": "Low"
+        },
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "description": "The response appears to contain suspicious comments which may help an attacker.",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "description": "The response appears to contain suspicious comments which may help an attacker.",
+          "confidence": "Low",
+          "risk": "Informational"
+        }
+      ],
+      "Informational": [
+        {
+          "header": "Modern Web Application",
+          "description": "The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.",
+          "confidence": "Medium",
+          "risk": "Informational"
+        },
+        {
+          "header": "Modern Web Application",
+          "description": "The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.",
+          "confidence": "Medium",
+          "risk": "Informational"
+        }
+      ]
+    },
+    "proofs": {
+      "Caching": [
+        {
+          "header": "Re-examine Cache-control Directives",
+          "proof": "<!DOCTYPE html><html lang=\"en-GB\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio</title><meta name=\"page.section\" content=\"Home\"/><meta property=\"og:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio\"/><meta name=\"twitter:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp;",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Re-examine Cache-control Directives",
+          "proof": "<!DOCTYPE html><html lang=\"en-GB\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio</title><meta name=\"page.section\" content=\"Home\"/><meta property=\"og:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio\"/><meta name=\"twitter:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp;",
+          "confidence": "Low",
+          "risk": "Informational"
+        }
+      ],
+      "CSP/Policy": [
+        {
+          "header": "Content Security Policy (CSP) Header Not Set",
+          "proof": "<!DOCTYPE html><html lang=\"en-GB\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio</title><meta name=\"page.section\" content=\"Home\"/><meta property=\"og:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio\"/><meta name=\"twitter:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp;",
+          "confidence": "High",
+          "risk": "Medium"
+        },
+        {
+          "header": "Content Security Policy (CSP) Header Not Set",
+          "proof": "<!DOCTYPE html><html lang=\"en-GB\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio</title><meta name=\"page.section\" content=\"Home\"/><meta property=\"og:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio\"/><meta name=\"twitter:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp;",
+          "confidence": "High",
+          "risk": "Medium"
+        }
+      ],
+      "CORS": [
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "c.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/css/01a150b7a2e75b22.css\" data-n-p=\"\"/><noscript data-n-css=\"\"></noscript><script defer=\"\" nomodule=\"\" src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/polyfills-42372ed130431b0a.js\"></script><script id=\"requirejs-script\" src=\"https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "c.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/css/01a150b7a2e75b22.css\" data-n-p=\"\"/><noscript data-n-css=\"\"></noscript><script defer=\"\" nomodule=\"\" src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/polyfills-42372ed130431b0a.js\"></script><script id=\"requirejs-script\" src=\"https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "odule=\"\" src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/polyfills-42372ed130431b0a.js\"></script><script id=\"requirejs-script\" src=\"https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"optimizely-script\" src=\"https://cdn.optimizely.com/public/4621041136/s/bbcx_prod.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeIn",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "odule=\"\" src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/polyfills-42372ed130431b0a.js\"></script><script id=\"requirejs-script\" src=\"https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"optimizely-script\" src=\"https://cdn.optimizely.com/public/4621041136/s/bbcx_prod.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeIn",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ps://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"optimizely-script\" src=\"https://cdn.optimizely.com/public/4621041136/s/bbcx_prod.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"piano-script\" src=\"https://cdn.tinypass.com/api/tinypass.min.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script>",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ps://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"optimizely-script\" src=\"https://cdn.optimizely.com/public/4621041136/s/bbcx_prod.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"piano-script\" src=\"https://cdn.tinypass.com/api/tinypass.min.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script>",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ly-script\" src=\"https://cdn.optimizely.com/public/4621041136/s/bbcx_prod.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"piano-script\" src=\"https://cdn.tinypass.com/api/tinypass.min.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"ads-service-script\" src=\"https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js\" async=\"\" type=\"module\" defer=\"\" data-nscript=\"beforeInte",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ly-script\" src=\"https://cdn.optimizely.com/public/4621041136/s/bbcx_prod.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"piano-script\" src=\"https://cdn.tinypass.com/api/tinypass.min.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"ads-service-script\" src=\"https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js\" async=\"\" type=\"module\" defer=\"\" data-nscript=\"beforeInte",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "<script id=\"piano-script\" src=\"https://cdn.tinypass.com/api/tinypass.min.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"ads-service-script\" src=\"https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js\" async=\"\" type=\"module\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><s",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "<script id=\"piano-script\" src=\"https://cdn.tinypass.com/api/tinypass.min.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"ads-service-script\" src=\"https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js\" async=\"\" type=\"module\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><s",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "rvice-script\" src=\"https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js\" async=\"\" type=\"module\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/webpack-b0486f7dd4cf4e62.js\" defer=\"\"></s",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "rvice-script\" src=\"https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js\" async=\"\" type=\"module\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/webpack-b0486f7dd4cf4e62.js\" defer=\"\"></s",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/webpack-b0486f7dd4cf4e62.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"><",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/webpack-b0486f7dd4cf4e62.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"><",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/webpack-b0486f7dd4cf4e62.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></scri",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/webpack-b0486f7dd4cf4e62.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></scri",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/_app-1359817a6bd61382.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/_app-1359817a6bd61382.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/_app-1359817a6bd61382.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/_app-1359817a6bd61382.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "rc=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/_app-1359817a6bd61382.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/882-2494f69d918b779a.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "rc=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/_app-1359817a6bd61382.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/882-2494f69d918b779a.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/882-2494f69d918b779a.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/903-6caf320c0d8a6ffb.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/882-2494f69d918b779a.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/903-6caf320c0d8a6ffb.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/882-2494f69d918b779a.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/903-6caf320c0d8a6ffb.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cfb407be7291669",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/882-2494f69d918b779a.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/903-6caf320c0d8a6ffb.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cfb407be7291669",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/903-6caf320c0d8a6ffb.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cfb407be72916699.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_buildManifest.js\" defer=\"",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/903-6caf320c0d8a6ffb.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cfb407be72916699.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_buildManifest.js\" defer=\"",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "tic.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cfb407be72916699.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_ssgManifest.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "tic.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cfb407be72916699.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_ssgManifest.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_ssgManifest.js\" defer=\"\"></script><style>@font-face{font-family:'BBC Reith Sans';font-display:block;font-weight:300;src:url(https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Lt.wo",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1/_next/static/l9byZ9pm2MLF_NDjdUhgl/_ssgManifest.js\" defer=\"\"></script><style>@font-face{font-family:'BBC Reith Sans';font-display:block;font-weight:300;src:url(https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Lt.wo",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "c.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/css/33a17d4dadebed0c.css\" data-n-p=\"\"/><noscript data-n-css=\"\"></noscript><script defer=\"\" nomodule=\"\" src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/polyfills-42372ed130431b0a.js\"></script><script id=\"requirejs-script\" src=\"https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/webpack-555f46b3dd5b635b.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"><",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "c.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/css/33a17d4dadebed0c.css\" data-n-p=\"\"/><noscript data-n-css=\"\"></noscript><script defer=\"\" nomodule=\"\" src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/polyfills-42372ed130431b0a.js\"></script><script id=\"requirejs-script\" src=\"https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js\" async=\"\" type=\"text/javascript\" defer=\"\" data",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/webpack-555f46b3dd5b635b.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></scri",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/_app-e022486bbea2af4f.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/_app-e022486bbea2af4f.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "rc=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/_app-e022486bbea2af4f.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/882-d3c55094fea2720e.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/882-d3c55094fea2720e.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/691-c1d1259d0cd878c4.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/882-d3c55094fea2720e.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/691-c1d1259d0cd878c4.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/127-c0595538ff270550.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/691-c1d1259d0cd878c4.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/127-c0595538ff270550.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cc86b851884ff90",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t><script id=\"bump-script\" src=\"https://emp.bbci.co.uk/emp/bump-4/bump-4.js\" async=\"\" type=\"text/javascript\" defer=\"\" data-nscript=\"beforeInteractive\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/webpack-555f46b3dd5b635b.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"><",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/127-c0595538ff270550.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cc86b851884ff907.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_buildManifest.js\" defer=\"",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "t src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/webpack-555f46b3dd5b635b.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></scri",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "tic.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cc86b851884ff907.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_ssgManifest.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_ssgManifest.js\" defer=\"\"></script><style>@font-face{font-family:'BBC Reith Sans';font-display:block;font-weight:300;src:url(https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Lt.wo",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/framework-331fb39aeba27237.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/_app-e022486bbea2af4f.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "ript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/main-9c5e7441d22ac4fa.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/_app-e022486bbea2af4f.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "rc=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/_app-e022486bbea2af4f.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/882-d3c55094fea2720e.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/905-0080178b74282117.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/882-d3c55094fea2720e.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/691-c1d1259d0cd878c4.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/882-d3c55094fea2720e.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/691-c1d1259d0cd878c4.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/127-c0595538ff270550.js\" defer=\"\"></scrip",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/691-c1d1259d0cd878c4.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/127-c0595538ff270550.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cc86b851884ff90",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "cript src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/127-c0595538ff270550.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cc86b851884ff907.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_buildManifest.js\" defer=\"",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "tic.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/chunks/pages/%5B%5B...slug%5D%5D-cc86b851884ff907.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_ssgManifest.js\" defer=\"\">",
+          "confidence": "Medium",
+          "risk": "Low"
+        },
+        {
+          "header": "Cross-Domain JavaScript Source File Inclusion",
+          "proof": "=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_buildManifest.js\" defer=\"\"></script><script src=\"https://static.files.bbci.co.uk/bbcdotcom/web/20260113-125315-2e65791d43-web-2.37.1-4/_next/static/E3BI29uXMdbK7Aqbr_r7U/_ssgManifest.js\" defer=\"\"></script><style>@font-face{font-family:'BBC Reith Sans';font-display:block;font-weight:300;src:url(https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Lt.wo",
+          "confidence": "Medium",
+          "risk": "Low"
+        }
+      ],
+      "General": [
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "proof": " more.\"},\"hreflang\":{\"en-gb\":\"https://www.bbc.co.uk\"}}}},\"type\":\"indexPage\",\"subtype\":null,\"slug\":\"home\",\"analytics\":[]},\"__N_SSP\":true},\"page\":\"/[[...slug]]\",\"query\":{},\"buildId\":\"l9byZ9pm2MLF_NDjdUhgl\",\"assetPrefix\":\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1\",\"isFallback\":false,",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "proof": " more.\"},\"hreflang\":{\"en-gb\":\"https://www.bbc.co.uk\"}}}},\"type\":\"indexPage\",\"subtype\":null,\"slug\":\"home\",\"analytics\":[]},\"__N_SSP\":true},\"page\":\"/[[...slug]]\",\"query\":{},\"buildId\":\"l9byZ9pm2MLF_NDjdUhgl\",\"assetPrefix\":\"https://static.files.bbci.co.uk/bbcdotcom/web/20251210-151139-37baf2dfdd-web-2.36.1-1\",\"isFallback\":false,",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Retrieved from Cache",
+          "proof": "<!DOCTYPE html><html lang=\"en-GB\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio</title><meta name=\"page.section\" content=\"Home\"/><meta property=\"og:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio\"/><meta name=\"twitter:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp;",
+          "confidence": "Medium",
+          "risk": "Informational"
+        },
+        {
+          "header": "Retrieved from Cache",
+          "proof": "<!DOCTYPE html><html lang=\"en-GB\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio</title><meta name=\"page.section\" content=\"Home\"/><meta property=\"og:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio\"/><meta name=\"twitter:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp;",
+          "confidence": "Medium",
+          "risk": "Informational"
+        },
+        {
+          "header": "ZAP is Out of Date",
+          "proof": "<!DOCTYPE html><html lang=\"en-GB\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio</title><meta name=\"page.section\" content=\"Home\"/><meta property=\"og:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp; Audio\"/><meta name=\"twitter:title\" content=\"BBC Home - Breaking News, World News, US News, Sports, Business, Innovation, Climate, Culture, Travel, Video &amp;",
+          "confidence": "High",
+          "risk": "Low"
+        },
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "proof": "d-headline\" class=\"sc-fa814188-3 iCfgww\">The healthy protein many find revolting</h2></div></div><p data-testid=\"card-description\" class=\"sc-9003107f-4 eDciQB\">Bugs are a nutritious and sustainable source of protein. Why are we so squeamish about eating them?</p></div></div></a></div></div><div data-testid=\"edinburgh-card\"",
+          "confidence": "Low",
+          "risk": "Informational"
+        },
+        {
+          "header": "Information Disclosure - Suspicious Comments",
+          "proof": "d-headline\" class=\"sc-fa814188-3 iCfgww\">The healthy protein many find revolting</h2></div></div><p data-testid=\"card-description\" class=\"sc-9003107f-4 eDciQB\">Bugs are a nutritious and sustainable source of protein. Why are we so squeamish about eating them?</p></div></div></a></div></div><div data-testid=\"edinburgh-card\"",
+          "confidence": "Low",
+          "risk": "Informational"
+        }
+      ],
+      "Informational": [
+        {
+          "header": "Modern Web Application",
+          "proof": ".7L16 27.8 31.1 11V4.3L14.3 22.6h3.4z\"></path></svg></div></button></div></div><div data-testid=\"navigationPanel-navItem-level0-/\" class=\"sc-fc671f27-5 bioPvL\"><a target=\"_self\" href=\"https://www.bbc.com/weather\" class=\"sc-8a623a54-0 huZCWi\"><button data-testid=\"level0NavButton-https://www.bbc.com/weather\" class=\"sc-fc671f27-2 hrednP\"><span data-testid=\"level0NavText-https://www.bbc.com/weather\">Weather</span></button></a></div><div data-testid=\"navigationPanel-navItem-level0-/\" class=\"sc-fc671f27-5 bioPvL\"><a target=\"_self\" href=\"https://www.bbc.com/newsletters\" class=\"sc-8a623a",
+          "confidence": "Medium",
+          "risk": "Informational"
+        },
+        {
+          "header": "Modern Web Application",
+          "proof": ".7L16 27.8 31.1 11V4.3L14.3 22.6h3.4z\"></path></svg></div></button></div></div><div data-testid=\"navigationPanel-navItem-level0-/\" class=\"sc-fc671f27-5 bioPvL\"><a target=\"_self\" href=\"https://www.bbc.com/weather\" class=\"sc-8a623a54-0 huZCWi\"><button data-testid=\"level0NavButton-https://www.bbc.com/weather\" class=\"sc-fc671f27-2 hrednP\"><span data-testid=\"level0NavText-https://www.bbc.com/weather\">Weather</span></button></a></div><div data-testid=\"navigationPanel-navItem-level0-/\" class=\"sc-fc671f27-5 bioPvL\"><a target=\"_self\" href=\"https://www.bbc.com/newsletters\" class=\"sc-8a623a",
+          "confidence": "Medium",
+          "risk": "Informational"
+        }
+      ]
+    },
+    "grade": "D",
+    "grade_counts": {
+      "high": 0,
+      "medium": 8,
+      "low": 57,
+      "informational": 11
+    }
+  }
+}

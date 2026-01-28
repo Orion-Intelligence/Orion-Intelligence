@@ -1,9 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { ApiService } from '../../../shared/services/api.service';
-import { EMPTY, timer, interval, Subject } from 'rxjs';
-import { expand, switchMap, takeWhile, finalize, takeUntil, tap } from 'rxjs/operators';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {ApiService} from '../../../shared/services/api.service';
+import {EMPTY, timer, interval, Subject} from 'rxjs';
+import {expand, switchMap, takeWhile, finalize, takeUntil, tap} from 'rxjs/operators';
 
 interface SubdomainResponse {
   result?: {
@@ -29,6 +29,7 @@ export class SubdomainsComponent {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
   @Output() search = new EventEmitter<string[]>();
+  toast = ""
 
   domain = '';
   loading = false;
@@ -43,7 +44,8 @@ export class SubdomainsComponent {
   private destroy$ = new Subject<void>();
   private progressTimer$ = new Subject<void>();
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) {
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -223,4 +225,17 @@ export class SubdomainsComponent {
         }
       });
   }
+
+  copyOne(value: string): void {
+    navigator.clipboard.writeText(value).then();
+    this.toast = 'Copied';
+    setTimeout(() => (this.toast = ''), 900);
+  }
+
+  copyAll(): void {
+    navigator.clipboard.writeText(this.subdomains.join(', ')).then();
+    this.toast = 'All copied';
+    setTimeout(() => (this.toast = ''), 900);
+  }
+
 }
