@@ -1,23 +1,22 @@
-import {Suggestion} from "../shared/common-result";
-import {initCallbackModel} from '../callback.init';
-import {ExploitResultItem} from '../exploit/exploit.callback.model';
+import { Suggestion } from "../shared/common-result";
+import { initCallbackModel } from '../callback.init';
 
 export class DefacementResultItem {
-  q = ""
-  m_attacker: string[] = [];
-  m_team = "";
-  m_web_server: string[] = [];
-  m_ioc_type: string[] = [];
-  ioc: string[] = [];
-  m_base_url = "";
-  m_ip: string[] = [];
-  m_location = ""
-  m_content = ""
+  q!: string;
+  m_attacker!: string[];
+  m_team!: string;
+  m_web_server!: string[];
+  m_ioc_type!: string[];
+  ioc!: string[];
+  m_base_url!: string;
+  m_ip!: string[];
+  m_location!: string;
+  m_content!: string;
   m_leak_date?: string;
-  m_source_url: string[] = [];
-  m_hash = "";
+  m_source_url!: string[];
+  m_hash!: string;
   m_screenshot?: string;
-  m_url = "";
+  m_url!: string;
 
   constructor(init?: Partial<DefacementResultItem>) {
     Object.assign(this, init);
@@ -25,9 +24,9 @@ export class DefacementResultItem {
 }
 
 export class DefacementCallbackModel {
-  Result: DefacementResultItem[] = [];
-  Page_Count = 0;
-  Suggestions: Suggestion[] = [];
+  Result!: DefacementResultItem[];
+  Page_Count!: number;
+  Suggestions!: Suggestion[];
 
   constructor(init?: Partial<DefacementCallbackModel>) {
     if (init) {

@@ -1,15 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NgClass, NgForOf, NgIf, NgOptimizedImage } from '@angular/common';
-import { DefacementModel, GenericModel, InsightCallbackModel, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
-import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
-import { ScrollService } from '../../../shared/services/scroll.service';
-import { CustomizeBarChartComponent } from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
-import { GraphModel } from '../../../shared/model/charts/charts.model';
-import { GraphInsightCallbackModel } from '../../../shared/model/homepage/graph.insight.model';
-import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
-import { AppService } from '../../../services/core/app/app.service';
-import { LicenseService } from '../../../services/licenses/licenses.service';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NgClass, NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
+import {
+  DefacementModel,
+  GenericModel,
+  InsightCallbackModel,
+  LeakModel
+} from '../../../shared/model/homepage/stats_insight.model';
+import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
+import {ScrollService} from '../../../shared/services/scroll.service';
+import {CustomizeBarChartComponent} from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
+import {GraphModel} from '../../../shared/model/charts/charts.model';
+import {GraphInsightCallbackModel} from '../../../shared/model/homepage/graph.insight.model';
+import {LatestDocument, LatestDocumentCallbackModel} from '../../../shared/model/homepage/document_insight.model';
+import {AppService} from '../../../services/core/app/app.service';
+import {LicenseService} from '../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-home-insight',
@@ -33,6 +38,7 @@ export class HomeInsightComponent implements OnInit {
     this.insights = data.insights;
     this.latestDocuments = data.latestDocument;
     this.graphInsight = data.graph_insight;
+
     this.latestDocumentModelKeys = (
       Object.keys(this.latestDocuments) as (keyof LatestDocumentCallbackModel)[]
     ).filter(
@@ -41,8 +47,17 @@ export class HomeInsightComponent implements OnInit {
         this.latestDocuments[key] &&
         this.latestDocuments[key].length > 0
     );
-    this.GraphData = this.transformToGraphDataList(data.graph_insight);
+
+    const graphs = this.transformToGraphDataList(data.graph_insight);
+    this.GraphData = graphs.length
+      ? graphs
+      : Array.from({length: 4}, () => ({
+        type: 'bar',
+        title: '',
+        data: []
+      }));
   }
+
 
   transformToGraphDataList(insight: [true, any[]] | [false, null]): GraphModel[] {
     if (!Array.isArray(insight) || !insight[0] || !Array.isArray(insight[1])) {
@@ -100,6 +115,7 @@ export class HomeInsightComponent implements OnInit {
     const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
     return cleanUrl.length > maxLength ? cleanUrl.slice(0, maxLength) + '...' : cleanUrl;
   }
+
   protected readonly String = String;
 
 }

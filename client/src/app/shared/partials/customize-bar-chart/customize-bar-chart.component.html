@@ -1,7 +1,12 @@
 <div class="bar-chart_container">
   <div class="bar-chart_statistics-text">
-    <span>Statistics</span> <img src="/assets/images/shared/theme/info.svg" alt="info" class="bar-chart_info-icon"
-      [appTooltip]="dashboardTooltips[graphModel.title!]" />
+    <span>Statistics</span>
+    <img
+      src="/assets/images/shared/theme/info.svg"
+      alt="info"
+      class="bar-chart_info-icon"
+      [appTooltip]="dashboardTooltips[graphModel?.title!]"
+    />
   </div>
 
   <div *ngIf="graphModel?.title" class="bar-chart_chart-title">
@@ -25,11 +30,20 @@
       </div>
 
       <div class="bar-chart_bars">
-        <div class="bar-chart_bar-wrapper" *ngFor="let item of graphModel.data">
+        <div class="bar-chart_bar-wrapper" *ngFor="let item of displayData">
           <div class="bar-chart_bar-container">
-            <div class="bar-chart_bar" [style.height.%]="(item.value / roundedMaxValue) * 100"
-              [appTooltip]="item.name + ': ' + item.value.toLocaleString()" tooltipPosition="top"></div>
+            <div class="bar-chart_bar-value">
+              {{ item.value.toLocaleString() }}
+            </div>
+
+            <div
+              class="bar-chart_bar"
+              [style.height.%]="(item.value / roundedMaxValue) * 100"
+              [appTooltip]="item.name + ': ' + item.value.toLocaleString()"
+              tooltipPosition="top"
+            ></div>
           </div>
+
           <div class="bar-chart_bar-label">
             {{ item.name.length > 10 ? (item.name | slice: 0:10) + '…' : item.name }}
           </div>

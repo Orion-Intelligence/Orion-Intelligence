@@ -7,14 +7,13 @@ import { filterAnimation } from '../../animations/filter.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePickerComponent } from './date-picker/date-picker.component';
-import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
-  imports: [FormsModule, CommonModule, NgOptimizedImage, TooltipDirective, NgbModule, DatePickerComponent, MultipleSelectionComponent],
+  imports: [FormsModule, CommonModule, NgOptimizedImage, TooltipDirective, NgbModule, DatePickerComponent],
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {
