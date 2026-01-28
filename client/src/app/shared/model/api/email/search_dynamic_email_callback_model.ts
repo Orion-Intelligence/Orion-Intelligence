@@ -35,7 +35,7 @@ export class CardData {
 }
 
 export class SearchDynamicEmailCallbackModel {
-  cards_data!: CardData[];
+  cards_data: CardData[] = [];
   base_url?: string;
   m_network?: string;
 
