@@ -7,6 +7,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
   };
 
   it('Tenant signs up', () => {
+    cy.clearAllEmails()
     cy.visit('/login');
 
     cy.contains('Sign Up').click();
