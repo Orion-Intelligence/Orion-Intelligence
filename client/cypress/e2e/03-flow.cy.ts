@@ -59,6 +59,7 @@ describe('Orion Intelligence – Full Stable Flow', () => {
     cy.contains('.sidebar__item-dropdown', 'Data Breach')
       .click({ force: true });
 
+    cy.get('img.scroller[alt="scroll to top"]').click();
     ['All', 'Databases', 'Tracking'].forEach((s) => {
       cy.contains('.sidebar__subitem-content', s)
         .click({ force: true });

@@ -105,22 +105,36 @@ describe('Login & Sidebar Checks for Users', () => {
 
     sidebarItems.forEach(item => {
       if (username === 'testing5' && item.name === 'Stealer logs') {
-        cy.get(item.selector).contains(item.name).should('exist').click({force: true});
+        cy.get(item.selector).contains(item.name).should('exist').click({ force: true });
 
         cy.get('body').then($b => {
           if ($b.find('.pro-subscription_container').length) {
             cy.get('.pro-subscription_container').should('be.visible');
-            cy.get('button.pro-subscription_btn-close')
-              .should('be.visible')
-              .click({force: true});
+            cy.get('.pro-subscription_subscription-options input[type="radio"][value="annual"]').check({ force: true });
+            cy.get('input#name').clear().type('Test User');
+            cy.get('input#phone').clear().type('03001234567');
+            cy.get('input#email').clear().type('test.user@example.com');
+            cy.get('form.pro-subscription_payment-form').submit();
+
+            cy.contains('button', 'Homepage').should('be.visible').click({ force: true });
+
+            cy.get(item.selector).contains(item.name).should('exist').click({ force: true });
+
+            cy.get('body').then($b2 => {
+              if ($b2.find('.pro-subscription_container').length) {
+                cy.get('.pro-subscription_container').should('be.visible');
+                cy.get('button.pro-subscription_btn-close').should('be.visible').click({ force: true });
+              }
+            });
           }
         });
 
         return;
       }
 
-      cy.get(item.selector).contains(item.name).should('exist').click({force: true});
+      cy.get(item.selector).contains(item.name).should('exist').click({ force: true });
     });
+
 
     cy.get('div.profile_category.profile_logout_icon').should('exist').click({force: true});
     cy.get('li.profile-item').contains('Sign out').should('exist').click({force: true});
