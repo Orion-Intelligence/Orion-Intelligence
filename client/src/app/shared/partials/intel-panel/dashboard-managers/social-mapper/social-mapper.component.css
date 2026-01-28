@@ -161,6 +161,14 @@
   color: var(--color-gray-900);
 }
 
+.social-mapper__loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
+  width: 100%;
+}
+
 .social-mapper__loading-spinner {
   width: 40px;
   height: 40px;
@@ -169,6 +177,60 @@
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
+}
+
+.social-mapper__loading-text {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--color-text1);
+}
+
+.social-mapper__progress-container {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.social-mapper__progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-blue-680);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.social-mapper__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-blue-640), var(--color-blue-500));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.social-mapper__progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.social-mapper__progress-percentage {
+  color: var(--color-blue-640);
+  font-weight: 600;
+}
+
+.social-mapper__progress-step {
+  color: var(--color-gray-900);
+  font-style: italic;
 }
 
 @keyframes spin {

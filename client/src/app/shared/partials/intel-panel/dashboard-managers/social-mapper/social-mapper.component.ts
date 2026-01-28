@@ -12,6 +12,8 @@ import { ApiService } from '../../../../services/api.service';
 interface SocialTarget {
   usernames: string[];
   platform: string;
+  max_followers: number;
+  max_following: number;
 }
 
 interface ScrapeRequest {
@@ -125,12 +127,6 @@ export class SocialMapperComponent implements OnInit {
   platforms = [
     { value: 'instagram', label: 'Instagram', icon: 'bi-instagram' },
     { value: 'facebook', label: 'Facebook', icon: 'bi-facebook' },
-    { value: 'twitter', label: 'Twitter/X', icon: 'bi-twitter-x' },
-    { value: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin' },
-    { value: 'tiktok', label: 'TikTok', icon: 'bi-tiktok' },
-    { value: 'youtube', label: 'YouTube', icon: 'bi-youtube' },
-    { value: 'reddit', label: 'Reddit', icon: 'bi-reddit' },
-    { value: 'telegram', label: 'Telegram', icon: 'bi-telegram' },
     { value: 'behance', label: 'Behance', icon: 'bi-behance' }
   ];
 
@@ -171,7 +167,7 @@ export class SocialMapperComponent implements OnInit {
     protected appService: AppService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const queryParams = this.route.snapshot.queryParams;
@@ -344,24 +340,25 @@ export class SocialMapperComponent implements OnInit {
     this.rawResults = null;
     this.progress.set(0);
     this.currentStep = '';
+    this.activeTab = 'network';
 
     const request = this.buildRequest();
 
     this.apiService.post<SocialMapperResponse>('social/scrape', request)
       .pipe(
         expand(res => (
-            res?.status === 'pending' ||
-            res?.result?.status === 'busy' ||
-            res?.result?.status === 'pending'
-          ) ? timer(5000).pipe(
-              switchMap(() => this.apiService.post<SocialMapperResponse>('social/scrape', request))
-            )
-            : EMPTY
+          res?.status === 'pending' ||
+          res?.result?.status === 'busy' ||
+          res?.result?.status === 'pending'
+        ) ? timer(5000).pipe(
+          switchMap(() => this.apiService.post<SocialMapperResponse>('social/scrape', request))
+        )
+          : EMPTY
         ),
         takeWhile(res =>
-            res?.status === 'pending' ||
-            res?.result?.status === 'busy' ||
-            res?.result?.status === 'pending',
+          res?.status === 'pending' ||
+          res?.result?.status === 'busy' ||
+          res?.result?.status === 'pending',
           true
         ),
         finalize(() => {
@@ -371,8 +368,8 @@ export class SocialMapperComponent implements OnInit {
       .subscribe({
         next: (res: SocialMapperResponse) => {
           if (res?.result?.status === 'busy' ||
-              res?.result?.status === 'pending' ||
-              res?.status === 'pending') {
+            res?.result?.status === 'pending' ||
+            res?.status === 'pending') {
             const p = res?.result?.progress ?? res?.progress;
             if (typeof p === 'number' && !Number.isNaN(p)) {
               this.progress.set(p);
@@ -396,48 +393,68 @@ export class SocialMapperComponent implements OnInit {
           this.rawResults = res.result!;
           this.analysisData = res.result!.analysis || null;
           this.hasResults = true;
+          this.isLoading = false;
 
-          this.renderNetworkGraph();
+          if (this.activeTab === 'network') {
+            setTimeout(() => {
+              this.renderNetworkGraph();
+            }, 500);
+          }
         },
         error: (err) => {
           this.isFetched = true;
           this.hasError = true;
           this.errorMessage = (err && (err.error?.detail || err.message)) ||
-                             'Failed to fetch social intelligence.';
+            'Failed to fetch social intelligence.';
         }
       });
   }
 
   private buildRequest(): ScrapeRequest {
+    const maxF = Number(this.maxFollowers);
+    const maxFl = Number(this.maxFollowing);
+
     if (this.queryMode === 'single') {
       return {
         usernames: [this.username.trim()],
         platform: this.selectedPlatform,
-        max_followers: this.maxFollowers,
-        max_following: this.maxFollowing
+        max_followers: maxF,
+        max_following: maxFl
       };
     } else {
       const platformGroups: Record<string, string[]> = {};
-
-      this.multiTargets.forEach(target => {
-        if (target.username.trim() && target.platform) {
-          if (!platformGroups[target.platform]) {
-            platformGroups[target.platform] = [];
+      this.multiTargets.forEach(t => {
+        if (t.username.trim() && t.platform) {
+          if (!platformGroups[t.platform]) {
+            platformGroups[t.platform] = [];
           }
-          platformGroups[target.platform].push(target.username.trim());
+          platformGroups[t.platform].push(t.username.trim());
         }
       });
 
-      const targets: SocialTarget[] = Object.entries(platformGroups).map(([platform, usernames]) => ({
-        usernames,
-        platform
-      }));
+      const platforms = Object.keys(platformGroups);
+      if (platforms.length === 0) return { usernames: [], platform: '' };
 
-      return {
-        targets,
-        max_followers: this.maxFollowers,
-        max_following: this.maxFollowing
+      const rootPlatform = platforms[0];
+      const otherPlatforms = platforms.slice(1);
+
+      const req: ScrapeRequest = {
+        usernames: platformGroups[rootPlatform],
+        platform: rootPlatform,
+        max_followers: maxF,
+        max_following: maxFl
       };
+
+      if (otherPlatforms.length > 0) {
+        req.targets = otherPlatforms.map(platform => ({
+          usernames: platformGroups[platform],
+          platform,
+          max_followers: maxF,
+          max_following: maxFl
+        }));
+      }
+
+      return req;
     }
   }
 
@@ -452,14 +469,13 @@ export class SocialMapperComponent implements OnInit {
   private renderNetworkGraph(): void {
     if (!this.analysisData) return;
 
-    if (!this.network) {
-      setTimeout(() => {
-        this.initializeNetwork();
-        this.doRenderNetwork();
-      }, 100);
-    } else {
-      this.doRenderNetwork();
+    if (this.network) {
+      this.network.destroy();
+      this.network = null as any;
     }
+
+    this.initializeNetwork();
+    this.doRenderNetwork();
   }
 
   private doRenderNetwork(): void {
@@ -519,7 +535,7 @@ export class SocialMapperComponent implements OnInit {
         });
       });
 
-      card.followers?.slice(0, 15).forEach((follower, i) => {
+      card.followers?.forEach((follower, i) => {
         const followerId = `follower_${card.platform}_${follower}`;
         if (!addedNodes.has(followerId)) {
           nodes.push({
@@ -543,7 +559,7 @@ export class SocialMapperComponent implements OnInit {
         });
       });
 
-      card.following?.slice(0, 15).forEach((following, i) => {
+      card.following?.forEach((following, i) => {
         const followingId = `following_${card.platform}_${following}`;
         if (!addedNodes.has(followingId)) {
           nodes.push({
@@ -595,6 +611,43 @@ export class SocialMapperComponent implements OnInit {
             node.title = `Bridge User (Multi-platform)\n${node.title}`;
           });
         });
+      });
+    }
+
+    if (this.analysisData.summary.cards.length > 1) {
+      const usernameOccurrences = new Map<string, { count: number; platforms: Set<string> }>();
+
+      this.analysisData.summary.cards.forEach(card => {
+        const allUsernames = [
+          ...(card.followers || []),
+          ...(card.following || []),
+          ...(card.mutual_usernames || [])
+        ];
+
+        allUsernames.forEach(username => {
+          const lowerUsername = username.toLowerCase();
+          if (!usernameOccurrences.has(lowerUsername)) {
+            usernameOccurrences.set(lowerUsername, { count: 0, platforms: new Set() });
+          }
+          const entry = usernameOccurrences.get(lowerUsername)!;
+          entry.count++;
+          entry.platforms.add(card.platform);
+        });
+      });
+
+      usernameOccurrences.forEach((data, username) => {
+        if (data.count > 1 || data.platforms.size > 1) {
+          const matchingNodes = nodes.filter(n =>
+            n.label?.toLowerCase().replace('@', '').trim() === username
+          );
+          matchingNodes.forEach(node => {
+            if (node.nodeType !== 'target' && node.color !== this.nodeColors['influencer'] && node.color !== this.nodeColors['bridge']) {
+              node.color = { background: '#E91E63', border: '#C2185B' };
+              node.size = 20;
+              node.title = `Cross-Profile Connection\nAppears in ${data.count} connections\n${node.title}`;
+            }
+          });
+        }
       });
     }
 
