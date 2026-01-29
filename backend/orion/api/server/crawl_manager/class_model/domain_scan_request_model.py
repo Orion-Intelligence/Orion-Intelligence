@@ -1,9 +1,11 @@
 from pydantic import BaseModel, ConfigDict
-
+from typing import Optional
 
 class DomainScanRequest(BaseModel):
     domain: str
     scanType: str
+    checkLive: Optional[bool] = False
+
 
     model_config = ConfigDict(
-        json_schema_extra={"example": {"domain": "www.bbc.com", "scanType": "basic"}})
+        json_schema_extra={"example": {"domain": "www.bbc.com", "scanType": "basic","checkLive": False}})

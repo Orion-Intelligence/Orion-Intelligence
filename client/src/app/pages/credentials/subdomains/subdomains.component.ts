@@ -9,12 +9,16 @@ interface SubdomainResponse {
   result?: {
     status?: string;
     subdomains?: string[];
+    live_subdomains?: string[];
     count?: number;
+    live_count?: number;
     message?: string;
   };
   status?: string;
   subdomains?: string[];
+  live_subdomains?: string[];
   count?: number;
+  live_count?: number;
   message?: string;
 }
 
@@ -40,6 +44,7 @@ export class SubdomainsComponent {
   statusMessage = 'Initializing...';
   isValidDomain = true;
   submitted = false;
+  checkLive = false;
 
   private destroy$ = new Subject<void>();
   private progressTimer$ = new Subject<void>();
@@ -97,12 +102,18 @@ export class SubdomainsComponent {
     const status = res?.result?.status || res?.status;
 
     if (status === 'pending') {
-      this.statusMessage = 'Scanning for subdomains...';
+      this.statusMessage = this.checkLive ? 'Checking live subdomains...' : 'Scanning for subdomains...';
     } else if (status === 'busy') {
       this.statusMessage = 'Processing request...';
     } else if (status === 'success') {
       const count = res?.result?.count || res?.count || 0;
-      this.statusMessage = `Found ${count} subdomain${count !== 1 ? 's' : ''}`;
+      const liveCount = res?.result?.live_count || res?.live_count || 0;
+
+      if (this.checkLive) {
+        this.statusMessage = `Found ${liveCount} live subdomain${liveCount !== 1 ? 's' : ''}`;
+      } else {
+        this.statusMessage = `Found ${count} subdomain${count !== 1 ? 's' : ''}`;
+      }
     } else {
       this.statusMessage = 'Requesting...';
     }
@@ -158,7 +169,8 @@ export class SubdomainsComponent {
     this.api
       .post<SubdomainResponse>('urlscan/domain', {
         domain: resolved,
-        scanType: 'subdomains'
+        scanType: 'subdomains',
+        checkLive: this.checkLive
       })
       .pipe(
         tap((res) => this.updateStatusMessage(res)),
@@ -171,7 +183,8 @@ export class SubdomainsComponent {
                 this.api
                   .post<SubdomainResponse>('urlscan/domain', {
                     domain: resolved,
-                    scanType: 'subdomains'
+                    scanType: 'subdomains',
+                    checkLive: this.checkLive
                   })
                   .pipe(tap((newRes) => this.updateStatusMessage(newRes)))
               )
@@ -201,13 +214,19 @@ export class SubdomainsComponent {
           }
 
           if (status === 'success') {
-            const list = res?.result?.subdomains || res?.subdomains || [];
-            const count = res?.result?.count || res?.count || list.length;
+            if (this.checkLive) {
+              const liveList = res?.result?.live_subdomains || res?.live_subdomains || [];
+              this.subdomains = liveList;
+              this.count = liveList.length;
+              this.statusMessage = `Found ${this.count} live subdomain${this.count !== 1 ? 's' : ''}`;
+            } else {
+              const list = res?.result?.subdomains || res?.subdomains || [];
+              this.subdomains = list;
+              this.count = list.length;
+              this.statusMessage = `Found ${this.count} subdomain${this.count !== 1 ? 's' : ''}`;
+            }
 
-            this.subdomains = list;
-            this.count = count;
-            this.statusMessage = `Found ${count} subdomain${count !== 1 ? 's' : ''}`;
-            this.search.emit(list);
+            this.search.emit(this.subdomains);
             this.progress = 100;
           } else {
             this.error = res?.result?.message || res?.message || 'Failed to fetch subdomains';
