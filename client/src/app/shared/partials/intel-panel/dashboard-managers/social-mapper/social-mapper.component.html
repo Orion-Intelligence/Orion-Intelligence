@@ -33,7 +33,7 @@
         <ng-container *ngIf="queryMode === 'single'">
           <label class="sidebar_label mt-1">Username</label>
           <input [(ngModel)]="username" class="form-control sidebar_input mb-3" name="username"
-            placeholder="Enter username" type="text" pattern="[a-zA-Z0-9._-]*" />
+            placeholder="Enter username" type="text" />
 
           <label class="sidebar_label mt-1">Platform</label>
           <div class="dropdown mb-3">
@@ -53,332 +53,344 @@
                   {{ platform.label }}
                 </a>
                 <ng-container *ngIf="!last">
-              <li class="dropdown-divider m-0 mx-3"></li>
+                  <li class="dropdown-divider m-0 mx-3"></li>
+                </ng-container>
+              </li>
+            </ul>
+          </div>
         </ng-container>
-        </li>
-        </ul>
-      </div>
-      </ng-container>
 
-      <ng-container *ngIf="queryMode === 'multi'">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <label class="sidebar_label mt-1 mb-0">Targets</label>
-          <button class="btn btn-sm social-mapper__add-btn" type="button" (click)="addTarget()">
-            <i class="bi bi-plus"></i> Add
+        <ng-container *ngIf="queryMode === 'multi'">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="sidebar_label mt-1 mb-0">Targets</label>
+            <button class="btn btn-sm social-mapper__add-btn" type="button" (click)="addTarget()">
+              <i class="bi bi-plus"></i> Add
+            </button>
+          </div>
+
+          <div class="social-mapper__targets-list">
+            <div *ngFor="let target of multiTargets; let i = index" class="social-mapper__target-row mb-2">
+              <input [(ngModel)]="target.username" [name]="'username_' + i"
+                class="form-control sidebar_input social-mapper__target-input" placeholder="Username" type="text" />
+
+              <div class="dropdown social-mapper__target-dropdown">
+                <button
+                  class="btn dropdown-toggle sidebar_input d-flex justify-content-between align-items-center dropdown-select"
+                  data-bs-toggle="dropdown" type="button">
+                  <span *ngIf="target.platform">
+                    <i [class]="'bi ' + getPlatformIcon(target.platform)"></i>
+                  </span>
+                  <span *ngIf="!target.platform">
+                    <i class="bi bi-globe"></i>
+                  </span>
+                </button>
+                <ul class="dropdown-menu p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
+                  <li *ngFor="let platform of platforms; let last = last">
+                    <a (click)="target.platform = platform.value" class="dropdown-item py-2 d-flex align-items-center">
+                      <i [class]="'bi ' + platform.icon + ' me-2'"></i>
+                      {{ platform.label }}
+                    </a>
+                    <ng-container *ngIf="!last">
+                      <li class="dropdown-divider m-0 mx-3"></li>
+                    </ng-container>
+                  </li>
+                </ul>
+              </div>
+
+              <button class="btn social-mapper__remove-btn" type="button" (click)="removeTarget(i)"
+                [disabled]="multiTargets.length === 1">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </ng-container>
+
+        <label class="sidebar_label mt-3">Max Followers</label>
+        <input [(ngModel)]="maxFollowers" class="form-control sidebar_input mb-3" name="maxFollowers"
+          placeholder="Enter max followers" min="1" max="500" type="number" (keydown)="$event.stopPropagation()" />
+
+        <label class="sidebar_label mt-1">Max Following</label>
+        <input [(ngModel)]="maxFollowing" class="form-control sidebar_input mb-3" name="maxFollowing"
+          placeholder="Enter max following" min="1" max="500" type="number" (keydown)="$event.stopPropagation()" />
+
+        <div *ngIf="errorMessage" class="alert alert-danger py-2 px-3 mb-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {{ errorMessage }}
+        </div>
+
+        <div class="sidebar_submit">
+          <button (click)="showIntelligence()" class="btn btn-primary sidebar_submit-button" type="button"
+            [disabled]="isLoading">
+            <span *ngIf="!isLoading">Apply</span>
+            <span *ngIf="isLoading">
+              <i class="bi bi-arrow-repeat spin me-1"></i> Analyzing...
+            </span>
+          </button>
+          <button (click)="resetForm()" class="btn btn-secondary sidebar_submit-button" type="button"
+            [disabled]="isLoading">
+            Reset
           </button>
         </div>
+      </div>
+    </form>
 
-        <div class="social-mapper__targets-list">
-          <div *ngFor="let target of multiTargets; let i = index" class="social-mapper__target-row mb-2">
-            <input [(ngModel)]="target.username" [name]="'username_' + i"
-              class="form-control sidebar_input social-mapper__target-input" placeholder="Username" type="text"
-              pattern="[a-zA-Z0-9._-]*" />
-
-            <div class="dropdown social-mapper__target-dropdown">
-              <button
-                class="btn dropdown-toggle sidebar_input d-flex justify-content-between align-items-center dropdown-select"
-                data-bs-toggle="dropdown" type="button">
-                <span *ngIf="target.platform">
-                  <i [class]="'bi ' + getPlatformIcon(target.platform)"></i>
-                </span>
-                <span *ngIf="!target.platform">
-                  <i class="bi bi-globe"></i>
-                </span>
-              </button>
-              <ul class="dropdown-menu p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
-                <li *ngFor="let platform of platforms; let last = last">
-                  <a (click)="target.platform = platform.value" class="dropdown-item py-2 d-flex align-items-center">
-                    <i [class]="'bi ' + platform.icon + ' me-2'"></i>
-                    {{ platform.label }}
-                  </a>
-                  <ng-container *ngIf="!last">
-                <li class="dropdown-divider m-0 mx-3"></li>
-      </ng-container>
-      </li>
-      </ul>
-  </div>
-
-  <button class="btn social-mapper__remove-btn" type="button" (click)="removeTarget(i)"
-    [disabled]="multiTargets.length === 1">
-    <i class="bi bi-trash"></i>
-  </button>
-</div>
-</div>
-</ng-container>
-
-<label class="sidebar_label mt-3">Max Followers</label>
-<input [(ngModel)]="maxFollowers" class="form-control sidebar_input mb-3" name="maxFollowers"
-  placeholder="Enter max followers" min="1" max="500" type="number" (keydown)="$event.stopPropagation()" />
-
-<label class="sidebar_label mt-1">Max Following</label>
-<input [(ngModel)]="maxFollowing" class="form-control sidebar_input mb-3" name="maxFollowing"
-  placeholder="Enter max following" min="1" max="500" type="number" (keydown)="$event.stopPropagation()" />
-
-<div *ngIf="errorMessage" class="alert alert-danger py-2 px-3 mb-3">>
-  <i class="bi bi-exclamation-triangle me-2"></i>
-  {{ errorMessage }}
-</div>
-
-<div class="sidebar_submit">
-  <button (click)="showIntelligence()" class="btn btn-primary sidebar_submit-button" type="button"
-    [disabled]="isLoading">
-    <span *ngIf="!isLoading">Apply</span>
-    <span *ngIf="isLoading">
-      <i class="bi bi-arrow-repeat spin me-1"></i> Analyzing...
-    </span>
-  </button>
-  <button (click)="resetForm()" class="btn btn-secondary sidebar_submit-button" type="button" [disabled]="isLoading">
-    Reset
-  </button>
-</div>
-</div>
-</form>
-
-<div class="social-mapper__legend" *ngIf="hasResults">
-  <h6 class="social-mapper__legend-title">Node Types</h6>
-  <div class="social-mapper__legend-items">
-    <div class="social-mapper__legend-item">
-      <span class="social-mapper__legend-dot" style="background: #57A5EB;"></span>
-      <span>Target</span>
-    </div>
-    <div class="social-mapper__legend-item">
-      <span class="social-mapper__legend-dot" style="background: #AB47BC;"></span>
-      <span>Mutual</span>
-    </div>
-    <div class="social-mapper__legend-item">
-      <span class="social-mapper__legend-dot" style="background: #66BB6A;"></span>
-      <span>Follower</span>
-    </div>
-    <div class="social-mapper__legend-item">
-      <span class="social-mapper__legend-dot" style="background: #FFA726;"></span>
-      <span>Following</span>
-    </div>
-    <div class="social-mapper__legend-item">
-      <span class="social-mapper__legend-dot" style="background: #EF5350;"></span>
-      <span>Influencer</span>
-    </div>
-    <div class="social-mapper__legend-item">
-      <span class="social-mapper__legend-dot" style="background: #26C6DA;"></span>
-      <span>Bridge</span>
-    </div>
-    <div class="social-mapper__legend-item">
-      <span class="social-mapper__legend-dot" style="background: #E91E63;"></span>
-      <span>Cross-Profile</span>
-    </div>
-  </div>
-</div>
-</div>
-
-<div class="social-mapper__content">
-  <div *ngIf="isLoading" class="social-mapper__loading">
-    <div class="social-mapper__loading-content">
-      <div class="social-mapper__loading-spinner"></div>
-      <p class="social-mapper__loading-text">Fetching social intelligence data...</p>
-      <div *ngIf="progress() > 0" class="social-mapper__progress-container">
-        <div class="social-mapper__progress-bar">
-          <div class="social-mapper__progress-fill" [style.width.%]="progress()"></div>
+    <div class="social-mapper__legend" *ngIf="hasResults">
+      <h6 class="social-mapper__legend-title">Node Types</h6>
+      <div class="social-mapper__legend-items">
+        <div class="social-mapper__legend-item">
+          <span class="social-mapper__legend-dot" style="background: #57A5EB;"></span>
+          <span>Target</span>
         </div>
-        <div class="social-mapper__progress-info">
-          <span class="social-mapper__progress-percentage">{{ progress() }}%</span>
-          <span class="social-mapper__progress-step" *ngIf="currentStep">{{ currentStep }}</span>
+        <div class="social-mapper__legend-item">
+          <span class="social-mapper__legend-dot" style="background: #AB47BC;"></span>
+          <span>Mutual</span>
+        </div>
+        <div class="social-mapper__legend-item">
+          <span class="social-mapper__legend-dot" style="background: #66BB6A;"></span>
+          <span>Follower</span>
+        </div>
+        <div class="social-mapper__legend-item">
+          <span class="social-mapper__legend-dot" style="background: #FFA726;"></span>
+          <span>Following</span>
+        </div>
+        <div class="social-mapper__legend-item">
+          <span class="social-mapper__legend-dot" style="background: #EF5350;"></span>
+          <span>Influencer</span>
+        </div>
+        <div class="social-mapper__legend-item">
+          <span class="social-mapper__legend-dot" style="background: #26C6DA;"></span>
+          <span>Bridge</span>
+        </div>
+        <div class="social-mapper__legend-item">
+          <span class="social-mapper__legend-dot" style="background: #E91E63;"></span>
+          <span>Cross-Profile</span>
         </div>
       </div>
     </div>
   </div>
 
-  <div *ngIf="!isLoading && !hasResults" class="social-mapper__empty">
-    <img src="assets/images/shared/cti-empty.svg" alt="No data" class="social-mapper__empty-img" />
-    <h5>No Intelligence Data</h5>
-    <p>Enter a username and platform to start mapping social connections</p>
-  </div>
-
-  <div *ngIf="!isLoading && hasResults" class="social-mapper__results">
-    <div class="social-mapper__tabs">
-      <button class="social-mapper__tab" [class.active]="activeTab === 'network'" (click)="setActiveTab('network')">
-        <i class="bi bi-diagram-3"></i> Network Graph
-      </button>
-      <button class="social-mapper__tab" [class.active]="activeTab === 'summary'" (click)="setActiveTab('summary')">
-        <i class="bi bi-card-list"></i> Summary
-      </button>
-      <button class="social-mapper__tab" [class.active]="activeTab === 'influencers'"
-        (click)="setActiveTab('influencers')">
-        <i class="bi bi-star"></i> Influencers
-      </button>
-      <button class="social-mapper__tab" [class.active]="activeTab === 'identities'"
-        (click)="setActiveTab('identities')">
-        <i class="bi bi-people"></i> Identity Groups
-      </button>
-    </div>
-
-    <div *ngIf="activeTab === 'network'" class="social-mapper__tab-content">
-      <div #networkContainer class="social-mapper__network-container"></div>
-    </div>
-
-    <div *ngIf="activeTab === 'summary'" class="social-mapper__tab-content social-mapper__tab-content--scrollable">
-      <div class="social-mapper__cards-grid">
-        <div *ngFor="let card of analysisData?.summary?.cards" class="social-mapper__card">
-          <div class="social-mapper__card-header">
-            <div class="social-mapper__card-platform">
-              <i [class]="'bi ' + getPlatformIcon(card.platform)"></i>
-              {{ card.platform | titlecase }}
-            </div>
-            <span class="social-mapper__card-username">{{'@'}}{{ card.username }}</span>
+  <div class="social-mapper__content">
+    <div *ngIf="isLoading && loadingStatuses.length > 0" class="social-mapper__loading-bar">
+      <div class="social-mapper__loading-header">
+        <span class="social-mapper__loading-title">
+          <i class="bi bi-arrow-repeat spin me-2"></i>
+          Fetching Social Intelligence
+        </span>
+        <span class="social-mapper__loading-percentage">{{ progress() }}%</span>
+      </div>
+      <div class="social-mapper__loading-profiles">
+        <div *ngFor="let status of loadingStatuses" class="social-mapper__loading-profile">
+          <div class="social-mapper__loading-profile-info">
+            <i [class]="'bi ' + getPlatformIcon(status.platform) + ' me-2'"></i>
+            <span class="social-mapper__loading-profile-name">
+              {{ getPlatformLabel(status.platform) }} - &#64;{{ status.username }}
+            </span>
           </div>
+          <div class="social-mapper__loading-profile-bar">
+            <div class="social-mapper__loading-profile-fill" [style.width.%]="status.progress"></div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="currentStep" class="social-mapper__loading-step">
+        {{ currentStep }}
+      </div>
+    </div>
 
-          <div class="social-mapper__card-body">
-            <div class="social-mapper__card-name" *ngIf="card.real_name">
-              {{ card.real_name }}
-            </div>
-            <div class="social-mapper__card-bio" *ngIf="card.bio">
-              {{ card.bio }}
+    <div *ngIf="!isLoading && !hasResults" class="social-mapper__empty">
+      <img src="assets/images/shared/cti-empty.svg" alt="No data" class="social-mapper__empty-img" />
+      <h5>No Intelligence Data</h5>
+      <p>Enter a username and platform to start mapping social connections</p>
+    </div>
+
+    <div *ngIf="!isLoading && hasResults" class="social-mapper__results">
+      <div class="social-mapper__tabs">
+        <button class="social-mapper__tab" [class.active]="activeTab === 'network'" (click)="setActiveTab('network')">
+          <i class="bi bi-diagram-3"></i> Network Graph
+        </button>
+        <button class="social-mapper__tab" [class.active]="activeTab === 'summary'" (click)="setActiveTab('summary')">
+          <i class="bi bi-card-list"></i> Summary
+        </button>
+        <button class="social-mapper__tab" [class.active]="activeTab === 'influencers'"
+          (click)="setActiveTab('influencers')">
+          <i class="bi bi-star"></i> Influencers
+        </button>
+        <button class="social-mapper__tab" [class.active]="activeTab === 'identities'"
+          (click)="setActiveTab('identities')">
+          <i class="bi bi-people"></i> Identity Groups
+        </button>
+      </div>
+
+      <div *ngIf="activeTab === 'network'" class="social-mapper__tab-content">
+        <div #networkContainer class="social-mapper__network-container"></div>
+      </div>
+
+      <div *ngIf="activeTab === 'summary'" class="social-mapper__tab-content social-mapper__tab-content--scrollable">
+        <div class="social-mapper__cards-grid">
+          <div *ngFor="let card of analysisData?.summary?.cards" class="social-mapper__card">
+            <div class="social-mapper__card-header">
+              <div class="social-mapper__card-platform">
+                <i [class]="'bi ' + getPlatformIcon(card.platform)"></i>
+                {{ card.platform | titlecase }}
+              </div>
+              <span class="social-mapper__card-username">{{'@'}}{{ card.username }}</span>
             </div>
 
-            <div class="social-mapper__card-stats">
-              <div class="social-mapper__card-stat">
-                <span class="social-mapper__card-stat-value">{{ card.total_posts || '0' }}</span>
-                <span class="social-mapper__card-stat-label">Posts</span>
+            <div class="social-mapper__card-body">
+              <div class="social-mapper__card-name" *ngIf="card.real_name">
+                {{ card.real_name }}
               </div>
-              <div class="social-mapper__card-stat">
-                <span class="social-mapper__card-stat-value">{{ card.total_followers || '0' }}</span>
-                <span class="social-mapper__card-stat-label">Followers</span>
+              <div class="social-mapper__card-bio" *ngIf="card.bio">
+                {{ card.bio }}
               </div>
-              <div class="social-mapper__card-stat">
-                <span class="social-mapper__card-stat-value">{{ card.total_following || '0' }}</span>
-                <span class="social-mapper__card-stat-label">Following</span>
+
+              <div class="social-mapper__card-stats">
+                <div class="social-mapper__card-stat">
+                  <span class="social-mapper__card-stat-value">{{ card.total_posts || '0' }}</span>
+                  <span class="social-mapper__card-stat-label">Posts</span>
+                </div>
+                <div class="social-mapper__card-stat">
+                  <span class="social-mapper__card-stat-value">{{ card.total_followers || '0' }}</span>
+                  <span class="social-mapper__card-stat-label">Followers</span>
+                </div>
+                <div class="social-mapper__card-stat">
+                  <span class="social-mapper__card-stat-value">{{ card.total_following || '0' }}</span>
+                  <span class="social-mapper__card-stat-label">Following</span>
+                </div>
+                <div class="social-mapper__card-stat social-mapper__card-stat--highlight">
+                  <span class="social-mapper__card-stat-value">{{ card.mutual_count || '0' }}</span>
+                  <span class="social-mapper__card-stat-label">Mutuals</span>
+                </div>
               </div>
-              <div class="social-mapper__card-stat social-mapper__card-stat--highlight">
-                <span class="social-mapper__card-stat-value">{{ card.mutual_count || '0' }}</span>
-                <span class="social-mapper__card-stat-label">Mutuals</span>
+
+              <div *ngIf="card.mutual_usernames && card.mutual_usernames.length > 0"
+                class="social-mapper__card-mutuals">
+                <h6>Mutual Connections</h6>
+                <div class="social-mapper__tags">
+                  <span *ngFor="let mutual of card.mutual_usernames"
+                    class="social-mapper__tag social-mapper__tag--mutual">
+                    {{'@'}}{{ mutual }}
+                  </span>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div *ngIf="card.mutual_usernames && card.mutual_usernames.length > 0" class="social-mapper__card-mutuals">
-              <h6>Mutual Connections</h6>
-              <div class="social-mapper__tags">
-                <span *ngFor="let mutual of card.mutual_usernames"
-                  class="social-mapper__tag social-mapper__tag--mutual">
-                  {{'@'}}{{ mutual }}
+      <div *ngIf="activeTab === 'influencers'"
+        class="social-mapper__tab-content social-mapper__tab-content--scrollable">
+        <ng-container *ngIf="analysisData?.influence_analysis?.statistics as stats">
+          <div class="social-mapper__stats-banner">
+            <div class="social-mapper__stats-item">
+              <span class="social-mapper__stats-value">{{ stats.total_unique_users }}</span>
+              <span class="social-mapper__stats-label">Unique Users</span>
+            </div>
+            <div class="social-mapper__stats-item">
+              <span class="social-mapper__stats-value">{{ stats.multi_platform_users }}</span>
+              <span class="social-mapper__stats-label">Multi-Platform</span>
+            </div>
+            <div class="social-mapper__stats-item">
+              <span class="social-mapper__stats-value">{{ stats.multi_platform_percentage }}%</span>
+              <span class="social-mapper__stats-label">Cross-Platform Rate</span>
+            </div>
+          </div>
+        </ng-container>
+
+        <div class="social-mapper__influencers-list">
+          <div *ngFor="let influencer of analysisData?.influence_analysis?.top_influencers; let i = index"
+            class="social-mapper__influencer-card">
+            <div class="social-mapper__influencer-rank">
+              <span class="social-mapper__rank-badge">{{ i + 1 }}</span>
+            </div>
+            <div class="social-mapper__influencer-info">
+              <div class="social-mapper__influencer-header">
+                <span class="social-mapper__influencer-name">
+                  {{'@'}}{{ influencer.username_variations[0] }}
+                </span>
+                <span class="social-mapper__influencer-score">
+                  <i class="bi bi-star-fill"></i> {{ influencer.influence_score }}
                 </span>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="activeTab === 'influencers'" class="social-mapper__tab-content social-mapper__tab-content--scrollable">
-      <ng-container *ngIf="analysisData?.influence_analysis?.statistics as stats">
-        <div class="social-mapper__stats-banner">
-          <div class="social-mapper__stats-item">
-            <span class="social-mapper__stats-value">{{ stats.total_unique_users }}</span>
-            <span class="social-mapper__stats-label">Unique Users</span>
-          </div>
-          <div class="social-mapper__stats-item">
-            <span class="social-mapper__stats-value">{{ stats.multi_platform_users }}</span>
-            <span class="social-mapper__stats-label">Multi-Platform</span>
-          </div>
-          <div class="social-mapper__stats-item">
-            <span class="social-mapper__stats-value">{{ stats.multi_platform_percentage }}%</span>
-            <span class="social-mapper__stats-label">Cross-Platform Rate</span>
-          </div>
-        </div>
-      </ng-container>
-
-      <div class="social-mapper__influencers-list">
-        <div *ngFor="let influencer of analysisData?.influence_analysis?.top_influencers; let i = index"
-          class="social-mapper__influencer-card">
-          <div class="social-mapper__influencer-rank">
-            <span class="social-mapper__rank-badge">{{ i + 1 }}</span>
-          </div>
-          <div class="social-mapper__influencer-info">
-            <div class="social-mapper__influencer-header">
-              <span class="social-mapper__influencer-name">
-                {{'@'}}{{ influencer.username_variations[0] }}
-              </span>
-              <span class="social-mapper__influencer-score">
-                <i class="bi bi-star-fill"></i> {{ influencer.influence_score }}
-              </span>
-            </div>
-            <div class="social-mapper__influencer-meta">
-              <span *ngFor="let platform of influencer.platforms" class="social-mapper__platform-badge">
-                <i [class]="'bi ' + getPlatformIcon(platform)"></i>
-                {{ platform }}
-              </span>
-            </div>
-            <div class="social-mapper__influencer-connections">
-              <span *ngFor="let type of influencer.connection_types" class="social-mapper__connection-badge"
-                [ngClass]="getConnectionTypeClass(type)">
-                {{ type }}
-              </span>
-            </div>
-            <div class="social-mapper__influencer-counts">
-              <span><i class="bi bi-person-plus"></i> {{ influencer.follower_count }} followers</span>
-              <span><i class="bi bi-person-check"></i> {{ influencer.following_count }} following</span>
-              <span><i class="bi bi-people-fill"></i> {{ influencer.mutual_count }} mutual</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <ng-container *ngIf="analysisData?.influence_analysis?.bridge_users as bridgeUsers">
-        <div *ngIf="bridgeUsers.length > 0" class="social-mapper__bridge-section">
-          <h5 class="social-mapper__section-title">
-            <i class="bi bi-link-45deg"></i> Bridge Users (Multi-Platform Presence)
-          </h5>
-          <div class="social-mapper__bridge-list">
-            <div *ngFor="let bridge of bridgeUsers" class="social-mapper__bridge-card">
-              <span class="social-mapper__bridge-name">{{'@'}}{{ bridge.username_variations[0] }}</span>
-              <div class="social-mapper__bridge-platforms">
-                <span *ngFor="let platform of bridge.platforms" class="social-mapper__platform-badge">
+              <div class="social-mapper__influencer-meta">
+                <span *ngFor="let platform of influencer.platforms" class="social-mapper__platform-badge">
                   <i [class]="'bi ' + getPlatformIcon(platform)"></i>
+                  {{ platform }}
                 </span>
               </div>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-    </div>
-
-    <div *ngIf="activeTab === 'identities'" class="social-mapper__tab-content social-mapper__tab-content--scrollable">
-      <div *ngIf="!analysisData?.identity_groups || analysisData?.identity_groups?.total_groups === 0"
-        class="social-mapper__empty-state">
-        <i class="bi bi-people"></i>
-        <p>No identity groups detected. Try analyzing more users across multiple platforms.</p>
-      </div>
-
-      <ng-container *ngIf="analysisData?.identity_groups as identityGroups">
-        <div *ngIf="identityGroups.total_groups > 0" class="social-mapper__identity-groups">
-          <div class="social-mapper__groups-header">
-            <span>Found {{ identityGroups.total_groups }} identity group(s)</span>
-            <span class="social-mapper__threshold">Threshold: {{ identityGroups.threshold }}%</span>
-          </div>
-
-          <div *ngFor="let group of identityGroups.identity_groups" class="social-mapper__identity-group">
-            <div class="social-mapper__group-header">
-              <span class="social-mapper__group-id">Group #{{ group.group_id }}</span>
-              <span class="social-mapper__group-count">{{ group.members.length }} members</span>
-            </div>
-            <div class="social-mapper__group-members">
-              <div *ngFor="let member of group.members" class="social-mapper__group-member">
-                <i [class]="'bi ' + getPlatformIcon(member.platform)"></i>
-                <span class="social-mapper__member-username">{{'@'}}{{ member.username }}</span>
-                <span class="social-mapper__member-confidence">{{ member.confidence }}% match</span>
+              <div class="social-mapper__influencer-connections">
+                <span *ngFor="let type of influencer.connection_types" class="social-mapper__connection-badge"
+                  [ngClass]="getConnectionTypeClass(type)">
+                  {{ type }}
+                </span>
+              </div>
+              <div class="social-mapper__influencer-counts">
+                <span><i class="bi bi-person-plus"></i> {{ influencer.follower_count }} followers</span>
+                <span><i class="bi bi-person-check"></i> {{ influencer.following_count }} following</span>
+                <span><i class="bi bi-people-fill"></i> {{ influencer.mutual_count }} mutual</span>
               </div>
             </div>
           </div>
         </div>
-      </ng-container>
+
+        <ng-container *ngIf="analysisData?.influence_analysis?.bridge_users as bridgeUsers">
+          <div *ngIf="bridgeUsers.length > 0" class="social-mapper__bridge-section">
+            <h5 class="social-mapper__section-title">
+              <i class="bi bi-link-45deg"></i> Bridge Users (Multi-Platform Presence)
+            </h5>
+            <div class="social-mapper__bridge-list">
+              <div *ngFor="let bridge of bridgeUsers" class="social-mapper__bridge-card">
+                <span class="social-mapper__bridge-name">{{'@'}}{{ bridge.username_variations[0] }}</span>
+                <div class="social-mapper__bridge-platforms">
+                  <span *ngFor="let platform of bridge.platforms" class="social-mapper__platform-badge">
+                    <i [class]="'bi ' + getPlatformIcon(platform)"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div *ngIf="activeTab === 'identities'" class="social-mapper__tab-content social-mapper__tab-content--scrollable">
+        <div *ngIf="!analysisData?.identity_groups || analysisData?.identity_groups?.total_groups === 0"
+          class="social-mapper__empty-state">
+          <i class="bi bi-people"></i>
+          <p>No identity groups detected. Try analyzing more users across multiple platforms.</p>
+        </div>
+
+        <ng-container *ngIf="analysisData?.identity_groups as identityGroups">
+          <div *ngIf="identityGroups.total_groups > 0" class="social-mapper__identity-groups">
+            <div class="social-mapper__groups-header">
+              <span>Found {{ identityGroups.total_groups }} identity group(s)</span>
+              <span class="social-mapper__threshold">Threshold: {{ identityGroups.threshold }}%</span>
+            </div>
+
+            <div *ngFor="let group of identityGroups.identity_groups" class="social-mapper__identity-group">
+              <div class="social-mapper__group-header">
+                <span class="social-mapper__group-id">Group #{{ group.group_id }}</span>
+                <span class="social-mapper__group-count">{{ group.members.length }} members</span>
+              </div>
+              <div class="social-mapper__group-members">
+                <div *ngFor="let member of group.members" class="social-mapper__group-member">
+                  <i [class]="'bi ' + getPlatformIcon(member.platform)"></i>
+                  <span class="social-mapper__member-username">{{'@'}}{{ member.username }}</span>
+                  <span class="social-mapper__member-confidence">{{ member.confidence }}% match</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
     </div>
   </div>
-</div>
 
-<div *ngIf="contextMenuVisible" class="social-mapper__context-menu" [style.left.px]="contextMenuX + 280"
-  [style.top.px]="contextMenuY">
-  <button class="social-mapper__context-btn" (click)="copyUsername()">
-    <i class="bi bi-clipboard"></i> Copy Username
-  </button>
-  <button class="social-mapper__context-btn" (click)="searchUser()">
-    <i class="bi bi-search"></i> Search User
-  </button>
-</div>
+  <div *ngIf="contextMenuVisible" class="social-mapper__context-menu" [style.left.px]="contextMenuX + 280"
+    [style.top.px]="contextMenuY">
+    <button class="social-mapper__context-btn" (click)="copyUsername()">
+      <i class="bi bi-clipboard"></i> Copy Username
+    </button>
+    <button class="social-mapper__context-btn" (click)="searchUser()">
+      <i class="bi bi-search"></i> Search User
+    </button>
+  </div>
 </div>
