@@ -84,17 +84,18 @@
         [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
         [title]="'Live APIs'"></app-dashboard-sidebar-items>
     </ng-container>
-
-    <ng-container *ngIf="licenseService.canUseScanning()|| licenseService.canUseModule('stealer_logs')">
-      <div class="sidebar_heading">Data Collection</div>
-      <div class="sidebar__item_break_light_color"></div>
-    </ng-container>
-
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'"
         [title]="'Dump'"></app-dashboard-sidebar-items>
+    </ng-container>
+
+    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
+      <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.EXTRACTOR"
+        [icon]="'assets/images/sidebar/theme/scanner.svg'" [items]="extractorCatagories" [routePrefix]="'ioc-extractor'"
+        [title]="'IOC Extractor'"></app-dashboard-sidebar-items>
     </ng-container>
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
