@@ -17,6 +17,8 @@ from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_d
 from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
 
 
+
+
 class crawl_model:
     __instance = None
 
@@ -114,6 +116,21 @@ class crawl_model:
         except Exception:
             return JSONResponse(
                 status_code=500, content={"detail": "Something happened while calling urlscan/domain"})
+
+    @staticmethod
+    async def scrape_social(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/social/scrape", json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling social/scrape"})
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling social/scrape"})
 
     @staticmethod
     async def ioc_extract(model):

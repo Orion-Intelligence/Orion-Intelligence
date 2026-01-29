@@ -21,6 +21,7 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_par
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (search_social_param_model, )
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
+from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
@@ -30,7 +31,6 @@ from orion.services.stix_manager.stix_manager import stix_manager
 
 
 _DOCS_DIR = Path(__file__).resolve().parent / "docs" / "api_docs"
-
 
 def _read_md(rel_path: str) -> str:
     p = _DOCS_DIR / rel_path
@@ -567,6 +567,22 @@ async def search_dynamic_software(param: search_dynamic_crack_model = Body(...))
         Depends(license_required("scanning")), ], )
 async def parse_text(payload: DomainScanRequest):
     return await crawl_model.getInstance().scan_domain(payload)
+
+
+@api_routes.post(
+    "/api/social/scrape",
+    summary="Social media profile scraping and analysis",
+    description="Scrape social media profiles and analyze connections, followers, and influence patterns",
+    tags=["Live Dynamic Scan"],
+    operation_id="scrapeSocialProfiles",
+    response_description="Social intelligence analysis results",
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
+        Depends(license_required("scanning")), ], )
+async def scrape_social(payload: SocialScrapeRequest):
+    return await crawl_model.getInstance().scrape_social(payload)
 
 
 @api_routes.post(
