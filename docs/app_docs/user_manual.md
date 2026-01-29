@@ -414,31 +414,37 @@ company data, or proprietary tools that have been exposed.
 ## Data Breach
 The Data Breach section in the navigation bar includes six categories:
 
-<img width="1918" height="585" alt="data breach" src="https://github.com/user-attachments/assets/05a60160-0bd1-412e-98e5-b77b1cf19c4b" />
+<img width="1916" height="746" alt="databreach" src="https://github.com/user-attachments/assets/864f5b1c-7f61-433f-9824-0fe23fabff97" />
+
+ **Databases**
+
+This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
+
+<img width="1917" height="891" alt="database" src="https://github.com/user-attachments/assets/234263fe-87c8-44f9-b62b-14c31ac1632e" />
+
+ **Tracking**
+ 
+ ![tracking](https://github.com/user-attachments/assets/b7719919-c665-4068-b382-bd4f73b959cc)
 
 
-**Discussion** 
+## Discussion
 
 In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
 
 <img width="1917" height="630" alt="image" src="https://github.com/user-attachments/assets/aee08d43-1e09-4ec2-ab34-4fe201686255" />
-
-
-1. ### Databases
-
-This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
-
-2. ### Email
-This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
-
-3. ### Logs
-The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
 
 4. ### Warfare
 This section provides curated intelligence on cyber warfare activities, including attacks on critical infrastructure, state-sponsored campaigns, and geopolitical cyber threats. Orion continuously monitors sources for warfare-related incidents, offering organizations timely insights into high-level threats with global implications.
 
 5. ### Cloud
 The Cloud module focuses on identifying misconfigurations, leaked credentials, and potential vulnerabilities in cloud environments. Orion scans for exposed cloud assets, such as open buckets, API keys, or improperly secured services, helping teams secure their cloud infrastructure proactively.
+
+2. ### Tracking
+This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
+
+3. ### Logs
+The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
+
 
 ## Defacement
 
