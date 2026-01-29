@@ -14,6 +14,7 @@ import { SortType } from '../../../../constants/shared-enums';
 import { HelperService } from '../../../../services/helper.service';
 import { RankedCallbackModel } from '../../../../model/results/consolidated/ranked.callback.model';
 import { DashboardResultSocialComponent } from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import {SocialCallbackModel} from '../../../../model/results/social/social.callback.model';
 
 @Component({
   selector: 'app-dashboard-discussion',
@@ -72,13 +73,19 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
 
+        const route: string = this.router.url.split('?')[0];
+        if (String(route) != this.dashboardService.m_current_route) {
+          this.dashboardService.rankedResult = new RankedCallbackModel()
+          this.dashboardService.socialCallbackModel = new SocialCallbackModel();
+        }
+
         if (this.firstTrigger && this.discussionCallbackModel.result.length > 0) {
           this.isResponseLoading.set(false);
           this.query = this.dashboardService.consolidatedParamModel.q;
         } else if (!this.hasResultsInService()) {
           this.cdr.detectChanges();
           this.fetchSearchResults();
-        } else {
+        } else if(this.dashboardService.rankedResult.result.length==0 && this.dashboardService.socialCallbackModel.Result.length==0){
           this.fetchSearchResults();
         }
 
@@ -121,6 +128,7 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
       .subscribe(response => {
         if (response.success && response.data) {
           this.discussionCallbackModel = this.toRankedModel(response.data as ChatCallbackModel);
+          this.dashboardService.rankedResult = this.toRankedModel(response.data as ChatCallbackModel)
           this.dashboardService.chatCallbackModel = response.data as ChatCallbackModel;
         } else {
           this.discussionCallbackModel = new RankedCallbackModel();

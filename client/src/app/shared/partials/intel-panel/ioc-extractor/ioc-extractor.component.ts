@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';

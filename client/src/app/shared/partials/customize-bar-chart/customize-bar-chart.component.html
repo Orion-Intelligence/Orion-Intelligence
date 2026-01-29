@@ -5,7 +5,8 @@
       src="/assets/images/shared/theme/info.svg"
       alt="info"
       class="bar-chart_info-icon"
-      [appTooltip]="dashboardTooltips[graphModel?.title!]"
+      [appTooltip]="dashboardTooltips[graphModel.title ?? '']"
+
     />
   </div>
 

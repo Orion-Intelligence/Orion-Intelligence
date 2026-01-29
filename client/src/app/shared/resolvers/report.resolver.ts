@@ -33,7 +33,11 @@ export class ReportResolver implements Resolve<any> {
         break;
       case 'social':
         if (category_2 == "all"){
-          apiUrl = hash ? `search/social/${hash}` : `search/social`;
+          if(apiUrl.includes("chat")){
+            apiUrl = `search/chat/${hash}`;
+          }else {
+            apiUrl = hash ? `search/social/${hash}` : `search/social`;
+          }
         }
         else if (category_2 == "twitter" || category_2 == "reddit" || category_2 == "forum" || category_2 == "pastebin" || category_2 == "mastodon"){
           apiUrl = hash ? `search/social/${hash}` : `search/social`;

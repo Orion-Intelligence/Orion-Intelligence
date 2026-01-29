@@ -251,6 +251,11 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: ':category/social',
+            redirectTo: '/dashboard/discussion/:category',
+            pathMatch: 'full'
+          },
+          {
             path: 'all',
             component: DashboardDiscussionComponent,
             data: { type: 'all', animation: 'Discussion' },
@@ -442,6 +447,12 @@ export const routes: Routes = [
           },
           {
             path: ':category/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Social', animation: 'HashPage' }
+          },
+          {
+            path: ':category/all/:m_hash',
             component: ReportChatComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Social', animation: 'HashPage' }

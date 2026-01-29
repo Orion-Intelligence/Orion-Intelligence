@@ -67,7 +67,6 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.dashboardService.socialCallbackModel = {...this.dashboardService.socialCallbackModel} as SocialCallbackModel;
     this.result_count = this.dashboardService.socialCallbackModel.Result.length;
-
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
@@ -84,7 +83,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
         } else if (this.firstTrigger && this.currentResultCount > 0) {
           this.isLoading.set(false);
           this.query = this.dashboardService.consolidatedParamModel.q;
-        } else {
+        } else if(this.dashboardService.rankedResult.pageCount==0){
           this.cdr.detectChanges();
           this.fetchSearchResults();
         }

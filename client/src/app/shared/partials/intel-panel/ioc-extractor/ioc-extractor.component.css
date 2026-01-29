@@ -15,12 +15,12 @@
   max-width: 600px;
   width: 100%;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgb(0 0 0 / 10%);
 }
 
 .ioc-extractor-upload-card:hover {
   border-color: var(--color-blue-640);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px rgb(0 0 0 / 15%);
   transform: translateY(-2px);
 }
 
@@ -32,8 +32,9 @@
 
 @keyframes float {
   0%, 100% {
-    transform: translateY(0px);
+    transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -67,12 +68,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgb(102 126 234 / 40%);
 }
 
 .ioc-extractor-upload-btn-large:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgb(102 126 234 / 60%);
 }
 
 .ioc-extractor-upload-btn-large:active {
@@ -111,6 +112,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -130,13 +132,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgb(102 126 234 / 30%);
   margin-left: 20px;
 }
 
 .ioc-extractor-select-file-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 4px 12px rgb(102 126 234 / 50%);
 }
 
 .ioc-extractor-select-file-btn:active {
@@ -161,6 +163,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -327,7 +330,7 @@
 }
 
 .ioc-extractor-scan_alert-close:hover {
-  background: rgba(252, 165, 165, 0.1);
+  background: rgb(252 165 165 / 10%);
   color: #fecaca;
   transform: scale(1.1);
 }
@@ -464,6 +467,7 @@
   from {
     background-position: 0 0;
   }
+
   to {
     background-position: 40px 0;
   }
@@ -540,7 +544,7 @@
   display: inline-block;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .ioc-extractor-upload-center-container {
     min-height: 60vh;
     padding: 20px;

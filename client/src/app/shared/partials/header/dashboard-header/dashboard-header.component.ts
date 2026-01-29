@@ -54,6 +54,10 @@ export class DashboardHeaderComponent implements OnInit {
       this.router.navigate(['/dashboard/consolidated/all'], { queryParams }).then();
       return;
     }
+    if (this.router.url.includes('/social/chat/all')) {
+      this.router.navigate(['/dashboard/social/all'], { queryParams }).then();
+      return;
+    }
 
     if (this.breadcrumb.length > 2) {
       const secondLastPath = '/dashboard/' + this.breadcrumb.slice(0, -1).map(crumb => crumb.path).join('/');

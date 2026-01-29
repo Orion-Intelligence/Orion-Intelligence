@@ -128,4 +128,5 @@ export enum ProfileSubCategory {
 }
 
 export enum ExtractorSubCategory {
-  IOC_EXTRACTOR = 'IOC-Extractor',}
+  IOC_EXTRACTOR = 'IOC-Extractor',
+}
