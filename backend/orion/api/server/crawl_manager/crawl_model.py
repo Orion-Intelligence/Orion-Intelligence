@@ -118,6 +118,30 @@ class crawl_model:
                 status_code=500, content={"detail": "Something happened while calling urlscan/domain"})
 
     @staticmethod
+    async def scan_ip(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/urlscan/ip",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling urlscan/ip"}
+                    )
+
+                return response.json()
+
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling urlscan/ip"}
+            )
+
+    @staticmethod
     async def scrape_social(model):
         try:
             async with httpx.AsyncClient() as client:
