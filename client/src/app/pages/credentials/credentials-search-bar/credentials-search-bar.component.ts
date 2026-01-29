@@ -21,6 +21,7 @@ export class CredentialsSearchBarComponent {
 
   isAdvanced = false;
   basicSubmitted = false;
+  basicTouched = false;
   selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
 
@@ -87,6 +88,7 @@ export class CredentialsSearchBarComponent {
     this.searchTriggered.emit(finalQuery);
   }
   isBasicInvalid(): boolean {
+    if (!this.basicSubmitted && !this.basicTouched) return false;
     if (!this.basicSubmitted) return false;
 
     const value = this.basicQuery?.trim();
@@ -96,22 +98,73 @@ export class CredentialsSearchBarComponent {
     }
 
     if (!value) return false;
-
-    return !this.validateValue(this.selectedTag, value);
+    return !this.validateComplexQuery(value);
   }
   isAdvancedInvalid(filter: StealerlogsAdvancedFilter): boolean {
     return !!filter.value && !this.validateValue(filter.tag, filter.value);
   }
+  validateComplexQuery(input: string): boolean {
+    if (!input.trim()) return false;
+
+    if (this.hasInvalidOperators(input)) return false;
+
+    if (/\s+/.test(input) && !/&&|\|\|/.test(input)) {
+      return false;
+    }
+
+    const tokens = this.extractTokens(input);
+
+    if (!tokens.length) return false;
+
+    return tokens.every(token => this.isValidToken(token));
+  }
+  private isValidToken(value: string): boolean {
+    return this.VALUE_VALIDATORS.some(regex => regex.test(value));
+  }
+  private hasInvalidOperators(input: string): boolean {
+    return (
+      /(&{3,}|\|{3,})/.test(input) ||
+      /(&&\|\||\|\|&&)/.test(input) ||
+      /^[&|]/.test(input)
+    );
+  } private extractTokens(input: string): string[] {
+    const normalized = this.normalizeOperators(input);
+
+    return normalized
+      .split(/\s+(?:\|\||&&)\s+/)
+      .map(v => v.trim())
+      .filter(Boolean);
+  } private normalizeOperators(input: string): string {
+    return input
+      .replace(/(?<!\|)\|(?!\|)/g, ' || ')
+      .replace(/(?<!&)&(?!&)/g, ' && ')
+      .replace(/\s*\|\|\s*/g, ' || ')
+      .replace(/\s*&&\s*/g, ' && ')
+      .trim();
+  }
+  private VALUE_VALIDATORS: RegExp[] = [
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
+    /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/,
+    /^\d{13,19}$/
+  ];
+
   validateValue(tag: StealerlogsSearchFilters, value: string): boolean {
+    if (this.hasInvalidOperators(value)) return false;
+    if (/\s+/.test(value) && !/&&|\|\|/.test(value)) {
+      return false;
+    }
     const validator = this.TAG_VALIDATORS[tag];
     if (!validator) return true;
-
-    return validator.test(value.trim());
+    const values = this.extractValues(value);
+    if (!values.length) return false;
+    return values.every(v => validator.test(v));
   }
   private TAG_VALIDATORS: Record<string, RegExp> = {
     [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
-    [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/
+    [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/,
+    [StealerlogsSearchFilters.CREDITCARD]: /^\d{13,19}$/
   };
 
   private normalizeBasicQuery(tag: string, input: string): string {
@@ -144,19 +197,17 @@ export class CredentialsSearchBarComponent {
     const value = this.basicQuery?.trim();
 
     if (!value && this.selectedTag !== StealerlogsSearchFilters.ALL) {
-      switch (this.selectedTag) {
-        case StealerlogsSearchFilters.EMAIL:
-          return 'Please enter a valid email';
-        case StealerlogsSearchFilters.DOMAIN:
-          return 'Please enter a valid domain';
-        case StealerlogsSearchFilters.IP:
-          return 'Please enter a valid IP address';
-        default:
-          return 'Please enter a value';
-      }
+      return `Please enter a valid ${this.selectedTag}`;
     }
 
-    // format error
+    if (this.hasInvalidOperators(value)) {
+      return 'Invalid operator usage (use && or ||)';
+    }
+
+    if (/\s+/.test(value) && !/&&|\|\|/.test(value)) {
+      return 'Use && or || between multiple values';
+    }
+
     switch (this.selectedTag) {
       case StealerlogsSearchFilters.EMAIL:
         return 'Invalid email format';
@@ -164,8 +215,40 @@ export class CredentialsSearchBarComponent {
         return 'Invalid domain format';
       case StealerlogsSearchFilters.IP:
         return 'Invalid IP address format';
+      case StealerlogsSearchFilters.CREDITCARD:
+        return 'Invalid crediticard format';
       default:
         return 'Invalid value';
+    }
+  }
+
+  private extractValues(input: string): string[] {
+    return input
+      .replace(/(?<!\|)\|(?!\|)/g, ' || ')
+      .replace(/(?<!&)&(?!&)/g, ' && ')
+      .split(/\s+(?:\|\||&&)\s+/)
+      .map(v => v.trim())
+      .filter(Boolean);
+  }
+
+  onBasicQueryChange(value: string): void {
+    this.basicQuery = value;
+    if (!this.basicTouched && value.trim().length > 0) {
+      this.basicTouched = true;
+    }
+    this.basicSubmitted = this.basicTouched;
+  }
+
+  filterBasicInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const sanitized = input.value.replace(/[^a-zA-Z0-9&|@.\s]/g, '');
+
+    if (sanitized !== input.value) {
+      const cursor = input.selectionStart ?? sanitized.length;
+
+      input.value = sanitized;
+      this.basicQuery = sanitized;
+      input.setSelectionRange(cursor - 1, cursor - 1);
     }
   }
 
