@@ -21,6 +21,7 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_par
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (search_social_param_model, )
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
+from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -62,7 +63,7 @@ REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("repo
 
 DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dynamic_cracked": _doc(
     "dynamic/dynamic_cracked.md"), "dynamic_software": _doc("dynamic/dynamic_software.md"), "dynamic_social": _doc(
-    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"), }
+    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"),"ip_scan": _doc("dynamic/ip_scan.md"), }
 
 SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
     "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
@@ -567,7 +568,26 @@ async def search_dynamic_software(param: search_dynamic_crack_model = Body(...))
         Depends(license_required("scanning")), ], )
 async def parse_text(payload: DomainScanRequest):
     return await crawl_model.getInstance().scan_domain(payload)
-
+@api_routes.post(
+    "/api/urlscan/ip",
+    summary="IP scan (hostname & reachability)",
+    description=DYNAMIC_DOCS["ip_scan"]["description"],
+    tags=["Live Dynamic Scan"],
+    operation_id="scanIP",
+    response_description=DYNAMIC_DOCS["ip_scan"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
+            )
+        ),
+        Depends(limiter_dependency),
+        Depends(license_required("scanning")),
+    ],
+)
+async def parse_ip(payload: IPScanRequest):
+    return await crawl_model.getInstance().scan_ip(payload)
 
 @api_routes.post(
     "/api/social/scrape",
