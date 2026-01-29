@@ -17,11 +17,7 @@ interface SocialTarget {
 }
 
 interface ScrapeRequest {
-  usernames?: string[];
-  platform?: string;
-  max_followers?: number;
-  max_following?: number;
-  targets?: SocialTarget[];
+  targets: SocialTarget[];
 }
 
 interface CardData {
@@ -102,6 +98,12 @@ interface SocialMapperResponse {
   step?: string;
 }
 
+interface LoadingStatus {
+  platform: string;
+  username: string;
+  progress: number;
+}
+
 @Component({
   selector: 'app-social-mapper',
   standalone: true,
@@ -138,6 +140,7 @@ export class SocialMapperComponent implements OnInit {
 
   progress = signal(0);
   currentStep = '';
+  loadingStatuses: LoadingStatus[] = [];
 
   analysisData: AnalysisData | null = null;
   rawResults: any = null;
@@ -238,7 +241,10 @@ export class SocialMapperComponent implements OnInit {
         tooltipDelay: 200,
         hideEdgesOnDrag: true,
         navigationButtons: true,
-        keyboard: true
+        keyboard: {
+          enabled: true,
+          bindToWindow: false
+        }
       }
     };
 
@@ -341,6 +347,7 @@ export class SocialMapperComponent implements OnInit {
     this.progress.set(0);
     this.currentStep = '';
     this.activeTab = 'network';
+    this.initializeLoadingStatuses();
 
     const request = this.buildRequest();
 
@@ -373,6 +380,7 @@ export class SocialMapperComponent implements OnInit {
             const p = res?.result?.progress ?? res?.progress;
             if (typeof p === 'number' && !Number.isNaN(p)) {
               this.progress.set(p);
+              this.updateLoadingStatuses(p);
             }
             const st = res?.result?.step ?? res?.step;
             if (typeof st === 'string' && st) {
@@ -410,39 +418,69 @@ export class SocialMapperComponent implements OnInit {
       });
   }
 
-  private buildRequest(): ScrapeRequest {
-  const maxF = Number(this.maxFollowers);
-  const maxFl = Number(this.maxFollowing);
+  private initializeLoadingStatuses(): void {
+    this.loadingStatuses = [];
 
-  if (this.queryMode === 'single') {
-    return {
-      usernames: [this.username.trim()],
-      platform: this.selectedPlatform,
-      max_followers: maxF,
-      max_following: maxFl
-    };
+    if (this.queryMode === 'single') {
+      this.loadingStatuses.push({
+        platform: this.selectedPlatform,
+        username: this.username.trim(),
+        progress: 0
+      });
+    } else {
+      const validTargets = this.multiTargets.filter(t => t.username.trim() && t.platform);
+      validTargets.forEach(target => {
+        this.loadingStatuses.push({
+          platform: target.platform,
+          username: target.username.trim(),
+          progress: 0
+        });
+      });
+    }
   }
 
-  const platformGroups: Record<string, string[]> = {};
+  private updateLoadingStatuses(overallProgress: number): void {
+    this.loadingStatuses.forEach(status => {
+      status.progress = overallProgress;
+    });
+  }
 
-  this.multiTargets.forEach(t => {
-    if (t.username.trim() && t.platform) {
-      if (!platformGroups[t.platform]) {
-        platformGroups[t.platform] = [];
-      }
-      platformGroups[t.platform].push(t.username.trim());
+  private buildRequest(): ScrapeRequest {
+    const maxF = Number(this.maxFollowers);
+    const maxFl = Number(this.maxFollowing);
+    const targets: SocialTarget[] = [];
+
+    if (this.queryMode === 'single') {
+      targets.push({
+        platform: this.selectedPlatform,
+        usernames: [this.username.trim()],
+        max_followers: maxF,
+        max_following: maxFl
+      });
+    } else {
+      const platformGroups: Record<string, string[]> = {};
+
+      this.multiTargets.forEach(t => {
+        if (t.username.trim() && t.platform) {
+          if (!platformGroups[t.platform]) {
+            platformGroups[t.platform] = [];
+          }
+          platformGroups[t.platform].push(t.username.trim());
+        }
+      });
+
+      Object.keys(platformGroups).forEach(platform => {
+        targets.push({
+          platform,
+          usernames: platformGroups[platform],
+          max_followers: maxF,
+          max_following: maxFl
+        });
+      });
     }
-  });
 
-  const targets: SocialTarget[] = Object.keys(platformGroups).map(platform => ({
-    platform,
-    usernames: platformGroups[platform],
-    max_followers: maxF,
-    max_following: maxFl
-  }));
-
-  return { targets };
-}
+    return { targets };
+  }
 
   retry(): void {
     this.load();
@@ -479,7 +517,7 @@ export class SocialMapperComponent implements OnInit {
     const addedNodes = new Set<string>();
     let edgeId = 0;
 
-    this.analysisData.summary.cards.forEach((card, cardIndex) => {
+    this.analysisData.summary.cards.forEach((card) => {
       const targetId = `target_${card.platform}_${card.username}`;
 
       if (!addedNodes.has(targetId)) {
@@ -496,7 +534,7 @@ export class SocialMapperComponent implements OnInit {
         addedNodes.add(targetId);
       }
 
-      card.mutual_usernames?.forEach((mutual, i) => {
+      card.mutual_usernames?.forEach((mutual) => {
         const mutualId = `mutual_${card.platform}_${mutual}`;
         if (!addedNodes.has(mutualId)) {
           nodes.push({
@@ -521,7 +559,7 @@ export class SocialMapperComponent implements OnInit {
         });
       });
 
-      card.followers?.forEach((follower, i) => {
+      card.followers?.forEach((follower) => {
         const followerId = `follower_${card.platform}_${follower}`;
         if (!addedNodes.has(followerId)) {
           nodes.push({
@@ -545,7 +583,7 @@ export class SocialMapperComponent implements OnInit {
         });
       });
 
-      card.following?.forEach((following, i) => {
+      card.following?.forEach((following) => {
         const followingId = `following_${card.platform}_${following}`;
         if (!addedNodes.has(followingId)) {
           nodes.push({
@@ -708,6 +746,7 @@ export class SocialMapperComponent implements OnInit {
     this.isFetched = false;
     this.progress.set(0);
     this.currentStep = '';
+    this.loadingStatuses = [];
     this.nodeSet?.clear();
     this.edgeSet?.clear();
 

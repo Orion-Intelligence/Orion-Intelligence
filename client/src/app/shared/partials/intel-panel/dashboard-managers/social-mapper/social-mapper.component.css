@@ -152,85 +152,114 @@
   background: var(--color-blue-850);
 }
 
-.social-mapper__loading {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-gray-900);
+.social-mapper__loading-bar {
+  background: var(--color-blue-700);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.social-mapper__loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 400px;
-  width: 100%;
-}
-
-.social-mapper__loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-blue-640);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-.social-mapper__loading-text {
-  margin-bottom: 20px;
-  font-size: 14px;
-  color: var(--color-text1);
-}
-
-.social-mapper__progress-container {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.social-mapper__progress-bar {
-  width: 100%;
-  height: 6px;
-  background: var(--color-blue-680);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.social-mapper__progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-blue-640), var(--color-blue-500));
-  border-radius: 3px;
-  transition: width 0.3s ease;
-  animation: progressPulse 2s ease-in-out infinite;
-}
-
-@keyframes progressPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-.social-mapper__progress-info {
+.social-mapper__loading-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  margin-bottom: 16px;
 }
 
-.social-mapper__progress-percentage {
-  color: var(--color-blue-640);
+.social-mapper__loading-title {
+  font-size: 16px;
   font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
 }
 
-.social-mapper__progress-step {
+.social-mapper__loading-percentage {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-blue-640);
+}
+
+.social-mapper__loading-profiles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.social-mapper__loading-profile {
+  background: var(--color-blue-680);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.social-mapper__loading-profile-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.social-mapper__loading-profile-name {
+  font-weight: 500;
+}
+
+.social-mapper__loading-profile-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-blue-800);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.social-mapper__loading-profile-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-blue-640), #66BB6A);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.social-mapper__loading-profile-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.social-mapper__loading-step {
+  font-size: 13px;
   color: var(--color-gray-900);
   font-style: italic;
+  padding: 8px 12px;
+  background: var(--color-blue-680);
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid var(--color-border);
 }
 
 @keyframes spin {
@@ -787,5 +816,24 @@
 
   .social-mapper__cards-grid {
     grid-template-columns: 1fr;
+  }
+
+  .social-mapper__loading-bar {
+    margin: 12px;
+    padding: 16px;
+  }
+
+  .social-mapper__loading-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .social-mapper__loading-profiles {
+    gap: 10px;
+  }
+
+  .social-mapper__loading-profile {
+    padding: 10px;
   }
 }
