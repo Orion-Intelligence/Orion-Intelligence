@@ -55,9 +55,8 @@ export class ExpandedRowComponent implements OnChanges {
   }
 
   get yearValue(): string {
-    const id = (this.item?.['_id'] || this.result?.['_id'] || '').toString();
-    const y = id.split('_')[0];
-    return y || '-';
+    const d = this.item?.date || this.result?.m_update_date;
+    return d ? new Date(d).toISOString().slice(0, 7) : '-';
   }
 
   get fileTypeValue(): string {

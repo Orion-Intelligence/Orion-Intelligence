@@ -91,13 +91,6 @@
         [title]="'Dump'"></app-dashboard-sidebar-items>
     </ng-container>
 
-    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
-      <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" [category]="category.EXTRACTOR"
-        [icon]="'assets/images/sidebar/theme/scanner.svg'" [items]="extractorCatagories" [routePrefix]="'ioc-extractor'"
-        [title]="'IOC Extractor'"></app-dashboard-sidebar-items>
-    </ng-container>
-
     <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <div class="sidebar__item">
         <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph" target="_blank">

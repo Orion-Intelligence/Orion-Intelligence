@@ -16,7 +16,6 @@ export enum Category {
   SCANNER = 'Scanner',
   TENANT = 'Tenant',
   PROFILE = 'Profile',
-  EXTRACTOR = "IOC"
 }
 
 export enum GeneralSubCategory {
@@ -73,6 +72,7 @@ export enum ApiSubCategory {
   SOCIAL = 'Social-Scanner',
   CRACKED = 'Playstore-Scanner',
   SOFTWARE = 'Software-Scanner',
+  FILE = 'File-Scanner',
 }
 
 export enum SocialSubCategory {

@@ -2,7 +2,6 @@ import { Component, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { CodeBlockComponent } from '../../code-block/code-block.component';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { NgxPrintModule } from 'ngx-print';
 import { FormsModule } from '@angular/forms';
@@ -21,16 +20,15 @@ import { ApiService } from '../../../services/api.service';
   standalone: true,
   imports: [
     CommonModule,
-    CodeBlockComponent,
     NgxPrintModule,
     NgOptimizedImage,
     TooltipDirective,
     FormsModule,
   ],
-  templateUrl: './ioc-extractor.component.html',
+  templateUrl: './file-scanner.component.html',
   animations: [fadeInDashboardItem]
 })
-export class IocExtractorComponent {
+export class FileScannerComponent {
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
   selectedFile: File | null = null;
@@ -44,7 +42,6 @@ export class IocExtractorComponent {
   isFileSizeError = false;
   extractionResult: IocExtractionResult | null = null;
   groupedIocs: GroupedIoc[] = [];
-  skeletonCards = Array.from({ length: 3 });
   progress = signal(0);
   currentStep = '';
 
@@ -362,14 +359,7 @@ export class IocExtractorComponent {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   }
 
-  formatNumber(num: number): string {
-    return num?.toLocaleString() || '0';
-  }
-
   getTotalIocCount(): number {
     return this.extractionResult?.iocs?.length || 0;
   }
-
-  trackByCategory = (_: number, c: GroupedIoc) => c.name;
-  trackByItem = (i: number) => i;
 }

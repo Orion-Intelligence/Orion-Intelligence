@@ -1,0 +1,116 @@
+<input type="file" #fileInput id="fileInput" class="ioc-extractor-file-input-hidden" accept=".pdf,.txt,.png,.jpg,.jpeg" (change)="onFileSelected($event)">
+
+<div class="ioc-extractor-upload-center-container" *ngIf="!isFetched && !isLoading" @fadeInDashboardItem>
+  <div class="ioc-extractor-upload-card">
+    <div class="ioc-extractor-upload-icon-large">
+      <img src="assets/images/shared/theme/file-search.svg" alt="File Upload"/>
+    </div>
+    <h2 class="ioc-extractor-upload-title">IOC Extraction</h2>
+    <p class="ioc-extractor-upload-description">
+      Upload a file to extract Indicators of Compromise (IOCs)
+    </p>
+    <button type="button" class="ioc-extractor-upload-btn-large" (click)="triggerFileInput()">
+      <img ngSrc="assets/images/shared/theme/ai.svg" alt="Upload" width="24" height="24" style="margin-right: 10px;"/>
+      Choose File
+    </button>
+    <div class="ioc-extractor-upload-info">
+      <div class="ioc-extractor-upload-info-item">
+        <strong>Supported formats:</strong>
+        PDF, TXT, Images (PNG, JPG, JPEG)
+      </div>
+      <div class="ioc-extractor-upload-info-item">
+        <strong>Maximum file size:</strong>
+        1 MB
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-container *ngIf="isFetched || isLoading">
+
+  <div class="ioc-extractor-scan_progress-top" *ngIf="!hasError && isLoading && progress() < 100">
+    <div class="ioc-extractor-scan_progress-text">
+      {{ currentStep || 'Processing file...' }} ({{ progress() }}%)
+    </div>
+    <div class="ioc-extractor-scan_progress-bar">
+      <div class="ioc-extractor-scan_progress-fill" [style.width.%]="progress()"></div>
+    </div>
+  </div>
+
+  <div class="ioc-extractor-action-buttons-bar" *ngIf="!hasError && !isLoading && extractionResult">
+    <button class="ioc-extractor-select-file-btn" (click)="triggerFileInput()">
+      <img ngSrc="assets/images/shared/theme/file-search.svg" alt="Upload" width="18" height="18" style="margin-right: 8px;"/>
+      Scan Another File
+    </button>
+    <div class="btn-group report-menu-option-container">
+      <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
+        <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25"/>
+      </button>
+      <div class="vr report-menu-divider"></div>
+    </div>
+  </div>
+
+  <div class="security-scan ioc-extractor-scan_container">
+
+    <div class="ioc-extractor-scan_report-section" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
+      <div class="ioc-extractor-scan_alert">
+        <button class="ioc-extractor-scan_alert-close" (click)="closeError()" aria-label="Close error">
+          <img ngSrc="assets/images/shared/searchFilter_clossButton.svg" alt="Close" width="20" height="20"/>
+        </button>
+        <div class="ioc-extractor-scan_alert-title">Extraction Failed</div>
+        <div class="ioc-extractor-scan_alert-text">
+          {{ errorMessage }}
+        </div>
+
+        <ul class="ioc-extractor-scan_alert-reasons" *ngIf="isFileSizeError">
+          <li>
+            <strong>File size limit:</strong>
+            Maximum 10MB
+          </li>
+          <li>
+            Please compress your file or select a smaller file
+          </li>
+        </ul>
+
+        <ul class="ioc-extractor-scan_alert-reasons" *ngIf="isUnsupportedFileError">
+          <li>
+            <strong>Supported formats:</strong>
+          </li>
+          <li>PDF documents (.pdf)</li>
+          <li>Text files (.txt)</li>
+          <li>Images (.png, .jpg, .jpeg)</li>
+        </ul>
+
+        <ul class="ioc-extractor-scan_alert-reasons" *ngIf="!isUnsupportedFileError && !isFileSizeError">
+          <li>The file format may not be supported</li>
+          <li>The file may be corrupted or too large</li>
+          <li>An unexpected error occurred during processing</li>
+        </ul>
+
+        <button class="ioc-extractor-scan_btn ioc-extractor-scan_btn-primary" (click)="triggerFileInput()">Try Again</button>
+      </div>
+    </div>
+
+    <div class="ioc-extractor-scan_report-section" *ngIf="!hasError && extractionResult">
+      <h3 class="ioc-extractor-scan_section-title">
+        IOC Extraction Report for 〡 {{ extractionResult.original_filename }}
+      </h3>
+      <div class="ioc-extractor-scan_divider"></div>
+
+      <div class="ioc-extractor-scan_scan-meta-grid" *ngIf="!isLoading">
+        <div class="ioc-extractor-scan_meta-card">
+          <p class="ioc-extractor-scan_meta-value ioc-extractor-scan_meta-value-large">
+            {{ getTotalIocCount() }} IOCs
+          </p>
+        </div>
+        <div class="ioc-extractor-scan_meta-card">
+          <p class="ioc-extractor-scan_meta-label">File Type</p>
+          <p class="ioc-extractor-scan_meta-value">
+            {{ extractionResult.file_type.toUpperCase() }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ng-container>

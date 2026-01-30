@@ -118,7 +118,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       return
     }
     if (this.licenseService.canUseScanning()) {
-      console.log("xxxxx2")
       this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
 

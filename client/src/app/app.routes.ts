@@ -45,7 +45,7 @@ import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
-import {IocExtractorComponent} from './shared/partials/intel-panel/ioc-extractor/ioc-extractor.component';
+import {FileScannerComponent} from './shared/partials/intel-panel/ioc-extractor/file-scanner.component';
 import { SocialMapperComponent } from './shared/partials/intel-panel/dashboard-managers/social-mapper/social-mapper.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
@@ -163,26 +163,6 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'ioc-extractor',
-
-        data: { animation: 'HomePage' },
-
-        children:
-        [
-          {
-            path: '',
-            redirectTo: 'ioc-extractor',
-            pathMatch: 'full'
-          },
-
-          {
-            path: 'ioc-extractor',
-            component: IocExtractorComponent,
-            data: { animation: 'HomePage' },
-        }
-        ]
-      },
-      {
         path: 'scan',
         component: SecurityScanResultsComponent,
         data: { animation: 'HomePage' }
@@ -238,6 +218,11 @@ export const routes: Routes = [
             path: 'software-scanner',
             component: DashboardApiComponent,
             data: { animation: 'SoftwareAPI', type: 'software' }
+          },
+          {
+            path: 'file-scanner',
+            component: FileScannerComponent,
+            data: { animation: 'FileAPI', type: 'file' }
           }
         ]
       },

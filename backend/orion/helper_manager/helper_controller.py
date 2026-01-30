@@ -70,17 +70,27 @@ class helper_controller:
         should_filter_clauses = []
 
         if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys or k == "m_search_all"}
+            allowed_filtered = {
+                k: (v if isinstance(v, list) else [v])
+                for k, v in pfilter.items()
+                if k in allowed_keys or k == "m_search_all"
+            }
             clauses = []
 
             for k, vals in allowed_filtered.items():
-                if k == "m_search_all":
-                    for val in vals:
-                        search_all_clause = {"bool": {"should": [{"term": {field: val}} for field in
-                            allowed_keys], "minimum_should_match": 1}}
-                        clauses.append(search_all_clause)
-                else:
-                    clauses.extend([{"term": {k: val}} for val in vals])
+                for val in vals:
+                    fields = allowed_keys if k == "m_search_all" else [k]
+                    clauses.append({
+                        "bool": {
+                            "should": (
+                                    [{"term": {f: {"value": val, "case_insensitive": True}}} for f in fields] +
+                                    [{"match": {f: val}} for f in fields] +
+                                    [{"match_phrase": {f: val}} for f in fields] +
+                                    [{"prefix": {f: val}} for f in fields]
+                            ),
+                            "minimum_should_match": 1
+                        }
+                    })
 
             if p_query_model.must:
                 must_filter_clauses = clauses

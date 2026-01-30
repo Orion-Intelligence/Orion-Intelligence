@@ -64,14 +64,23 @@ class elastic_request_generator:
             return must_filters
 
         for ioc_key, values in pfilter.items():
-            if ioc_key not in ELASTIC_ENUMS.ioc_field_mapping or not values:
+            if not values:
                 continue
 
             if not isinstance(values, list):
                 values = [values]
 
+            # SPECIAL CASE: make m_search_all work in leak/generic/exploit/social/defacement flows
+            if ioc_key == "m_search_all":
+                es_fields = allowed_keys
+            else:
+                if ioc_key not in ELASTIC_ENUMS.ioc_field_mapping:
+                    continue
+                es_fields = ELASTIC_ENUMS.ioc_field_mapping[ioc_key]
+                if not isinstance(es_fields, list):
+                    es_fields = [es_fields]
+
             shoulds = []
-            es_fields = ELASTIC_ENUMS.ioc_field_mapping[ioc_key]
 
             for val in values:
                 if not isinstance(val, str):
@@ -82,14 +91,30 @@ class elastic_request_generator:
                     continue
 
                 for field in es_fields:
+                    term_field = field if str(field).endswith((".keyword", ".raw")) else f"{field}.keyword"
+
                     shoulds.append({
                         "term": {
-                            field: {
+                            term_field: {
                                 "value": val,
                                 "case_insensitive": True
                             }
                         }
                     })
+
+                    if ioc_key == "m_search_all":
+                        shoulds.append({"match_phrase": {field: val}})
+                        shoulds.append({"match": {field: {"query": val, "operator": "AND"}}})
+
+                    if len(val) >= 5111:
+                        shoulds.append({
+                            "prefix": {
+                                term_field: {
+                                    "value": val,
+                                    "case_insensitive": True
+                                }
+                            }
+                        })
 
             if shoulds:
                 must_filters.append({
@@ -703,7 +728,6 @@ class elastic_request_generator:
         queries.append(helper_controller.strip_query(q10))
         indices.append(i10)
         labels.append("news_model")
-
         return indices, queries, labels
 
     def on_search_leakdata(self, p_query_model, pfilter=None):
