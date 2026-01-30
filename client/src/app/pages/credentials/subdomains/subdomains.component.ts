@@ -242,9 +242,28 @@ private updateDnsStatusMessage(res: DnsResponse): void {
       return;
     }
 
-    const domainOnly = trimmed.replace(/^https?:\/\//i, '').replace(/\/.*/, '');
-    const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
-    this.isValidDomain = domainRegex.test(domainOnly);
+    if (this.activeTab === 'dns') {
+      this.validateIp();
+    } else {
+      const domainOnly = trimmed.replace(/^https?:\/\//i, '').replace(/\/.*/, '');
+      const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
+      this.isValidDomain = domainRegex.test(domainOnly);
+    }
+  }
+
+  validateIp(): void {
+    const ip = this.domain.trim();
+
+    if (!ip) {
+      this.isValidDomain = true;
+      return;
+    }
+
+    const ipv4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
+
+    const ipv6 = /^((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::1|::|(?:[0-9a-fA-F]{1,4}:){1,7}:)$/;
+
+    this.isValidDomain = ipv4.test(ip) || ipv6.test(ip);
   }
 
   getSubdomainUrl(subdomain: string): string {
@@ -356,16 +375,6 @@ private updateDnsStatusMessage(res: DnsResponse): void {
         }
       });
   }
-
-  validateIp(): void {
-  const ip = this.domain.trim();
-
-  const ipv4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
-
-  const ipv6 = /^((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::1|::|(?:[0-9a-fA-F]{1,4}:){1,7}:)$/;
-
-  this.isValidDomain = ipv4.test(ip) || ipv6.test(ip);
-}
 
 onDnsCheck(): void {
   this.dnsSubmitted = true;
