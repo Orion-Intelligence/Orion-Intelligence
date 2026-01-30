@@ -14,6 +14,7 @@ import {
   IocExtractResponse
 } from '../../../model/ioc-extractor/ioc.extractor.model';
 import { ApiService } from '../../../services/api.service';
+import { CodeBlockComponent } from '../../code-block/code-block.component';
 
 @Component({
   selector: 'app-ioc-extractor',
@@ -24,6 +25,7 @@ import { ApiService } from '../../../services/api.service';
     NgOptimizedImage,
     TooltipDirective,
     FormsModule,
+    CodeBlockComponent
   ],
   templateUrl: './file-scanner.component.html',
   animations: [fadeInDashboardItem]
@@ -44,9 +46,10 @@ export class FileScannerComponent {
   groupedIocs: GroupedIoc[] = [];
   progress = signal(0);
   currentStep = '';
+  skeletonCards = Array.from({ length: 3 });
 
   private readonly IOC_EXTRACT_ENDPOINT = 'ioc/extract';
-  private readonly MAX_FILE_SIZE = 1024 * 1024; // 10MB
+  private readonly MAX_FILE_SIZE = 1024 * 1024; // 1 MB
 
   private readonly ALLOWED_FILE_TYPES = {
     'application/pdf': ['.pdf'],
@@ -84,7 +87,6 @@ export class FileScannerComponent {
       this.handleFileSelect(target.files[0]);
     }
   }
-
 
   private isFileTypeAllowed(file: File): boolean {
     const mimeType = (file.type || '').toLowerCase();
@@ -131,7 +133,6 @@ export class FileScannerComponent {
     }).catch(() => {
 
     });
-
 
     this.extractIocs();
   }
@@ -359,7 +360,14 @@ export class FileScannerComponent {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   }
 
+  formatNumber(num: number): string {
+    return num?.toLocaleString() || '0';
+  }
+
   getTotalIocCount(): number {
     return this.extractionResult?.iocs?.length || 0;
   }
+
+  trackByCategory = (_: number, c: GroupedIoc) => c.name;
+  trackByItem = (i: number) => i;
 }
