@@ -442,7 +442,7 @@ onDnsCheck(): void {
           }[res.step] || `Processing (${res.step})`;
         }
 
-        if (res.status === 'done' && res.result) {
+        if (res.result) {
           this.dnsRecords = [res.result];
           this.dnsProgress = 100;
 
