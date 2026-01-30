@@ -21,7 +21,7 @@
 .ioc-extractor-upload-card:hover {
   border-color: var(--color-blue-640);
   box-shadow: 0 8px 16px rgb(0 0 0 / 15%);
-  transform: translateY(-2px);
+
 }
 
 .ioc-extractor-upload-icon-large {
@@ -55,29 +55,39 @@
   line-height: 1.6;
 }
 
+
 .ioc-extractor-upload-btn-large {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 16px 40px;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  background: var(--color-blue-640);
+  font-family: Inter, sans-serif;
+  color: var(--color-text1);
+  border: 0;
+  font-weight: 500;
+  font-size: 14px;
+  outline: none;
+  height: 42px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  width: auto;
+  filter: brightness(100%);
+  transition:
+    opacity 0.2s ease-in-out,
+    background 0.2s ease-in-out,
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgb(102 126 234 / 40%);
+  box-shadow: 0 1px 2px 0 #1018280d;
 }
 
 .ioc-extractor-upload-btn-large:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgb(102 126 234 / 60%);
+  background: var(--color-blue-640);
+  opacity: 0.9;
 }
 
 .ioc-extractor-upload-btn-large:active {
-  transform: translateY(-1px);
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .ioc-extractor-upload-info {
@@ -97,14 +107,40 @@
   color: var(--color-text2);
 }
 
-/* Action Buttons Bar */
 .ioc-extractor-action-buttons-bar {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 15px 20px;
   margin-bottom: 10px;
   animation: slideDown 0.4s ease-out;
+}
+
+.report-menu-option-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+
+.report-menu-option {
+  background: var(--color-blue-640);
+  border-radius: 8px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  box-sizing: border-box;
+  transition: opacity 0.2s ease-in-out, background 0.2s ease-in-out;
+}
+
+.report-menu-option:hover {
+  background: var(--color-blue-640);
+  opacity: 0.9;
 }
 
 @keyframes slideDown {
@@ -119,30 +155,42 @@
   }
 }
 
+
 .ioc-extractor-select-file-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 10px 20px;
+  background: var(--color-blue-640);
+  font-family: Inter, sans-serif;
+  color: var(--color-text1);
+  border: 0;
+  font-weight: 500;
+  font-size: 13px;
+  outline: none;
+  height: 36px;
   border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  padding: 6px 12px;
+  width: auto;
+  filter: brightness(100%);
+  transition:
+    opacity 0.2s ease-in-out,
+    background 0.2s ease-in-out,
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgb(102 126 234 / 30%);
+  box-shadow: 0 1px 2px 0 #1018280d;
   margin-left: 20px;
+  box-sizing: border-box;
 }
 
 .ioc-extractor-select-file-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgb(102 126 234 / 50%);
+  background: var(--color-blue-640);
+  opacity: 0.9;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 }
 
 .ioc-extractor-select-file-btn:active {
   transform: translateY(0);
+  opacity: 1;
 }
 
 .ioc-extractor-file-input-hidden {
@@ -153,7 +201,6 @@
   font-family: 'Segoe UI', Arial, sans-serif;
   color: #e2e8f0;
   padding: 20px;
-  background-color: #0f172a;
   margin: 0 auto 0 20px;
   width: 100%;
 }
@@ -218,6 +265,8 @@
   font-size: 14px;
   color: var(--color-text4);
   word-break: break-word;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .ioc-extractor-scan_meta-value-large {
@@ -247,6 +296,10 @@
   padding: 15px;
   transition: all 0.3s ease;
   background: var(--color-consolidated-secondary);
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .ioc-extractor-scan_finding-header {
@@ -261,6 +314,14 @@
   font-weight: 600;
   display: flex;
   align-items: center;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.ioc-extractor-scan_finding-title span {
+  flex-shrink: 0; /* keep the status dot from shrinking */
 }
 
 .ioc-extractor-scan_finding-description {
@@ -268,6 +329,9 @@
   font-size: 14px;
   color: var(--color-text4);
   line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .ioc-extractor-scan_finding-meta {
@@ -332,7 +396,7 @@
 .ioc-extractor-scan_alert-close:hover {
   background: rgb(252 165 165 / 10%);
   color: #fecaca;
-  transform: scale(1.1);
+
 }
 
 .ioc-extractor-scan_alert-close:active {
@@ -389,8 +453,8 @@
 }
 
 .ioc-extractor-scan_btn {
-  background: var(--color-scan-light-200);
-  border: 1px solid var(--color-border);
+  background: var(--color-blue-640);
+  font-family: Inter, sans-serif;
   color: var(--color-text1);
   padding: 8px 16px;
   border-radius: 6px;
@@ -403,13 +467,11 @@
 
 .ioc-extractor-scan_btn:hover {
   background: #1f2937;
-  transform: translateY(-1px);
 }
 
 .ioc-extractor-scan_btn-primary {
-  background: #0069d9;
-  border-color: #1d4ed8;
-  color: #fff;
+  background: var(--color-blue-640);
+  color: var(--color-text1);
 }
 
 .ioc-extractor-scan_btn-primary:hover {
@@ -544,6 +606,14 @@
   display: inline-block;
 }
 
+/* Hidden print/export report list items: avoid overflow */
+#iocReport li {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Mobile layout: keep actions bar horizontal but compact */
 @media (width <= 768px) {
   .ioc-extractor-upload-center-container {
     min-height: 60vh;
@@ -559,18 +629,16 @@
   }
 
   .ioc-extractor-upload-btn-large {
-    padding: 14px 32px;
-    font-size: 16px;
+    width: 100%;
   }
 
   .ioc-extractor-action-buttons-bar {
-    flex-direction: column-reverse;
-    gap: 15px;
-    padding: 15px;
+    padding: 10px 12px;
+    gap: 10px;
   }
 
   .ioc-extractor-select-file-btn {
-    width: 100%;
+    margin-left: 0;
   }
 
   .ioc-extractor-scan_container {
