@@ -1,4 +1,4 @@
-:host {
+.file-scan-container {
   --bg-color: #0E1626;
   --panel-bg: rgb(29 41 61 / 70%);
   --panel-border: rgb(56 189 248 / 20%);
@@ -20,7 +20,6 @@
   margin-top: 10px;
   margin-bottom: 10px;
 }
-
 
 @keyframes ioc-move-bg {
   0% {
@@ -800,7 +799,6 @@
   .ioc-report-download-text {
     display: none;
   }
-
 }
 
 .ioc-report-summary-grid .ioc-report-stat {
@@ -821,4 +819,3 @@
 .ioc-report-stat {
   padding: 12px !important;
 }
-
