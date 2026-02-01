@@ -1249,13 +1249,22 @@ class elastic_request_generator:
         size = 100 if is_match_all else (getattr(p_query_model, "size", 500) or 500)
         frm = max((page - 1) * size, 0)
 
-        query_body = {
-            "query": es_query,
-            "from": frm,
-            "size": size,
-            "sort": [{"_shard_doc": "asc"}],
-            "track_total_hits": False,
-        }
+        if is_match_all:
+            query_body = {
+                "query": es_query,
+                "size": 100,
+                "sort": ["_doc"],
+                "terminate_after": 100,
+                "track_total_hits": False,
+            }
+        else:
+            query_body = {
+                "query": es_query,
+                "from": frm,
+                "size": size,
+                "sort": ["_doc"],
+                "track_total_hits": False,
+            }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
 
