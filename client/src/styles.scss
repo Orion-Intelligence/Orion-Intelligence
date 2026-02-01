@@ -45,7 +45,6 @@
 @use 'app/pages/credentials/credential.component.css';
 @use 'app/pages/credentials/credentials-search-bar/credentials-search-bar.component.css';
 @use 'app/pages/credentials/subdomains/subdomains.component.css';
-@use 'app/pages/credentials/expanded-row/expanded-row.component.css';
 @use 'app/pages/credentials/password-schema/password-schema.component.css';
 @use 'app/shared/partials/suggestion/suggestion.component.css';
 @use 'app/shared/partials/loading-form/loading-form.component.css';
@@ -83,6 +82,7 @@
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-month';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
+@use 'app/pages/credentials/expanded-row/expanded-row.component.css';
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
 
