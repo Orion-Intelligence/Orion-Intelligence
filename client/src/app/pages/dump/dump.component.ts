@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { PaginationComponent } from '../../shared/partials/pagination/pagination.component';
 import { FiltersComponent } from '../../shared/partials/filters/filters.component';
@@ -22,7 +22,6 @@ import { BaseListingComponent } from '../../shared/directive/base.listing.direct
     FormsModule,
     ReactiveFormsModule,
   ],
-  styleUrls: ['../../../assets/styles/shared/listing/directory.component.css']
 })
 export class DumpComponent extends BaseListingComponent<DumpCallbackModel> {
   filterModel = dump_filters;

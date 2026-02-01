@@ -12,8 +12,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
   selector: 'app-sidebar-user-system-settings',
   imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
   animations: [fadeInDashboardItem],
-  templateUrl: './sidebar-user-system-settings.component.html',
-  styleUrls: ['./sidebar-user-system-settings.component.css']
+  templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;

@@ -8,8 +8,7 @@ type TelemetryGroup = { key: string; label: string; values: string[] };
   selector: 'app-expanded-row',
   standalone: true,
   imports: [NgIf, NgForOf, NgClass, TooltipDirective],
-  templateUrl: './expanded-row.component.html',
-  styleUrls: ['./expanded-row.component.css']
+  templateUrl: './expanded-row.component.html'
 })
 export class ExpandedRowComponent implements OnChanges {
   @Input() mode: 'stealer' | 'threat' = 'stealer';

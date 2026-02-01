@@ -109,10 +109,6 @@ interface LoadingStatus {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './social-mapper.component.html',
-  styleUrls: [
-    './social-mapper.component.css',
-    '../../../../../../assets/styles/shared/sidebar/filters-sidebar.component.css'
-  ],
   animations: [fadeInDashboardItem]
 })
 export class SocialMapperComponent implements OnInit {

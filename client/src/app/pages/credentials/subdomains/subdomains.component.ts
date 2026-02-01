@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnDestroy} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {ApiService} from '../../../shared/services/api.service';
@@ -41,10 +41,9 @@ interface DnsResponse {
   selector: 'app-subdomains',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './subdomains.component.html',
-  styleUrls: ['./subdomains.component.css']
+  templateUrl: './subdomains.component.html'
 })
-export class SubdomainsComponent {
+export class SubdomainsComponent implements OnDestroy {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
   @Output() search = new EventEmitter<string[]>();
@@ -75,7 +74,8 @@ export class SubdomainsComponent {
   private progressTimer$ = new Subject<void>();
   private dnsProgressTimer$ = new Subject<void>();
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) {
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -207,32 +207,32 @@ export class SubdomainsComponent {
     }
   }
 
-private updateDnsStatusMessage(res: DnsResponse): void {
-  const status = res?.status;
+  private updateDnsStatusMessage(res: DnsResponse): void {
+    const status = res?.status;
 
-  if (status === 'pending') {
-    this.dnsStatusMessage = 'Resolving DNS records...';
-  } else if (status === 'busy') {
-    this.dnsStatusMessage = 'Processing DNS resolution...';
-  } else if (status === 'done') {
-    const result = res.result;
-    if (result) {
-      if (result.hostname) {
-        this.dnsStatusMessage = result.ping
-          ? `Reachable • ${result.hostname}`
-          : `Not reachable • ${result.hostname}`;
-      } else {
-        this.dnsStatusMessage = result.ping
-          ? 'Reachable • No PTR record'
-          : 'Not reachable • No PTR record';
+    if (status === 'pending') {
+      this.dnsStatusMessage = 'Resolving DNS records...';
+    } else if (status === 'busy') {
+      this.dnsStatusMessage = 'Processing DNS resolution...';
+    } else if (status === 'done') {
+      const result = res.result;
+      if (result) {
+        if (result.hostname) {
+          this.dnsStatusMessage = result.ping
+            ? `Reachable • ${result.hostname}`
+            : `Not reachable • ${result.hostname}`;
+        } else {
+          this.dnsStatusMessage = result.ping
+            ? 'Reachable • No PTR record'
+            : 'Not reachable • No PTR record';
+        }
       }
+    } else if (status === 'error') {
+      this.dnsStatusMessage = 'Failed to resolve';
+    } else {
+      this.dnsStatusMessage = 'Requesting...';
     }
-  } else if (status === 'error') {
-    this.dnsStatusMessage = 'Failed to resolve';
-  } else {
-    this.dnsStatusMessage = 'Requesting...';
   }
-}
 
   validateDomain(): void {
     const trimmed = this.domain.trim();
@@ -376,94 +376,94 @@ private updateDnsStatusMessage(res: DnsResponse): void {
       });
   }
 
-onDnsCheck(): void {
-  this.dnsSubmitted = true;
-  this.dnsError = '';
+  onDnsCheck(): void {
+    this.dnsSubmitted = true;
+    this.dnsError = '';
 
-  const ip = this.domain?.trim();
-  if (!ip) {
-    this.dnsError = 'Please enter an IP address';
-    return;
+    const ip = this.domain?.trim();
+    if (!ip) {
+      this.dnsError = 'Please enter an IP address';
+      return;
+    }
+
+    this.validateIp();
+    if (!this.isValidDomain) {
+      this.dnsError = 'Invalid IP address format';
+      return;
+    }
+
+    this.dnsLoading = true;
+    this.dnsRecords = [];
+    this.dnsProgress = 0;
+    this.dnsStatusMessage = 'Queued...';
+    this.startDnsProgressSimulation();
+
+    const record: DnsRecord = {ip, hostname: '', ping: null};
+    this.dnsRecords = [record];
+
+    this.api
+      .post<DnsResponse>('urlscan/ip', {ip})
+      .pipe(
+        expand((res: DnsResponse) => {
+          const status = res.status;
+
+          if (status === 'pending' || status === 'busy') {
+            return timer(4000).pipe(
+              switchMap(() => this.api.post<DnsResponse>('urlscan/ip', {ip}))
+            );
+          }
+          return EMPTY;
+        }),
+
+        takeWhile((res: DnsResponse) => {
+          return res.status === 'pending' || res.status === 'busy';
+        }, true),
+
+        takeUntil(this.destroy$),
+
+        finalize(() => {
+          this.dnsLoading = false;
+          this.stopDnsProgressSimulation();
+        })
+      )
+      .subscribe({
+        next: (res: DnsResponse) => {
+          if (res.progress != null) {
+            this.dnsProgress = res.progress;
+          }
+
+          if (res.step) {
+            this.dnsStatusMessage = {
+              'queued': 'Queued...',
+              'hostname_lookup': 'Performing reverse DNS lookup...',
+              'ping_check': 'Checking reachability (ping)...',
+              'done': 'Finished',
+              'error': 'Error occurred'
+            }[res.step] || `Processing (${res.step})`;
+          }
+
+          if (res.result) {
+            this.dnsRecords = [res.result];
+            this.dnsProgress = 100;
+
+            this.updateDnsStatusMessage(res);
+          } else if (res.status === 'error') {
+            this.dnsError = res.error || 'Resolution failed';
+            this.dnsStatusMessage = 'Failed';
+            this.dnsProgress = 100;
+          }
+        },
+
+        error: (err) => {
+          this.dnsLoading = false;
+          this.stopDnsProgressSimulation();
+          this.dnsStatusMessage = 'Connection error';
+          this.dnsError = err?.error?.message || 'Failed to contact server';
+          this.dnsProgress = 100;
+        }
+      });
   }
 
-  this.validateIp();
-  if (!this.isValidDomain) {
-    this.dnsError = 'Invalid IP address format';
-    return;
-  }
-
-  this.dnsLoading = true;
-  this.dnsRecords = [];
-  this.dnsProgress = 0;
-  this.dnsStatusMessage = 'Queued...';
-  this.startDnsProgressSimulation();
-
-  const record: DnsRecord = { ip, hostname: '', ping: null };
-  this.dnsRecords = [record];
-
-  this.api
-    .post<DnsResponse>('urlscan/ip', { ip })
-    .pipe(
-      expand((res: DnsResponse) => {
-        const status = res.status;
-
-        if (status === 'pending' || status === 'busy') {
-          return timer(4000).pipe(
-            switchMap(() => this.api.post<DnsResponse>('urlscan/ip', { ip }))
-          );
-        }
-        return EMPTY;
-      }),
-
-      takeWhile((res: DnsResponse) => {
-        return res.status === 'pending' || res.status === 'busy';
-      }, true),
-
-      takeUntil(this.destroy$),
-
-      finalize(() => {
-        this.dnsLoading = false;
-        this.stopDnsProgressSimulation();
-      })
-    )
-    .subscribe({
-      next: (res: DnsResponse) => {
-        if (res.progress != null) {
-          this.dnsProgress = res.progress;
-        }
-
-        if (res.step) {
-          this.dnsStatusMessage = {
-            'queued': 'Queued...',
-            'hostname_lookup': 'Performing reverse DNS lookup...',
-            'ping_check': 'Checking reachability (ping)...',
-            'done': 'Finished',
-            'error': 'Error occurred'
-          }[res.step] || `Processing (${res.step})`;
-        }
-
-        if (res.result) {
-          this.dnsRecords = [res.result];
-          this.dnsProgress = 100;
-
-          this.updateDnsStatusMessage(res);
-        }
-        else if (res.status === 'error') {
-          this.dnsError = res.error || 'Resolution failed';
-          this.dnsStatusMessage = 'Failed';
-          this.dnsProgress = 100;
-        }
-      },
-
-      error: (err) => {
-        this.dnsLoading = false;
-        this.stopDnsProgressSimulation();
-        this.dnsStatusMessage = 'Connection error';
-        this.dnsError = err?.error?.message || 'Failed to contact server';
-        this.dnsProgress = 100;
-      }
-    });
-}
   copyOne(value: string): void {
     navigator.clipboard.writeText(value).then();
     this.toast = 'Copied';
@@ -477,19 +477,10 @@ onDnsCheck(): void {
   }
 
   copyDnsRecord(record: DnsRecord): void {
-  const text = `${record.ip}: ${record.hostname || 'No PTR record'} (Ping: ${record.ping ? 'Reachable' : 'Not reachable'})`;
-  navigator.clipboard.writeText(text).then();
-  this.toast = 'DNS record copied';
-  setTimeout(() => (this.toast = ''), 900);
-}
-
-copyAllDns(): void {
-  const allRecords = this.dnsRecords
-    .map(r => `${r.ip}: ${r.hostname || 'No PTR record'} (Ping: ${r.ping ? 'Reachable' : 'Not reachable'})`)
-    .join('\n');
-  navigator.clipboard.writeText(allRecords).then();
-  this.toast = 'All DNS records copied';
-  setTimeout(() => (this.toast = ''), 900);
-}
+    const text = `${record.ip}: ${record.hostname || 'No PTR record'} (Ping: ${record.ping ? 'Reachable' : 'Not reachable'})`;
+    navigator.clipboard.writeText(text).then();
+    this.toast = 'DNS record copied';
+    setTimeout(() => (this.toast = ''), 900);
+  }
 
 }

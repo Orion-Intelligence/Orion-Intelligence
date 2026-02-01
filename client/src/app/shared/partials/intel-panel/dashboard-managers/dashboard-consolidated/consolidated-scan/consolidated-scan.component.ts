@@ -19,7 +19,6 @@ type PendingMsg = { status: 'pending'; progress?: number; step?: string };
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './consolidated-scan.component.html',
-  styleUrls: ['./consolidated-scan.component.css'],
   animations: [scanAnimation]
 })
 export class ConsolidatedScanComponent {

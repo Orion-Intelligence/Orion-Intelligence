@@ -28,7 +28,6 @@ type UiStat = { icon: string; label: string; value: string; accent: string };
     FormsModule,
   ],
   templateUrl: './file-scanner.component.html',
-  styleUrls: ['./file-scanner.component.css'],
   animations: [fadeInDashboardItem],
   host: {
     '(window:scroll)': 'onWindowScroll()'
