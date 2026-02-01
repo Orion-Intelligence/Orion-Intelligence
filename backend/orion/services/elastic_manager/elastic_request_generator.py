@@ -55,7 +55,7 @@ class elastic_request_generator:
             merged = _as_list(fields)
             merged += _as_list(mapping.get("source_domain"))
             merged += _as_list(mapping.get("m_source_domain"))
-            merged += ["source_domain.keyword", "source_domain"]
+            merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
         if not fields:
@@ -103,7 +103,7 @@ class elastic_request_generator:
                     continue
 
                 for field in es_fields:
-                    term_field = field if str(field).endswith((".keyword", ".raw")) else f"{field}.keyword"
+                    term_field = field if str(field).endswith((".keyword", ".raw")) else f"{field}"
 
                     shoulds.append({
                         "term": {
