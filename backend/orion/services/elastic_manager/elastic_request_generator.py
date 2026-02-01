@@ -30,14 +30,14 @@ class elastic_request_generator:
 
             if "OR" in parsed:
                 should_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
-                                for x in parsed["OR"]]
+                                  for x in parsed["OR"]]
                 if len(should_clauses) == 1:
                     return should_clauses[0]
                 return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
         if isinstance(parsed, list):
             should_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
-                            for x in parsed]
+                              for x in parsed]
             if len(should_clauses) == 1:
                 return should_clauses[0]
             return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
@@ -45,6 +45,18 @@ class elastic_request_generator:
         tag = parsed.get("tag")
         value = parsed.get("value")
         fields = mapping.get(tag)
+
+        if tag in ("m_domain", "domain", "m_search_all"):
+            def _as_list(x):
+                if not x:
+                    return []
+                return x if isinstance(x, list) else [x]
+
+            merged = _as_list(fields)
+            merged += _as_list(mapping.get("source_domain"))
+            merged += _as_list(mapping.get("m_source_domain"))
+            merged += ["source_domain.keyword", "source_domain"]
+            fields = list(dict.fromkeys([f for f in merged if f]))
 
         if not fields:
             return {"match_none": {}}
@@ -1243,12 +1255,7 @@ class elastic_request_generator:
             "size": size,
             "sort": [{"_shard_doc": "asc"}],
             "track_total_hits": False,
-            "_source": [
-                "url", "username", "domain", "email",
-                "password", "ip", "channel", "type", "raw", "_id", "file", "date" 
-            ]
         }
-
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
 

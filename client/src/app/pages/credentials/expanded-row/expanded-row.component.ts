@@ -275,6 +275,7 @@ export class ExpandedRowComponent implements OnChanges {
       'fileType',
       'channel',
       'm_channel',
+      'm_sub_host',
       'source_channel',
       'm_source_channel',
       'email',

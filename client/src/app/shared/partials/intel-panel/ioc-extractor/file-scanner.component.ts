@@ -14,7 +14,8 @@ import {
   IocExtractResponse
 } from '../../../model/ioc-extractor/ioc.extractor.model';
 import { ApiService } from '../../../services/api.service';
-import { CodeBlockComponent } from '../../code-block/code-block.component';
+
+type UiStat = { icon: string; label: string; value: string; accent: string };
 
 @Component({
   selector: 'app-ioc-extractor',
@@ -25,10 +26,13 @@ import { CodeBlockComponent } from '../../code-block/code-block.component';
     NgOptimizedImage,
     TooltipDirective,
     FormsModule,
-    CodeBlockComponent
   ],
   templateUrl: './file-scanner.component.html',
-  animations: [fadeInDashboardItem]
+  styleUrls: ['./file-scanner.component.css'],
+  animations: [fadeInDashboardItem],
+  host: {
+    '(window:scroll)': 'onWindowScroll()'
+  }
 })
 export class FileScannerComponent {
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
@@ -46,10 +50,12 @@ export class FileScannerComponent {
   groupedIocs: GroupedIoc[] = [];
   progress = signal(0);
   currentStep = '';
-  skeletonCards = Array.from({ length: 3 });
+
+  isScrolled = signal(false);
+  copiedValue = signal<string | null>(null);
 
   private readonly IOC_EXTRACT_ENDPOINT = 'ioc/extract';
-  private readonly MAX_FILE_SIZE = 1024 * 1024; // 1 MB
+  private readonly MAX_FILE_SIZE = 1024 * 1024;
 
   private readonly ALLOWED_FILE_TYPES = {
     'application/pdf': ['.pdf'],
@@ -58,21 +64,21 @@ export class FileScannerComponent {
     'image/jpeg': ['.jpg', '.jpeg'],
   };
 
-  private readonly IOC_LABELS: { [key: string]: { label: string; description: string } } = {
-    m_domain: { label: 'Domain', description: 'Domain name detected in the file' },
-    m_email: { label: 'Email Address', description: 'Email address found in the document' },
-    m_phone_number: { label: 'Phone Number', description: 'Phone number extracted from content' },
-    m_country: { label: 'Country', description: 'Country name mentioned' },
-    m_location: { label: 'Location', description: 'Geographic location reference' },
-    m_uk_nhs: { label: 'UK NHS Number', description: 'UK National Health Service identifier' },
-    m_us_driver_license: { label: 'US Driver License', description: 'US driver license identifier' },
-    m_username: { label: 'Username', description: 'Username or handle detected' },
-    m_language: { label: 'Language', description: 'Language code identified' },
-    m_ip: { label: 'IP Address', description: 'IP address found in content' },
-    m_url: { label: 'URL', description: 'Web URL extracted' },
-    m_hash: { label: 'Hash', description: 'File hash or cryptographic hash' },
-    m_ssn: { label: 'SSN', description: 'Social Security Number' },
-    m_credit_card: { label: 'Credit Card', description: 'Credit card number' }
+  private readonly IOC_LABELS: { [key: string]: { label: string; description: string; color?: string } } = {
+    m_domain: { label: 'Domain', description: 'Domain name detected in the file', color: '#0EA5E9' },
+    m_email: { label: 'Email Address', description: 'Email address found in the document', color: '#8B5CF6' },
+    m_phone_number: { label: 'Phone Number', description: 'Phone number extracted from content', color: '#22C55E' },
+    m_country: { label: 'Country', description: 'Country name mentioned', color: '#F97316' },
+    m_location: { label: 'Location', description: 'Geographic location reference', color: '#6366F1' },
+    m_uk_nhs: { label: 'UK NHS Number', description: 'UK National Health Service identifier', color: '#0EA5E9' },
+    m_us_driver_license: { label: 'US Driver License', description: 'US driver license identifier', color: '#F97316' },
+    m_username: { label: 'Username', description: 'Username or handle detected', color: '#8B5CF6' },
+    m_language: { label: 'Language', description: 'Language code identified', color: '#22C55E' },
+    m_ip: { label: 'IP Address', description: 'IP address found in content', color: '#0EA5E9' },
+    m_url: { label: 'URL', description: 'Web URL extracted', color: '#6366F1' },
+    m_hash: { label: 'Hash', description: 'File hash or cryptographic hash', color: '#EAB308' },
+    m_ssn: { label: 'SSN', description: 'Social Security Number', color: '#F97316' },
+    m_credit_card: { label: 'Credit Card', description: 'Credit card number', color: '#EF4444' }
   };
 
   constructor(
@@ -80,6 +86,11 @@ export class FileScannerComponent {
     private route: ActivatedRoute,
     private router: Router
   ) {}
+
+  onWindowScroll(): void {
+    const scrolled = window.scrollY > 10;
+    if (scrolled !== this.isScrolled()) this.isScrolled.set(scrolled);
+  }
 
   onFileSelected(event: Event): void {
     const target = event.target as HTMLInputElement;
@@ -90,9 +101,7 @@ export class FileScannerComponent {
 
   private isFileTypeAllowed(file: File): boolean {
     const mimeType = (file.type || '').toLowerCase();
-    if (Object.keys(this.ALLOWED_FILE_TYPES).includes(mimeType)) {
-      return true;
-    }
+    if (Object.keys(this.ALLOWED_FILE_TYPES).includes(mimeType)) return true;
     const fileName = file.name.toLowerCase();
     const allowedExtensions = Object.values(this.ALLOWED_FILE_TYPES).flat();
     return allowedExtensions.some(ext => fileName.endsWith(ext));
@@ -116,7 +125,7 @@ export class FileScannerComponent {
     if (file.size > this.MAX_FILE_SIZE) {
       this.hasError = true;
       this.isFileSizeError = true;
-      this.errorMessage = `File size exceeds 10MB. Your file is ${this.formatFileSize(file.size)}.`;
+      this.errorMessage = `File size exceeds 1MB. Your file is ${this.formatFileSize(file.size)}.`;
       this.resetFileInput();
       this.isFetched = true;
       return;
@@ -130,9 +139,7 @@ export class FileScannerComponent {
       relativeTo: this.route,
       queryParams: { file: encodeURIComponent(file.name) },
       queryParamsHandling: 'merge'
-    }).catch(() => {
-
-    });
+    }).catch(() => {});
 
     this.extractIocs();
   }
@@ -238,15 +245,18 @@ export class FileScannerComponent {
   }
 
   private processIocs(iocs: IocItem[]): void {
-    const categorized = new Map<string, any[]>();
+    const categorized = new Map<string, { key: string; color: string; items: any[] }>();
 
     iocs.forEach(ioc => {
       Object.entries(ioc).forEach(([key, value]) => {
-        const category = this.IOC_LABELS[key]?.label || this.formatIocType(key);
-        if (!categorized.has(category)) {
-          categorized.set(category, []);
+        const label = this.IOC_LABELS[key]?.label || this.formatIocType(key);
+        const color = this.IOC_LABELS[key]?.color || '#0EA5E9';
+
+        if (!categorized.has(label)) {
+          categorized.set(label, { key, color, items: [] });
         }
-        categorized.get(category)!.push({
+
+        categorized.get(label)!.items.push({
           type: key,
           value,
           display: value,
@@ -256,13 +266,12 @@ export class FileScannerComponent {
     });
 
     this.groupedIocs = Array.from(categorized.entries())
-      .map(([name, items]) => ({
+      .map(([name, meta]) => ({
         name,
-        total: items.length,
-        items: items.filter(
-          (item, index, self) => index === self.findIndex(t => t.value === item.value)
-        )
-      }))
+        total: meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value)).length,
+        items: meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value)),
+        color: meta.color
+      }) as any)
       .filter(c => c.items.length > 0);
   }
 
@@ -308,10 +317,10 @@ export class FileScannerComponent {
         status: this.extractionResult.status
       },
       total_iocs: this.getTotalIocCount(),
-      ioc_categories: this.groupedIocs.map(cat => ({
+      ioc_categories: this.groupedIocs.map((cat: any) => ({
         category: cat.name,
         count: cat.total,
-        items: cat.items.map(item => item.value)
+        items: cat.items.map((item: any) => item.value)
       })),
       raw_iocs: this.extractionResult.iocs
     };
@@ -368,6 +377,26 @@ export class FileScannerComponent {
     return this.extractionResult?.iocs?.length || 0;
   }
 
-  trackByCategory = (_: number, c: GroupedIoc) => c.name;
+  getSummaryStats(): UiStat[] {
+    if (!this.extractionResult) return [];
+    const r = this.extractionResult;
+
+    return [
+      { icon: 'bi-file-earmark-text', label: 'Filename', value: r.original_filename || '-', accent: '#0EA5E9' },
+      { icon: 'bi-code-slash', label: 'File Type', value: (r.file_type || '').toUpperCase(), accent: '#8B5CF6' },
+      { icon: 'bi-body-text', label: 'Extracted Text', value: `${this.formatNumber(r.extracted_text_length)} chars`, accent: '#06B6D4' },
+      { icon: 'bi-shield-exclamation', label: 'Total IOCs', value: `${this.getTotalIocCount()}`, accent: '#EAB308' },
+      { icon: 'bi-check-circle', label: 'Status', value: r.status || '-', accent: '#22C55E' }
+    ];
+  }
+
+  copyValue(value: string): void {
+    navigator.clipboard.writeText(value).then(() => {
+      this.copiedValue.set(value);
+      setTimeout(() => this.copiedValue.set(null), 1500);
+    });
+  }
+
+  trackByCategory = (_: number, c: any) => c.name;
   trackByItem = (i: number) => i;
 }

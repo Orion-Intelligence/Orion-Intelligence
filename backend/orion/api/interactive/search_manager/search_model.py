@@ -221,11 +221,6 @@ class search_model:
 
         indices, queries, labels = elastic_request_generator().on_search_consolidated_data(param, filter_dict)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
-        print(":::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::")
-        print(queries)
-        print(":::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::")
 
         leak_data = {}
         general_data = {}
@@ -349,13 +344,6 @@ class search_model:
             return False, []
 
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-
-        # hits = m_documents.get("hits", {}).get("hits", [])
-        # for h in hits:
-        #     src = h.get("_source", {})
-        #     src["_id"] = h.get("_id")
-        #     if param.category != "credential" and "mapping" in src:
-        #         src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
 
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
