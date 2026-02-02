@@ -99,10 +99,12 @@
         </a>
       </div>
     </ng-container>
-    <ng-container>
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
       <div class="sidebar__item">
-        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/social-mapper" target="_blank">
-          <img alt="Social Mapper" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/social.svg" width="20"> Social
+        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/social-mapper"
+          target="_blank">
+          <img alt="Social Mapper" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/social.svg"
+            width="20"> Social
           Mapper
         </a>
       </div>
