@@ -37,6 +37,26 @@ interface DnsResponse {
   error?: string;
 }
 
+interface WaybackSnapshot {
+  timestamp: string;
+  url: string;
+  statuscode: string;
+  mimetype?: string;
+}
+
+interface WaybackResponse {
+  result?: {
+    status?: string;
+    snapshots?: WaybackSnapshot[];
+    count?: number;
+    message?: string;
+  };
+  status?: string;
+  snapshots?: WaybackSnapshot[];
+  count?: number;
+  message?: string;
+}
+
 @Component({
   selector: 'app-subdomains',
   standalone: true,
@@ -49,7 +69,7 @@ export class SubdomainsComponent {
   @Output() close = new EventEmitter<void>();
   @Output() search = new EventEmitter<string[]>();
 
-  activeTab: 'subdomains' | 'dns' = 'subdomains';
+  activeTab: 'subdomains' | 'dns' | 'wayback' = 'subdomains';
 
   domain = '';
   isValidDomain = true;
@@ -71,9 +91,17 @@ export class SubdomainsComponent {
   dnsStatusMessage = 'Initializing...';
   dnsSubmitted = false;
 
+  waybackLoading = false;
+  waybackError = '';
+  waybackSnapshots: WaybackSnapshot[] = [];
+  waybackProgress = 0;
+  waybackStatusMessage = 'Initializing...';
+  waybackSubmitted = false;
+
   private destroy$ = new Subject<void>();
   private progressTimer$ = new Subject<void>();
   private dnsProgressTimer$ = new Subject<void>();
+  private waybackProgressTimer$ = new Subject<void>();
 
   constructor(private api: ApiService) {}
 
@@ -84,9 +112,11 @@ export class SubdomainsComponent {
     this.progressTimer$.complete();
     this.dnsProgressTimer$.next();
     this.dnsProgressTimer$.complete();
+    this.waybackProgressTimer$.next();
+    this.waybackProgressTimer$.complete();
   }
 
-  switchTab(tab: 'subdomains' | 'dns'): void {
+  switchTab(tab: 'subdomains' | 'dns' | 'wayback'): void {
     this.activeTab = tab;
   }
 
@@ -94,15 +124,19 @@ export class SubdomainsComponent {
     if (this.activeTab === 'subdomains') {
       this.submitted = true;
       this.onSearch();
-    } else {
+    } else if (this.activeTab === 'dns') {
       this.dnsSubmitted = true;
       this.onDnsCheck();
+    } else if (this.activeTab === 'wayback') {
+      this.waybackSubmitted = true;
+      this.onWaybackSearch();
     }
   }
 
   onClose(): void {
     this.stopProgressSimulation();
     this.stopDnsProgressSimulation();
+    this.stopWaybackProgressSimulation();
     this.resetState();
     this.close.emit();
   }
@@ -127,6 +161,13 @@ export class SubdomainsComponent {
     this.dnsProgress = 0;
     this.dnsStatusMessage = 'Initializing...';
     this.dnsSubmitted = false;
+
+    this.waybackLoading = false;
+    this.waybackError = '';
+    this.waybackSnapshots = [];
+    this.waybackProgress = 0;
+    this.waybackStatusMessage = 'Initializing...';
+    this.waybackSubmitted = false;
 
     this.activeTab = 'subdomains';
   }
@@ -186,6 +227,28 @@ export class SubdomainsComponent {
     this.dnsProgress = 100;
   }
 
+  private startWaybackProgressSimulation(): void {
+    this.waybackProgress = 0;
+    this.waybackProgressTimer$ = new Subject<void>();
+
+    interval(300)
+      .pipe(
+        takeUntil(this.waybackProgressTimer$),
+        tap(() => {
+          if (this.waybackProgress < 90) {
+            const increment = this.waybackProgress < 30 ? 3 : this.waybackProgress < 60 ? 2 : 1;
+            this.waybackProgress = Math.min(90, this.waybackProgress + increment);
+          }
+        })
+      )
+      .subscribe();
+  }
+
+  private stopWaybackProgressSimulation(): void {
+    this.waybackProgressTimer$.next();
+    this.waybackProgress = 100;
+  }
+
   private updateStatusMessage(res: SubdomainResponse): void {
     const status = res?.result?.status || res?.status;
 
@@ -207,32 +270,47 @@ export class SubdomainsComponent {
     }
   }
 
-private updateDnsStatusMessage(res: DnsResponse): void {
-  const status = res?.status;
+  private updateDnsStatusMessage(res: DnsResponse): void {
+    const status = res?.status;
 
-  if (status === 'pending') {
-    this.dnsStatusMessage = 'Resolving DNS records...';
-  } else if (status === 'busy') {
-    this.dnsStatusMessage = 'Processing DNS resolution...';
-  } else if (status === 'done') {
-    const result = res.result;
-    if (result) {
-      if (result.hostname) {
-        this.dnsStatusMessage = result.ping
-          ? `Reachable • ${result.hostname}`
-          : `Not reachable • ${result.hostname}`;
-      } else {
-        this.dnsStatusMessage = result.ping
-          ? 'Reachable • No PTR record'
-          : 'Not reachable • No PTR record';
+    if (status === 'pending') {
+      this.dnsStatusMessage = 'Resolving DNS records...';
+    } else if (status === 'busy') {
+      this.dnsStatusMessage = 'Processing DNS resolution...';
+    } else if (status === 'done') {
+      const result = res.result;
+      if (result) {
+        if (result.hostname) {
+          this.dnsStatusMessage = result.ping
+            ? `Reachable • ${result.hostname}`
+            : `Not reachable • ${result.hostname}`;
+        } else {
+          this.dnsStatusMessage = result.ping
+            ? 'Reachable • No PTR record'
+            : 'Not reachable • No PTR record';
+        }
       }
+    } else if (status === 'error') {
+      this.dnsStatusMessage = 'Failed to resolve';
+    } else {
+      this.dnsStatusMessage = 'Requesting...';
     }
-  } else if (status === 'error') {
-    this.dnsStatusMessage = 'Failed to resolve';
-  } else {
-    this.dnsStatusMessage = 'Requesting...';
   }
-}
+
+  private updateWaybackStatusMessage(res: WaybackResponse): void {
+    const status = res?.result?.status || res?.status;
+
+    if (status === 'pending') {
+      this.waybackStatusMessage = 'Searching Wayback Machine...';
+    } else if (status === 'busy') {
+      this.waybackStatusMessage = 'Processing request...';
+    } else if (status === 'success') {
+      const count = res?.result?.count || res?.count || 0;
+      this.waybackStatusMessage = `Found ${count} snapshot${count !== 1 ? 's' : ''}`;
+    } else {
+      this.waybackStatusMessage = 'Requesting...';
+    }
+  }
 
   validateDomain(): void {
     const trimmed = this.domain.trim();
@@ -260,7 +338,6 @@ private updateDnsStatusMessage(res: DnsResponse): void {
     }
 
     const ipv4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
-
     const ipv6 = /^((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::1|::|(?:[0-9a-fA-F]{1,4}:){1,7}:)$/;
 
     this.isValidDomain = ipv4.test(ip) || ipv6.test(ip);
@@ -376,94 +453,185 @@ private updateDnsStatusMessage(res: DnsResponse): void {
       });
   }
 
-onDnsCheck(): void {
-  this.dnsSubmitted = true;
-  this.dnsError = '';
+  onDnsCheck(): void {
+    this.dnsSubmitted = true;
+    this.dnsError = '';
 
-  const ip = this.domain?.trim();
-  if (!ip) {
-    this.dnsError = 'Please enter an IP address';
-    return;
-  }
+    const ip = this.domain?.trim();
+    if (!ip) {
+      this.dnsError = 'Please enter an IP address';
+      return;
+    }
 
-  this.validateIp();
-  if (!this.isValidDomain) {
-    this.dnsError = 'Invalid IP address format';
-    return;
-  }
+    this.validateIp();
+    if (!this.isValidDomain) {
+      this.dnsError = 'Invalid IP address format';
+      return;
+    }
 
-  this.dnsLoading = true;
-  this.dnsRecords = [];
-  this.dnsProgress = 0;
-  this.dnsStatusMessage = 'Queued...';
-  this.startDnsProgressSimulation();
+    this.dnsLoading = true;
+    this.dnsRecords = [];
+    this.dnsProgress = 0;
+    this.dnsStatusMessage = 'Queued...';
+    this.startDnsProgressSimulation();
 
-  const record: DnsRecord = { ip, hostname: '', ping: null };
-  this.dnsRecords = [record];
+    const record: DnsRecord = { ip, hostname: '', ping: null };
+    this.dnsRecords = [record];
 
-  this.api
-    .post<DnsResponse>('urlscan/ip', { ip })
-    .pipe(
-      expand((res: DnsResponse) => {
-        const status = res.status;
+    this.api
+      .post<DnsResponse>('urlscan/ip', { ip })
+      .pipe(
+        expand((res: DnsResponse) => {
+          const status = res.status;
 
-        if (status === 'pending' || status === 'busy') {
-          return timer(4000).pipe(
-            switchMap(() => this.api.post<DnsResponse>('urlscan/ip', { ip }))
-          );
+          if (status === 'pending' || status === 'busy') {
+            return timer(4000).pipe(
+              switchMap(() => this.api.post<DnsResponse>('urlscan/ip', { ip }))
+            );
+          }
+          return EMPTY;
+        }),
+
+        takeWhile((res: DnsResponse) => {
+          return res.status === 'pending' || res.status === 'busy';
+        }, true),
+
+        takeUntil(this.destroy$),
+
+        finalize(() => {
+          this.dnsLoading = false;
+          this.stopDnsProgressSimulation();
+        })
+      )
+      .subscribe({
+        next: (res: DnsResponse) => {
+          if (res.progress != null) {
+            this.dnsProgress = res.progress;
+          }
+
+          if (res.step) {
+            this.dnsStatusMessage = {
+              'queued': 'Queued...',
+              'hostname_lookup': 'Performing reverse DNS lookup...',
+              'ping_check': 'Checking reachability (ping)...',
+              'done': 'Finished',
+              'error': 'Error occurred'
+            }[res.step] || `Processing (${res.step})`;
+          }
+
+          if (res.status === 'done' && res.result) {
+            this.dnsRecords = [res.result];
+            this.dnsProgress = 100;
+
+            this.updateDnsStatusMessage(res);
+          }
+          else if (res.status === 'error') {
+            this.dnsError = res.error || 'Resolution failed';
+            this.dnsStatusMessage = 'Failed';
+            this.dnsProgress = 100;
+          }
+        },
+
+        error: (err) => {
+          this.dnsLoading = false;
+          this.stopDnsProgressSimulation();
+          this.dnsStatusMessage = 'Connection error';
+          this.dnsError = err?.error?.message || 'Failed to contact server';
+          this.dnsProgress = 100;
         }
-        return EMPTY;
-      }),
+      });
+  }
 
-      takeWhile((res: DnsResponse) => {
-        return res.status === 'pending' || res.status === 'busy';
-      }, true),
+  onWaybackSearch(): void {
+    this.waybackSubmitted = true;
 
-      takeUntil(this.destroy$),
+    const raw = (this.domain ?? '').trim();
+    if (!raw) {
+      this.waybackError = 'Please enter a domain';
+      return;
+    }
 
-      finalize(() => {
-        this.dnsLoading = false;
-        this.stopDnsProgressSimulation();
+    this.validateDomain();
+    if (!this.isValidDomain) {
+      this.waybackError = 'Please enter a valid domain (e.g., example.com)';
+      return;
+    }
+
+    const resolved = this.resolveRequestedUrl(raw);
+
+    this.waybackLoading = true;
+    this.waybackError = '';
+    this.waybackSnapshots = [];
+    this.startWaybackProgressSimulation();
+    this.waybackStatusMessage = 'Initiating search...';
+
+    this.api
+      .post<WaybackResponse>('urlscan/domain', {
+        domain: resolved,
+        scanType: 'wayback'
       })
-    )
-    .subscribe({
-      next: (res: DnsResponse) => {
-        if (res.progress != null) {
-          this.dnsProgress = res.progress;
-        }
+      .pipe(
+        tap((res) => this.updateWaybackStatusMessage(res)),
+        expand((res: WaybackResponse) => {
+          const status = res?.result?.status || res?.status;
 
-        if (res.step) {
-          this.dnsStatusMessage = {
-            'queued': 'Queued...',
-            'hostname_lookup': 'Performing reverse DNS lookup...',
-            'ping_check': 'Checking reachability (ping)...',
-            'done': 'Finished',
-            'error': 'Error occurred'
-          }[res.step] || `Processing (${res.step})`;
-        }
+          if (status === 'pending' || status === 'busy') {
+            return timer(4000).pipe(
+              switchMap(() =>
+                this.api
+                  .post<WaybackResponse>('urlscan/domain', {
+                    domain: resolved,
+                    scanType: 'wayback'
+                  })
+                  .pipe(tap((newRes) => this.updateWaybackStatusMessage(newRes)))
+              )
+            );
+          }
+          return EMPTY;
+        }),
+        takeWhile(
+          (res: WaybackResponse) => {
+            const status = res?.result?.status || res?.status;
+            return status === 'pending' || status === 'busy';
+          },
+          true
+        ),
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.waybackLoading = false;
+          this.stopWaybackProgressSimulation();
+        })
+      )
+      .subscribe({
+        next: (res: WaybackResponse) => {
+          const status = res?.result?.status || res?.status;
 
-        if (res.status === 'done' && res.result) {
-          this.dnsRecords = [res.result];
-          this.dnsProgress = 100;
+          if (status === 'pending' || status === 'busy') {
+            return;
+          }
 
-          this.updateDnsStatusMessage(res);
+          if (status === 'success') {
+            const snapshots = res?.result?.snapshots || res?.snapshots || [];
+            this.waybackSnapshots = snapshots;
+            this.waybackStatusMessage = `Found ${snapshots.length} snapshot${snapshots.length !== 1 ? 's' : ''}`;
+            this.waybackProgress = 100;
+          } else {
+            this.waybackError = res?.result?.message || res?.message || 'Failed to fetch snapshots';
+            this.waybackStatusMessage = 'Search failed';
+          }
+        },
+        error: (err) => {
+          this.waybackLoading = false;
+          this.stopWaybackProgressSimulation();
+          this.waybackStatusMessage = 'Error occurred';
+          this.waybackError =
+            err?.status === 401
+              ? 'Unauthorized: Please check your credentials'
+              : err?.error?.message || 'Failed to fetch snapshots. Please try again.';
         }
-        else if (res.status === 'error') {
-          this.dnsError = res.error || 'Resolution failed';
-          this.dnsStatusMessage = 'Failed';
-          this.dnsProgress = 100;
-        }
-      },
+      });
+  }
 
-      error: (err) => {
-        this.dnsLoading = false;
-        this.stopDnsProgressSimulation();
-        this.dnsStatusMessage = 'Connection error';
-        this.dnsError = err?.error?.message || 'Failed to contact server';
-        this.dnsProgress = 100;
-      }
-    });
-}
   copyOne(value: string): void {
     navigator.clipboard.writeText(value).then();
     this.toast = 'Copied';
@@ -477,19 +645,33 @@ onDnsCheck(): void {
   }
 
   copyDnsRecord(record: DnsRecord): void {
-  const text = `${record.ip}: ${record.hostname || 'No PTR record'} (Ping: ${record.ping ? 'Reachable' : 'Not reachable'})`;
-  navigator.clipboard.writeText(text).then();
-  this.toast = 'DNS record copied';
-  setTimeout(() => (this.toast = ''), 900);
-}
+    const text = `${record.ip}: ${record.hostname || 'No PTR record'} (Ping: ${record.ping ? 'Reachable' : 'Not reachable'})`;
+    navigator.clipboard.writeText(text).then();
+    this.toast = 'DNS record copied';
+    setTimeout(() => (this.toast = ''), 900);
+  }
 
-copyAllDns(): void {
-  const allRecords = this.dnsRecords
-    .map(r => `${r.ip}: ${r.hostname || 'No PTR record'} (Ping: ${r.ping ? 'Reachable' : 'Not reachable'})`)
-    .join('\n');
-  navigator.clipboard.writeText(allRecords).then();
-  this.toast = 'All DNS records copied';
-  setTimeout(() => (this.toast = ''), 900);
-}
+  copyAllDns(): void {
+    const allRecords = this.dnsRecords
+      .map(r => `${r.ip}: ${r.hostname || 'No PTR record'} (Ping: ${r.ping ? 'Reachable' : 'Not reachable'})`)
+      .join('\n');
+    navigator.clipboard.writeText(allRecords).then();
+    this.toast = 'All DNS records copied';
+    setTimeout(() => (this.toast = ''), 900);
+  }
 
+  copyWaybackUrl(url: string): void {
+    navigator.clipboard.writeText(url).then();
+    this.toast = 'URL copied';
+    setTimeout(() => (this.toast = ''), 900);
+  }
+
+  copyAllWayback(): void {
+    const allUrls = this.waybackSnapshots
+      .map(s => s.url)
+      .join('\n');
+    navigator.clipboard.writeText(allUrls).then();
+    this.toast = 'All URLs copied';
+    setTimeout(() => (this.toast = ''), 900);
+  }
 }
