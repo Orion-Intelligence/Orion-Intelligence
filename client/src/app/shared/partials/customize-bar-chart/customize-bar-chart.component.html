@@ -1,13 +1,8 @@
 <div class="bar-chart_container">
   <div class="bar-chart_statistics-text">
     <span>Statistics</span>
-    <img
-      src="/assets/images/shared/theme/info.svg"
-      alt="info"
-      class="bar-chart_info-icon"
-      [appTooltip]="dashboardTooltips[graphModel.title ?? '']"
-
-    />
+    <img src="/assets/images/shared/theme/info.svg" alt="info" class="bar-chart_info-icon"
+      [appTooltip]="dashboardTooltips[graphModel.title ?? '']" />
   </div>
 
   <div *ngIf="graphModel?.title" class="bar-chart_chart-title">
@@ -37,12 +32,8 @@
               {{ item.value.toLocaleString() }}
             </div>
 
-            <div
-              class="bar-chart_bar"
-              [style.height.%]="(item.value / roundedMaxValue) * 100"
-              [appTooltip]="item.name + ': ' + item.value.toLocaleString()"
-              tooltipPosition="top"
-            ></div>
+            <div class="bar-chart_bar" [style.height.%]="(item.value / roundedMaxValue) * 100"
+              [appTooltip]="item.name + ': ' + item.value.toLocaleString()" tooltipPosition="top"></div>
           </div>
 
           <div class="bar-chart_bar-label">

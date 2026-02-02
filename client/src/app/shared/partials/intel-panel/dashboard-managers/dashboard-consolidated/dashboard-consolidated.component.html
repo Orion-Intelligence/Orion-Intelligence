@@ -1,8 +1,8 @@
 <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false" [showNoResult]="false"
   (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
-  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading()" [searchQuery]="query"
-  [result_count_enabled]="false" [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
-  (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)"
+  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [activeTab]="isIOC ? 'IOCs' : 'Group'"
+  [isLoading]="isLoading()" [searchQuery]="query" [result_count_enabled]="false" [result_count]="getTotalResultCount()"
+  [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)"
   [showSelectedFilters]="true"></app-result>
 
 <br>

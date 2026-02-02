@@ -56,6 +56,8 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() filterModel!: FilterModel;
   @Input() showSorting: boolean = true;
   @Input() showSelectedFilters: boolean = true;
+  @Input() activeTab: string = 'Group';
+
 
   @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
@@ -73,7 +75,6 @@ export class ResultComponent implements OnInit, OnChanges {
   local_query = ""
   showScans = false;
   scandomains: string[] = [];
-  tab: string = '';
 
   protected readonly query = query;
   protected readonly Category = Category;
@@ -189,7 +190,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onToggleAnalytics(_tab: string) {
-    this.tab = _tab;
+    this.activeTab = _tab;
     this.onToggleSwitch.emit(_tab);
   }
 

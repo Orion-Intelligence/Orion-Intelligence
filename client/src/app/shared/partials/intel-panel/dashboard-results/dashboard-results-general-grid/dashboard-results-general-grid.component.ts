@@ -47,8 +47,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
-
-    const ci = this.type === 'leak' ? 'leak' : this.type === 'tracking' ? 'leak' : this.type === 'news' ? 'leak' : this.type === 'Strategic' ? 'strategic' : 'leak';
+    const ci = this.type === 'leak' ? 'leak' : this.type === 'tracking' ? 'leak' : this.type === 'news' ? 'leak' : this.type === 'general' ? 'general' : this.type === 'Strategic' ? 'strategic' : 'leak';
     if (this.currentUrl.includes('/consolidated/all') || this.currentUrl.includes('/profile/homepage/all')) {
       this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);
     }

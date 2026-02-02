@@ -109,15 +109,22 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         }
         this.firstTrigger = false;
       });
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'];
+
+      if (tab) {
+        this.onToggleMenu(tab);
+      }
+    });
   }
 
   fetchSearchResults(_ = false): void {
-    this.domainScanComponent.clearResults()
+    if (this.domainScanComponent) { this.domainScanComponent.clearResults() }
     if (!this.isGrouped) {
       this.fetchRanked()
       return
     }
-    if (this.licenseService.canUseScanning()) {
+    if (this.licenseService.canUseScanning() && this.domainScanComponent) {
       this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
 
@@ -335,6 +342,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   onToggleMenu(tab: string): void {
+    this.dashboardService.consolidatedParamModel.tab = tab;
+
     if (tab == "Group") {
       this.isGrouped = true
       this.isIOC = false

@@ -13,13 +13,13 @@
     <a class="nav-link cursor-pointer">Discussion</a>
   </li>
   <li class="nav-item" *ngIf="!list_grid && consolidated">
-    <a class="nav-link cursor-pointer active">Group</a>
+    <a class="nav-link cursor-pointer active" [class.active]="activeTab === 'Group'">Group</a>
   </li>
   <!-- <li class="nav-item" *ngIf="!list_grid && consolidated">
     <a class="nav-link cursor-pointer">Ranked</a>
   </li> -->
   <li class="nav-item" *ngIf="!list_grid && consolidated">
-    <a class="nav-link cursor-pointer">IOCs</a>
+    <a class="nav-link cursor-pointer" [class.active]="activeTab === 'IOCs'">IOCs</a>
   </li>
   <li class="nav-item" *ngIf="!list_grid && domain">
     <a class="nav-link cursor-pointer active">Stealers</a>
@@ -28,14 +28,14 @@
     <a class="nav-link cursor-pointer">Threats</a>
   </li>
 </ul>
-<ng-container *ngIf="tab!='IOCs'&&consolidated">
+<ng-container *ngIf="activeTab!='IOCs'&&consolidated">
   <br>
 </ng-container>
-<ng-container *ngIf="tab!='IOCs'">
+<ng-container *ngIf="activeTab!='IOCs'">
 
   <form (submit)="onFormSubmit()" @fadeInDashboardItem
     class="default-input-container default-input-sub-container-padded w-90"
-    [ngClass]="{ 'mt-0': tab != 'IOCs' && consolidated }" *ngIf="!domain">
+    [ngClass]="{ 'mt-0': activeTab != 'IOCs' && consolidated }" *ngIf="!domain">
     <div class="search-filter-d-flex search-filter-row">
       <div class="search-bar-wrapper default-input-container-mobile">
         <div class="mobile-backdrop" *ngIf="homeSearchService.showFiltersOverlay"></div>

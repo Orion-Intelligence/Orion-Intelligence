@@ -12,6 +12,7 @@ export class ConsolidatedParamModel {
   user = "";
   ioc = "";
   fullsearch = false;
+  tab = "";
 
 
   reset(): void {
@@ -26,5 +27,6 @@ export class ConsolidatedParamModel {
     this.user = "";
     this.ioc = "";
     this.fullsearch = false;
+    this.tab = "";
   }
 }
