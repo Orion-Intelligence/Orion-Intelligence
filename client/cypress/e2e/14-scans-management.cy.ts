@@ -132,6 +132,28 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
     // cy.get('.dashboard-result-card .card-subtitle a')
     //   .should('exist');
+    cy.contains('.sidebar__subitem-content', 'File Scanner')
+    .click();
+
+  // Wait for the file upload button to appear
+  cy.contains('.sidebar__subitem-content', 'File Scanner').click();
+
+// Get the hidden file input (not the button)
+  cy.get('input[type="file"]', { includeShadowDom: true }) // adjust selector if needed
+    .should('exist')
+    .then((input) => {
+     cy.fixture('avatar.png', 'base64').then((fileContent) => {
+        const blob = Cypress.Blob.base64StringToBlob(fileContent, 'image/png');
+        const testFile = new File([blob], 'avatar.png', { type: 'image/png' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(testFile);
+
+        const fileInput = input[0] as HTMLInputElement;
+        fileInput.files = dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+
   });
 
   it('Dashboard → Global Search → Consolidated Scan → Ranked → IOCs', () => {
