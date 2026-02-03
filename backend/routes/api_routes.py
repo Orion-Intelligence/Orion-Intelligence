@@ -764,3 +764,29 @@ async def extract_ioc(file: UploadFile = File(...)):
     result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename)
 
     return result
+
+
+@api_routes.post(
+    "/api/apk/scan",
+    summary="Scan APK for vulnerabilities",
+    description=(
+        "Upload an Android APK file to perform static analysis and detect "
+        "security vulnerabilities, misconfigurations, and risky permissions."
+    ),
+    tags=["APK Scanning"],
+    operation_id="scanApkForVulnerabilities",
+    response_description="Static vulnerability analysis results for the uploaded APK",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def scan_apk(file: UploadFile = File(...)):
+
+    file_content = await file.read()
+
+
+    result = await search_model.getInstance().scan_apk(file_content, file.filename,
+    )
+
+    return result

@@ -1,0 +1,282 @@
+<div class="apk-scan-container">
+  <input
+    type="file"
+    #fileInput
+    id="apkFileInput"
+    class="apk-scanner-file-input-hidden"
+    accept=".apk"
+    (change)="onFileSelected($event)">
+
+  <div class="apk-report-background" *ngIf="isFetched || isLoading"></div>
+
+  <div
+    class="apk-scanner-upload-center-container"
+    *ngIf="!isFetched && !isLoading"
+    @fadeInDashboardItem>
+    <div class="apk-scanner-upload-card">
+      <div class="apk-scanner-upload-icon-large">
+        <img src="assets/images/shared/theme/file-search.svg" alt="APK Upload">
+      </div>
+      <h2 class="apk-scanner-upload-title">APK Vulnerability Scan</h2>
+      <p class="apk-scanner-upload-description">
+        Upload an Android APK file to analyze for security vulnerabilities and misconfigurations.
+      </p>
+      <button
+        type="button"
+        class="sidebar_submit-button"
+        (click)="triggerFileInput()">
+        <img
+          ngSrc="assets/images/shared/theme/ai.svg"
+          alt="Upload"
+          width="24"
+          height="24"
+          style="margin-right: 10px;">
+        Choose APK
+      </button>
+      <div class="apk-scanner-upload-info">
+        <div class="apk-scanner-upload-info-item">
+          <strong>Supported format:</strong> Android Package (.apk)
+        </div>
+        <div class="apk-scanner-upload-info-item">
+          <strong>Maximum file size:</strong> 50 MB
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="isFetched || isLoading">
+    <header class="apk-report-header" [class.scrolled]="isScrolled()">
+      <div class="apk-report-header-left">
+        <h1 class="apk-report-title">APK Security Debriefing</h1>
+        <p class="apk-report-subtitle">Static Vulnerability Analysis Report</p>
+      </div>
+
+      <div
+        class="apk-report-header-actions"
+        *ngIf="!hasError && !isLoading && scanResult">
+        <div class="btn-group report-menu-option-container mr-0">
+          <button
+            type="button"
+            class="p-0 report-menu-option"
+            appTooltip="Scan another APK"
+            (click)="triggerFileInput()"
+            aria-label="Scan another APK">
+            <img
+              ngSrc="assets/images/shared/theme/file-search.svg"
+              width="20"
+              height="20"
+              alt="scan">
+          </button>
+
+          <div class="vr report-menu-divider"></div>
+
+          <button
+            type="button"
+            class="p-0 report-menu-option"
+            appTooltip="Download report"
+            (click)="exportReport()"
+            aria-label="Download report">
+            <img
+              ngSrc="assets/images/shared/theme/download.svg"
+              width="20"
+              height="20"
+              alt="download">
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div
+      class="apk-report-progress"
+      *ngIf="!hasError && isLoading && progress() < 100">
+      <div class="apk-report-progress-text">
+        {{ currentStep || 'Analyzing APK...' }} ({{ progress() }}%)
+      </div>
+      <div class="apk-report-progress-bar">
+        <div class="apk-report-progress-fill" [style.width.%]="progress()"></div>
+      </div>
+    </div>
+
+    <div class="security-scan apk-report-wrapper">
+      <div
+        class="apk-report-error"
+        *ngIf="hasError && !isLoading"
+        @fadeInDashboardItem>
+        <div class="apk-extractor-scan_alert">
+          <button
+            class="apk-extractor-scan_alert-close"
+            (click)="closeError()"
+            aria-label="Close error">
+            <img
+              ngSrc="assets/images/shared/searchFilter_clossButton.svg"
+              alt="Close"
+              width="20"
+              height="20">
+          </button>
+
+          <div class="apk-extractor-scan_alert-title">Scan Failed</div>
+          <div class="apk-extractor-scan_alert-text">{{ errorMessage }}</div>
+
+          <ul class="apk-extractor-scan_alert-reasons" *ngIf="isFileSizeError">
+            <li><strong>File size limit:</strong> Maximum 50 MB</li>
+            <li>Please compress your APK or select a smaller file</li>
+          </ul>
+
+          <ul class="apk-extractor-scan_alert-reasons" *ngIf="isUnsupportedFileError">
+            <li><strong>Supported format:</strong></li>
+            <li>Android Package (.apk)</li>
+          </ul>
+
+          <ul
+            class="apk-extractor-scan_alert-reasons"
+            *ngIf="!isUnsupportedFileError && !isFileSizeError">
+            <li>The APK format may not be supported</li>
+            <li>The APK may be corrupted or too large</li>
+            <li>An unexpected error occurred during analysis</li>
+          </ul>
+
+          <button
+            class="apk-extractor-scan_btn apk-extractor-scan_btn-primary"
+            (click)="triggerFileInput()">
+            Try Again
+          </button>
+        </div>
+      </div>
+
+      <section
+        class="apk-report-container"
+        *ngIf="!hasError && scanResult">
+        <div class="apk-report-hero" @fadeInDashboardItem>
+          <div class="apk-report-hero-title">
+            APK Vulnerability Report for
+            <span class="apk-report-hero-sep">〡</span>
+            <span class="apk-report-hero-file">{{ scanResult.package }}</span>
+          </div>
+          <div class="ioc-report-hero-sub">
+            <span class="ioc-report-pill" [class.ok]="scanResult.status === 'success'"
+                  [class.bad]="scanResult.status !== 'success'">
+              <i class="bi"
+                 [ngClass]="scanResult.status === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+              {{ scanResult.status }}
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="apk-report-summary-grid"
+          *ngIf="!isLoading; else metaGridSkeleton"
+          @fadeInDashboardItem>
+          <div
+            class="apk-report-stat"
+            *ngFor="let s of getSummaryStats(); let idx = index"
+            [style.--accent-color]="s.accent"
+            [style.--animation-delay]="(120 + idx * 120) + 'ms'">
+            <div class="apk-report-stat-icon">
+              <i class="bi" [ngClass]="s.icon"></i>
+            </div>
+            <div class="apk-report-stat-body">
+              <div class="apk-report-stat-label">{{ s.label }}</div>
+              <div
+                class="apk-report-stat-value"
+                [class.mono]="s.label === 'Package Name'">
+                {{ s.value }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-container *ngIf="groupedVulns.length > 0; else emptyState">
+          <section class="apk-report-findings">
+            <div
+              class="apk-report-category"
+              *ngFor="let category of groupedVulns; trackBy: trackByCategory"
+              @fadeInDashboardItem>
+              <div class="apk-report-category-header">
+                <div class="apk-report-category-left">
+                  <div class="apk-report-category-name">{{ category.name }}</div>
+                  <div class="apk-report-category-count">{{ category.total }} Issues</div>
+                </div>
+              </div>
+
+              <div class="apk-report-findings-list">
+                <div
+                  class="apk-report-finding"
+                  *ngFor="let item of category.items; trackBy: trackByItem"
+                  @fadeInDashboardItem>
+                  <div class="apk-report-finding-main">
+                    <div class="apk-report-finding-value">{{ item.id }}</div>
+                    <div class="apk-report-finding-desc">{{ item.description }}</div>
+                  </div>
+
+                  <div class="apk-report-finding-right">
+                    <button
+                      class="apk-report-copy-btn"
+                      type="button"
+                      [class.copied]="copiedValue() === item.id"
+                      (click)="copyValue(item.id)">
+                      <i
+                        class="bi"
+                        [ngClass]="copiedValue() === item.id ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                      <span class="apk-report-copy-text">
+                        {{ copiedValue() === item.id ? 'Copied!' : 'Copy ID' }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ng-container>
+
+        <ng-template #emptyState>
+          <div class="apk-report-empty" @fadeInDashboardItem>
+            <div class="apk-report-empty-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="apk-report-empty-title">No Vulnerabilities Found</div>
+            <div class="apk-report-empty-text">
+              No known vulnerabilities or misconfigurations were detected in this APK.
+            </div>
+            <button
+              class="apk-extractor-scan_btn"
+              (click)="triggerFileInput()">
+              Upload Another APK
+            </button>
+          </div>
+        </ng-template>
+      </section>
+
+      <ng-template #metaGridSkeleton>
+        <div class="apk-report-summary-grid">
+          <div
+            class="apk-report-stat"
+            *ngFor="let i of [1,2,3,4,5]">
+            <div class="apk-extractor-skeleton apk-extractor-skeleton-label apk-extractor-shimmer"></div>
+            <div class="apk-extractor-skeleton apk-extractor-skeleton-text apk-extractor-shimmer"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <div id="apkReport" class="d-none">
+      <div *ngIf="scanResult" style="padding: 20px;">
+        <h2>APK Vulnerability Report</h2>
+        <hr>
+        <h3>APK Information</h3>
+        <p><strong>Package Name:</strong> {{ scanResult.package }}</p>
+        <p><strong>Version:</strong> {{ scanResult.version }}</p>
+        <p><strong>SDK Target:</strong> {{ scanResult.sdk?.target }}</p>
+        <p><strong>Min SDK:</strong> {{ scanResult.sdk?.min }}</p>
+        <hr>
+        <div *ngFor="let category of groupedVulns">
+          <h3>{{ category.name }} ({{ category.total }})</h3>
+          <ul>
+            <li *ngFor="let item of category.items">
+              {{ item.id }} - {{ item.description }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

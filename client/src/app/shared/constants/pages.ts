@@ -101,6 +101,7 @@ export enum ScannerSubCategory {
   FULL = 'Port-Scan',
   REPOSITORY = 'Repository-Scan',
   SEO = 'SEO-Scan',
+  APK= 'APK-Scan',
 }
 
 export enum DumpSubCategory {
