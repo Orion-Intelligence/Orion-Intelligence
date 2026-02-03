@@ -16,7 +16,7 @@
     </app-dashboard-sidebar-items>
     <ng-container
       *ngIf=" licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced')|| licenseService.canUseModule('enterprise')">
-      <div class="sidebar_heading">Search API's</div>
+      <div class="dashboard_sidebar_heading">Search API's</div>
       <div class="sidebar__item_break_light_color"></div>
     </ng-container>
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('general')">
@@ -63,7 +63,7 @@
     </ng-container>
 
     <ng-container *ngIf="licenseService.canUseScanning()|| licenseService.canUseModule('stealer_logs')">
-      <div class="sidebar_heading">Webscans</div>
+      <div class="dashboard_sidebar_heading">Webscans</div>
       <div class="sidebar__item_break_light_color"></div>
     </ng-container>
 
@@ -84,6 +84,12 @@
         [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
         [title]="'Live APIs'"></app-dashboard-sidebar-items>
     </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseScanning()|| licenseService.canUseModule('stealer_logs')">
+      <div class="dashboard_sidebar_heading">Data Collection</div>
+      <div class="sidebar__item_break_light_color"></div>
+    </ng-container>
+
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
@@ -119,7 +125,7 @@
       </div>
     </ng-container>
 
-    <div class="sidebar_heading">Help & Support</div>
+    <div class="dashboard_sidebar_heading">Help & Support</div>
     <div class="sidebar__item_break_light_color"></div>
 
     <a class="gc-clear-selection" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion"
