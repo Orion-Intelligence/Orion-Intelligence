@@ -309,7 +309,9 @@ export class ExpandedRowComponent implements OnChanges {
       'email',
       'domain',
       'ip',
-      'password'
+      'password',
+      'mapping',
+      'delimiter'
     ]);
 
     const core: TelemetryGroup[] = [];
