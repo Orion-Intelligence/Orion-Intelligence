@@ -18,7 +18,7 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import (search_exploit_param_model, )
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import (search_general_param_model, )
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import (search_leak_param_model, search_news_internal_param_model, search_news_param_model, )
-from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (search_social_param_model, )
+from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (search_social_param_model, SocialReconRequest, )
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
@@ -522,6 +522,12 @@ async def get_screenshot(filename: str):
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "user")
+
+@api_routes.post(
+    "/api/social/recon",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_email(param: SocialReconRequest = Body(...)):
+    return await search_model.getInstance().social_search(param)
 
 
 @api_routes.post(

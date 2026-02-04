@@ -1,0 +1,4 @@
+.main-bg-grid {
+    background-image: radial-gradient(circle, rgba(100, 116, 139, 0.15) 1px, transparent 1px);
+    background-size: 2rem 2rem;
+}

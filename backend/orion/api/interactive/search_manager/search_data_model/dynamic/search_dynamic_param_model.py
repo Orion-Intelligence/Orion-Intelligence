@@ -16,3 +16,4 @@ class search_dynamic_crack_model(BaseModel):
 class search_dynamic_social_model(BaseModel):
     text: Dict[str, str] = Field(
         default_factory=dict, examples=[{"username": "bitcoin"}])
+

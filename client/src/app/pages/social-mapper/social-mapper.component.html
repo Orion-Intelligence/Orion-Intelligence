@@ -1,0 +1,253 @@
+
+<div class="h-screen w-screen flex flex-col overflow-hidden text-slate-200" (click)="closeContextMenu()">
+  
+  <div class="flex-grow flex relative">
+    
+    <aside class="w-80 border-r border-slate-800 flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md">
+      <div class="p-3 border-b border-slate-800 flex items-center gap-3">
+        <i class="bi bi-bullseye text-3xl text-indigo-400"></i>
+        <h1 class="text-xl font-bold mb-0 text-slate-200">VisuScan</h1>
+      </div>
+
+      <div class="p-3 border-b border-slate-800">
+        <div class="relative">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <i class="bi bi-search w-5 h-5 text-slate-400"></i>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Filter history..."
+            [value]="sidebarSearchTerm()"
+            (input)="onSidebarSearchInput($event)"
+            class="block w-full rounded-md border-0 bg-slate-800 py-1.5 pl-10 pr-3 text-slate-200 ring-1 ring-inset ring-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
+          />
+        </div>
+      </div>
+      
+      <div class="flex-grow overflow-auto p-3">
+        <div class="flex flex-col gap-3">
+          <div *ngFor="let job of filteredJobs(); trackBy: trackByJobId" [class]="getJobClasses(job)"
+               (click)="handleCompletedJobClick(job)">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3 min-w-0">
+                <div [ngSwitch]="job.status">
+                  <div *ngSwitchCase="'in_progress'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-400" role="status"></div>
+                  <i *ngSwitchCase="'completed'" class="bi bi-check-circle-fill w-4 h-4 text-green-500"></i>
+                  <i *ngSwitchCase="'failed'" class="bi bi-x-circle-fill w-4 h-4 text-red-500"></i>
+                </div>
+                <p class="font-bold mb-0 truncate text-indigo-300">{{ job.username }}</p>
+              </div>
+              <div *ngIf="job.status === 'in_progress'" class="font-mono text-xs text-slate-400">{{ job.progress }}%</div>
+            </div>
+            
+            <div *ngIf="job.status === 'in_progress'" class="w-full bg-slate-700 rounded-full h-1.5 mt-2">
+              <div class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500 ease-out" [style.width.%]="job.progress"></div>
+            </div>
+            <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ job.step }}</p>
+
+            <div *ngIf="job.status === 'completed'" class="flex justify-between items-center mt-3">
+              <div *ngIf="activeUsernames().has(job.username)" class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>On Graph</span>
+              </div>
+              <div *ngIf="!activeUsernames().has(job.username)" class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-full">
+                <i class="bi bi-node-minus"></i>
+                <span>Not on Graph</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button *ngIf="activeUsernames().has(job.username)" (click)="$event.stopPropagation(); focusOnUser(job.username)" title="Focus on graph" 
+                        class="p-1.5 rounded-md text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors">
+                    <i class="bi bi-bullseye w-4 h-4"></i>
+                </button>
+                <button (click)="$event.stopPropagation(); openDeleteConfirmation(job.username)" title="Delete Profile"
+                        class="p-1.5 rounded-md text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                  <i class="bi bi-trash3 w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="jobs().length === 0; else jobsList" class="text-center text-slate-500 pt-16 flex flex-col items-center">
+          <i class="bi bi-x-circle text-5xl text-slate-600"></i>
+          <h3 class="mt-4 text-lg font-semibold text-slate-300">History is Empty</h3>
+          <p class="text-sm">Start a new scan to see results here.</p>
+        </div>
+        <ng-template #jobsList>
+          <div *ngIf="filteredJobs().length === 0" class="text-center text-slate-500 pt-16 flex flex-col items-center">
+            <i class="bi bi-search text-5xl text-slate-600"></i>
+            <h3 class="mt-4 text-lg font-semibold text-slate-300">No Results Found</h3>
+            <p class="text-sm">Your search for "{{ sidebarSearchTerm() }}" did not match any scans.</p>
+          </div>
+        </ng-template>
+      </div>
+    </aside>
+
+    <main class="flex-grow flex flex-col relative main-bg-grid">
+      
+      <div class="absolute top-0 left-0 right-0 p-4 z-10">
+         <div class="relative mx-auto max-w-md focus-within:max-w-xl transition-all duration-300">
+           <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+              <i class="bi bi-search w-5 h-5 text-slate-400"></i>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Enter username to scan..."
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+            (keyup.enter)="triggerScan()"
+            class="block w-full rounded-full border-0 bg-slate-800/80 py-3 pl-11 pr-32 text-slate-200 shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
+          />
+          <button 
+            (click)="triggerScan()" 
+            [disabled]="isSearchDisabled()"
+            class="absolute inset-y-1.5 right-1.5 flex items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed">
+            Scan
+          </button>
+        </div>
+      </div>
+      
+      <div class="flex-grow w-full h-full relative">
+        <app-network-graph 
+          [data]="networkData()" 
+          [focusNodeId]="nodeToFocus()" 
+          (nodeClicked)="onNodeClicked($event)" 
+          (platformNodeClicked)="onPlatformNodeClicked($event)" 
+          (nodeRightClicked)="onNodeRightClicked($event)"
+          (dragStart)="closeContextMenu()"
+          (zoom)="closeContextMenu()">
+        </app-network-graph>
+        <div *ngIf="networkData().nodes.length === 0" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-600 select-none">
+            <div class="text-center">
+                <i class="bi bi-share text-5xl text-slate-800 mx-auto"></i>
+                <p class="text-2xl font-semibold mt-3 text-slate-700">Graph is Waiting for Data</p>
+                <p class="text-slate-700/80">Complete a scan and add a profile to begin visualization.</p>
+            </div>
+        </div>
+
+        <div *ngIf="networkData().nodes.length > 0" class="absolute bottom-4 left-4 bg-slate-800/70 backdrop-blur-sm border border-slate-700 rounded-lg p-3 shadow-lg select-none animate-fade-in">
+          <h3 class="font-semibold text-slate-300 text-sm mb-2 border-b border-slate-700 pb-1">Legend</h3>
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded-full border-2 border-indigo-400 bg-indigo-800 flex-shrink-0"></div>
+              <span class="text-xs text-slate-400">User Profile</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded-full border-2 border-teal-500 bg-teal-700 flex-shrink-0"></div>
+              <span class="text-xs text-slate-400">Social Platform</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div *ngIf="showAlreadyAddedNotification() || showAlreadyScannedNotification()" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] animate-fade-in-scale">
+    <div *ngIf="showAlreadyAddedNotification()" class="flex items-center gap-3 bg-yellow-500/90 text-slate-900 text-sm font-medium px-4 py-2 rounded-full shadow-lg border border-yellow-400 backdrop-blur-sm">
+      <i class="bi bi-exclamation-triangle-fill w-5 h-5"></i>
+      <span>User is already on the graph.</span>
+    </div>
+    <div *ngIf="showAlreadyScannedNotification()" class="flex items-center gap-3 bg-blue-500/90 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg border border-blue-400 backdrop-blur-sm">
+      <i class="bi bi-info-circle-fill w-5 h-5"></i>
+      <span>A scan for this user already exists.</span>
+    </div>
+  </div>
+
+  <div *ngIf="isModalVisible()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeModal()">
+    <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-md animate-fade-in-scale" (click)="$event.stopPropagation()">
+      <div class="p-4 flex justify-between items-start border-b border-slate-700">
+        <div>
+          <h3 class="text-lg font-semibold leading-6 text-white">Manage Profiles for <span class="text-indigo-400">{{ modalResults().username }}</span></h3>
+          <p class="text-sm text-slate-400 mt-1">Select profiles to display on the graph.</p>
+        </div>
+         <button (click)="closeModal()" type="button" class="p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
+          <i class="bi bi-x-lg w-6 h-6"></i>
+         </button>
+      </div>
+      
+      <div class="p-2 max-h-96 overflow-y-auto">
+        <div class="flex flex-col">
+          <label *ngFor="let platform of modalResults().platforms; trackBy: trackByPlatformName" class="flex items-center p-3 rounded-lg hover:bg-slate-700/50 cursor-pointer">
+            <input 
+              type="checkbox"
+              class="sr-only peer"
+              [checked]="platform.isSelected"
+              (change)="togglePlatformSelection(platform.platform)"
+            />
+            <div class="flex items-center justify-center mr-3 w-5 h-5 rounded border-2 border-slate-500 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-colors">
+              <i class="bi bi-check-lg text-white transform scale-0 peer-checked:scale-100 transition-transform"></i>
+            </div>
+            <img [src]="'https://logo.clearbit.com/' + platform.url.split('/')[2]" class="mr-3 rounded-sm h-6 w-6"/>
+            <span class="font-medium text-slate-200">{{ platform.platform }}</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
+        <button (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
+          Cancel
+        </button>
+        <button (click)="updateGraphFromModal()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+          Update Graph
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="contextMenu().visible" 
+      class="fixed z-[100] bg-white rounded-md shadow-lg border border-slate-200 animate-fade-in text-sm text-slate-800"
+      [style.left.px]="contextMenu().x"
+      [style.top.px]="contextMenu().y"
+      (click)="$event.stopPropagation()">
+    <ul class="py-1">
+      <li>
+        <button (click)="removeAllPlatformNodes()" class="w-full text-left flex items-center gap-3 px-4 py-2 hover:bg-slate-100">
+          <i class="bi bi-x-circle w-5 h-5 text-slate-500"></i>
+          <span>Clear Connections</span>
+        </button>
+      </li>
+      <li>
+        <button (click)="openDeleteConfirmation(contextMenu().username!)" class="w-full text-left flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50">
+          <i class="bi bi-trash3-fill w-5 h-5"></i>
+          <span>Delete Profile</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <div *ngIf="deleteConfirmation().visible" class="fixed inset-0 z-[101] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeDeleteConfirmation()">
+    <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-sm animate-fade-in-scale" (click)="$event.stopPropagation()">
+      <div class="p-5 text-center">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+          <i class="bi bi-exclamation-triangle h-6 w-6 text-red-500"></i>
+        </div>
+        <h3 class="mt-4 text-lg font-semibold text-white">Delete Profile</h3>
+        <p class="mt-2 text-sm text-slate-400">
+          Are you sure you want to delete the profile for <strong class="text-indigo-400">{{ deleteConfirmation().username }}</strong>? This will remove all associated data and cannot be undone.
+        </p>
+      </div>
+      <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
+        <button (click)="closeDeleteConfirmation()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
+          Cancel
+        </button>
+        <button (click)="confirmDeletion()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
+          Confirm Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <app-metadata-popup 
+    *ngIf="isMetadataPopupVisible() && selectedPlatformData()"
+    [data]="selectedPlatformData()!" 
+    (close)="closeMetadataPopup()">
+  </app-metadata-popup>
+  
+  <app-profile-summary-popup
+    *ngIf="isSummaryPopupVisible() && summaryPopupData()"
+    [username]="summaryPopupData()!.username"
+    [platforms]="summaryPopupData()!.platforms"
+    [email]="summaryPopupData()!.email"
+    (close)="closeSummaryPopup()">
+  </app-profile-summary-popup>
+</div>

@@ -136,7 +136,7 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server
@@ -145,3 +145,4 @@ fi
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
     wait_for_test_service
 fi
+

@@ -1,89 +1,89 @@
-@use 'assets/libs/bootstrap.min.css';
-@use 'assets/styles/shared/shared.css';
-@use 'assets/styles/shared/override.scss';
-@use 'assets/styles/fonts.scss';
-@use 'app/shared/partials/alert-notification/alert-notification.component.css';
-@use 'app/shared/partials/error-handler/error-handler.component.css';
-@use 'app/pages/homepage/homepage.component.css';
-@use 'app/shared/partials/chat-widget/chat-widget.component.css';
-@use 'app/shared/partials/header/login-header/header.component.css';
-@use 'app/pages/homepage/home-insight/home-insight.component.css';
-@use 'app/pages/homepage/search-filters/search-filters.component.css';
-@use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
-@use 'app/pages/tenant/tenant.component.css';
-@use 'app/shared/partials/intel-panel/ioc-extractor/file-scanner.component.css';
-@use 'app/pages/tenant/tenant-management/view-tenant.component-shared.css';
-@use 'app/pages/tenant/tenant-management/view-profile/manage-profile.component.css';
-@use 'app/pages/tenant/tenant-management/add-tenant/add-tenant.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/alert-export-component/alert-export-component.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/alert-scan-loading/alert-scan-loading.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.css';
-@use 'app/shared/partials/confirmation-popup/confirmation-popup.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-settings/account-settings.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-settings/user-image-picker/user-image-picker.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component.css';
-@use 'app/pages/welcome/welcome.component.css';
-@use 'app/shared/partials/loader/loader.component.css';
-@use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
-@use 'app/pages/login/login-container/login-container.component.css';
-@use 'app/pages/signup/signup.component.css';
-@use 'assets/styles/shared/listing/list.component.css';
-@use 'assets/styles/shared/sidebar/filters-sidebar.component.css';
-@use 'assets/styles/shared/listing/directory.component.css';
-@use 'app/shared/partials/profile/profile.component.css';
-@use 'app/shared/partials/forgot-password/reset-password.component.css';
-@use 'app/shared/partials/empty-result/empty-result.component.css';
-@use 'app/shared/partials/header/dashboard-header/dashboard-header.component.css';
-@use 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
-@use 'app/shared/partials/pagination/pagination.component.css';
-@use 'app/shared/partials/customize-bar-chart/customize-bar-chart.component.css';
-@use 'app/pages/dashboard/dashboard.component.css';
-@use 'app/pages/credentials/credential.component.css';
-@use 'app/pages/credentials/credentials-search-bar/credentials-search-bar.component.css';
-@use 'app/pages/credentials/subdomains/subdomains.component.css';
-@use 'app/pages/credentials/password-schema/password-schema.component.css';
-@use 'app/shared/partials/suggestion/suggestion.component.css';
-@use 'app/shared/partials/loading-form/loading-form.component.css';
-@use 'assets/styles/shared/report.component.css';
-@use 'assets/styles/shared/result/result-list.component.css';
-@use 'app/shared/partials/report/report-defacement/report-defacement.component.css';
-@use 'app/shared/partials/report-mapping/report-mapping.component.css';
-@use 'app/shared/partials/empty-query/empty-query.component.css';
-@use 'app/shared/partials/empty-ioc/empty-ioc.component.css';
-@use 'app/shared/partials/pro-subscription/pro-subscription.component.css';
-@use 'app/shared/partials/result/result.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-general-list/dashboard-result-general-list.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-api/dashboard-api.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/result-insights/result-insights.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-apis/consolidated-apis.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-ioc/consolidated-ioc.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-scan/consolidated-scan.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/defacement-results/threat-results.component.css';
-@use 'app/shared/partials/scroll-top/scroll-top.component.css';
-@use 'app/shared/partials/security-scan-results/security-scan-export-component/security-scan-export-component.component.css';
-@use 'app/shared/partials/trail-notification/trail-notification.component.css';
-@use 'app/shared/partials/message-notification/message-notification.component.css';
-@use 'app/pages/graphs/graphs.component.css';
-@use 'app/pages/graphs/graph-info/graph-info.component.css';
-@use 'app/pages/graphs/listings/graph-listings.component.css';
-@use 'app/pages/graphs/sidebar/sidebar.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-managers/social-mapper/social-mapper.component.css';
-@use 'app/shared/partials/report/report-chat/report-chat.component.css';
-@use 'app/shared/partials/filters/date-picker/date-picker.component.css';
-@use 'app/shared/partials/json-api-viewer/json-viewer/json-viewer.component.css';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-day-view';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-month';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
-@use 'app/pages/credentials/expanded-row/expanded-row.component.css';
-@import "bootstrap-icons/font/bootstrap-icons.css";
+//@use 'assets/libs/bootstrap.min.css';
+//@use 'assets/styles/shared/shared.css';
+//@use 'assets/styles/shared/override.scss';
+//@use 'assets/styles/fonts.scss';
+//@use 'app/shared/partials/alert-notification/alert-notification.component.css';
+//@use 'app/shared/partials/error-handler/error-handler.component.css';
+//@use 'app/pages/homepage/homepage.component.css';
+//@use 'app/shared/partials/chat-widget/chat-widget.component.css';
+//@use 'app/shared/partials/header/login-header/header.component.css';
+//@use 'app/pages/homepage/home-insight/home-insight.component.css';
+//@use 'app/pages/homepage/search-filters/search-filters.component.css';
+//@use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
+//@use 'app/pages/tenant/tenant.component.css';
+//@use 'app/shared/partials/intel-panel/ioc-extractor/file-scanner.component.css';
+//@use 'app/pages/tenant/tenant-management/view-tenant.component-shared.css';
+//@use 'app/pages/tenant/tenant-management/view-profile/manage-profile.component.css';
+//@use 'app/pages/tenant/tenant-management/add-tenant/add-tenant.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/alert-export-component/alert-export-component.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/alert-scan-loading/alert-scan-loading.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.css';
+//@use 'app/shared/partials/confirmation-popup/confirmation-popup.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-settings/account-settings.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-settings/user-image-picker/user-image-picker.component.css';
+//@use 'app/shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component.css';
+//@use 'app/pages/welcome/welcome.component.css';
+//@use 'app/shared/partials/loader/loader.component.css';
+//@use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
+//@use 'app/pages/login/login-container/login-container.component.css';
+//@use 'app/pages/signup/signup.component.css';
+//@use 'assets/styles/shared/listing/list.component.css';
+//@use 'assets/styles/shared/sidebar/filters-sidebar.component.css';
+//@use 'assets/styles/shared/listing/directory.component.css';
+//@use 'app/shared/partials/profile/profile.component.css';
+//@use 'app/shared/partials/forgot-password/reset-password.component.css';
+//@use 'app/shared/partials/empty-result/empty-result.component.css';
+//@use 'app/shared/partials/header/dashboard-header/dashboard-header.component.css';
+//@use 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
+//@use 'app/shared/partials/pagination/pagination.component.css';
+//@use 'app/shared/partials/customize-bar-chart/customize-bar-chart.component.css';
+//@use 'app/pages/dashboard/dashboard.component.css';
+//@use 'app/pages/credentials/credential.component.css';
+//@use 'app/pages/credentials/credentials-search-bar/credentials-search-bar.component.css';
+//@use 'app/pages/credentials/subdomains/subdomains.component.css';
+//@use 'app/pages/credentials/password-schema/password-schema.component.css';
+//@use 'app/shared/partials/suggestion/suggestion.component.css';
+//@use 'app/shared/partials/loading-form/loading-form.component.css';
+//@use 'assets/styles/shared/report.component.css';
+//@use 'assets/styles/shared/result/result-list.component.css';
+//@use 'app/shared/partials/report/report-defacement/report-defacement.component.css';
+//@use 'app/shared/partials/report-mapping/report-mapping.component.css';
+//@use 'app/shared/partials/empty-query/empty-query.component.css';
+//@use 'app/shared/partials/empty-ioc/empty-ioc.component.css';
+//@use 'app/shared/partials/pro-subscription/pro-subscription.component.css';
+//@use 'app/shared/partials/result/result.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-general-list/dashboard-result-general-list.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-api/dashboard-api.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-managers/result-insights/result-insights.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-apis/consolidated-apis.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-ioc/consolidated-ioc.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-scan/consolidated-scan.component.css';
+//@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/defacement-results/threat-results.component.css';
+//@use 'app/shared/partials/scroll-top/scroll-top.component.css';
+//@use 'app/shared/partials/security-scan-results/security-scan-export-component/security-scan-export-component.component.css';
+//@use 'app/shared/partials/trail-notification/trail-notification.component.css';
+//@use 'app/shared/partials/message-notification/message-notification.component.css';
+//@use 'app/pages/graphs/graphs.component.css';
+//@use 'app/pages/graphs/graph-info/graph-info.component.css';
+//@use 'app/pages/graphs/listings/graph-listings.component.css';
+//@use 'app/pages/graphs/sidebar/sidebar.component.css';
+//@use 'app/pages/social-mapper/social-mapper.component.css';
+//@use 'app/shared/partials/report/report-chat/report-chat.component.css';
+//@use 'app/shared/partials/filters/date-picker/date-picker.component.css';
+//@use 'app/shared/partials/json-api-viewer/json-viewer/json-viewer.component.css';
+//@use 'assets/styles/ng-bootstrap/datepicker/datepicker';
+//@use 'assets/styles/ng-bootstrap/datepicker/datepicker-day-view';
+//@use 'assets/styles/ng-bootstrap/datepicker/datepicker-month';
+//@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation';
+//@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
+//@use 'app/pages/credentials/expanded-row/expanded-row.component.css';
+//@import "bootstrap-icons/font/bootstrap-icons.css";
 
 
 :root {
@@ -291,146 +291,146 @@ body.dark-theme {
   background-color: #0E1626;
 }
 
-body.light-theme {
-  background-color: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%);
-}
-
-body::-webkit-scrollbar,
-html::-webkit-scrollbar {
-  display: none;
-}
-
-.gc-clear-selection {
-  -webkit-touch-callout: none;
-  user-select: none;
-  outline: none;
-  text-decoration: none;
-  text-underline: none;
-}
-
-@media print {
-  * {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .security-report-pre {
-    background: #0b1020 !important;
-    color: #e6edf3 !important;
-    border-color: #1f2a44 !important;
-  }
-}
-
-img[data-ph] {
-  background:
-    var(--color-placeholder),
-    url('/assets/images/shared/placeholder.svg') center/cover no-repeat;
-  object-fit: cover;
-  border-radius: 8px;
-  opacity: 0.85;
-  background-size: 200% 100%, cover;
-  animation: shimmer-dark 1.6s linear infinite;
-}
-
-.dark-theme img[data-ph] {
-  background:
-    var(--color-placeholder),
-    url('/assets/images/shared/theme/placeholder.svg') center/cover no-repeat;
-}
-
-@keyframes shimmer-dark {
-  0% {
-    background-position: -200% 0, center;
-  }
-
-  100% {
-    background-position: 200% 0, center;
-  }
-}
-
-img[data-ph]:not([width], [height]) {
-  aspect-ratio: 1/1;
-  min-width: 24px;
-  min-height: 24px;
-  display: inline-block;
-}
-
-.dropdown-item.text-muted {
-  opacity: 0.60;
-  pointer-events: none;
-}
-
-table tr td,
-table tr th {
-  vertical-align: middle !important;
-}
-
-.directory-list__table tbody tr {
-  overflow: visible !important;
-}
-
-.dropdown-short a {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.dropdown-short .dropdown-divider {
-  margin-top: 1px;
-  margin-bottom: 1px;
-}
-
-.view-tenant_dropdown-wrapper-min {
-  height: 40px;
-  margin-left: -60px;
-}
-
-.dropdown-item:hover {
-  background: #cccccc60;
-}
-
-.dropdown-menu {
-  opacity: 0;
-  transform: translateY(-2px);
-  visibility: hidden;
-  display: block !important;
-  transition: opacity .22s ease-in-out, transform .12s ease-out;
-}
-
-.show>.dropdown-menu,
-.dropdown-menu.show {
-  opacity: 1;
-  transform: translateY(0);
-  visibility: visible;
-}
-
-.dropdown-item:hover {
-  background: #cccccc60;
-}
-
-.table {
-  overflow: hidden;
-}
-
-table tr:last-child td {
-  border-bottom: none !important;
-}
-
-.btn-danger {
-  background: red !important;
-}
-
-.dropdown-menu {
-  max-height: 400px !important;
-}
-
-.quota-banner {
-  background: #2E2600;
-  border: 0;
-  border-bottom: 1px solid #6B5600;
-  color: #FFD966;
-}
-
-.dropdown-disabled {
-  opacity: 0.2;
-  pointer-events: none;
-}
+//body.light-theme {
+//  background-color: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%);
+//}
+//
+//body::-webkit-scrollbar,
+//html::-webkit-scrollbar {
+//  display: none;
+//}
+//
+//.gc-clear-selection {
+//  -webkit-touch-callout: none;
+//  user-select: none;
+//  outline: none;
+//  text-decoration: none;
+//  text-underline: none;
+//}
+//
+//@media print {
+//  * {
+//    -webkit-print-color-adjust: exact;
+//    print-color-adjust: exact;
+//  }
+//
+//  .security-report-pre {
+//    background: #0b1020 !important;
+//    color: #e6edf3 !important;
+//    border-color: #1f2a44 !important;
+//  }
+//}
+//
+//img[data-ph] {
+//  background:
+//    var(--color-placeholder),
+//    url('/assets/images/shared/placeholder.svg') center/cover no-repeat;
+//  object-fit: cover;
+//  border-radius: 8px;
+//  opacity: 0.85;
+//  background-size: 200% 100%, cover;
+//  animation: shimmer-dark 1.6s linear infinite;
+//}
+//
+//.dark-theme img[data-ph] {
+//  background:
+//    var(--color-placeholder),
+//    url('/assets/images/shared/theme/placeholder.svg') center/cover no-repeat;
+//}
+//
+//@keyframes shimmer-dark {
+//  0% {
+//    background-position: -200% 0, center;
+//  }
+//
+//  100% {
+//    background-position: 200% 0, center;
+//  }
+//}
+//
+//img[data-ph]:not([width], [height]) {
+//  aspect-ratio: 1/1;
+//  min-width: 24px;
+//  min-height: 24px;
+//  display: inline-block;
+//}
+//
+//.dropdown-item.text-muted {
+//  opacity: 0.60;
+//  pointer-events: none;
+//}
+//
+//table tr td,
+//table tr th {
+//  vertical-align: middle !important;
+//}
+//
+//.directory-list__table tbody tr {
+//  overflow: visible !important;
+//}
+//
+//.dropdown-short a {
+//  padding-top: 10px;
+//  padding-bottom: 10px;
+//}
+//
+//.dropdown-short .dropdown-divider {
+//  margin-top: 1px;
+//  margin-bottom: 1px;
+//}
+//
+//.view-tenant_dropdown-wrapper-min {
+//  height: 40px;
+//  margin-left: -60px;
+//}
+//
+//.dropdown-item:hover {
+//  background: #cccccc60;
+//}
+//
+//.dropdown-menu {
+//  opacity: 0;
+//  transform: translateY(-2px);
+//  visibility: hidden;
+//  display: block !important;
+//  transition: opacity .22s ease-in-out, transform .12s ease-out;
+//}
+//
+//.show>.dropdown-menu,
+//.dropdown-menu.show {
+//  opacity: 1;
+//  transform: translateY(0);
+//  visibility: visible;
+//}
+//
+//.dropdown-item:hover {
+//  background: #cccccc60;
+//}
+//
+//.table {
+//  overflow: hidden;
+//}
+//
+//table tr:last-child td {
+//  border-bottom: none !important;
+//}
+//
+//.btn-danger {
+//  background: red !important;
+//}
+//
+//.dropdown-menu {
+//  max-height: 400px !important;
+//}
+//
+//.quota-banner {
+//  background: #2E2600;
+//  border: 0;
+//  border-bottom: 1px solid #6B5600;
+//  color: #FFD966;
+//}
+//
+//.dropdown-disabled {
+//  opacity: 0.2;
+//  pointer-events: none;
+//}

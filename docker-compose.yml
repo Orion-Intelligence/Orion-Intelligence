@@ -150,7 +150,7 @@ services:
           memory: 128M
 
   mailpit:
-    container_name: mailpit
+    container_name: trusted-web-mailpit
     image: axllent/mailpit:latest
     restart: unless-stopped
     ports:
