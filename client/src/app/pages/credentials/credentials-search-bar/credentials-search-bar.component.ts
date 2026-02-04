@@ -26,12 +26,11 @@ export class CredentialsSearchBarComponent {
   basicQuery = '';
 
   @Output() searchTriggered = new EventEmitter<string>();
+  constructor(protected sidebarService: SidebarService) { }
 
   advancedFilters: StealerlogsAdvancedFilter[] = [
     { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
   ];
-
-  constructor(protected sidebarService: SidebarService) { }
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;
