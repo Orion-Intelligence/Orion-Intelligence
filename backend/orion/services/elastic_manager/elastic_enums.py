@@ -210,7 +210,7 @@ class ELASTIC_ENUMS:
         "m_au_abn": ["m_au_abn"],
         "m_us_passport": ["m_us_passport"],
         "m_us_bank_number": ["m_us_bank_number"],
-        "m_platform": ["m_platform"],
+        "m_platform": ["m_platform","m_platforms"],
         "m_author": ["m_author"],
         "m_industry": ["m_industry"],
         "m_scrap_file": ["m_scrap_file"],
