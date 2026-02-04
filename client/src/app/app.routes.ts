@@ -47,6 +47,7 @@ import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import {FileScannerComponent} from './shared/partials/intel-panel/ioc-extractor/file-scanner.component';
 import { SocialMapperComponent } from './shared/partials/intel-panel/dashboard-managers/social-mapper/social-mapper.component';
+import {ApkScannerComponent} from './shared/partials/intel-panel/dashboard-managers/apk-scanner/apk-scanner.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
@@ -538,6 +539,11 @@ export const routes: Routes = [
             path: 'seo-scan',
             component: SecurityScanResultsComponent,
             data: { type: 'seo', animation: 'CategoryPage' }
+          },
+          {
+            path: 'apk-scan',
+            component: ApkScannerComponent,
+            data: { type: 'apk', animation: 'CategoryPage' }
           }
         ]
       },
