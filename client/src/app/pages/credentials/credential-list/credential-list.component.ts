@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import { DatePipe, NgForOf, NgIf } from '@angular/common';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../shared/animations/row.animations';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -19,6 +19,8 @@ export class CredentialListComponent {
   @Input() type: string = 'credential';
   @Input() isLoading!: boolean;
   @Input() rankedResult: RankedCallbackModel = new RankedCallbackModel();
+  @Input() searchQuery: string = '';
+
 
   pageSize: number = 500;
   thretsExpandedRows = new Set<number>();

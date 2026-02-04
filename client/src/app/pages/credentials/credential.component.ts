@@ -270,11 +270,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.showPasswordscheme = true;
   }
   openSubdomains() {
-  this.showSubdomains = true;
+    this.showSubdomains = true;
   }
   onSubdomainSearch(domains: string[]) {
-  this.subdomainList = domains;
-}
+    this.subdomainList = domains;
+  }
   closeScheme() {
     this.showPasswordscheme = false;
   }

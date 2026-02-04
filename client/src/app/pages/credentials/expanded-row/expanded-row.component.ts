@@ -15,8 +15,11 @@ export class ExpandedRowComponent implements OnChanges {
   @Input() item: any = null;
   @Input() result: any = null;
   @Input() index: number = 0;
+  @Input() searchQuery: string = '';
 
   activeTelemetryKey: string | null = null;
+  matchedTelemetryKeys: string[] = [];
+  matchedValues: string[] = [];
 
   copiedKey: string | null = null;
   private copiedTimer: any = null;
@@ -26,7 +29,33 @@ export class ExpandedRowComponent implements OnChanges {
       this.activeTelemetryKey = null;
       this.copiedKey = null;
       if (this.copiedTimer) clearTimeout(this.copiedTimer);
+      this.parseSearchQuery();
     }
+  }
+  parseSearchQuery() {
+    if (!this.searchQuery) return;
+    const parts = this.searchQuery
+      .split(/\s*(\|\||\||&&|&)\s*/)
+      .filter(p => p && !['||', '|', '&&', '&'].includes(p));
+
+
+    for (let part of parts) {
+      part = part.trim();
+      let value = part;
+      const tagMatch = part.match(/^(\w+):(.+)$/);
+      if (tagMatch) {
+        value = tagMatch[2].trim();
+      }
+      this.matchedValues.push(value);
+    }
+  }
+
+  isTelemetryMatched(group: TelemetryGroup): boolean {
+    return group.values.some(value => this.matchedValues.includes(value));
+  }
+
+  isValueMatched(value: string): boolean {
+    return this.matchedValues.includes(value);
   }
 
   get indexValue(): string {
@@ -220,7 +249,7 @@ export class ExpandedRowComponent implements OnChanges {
         await navigator.clipboard.writeText(value);
         return true;
       }
-    } catch {}
+    } catch { }
 
     try {
       const ta = document.createElement('textarea');
@@ -327,10 +356,10 @@ export class ExpandedRowComponent implements OnChanges {
     const passV = this.normalizeToArray(result?.[passK]);
 
     const core: TelemetryGroup[] = [];
-    if (emailV.length > 1) core.push({ key: emailK, label: 'Email', values: emailV });
-    if (domainV.length > 1) core.push({ key: domainK, label: 'Domain', values: domainV });
-    if (ipV.length > 1) core.push({ key: ipK, label: 'IP', values: ipV });
-    if (passV.length > 1) core.push({ key: passK, label: 'Password', values: passV });
+    if (emailV.length > 0) core.push({ key: emailK, label: 'Email', values: emailV });
+    if (domainV.length > 0) core.push({ key: domainK, label: 'Domain', values: domainV });
+    if (ipV.length > 0) core.push({ key: ipK, label: 'IP', values: ipV });
+    if (passV.length > 0) core.push({ key: passK, label: 'Password', values: passV });
 
     const rest = groups
       .filter(g => ![emailK, domainK, ipK, passK].includes(g.key))

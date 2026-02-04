@@ -3,7 +3,6 @@ import { NgFor, KeyValuePipe, NgIf, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
-import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
 
@@ -30,8 +29,6 @@ export class CredentialsSearchBarComponent {
   advancedFilters: StealerlogsAdvancedFilter[] = [
     { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
   ];
-
-  constructor(protected sidebarService: SidebarService) { }
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;
