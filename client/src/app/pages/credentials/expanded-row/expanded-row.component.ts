@@ -55,7 +55,8 @@ export class ExpandedRowComponent implements OnChanges {
   }
 
   isValueMatched(value: string): boolean {
-    return this.matchedValues.includes(value);
+    const lowerValue = value.toLowerCase();
+    return this.matchedValues.some(v => lowerValue.includes(v.toLowerCase()));
   }
 
   get indexValue(): string {
