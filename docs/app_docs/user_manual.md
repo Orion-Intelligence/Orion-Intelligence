@@ -54,6 +54,7 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
    **Auditlog**
    ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
 
+  
    The Account Settings module allows users to manage and customize their personal account preferences. Within this section, users are provided with several configuration options related to security and appearance.
 
 Firstly, users can manage their login and security settings, including the ability to enable or disable Two-Factor Authentication (2FA) to enhance account security. This allows users to choose the level of protection they require for their accounts.
