@@ -744,7 +744,6 @@ async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
 
 @api_routes.post(
     "/api/ioc/extract",
-    include_in_schema=False,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST, Depends(license_required("scanning"))])),
     ],
@@ -757,7 +756,6 @@ async def extract_ioc(file: UploadFile = File(...)):
 
 @api_routes.post(
     "/api/apk/scan",
-    include_in_schema=False,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning"))],
 )
