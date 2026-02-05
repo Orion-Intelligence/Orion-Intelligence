@@ -56,11 +56,7 @@ export class FileScannerComponent {
   isScrolled = signal(false);
   copiedValue = signal<string | null>(null);
 
-  constructor(
-    private api: ApiService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {
+  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {
     this.route.data.subscribe(data => {
       this.type = data['type'] ?? this.type;
       this.title = data['title'] ?? this.title;
