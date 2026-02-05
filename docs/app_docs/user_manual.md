@@ -33,13 +33,50 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
 
 **Account**
 <img width="1918" height="652" alt="account" src="https://github.com/user-attachments/assets/7915872b-5c3d-4f65-bcd7-a4b8727ee743" />
+The Account Settings module allows users to manage and customize their personal account preferences. Within this section, users are provided with several configuration options related to security and appearance.
+
+Firstly, users can manage their login and security settings, including the ability to enable or disable Two-Factor Authentication (2FA) to enhance account security. This allows users to choose the level of protection they require for their accounts.
+
+Secondly, users can customize the application interface according to their preferences. The system provides an option to change the theme, allowing users to switch between Light Mode and Dark Mode for better usability and visual comfort.
+
+These settings are designed to give users greater control over their account security and user experience, ensuring flexibility and convenience while using the system.
 
 **Users**
    ![users](https://github.com/user-attachments/assets/c2ba3864-7d71-4b13-8cf9-36bc9375f1f3)
 
+   The Users module provides functionality to view and manage all users who have been added to the system. In this section, authorized personnel (such as an administrator or tenant manager) can see detailed information about each user.
+
+The displayed information includes:
+
+- User Email Address
+
+- Assigned Role within the system
+
+- Account Status (Active or Inactive)
+
+- Subscription Plan associated with the user
+
+- In addition to viewing user details, the module also provides View and Edit options.
+
+The View option allows administrators to open and review complete user information without making changes. The Edit option allows administrators to modify user details, such as role, status, or other relevant information, as permitted by system policies. This feature helps administrators efficiently monitor, manage, and update user accounts while ensuring proper access control and subscription management.
+
    **Adduser**
    <img width="1918" height="803" alt="add" src="https://github.com/user-attachments/assets/364b9515-25fa-4f66-83ae-de08162bcb33" />
+The Add User feature allows an administrator to manually create and register a new user in the system. When the administrator clicks on the “Add User” option, a user registration form is displayed.
 
+This form requires the administrator to enter the necessary details, including:
+
+- Username
+
+- Email Address
+
+- Password
+
+- Role (as defined in the system)
+
+- Licensing or Subscription Options (to assign the appropriate plan or permissions)
+
+After filling in the required information and submitting the form, the system creates the new user account and assigns the selected role and licensing configuration. This feature ensures that administrators can efficiently onboard new users and configure their access and subscription settings according to organizational requirements.
 
    **Viewuser**
    
@@ -55,13 +92,7 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
    ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
 
   
-   The Account Settings module allows users to manage and customize their personal account preferences. Within this section, users are provided with several configuration options related to security and appearance.
-
-Firstly, users can manage their login and security settings, including the ability to enable or disable Two-Factor Authentication (2FA) to enhance account security. This allows users to choose the level of protection they require for their accounts.
-
-Secondly, users can customize the application interface according to their preferences. The system provides an option to change the theme, allowing users to switch between Light Mode and Dark Mode for better usability and visual comfort.
-
-These settings are designed to give users greater control over their account security and user experience, ensuring flexibility and convenience while using the system.
+   
 
    **Tenant**
    <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
