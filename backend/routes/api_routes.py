@@ -63,7 +63,8 @@ REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("repo
 
 DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dynamic_cracked": _doc(
     "dynamic/dynamic_cracked.md"), "dynamic_software": _doc("dynamic/dynamic_software.md"), "dynamic_social": _doc(
-    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"), "ip_scan": _doc("dynamic/ip_scan.md"), }
+    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"), "ip_scan": _doc("dynamic/ip_scan.md"), 
+    "ioc_extract": _doc("dynamic/ioc_extract.md"),"apk_scan": _doc("dynamic/apk_scan.md"),}
 
 SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
     "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
@@ -744,6 +745,12 @@ async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
 
 @api_routes.post(
     "/api/ioc/extract",
+    summary="Extract IOCs from file(.pdf or .txt) or image(.png, .jpg or .jpeg)",
+    description=DYNAMIC_DOCS["ioc_extract"]["description"],
+    tags=["Live Dynamic Scan"],
+    operation_id="iocExtractFromFile",
+    response_description=DYNAMIC_DOCS["ioc_extract"]["response_description"],
+    status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST, Depends(license_required("scanning"))])),
     ],
@@ -756,6 +763,12 @@ async def extract_ioc(file: UploadFile = File(...)):
 
 @api_routes.post(
     "/api/apk/scan",
+    summary="Dynamic analysis scan to identify application metadata, cracking indicators, etc",
+    description=DYNAMIC_DOCS["apk_scan"]["description"],
+    tags=["Live Dynamic Scan"],
+    operation_id="dynamicApkScan",
+    response_description=DYNAMIC_DOCS["apk_scan"]["response_description"],
+    status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning"))],
 )
