@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, UploadFile, File
 from configs.app_dependency import license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, )
@@ -71,6 +71,16 @@ async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(
         return step
     return json.loads((_MOCKS_DIR / "dynamic_software.json").read_text(encoding="utf-8"))
 
+@test_routes.post(
+    "/api/urlscan/ip",
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
+    step = _mock_step("dynamic_software")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / "urlscan_domain_iplookup.json").read_text(encoding="utf-8"))
 
 @test_routes.post(
     "/api/dynamic/social",
@@ -94,3 +104,29 @@ async def test_parse_text(payload: DomainScanRequest):
     if step:
         return step
     return json.loads((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json").read_text(encoding="utf-8"))
+
+@test_routes.post(
+    "/api/ioc/extract",
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+
+async def extract_ioc(file: UploadFile = File(...)):
+    step = _mock_step(f"ioc_file_extract")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / f"ioc_file_extract.json").read_text(encoding="utf-8"))
+
+@test_routes.post(
+    "/api/apk/scan",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def extract_ioc(file: UploadFile = File(...)):
+    step = _mock_step(f"ioc_apk_extract")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / f"ioc_apk_extract.json").read_text(encoding="utf-8"))
