@@ -25,3 +25,21 @@ export interface GroupedIoc {
   total: number;
   items: { type: string; value: string; display: string; description: string }[];
 }
+
+export interface ApkScanResult {
+  package: string;
+  version: string;
+  sdk: { min: number; target: number };
+  signed: boolean;
+  debuggable: boolean;
+  certificate: { issuer: string; sha256: string };
+  permissions: { total: number; dangerous: number; dangerous_list: string[] };
+  network: { urls_found: number; cleartext: boolean; sample_urls: string[] };
+  crypto: { weak_algorithms: string[] };
+  tampering: { suspected: boolean; reasons: string[] };
+  status: string;
+  original_filename: string;
+}
+
+export type SummaryItem = { label: string; value: string };
+export type UiStat = { icon: string; label: string; value: string; accent: string };

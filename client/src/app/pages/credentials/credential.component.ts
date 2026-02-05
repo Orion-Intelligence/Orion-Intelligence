@@ -18,7 +18,7 @@ import { CredentialsSearchBarComponent } from "./credentials-search-bar/credenti
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
-import { SubdomainsComponent } from './subdomains/subdomains.component';
+import {ScanHelperMethods} from '../../shared/partials/scan-helper-methods/scan-helper-methods.component';
 
 @Component({
   selector: 'app-credential',
@@ -32,7 +32,7 @@ import { SubdomainsComponent } from './subdomains/subdomains.component';
     PaginationComponent,
     CredentialsSearchBarComponent,
     PasswordSchemaComponent,
-    SubdomainsComponent
+    ScanHelperMethods,
   ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],

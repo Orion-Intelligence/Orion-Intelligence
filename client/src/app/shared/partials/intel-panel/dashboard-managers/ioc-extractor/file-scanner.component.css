@@ -819,3 +819,138 @@
 .ioc-report-stat {
   padding: 12px !important;
 }
+
+.ioc-report-stat {
+  border-left: 4px solid #6b7280;
+  transition: border-color 0.3s ease;
+}
+
+.stat-0 { border-left-color: #0ea5e9; }
+.stat-1 { border-left-color: #8b5cf6; }
+.stat-2 { border-left-color: #06b6d4; }
+.stat-3 { border-left-color: #eab308; }
+.ioc-report-stat:last-child { border-left-color: #22c55e; }
+
+.status-success {
+  background: #22c55e;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.status-failed {
+  background: #ef4444;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.ioc-report-type-badge {
+  background: linear-gradient(135deg, #4b5563, #374151);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+  transition: all 0.2s ease;
+}
+
+.ioc-report-type-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgb(0 0 0 / 15%);
+}
+
+.ioc-report-category-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #f3f4f6;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ioc-report-category-name::before {
+  font-family: bootstrap-icons, serif;
+  font-size: 1.2rem;
+  opacity: 0.85;
+}
+
+.ioc-report-category-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #f3f4f6;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ioc-report-category-name::before {
+  font-family: bootstrap-icons, serif;
+  font-size: 1.2rem;
+  opacity: 0.85;
+}
+
+[data-text="Domain"] .ioc-report-category-name,
+[data-text="IP Address"] .ioc-report-category-name {
+  color: #0ea5e9;
+}
+
+[data-text="Domain"] .ioc-report-category-name::before,
+[data-text="IP Address"] .ioc-report-category-name::before {
+  content: "\f1e9";
+}
+
+[data-text="Email Address"] .ioc-report-category-name {
+  color: #8b5cf6;
+}
+
+[data-text="Email Address"] .ioc-report-category-name::before {
+  content: "\f0e0";
+}
+
+[data-text="Phone Number"] .ioc-report-category-name {
+  color: #22c55e;
+}
+
+[data-text="Phone Number"] .ioc-report-category-name::before {
+  content: "\f095";
+}
+
+[data-text="URL"] .ioc-report-category-name {
+  color: #6366f1;
+}
+
+[data-text="URL"] .ioc-report-category-name::before {
+  content: "\f0c1";
+}
+
+[data-text="Hash"] .ioc-report-category-name {
+  color: #eab308;
+}
+
+[data-text="Hash"] .ioc-report-category-name::before {
+  content: "\f292";
+}
+
+[data-text="Credit Card"] .ioc-report-category-name {
+  color: #ef4444;
+}
+
+[data-text="Credit Card"] .ioc-report-category-name::before {
+  content: "\f09d";
+}
+
+[data-text="SSN"] .ioc-report-category-name {
+  color: #f97316;
+}
+
+[data-text="SSN"] .ioc-report-category-name::before {
+  content: "\f2c2";
+}
