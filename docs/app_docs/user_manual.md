@@ -57,6 +57,12 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
    **Tenant**
    <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
 
+   In this system, the concept of a tenant refers to an independent company or organization that is provided with its own isolated environment. Each company (tenant) will have the ability to create, manage, and maintain its own users internally.
+
+Under this feature, the company will be fully responsible for adding, updating, or removing its users according to its operational requirements. These activities will be performed within the company’s tenant environment, and no involvement from the system’s central administrator will be required. Furthermore, the administrator will not have visibility into or control over the internal user management of each tenant.
+
+This functionality is specifically designed to give companies flexibility and autonomy, allowing them to customize the system usage according to their internal structure, workflows, and policies. The tenant-based approach ensures that each company can configure and utilize the platform independently, without interference, while maintaining proper isolation and data privacy between different tenants.
+
    
 
 **System Settings**
