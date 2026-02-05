@@ -73,15 +73,14 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
         const messages = (r.body?.messages || []) as any[];
         const total = messages.length;
 
-        if (total === 0) {
+        if (total !== 1) {
           if (Date.now() - startedAt > timeoutMs) {
-            throw new Error("No emails found");
+            throw new Error(`Expected exactly 1 email, found ${total}`);
           }
           return cy.wait(intervalMs).then(() => waitForUrl());
         }
 
-        const latest = messages[messages.length - 1];
-        const id = latest?.ID as string;
+        const id = messages[0]?.ID as string;
         return cy.request("GET", `http://localhost:8025/api/v1/message/${id}`);
       })
       .then((r: any) => {
@@ -111,5 +110,13 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
       });
   };
 
-  return waitForUrl();
+  return waitForUrl().then((url) =>
+    cy.request("GET", "http://localhost:8025/api/v1/messages").then((r) => {
+      const total = (r.body?.messages || []).length;
+      if (total !== 1) {
+        throw new Error(`Expected exactly 1 email at end, found ${total}`);
+      }
+      return url;
+    })
+  );
 });
