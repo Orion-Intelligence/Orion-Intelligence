@@ -10,7 +10,7 @@ class search_dynamic_param_model(BaseModel):
 
 class search_dynamic_crack_model(BaseModel):
     text: Dict[str, str] = Field(
-        default_factory=dict, examples=[{"name": "gta"}])
+        default_factory=dict, examples=[{"name": "https://play.google.com/store/apps/details?id=com.jrzheng.supervpnfree&hl=en"}])
 
 
 class search_dynamic_social_model(BaseModel):

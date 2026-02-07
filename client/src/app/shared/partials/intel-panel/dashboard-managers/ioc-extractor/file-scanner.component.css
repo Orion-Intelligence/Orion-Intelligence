@@ -133,10 +133,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
   top: 0;
-  z-index: 25;
-  backdrop-filter: blur(12px);
   animation: slide-in-fade 0.5s ease-out forwards;
   transition: box-shadow 0.3s ease-out, border-color 0.3s ease-out;
 }
@@ -622,7 +619,6 @@
   justify-content: center;
   border-radius: 8px;
   transition: all 0.2s ease;
-  z-index: 10;
 }
 
 .ioc-extractor-scan_alert-close:hover {
@@ -821,22 +817,13 @@
 }
 
 .ioc-report-stat {
-  border-left: 4px solid #6b7280;
   transition: border-color 0.3s ease;
 }
 
-.stat-0 { border-left-color: #0ea5e9; }
-.stat-1 { border-left-color: #8b5cf6; }
-.stat-2 { border-left-color: #06b6d4; }
-.stat-3 { border-left-color: #eab308; }
-.ioc-report-stat:last-child { border-left-color: #22c55e; }
-
 .status-success {
-  background: #22c55e;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
+  background: rgb(34 197 94 / 18%);
+  border-color: rgb(34 197 94 / 28%);
+  color: #a7f3d0;
 }
 
 .status-failed {
@@ -848,16 +835,14 @@
 }
 
 .ioc-report-type-badge {
-  background: linear-gradient(135deg, #4b5563, #374151);
-  color: white;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
-  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-color);
+  background: color-mix(in srgb,var(--accent-color) 20%,transparent);
+  border: 1px solid color-mix(in srgb,var(--accent-color) 30%,transparent);
+  white-space: nowrap;
 }
 
 .ioc-report-type-badge:hover {

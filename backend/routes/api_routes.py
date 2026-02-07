@@ -201,6 +201,7 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     summary="Search consolidated reports (ranked)",
     description=SEARCH_DOCS["consolidated_ranked"]["description"],
     tags=["Search"],
+    include_in_schema=False,
     operation_id="searchConsolidatedReportsRanked",
     response_description=SEARCH_DOCS["consolidated_ranked"]["response_description"],
     status_code=200,
@@ -219,6 +220,7 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
     summary="Search consolidated reports (ranked with operators)",
     tags=["Search"],
     operation_id="searchConsolidatedRankedLogic",
+    include_in_schema=False,
     status_code=200,
     dependencies=[Depends(
         role_required(

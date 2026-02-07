@@ -58,6 +58,14 @@ class elastic_request_generator:
             merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
+            if tag == "m_search_all" and allowed_keys:
+                fields = list(dict.fromkeys(fields + list(allowed_keys)))
+
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+            print(fields, flush=True)
+            print(allowed_keys, flush=True)
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+
         if not fields:
             return {"match_none": {}}
 
@@ -82,7 +90,6 @@ class elastic_request_generator:
             if not isinstance(values, list):
                 values = [values]
 
-            # SPECIAL CASE: make m_search_all work in leak/generic/exploit/social/defacement flows
             if ioc_key == "m_search_all":
                 es_fields = allowed_keys
             else:
@@ -327,8 +334,6 @@ class elastic_request_generator:
             except Exception:
                 pass
 
-        print("*" * 75)
-        print(query_statement)
         return query_statement
 
 
@@ -625,8 +630,6 @@ class elastic_request_generator:
         p_query_model,
         pfilter,
         base_index,
-        blocked_categories,
-        allowed_categories,
     ):
         must_clauses = []
         must_not_clause = []
@@ -635,6 +638,7 @@ class elastic_request_generator:
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
             logic_query = self.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_consolidated_iocs)
             must_clauses.append(logic_query)
+
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")

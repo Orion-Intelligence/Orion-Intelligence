@@ -145,12 +145,12 @@ class search_model:
         blocked_categories,
         allowed_categories,
     ):
-        filter_dict = param.entity_filter if param.entity_filter else {}
+        filter_dict = {}
 
         indices, query, indices_boost = (
             elastic_request_generator()
             .on_search_consolidated_iocs(
-                param, filter_dict, base_index, blocked_categories, allowed_categories
+                param, filter_dict, base_index
             )
         )
 

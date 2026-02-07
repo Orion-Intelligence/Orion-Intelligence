@@ -24,7 +24,7 @@
   </div>
 
   <ng-container *ngIf="isFetched || isLoading">
-    <header class="ioc-report-header" [class.scrolled]="isScrolled()">
+    <div class="ioc-report-header">
       <div class="ioc-report-header-left">
         <h1 class="ioc-report-title">Analysis Report</h1>
         <p class="ioc-report-subtitle">File Processing Results</p>
@@ -40,7 +40,7 @@
           </button>
         </div>
       </div>
-    </header>
+    </div>
 
     <div class="ioc-report-progress" *ngIf="!hasError && isLoading && progress() < 100">
       <div class="ioc-report-progress-text">
