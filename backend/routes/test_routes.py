@@ -103,6 +103,7 @@ async def test_parse_text(payload: DomainScanRequest):
     step = _mock_step(f"urlscan_domain_{payload.scanType}")
     if step:
         return step
+    print((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json"))
     return json.loads((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json").read_text(encoding="utf-8"))
 
 @test_routes.post(
