@@ -46,6 +46,7 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
       .and('be.visible');
 
     cy.visit('/');
+    cy.clearAllEmails()
 
     cy.contains('span.reset-password', 'Reset password?')
       .should('be.visible')

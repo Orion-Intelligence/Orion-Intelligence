@@ -22,6 +22,8 @@ import {UrlScanMeta, UrlScanResponse, UrlScanThreatItem} from '../../model/secur
   animations: [fadeInDashboardItem]
 })
 export class SecurityScanResultsComponent implements OnInit {
+  private static allowAutoRunOnce = true;
+
   meta: UrlScanMeta | null = null;
   categories: { name: string; total: number; items: UrlScanThreatItem[] }[] = [];
   requestedUrl = '';
@@ -43,15 +45,21 @@ export class SecurityScanResultsComponent implements OnInit {
 
   ngOnInit(): void {
     this.scanType = this.route.snapshot.data['type'];
-    if (!this.scanType){
-      this.scanType = "basic"
-    }
+    if (!this.scanType) this.scanType = "basic";
+
     const rawParam = this.route.snapshot.queryParamMap.get('domain') || '';
     this.searchQuery = rawParam;
+
     if (!rawParam) {
       this.isLoading = false;
       return;
     }
+
+    if (!SecurityScanResultsComponent.allowAutoRunOnce) {
+      this.isLoading = false;
+      return;
+    }
+    SecurityScanResultsComponent.allowAutoRunOnce = false;
 
     const resolved = this.resolveRequestedUrl(rawParam);
     try {
@@ -242,6 +250,8 @@ export class SecurityScanResultsComponent implements OnInit {
 
     const domain = this.resolveRequestedUrl(raw);
 
+    SecurityScanResultsComponent.allowAutoRunOnce = true;
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -249,10 +259,7 @@ export class SecurityScanResultsComponent implements OnInit {
         scanType: this.scanType
       },
       queryParamsHandling: 'merge'
-    }).then(() => {
-      this.requestedUrl = domain;
-      this.requestedDomain = this.extractHost(domain) || this.requestedDomain;
-      this.load();
-    });
+    }).then();
   }
 }
+

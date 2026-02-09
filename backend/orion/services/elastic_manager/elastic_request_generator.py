@@ -58,6 +58,14 @@ class elastic_request_generator:
             merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
+            if tag == "m_search_all" and allowed_keys:
+                fields = list(dict.fromkeys(fields + list(allowed_keys)))
+
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+            print(fields, flush=True)
+            print(allowed_keys, flush=True)
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+
         if not fields:
             return {"match_none": {}}
 
@@ -82,7 +90,6 @@ class elastic_request_generator:
             if not isinstance(values, list):
                 values = [values]
 
-            # SPECIAL CASE: make m_search_all work in leak/generic/exploit/social/defacement flows
             if ioc_key == "m_search_all":
                 es_fields = allowed_keys
             else:
@@ -327,8 +334,6 @@ class elastic_request_generator:
             except Exception:
                 pass
 
-        print("*" * 75)
-        print(query_statement)
         return query_statement
 
 
@@ -625,8 +630,6 @@ class elastic_request_generator:
         p_query_model,
         pfilter,
         base_index,
-        blocked_categories,
-        allowed_categories,
     ):
         must_clauses = []
         must_not_clause = []
@@ -635,6 +638,7 @@ class elastic_request_generator:
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
             logic_query = self.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_consolidated_iocs)
             must_clauses.append(logic_query)
+
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")
@@ -1468,25 +1472,8 @@ class elastic_request_generator:
         bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
-            email = log["email"][0] if "email" in log and log["email"] else None
-            username = log["username"][0] if "username" in log and log["username"] else None
-            domain = log["domain"][0] if "domain" in log and log["domain"] else None
-            ip = log["ip"][0] if "ip" in log and log["ip"] else None
-            channel = log["channel"] if "channel" in log else None
 
-            if log["type"] == 'c' or log["type"] == 'credential':
-                if not email and not username:
-                    continue
-
-                val = email or username
-                seed = str(val) + "|" + str(channel or "")
-            else:
-                if not any([email, username, domain, ip, channel]):
-                    continue
-                val = email or username or domain or ip or channel
-                seed = str(val) + "|" + str(channel or "")
-
-            m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
+            m_hash = log["m_hash"]
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
             if bf.isduplicate(m_hash):

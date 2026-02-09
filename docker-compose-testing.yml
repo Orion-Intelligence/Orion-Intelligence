@@ -48,7 +48,7 @@ services:
     ports:
       - "8529:8529"
     volumes:
-      - arangodb:/var/lib/arangodb3
+      - arangodb_test:/var/lib/arangodb3
     networks:
       backend:
         ipv4_address: 172.20.1.15
@@ -84,7 +84,7 @@ services:
       - ENABLE_BROTLI=1
 
   elasticsearch:
-    container_name: trusted-web-elastic
+    container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
     environment:
       - cluster.routing.allocation.disk.threshold_enabled=false
@@ -102,7 +102,7 @@ services:
     ports:
       - "9400:9400"
     volumes:
-      - elastic:/usr/share/elasticsearch/data
+      - elastic_test:/usr/share/elasticsearch/data
     healthcheck:
       test: curl -f http://localhost:9400/_cluster/health || exit 1
       interval: 10s
@@ -133,7 +133,7 @@ services:
     env_file:
       - .env
     volumes:
-      - redis:/data
+      - redis_test:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
       interval: 10s
@@ -174,7 +174,7 @@ services:
     ports:
       - "27020:27017"
     volumes:
-      - mongo:/data/db
+      - mongo_test:/data/db
     command: >
       bash -c "
       mongod --bind_ip_all --fork --logpath /var/log/mongodb.log &&
@@ -220,11 +220,9 @@ networks:
         - subnet: 172.20.1.0/24
 
 volumes:
-  redis:
-  mongo:
-  elastic:
+  redis_test:
+  mongo_test:
+  elastic_test:
   static_volume:
   media_volume:
-  arangodb:
-
-
+  arangodb_test:

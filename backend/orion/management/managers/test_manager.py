@@ -132,7 +132,10 @@ class test_manager:
             await db["db_user_account"].insert_many(docs, ordered=False)
 
     async def reset_test_elastic_and_import_mocks(self):
+        print("reset_test_elastic_and_import_mocks: start", flush=True)
+
         if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
+            print("TESTING_ENABLED != 1, exiting", flush=True)
             return
 
         es_host = ELASTIC_CONNECTIONS.S_DATABASE_IP or "localhost"
@@ -140,65 +143,103 @@ class test_manager:
         es_user = ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME
         es_pass = ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD
 
+        print(f"Connecting to ES {es_host}:{es_port}", flush=True)
+
         if es_user and es_pass:
             es = AsyncElasticsearch(
-                hosts=[{"host": es_host, "port": es_port, "scheme": "http"}], basic_auth=(es_user, es_pass), )
+                hosts=[{"host": es_host, "port": es_port, "scheme": "http"}],
+                basic_auth=(es_user, es_pass),
+            )
         else:
-            es = AsyncElasticsearch(hosts=[{"host": es_host, "port": es_port, "scheme": "http"}])
+            es = AsyncElasticsearch(
+                hosts=[{"host": es_host, "port": es_port, "scheme": "http"}]
+            )
 
         try:
             async def _delete_indices(indices):
                 for idx in list(indices.keys()):
                     if idx.startswith("."):
                         continue
+                    print(f"Deleting index: {idx}", flush=True)
                     try:
                         await es.indices.delete(index=idx, ignore_unavailable=True)
                     except NotFoundError:
+                        print(f"Index not found: {idx}", flush=True)
                         continue
                     except ApiError as e:
+                        print(f"Error deleting index {idx}: {e}", flush=True)
                         if getattr(e, "status_code", None) == 404:
                             continue
                         raise
 
+            print("Fetching indices (*)", flush=True)
             indices = await es.indices.get(index="*", ignore_unavailable=True)
             await _delete_indices(indices)
 
+            print("Updating cluster settings (allow destructive)", flush=True)
             await es.cluster.put_settings(
-                persistent={"action.destructive_requires_name": False, "cluster.blocks.read_only_allow_delete": None, })
+                persistent={
+                    "action.destructive_requires_name": False,
+                    "cluster.blocks.read_only_allow_delete": None,
+                }
+            )
 
+            print("Fetching data streams", flush=True)
             try:
                 ds = await es.indices.get_data_stream(name="*")
             except NotFoundError:
+                print("No data streams found", flush=True)
                 ds = {"data_streams": []}
             except ApiError as e:
+                print(f"Error fetching data streams: {e}", flush=True)
                 if getattr(e, "status_code", None) == 404:
                     ds = {"data_streams": []}
                 else:
                     raise
 
             for d in ds.get("data_streams", []):
+                print(f"Deleting data stream: {d['name']}", flush=True)
                 try:
                     await es.indices.delete_data_stream(name=d["name"])
                 except NotFoundError:
+                    print(f"Data stream not found: {d['name']}", flush=True)
                     continue
                 except ApiError as e:
+                    print(f"Error deleting data stream {d['name']}: {e}", flush=True)
                     if getattr(e, "status_code", None) == 404:
                         continue
                     raise
 
-            indices = await es.indices.get(index="*", expand_wildcards="all", ignore_unavailable=True)
+            print("Fetching indices (*, expand_wildcards=all)", flush=True)
+            indices = await es.indices.get(
+                index="*", expand_wildcards="all", ignore_unavailable=True
+            )
             await _delete_indices(indices)
 
+            print("Refreshing indices", flush=True)
             try:
                 await es.indices.refresh(index="*", ignore_unavailable=True)
             except ApiError as e:
+                print(f"Refresh error: {e}", flush=True)
                 if getattr(e, "status_code", None) != 404:
                     raise
 
-            await es.cluster.put_settings(persistent={"action.destructive_requires_name": True})
+            print("Restoring cluster settings (require name)", flush=True)
+            await es.cluster.put_settings(
+                persistent={"action.destructive_requires_name": True}
+            )
 
-            mocks_dir = (Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "elastic")
+            mocks_dir = (
+                    Path(__file__).resolve().parents[3]
+                    / "static"
+                    / "test"
+                    / "mocks"
+                    / "elastic"
+            )
+            print(f"Mocks dir: {mocks_dir}", flush=True)
+
             if not mocks_dir.exists():
+                print("Mocks dir does not exist, exiting", flush=True)
                 return
 
             def _has_data(p: Path) -> bool:
@@ -209,12 +250,17 @@ class test_manager:
                 return False
 
             for data_fp in sorted(mocks_dir.glob("*.data.ndjson")):
+                print(f"Processing mock file: {data_fp}", flush=True)
+
                 if data_fp.stat().st_size == 0:
+                    print("File is empty, skipping", flush=True)
                     continue
                 if not _has_data(data_fp):
+                    print("File has no data lines, skipping", flush=True)
                     continue
 
                 idx = data_fp.name.replace(".data.ndjson", "")
+                print(f"Target index: {idx}", flush=True)
 
                 async def gen(fp=data_fp, default_index=idx):
                     with fp.open("r", encoding="utf-8") as f:
@@ -226,15 +272,30 @@ class test_manager:
                             _id = d.get("_id")
                             _index = d.get("_index") or default_index
                             src = d.get("_source", d)
-                            a = {"_op_type": "index", "_index": _index, "_source": src}
+                            a = {
+                                "_op_type": "index",
+                                "_index": _index,
+                                "_source": src,
+                            }
                             if _id is not None:
                                 a["_id"] = _id
                             yield a
 
+                print(f"Bulk indexing from {data_fp}", flush=True)
                 await es_helpers.async_bulk(
-                    es, gen(), chunk_size=2000, request_timeout=120, raise_on_error=False, raise_on_exception=False, )
+                    es,
+                    gen(),
+                    chunk_size=2000,
+                    request_timeout=120,
+                    raise_on_error=False,
+                    raise_on_exception=False,
+                )
+                print(f"Finished bulk indexing {data_fp}", flush=True)
+
+            print("reset_test_elastic_and_import_mocks: done", flush=True)
 
         finally:
+            print("Closing Elasticsearch client", flush=True)
             await es.close()
 
     async def reset_test_arango_and_import_mocks(self):

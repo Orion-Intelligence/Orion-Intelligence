@@ -72,6 +72,35 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
     cy.contains('button', 'Search')
       .click();
+
+    cy.contains('.sidebar__subitem-content', 'APK Scan')
+      .should('be.visible')
+      .click();
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
+
+    cy.get('button[aria-label="Download report"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('button[aria-label="Scan another file"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
+
   });
 
   it('Live APIs → Email Breach, Social Scanner, Playstore Scanner, Software Scanner', () => {
@@ -81,6 +110,42 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
     cy.contains('.sidebar__item-dropdown', 'Live APIs')
       .should('be.visible')
       .click();
+
+        cy.contains('.sidebar__subitem-content', 'File Scanner')
+      .should('be.visible')
+      .click();
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile({
+        contents: 'cypress/fixtures/resume-sample.pdf',
+        fileName: 'resume-sample.pdf',
+        mimeType: 'application/pdf'
+      }, { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
+
+    cy.get('button[aria-label="Download report"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('button[aria-label="Scan another file"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile({
+        contents: 'cypress/fixtures/resume-sample.pdf',
+        fileName: 'resume-sample.pdf',
+        mimeType: 'application/pdf'
+      }, { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
 
     cy.contains('.sidebar__subitem-content', 'Email Breach')
       .click();
@@ -129,30 +194,6 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
     cy.get('.dash-search-button')
       .click();
-
-    // cy.get('.dashboard-result-card .card-subtitle a')
-    //   .should('exist');
-    cy.contains('.sidebar__subitem-content', 'File Scanner')
-    .click();
-
-  // Wait for the file upload button to appear
-  cy.contains('.sidebar__subitem-content', 'File Scanner').click();
-
-// Get the hidden file input (not the button)
-  cy.get('input[type="file"]', { includeShadowDom: true }) // adjust selector if needed
-    .should('exist')
-    .then((input) => {
-     cy.fixture('avatar.png', 'base64').then((fileContent) => {
-        const blob = Cypress.Blob.base64StringToBlob(fileContent, 'image/png');
-        const testFile = new File([blob], 'avatar.png', { type: 'image/png' });
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(testFile);
-
-        const fileInput = input[0] as HTMLInputElement;
-        fileInput.files = dataTransfer.files;
-        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-  });
 
   });
 
