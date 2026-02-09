@@ -1472,25 +1472,8 @@ class elastic_request_generator:
         bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
-            email = log["email"][0] if "email" in log and log["email"] else None
-            username = log["username"][0] if "username" in log and log["username"] else None
-            domain = log["domain"][0] if "domain" in log and log["domain"] else None
-            ip = log["ip"][0] if "ip" in log and log["ip"] else None
-            channel = log["channel"] if "channel" in log else None
 
-            if log["type"] == 'c' or log["type"] == 'credential':
-                if not email and not username:
-                    continue
-
-                val = email or username
-                seed = str(val) + "|" + str(channel or "")
-            else:
-                if not any([email, username, domain, ip, channel]):
-                    continue
-                val = email or username or domain or ip or channel
-                seed = str(val) + "|" + str(channel or "")
-
-            m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
+            m_hash = log["m_hash"]
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
             if bf.isduplicate(m_hash):
