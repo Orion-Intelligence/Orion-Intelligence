@@ -8,6 +8,8 @@
 @use 'app/shared/partials/chat-widget/chat-widget.component.css';
 @use 'app/shared/partials/header/login-header/header.component.css';
 @use 'app/pages/homepage/home-insight/home-insight.component.css';
+@use 'app/pages/homepage/world-heatmap/world-heatmap.component.css';
+@use 'app/pages/homepage/world-heatmap/heatmap-report/heatmap-report.component.css';
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/pages/tenant/tenant.component.css';
@@ -110,7 +112,8 @@
   --color-blue-730: #fff;
   --color-blue-720: #ffffff;
   --color-blue-710: #F6F8FB;
-  --color-blue-715: linear-gradient(to right, #cccccc50 50%, #cccccc40 70%, #cccccc30 80%, #cccccc20 100%);;
+  --color-blue-715: linear-gradient(to right, #cccccc50 50%, #cccccc40 70%, #cccccc30 80%, #cccccc20 100%);
+  ;
   --color-blue-700: #ffffff;
   --color-blue-690: #E4E7EC;
   --color-blue-680: #ffffff;

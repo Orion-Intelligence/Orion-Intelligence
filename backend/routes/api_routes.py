@@ -120,11 +120,11 @@ async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
     latestDocument_task = homepage_model.getInstance().insight_consolidated_result()
     graph_insight_task = homepage_model.getInstance().invoke_graphs()
+    countryInsightsTask=homepage_model.getInstance().get_country_specific_insights()
 
-    insights, latestDocument, graph_insight = await asyncio.gather(
-        insights_task, latestDocument_task, graph_insight_task, )
-
-    return {"insights": insights, "latestDocument": latestDocument, "graph_insight": graph_insight, }
+    insights, latestDocument, graph_insight,country_insight = await asyncio.gather(
+        insights_task, latestDocument_task, graph_insight_task,countryInsightsTask )
+    return {"insights": insights, "latestDocument": latestDocument, "graph_insight": graph_insight, "country_insight":country_insight}
 
 
 @api_routes.post(

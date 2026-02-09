@@ -1,0 +1,126 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.popup {
+    background: #ffffff;
+    width: 480px;
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: #f1f5f9;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    color: #64748b;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.report-list {
+    padding: 16px;
+    overflow-y: auto;
+    background-color: #f8fafc;
+}
+
+.report-card {
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
+    transition: transform 0.1s;
+}
+
+.report-card:hover {
+    border-color: #cbd5e1;
+}
+
+.card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.card-header h4 {
+    margin: 0;
+    color: #2563eb;
+    font-size: 1rem;
+}
+
+.card-body {
+    padding: 12px 16px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+}
+
+.label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.value {
+    color: #334155;
+    font-weight: 600;
+}
+
+.domain-section {
+    margin-top: 12px;
+}
+
+.chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.chip {
+    background: #eff6ff;
+    color: #3b82f6;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid #dbeafe;
+}

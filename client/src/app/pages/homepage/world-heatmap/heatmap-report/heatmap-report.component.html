@@ -1,0 +1,40 @@
+<div class="overlay" (click)="closePopup()">
+    <div class="popup" (click)="$event.stopPropagation()">
+        <div class="header">
+            <h3>Reports</h3>
+            <button class="close-btn" (click)="closePopup()">&times;</button>
+        </div>
+
+        <div class="report-list">
+            <div class="report-card" *ngFor="let report of reports">
+                <div class="card-header">
+                    <h4>{{ report?.m_title || 'Untitled Report' }}</h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="label">Company:</span>
+                        <span class="value">{{ report?.m_company_name || 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Team:</span>
+                        <span class="value">{{ report?.m_team || 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Network:</span>
+                        <span class="value">{{ report?.m_network || 'N/A' }}</span>
+                    </div>
+
+                    <div class="domain-section" *ngIf="report?.m_domain?.length">
+                        <span class="label">Domains:</span>
+                        <div class="chip-container">
+                            <span class="chip" *ngFor="let domain of report.m_domain">
+                                {{ domain }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
