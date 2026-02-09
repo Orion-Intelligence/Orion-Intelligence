@@ -82,6 +82,8 @@ After filling in the required information and submitting the form, the system cr
    
    ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
 
+   In this section, we can view all information related to a user. This includes details such as the username, email address, account status (active or inactive), and subscription or license information. It provides a complete overview of each user’s account and access details.
+
    **Edituser**
    
    <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
