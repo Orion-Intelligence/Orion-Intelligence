@@ -27,113 +27,11 @@ The Orion Platform's main interface is designed with user-friendliness in mind, 
 
 <img width="1919" height="1079" alt="homepage" src="https://github.com/user-attachments/assets/022963ba-4c8e-41df-85aa-d719ca881edb" />
 
-### Homepage Menu
-![hompagemenu](https://github.com/user-attachments/assets/c1da6427-81d7-478d-9e1e-03e08214df40)
-
-
-**Account**
-
-The Account Settings module allows users to manage and customize their personal account preferences. Within this section, users are provided with several configuration options related to security and appearance.
-
-Firstly, users can manage their login and security settings, including the ability to enable or disable Two-Factor Authentication (2FA) to enhance account security. This allows users to choose the level of protection they require for their accounts.
-
-Secondly, users can customize the application interface according to their preferences. The system provides an option to change the theme, allowing users to switch between Light Mode and Dark Mode for better usability and visual comfort.
-
-These settings are designed to give users greater control over their account security and user experience, ensuring flexibility and convenience while using the system.
-
-<img width="1918" height="652" alt="account" src="https://github.com/user-attachments/assets/7915872b-5c3d-4f65-bcd7-a4b8727ee743" />
-
-**Users**
-
-  The Users module provides functionality to view and manage all users who have been added to the system. In this section, authorized personnel (such as an administrator or tenant manager) can see detailed information about each user.
-
-The displayed information includes:
-
-- User Email Address
-
-- Assigned Role within the system
-
-- Account Status (Active or Inactive)
-
-- Subscription Plan associated with the user
-
-- In addition to viewing user details, the module also provides View and Edit options.
-
-The View option allows administrators to open and review complete user information without making changes. The Edit option allows administrators to modify user details, such as role, status, or other relevant information, as permitted by system policies. This feature helps administrators efficiently monitor, manage, and update user accounts while ensuring proper access control and subscription management.
-   ![users](https://github.com/user-attachments/assets/c2ba3864-7d71-4b13-8cf9-36bc9375f1f3)
-
- 
-
-   **Adduser**
-The Add User feature allows an administrator to manually create and register a new user in the system. When the administrator clicks on the “Add User” option, a user registration form is displayed.
-
-This form requires the administrator to enter the necessary details, including:
-
-- Username
-
-- Email Address
-
-- Password
-
-- Role (as defined in the system)
-
-- Licensing or Subscription Options (to assign the appropriate plan or permissions)
-
-After filling in the required information and submitting the form, the system creates the new user account and assigns the selected role and licensing configuration. This feature ensures that administrators can efficiently onboard new users and configure their access and subscription settings according to organizational requirements.
-
-   
-   <img width="1918" height="803" alt="add" src="https://github.com/user-attachments/assets/364b9515-25fa-4f66-83ae-de08162bcb33" />
-
-
-   **Viewuser**
-
-In this section, we can view all information related to a user. This includes details such as the username, email address, account status (active or inactive), and subscription or license information. It provides a complete overview of each user’s account and access details.
-   
-   ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
-
-
-
-   **Edituser**
-
-In this section, user details can be modified as needed. The admin has the option to edit, delete, or manage all users displayed in the list. User accounts can be activated or disabled, and their license category or subscription type can also be updated according to requirements. This allows the administrator to fully manage user accounts and their access.
-   
-   <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
-
-
-
-   **Auditlog**
-   ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
-
-  
-   
-
-   **Tenant**
-
-In this system, the concept of a tenant refers to an independent company or organization that is provided with its own isolated environment. Each company (tenant) will have the ability to create, manage, and maintain its own users internally.
-Under this feature, the company will be fully responsible for adding, updating, or removing its users according to its operational requirements. These activities will be performed within the company’s tenant environment, and no involvement from the system’s central administrator will be required. Furthermore, the administrator will not have visibility into or control over the internal user management of each tenant. This functionality is specifically designed to give companies flexibility and autonomy, allowing them to customize the system usage according to their internal structure, workflows, and policies. The tenant-based approach ensures that each company can configure and utilize the platform independently, without interference, while maintaining proper isolation and data privacy between different tenants.
-
-   <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
-
- 
-   
-
-**System Settings**
-
-In the System Settings section, users can modify the default configuration of the system according to their requirements. This includes options such as changing the theme, updating the system logo, renaming the application, and selecting or changing the system language. This feature is particularly useful for organizations or clients who want to customize and integrate the system in their own way, such as implementing white labeling, branding the platform with their identity, and adjusting the interface to match their preferences.
-
-![systemsetting](https://github.com/user-attachments/assets/aad4a8de-b8bf-4a78-85df-dcc60c4265b7)
-
-
-
-### Navbar
-
-
-
 ## Directory Page
 
 Here’s an overview of the interface components
 
-### Navbar Filter
+### Navbar
 
 The navigation bar has been moved to the left side of the page. This adjustment enhances accessibility for users. It also creates a cleaner and more efficient workflow.
 
@@ -376,6 +274,106 @@ the overall security posture of affected web servers. Furthermore, this informat
 strategies and mitigating future risks associated with web defacements.
 
 <img width="1647" height="203" alt="defacement" src="https://github.com/user-attachments/assets/9b4ce4c0-9bfd-46e8-b68a-15405d3fd0aa" />
+
+
+
+### Homepage Menu
+![hompagemenu](https://github.com/user-attachments/assets/c1da6427-81d7-478d-9e1e-03e08214df40)
+
+
+**Account**
+
+The Account Settings module allows users to manage and customize their personal account preferences. Within this section, users are provided with several configuration options related to security and appearance.
+
+Firstly, users can manage their login and security settings, including the ability to enable or disable Two-Factor Authentication (2FA) to enhance account security. This allows users to choose the level of protection they require for their accounts.
+
+Secondly, users can customize the application interface according to their preferences. The system provides an option to change the theme, allowing users to switch between Light Mode and Dark Mode for better usability and visual comfort.
+
+These settings are designed to give users greater control over their account security and user experience, ensuring flexibility and convenience while using the system.
+
+<img width="1918" height="652" alt="account" src="https://github.com/user-attachments/assets/7915872b-5c3d-4f65-bcd7-a4b8727ee743" />
+
+**Users**
+
+  The Users module provides functionality to view and manage all users who have been added to the system. In this section, authorized personnel (such as an administrator or tenant manager) can see detailed information about each user.
+
+The displayed information includes:
+
+- User Email Address
+
+- Assigned Role within the system
+
+- Account Status (Active or Inactive)
+
+- Subscription Plan associated with the user
+
+- In addition to viewing user details, the module also provides View and Edit options.
+
+The View option allows administrators to open and review complete user information without making changes. The Edit option allows administrators to modify user details, such as role, status, or other relevant information, as permitted by system policies. This feature helps administrators efficiently monitor, manage, and update user accounts while ensuring proper access control and subscription management.
+   ![users](https://github.com/user-attachments/assets/c2ba3864-7d71-4b13-8cf9-36bc9375f1f3)
+
+ 
+
+   **Adduser**
+The Add User feature allows an administrator to manually create and register a new user in the system. When the administrator clicks on the “Add User” option, a user registration form is displayed.
+
+This form requires the administrator to enter the necessary details, including:
+
+- Username
+
+- Email Address
+
+- Password
+
+- Role (as defined in the system)
+
+- Licensing or Subscription Options (to assign the appropriate plan or permissions)
+
+After filling in the required information and submitting the form, the system creates the new user account and assigns the selected role and licensing configuration. This feature ensures that administrators can efficiently onboard new users and configure their access and subscription settings according to organizational requirements.
+
+   
+   <img width="1918" height="803" alt="add" src="https://github.com/user-attachments/assets/364b9515-25fa-4f66-83ae-de08162bcb33" />
+
+
+   **Viewuser**
+
+In this section, we can view all information related to a user. This includes details such as the username, email address, account status (active or inactive), and subscription or license information. It provides a complete overview of each user’s account and access details.
+   
+   ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
+
+
+
+   **Edituser**
+
+In this section, user details can be modified as needed. The admin has the option to edit, delete, or manage all users displayed in the list. User accounts can be activated or disabled, and their license category or subscription type can also be updated according to requirements. This allows the administrator to fully manage user accounts and their access.
+   
+   <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
+
+
+
+   **Auditlog**
+   ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
+
+  
+   
+
+   **Tenant**
+
+In this system, the concept of a tenant refers to an independent company or organization that is provided with its own isolated environment. Each company (tenant) will have the ability to create, manage, and maintain its own users internally.
+Under this feature, the company will be fully responsible for adding, updating, or removing its users according to its operational requirements. These activities will be performed within the company’s tenant environment, and no involvement from the system’s central administrator will be required. Furthermore, the administrator will not have visibility into or control over the internal user management of each tenant. This functionality is specifically designed to give companies flexibility and autonomy, allowing them to customize the system usage according to their internal structure, workflows, and policies. The tenant-based approach ensures that each company can configure and utilize the platform independently, without interference, while maintaining proper isolation and data privacy between different tenants.
+
+   <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
+
+ 
+   
+
+**System Settings**
+
+In the System Settings section, users can modify the default configuration of the system according to their requirements. This includes options such as changing the theme, updating the system logo, renaming the application, and selecting or changing the system language. This feature is particularly useful for organizations or clients who want to customize and integrate the system in their own way, such as implementing white labeling, branding the platform with their identity, and adjusting the interface to match their preferences.
+
+![systemsetting](https://github.com/user-attachments/assets/aad4a8de-b8bf-4a78-85df-dcc60c4265b7)
+
+
 
 
 ## General Intellignece
