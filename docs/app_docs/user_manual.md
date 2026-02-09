@@ -87,7 +87,7 @@ After filling in the required information and submitting the form, the system cr
 
    **Viewuser**
 
-      In this section, we can view all information related to a user. This includes details such as the username, email address, account status (active or inactive), and subscription or license information. It provides a complete overview of each user’s account and access details.
+In this section, we can view all information related to a user. This includes details such as the username, email address, account status (active or inactive), and subscription or license information. It provides a complete overview of each user’s account and access details.
    
    ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
 
@@ -95,7 +95,7 @@ After filling in the required information and submitting the form, the system cr
 
    **Edituser**
 
-   In this section, user details can be modified as needed. The admin has the option to edit, delete, or manage all users displayed in the list. User accounts can be activated or disabled, and their license category or subscription type can also be updated according to requirements. This allows the administrator to fully manage user accounts and their access.
+In this section, user details can be modified as needed. The admin has the option to edit, delete, or manage all users displayed in the list. User accounts can be activated or disabled, and their license category or subscription type can also be updated according to requirements. This allows the administrator to fully manage user accounts and their access.
    
    <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
 
@@ -109,11 +109,8 @@ After filling in the required information and submitting the form, the system cr
 
    **Tenant**
 
-     In this system, the concept of a tenant refers to an independent company or organization that is provided with its own isolated environment. Each company (tenant) will have the ability to create, manage, and maintain its own users internally.
-
-Under this feature, the company will be fully responsible for adding, updating, or removing its users according to its operational requirements. These activities will be performed within the company’s tenant environment, and no involvement from the system’s central administrator will be required. Furthermore, the administrator will not have visibility into or control over the internal user management of each tenant.
-
-This functionality is specifically designed to give companies flexibility and autonomy, allowing them to customize the system usage according to their internal structure, workflows, and policies. The tenant-based approach ensures that each company can configure and utilize the platform independently, without interference, while maintaining proper isolation and data privacy between different tenants.
+In this system, the concept of a tenant refers to an independent company or organization that is provided with its own isolated environment. Each company (tenant) will have the ability to create, manage, and maintain its own users internally.
+Under this feature, the company will be fully responsible for adding, updating, or removing its users according to its operational requirements. These activities will be performed within the company’s tenant environment, and no involvement from the system’s central administrator will be required. Furthermore, the administrator will not have visibility into or control over the internal user management of each tenant. This functionality is specifically designed to give companies flexibility and autonomy, allowing them to customize the system usage according to their internal structure, workflows, and policies. The tenant-based approach ensures that each company can configure and utilize the platform independently, without interference, while maintaining proper isolation and data privacy between different tenants.
 
    <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
 
@@ -121,6 +118,9 @@ This functionality is specifically designed to give companies flexibility and au
    
 
 **System Settings**
+
+In the System Settings section, users can modify the default configuration of the system according to their requirements. This includes options such as changing the theme, updating the system logo, renaming the application, and selecting or changing the system language. This feature is particularly useful for organizations or clients who want to customize and integrate the system in their own way, such as implementing white labeling, branding the platform with their identity, and adjusting the interface to match their preferences.
+
 ![systemsetting](https://github.com/user-attachments/assets/aad4a8de-b8bf-4a78-85df-dcc60c4265b7)
 
 
