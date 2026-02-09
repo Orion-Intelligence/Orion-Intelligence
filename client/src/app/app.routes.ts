@@ -35,7 +35,7 @@ import {
   DashboardSocialsComponent
 } from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
 import {subscriptionGuard} from './shared/guards/subscription.guard';
-import {SecurityScanResultsComponent} from './shared/partials/security-scan-results/security-scan-results.component';
+import {SecurityScanComponent} from './pages/security-scan/security-scan.component';
 import {SignupComponent} from './pages/signup/signup.component';
 import {TenantComponent} from './pages/tenant/tenant.component';
 import {WelcomeComponent} from './pages/welcome/welcome.component';
@@ -198,7 +198,7 @@ export const routes: Routes = [
       },
       {
         path: 'scan',
-        component: SecurityScanResultsComponent,
+        component: SecurityScanComponent,
         data: {animation: 'HomePage'}
       },
       {
@@ -560,22 +560,22 @@ export const routes: Routes = [
           },
           {
             path: 'basic-scan',
-            component: SecurityScanResultsComponent,
+            component: SecurityScanComponent,
             data: {type: 'basic', animation: 'CategoryPage'}
           },
           {
             path: 'port-scan',
-            component: SecurityScanResultsComponent,
+            component: SecurityScanComponent,
             data: {type: 'advanced', animation: 'CategoryPage'}
           },
           {
             path: 'repository-scan',
-            component: SecurityScanResultsComponent,
+            component: SecurityScanComponent,
             data: {type: 'repo', animation: 'CategoryPage'}
           },
           {
             path: 'seo-scan',
-            component: SecurityScanResultsComponent,
+            component: SecurityScanComponent,
             data: {type: 'seo', animation: 'CategoryPage'}
           },
           {

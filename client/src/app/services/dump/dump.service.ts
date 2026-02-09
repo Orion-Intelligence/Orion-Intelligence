@@ -11,6 +11,7 @@ export class DumpService implements ListService<DumpCallbackModel> {
     group: 'all',
     parsed_status: 'all'
   };
+
   private dumpDataSubject = new BehaviorSubject<DumpCallbackModel | null>(null);
   private currentPageSubject = new BehaviorSubject<number>(1);
   private filterOpenSubject = new BehaviorSubject<boolean>(false);
@@ -19,17 +20,21 @@ export class DumpService implements ListService<DumpCallbackModel> {
   currentPage$ = this.currentPageSubject.asObservable();
   isFilterOpen$ = this.filterOpenSubject.asObservable();
 
-  constructor(private apiService: ApiService) {
-  }
+  constructor(private apiService: ApiService) {}
 
   setDumpData(data: DumpCallbackModel): void {
     this.dumpDataSubject.next(data);
   }
 
   reloadDumpData(params?: any): void {
-    this.apiService.get<DumpCallbackModel>('dumps', { params }).subscribe((data) => {
+    const page = params?.page ?? this.currentPageSubject.getValue();
+    this.apiService.get<DumpCallbackModel>('dumps', { params: { ...(params || {}), page } }).subscribe((data) => {
       this.dumpDataSubject.next(data);
     });
+  }
+
+  getCurrentPage(): number {
+    return this.currentPageSubject.getValue();
   }
 
   setCurrentPage(page: number): void {
@@ -41,9 +46,8 @@ export class DumpService implements ListService<DumpCallbackModel> {
   toggleFilter(open: boolean): void {
     this.filterOpenSubject.next(open);
   }
+
   reload(params?: any): void {
-    this.apiService.get<DumpCallbackModel>('dumps', { params }).subscribe(data => {
-      this.dumpDataSubject.next(data);
-    });
+    this.reloadDumpData(params);
   }
 }

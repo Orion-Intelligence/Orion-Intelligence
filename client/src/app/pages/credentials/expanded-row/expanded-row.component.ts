@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
+import {NgClass, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
 type TelemetryGroup = { key: string; label: string; values: string[] };
@@ -7,7 +7,7 @@ type TelemetryGroup = { key: string; label: string; values: string[] };
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
-  imports: [NgIf, NgForOf, NgClass, TooltipDirective],
+  imports: [NgIf, NgForOf, NgClass, TooltipDirective, TitleCasePipe],
   templateUrl: './expanded-row.component.html'
 })
 export class ExpandedRowComponent implements OnChanges {
@@ -301,14 +301,13 @@ export class ExpandedRowComponent implements OnChanges {
       'raw',
       'type',
       'file_type',
+      'date',
       'fileType',
       'channel',
       'm_channel',
       'm_sub_host',
       'source_channel',
       'm_source_channel',
-      'email',
-      'domain',
       'ip',
       'password',
       'mapping',

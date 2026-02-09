@@ -4,94 +4,107 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, take } from 'rxjs';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { FilterModel } from '../model/filter/filter.model';
+
 export interface BaseListResponse {
-    total_count: number;
+  total_count: number;
 }
 
 export interface ListService<T extends BaseListResponse> {
-    reload(params: any): void;
-    setCurrentPage(page: number): void;
+  reload(params: any): void;
+  setCurrentPage(page: number): void;
 }
-
 
 @Directive()
 export abstract class BaseListingComponent<T extends BaseListResponse> implements OnInit {
-    protected route = inject(ActivatedRoute);
-    protected router = inject(Router);
-    protected dashboard = inject(DashboardService);
-    protected destroyRef = inject(DestroyRef);
+  protected route = inject(ActivatedRoute);
+  protected router = inject(Router);
+  protected dashboard = inject(DashboardService);
+  protected destroyRef = inject(DestroyRef);
 
-    abstract filterModel: FilterModel;
-    selectedFilters: Record<string, string | null> = {};
-    totalPages = 0;
-    searchQuery = '';
-    isLoading = signal(false);
-    protected abstract data$: Observable<T | null>;
-    protected abstract service: ListService<T>;
+  abstract filterModel: FilterModel;
+  selectedFilters: Record<string, string | null> = {};
+  totalPages = 0;
+  searchQuery = '';
+  isLoading = signal(false);
 
-    abstract isFilterOpen$: Observable<boolean>;
-    abstract openSidebar(): void;
-    abstract closeSidebar(): void;
+  protected abstract data$: Observable<T | null>;
+  protected abstract service: ListService<T>;
 
-    ngOnInit(): void {
-        this.data$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-            if (data) {
-                this.totalPages = Math.ceil(data.total_count / 100);
-                this.isLoading.set(false);
-            }
-        });
+  abstract isFilterOpen$: Observable<boolean>;
+  abstract openSidebar(): void;
+  abstract closeSidebar(): void;
 
-        this.route.queryParams.pipe(take(1)).subscribe(params => {
-            this.initializeFilters(params);
-            this.applyFilters(this.dashboard.selectedFilters());
-        });
-    }
+  ngOnInit(): void {
+    this.data$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      if (data) {
+        this.totalPages = Math.ceil(data.total_count / 100);
+        this.isLoading.set(false);
+      }
+    });
 
-    private initializeFilters(params: any): void {
-        const baseFilters = this.filterModel.filters;
-        const initialSelected: Record<string, string> = {};
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      this.initializeFilters(params);
 
-        Object.keys(baseFilters).forEach(key => {
-            const value = params[key];
-            if (value && baseFilters[key].options.includes(value)) {
-                baseFilters[key].selected = value;
-                initialSelected[key] = value;
-            }
-        });
+      const page = parseInt(params['page'], 10) || 1;
+      this.service.setCurrentPage(page);
 
-        this.selectedFilters = initialSelected;
-        this.searchQuery = params['q'] || '';
-    }
+      const mergedFilters = { ...this.dashboard.selectedFilters(), ...this.selectedFilters };
+      this.selectedFilters = mergedFilters;
 
-    onPageChange(page: number): void {
-        this.isLoading.set(true);
-        this.service.setCurrentPage(page);
-        this.service.reload({ ...this.selectedFilters, page });
-    }
+      this.isLoading.set(true);
+      this.service.reload({ ...mergedFilters, q: this.searchQuery || null, page });
+    });
+  }
 
-    applyFilters(filters: Record<string, string | null>): void {
-        this.selectedFilters = filters;
-        this.reload();
-    }
+  private initializeFilters(params: any): void {
+    const baseFilters = this.filterModel.filters;
+    const initialSelected: Record<string, string> = {};
 
-    onSearchSubmit(): void {
-        this.reload();
-    }
+    Object.keys(baseFilters).forEach(key => {
+      const value = params[key];
+      if (value && baseFilters[key].options.includes(value)) {
+        baseFilters[key].selected = value;
+        initialSelected[key] = value;
+      }
+    });
 
-    resetFilters(): void {
-        this.selectedFilters = {};
-        Object.keys(this.filterModel.filters).forEach(key => delete (this.filterModel.filters as any)[key].selected);
+    this.selectedFilters = initialSelected;
+    this.searchQuery = params['q'] || '';
+  }
 
-        const currentUrl = this.router.url.split('?')[0];
-        this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => this.reload());
-    }
+  onPageChange(page: number): void {
+    this.isLoading.set(true);
+    this.service.setCurrentPage(page);
 
-    protected reload(): void {
-        this.isLoading.set(true);
+    const queryParams = { ...this.selectedFilters, q: this.searchQuery || null, page };
+    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
 
-        const queryParams = { ...this.selectedFilters, q: this.searchQuery || null };
-        this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
-        this.service.reload({ ...queryParams, page: 1 });
-    }
+    this.service.reload(queryParams);
+  }
 
+  applyFilters(filters: Record<string, string | null>): void {
+    this.selectedFilters = filters;
+    this.reload();
+  }
+
+  onSearchSubmit(): void {
+    this.reload();
+  }
+
+  resetFilters(): void {
+    this.selectedFilters = {};
+    Object.keys(this.filterModel.filters).forEach(key => delete (this.filterModel.filters as any)[key].selected);
+
+    const currentUrl = this.router.url.split('?')[0];
+    this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => this.reload());
+  }
+
+  protected reload(): void {
+    this.isLoading.set(true);
+
+    const queryParams = { ...this.selectedFilters, q: this.searchQuery || null, page: 1 };
+    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
+
+    this.service.reload(queryParams);
+  }
 }

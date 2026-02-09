@@ -1,65 +1,77 @@
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {Component, OnInit, signal} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {finalize, expand, switchMap, takeWhile} from 'rxjs/operators';
-import {EMPTY, timer} from 'rxjs';
-import {ApiService} from '../../services/api.service';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {CodeBlockComponent} from '../code-block/code-block.component';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {SecurityScanExportComponentComponent} from './security-scan-export-component/security-scan-export-component.component';
-import {NgxPrintDirective, NgxPrintModule} from 'ngx-print';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {EmptyQueryComponent} from '../empty-query/empty-query.component';
-import {UrlScanMeta, UrlScanResponse, UrlScanThreatItem} from '../../model/security-scan/security.scan.results.model';
+// src/app/security-scan/security-scan.component.ts
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+
+import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
+import { CodeBlockComponent } from '../../shared/partials/code-block/code-block.component';
+import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
+import { SecurityScanExportComponentComponent } from './security-scan-export-component/security-scan-export-component.component';
+import { NgxPrintDirective, NgxPrintModule } from 'ngx-print';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
+import {
+  UrlScanMeta,
+  UrlScanThreatItem,
+} from '../../shared/model/security-scan/security.scan.results.model';
+import {ScannerService} from './scanner-service.service';
+
 
 @Component({
-  selector: 'app-security-scan-results',
+  selector: 'app-security-scan',
   standalone: true,
-  imports: [CommonModule, CodeBlockComponent, NgxPrintModule, NgOptimizedImage, TooltipDirective, SecurityScanExportComponentComponent, NgxPrintDirective, FormsModule, ReactiveFormsModule, EmptyQueryComponent],
-  templateUrl: './security-scan-results.component.html',
-  styleUrl: './security-scan-results.component.css',
-  animations: [fadeInDashboardItem]
+  imports: [
+    CommonModule,
+    CodeBlockComponent,
+    NgxPrintModule,
+    NgOptimizedImage,
+    TooltipDirective,
+    SecurityScanExportComponentComponent,
+    NgxPrintDirective,
+    FormsModule,
+    ReactiveFormsModule,
+    EmptyQueryComponent,
+  ],
+  templateUrl: './security-scan.component.html',
+  styleUrl: './security-scan.component.css',
+  animations: [fadeInDashboardItem],
 })
-export class SecurityScanResultsComponent implements OnInit {
-  private static allowAutoRunOnce = true;
-
+export class SecurityScanComponent implements OnInit {
   meta: UrlScanMeta | null = null;
   categories: { name: string; total: number; items: UrlScanThreatItem[] }[] = [];
   requestedUrl = '';
   searchQuery: any = '';
   requestedDomain = '';
-  isLoading = true;
+  isLoading = false;
   isFetched = false;
   hasError = false;
   errorMessage = '';
-  skeletonCards = Array.from({length: 3});
+  skeletonCards = Array.from({ length: 3 });
   progress = signal(0);
   currentStep = '';
-  scanType: string = "";
+  scanType: string = '';
   grade = '';
-  gradeCounts: { high: number; medium: number; low: number; informational: number } = { high: 0, medium: 0, low: 0, informational: 0 };
+  gradeCounts: { high: number; medium: number; low: number; informational: number } = {
+    high: 0,
+    medium: 0,
+    low: 0,
+    informational: 0,
+  };
 
-  constructor(private router: Router, private api: ApiService, private route: ActivatedRoute) {
-  }
+  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService) {}
 
   ngOnInit(): void {
     this.scanType = this.route.snapshot.data['type'];
-    if (!this.scanType) this.scanType = "basic";
+    if (!this.scanType) {
+      this.scanType = 'basic';
+    }
 
     const rawParam = this.route.snapshot.queryParamMap.get('domain') || '';
     this.searchQuery = rawParam;
-
     if (!rawParam) {
-      this.isLoading = false;
       return;
     }
-
-    if (!SecurityScanResultsComponent.allowAutoRunOnce) {
-      this.isLoading = false;
-      return;
-    }
-    SecurityScanResultsComponent.allowAutoRunOnce = false;
 
     const resolved = this.resolveRequestedUrl(rawParam);
     try {
@@ -68,15 +80,15 @@ export class SecurityScanResultsComponent implements OnInit {
       const isIPv4 = /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
       const validHost = host === 'localhost' || isIPv4 || host.includes('.');
       if (!validHost) {
-        this.isLoading = false;
         return;
       }
-
       this.requestedUrl = u.toString();
       this.requestedDomain = this.extractHost(this.requestedUrl) || window.location.hostname || 'localhost';
-      this.load();
+      if (this.scanner.first_load){
+        this.load()
+      }
+      this.scanner.first_load = false;
     } catch {
-      this.isLoading = false;
     }
   }
 
@@ -92,33 +104,17 @@ export class SecurityScanResultsComponent implements OnInit {
     this.grade = '';
     this.gradeCounts = { high: 0, medium: 0, low: 0, informational: 0 };
 
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {domain: this.requestedUrl, scanType: this.scanType},
-      queryParamsHandling: 'merge'
-    }).then();
+    this.router
+      .navigate([], {
+        relativeTo: this.route,
+        queryParams: { domain: this.requestedUrl, scanType: this.scanType },
+        queryParamsHandling: 'merge',
+      })
+      .then();
 
-    this.api.post<UrlScanResponse | any>('urlscan/domain', {domain: this.requestedUrl, scanType: this.scanType})
-      .pipe(
-        expand(res => (
-            res?.status === 'pending' ||
-            res?.result?.status === 'busy' ||
-            res?.result?.status === 'pending'
-          ) ? timer(5000).pipe(
-              switchMap(() => this.api.post<any>('urlscan/domain', {domain: this.requestedUrl, scanType: this.scanType}))
-            )
-            : EMPTY
-        ),
-        takeWhile(res =>
-            res?.status === 'pending' ||
-            res?.result?.status === 'busy' ||
-            res?.result?.status === 'pending',
-          true
-        ),
-        finalize(() => {
-          this.isLoading = false;
-        })
-      )
+    this.scanner
+      .scanDomain(this.requestedUrl, this.scanType)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (res: any) => {
           if (res?.result?.status === 'busy' || res?.result?.status === 'pending' || res?.status === 'pending') {
@@ -142,7 +138,7 @@ export class SecurityScanResultsComponent implements OnInit {
           this.meta = {
             ...m,
             Host: (m?.Host && m.Host.trim()) || this.extractHost(m?.URL) || this.requestedDomain,
-            URL: m?.URL || this.requestedUrl
+            URL: m?.URL || this.requestedUrl,
           };
 
           this.grade = res.result.grade || '';
@@ -152,7 +148,7 @@ export class SecurityScanResultsComponent implements OnInit {
           const proofs = res.result.proofs || {};
           Object.entries(proofs).forEach(([cat, items]) => {
             (items as any[] || []).forEach((p: any) => {
-              const k = (cat + '|' + (p.header || '').trim().toLowerCase());
+              const k = cat + '|' + (p.header || '').trim().toLowerCase();
               if (p.proof && !proofMap.has(k)) proofMap.set(k, p.proof);
             });
           });
@@ -163,26 +159,27 @@ export class SecurityScanResultsComponent implements OnInit {
               const list: any[] = Array.isArray(items) ? items : [];
               const seen = new Set<string>();
               const uniqueItems = list
-                .filter(it => {
+                .filter((it) => {
                   const key = (it.header || '').trim().toLowerCase();
                   if (!key || seen.has(key)) return false;
                   seen.add(key);
                   return true;
                 })
-                .map(it => {
+                .map((it) => {
                   const key = (it.header || '').trim().toLowerCase();
                   const mergedProof = proofMap.get(name + '|' + key);
-                  return mergedProof ? {...it, proof: mergedProof} : it;
+                  return mergedProof ? { ...it, proof: mergedProof } : it;
                 });
-              return {name, total: list.length, items: uniqueItems as UrlScanThreatItem[]};
+              return { name, total: list.length, items: uniqueItems as UrlScanThreatItem[] };
             })
-            .filter(c => c.items.length > 0);
+            .filter((c) => c.items.length > 0);
         },
         error: (err) => {
           this.isFetched = true;
           this.hasError = true;
-          this.errorMessage = (err && (err.error?.detail || err.message)) || 'Failed to fetch security scan results.';
-        }
+          this.errorMessage =
+            (err && (err.error?.detail || err.message)) || 'Failed to fetch security scan results.';
+        },
       });
   }
 
@@ -191,9 +188,9 @@ export class SecurityScanResultsComponent implements OnInit {
       meta: this.meta,
       grade: this.grade,
       grade_counts: this.gradeCounts,
-      threats: Object.fromEntries(this.categories.map(c => [c.name, c.items]))
+      threats: Object.fromEntries(this.categories.map((c) => [c.name, c.items])),
     };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     const host = this.displayHost?.replace(/[^a-z0-9.-]/gi, '_') || 'report';
     const dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -250,16 +247,16 @@ export class SecurityScanResultsComponent implements OnInit {
 
     const domain = this.resolveRequestedUrl(raw);
 
-    SecurityScanResultsComponent.allowAutoRunOnce = true;
-
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        domain,
-        scanType: this.scanType
-      },
-      queryParamsHandling: 'merge'
-    }).then();
+    this.router
+      .navigate([], {
+        relativeTo: this.route,
+        queryParams: { domain, scanType: this.scanType },
+        queryParamsHandling: 'merge',
+      })
+      .then(() => {
+        this.requestedUrl = domain;
+        this.requestedDomain = this.extractHost(domain) || this.requestedDomain;
+        this.load();
+      });
   }
 }
-

@@ -28,7 +28,7 @@
 @use 'app/shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
-@use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
+@use 'app/pages/security-scan/security-scan.component.css';
 @use 'app/pages/login/login-container/login-container.component.css';
 @use 'app/pages/signup/signup.component.css';
 @use 'assets/styles/shared/listing/list.component.css';
@@ -66,7 +66,7 @@
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-scan/consolidated-scan.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/defacement-results/threat-results.component.css';
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
-@use 'app/shared/partials/security-scan-results/security-scan-export-component/security-scan-export-component.component.css';
+@use 'app/pages/security-scan/security-scan-export-component/security-scan-export-component.component.css';
 @use 'app/shared/partials/trail-notification/trail-notification.component.css';
 @use 'app/shared/partials/message-notification/message-notification.component.css';
 @use 'app/pages/graphs/graphs.component.css';

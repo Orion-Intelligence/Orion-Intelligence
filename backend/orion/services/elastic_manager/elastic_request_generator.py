@@ -1203,7 +1203,8 @@ class elastic_request_generator:
             "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
-    
+
+    from datetime import datetime
 
     @staticmethod
     def on_search_stealer_iocs(p_query_model, alert=False):
@@ -1213,7 +1214,9 @@ class elastic_request_generator:
             inner_query = {"match_all": {}}
         else:
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
-            inner_query = elastic_request_generator.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_stealer_log_field)
+            inner_query = elastic_request_generator.build_es_from_tagged(
+                parsed, ELASTIC_ENUMS.mapping_stealer_log_field
+            )
 
         es_query = {
             "bool": {
@@ -1236,42 +1239,34 @@ class elastic_request_generator:
             if getattr(password_filter, "hasSpecialChars", False):
                 es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[^a-zA-Z0-9].*"}})
 
-        date_field = "date.keyword"
+        date_field = "date"
         date_range = getattr(p_query_model, "daterange", None)
 
         if date_range:
             parts = date_range.split(',')
             if len(parts) == 2:
                 try:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00.000000+00:00")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59.999999+00:00")
-                    es_query["bool"]["filter"].append({"range": {date_field: {"gte": from_date, "lte": to_date}}})
+                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    es_query["bool"]["filter"].append({
+                        "range": {date_field: {"gte": from_date, "lte": to_date}}
+                    })
                 except ValueError:
                     pass
 
         page = getattr(p_query_model, "page", 1) or 1
-        size = 100 if is_match_all else (getattr(p_query_model, "size", 500) or 500)
+        size = (getattr(p_query_model, "size", None) or (100 if is_match_all else 500))
         frm = max((page - 1) * size, 0)
 
-        if is_match_all:
-            query_body = {
-                "query": es_query,
-                "size": 100,
-                "sort": ["_doc"],
-                "terminate_after": 100,
-                "track_total_hits": False,
-            }
-        else:
-            query_body = {
-                "query": es_query,
-                "from": frm,
-                "size": size,
-                "sort": ["_doc"],
-                "track_total_hits": False,
-            }
+        query_body = {
+            "query": es_query,
+            "from": frm,
+            "size": size,
+            "sort": ["_doc"],
+            "track_total_hits": False,
+        }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
-
 
     @staticmethod
     def on_search_persona(p_query_model):
