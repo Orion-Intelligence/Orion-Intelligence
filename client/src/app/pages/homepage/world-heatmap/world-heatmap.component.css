@@ -1,0 +1,58 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.heatmap-wrapper {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.map-container {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+}
+
+.country {
+    transition: opacity 0.2s ease, stroke 0.2s ease;
+    cursor: pointer;
+}
+
+.country:hover {
+    opacity: 0.8;
+    stroke: #333 !important;
+    stroke-width: 1px !important;
+}
+
+::ng-deep .heatmap-tooltip {
+    position: absolute;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    pointer-events: none;
+    font-family: sans-serif;
+    font-size: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    color: #333;
+    z-index: 1000;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.legend span {
+    width: 40px;
+    height: 12px;
+    border-radius: 2px;
+}

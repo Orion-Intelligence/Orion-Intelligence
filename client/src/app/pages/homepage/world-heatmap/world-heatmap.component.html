@@ -1,0 +1,12 @@
+<div class="heatmap-wrapper">
+    <div #mapContainer class="map-container"></div>
+
+    <div class="legend" *ngIf="mapData.length > 0">
+        <span [style.background]="lowColor"></span>
+        <p>Low to High</p>
+        <span [style.background]="highColor"></span>
+    </div>
+</div>
+<div *ngIf="isOpenCountryReport">
+    <app-heatmap-report [reports]="selectedCountryReports" (close)="closeCountryReport()"></app-heatmap-report>
+</div>

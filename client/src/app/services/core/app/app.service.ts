@@ -18,7 +18,7 @@ export class AppService {
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
   public entities = signal<any[]>([]);
-
+  public worldJson = signal<any>(null);
   private entitiesCache: any[] | null = null;
 
   private createEmptyUserSessionData(): userSessionData {
@@ -70,6 +70,7 @@ export class AppService {
   ) {
     this.loadEntities();
     this.loadLicenseRules();
+    this.loadWorldJson();
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) this.updatePage(pageParam);
@@ -168,6 +169,16 @@ export class AppService {
           for (const key in data) {
             license_rules[key] = data[key];
           }
+        })
+      )
+      .subscribe();
+  }
+  loadWorldJson(): void {
+    this.http
+      .get<any>('assets/data/map/world.json')
+      .pipe(
+        tap(data => {
+          this.worldJson.set(data);
         })
       )
       .subscribe();
