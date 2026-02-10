@@ -23,7 +23,6 @@
     "@ng-bootstrap/ng-bootstrap": "^18.0.0",
     "@popperjs/core": "^2.11.8",
     "bootstrap-icons": "^1.13.1",
-    "vis-network": "^9.1.12",
     "cypress-axe": "1.7.0",
     "d3": "^7.9.0",
     "franc-min": "^6.2.0",
@@ -68,10 +67,11 @@
     "typescript-eslint": "^8.34.0"
   },
   "overrides": {
-    "tar": "7.5.4",
+    "tar": "7.5.7",
+    "webpack": "5.105.0",
     "js-yaml": "4.1.1",
     "pacote": {
-      "tar": "7.5.4"
+      "tar": "7.5.7"
     },
     "@cypress/code-coverage": {
       "js-yaml": "4.1.1"
