@@ -1,53 +1,4 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './shared/guards/auth-guard.guard';
-import { InsightResolver } from './shared/resolvers/insight.resolver';
-import { ReportResolver } from './shared/resolvers/report.resolver';
-import { LoginComponent } from './pages/login/login.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { HomepageComponent } from './pages/homepage/homepage.component';
-import { DirectoryComponent } from './pages/directory/directory.component';
-import { DashboardApiComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-api/dashboard-api.component';
-import { DashboardChatsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-chats/dashboard-chats.component';
-import { DashboardGeneralComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-general/dashboard-general.component';
-import { ReportComponent } from './shared/partials/report/report_general/report.component';
-import { DashboardDefacementComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-defacement/dashboard-defacement.component';
-import { ReportDefacementComponent } from './shared/partials/report/report-defacement/report-defacement.component';
-import { ReportChatComponent } from './shared/partials/report/report-chat/report-chat.component';
-import { DashboardExploitComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-exploit/dashboard-exploit.component';
-import { DumpComponent } from './pages/dump/dump.component';
-import { CredentialComponent } from './pages/credentials/credential.component';
-import { ErrorHandlerComponent } from './shared/partials/error-handler/error-handler.component';
-import { DashboardConsolidatedComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component';
-import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.resolver';
-import { DashboardSocialsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
-import { subscriptionGuard } from './shared/guards/subscription.guard';
-import { SecurityScanResultsComponent } from './shared/partials/security-scan-results/security-scan-results.component';
-import { SignupComponent } from './pages/signup/signup.component';
-import { TenantComponent } from './pages/tenant/tenant.component';
-import { WelcomeComponent } from './pages/welcome/welcome.component';
-import { ResetPasswordComponent } from './shared/partials/forgot-password/reset-password.component';
-import { TenantGuard } from './shared/guards/tenant-guard.guard';
-import { SidebarUserStatisticsComponent } from './shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component';
-import { SidebarUserIocComponent } from './shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component';
-import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
-import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
-import { NotificationComponent } from './shared/partials/notification/notification.component';
-import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
-import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/account-settings.component';
-import { IocResolver } from './shared/resolvers/ioc.resolver';
-import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
-import { SidebarUserHomepageComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component';
-import { CategoryAlertReportComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component';
-import { AddCustomAlertComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component';
-import { ManageProfileComponent } from './pages/tenant/tenant-management/view-profile/manage-profile.component';
-import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
-import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component';
-import { ConfigResolver } from './shared/resolvers/config.resolver';
-import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
-import { OnboardingGuard } from './shared/guards/onboarding-guar';
-import {FileScannerComponent} from './shared/partials/intel-panel/ioc-extractor/file-scanner.component';
-import { SocialMapperComponent } from './pages/social-mapper/social-mapper.component';
-import {Routes} from '@angular/router';
 import {AuthGuard} from './shared/guards/auth-guard.guard';
 import {InsightResolver} from './shared/resolvers/insight.resolver';
 import {ReportResolver} from './shared/resolvers/report.resolver';
@@ -127,9 +78,7 @@ import {OnboardingGuard} from './shared/guards/onboarding-guar';
 import {
   FileScannerComponent
 } from './shared/partials/intel-panel/dashboard-managers/ioc-extractor/file-scanner.component';
-import {
-  SocialMapperComponent
-} from './shared/partials/intel-panel/dashboard-managers/social-mapper/social-mapper.component';
+import {SocialMapperComponent} from './pages/social-mapper/social-mapper.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: {reportdata: ReportConsolidatedResolver},
