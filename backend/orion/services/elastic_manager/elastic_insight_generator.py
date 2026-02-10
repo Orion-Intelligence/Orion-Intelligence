@@ -14,10 +14,24 @@ class elastic_insight_generator:
     def on_insight_leakdata():
         from_ = 0
         size = 500
-        query_statement = {"query": {"bool": {"must": [{"exists": {"field": "m_domain"}},
-                                                       {"script": {"script": "doc['m_domain'].size()==1"}}], "must_not": [
-            {"terms": {"m_content_type": ["news", "tracking"]}}]}}, "sort": [
-            {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True, "collapse": {"field": "m_domain"}}
+        query_statement = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_domain"}},
+                        {"script": {"script": {"lang": "painless", "source": "doc['m_domain'].size()==1"}}},
+                    ],
+                    "must_not": [
+                        {"terms": {"m_content_type": ["news", "tracking"]}}
+                    ],
+                }
+            },
+            "sort": [{"m_update_date": {"order": "desc"}}],
+            "from": from_,
+            "size": size,
+            "track_total_hits": True,
+            "collapse": {"field": "m_domain"},
+        }
         return "leak_model", query_statement
 
     @staticmethod
