@@ -66,6 +66,8 @@ DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dy
     "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"), "ip_scan": _doc("dynamic/ip_scan.md"), 
     "ioc_extract": _doc("dynamic/ioc_extract.md"),"apk_scan": _doc("dynamic/apk_scan.md"),}
 
+CRYPTO_DOCS = {"crypto_scan": _doc("dynamic/crypto_scan.md"),}
+
 SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
     "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
     "search/consolidated_ranked.md"), "telegram": _doc("search/telegram.md"), "social": _doc(
@@ -790,10 +792,10 @@ async def scan_apk(file: UploadFile = File(...)):
 @api_routes.post(
     "/api/crypto/scan",
     summary="Scan cryptocurrency wallet address or transaction hash",
-    description="Analyzes cryptocurrency wallet addresses and transaction hashes for risk indicators, associated entities, and transaction patterns.",
+    description=CRYPTO_DOCS["crypto_scan"]["description"],
     tags=["Crypto Analysis"],
     operation_id="dynamicCryptoScan",
-    response_description="Crypto wallet/transaction analysis results",
+    response_description=CRYPTO_DOCS["crypto_scan"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),

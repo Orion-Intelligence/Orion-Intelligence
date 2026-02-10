@@ -11,7 +11,7 @@ from orion.constants import constant
 from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, db_user_account, user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
@@ -62,14 +62,17 @@ class auth_manager:
                     user.username, extra={"tfa_secret": secret})
                 return {"twofa_required": True, "temp_token": temp_token, "provisioning_uri": provisioning_uri, "twofa_secret": secret, "username": user.username}
 
+        engine = mongo_controller.get_instance().get_engine()
+        maintainer_user = await engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
+        if not maintainer_user:
+                raise HTTPException(status_code=401, detail="Maintainer user not found")
         role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
-        acct_at = user.account_verify_at
+        acct_at = maintainer_user.account_verify_at
         if isinstance(acct_at, datetime):
             acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
 
         if not getattr(user, "tenant_uuid", None):
             raise HTTPException(status_code=401, detail="account not found")
-        engine = mongo_controller.get_instance().get_engine()
         tenant = await engine.find_one(
             db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
         if tenant and not tenant.verified:
