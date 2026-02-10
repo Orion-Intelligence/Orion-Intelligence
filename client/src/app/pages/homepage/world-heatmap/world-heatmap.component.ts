@@ -9,12 +9,12 @@ import {
   OnInit,
   OnDestroy
 } from '@angular/core';
-import { NgIf } from '@angular/common';
+import {NgIf} from '@angular/common';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
-import { ActivatedRoute } from '@angular/router';
-import { HeatmapReportComponent } from './heatmap-report/heatmap-report.component';
-import { AppService } from '../../../services/core/app/app.service';
+import {ActivatedRoute} from '@angular/router';
+import {HeatmapReportComponent} from './heatmap-report/heatmap-report.component';
+import {AppService} from '../../../services/core/app/app.service';
 
 type CountryData = { id: string; name: string; value: number };
 
@@ -49,7 +49,8 @@ export class WorldHeatmapComponent
   constructor(
     private route: ActivatedRoute,
     private appService: AppService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     const data = this.route.snapshot.data['insights'];
@@ -70,6 +71,7 @@ export class WorldHeatmapComponent
     if (changes['data'] && !changes['data'].firstChange) {
       this.buildIndex();
       this.updateColors();
+      this.updateLegend();
     }
   }
 
@@ -84,6 +86,90 @@ export class WorldHeatmapComponent
       const key = d.name?.toLowerCase().trim();
       if (key) this.valueByName.set(key, d.value);
     }
+  }
+
+  private ensureLegendDefs(): void {
+    const defs = this.svg.select('defs').empty()
+      ? this.svg.append('defs')
+      : this.svg.select('defs');
+
+    defs.select('#legend-gradient').remove();
+
+    const grad = defs.append('linearGradient')
+      .attr('id', 'legend-gradient')
+      .attr('x1', '0%')
+      .attr('y1', '0%')
+      .attr('x2', '100%')
+      .attr('y2', '0%');
+
+    const stops: Array<{ o: number; c: string }> = [
+      {o: 0, c: 'hsl(0,30%,20%)'},
+      {o: 100, c: 'hsl(0,55%,40%)'}
+    ];
+
+    grad.selectAll<SVGStopElement, { o: number; c: string }>('stop')
+      .data(stops)
+      .join('stop')
+      .attr('offset', d => `${d.o}%`)
+      .attr('stop-color', d => d.c);
+  }
+
+  private updateLegend(): void {
+    const el = this.chartContainer.nativeElement as HTMLElement;
+    const width = el.offsetWidth || 800;
+    const height = Math.round(width * 0.52);
+
+    this.ensureLegendDefs();
+
+    const max = Math.max(...this.mapData.map(d => d.value), 1);
+
+    const legend = this.svg.selectAll<SVGGElement, any>('g.legend').data([0]).join('g').attr('class', 'legend');
+
+    const pad = 14;
+    const barW = 180;
+    const barH = 10;
+
+    legend.attr('transform', `translate(${width - pad - barW - 25},${pad + 6})`);
+
+    legend.selectAll<SVGTextElement, any>('text.legend-title')
+      .data([0])
+      .join('text')
+      .attr('class', 'legend-title')
+      .attr('x', 0)
+      .attr('y', 0)
+      .text('Leaks');
+
+    legend.selectAll<SVGRectElement, any>('rect.legend-bar')
+      .data([0])
+      .join('rect')
+      .attr('class', 'legend-bar')
+      .attr('x', 0)
+      .attr('y', 8)
+      .attr('width', barW)
+      .attr('height', barH)
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .attr('fill', 'url(#legend-gradient)');
+
+    const ticks = [0, Math.round(max * 0.33), Math.round(max * 0.66), max];
+
+    legend.selectAll<SVGLineElement, number>('line.legend-tick')
+      .data(ticks)
+      .join('line')
+      .attr('class', 'legend-tick')
+      .attr('x1', d => (d / max) * barW)
+      .attr('x2', d => (d / max) * barW)
+      .attr('y1', 8 + barH)
+      .attr('y2', 8 + barH + 6);
+
+    legend.selectAll<SVGTextElement, number>('text.legend-tick-label')
+      .data(ticks)
+      .join('text')
+      .attr('class', 'aend-tick-label')
+      .attr('x', d => (d / max) * barW)
+      .attr('y', 8 + barH + 18)
+      .attr('text-anchor', (d, i) => i === 0 ? 'start' : i === ticks.length - 1 ? 'end' : 'middle')
+      .text(d => String(d));
   }
 
   private createChart(): void {
@@ -122,17 +208,42 @@ export class WorldHeatmapComponent
     ) as any;
 
     this.mapG
-      .selectAll<SVGPathElement, any>('path')
+      .selectAll<SVGPathElement, any>('path.country')
       .data(countries.features)
       .enter()
       .append('path')
       .attr('d', this.path as any)
       .attr('class', 'country')
+      .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
       .on('mousemove', (event: MouseEvent, d: any) => this.onHoverMove(event, d))
       .on('mouseleave', (event: MouseEvent) => this.onHoverOut(event))
-      .on('click', (_: MouseEvent, d: any) => this.onCountryClick(d));
+      .on('click', (_: MouseEvent, d: any) => {
+        if (this.getValueForFeature(d) == null) return;
+        this.onCountryClick(d);
+      });
+
+    const gridSize = 24;
+
+    const gridG = this.mapG.append('g').attr('class', 'pixel-grid');
+
+    for (let x = 0; x <= width; x += gridSize) {
+      gridG.append('line')
+        .attr('x1', x)
+        .attr('y1', 0)
+        .attr('x2', x)
+        .attr('y2', height);
+    }
+
+    for (let y = 0; y <= height; y += gridSize) {
+      gridG.append('line')
+        .attr('x1', 0)
+        .attr('y1', y)
+        .attr('x2', width)
+        .attr('y2', y);
+    }
 
     this.updateColors();
+    this.updateLegend();
   }
 
   private getValueForFeature(d: any): number | null {
@@ -151,7 +262,7 @@ export class WorldHeatmapComponent
 
   private updateColors(): void {
     const color = this.getColorScale();
-    this.mapG.selectAll<SVGPathElement, any>('path')
+    this.mapG.selectAll<SVGPathElement, any>('path.country')
       .attr('fill', (d: any) => {
         const v = this.getValueForFeature(d);
         return v == null ? this.neutralFill : color(v);
@@ -162,7 +273,7 @@ export class WorldHeatmapComponent
     const name = d?.properties?.name ?? '';
     const v = this.getValueForFeature(d);
 
-    this.mapG.selectAll('path').classed('hovered', false);
+    this.mapG.selectAll('path.country').classed('hovered', false);
     d3.select(event.currentTarget as SVGPathElement).classed('hovered', true);
 
     this.tooltip.selectAll('*').remove();

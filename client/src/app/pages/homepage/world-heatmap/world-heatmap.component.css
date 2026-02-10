@@ -59,12 +59,12 @@
 }
 
 .heatmap-shell {
-  width: 100%
+  width: 100%;
 }
 
 .map-container {
   width: 100%;
-  min-height: 340px
+  min-height: 340px;
 }
 
 .heatmap-tooltip {
@@ -77,7 +77,7 @@
   box-shadow: 0 18px 46px rgb(0 0 0 / 45%);
   border: 1px solid rgb(239 68 68 / 18%);
   backdrop-filter: blur(6px);
-  max-width: 240px
+  max-width: 240px;
 }
 
 .map-container {
@@ -95,24 +95,64 @@
   );
 }
 
-.country{
+.country {
   stroke: rgb(255 255 255 / 14%);
   stroke-width: 0.7px;
   cursor: pointer;
 }
 
-.country.hovered{
-  stroke: rgb(255 255 255 / 45%);
-  stroke-width: 1.2px;
+.country.hovered,
+.country:hover {
+  stroke: rgb(255 255 255 / 50%) !important;
+  stroke-width: 0.7px !important;
+  opacity: 0.9;
 }
 
-.heatmap-tooltip{
-  position:absolute;
-  pointer-events:none;
-  background:#0b1a2e;
-  color:#fecaca;
-  padding:6px 10px;
-  border-radius:8px;
-  font-size:12px;
-  z-index:5;
+.heatmap-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #0b1a2e;
+  color: #fecaca;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 5;
+}
+
+.graticule {
+  fill: none;
+  stroke: rgb(255 255 255 / 6%);
+  stroke-width: 0.4px;
+  pointer-events: none;
+}
+
+.pixel-grid line {
+  stroke: rgb(255 255 255 / 4%);
+  stroke-width: 0.5px;
+  pointer-events: none;
+}
+
+.country:not(.has-data) {
+  cursor: default;
+}
+
+svg .legend text {
+  font-family: sans-serif;
+  font-size: 11px;
+  fill: rgb(226 232 240 / 90%);
+}
+
+svg .legend-bar {
+  stroke: rgb(255 255 255 / 18%);
+  stroke-width: 1px;
+}
+
+svg .legend-tick {
+  stroke: rgb(226 232 240 / 45%);
+  stroke-width: 1px;
+}
+
+svg .legend-tick-label {
+  font-size: 10px;
+  fill: rgb(226 232 240 / 75%);
 }

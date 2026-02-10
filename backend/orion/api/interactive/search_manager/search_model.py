@@ -67,20 +67,15 @@ class search_model:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-social-api:8020/social/recon/", json=model.model_dump(), timeout=120)
+                    "http://trusted-social-api:8020/social/recon", json=model.model_dump(), timeout=120)
                 if response.status_code != 200:
-                    print("::::::::::::::::::::::::::::::::::", flush=True)
-                    print("::::::::::::::::::::::::::::::::::", flush=True)
-                    print(response.text, flush=True)
-                    print("::::::::::::::::::::::::::::::::::", flush=True)
-                    print("::::::::::::::::::::::::::::::::::", flush=True)
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling parse/"})
+                        content=str(response))
                 return response.json()
         except Exception as ex:
             return JSONResponse(
-                status_code=500, content={"detail": "Something happened while calling parse/"})
+                status_code=500, content=str(ex))
 
     async def _request_doc(self, index, doc_id, lang: Optional[str] = None, translate_fields: Optional[List[str]] = None):
         if translate_fields is None:

@@ -1,7 +1,7 @@
-<div class="h-full w-full flex flex-col overflow-hidden text-slate-200" (click)="closeContextMenu(); closeMobileEntityPanel()">
-  
+<div class="social-scanner-main h-full w-full flex flex-col overflow-hidden text-slate-200" (click)="closeContextMenu(); closeMobileEntityPanel()">
+
   <div class="flex-grow flex flex-col lg:flex-row relative">
-    
+
     <app-home-menu
       class="border-b lg:border-r border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
       [isCollapsed]="isHomeMenuCollapsed()"
@@ -18,11 +18,12 @@
       (jobClicked)="handleCompletedJobClick($event)"
       (entityClicked)="addEntityToGraph($event)"
       (focusUser)="focusOnUser($event)"
-      (deleteUser)="openDeleteConfirmation($event)">
+      (deleteUser)="openDeleteConfirmation($event)"
+      (cancelScan)="cancelScan($event)">
     </app-home-menu>
 
     <main class="flex-grow flex flex-col main-bg-grid">
-      
+
       <app-toolbar
         [searchTerm]="searchTerm()"
         [isSearchDisabled]="isSearchDisabled()"
@@ -36,16 +37,16 @@
         (physicsToggled)="onPhysicsToggled()"
         (editModeToggled)="onEditModeToggled()">
       </app-toolbar>
-      
+
       <div class="flex-grow w-full relative overflow-hidden">
         <ng-container *ngIf="viewMode() === 'graph'; else listViewBlock">
-          <app-network-graph 
-            [data]="networkData()" 
+          <app-network-graph
+            [data]="networkData()"
             [focusNodeId]="nodeToFocus()"
             [editMode]="isEditMode()"
             [physicsEnabled]="isPhysicsEnabled()"
-            (nodeClicked)="onNodeClicked($event)" 
-            (platformNodeClicked)="onPlatformNodeClicked($event)" 
+            (nodeClicked)="onNodeClicked($event)"
+            (platformNodeClicked)="onPlatformNodeClicked($event)"
             (nodeRightClicked)="onNodeRightClicked($event)"
             (dragStart)="closeContextMenu()"
             (zoom)="closeContextMenu()"
@@ -175,11 +176,11 @@
           <i class="bi bi-x-lg w-6 h-6"></i>
          </button>
       </div>
-      
+
       <div class="p-2 max-h-96 overflow-y-auto">
         <div class="flex flex-col">
           <label *ngFor="let platform of modalResults().platforms" class="flex items-center p-3 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors">
-            <input 
+            <input
               type="checkbox"
               class="sr-only peer"
               [checked]="platform.isSelected"
@@ -188,7 +189,7 @@
             <div class="flex items-center justify-center mr-3 w-5 h-5 rounded border-2 border-slate-500 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-colors">
               <i class="bi bi-check-lg text-white transform transition-transform" [class.scale-100]="platform.isSelected" [class.scale-0]="!platform.isSelected"></i>
             </div>
-            <div class="platform-icon mr-3 rounded-full h-6 w-6 flex-shrink-0 flex items-center justify-center text-sm font-bold text-white" 
+            <div class="platform-icon mr-3 rounded-full h-6 w-6 flex-shrink-0 flex items-center justify-center text-sm font-bold text-white"
                 [style.--platform-color]="getPlatformColor(platform.platform)">
                 {{ platform.platform.charAt(0).toUpperCase() }}
             </div>
@@ -196,7 +197,7 @@
           </label>
         </div>
       </div>
-      
+
       <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
         <button (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
           Cancel
@@ -208,12 +209,12 @@
     </div>
   </div>
 
-  <div *ngIf="contextMenu().visible" 
+  <div *ngIf="contextMenu().visible"
       class="context-menu-wrapper w-56 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none animate-context-menu-in"
       [style.--menu-x.px]="contextMenu().x"
       [style.--menu-y.px]="contextMenu().y"
       (click)="$event.stopPropagation()">
-      
+
     <div [ngSwitch]="contextMenu().type">
       <div *ngSwitchCase="'user'">
         <div class="p-1">
@@ -321,10 +322,10 @@
   </div>
 
   <app-metadata-popup *ngIf="isMetadataPopupVisible() && selectedPlatformData()"
-    [data]="selectedPlatformData()!" 
+    [data]="selectedPlatformData()!"
     (close)="closeMetadataPopup()">
   </app-metadata-popup>
-  
+
   <app-profile-summary-popup *ngIf="isSummaryPopupVisible() && summaryPopupData()"
     [username]="summaryPopupData()!.username"
     [platforms]="summaryPopupData()!.platforms"

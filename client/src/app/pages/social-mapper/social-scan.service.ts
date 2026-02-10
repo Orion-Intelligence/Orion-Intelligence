@@ -14,13 +14,13 @@ type ApiEnvelope<T> = {
   providedIn: 'root'
 })
 export class SocialScanService {
-  private useMockData = true;
+  private useMockData = false;
 
   constructor(private api: ApiService) {}
 
   private extractMetadata(platformName: string, data: any): Partial<PlatformResult> {
     if (!data) return { allMetadata: {} };
-    
+
     const platformData = data;
 
     if (!platformData || !platformData.ids) {
@@ -55,7 +55,7 @@ export class SocialScanService {
     request: () => Observable<ApiEnvelope<TResponse>>;
     isReady: (res: ApiEnvelope<TResponse>) => boolean;
     mapResult: (res: ApiEnvelope<TResponse>) => TResult;
-    onPending?: () => void;
+    onPending?: (res: any) => void;
     intervalMs?: number;
     initialDelayMs?: number;
   }): Observable<TResult> {
@@ -69,7 +69,9 @@ export class SocialScanService {
         return res;
       }),
       tap(res => {
-        if (!opts.isReady(res)) opts.onPending?.();
+        if (!opts.isReady(res)) {
+          opts.onPending?.(res);
+        }
       }),
       filter(res => opts.isReady(res)),
       take(1),
@@ -112,16 +114,19 @@ export class SocialScanService {
             finalTimeoutId = setTimeout(() => {
               const responseData = MOCK_API_RESPONSE.result;
               const platforms: PlatformResult[] = responseData
-                .filter(item => item.data && Object.keys(item.data).length > 0)
                 .map(item => {
-                  const metadata = this.extractMetadata(item.metadata.platform, item.data);
+                  const extractedData = this.extractMetadata(item.metadata.platform, item.data);
                   const platformResult = {
                     platform: item.metadata.platform,
                     username: item.metadata.username,
                     url: item.metadata.url,
                     isSelected: false,
-                    ...metadata
+                    ...extractedData
                   } as PlatformResult;
+
+                  if (!platformResult.allMetadata || Object.keys(platformResult.allMetadata).length === 0) {
+                      platformResult.allMetadata = item.metadata;
+                  }
 
                   if (item.metadata.platform.toLowerCase() === 'gitlab') {
                     platformResult.email = `${item.metadata.username}@example.com`;
@@ -146,42 +151,40 @@ export class SocialScanService {
     }
 
     return new Observable(subscriber => {
-      const progressSteps = [
-        { progress: 10, step: 'Submitting job to API...' },
-        { progress: 30, step: 'Scan queued, polling for status...' },
-        { progress: 60, step: 'Still processing, polling...' }
-      ];
-      let stepIndex = 0;
-
-      const emitProgress = () => {
-        if (stepIndex < progressSteps.length) {
-          subscriber.next({ type: 'progress', payload: progressSteps[stepIndex] });
-          stepIndex++;
-        }
-      };
-
-      emitProgress();
+      subscriber.next({ type: 'progress', payload: { progress: 10, step: 'Submitting job to API...' } });
 
       const pollingSub = this.pollForResult<
         { data?: any[] } | any,
         PlatformResult[]
       >({
-        request: () => this.api.post<any>('social/recon', { username }),
-        isReady: (res) => !!(res as any)?.result?.data,
+        request: () => this.api.post<any>('social/recon', { query: username }),
+        isReady: (res) => !!(res as any)?.result,
         mapResult: (res) =>
-          (res as any).result.data
-            .filter((i: any) => i.maigret !== null)
+          (res as any).result
             .map((item: any): PlatformResult => {
-              const metadata = this.extractMetadata(item.platform, item.maigret);
-              return {
-                platform: item.platform,
-                username: item.username,
-                url: item.url,
+              const extractedData = this.extractMetadata(item.metadata.platform, item.data);
+              const platformResult = {
+                platform: item.metadata.platform,
+                username: item.metadata.username,
+                url: item.metadata.url,
                 isSelected: false,
-                ...metadata
+                ...extractedData
               } as PlatformResult;
+
+              if (!platformResult.allMetadata || Object.keys(platformResult.allMetadata).length === 0) {
+                  platformResult.allMetadata = item.metadata;
+              }
+
+              return platformResult;
             }),
-        onPending: () => emitProgress(),
+        onPending: (res: any) => {
+          if (res && res.step) {
+            subscriber.next({
+              type: 'progress',
+              payload: { progress: res.progress || 0, step: res.step }
+            });
+          }
+        },
         initialDelayMs: 1000,
         intervalMs: 2000
       }).subscribe({

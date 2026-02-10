@@ -67,7 +67,12 @@
                         </div>
                         <p class="font-bold mb-0 truncate text-indigo-300">{{ job.username }}</p>
                       </div>
-                      <div *ngIf="job.status === 'in_progress'" class="font-mono text-xs text-slate-400">{{ job.progress }}%</div>
+                      <div *ngIf="job.status === 'in_progress'" class="flex items-center gap-2 shrink-0">
+                        <div class="font-mono text-xs text-slate-400">{{ job.progress }}%</div>
+                        <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="p-1 rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                      </div>
                     </div>
                     
                     <div *ngIf="job.status === 'in_progress'" class="w-full bg-slate-700 rounded-full h-1.5 mt-2">
@@ -75,7 +80,7 @@
                     </div>
                     <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ job.step }}</p>
 
-                    <div *ngIf="job.status === 'completed'" class="flex justify-between items-center mt-3">
+                    <div *ngIf="job.status === 'completed' || job.status === 'failed'" class="flex justify-between items-center mt-3">
                       <div *ngIf="activeUsernames().has(job.username); else notOnGraph">
                         <div class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
                           <i class="bi bi-check-circle-fill"></i>

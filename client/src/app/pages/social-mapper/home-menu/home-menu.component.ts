@@ -27,6 +27,7 @@ export class HomeMenuComponent {
   entityClicked = output<string>();
   focusUser = output<string>();
   deleteUser = output<string>();
+  cancelScan = output<string>();
 
   filteredJobs = computed(() => {
     const term = this.searchTerm().toLowerCase();

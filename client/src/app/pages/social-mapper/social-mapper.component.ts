@@ -7,13 +7,14 @@ import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-su
 import { NetworkData, Job, PlatformResult, CustomEntity, NetworkNode, TabState } from '../../shared/model/social/social-scan.models';
 import { SocialScanService } from './social-scan.service';
 import { TabManagerService } from '../../shared/services/tab-manager.service';
-
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { EntityMenuComponent } from './entity-menu/entity-menu.component';
 import { ListViewComponent } from './list-view/list-view.component';
 import { getPlatformColor } from '../../shared/utils/formatters';
 import { socialMapperAnimations } from './social-mapper.animations';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-social-mapper',
@@ -37,6 +38,7 @@ import { socialMapperAnimations } from './social-mapper.animations';
 export class SocialMapperComponent implements OnInit, OnDestroy {
   private readonly twId = 'tw-social';
   private activeTabState = computed(() => this.tabManager.activeTab()?.state);
+  private cancelScanSubjects = new Map<string, Subject<void>>();
 
   searchTerm = computed(() => this.activeTabState()?.searchTerm() ?? '');
   homeMenuSearchTerm = computed(() => this.activeTabState()?.homeMenuSearchTerm() ?? '');
@@ -136,6 +138,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       link.href = 'tailwind-social.css';
       document.head.appendChild(link);
     }
+    this.resumeIncompleteScans();
   }
 
   ngOnDestroy(): void {
@@ -212,6 +215,18 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     });
     this.runScan(newJob);
   }
+  
+  cancelScan(jobId: string) {
+    const cancelSubject = this.cancelScanSubjects.get(jobId);
+    if (cancelSubject) {
+      cancelSubject.next();
+      cancelSubject.complete();
+      this.cancelScanSubjects.delete(jobId);
+      this.updateState(state => {
+        state.jobs.update(currentJobs => currentJobs.filter(job => job.id !== jobId));
+      });
+    }
+  }
 
   handleCompletedJobClick(job: Job) {
     if (job.status !== 'completed' || this.activeUsernames().has(job.username)) {
@@ -271,6 +286,15 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.closeDeleteConfirmation();
   }
 
+  private resumeIncompleteScans() {
+    const incompleteJobs = this.jobs().filter(job => job.status === 'in_progress');
+    for (const job of incompleteJobs) {
+      if (!this.cancelScanSubjects.has(job.id)) {
+        this.runScan(job);
+      }
+    }
+  }
+
   private showNotification(type: 'added' | 'scanned') {
     if (this.notificationTimeout) {
       clearTimeout(this.notificationTimeout);
@@ -286,8 +310,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   private runScan(job: Job) {
+    const cancel$ = new Subject<void>();
+    this.cancelScanSubjects.set(job.id, cancel$);
+
     this.scanService.performScan(job.username)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        takeUntil(cancel$),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: (event: any) => {
           if (event.type === 'progress') {
@@ -316,6 +346,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
               ? { ...j, status: 'failed', step: 'Scan failed' }
               : j
           )));
+          this.cancelScanSubjects.delete(job.id);
+        },
+        complete: () => {
+          this.cancelScanSubjects.delete(job.id);
         }
       });
   }

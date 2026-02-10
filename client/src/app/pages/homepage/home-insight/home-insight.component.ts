@@ -19,7 +19,7 @@ import {LicenseService} from '../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
-  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, TooltipDirective, CustomizeBarChartComponent],
+  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, TooltipDirective],
   standalone: true
 })
 export class HomeInsightComponent implements OnInit {

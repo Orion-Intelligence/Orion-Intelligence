@@ -17,4 +17,4 @@ class search_social_param_model(BaseModel):
         default=None, examples=[{"m_country": ["pakistan"]}])
 
 class SocialReconRequest(BaseModel):
-    username: str = Field(..., min_length=1)
+    query: str = Field(..., min_length=1)
