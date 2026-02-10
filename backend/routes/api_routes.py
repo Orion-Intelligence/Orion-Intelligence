@@ -779,3 +779,22 @@ async def scan_apk(file: UploadFile = File(...)):
     result = await search_model.getInstance().scan_apk(file_content, file.filename)
 
     return result
+
+
+@api_routes.post(
+    "/api/crypto/scan",
+    summary="Scan cryptocurrency wallet address or transaction hash",
+    description="Analyzes cryptocurrency wallet addresses and transaction hashes for risk indicators, associated entities, and transaction patterns.",
+    tags=["Crypto Analysis"],
+    operation_id="dynamicCryptoScan",
+    response_description="Crypto wallet/transaction analysis results",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning"))
+    ],
+)
+async def crypto_scan(param: dict):
+
+    result = await search_model.getInstance().crypto_scan(param)
+    return result

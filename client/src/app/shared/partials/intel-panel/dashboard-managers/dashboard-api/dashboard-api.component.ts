@@ -53,6 +53,9 @@ export class DashboardApiComponent implements OnInit {
       } else if (this.apiType === 'software') {
         if (params['name']) this.q1 = params['name'];
         this.q2 = '';
+      } else if (this.apiType === 'crypto') {
+        if (params['address']) this.q1 = params['address'];
+        this.q2 = '';
       } else {
         if (params['q1']) this.q1 = params['q1'];
         if (params['q2']) this.q2 = params['q2'];
@@ -78,10 +81,17 @@ export class DashboardApiComponent implements OnInit {
       payload = {text: {playstore: this.q1}};
     } else if (this.apiType === 'software') {
       payload = {text: {name: this.q1}};
+    } else if (this.apiType === 'crypto') {
+  payload = {
+    text: {
+      address: this.q1?.trim() || '',
+      tx_hash: this.q2?.trim() || ''
+    }
+  };
     } else {
       payload = {text: {q1: this.q1, q2: this.q2}};
     }
-
+    console.log(this.apiType)
     const endpoint =
       this.apiType === 'user'
         ? '/api/dynamic/user'
@@ -91,7 +101,9 @@ export class DashboardApiComponent implements OnInit {
             ? '/api/dynamic/cracked'
           : this.apiType === 'software'
             ? '/api/dynamic/software'
-            : '/api/dynamic/';
+          : this.apiType === 'crypto'
+            ? '/api/crypto/scan'
+                : '/api/dynamic/';
 
     this.query_triggered = true;
     this.fetchSearchResults(endpoint, payload).pipe(finalize(() => {
@@ -160,6 +172,35 @@ export class DashboardApiComponent implements OnInit {
       return /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(this.q1);
     }
   }
+
+  get cryptoAddressValid(): boolean {
+
+  const addr = this.q1?.trim() || '';
+  if (!addr) return false;
+
+
+  const btcLegacy = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+  const btcSegwit = /^bc1[a-z0-9]{39,59}$/;
+
+  const eth = /^0x[a-fA-F0-9]{40}$/;
+
+  return btcLegacy.test(addr) || btcSegwit.test(addr) || eth.test(addr);
+}
+
+get cryptoTxHashValid(): boolean {
+
+  const hash = this.q2?.trim() || '';
+  if (!hash) return false;
+
+
+  const txHashPattern = /^(0x)?[a-fA-F0-9]{64}$/;
+  return txHashPattern.test(hash);
+}
+
+get cryptoValid(): boolean {
+
+  return this.cryptoAddressValid || this.cryptoTxHashValid;
+}
 
   private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
     return this.http.post<any>(apiEndpoint, paramModel).pipe(

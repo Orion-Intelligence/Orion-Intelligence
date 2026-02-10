@@ -262,6 +262,16 @@ export const routes: Routes = [
               title: 'File Analysis',
               description: 'Upload a file to extract Indicators of Compromise (IOCs)'
             }
+          },
+          {
+            path: 'crypto-scanner',
+            component: DashboardApiComponent,
+            data: {
+              animation: 'FileAPI',
+              type: 'crypto',
+              title: 'Crypto Analysis',
+              description: 'provide a cryptocurrency address to extract related information and potential risks'
+            }
           }
         ]
       },

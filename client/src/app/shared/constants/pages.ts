@@ -73,6 +73,7 @@ export enum ApiSubCategory {
   CRACKED = 'Playstore-Scanner',
   SOFTWARE = 'Software-Scanner',
   FILE = 'File-Scanner',
+  CRYPTO = 'Crypto-Scanner',
 }
 
 export enum SocialSubCategory {
