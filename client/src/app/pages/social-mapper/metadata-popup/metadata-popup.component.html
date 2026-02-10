@@ -1,17 +1,19 @@
-
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="onClose()">
-  <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-md animate-fade-in-scale flex flex-col"
-       (click)="$event.stopPropagation()" style="max-height: 90vh;">
-
+  <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-md animate-fade-in-scale flex flex-col popup-container"
+       (click)="$event.stopPropagation()">
+    
     <div class="p-5 relative flex-shrink-0">
       <div class="flex items-start gap-4">
-        <img [src]="'https://logo.clearbit.com/' + data().url.split('/')[2]" class="object-contain rounded-full bg-white p-2" [alt]="data().platform + ' logo'" style="width: 5rem; height: 5rem;"/>
+        <div class="platform-icon rounded-full flex-shrink-0 flex items-center justify-center text-4xl font-bold text-white w-20 h-20"
+             [style.--platform-color]="getPlatformColor(data().platform)">
+          {{ data().platform.charAt(0).toUpperCase() }}
+        </div>
         <div class="flex-grow">
           <h3 class="text-2xl font-bold text-slate-100">{{ data().platform }}</h3>
-          <p class="font-mono text-sm text-indigo-400">{{ data().username }}</p>
+          <p class="font-mono text-sm text-indigo-400">{{ '@' + data().username }}</p>
         </div>
       </div>
-
+      
       <p *ngIf="data().description" class="text-slate-400 mt-3 text-sm">{{ data().description }}</p>
 
       <div class="flex items-center gap-4 text-slate-400 text-sm mt-4">
@@ -25,29 +27,31 @@
         </div>
       </div>
     </div>
-
+    
     <div class="px-5 pb-4 overflow-y-auto">
       <h4 class="text-sm font-semibold text-slate-400 border-b border-slate-700 pb-2 mb-3">All Available Data</h4>
       <dl class="text-sm">
         <div *ngFor="let item of getMetadataEntries()" class="grid grid-cols-3 gap-4 py-2 border-b border-slate-700/50">
           <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
           <dd class="col-span-2 text-slate-200 break-words">
-            <ng-container *ngIf="isImageUrl(item.value)">
+            <ng-container *ngIf="isImageUrl(item.value); else urlCheck">
               <img [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40" [alt]="item.key"/>
             </ng-container>
-            <ng-container *ngIf="isUrl(item.value) && !isImageUrl(item.value)">
-              <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">{{ item.value }}</a>
-            </ng-container>
-             <ng-container *ngIf="!isUrl(item.value)">
+            <ng-template #urlCheck>
+              <ng-container *ngIf="isUrl(item.value); else plainText">
+                <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">{{ item.value }}</a>
+              </ng-container>
+            </ng-template>
+            <ng-template #plainText>
               {{ item.value }}
-            </ng-container>
+            </ng-template>
           </dd>
         </div>
       </dl>
     </div>
 
     <div class="p-4 bg-slate-900/50 flex justify-between items-center gap-4 flex-shrink-0 mt-auto rounded-b-lg border-t border-slate-700">
-       <a [href]="data().url" target="_blank" rel="noopener noreferrer" class="font-semibold text-decoration-none flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300">
+       <a [href]="data().url" target="_blank" rel="noopener noreferrer" class="font-semibold text-decoration-none flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
           <span>Visit Profile</span>
           <i class="bi bi-box-arrow-up-right"></i>
        </a>

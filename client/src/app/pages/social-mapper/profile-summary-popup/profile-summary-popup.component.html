@@ -1,27 +1,31 @@
-
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="onClose()">
   <div class="flex flex-col bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-lg animate-fade-in-scale overflow-hidden" (click)="$event.stopPropagation()">
     
-    <div class="relative p-4 pt-12 text-center bg-gradient-to-b from-slate-900 to-slate-800 border-b border-slate-700 flex-shrink-0">
-      <div class="absolute top-4 right-4">
-        <button (click)="onClose()" type="button" class="p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
-          <i class="bi bi-x-lg w-6 h-6"></i>
-        </button>
+    <div class="p-4 flex items-center gap-4 border-b border-slate-700 bg-slate-900/50 flex-shrink-0 relative">
+      <button (click)="onClose()" type="button" class="absolute top-3 right-3 p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors z-10">
+          <i class="bi bi-x-lg w-5 h-5"></i>
+      </button>
+
+      <img [src]="'https://i.pravatar.cc/150?u=' + username()" class="avatar-img rounded-full ring-2 ring-slate-600 flex-shrink-0"/>
+      
+      <div class="min-w-0">
+          <h3 class="text-xl font-bold text-slate-100 truncate">{{ username() }}</h3>
+          <p *ngIf="email()" class="text-sm text-indigo-400 font-mono truncate mb-1">{{ email() }}</p>
+          <span class="inline-block bg-slate-700 text-slate-300 text-xs font-medium px-2 py-0.5 rounded-full">
+              {{ platforms().length }} platforms found
+          </span>
       </div>
-      <img [src]="'https://i.pravatar.cc/150?u=' + username()" class="mx-auto rounded-full ring-4 ring-slate-700/50 p-1 bg-slate-800" style="width: 6rem; height: 6rem;"/>
-      <h3 class="text-2xl font-bold text-slate-100 mt-3 mb-0">{{ username() }}</h3>
-      <p *ngIf="email()" class="text-sm text-indigo-400 font-mono mb-2">{{ email() }}</p>
-      <span class="inline-block bg-slate-700/80 text-slate-300 text-xs font-medium px-2.5 py-1 rounded-full">
-        Found on {{ platforms().length }} platforms
-      </span>
     </div>
 
-    <div class="p-2 overflow-auto" style="max-height: 70vh;">
-      <div class="flex flex-col gap-1">
-        <div *ngFor="let platform of platforms(); trackBy: trackByPlatform" class="rounded-lg overflow-hidden bg-slate-700/50 transition-all duration-300"
-             [class.bg-slate-700]="expandedPlatform() === platform">
+    <div class="p-3 overflow-auto popup-content">
+      <div class="flex flex-col gap-2">
+        <div *ngFor="let platform of platforms()" class="rounded-lg overflow-hidden bg-slate-700/50 transition-colors duration-300"
+              [class.bg-slate-700]="expandedPlatform() === platform">
           <div (click)="onPlatformClick(platform)" class="group flex items-center p-3 transition-colors cursor-pointer">
-            <img [src]="'https://logo.clearbit.com/' + platform.url.split('/')[2]" class="flex-shrink-0 rounded-full p-1 bg-white mr-4" style="height: 2.5rem; width: 2.5rem;"/>
+            <div class="platform-icon flex-shrink-0 rounded-full mr-4 flex items-center justify-center text-lg font-bold text-white h-10 w-10" 
+                 [style.--platform-color]="getPlatformColor(platform.platform)">
+              {{ platform.platform.charAt(0).toUpperCase() }}
+            </div>
             <div class="flex-grow min-w-0">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-slate-200 truncate">{{ platform.platform }}</span>
@@ -33,25 +37,55 @@
               <div class="font-bold text-lg text-indigo-400">{{ formatFollowers(platform.followers) }}</div>
               <div class="text-xs text-slate-500">Followers</div>
             </div>
-            <a [href]="platform.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="ml-3 p-1 rounded-full hover:bg-slate-600 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" title="Visit profile">
-              <i class="bi bi-box-arrow-up-right w-4 h-4"></i>
-            </a>
+            <div class="flex items-center ml-4 flex-shrink-0">
+                <a [href]="platform.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="p-1 rounded-full hover:bg-slate-600 text-slate-500 group-hover:text-slate-300 transition-colors" title="Visit profile">
+                  <i class="bi bi-box-arrow-up-right w-4 h-4"></i>
+                </a>
+                <i class="bi bi-chevron-down text-slate-400 ml-2 transition-transform duration-300" [class.rotate-180]="expandedPlatform() === platform"></i>
+            </div>
           </div>
           <div class="transition-[max-height] duration-500 ease-in-out overflow-hidden" 
-               [class.max-h-[40rem]]="expandedPlatform() === platform"
-               [class.max-h-0]="expandedPlatform() !== platform">
+              [class.max-h-[40rem]]="expandedPlatform() === platform"
+              [class.max-h-0]="expandedPlatform() !== platform">
             <div class="border-t border-slate-600/50">
-              <div *ngIf="expandedPlatform() === platform" class="p-4">
-                 <p *ngIf="platform.description" class="text-slate-300 text-sm mb-4 whitespace-pre-wrap">{{ platform.description }}</p>
-                <div class="flex items-center gap-6 text-slate-400 text-sm">
-                  <div *ngIf="platform.joiningDate" class="flex items-center gap-1.5">
-                    <i class="bi bi-calendar3 w-4 h-4"></i>
-                    <span>Joined {{ platform.joiningDate }}</span>
+              <div *ngIf="expandedPlatform() === platform">
+                <div class="p-4">
+                  <p *ngIf="platform.description" class="text-slate-300 text-sm mb-4 whitespace-pre-wrap">{{ platform.description }}</p>
+                  <div class="flex items-center gap-6 text-slate-400 text-sm mb-4">
+                    <div *ngIf="platform.joiningDate" class="flex items-center gap-1.5">
+                      <i class="bi bi-calendar3 w-4 h-4"></i>
+                      <span>Joined {{ platform.joiningDate }}</span>
+                    </div>
+                    <div *ngIf="platform.followers !== undefined" class="flex items-center gap-1.5">
+                      <i class="bi bi-people w-4 h-4"></i>
+                      <span><strong class="font-medium text-slate-200">{{ formatFollowers(platform.followers) }}</strong> followers</span>
+                    </div>
                   </div>
-                  <div *ngIf="platform.followers !== undefined" class="flex items-center gap-1.5">
-                    <i class="bi bi-people w-4 h-4"></i>
-                    <span><strong class="font-medium text-slate-200">{{ formatFollowers(platform.followers) }}</strong> followers</span>
-                  </div>
+
+                  <h4 class="text-sm font-semibold text-slate-400 border-b border-slate-700 pb-2 mb-3">All Available Data</h4>
+                  <dl class="text-sm">
+                    <ng-container *ngFor="let item of getMetadataEntries(platform)">
+                      <div class="grid grid-cols-3 gap-4 py-2 border-b border-slate-700/50">
+                        <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
+                        <dd class="col-span-2 text-slate-200 break-words">
+                          <ng-container *ngIf="isImageUrl(item.value); else urlCheck">
+                            <img [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40" [alt]="item.key"/>
+                          </ng-container>
+                          <ng-template #urlCheck>
+                            <ng-container *ngIf="isUrl(item.value); else plainText">
+                              <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">{{ item.value }}</a>
+                            </ng-container>
+                          </ng-template>
+                          <ng-template #plainText>
+                            {{ item.value }}
+                          </ng-template>
+                        </dd>
+                      </div>
+                    </ng-container>
+                    <div *ngIf="getMetadataEntries(platform).length === 0" class="text-center py-4 text-slate-500">
+                      No additional metadata available.
+                    </div>
+                  </dl>
                 </div>
               </div>
             </div>
@@ -60,9 +94,20 @@
       </div>
     </div>
 
-    <div class="p-4 bg-slate-900/50 flex justify-end flex-shrink-0 rounded-b-lg border-t border-slate-700">
-      <button (click)="onClose()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
-        Done
+    <div class="p-4 bg-slate-900/50 flex justify-between items-center gap-4 flex-shrink-0 rounded-b-lg border-t border-slate-700">
+      <div class="flex items-center gap-2">
+        <button (click)="onClose()" class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors group" title="Fetch social media images (Not implemented)">
+          <i class="bi bi-images w-4 h-4 text-slate-400 group-hover:text-white transition-colors"></i>
+          <span>Fetch Images</span>
+        </button>
+        <button (click)="onClose()" class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors group" title="Fetch exposed post links (Not implemented)">
+          <i class="bi bi-link-45deg w-4 h-4 text-slate-400 group-hover:text-white transition-colors"></i>
+          <span>Fetch Links</span>
+        </button>
+      </div>
+      
+      <button (click)="onClose()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+        Close
       </button>
     </div>
   </div>

@@ -1,0 +1,9 @@
+:host(.manipulation-active) {
+  cursor: pointer;
+}
+
+.delete-edge-button {
+  position: absolute;
+  left: var(--btn-x);
+  top: var(--btn-y);
+}

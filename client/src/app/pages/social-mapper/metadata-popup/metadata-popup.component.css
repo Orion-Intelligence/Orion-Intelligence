@@ -1,0 +1,7 @@
+.platform-icon {
+    background-color: var(--platform-color);
+}
+
+.popup-container {
+    max-height: 90vh;
+}

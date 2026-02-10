@@ -1,24 +1,42 @@
-
 import { Component, ChangeDetectionStrategy, input, viewChild, ElementRef, effect, signal, OnDestroy, output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Network, Options } from 'vis-network';
 import { NetworkData } from '../../../shared/model/social/social-scan.models';
 
 @Component({
   selector: 'app-network-graph',
   templateUrl: './network-graph.component.html',
+  styleUrls: ['./network-graph.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule],
+  host: {
+    '[class.manipulation-active]': 'isManipulating()',
+  }
 })
 export class NetworkGraphComponent implements OnDestroy {
   data = input.required<NetworkData>();
   focusNodeId = input<string | null>(null);
+  editMode = input(false);
+  physicsEnabled = input(false);
   container = viewChild.required<ElementRef>('networkContainer');
   nodeClicked = output<string>();
   platformNodeClicked = output<string>();
   nodeRightClicked = output<{ nodeId: string; event: MouseEvent }>();
   dragStart = output<void>();
   zoom = output<void>();
+  edgeAdded = output<{ from: string, to: string }>();
+  edgeDeleted = output<{ edges: string[] }>();
   
   private networkInstance = signal<Network | null>(null);
+  deleteButtonState = signal({
+    visible: false,
+    x: 0,
+    y: 0,
+    edgeId: null as string | null
+  });
+  private hideButtonTimeout: any;
+  isManipulating = signal(false);
 
   constructor() {
     effect(() => {
@@ -36,7 +54,7 @@ export class NetworkGraphComponent implements OnDestroy {
           this.destroyNetwork();
         }
       }
-    }, { allowSignalWrites: true });
+    });
 
     effect(() => {
       const nodeId = this.focusNodeId();
@@ -49,6 +67,27 @@ export class NetworkGraphComponent implements OnDestroy {
             easingFunction: 'easeInOutQuad'
           }
         });
+      }
+    });
+
+    effect(() => {
+      const network = this.networkInstance();
+      if (!network) return;
+      if (this.editMode()) {
+        network.addEdgeMode();
+      } else {
+        network.disableEditMode();
+        network.unselectAll();
+        this.hideDeleteButton(true);
+        this.isManipulating.set(false);
+      }
+    });
+
+    effect(() => {
+      const network = this.networkInstance();
+      const enabled = this.physicsEnabled();
+      if (network) {
+        network.setOptions({ physics: { enabled: enabled } });
       }
     });
   }
@@ -94,41 +133,58 @@ export class NetworkGraphComponent implements OnDestroy {
         }
       },
       physics: {
+        enabled: this.physicsEnabled(),
         forceAtlas2Based: {
-          gravitationalConstant: -50,
-          centralGravity: 0.01,
-          springLength: 250,
-          springConstant: 0.09,
-          avoidOverlap: 0.9,
+          gravitationalConstant: -80,
+          centralGravity: 0.005,
+          springLength: 150,
+          springConstant: 0.08,
+          avoidOverlap: 0.7,
+          damping: 0.6,
         },
-        maxVelocity: 50,
+        maxVelocity: 100,
+        minVelocity: 0.75,
         solver: 'forceAtlas2Based',
-        timestep: 0.5,
         stabilization: { 
           enabled: true,
-          iterations: 200,
+          iterations: 1000,
           fit: true
         }
       },
       interaction: {
         tooltipDelay: 100,
-        hideEdgesOnDrag: true,
+        hideEdgesOnDrag: false,
         hover: true,
         navigationButtons: false,
         keyboard: true,
         zoomView: true,
-        dragView: true,
-        minZoom: 0.6,
-        maxZoom: 2.5,
+        dragView: true
       },
       layout: {
         improvedLayout: true,
+      },
+      manipulation: {
+        enabled: false,
+        addEdge: (data: any, callback: (data: any) => void) => {
+          if (data.from !== data.to) {
+            this.edgeAdded.emit(data);
+            callback(data);
+          }
+        },
+        deleteEdge: (data: any, callback: (data: any) => void) => {
+          this.edgeDeleted.emit(data);
+          callback(data);
+        },
       }
     };
 
     const network = new Network(containerEl, networkData, options);
     
     network.on('click', (properties) => {
+      if (this.editMode()) {
+        return;
+      }
+
       const { nodes } = properties;
       if (nodes.length > 0) {
         const clickedNodeId = nodes[0] as string;
@@ -137,6 +193,45 @@ export class NetworkGraphComponent implements OnDestroy {
         } else {
           this.platformNodeClicked.emit(clickedNodeId);
         }
+      }
+    });
+
+    network.on('hoverEdge', (properties) => {
+      if (this.editMode()) {
+        this.isManipulating.set(true);
+        this.cancelHideDeleteButton();
+        
+        const edgeId = properties.edge as string;
+
+        const edgeData = (network as any).body.data.edges.get(edgeId);
+        
+        if (edgeData?.from && edgeData?.to) {
+          const connectedNodeIds = [edgeData.from, edgeData.to];
+          const positions = network.getPositions(connectedNodeIds as string[]);
+          const fromNode = positions[edgeData.from];
+          const toNode = positions[edgeData.to];
+
+          if (fromNode && toNode) {
+            const midX = (fromNode.x + toNode.x) / 2;
+            const midY = (fromNode.y + toNode.y) / 2;
+
+            const domPos = network.canvasToDOM({ x: midX, y: midY });
+            
+            this.deleteButtonState.set({
+              visible: true,
+              x: domPos.x,
+              y: domPos.y,
+              edgeId: edgeId
+            });
+          }
+        }
+      }
+    });
+
+    network.on('blurEdge', (properties) => {
+      if (this.editMode()) {
+        this.isManipulating.set(false);
+        this.hideDeleteButton();
       }
     });
 
@@ -150,10 +245,12 @@ export class NetworkGraphComponent implements OnDestroy {
 
     network.on('dragStart', () => {
       this.dragStart.emit();
+      this.hideDeleteButton(true);
     });
 
     network.on('zoom', () => {
       this.zoom.emit();
+      this.hideDeleteButton(true);
     });
     
     this.networkInstance.set(network);
@@ -167,6 +264,25 @@ export class NetworkGraphComponent implements OnDestroy {
     if (this.networkInstance()) {
       this.networkInstance()?.destroy();
       this.networkInstance.set(null);
+    }
+  }
+
+  deleteEdge(edgeId: string) {
+    this.edgeDeleted.emit({ edges: [edgeId] });
+    this.hideDeleteButton(true);
+  }
+
+  cancelHideDeleteButton() {
+    clearTimeout(this.hideButtonTimeout);
+  }
+
+  hideDeleteButton(immediate = false) {
+    if (immediate) {
+      this.deleteButtonState.set({ visible: false, x: 0, y: 0, edgeId: null });
+    } else {
+      this.hideButtonTimeout = setTimeout(() => {
+        this.deleteButtonState.set({ visible: false, x: 0, y: 0, edgeId: null });
+      }, 200);
     }
   }
 }

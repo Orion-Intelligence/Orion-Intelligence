@@ -1,0 +1,12 @@
+.avatar-img {
+    width: 4.5rem;
+    height: 4.5rem;
+}
+
+.platform-icon {
+    background-color: var(--platform-color);
+}
+
+.popup-content {
+    max-height: 65vh;
+}

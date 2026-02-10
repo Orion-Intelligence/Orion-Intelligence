@@ -1,3 +1,4 @@
+import { WritableSignal } from '@angular/core';
 
 export interface NetworkNode {
   id: string | number;
@@ -39,3 +40,38 @@ export interface PlatformResult {
 export type ScanEvent =
   | { type: 'progress'; payload: Partial<Job> }
   | { type: 'complete'; payload: PlatformResult[] };
+
+export interface CustomEntity {
+  id: string;
+  type: 'wallet' | 'email' | 'domain';
+  label: string;
+  value: string;
+  onGraph: boolean;
+  status: 'pending' | 'added';
+}
+
+export interface TabState {
+  searchTerm: WritableSignal<string>;
+  homeMenuSearchTerm: WritableSignal<string>;
+  jobs: WritableSignal<Job[]>;
+  networkData: WritableSignal<NetworkData>;
+  scanResults: WritableSignal<Map<string, PlatformResult[]>>;
+  activeUsernames: WritableSignal<Set<string>>;
+  customEntities: WritableSignal<CustomEntity[]>;
+  isEditMode: WritableSignal<boolean>;
+  isHomeMenuCollapsed: WritableSignal<boolean>;
+  isEntityMenuCollapsed: WritableSignal<boolean>;
+  activeHomeMenuTab: WritableSignal<'history' | 'entities'>;
+  isPhysicsEnabled: WritableSignal<boolean>;
+  viewMode: WritableSignal<'graph' | 'list'>;
+}
+
+export type SerializableTabState = {
+  [K in keyof TabState]: ReturnType<TabState[K]>;
+};
+
+export interface Tab {
+  id: string;
+  name: string;
+  state: TabState;
+}
