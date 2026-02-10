@@ -495,7 +495,7 @@ This section contains detailed records of actual data breaches, offering in-dept
 
 In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
 
-<img width="1917" height="630" alt="image" src="https://github.com/user-attachments/assets/aee08d43-1e09-4ec2-ab34-4fe201686255" />
+<img width="1913" height="650" alt="discussion" src="https://github.com/user-attachments/assets/f69db8d6-2305-488a-9eb5-46e6d93c2b16" />
 
 4. ### Warfare
 This section provides curated intelligence on cyber warfare activities, including attacks on critical infrastructure, state-sponsored campaigns, and geopolitical cyber threats. Orion continuously monitors sources for warfare-related incidents, offering organizations timely insights into high-level threats with global implications.
