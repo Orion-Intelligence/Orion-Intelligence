@@ -449,3 +449,19 @@ class search_model:
             )
 
         return response.json()
+
+    async def crypto_scan(self, param: dict):
+
+        async with httpx.AsyncClient(timeout=120) as client:
+            response = await client.post(
+                "http://trusted-micros-api:8010/crypto/scan",
+                json=param
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+
+        return response.json()
