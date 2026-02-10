@@ -581,23 +581,6 @@ Orion can use Reddit to collect data on user discussions, emerging issues, and n
 <img width="1912" height="855" alt="social" src="https://github.com/user-attachments/assets/230e62db-50e4-4b09-baf7-cd274edee76b" />
 
 
-## Live APIs
-
-The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
-It can also include many other features and possibilities. Within this section:
-
-### Email Lookup:
-
-By selecting the email option, users can input any email address to retrieve related breach information. This tool helps
-identify where and how the data associated with the entered email may have been leaked or exposed, offering valuable
-insights into potential security incidents or data breaches.
-
-### Breach Records:
-
-Below the lookup interface, a list of data breach records is displayed. These records offer additional context and
-reference points, allowing users to explore known breaches and validate the exposure of specific information.
-
-<img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
 
 
 ## Exploit
@@ -636,6 +619,24 @@ Feed mainly contains news items that may cover any topic or be related to a spec
 You can also plot any result on the CTI graph to see its relationships and context. This lets analysts examine single items and explore their connections visually.
 
 <img width="1913" height="907" alt="feed" src="https://github.com/user-attachments/assets/28ed9fa1-df82-4f31-97ad-3de95c1b26dc" />
+
+## Live APIs
+
+The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
+It can also include many other features and possibilities. Within this section:
+
+### Email Lookup:
+
+By selecting the email option, users can input any email address to retrieve related breach information. This tool helps
+identify where and how the data associated with the entered email may have been leaked or exposed, offering valuable
+insights into potential security incidents or data breaches.
+
+### Breach Records:
+
+Below the lookup interface, a list of data breach records is displayed. These records offer additional context and
+reference points, allowing users to explore known breaches and validate the exposure of specific information.
+
+<img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
 
 
 ## Data Dump
