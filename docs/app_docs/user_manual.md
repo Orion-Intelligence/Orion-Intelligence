@@ -352,6 +352,9 @@ In this section, user details can be modified as needed. The admin has the optio
 
 
    **Auditlog**
+
+   In this section, we can view all users who have logged into the system. It maintains a complete record of login activity, including the details of each user, the date of login, and the exact time they accessed the system.The audit log serves as a comprehensive history of user access, allowing administrators to monitor system usage, track user activity, and review when and by whom the system was accessed. This log is automatically maintained to ensure transparency, security, and accountability.
+   
    ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
 
   
