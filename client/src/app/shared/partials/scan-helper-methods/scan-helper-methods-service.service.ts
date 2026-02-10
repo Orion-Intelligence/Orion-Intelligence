@@ -12,7 +12,7 @@ export class ScanHelperMethodsService {
 
   private currentCancel$?: Subject<boolean> = undefined;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) { }
 
   cancelCurrentScan(): void {
     if (this.currentCancel$) {
@@ -92,7 +92,7 @@ export class ScanHelperMethodsService {
   }
 
   scanDns(ip: string): Subscription {
-    const call = () => this.api.post<DnsResponse>('urlscan/ip', { ip });
+    const call = () => this.api.post<DnsResponse>('urlscan/domain', { domain: ip, scanType: 'dns' });
     const getStatus = (res: DnsResponse) => res?.status;
     const enhanced = (res: DnsResponse) => {
       const p = res?.progress;

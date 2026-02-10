@@ -23,10 +23,10 @@ class elastic_insight_generator:
     @staticmethod
     def on_insight_leakdata_country():
         from_ = 0
-        size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
+        size_ = CONSTANTS.S_SETTINGS_COUNTRY_DOCUMENT_SIZE
 
         query_statement = {
-            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,  
+            "size": size_,  
             "query": {
                 "bool": {
                     "must": [

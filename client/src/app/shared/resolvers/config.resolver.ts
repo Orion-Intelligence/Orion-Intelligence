@@ -1,17 +1,16 @@
-import {Injectable} from '@angular/core';
-import {Resolve} from '@angular/router';
-import {map, catchError, of, Observable} from 'rxjs';
-import {ConfigSettings} from '../model/app/config';
-import {ApiService} from '../services/api.service';
-import {AppService} from '../../services/core/app/app.service';
+import { Injectable } from '@angular/core';
+import { Resolve } from '@angular/router';
+import { map, catchError, of, Observable } from 'rxjs';
+import { ConfigSettings } from '../model/app/config';
+import { ApiService } from '../services/api.service';
+import { AppService } from '../../services/core/app/app.service';
 
 @Injectable({ providedIn: 'root' })
 export class ConfigResolver implements Resolve<boolean> {
 
-  constructor(private appService: AppService, private apiService: ApiService) {}
+  constructor(private appService: AppService, private apiService: ApiService) { }
 
   resolve(): Observable<boolean> {
-    console.log("dsadsa")
     return this.apiService.get<any>('public').pipe(
       map(response => {
         if (response?.settings) {
