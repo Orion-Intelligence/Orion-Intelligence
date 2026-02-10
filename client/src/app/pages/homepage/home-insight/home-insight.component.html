@@ -1,14 +1,14 @@
 <div id="analytics" [ngClass]="{
-    'sidebar-open': appService.getConfig().localSettings.isSidebarOpen===true,
-    'sidebar-closed': appService.getConfig().localSettings.isSidebarOpen===false
+    'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
+    'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen
   }">
   <div class="home_insight__container mt-lg-5">
     <app-customize-bar-chart *ngFor="let graph of GraphData" [graphModel]="graph"></app-customize-bar-chart>
   </div>
   <div class="home_insight__single">Top Data Leaks</div>
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
-    <div [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen===true,
-        'sidebar-closed': appService.getConfig().localSettings.isSidebarOpen===false}">
+    <div [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
+        'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen}">
       <div class="home_insight__container home_insight__container-top mt-4">
         <div *ngFor="let item of getResultItems(modelKey);" class="home-insight-card-container">
           <div class="home-insight-card-header-section">
@@ -77,8 +77,8 @@
 
   <div *ngFor="let model of models">
 
-    <div class="home_insight__container" [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen===true,
-    'sidebar-closed': appService.getConfig().localSettings.isSidebarOpen===false }">
+    <div class="home_insight__container" [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
+    'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen }">
       <div *ngFor="let key of getKeys(insights[model]); let first = first" class="home_insight__card">
         <div class="home_insight__content">
 

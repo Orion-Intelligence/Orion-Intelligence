@@ -181,7 +181,7 @@ export class DashboardApiComponent implements OnInit {
           ((res?.result?.step ?? res?.step) === 'failed');
         return isPending && !isFailedPending;
       }, true),
-      catchError(error => {
+      catchError(_ => {
         return of(null);
       })
     );

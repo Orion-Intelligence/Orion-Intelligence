@@ -24,6 +24,7 @@ export class HomeSearchComponent implements OnInit {
   selectedSearchBy = 'Match any term';
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  homeInsightExpanded = false;
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService,
     protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
@@ -33,9 +34,6 @@ export class HomeSearchComponent implements OnInit {
     const cfg = this.app_service.configData();
     const matchtype = cfg.localSettings.matchType;
     this.onSetMatchType(matchtype)
-    // if (!this.isRoleAdmin) {
-    //   this.onSearchSubmit();
-    // }
   }
 
   onSetMatchType(type: string) {

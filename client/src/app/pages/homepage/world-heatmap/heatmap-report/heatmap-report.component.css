@@ -1,126 +1,138 @@
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgb(2 6 23 / 75%);
+  backdrop-filter:blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
 }
 
-.popup {
-    background: #ffffff;
-    width: 480px;
-    max-height: 80vh;
-    border-radius: 12px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.popup{
+  width:620px;
+  max-height:80vh;
+  background:var(--color-blue-900);
+  border-radius:12px;
+  border:1px solid rgb(148 163 184 / 20%);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
-/* Header */
-.header {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f1f5f9;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.header{
+  padding:14px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid rgb(148 163 184 / 15%);
 }
 
-.header h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    color: #1e293b;
-    font-weight: 600;
+.header h3{
+  margin:0;
+  font-size:1.1rem;
+  color:#e5e7eb;
+  font-weight:600;
 }
 
-.close-btn {
-    background: #f1f5f9;
-    border: none;
-    font-size: 20px;
-    line-height: 1;
-    cursor: pointer;
-    color: #64748b;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    transition: all 0.2s;
+.close-btn{
+  background:transparent;
+  border:1px solid rgb(148 163 184 / 25%);
+  color:#cbd5e1;
+  width:30px;
+  height:30px;
+  border-radius:8px;
+  font-size:18px;
+  cursor:pointer;
 }
 
-.close-btn:hover {
-    background: #e2e8f0;
-    color: #0f172a;
+.close-btn:hover{
+  background:rgb(148 163 184 / 15%);
 }
 
-.report-list {
-    padding: 16px;
-    overflow-y: auto;
-    background-color: #f8fafc;
+.report-list{
+  padding:16px;
+  overflow-y:auto;
+  background:var(--color-blue-900);
 }
 
-.report-card {
-    background: #ffffff;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    margin-bottom: 12px;
-    transition: transform 0.1s;
+.report-card{
+  background:#fff;
+  border:1px solid rgb(148 163 184 / 15%);
+  border-radius:8px;
+  margin-bottom:12px;
 }
 
-.report-card:hover {
-    border-color: #cbd5e1;
+.card-header{
+  padding:10px 14px;
+  border-bottom:1px solid rgb(148 163 184 / 12%);
 }
 
-.card-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f1f5f9;
+.card-header h4{
+  margin:0;
+  font-size:.95rem;
+  color:#93c5fd;
+  font-weight:600;
 }
 
-.card-header h4 {
-    margin: 0;
-    color: #2563eb;
-    font-size: 1rem;
+.card-body{
+  padding:12px 14px;
 }
 
-.card-body {
-    padding: 12px 16px;
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
 }
 
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 0.875rem;
+.label{
+  display:block;
+  font-size:.7rem;
+  color:#94a3b8 !important;
+  margin-bottom:2px;
 }
 
-.label {
-    color: #64748b;
-    font-weight: 500;
+.value{
+  font-size:.85rem;
+  color:#e5e7eb;
+  font-weight:600;
 }
 
-.value {
-    color: #334155;
-    font-weight: 600;
+.domain-section{
+  margin-top:12px;
 }
 
-.domain-section {
-    margin-top: 12px;
+.chip-container{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:6px;
 }
 
-.chip-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
+.chip{
+  background:var(--color-blue-900);
+  color:#93c5fd;
+  border:1px solid rgb(148 163 184 / 20%);
+  padding:2px 10px;
+  border-radius:999px;
+  font-size:.7rem;
+  font-weight:600;
 }
 
-.chip {
-    background: #eff6ff;
-    color: #3b82f6;
-    padding: 2px 10px;
-    border-radius: 100px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border: 1px solid #dbeafe;
+@media (width <= 768px){
+  .overlay{
+    align-items:flex-start;
+    padding:16px;
+  }
+
+  .popup{
+    width:100%;
+    max-width:100%;
+    margin-top:16px;
+    border-radius:12px;
+  }
+
+  .info-grid{
+    grid-template-columns:1fr;
+  }
 }
