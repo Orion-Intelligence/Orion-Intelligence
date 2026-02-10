@@ -44,10 +44,10 @@ class elastic_insight_generator:
             "query": {
                 "bool": {
                     "must": [
-                        {"exists": {"field": "m_country.keyword"}}
+                        {"exists": {"field": "m_country"}}
                     ],
                     "must_not": [
-                        {"terms": {"m_content_type.keyword": ["news", "tracking"]}}
+                        {"terms": {"m_content_type": ["news", "tracking"]}}
                     ]
                 }
             },
@@ -57,6 +57,9 @@ class elastic_insight_generator:
             "track_total_hits": True 
         }
 
+        print("::::::::::::::::::::::::::::::::::::", flush=True)
+        print(query_statement, flush=True)
+        print("::::::::::::::::::::::::::::::::::::", flush=True)
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
 
