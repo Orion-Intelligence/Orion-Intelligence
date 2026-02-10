@@ -1,7 +1,12 @@
 from datetime import datetime, timedelta
 
-from orion.api.interactive.directory_manager.directory_shared_model.directory_callback_model import directory_callback_link, directory_callback_model
-from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
+from orion.api.interactive.directory_manager.directory_shared_model.directory_callback_model import (
+    directory_callback_link,
+    directory_callback_model,
+)
+from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (
+    directory_param_model,
+)
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 
@@ -36,18 +41,23 @@ class directory_model:
                 start_date = datetime.strptime(start_str, "%Y-%m-%d")
                 end_date = datetime.strptime(end_str, "%Y-%m-%d") + timedelta(days=1)
 
-                query["$or"] = [{"leak_model_last_update": {"$gte": start_date, "$lt": end_date}},
-                    {"geneic_model_last_update": {"$gte": start_date, "$lt": end_date}}, ]
-
-            except Exception as e:
+                query["$or"] = [
+                    {"leak_model_last_update": {"$gte": start_date, "$lt": end_date}},
+                    {"geneic_model_last_update": {"$gte": start_date, "$lt": end_date}},
+                ]
+            except Exception:
                 pass
-        else:
-            pass
 
         total_count = await self._engine.count(db_url_data_model, query)
 
+        page_size = 1000
+
         data = await self._engine.find(
-            db_url_data_model, query, skip=(params.page - 1) * 1000, limit=1000)
+            db_url_data_model,
+            query,
+            skip=max(0, (max(1, params.page) - 1) * page_size),
+            limit=page_size,
+        )
 
         return data, total_count
 
@@ -56,4 +66,5 @@ class directory_model:
         return directory_callback_model(
             total_count=total_count,
             page=param.page,
-            mDirectoryCallbackLinks=[directory_callback_link.from_odmantic(doc) for doc in results])
+            mDirectoryCallbackLinks=[directory_callback_link.from_odmantic(doc) for doc in results],
+        )

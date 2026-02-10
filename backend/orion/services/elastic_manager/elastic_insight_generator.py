@@ -19,6 +19,32 @@ class elastic_insight_generator:
             {"terms": {"m_content_type": ["news", "tracking"]}}]}}, "sort": [
             {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True, "collapse": {"field": "m_domain"}}
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
+    
+    @staticmethod
+    def on_insight_leakdata_country():
+        from_ = 0
+        size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
+
+        query_statement = {
+            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,  
+            "query": {
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_country.keyword"}}
+                    ],
+                    "must_not": [
+                        {"terms": {"m_content_type.keyword": ["news", "tracking"]}}
+                    ]
+                }
+            },
+            "sort": [
+                {"m_update_date": {"order": "desc"}}  
+            ],
+            "track_total_hits": True 
+        }
+
+        return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
+
 
     @staticmethod
     def on_shared_data_query():

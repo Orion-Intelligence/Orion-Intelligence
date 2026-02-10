@@ -29,8 +29,6 @@ class service_manager:
         self._is_available = False
 
     async def init_services(self):
-        await test_manager.get_instance().apply_test_overrides()
-
         while not self._is_available:
             try:
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)

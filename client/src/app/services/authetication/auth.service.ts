@@ -61,7 +61,6 @@ export class AuthService {
           if (!this.applyLoginResponse(response)) return;
 
           this.appService.loadSession(true).then(() => {
-            this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
           });
         },
         error: (error) => {

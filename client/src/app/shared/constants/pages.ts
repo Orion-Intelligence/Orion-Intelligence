@@ -73,6 +73,7 @@ export enum ApiSubCategory {
   CRACKED = 'Playstore-Scanner',
   SOFTWARE = 'Software-Scanner',
   FILE = 'File-Scanner',
+  CRYPTO = 'Crypto-Scanner',
 }
 
 export enum SocialSubCategory {
@@ -101,6 +102,7 @@ export enum ScannerSubCategory {
   FULL = 'Port-Scan',
   REPOSITORY = 'Repository-Scan',
   SEO = 'SEO-Scan',
+  APK= 'APK-Scan',
 }
 
 export enum DumpSubCategory {

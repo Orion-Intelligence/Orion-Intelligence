@@ -58,6 +58,14 @@ class elastic_request_generator:
             merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
+            if tag == "m_search_all" and allowed_keys:
+                fields = list(dict.fromkeys(fields + list(allowed_keys)))
+
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+            print(fields, flush=True)
+            print(allowed_keys, flush=True)
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+
         if not fields:
             return {"match_none": {}}
 
@@ -82,7 +90,6 @@ class elastic_request_generator:
             if not isinstance(values, list):
                 values = [values]
 
-            # SPECIAL CASE: make m_search_all work in leak/generic/exploit/social/defacement flows
             if ioc_key == "m_search_all":
                 es_fields = allowed_keys
             else:
@@ -327,8 +334,6 @@ class elastic_request_generator:
             except Exception:
                 pass
 
-        print("*" * 75)
-        print(query_statement)
         return query_statement
 
 
@@ -625,8 +630,6 @@ class elastic_request_generator:
         p_query_model,
         pfilter,
         base_index,
-        blocked_categories,
-        allowed_categories,
     ):
         must_clauses = []
         must_not_clause = []
@@ -635,6 +638,7 @@ class elastic_request_generator:
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
             logic_query = self.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_consolidated_iocs)
             must_clauses.append(logic_query)
+
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")
@@ -1199,7 +1203,8 @@ class elastic_request_generator:
             "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
-    
+
+    from datetime import datetime
 
     @staticmethod
     def on_search_stealer_iocs(p_query_model, alert=False):
@@ -1209,7 +1214,9 @@ class elastic_request_generator:
             inner_query = {"match_all": {}}
         else:
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
-            inner_query = elastic_request_generator.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_stealer_log_field)
+            inner_query = elastic_request_generator.build_es_from_tagged(
+                parsed, ELASTIC_ENUMS.mapping_stealer_log_field
+            )
 
         es_query = {
             "bool": {
@@ -1232,42 +1239,34 @@ class elastic_request_generator:
             if getattr(password_filter, "hasSpecialChars", False):
                 es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[^a-zA-Z0-9].*"}})
 
-        date_field = "date.keyword"
+        date_field = "date"
         date_range = getattr(p_query_model, "daterange", None)
 
         if date_range:
             parts = date_range.split(',')
             if len(parts) == 2:
                 try:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00.000000+00:00")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59.999999+00:00")
-                    es_query["bool"]["filter"].append({"range": {date_field: {"gte": from_date, "lte": to_date}}})
+                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    es_query["bool"]["filter"].append({
+                        "range": {date_field: {"gte": from_date, "lte": to_date}}
+                    })
                 except ValueError:
                     pass
 
         page = getattr(p_query_model, "page", 1) or 1
-        size = 100 if is_match_all else (getattr(p_query_model, "size", 500) or 500)
+        size = (getattr(p_query_model, "size", None) or (100 if is_match_all else 500))
         frm = max((page - 1) * size, 0)
 
-        if is_match_all:
-            query_body = {
-                "query": es_query,
-                "size": 100,
-                "sort": ["_doc"],
-                "terminate_after": 100,
-                "track_total_hits": False,
-            }
-        else:
-            query_body = {
-                "query": es_query,
-                "from": frm,
-                "size": size,
-                "sort": ["_doc"],
-                "track_total_hits": False,
-            }
+        query_body = {
+            "query": es_query,
+            "from": frm,
+            "size": size,
+            "sort": ["_doc"],
+            "track_total_hits": False,
+        }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
-
 
     @staticmethod
     def on_search_persona(p_query_model):
@@ -1468,25 +1467,8 @@ class elastic_request_generator:
         bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
-            email = log["email"][0] if "email" in log and log["email"] else None
-            username = log["username"][0] if "username" in log and log["username"] else None
-            domain = log["domain"][0] if "domain" in log and log["domain"] else None
-            ip = log["ip"][0] if "ip" in log and log["ip"] else None
-            channel = log["channel"] if "channel" in log else None
 
-            if log["type"] == 'c' or log["type"] == 'credential':
-                if not email and not username:
-                    continue
-
-                val = email or username
-                seed = str(val) + "|" + str(channel or "")
-            else:
-                if not any([email, username, domain, ip, channel]):
-                    continue
-                val = email or username or domain or ip or channel
-                seed = str(val) + "|" + str(channel or "")
-
-            m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
+            m_hash = log["m_hash"]
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
             if bf.isduplicate(m_hash):

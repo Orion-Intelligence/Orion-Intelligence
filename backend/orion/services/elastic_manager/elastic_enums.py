@@ -16,7 +16,6 @@ class ELASTIC_INDEX:
     S_DEFACEMENT_INDEX = "defacement_model"
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
-    S_CREDENTIAL_INDEX = "credential_model"
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
 
@@ -81,10 +80,6 @@ class ELASTIC_ENUMS:
         {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword", "normalizer": "lowercase_normalizer"}}}], "properties": {"m_content": {"type": "text", "fields": {"keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}}}, "m_caption": {"type": "text", "fields": {"keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}}}, "m_media_caption": {"type": "text", "fields": {"keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}}}, "m_ref_html": {"type": "text", "fields": {"keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}}}, "m_forwarded_from": {"type": "text", "fields": {"keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}}}, "m_sender_name": {"type": "text", "fields": {"keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}}}, "m_channel_name": {"type": "text", "fields": {"keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}}},
 
         "m_message_date": {"type": "date"}, "m_time": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_id": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_sharable_link": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_channel_id": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_views": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_size": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_sender_username": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_channel_url": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_type": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_media_url": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_reply_to_message_id": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_status": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_saved_as": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_path": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_weblink": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_name": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_users": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_hashtags": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
-
-    mapping_credential_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000, "codec": "best_compression", "analysis": {"filter": {"autocomplete_filter": {"type": "edge_ngram", "min_gram": 1, "max_gram": 20}}, "analyzer": {"autocomplete": {"type": "custom", "tokenizer": "standard", "filter": [
-        "lowercase",
-        "autocomplete_filter"]}}}}, "mappings": {"_source": {"enabled": True}, "properties": {"u": {"type": "text", "analyzer": "autocomplete", "search_analyzer": "standard"}, "l": {"type": "keyword", "index": False, "doc_values": False}, "fn": {"type": "keyword", "index": False, "doc_values": False}, "s": {"type": "byte", "index": False, "doc_values": False}, "g": {"type": "byte", "index": False, "doc_values": False}}}}
 
     mapping_stealer_log_model = {"settings": {"number_of_shards": 150, "number_of_replicas": 0, "analysis": {"analyzer": {"url_path_analyzer": {"type": "custom", "tokenizer": "custom_url_tokenizer", "filter": [
         "lowercase"]}}, "tokenizer": {"custom_url_tokenizer": {"type": "pattern", "pattern": "/[^/]+", "group": 0}}}}, "mappings": {"dynamic": True, "properties": {"type": {"type": "keyword"}, "raw": {"type": "text"}, "channel": {"type": "keyword"}, "filename": {"type": "keyword"}}}}
@@ -210,7 +205,7 @@ class ELASTIC_ENUMS:
         "m_au_abn": ["m_au_abn"],
         "m_us_passport": ["m_us_passport"],
         "m_us_bank_number": ["m_us_bank_number"],
-        "m_platform": ["m_platform"],
+        "m_platform": ["m_platform","m_platforms"],
         "m_author": ["m_author"],
         "m_industry": ["m_industry"],
         "m_scrap_file": ["m_scrap_file"],

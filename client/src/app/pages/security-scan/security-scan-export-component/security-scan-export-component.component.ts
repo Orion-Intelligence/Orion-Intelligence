@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { UrlScanMeta, UrlScanThreatItem } from '../../../model/security-scan/security.scan.results.model';
-import {HelperService} from '../../../services/helper.service';
+import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
+import {HelperService} from '../../../shared/services/helper.service';
 
 
 interface FindingRow {

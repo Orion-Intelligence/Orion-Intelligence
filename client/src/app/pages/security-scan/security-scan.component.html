@@ -4,7 +4,7 @@
     <div class="col-xl-9 col-12 input-container">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
-          <img alt="Search" height="20" ngSrc="assets/images/shared/domain.svg" priority width="20">
+          <img alt="Search" height="20" ngSrc="../../../assets/images/shared/domain.svg" priority width="20">
         </div>
         <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input"
           maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url"
@@ -33,13 +33,13 @@
   <div class="d-flex justify-content-end" *ngIf="!hasError && !isLoading">
     <div class="btn-group report-menu-option-container mr-2">
       <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
-        <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" />
+        <img alt="Download" height="25" ngSrc="../../../assets/images/shared/theme/download.svg" width="25" />
       </button>
       <div class="vr report-menu-divider"></div>
 
       <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print"
         class="p-0 report-menu-option">
-        <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" />
+        <img alt="Print" height="25" ngSrc="../../../assets/images/shared/theme/print.svg" width="25" />
       </button>
     </div>
   </div>

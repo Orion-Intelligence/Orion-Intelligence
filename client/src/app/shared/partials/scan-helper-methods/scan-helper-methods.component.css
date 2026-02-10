@@ -419,7 +419,7 @@
 }
 
 .dns-records {
-  padding: 8px;
+  background: #1a2835;
 }
 
 .dns-record-item {
@@ -431,11 +431,11 @@
 }
 
 .dns-record-header {
+  padding: 11px;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  background: #1a2835;
+  border: 0 !important;
   transition: all 0.2s;
 }
 
@@ -766,6 +766,20 @@
   transform: translateY(0);
 }
 
+.subdomain-btn.cancel.red {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+
+.subdomain-btn.cancel.red:hover {
+  background-color: #c82333;
+}
+
+.subdomain-btn.cancel.red:disabled {
+  background-color: #dc3545aa;
+  opacity: 0.7;
+}
 @media (width <= 640px) {
   .subdomain-overlay {
     padding: 12px;

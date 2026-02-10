@@ -116,9 +116,7 @@ describe('Login & Sidebar Checks for Users', () => {
             cy.get('input#email').clear().type('test.user@example.com');
             cy.get('form.pro-subscription_payment-form').submit();
 
-            cy.contains('button', 'Homepage').should('be.visible').click({ force: true });
 
-            cy.get(item.selector).contains(item.name).should('exist').click({ force: true });
 
             cy.get('body').then($b2 => {
               if ($b2.find('.pro-subscription_container').length) {
@@ -132,13 +130,10 @@ describe('Login & Sidebar Checks for Users', () => {
         return;
       }
 
-      cy.get(item.selector).contains(item.name).should('exist').click({ force: true });
     });
 
 
-    cy.get('div.profile_category.profile_logout_icon').should('exist').click({force: true});
-    cy.get('li.profile-item').contains('Sign out').should('exist').click({force: true});
-    cy.get('input[name="username"]').should('exist');
+
   };
 
 

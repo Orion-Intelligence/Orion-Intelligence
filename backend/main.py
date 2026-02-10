@@ -12,6 +12,7 @@ from configs.swagger_config import configure_swagger
 from interface import interface
 from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.service_manager import service_manager
+from orion.management.managers.test_manager import test_manager
 from orion.middleware.middleware_setup import setup_middlewares
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from routes.admin_routes import admin_routes
@@ -30,6 +31,7 @@ SWAGGER_STATIC_DIR = BASE_DIR / "static"
 
 @asynccontextmanager
 async def lifespan(p_app: FastAPI):
+    await test_manager.get_instance().apply_test_overrides()
     service_manager_instance = service_manager.get_instance()
     await service_manager_instance.build_assets(ANGULAR_BUILD_DIR)
     await service_manager_instance.init_services()

@@ -26,12 +26,11 @@ export class CredentialsSearchBarComponent {
   basicQuery = '';
 
   @Output() searchTriggered = new EventEmitter<string>();
+  constructor(protected sidebarService: SidebarService) { }
 
   advancedFilters: StealerlogsAdvancedFilter[] = [
     { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' }
   ];
-
-  constructor(protected sidebarService: SidebarService) { }
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;
@@ -105,6 +104,10 @@ export class CredentialsSearchBarComponent {
   }
   validateComplexQuery(input: string): boolean {
     if (!input.trim()) return false;
+    if (this.selectedTag === StealerlogsSearchFilters.ALL) {
+      return true;
+    }
+
 
     if (this.hasInvalidOperators(input)) return false;
 
@@ -150,10 +153,13 @@ export class CredentialsSearchBarComponent {
   ];
 
   validateValue(tag: StealerlogsSearchFilters, value: string): boolean {
+    if (tag == StealerlogsSearchFilters.CHANNEL)
+      return true;
     if (this.hasInvalidOperators(value)) return false;
     if (/\s+/.test(value) && !/&&|\|\|/.test(value)) {
       return false;
     }
+
     const validator = this.TAG_VALIDATORS[tag];
     if (!validator) return true;
     const values = this.extractValues(value);
@@ -164,7 +170,8 @@ export class CredentialsSearchBarComponent {
     [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
     [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/,
-    [StealerlogsSearchFilters.CREDITCARD]: /^\d{13,19}$/
+    [StealerlogsSearchFilters.CREDITCARD]: /^\d{13,19}$/,
+    [StealerlogsSearchFilters.CHANNEL]: /^.*$/
   };
 
   private normalizeBasicQuery(tag: string, input: string): string {
@@ -207,7 +214,9 @@ export class CredentialsSearchBarComponent {
     if (/\s+/.test(value) && !/&&|\|\|/.test(value)) {
       return 'Use && or || between multiple values';
     }
-
+    if (this.selectedTag === StealerlogsSearchFilters.ALL) {
+      return '';
+    }
     switch (this.selectedTag) {
       case StealerlogsSearchFilters.EMAIL:
         return 'Invalid email format';
@@ -241,7 +250,37 @@ export class CredentialsSearchBarComponent {
 
   filterBasicInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const sanitized = input.value.replace(/[^a-zA-Z0-9&|@.\s]/g, '');
+
+    if (this.selectedTag === StealerlogsSearchFilters.ALL) {
+      this.basicQuery = input.value;
+      return;
+    }
+
+    let regex: RegExp;
+
+    switch (this.selectedTag) {
+      case StealerlogsSearchFilters.EMAIL:
+        regex = /[^a-zA-Z0-9@._&|\s-]/g;
+        break;
+
+      case StealerlogsSearchFilters.DOMAIN:
+        regex = /[^a-zA-Z0-9.&|\s-]/g;
+        break;
+
+      case StealerlogsSearchFilters.IP:
+        regex = /[^0-9.&|\s]/g;
+        break;
+
+      case StealerlogsSearchFilters.CREDITCARD:
+        regex = /[^0-9\s&|]/g;
+        break;
+
+
+      default:
+        regex = /[^a-zA-Z0-9&|@.\s]/g;
+    }
+
+    const sanitized = input.value.replace(regex, '');
 
     if (sanitized !== input.value) {
       const cursor = input.selectionStart ?? sanitized.length;
@@ -251,6 +290,7 @@ export class CredentialsSearchBarComponent {
       input.setSelectionRange(cursor - 1, cursor - 1);
     }
   }
+
 
 
   private generateId(): string {

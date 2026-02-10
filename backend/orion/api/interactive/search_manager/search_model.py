@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 import httpx
 from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
 from orion.api.interactive.search_manager.search_callback_model import search_callback
@@ -165,12 +166,12 @@ class search_model:
         blocked_categories,
         allowed_categories,
     ):
-        filter_dict = param.entity_filter if param.entity_filter else {}
+        filter_dict = {}
 
         indices, query, indices_boost = (
             elastic_request_generator()
             .on_search_consolidated_iocs(
-                param, filter_dict, base_index, blocked_categories, allowed_categories
+                param, filter_dict, base_index
             )
         )
 
@@ -439,6 +440,26 @@ class search_model:
 
             response = await client.post(
                 "http://trusted-micros-api:8010/ioc/extract",
+                files=files
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+
+        return response.json()
+
+    async def scan_apk(self, file_content: bytes, filename: str):
+
+        async with httpx.AsyncClient(timeout=120) as client:
+            files = {
+                "file": (filename, file_content)
+            }
+
+            response = await client.post(
+                "http://trusted-micros-api:8010/apk/scan",
                 files=files
             )
 

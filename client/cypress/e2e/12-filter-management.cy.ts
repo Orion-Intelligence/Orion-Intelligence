@@ -412,7 +412,7 @@ describe('Social – Full Filters Flow', () => {
 
       cy.contains('span.custom-day', '1').click({ force: true });
 
-      cy.contains('span.custom-day', '31').click({ force: true });
+      cy.contains('span.custom-day', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
 
@@ -492,7 +492,7 @@ describe('Exploit – Full Filters Flow', () => {
 
       cy.contains('span.custom-day', '1').click({ force: true });
 
-      cy.contains('span.custom-day', '31').click({ force: true });
+      cy.contains('span.custom-day', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
 

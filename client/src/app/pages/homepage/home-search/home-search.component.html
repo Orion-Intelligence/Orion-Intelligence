@@ -6,40 +6,41 @@
       <ng-container
         *ngIf="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')">
         <div class="input-group default-input-sub-container"
-          [ngClass]="{'mobile-overlay-active': homeSearchService.showFiltersOverlay,'mobile-overlay-inactive': !homeSearchService.showFiltersOverlay }">
+             [ngClass]="{'mobile-overlay-active': homeSearchService.showFiltersOverlay,'mobile-overlay-inactive': !homeSearchService.showFiltersOverlay }">
           <button class="btn btn-primary default-input-button" (click)="onSearchSubmit()" type="submit">
             <img alt="Search" height="16" class="search-icon"
-              ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
+                 ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
           </button>
 
 
           <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
-            class="form-control default-input dashboard-general-input" data-cy="dashboard-general-input" maxlength="350"
-            name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)"
-            (input)="onSearchInput($event)"><input type="hidden" value="1">
+                 class="form-control default-input dashboard-general-input" data-cy="dashboard-general-input"
+                 maxlength="350"
+                 name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)"
+                 (input)="onSearchInput($event)"><input type="hidden" value="1">
 
           <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()"
-            [disabled]="!searchQuery">
+                  [disabled]="!searchQuery">
             <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14">
           </button>
 
           <span class="input-group-text border-start-0 gc-clear-selection cursor-pointer">
             <ng-container>
-              <hr class="vertical-divider" />
+              <hr class="vertical-divider"/>
               Advance &nbsp;&nbsp;
               <label class="small-switch">
                 <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle"
-                  (change)="onAdvanceSettingToggle()" />
+                       (change)="onAdvanceSettingToggle()"/>
                 <span class="small-slider round"></span>
               </label>
               <ng-container>
-                <hr class="vertical-divider ml-3" />
+                <hr class="vertical-divider ml-3"/>
                 <span (click)="onToolToggle($event)">
                   Tools
                   <div class="expand-icon">
                     <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon"
-                      [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools"
-                      class="transition-transform" />
+                         [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools"
+                         class="transition-transform"/>
                   </div>
                 </span>
               </ng-container>
@@ -49,47 +50,62 @@
         <div class="overlay-placeholder"></div>
 
         <div #filtersWrapper class="filters-overlay search-trigger"
-          *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+             *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
           <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
-            [homePage]="true"></app-search-filters>
+                              [homePage]="true"></app-search-filters>
         </div>
 
         <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools;">
           <div class="dropdown mt-2">
             <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
-              aria-expanded="false">
+                  aria-expanded="false">
               search by <b>({{ getMatchType() }})</b>
               <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16"
-                height="16">
+                   height="16">
             </span>
             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
               <li><a class="dropdown-item"
-                  (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();">Match any term
-                  (OR)</a></li>
+                     (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();">Match any term
+                (OR)</a></li>
               <li>
                 <hr class="dropdown-divider mx-3">
               </li>
               <li><a class="dropdown-item"
-                  (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();">Match
-                  indivisual terms (AND)</a></li>
+                     (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();">Match
+                indivisual terms (AND)</a></li>
               <li>
                 <hr class="dropdown-divider mx-3">
               </li>
               <li><a class="dropdown-item"
-                  (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();"> Match full
-                  query (AND)</a></li>
+                     (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();"> Match
+                full
+                query (AND)</a></li>
               <li>
                 <hr class="dropdown-divider mx-3">
               </li>
               <li><a class="dropdown-item"
-                  (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();">
-                  Match semantic query (semantic)</a></li>
+                     (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();">
+                Match semantic query (semantic)</a></li>
             </ul>
           </div>
         </ng-container>
       </ng-container>
       <ng-container *ngIf="isRoleAdmin">
-        <app-home-insight></app-home-insight>
+        <div>
+          <app-world-heatmap></app-world-heatmap>
+        </div>
+        <div class="home-insight-wrapper" [class.expanded]="homeInsightExpanded">
+          <div class="home-insight-toggle" (click)="homeInsightExpanded = !homeInsightExpanded">
+            <span>{{ homeInsightExpanded ? 'Collapse' : 'Expand' }}</span>
+            <i
+              class="bi bi-chevron-right"
+              aria-label="toggle insight"
+              [class.rotate]="homeInsightExpanded">
+            </i>
+          </div>
+
+          <app-home-insight></app-home-insight>
+        </div>
       </ng-container>
     </div>
   </div>

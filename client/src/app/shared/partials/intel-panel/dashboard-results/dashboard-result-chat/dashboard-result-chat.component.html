@@ -1,6 +1,6 @@
 <div class="dashboard__search-container dashboard__search-container-chat">
   <ng-container
-    *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 7))"
+    *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))"
     class="dashboard__search-card">
     <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">

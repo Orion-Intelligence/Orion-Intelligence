@@ -72,6 +72,35 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
     cy.contains('button', 'Search')
       .click();
+
+    cy.contains('.sidebar__subitem-content', 'APK Scan')
+      .should('be.visible')
+      .click();
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
+
+    cy.get('button[aria-label="Download report"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('button[aria-label="Scan another file"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
+
   });
 
   it('Live APIs → Email Breach, Social Scanner, Playstore Scanner, Software Scanner', () => {
@@ -81,6 +110,42 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
     cy.contains('.sidebar__item-dropdown', 'Live APIs')
       .should('be.visible')
       .click();
+
+        cy.contains('.sidebar__subitem-content', 'File Scanner')
+      .should('be.visible')
+      .click();
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile({
+        contents: 'cypress/fixtures/resume-sample.pdf',
+        fileName: 'resume-sample.pdf',
+        mimeType: 'application/pdf'
+      }, { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
+
+    cy.get('button[aria-label="Download report"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('button[aria-label="Scan another file"]', { timeout: 60000 })
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ force: true });
+
+    cy.get('input[type="file"]')
+      .should('exist')
+      .selectFile({
+        contents: 'cypress/fixtures/resume-sample.pdf',
+        fileName: 'resume-sample.pdf',
+        mimeType: 'application/pdf'
+      }, { force: true });
+
+    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+      .should('be.visible');
 
     cy.contains('.sidebar__subitem-content', 'Email Breach')
       .click();
@@ -130,8 +195,6 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
     cy.get('.dash-search-button')
       .click();
 
-    // cy.get('.dashboard-result-card .card-subtitle a')
-    //   .should('exist');
   });
 
   it('Dashboard → Global Search → Consolidated Scan → Ranked → IOCs', () => {

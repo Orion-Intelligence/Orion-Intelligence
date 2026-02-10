@@ -38,12 +38,13 @@ class dump_model:
             end_date = datetime.strptime(end_str, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=1)
             query["created_at"] = {"$gte": start_date, "$lte": end_date}
 
-        if params.q and params.q != "*":
+        if params.q and params.q.strip() and params.q != "*" and params.q.strip().lower() != "null":
             query["leak_url"] = {"$regex": re.escape(params.q), "$options": "i"}
 
         total_count = await self._engine.count(db_dump_record_model, query)
         data = await self._engine.find(
-            db_dump_record_model, query, skip=(params.page - 1) * 100, limit=100)
+            db_dump_record_model, query, skip=(params.page - 1) * 100, limit=100
+        )
         return data, total_count
 
     async def invoke_dump(self, param: dump_param_model):
@@ -51,4 +52,5 @@ class dump_model:
         return dump_callback_model(
             total_count=total_count,
             page=param.page,
-            mDumpCallbackLinks=[dump_callback_link.from_odmantic(doc) for doc in results])
+            mDumpCallbackLinks=[dump_callback_link.from_odmantic(doc) for doc in results],
+        )

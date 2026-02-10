@@ -1,0 +1,118 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.heatmap-wrapper {
+  position: relative;
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-container {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  min-height: 400px;
+}
+
+.country {
+  transition: opacity 0.2s ease, stroke 0.2s ease;
+  cursor: pointer;
+}
+
+.country:hover {
+  opacity: 0.8;
+  stroke: #333 !important;
+  stroke-width: 1px !important;
+}
+
+.heatmap-tooltip {
+  position: absolute;
+  padding: 10px;
+  background: rgb(255 255 255 / 95%);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  pointer-events: none;
+  font-family: sans-serif;
+  font-size: 12px;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
+  color: #333;
+  z-index: 1000;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.legend span {
+  width: 40px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.heatmap-shell {
+  width: 100%
+}
+
+.map-container {
+  width: 100%;
+  min-height: 340px
+}
+
+.heatmap-tooltip {
+  background: #0b1a2e;
+  color: #fecaca;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  line-height: 1.25;
+  box-shadow: 0 18px 46px rgb(0 0 0 / 45%);
+  border: 1px solid rgb(239 68 68 / 18%);
+  backdrop-filter: blur(6px);
+  max-width: 240px
+}
+
+.map-container {
+  position: relative;
+  width: calc(100% + 60px);
+  margin-left: -30px;
+  margin-right: -30px;
+  min-height: 340px;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+}
+
+.country{
+  stroke: rgb(255 255 255 / 14%);
+  stroke-width: 0.7px;
+  cursor: pointer;
+}
+
+.country.hovered{
+  stroke: rgb(255 255 255 / 45%);
+  stroke-width: 1.2px;
+}
+
+.heatmap-tooltip{
+  position:absolute;
+  pointer-events:none;
+  background:#0b1a2e;
+  color:#fecaca;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  z-index:5;
+}
