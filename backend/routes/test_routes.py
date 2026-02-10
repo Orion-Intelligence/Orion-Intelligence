@@ -131,3 +131,16 @@ async def extract_ioc(file: UploadFile = File(...)):
     if step:
         return step
     return json.loads((_MOCKS_DIR / f"ioc_apk_extract.json").read_text(encoding="utf-8"))
+
+@test_routes.post(
+    "/api/crypto/scan",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def extract_crypto():
+    step = _mock_step(f"dynamic_crypto_scan")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / f"dynamic_crypto_scan.json").read_text(encoding="utf-8"))
