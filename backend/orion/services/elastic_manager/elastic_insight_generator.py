@@ -13,13 +13,13 @@ class elastic_insight_generator:
     @staticmethod
     def on_insight_leakdata():
         from_ = 0
-        size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
+        size = 500
         query_statement = {"query": {"bool": {"must": [{"exists": {"field": "m_domain"}},
-            {"script": {"script": "doc['m_domain'].size()==1"}}], "must_not": [
+                                                       {"script": {"script": "doc['m_domain'].size()==1"}}], "must_not": [
             {"terms": {"m_content_type": ["news", "tracking"]}}]}}, "sort": [
-            {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True, "collapse": {"field": "m_domain"}}
+            {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True, "collapse": {"field": "m_domain", "missing": "__missing__"}}
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
-    
+
     @staticmethod
     def on_insight_leakdata_country():
         from_ = 0
