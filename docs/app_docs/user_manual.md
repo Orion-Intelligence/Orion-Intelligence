@@ -485,6 +485,8 @@ This section contains detailed records of actual data breaches, offering in-dept
 <img width="1917" height="891" alt="database" src="https://github.com/user-attachments/assets/234263fe-87c8-44f9-b62b-14c31ac1632e" />
 
  **Tracking**
+
+ This module enables users to verify whether specific email addresses have been exposed in public or underground data breaches. Orion scans and compares the provided email addresses against known leak databases and identifies any matches. If a breach is detected, the system provides detailed information, including the source of the breach, the date of exposure, and the type of data that may have been leaked. This helps users and administrators assess potential risks, take necessary security measures, and protect sensitive information.
  
  ![tracking](https://github.com/user-attachments/assets/b7719919-c665-4068-b382-bd4f73b959cc)
 
