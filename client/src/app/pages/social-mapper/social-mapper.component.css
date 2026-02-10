@@ -1,30 +1,22 @@
 .main-bg-grid {
-  background-image: radial-gradient(circle, rgb(100 116 139 / 15%) 1px, transparent 1px);
-  background-size: 2rem 2rem;
+    background-image: radial-gradient(circle, rgba(100, 116, 139, 0.15) 1px, transparent 1px);
+    background-size: 2rem 2rem;
 }
 
 .border-user-connection {
-  border-color: #fb923c;
+    border-color: #fb923c;
 }
-
-.social-scanner-main{
-  min-height: 100vh;
-  height: auto;
-}
-
-.social-home .h-full{
-  height: 100vh !important;
-}
-
-.social-home{
-  height: 100vh !important;
-}
-
 .border-entity-connection {
-  border-color: #a78bfa;
+    border-color: #a78bfa;
 }
 
 .context-menu-wrapper {
-  position: fixed;
-  z-index: 100;
+    position: fixed;
+    left: var(--menu-x);
+    top: var(--menu-y);
+    z-index: 100;
+}
+
+.platform-icon {
+    background-color: var(--platform-color);
 }
