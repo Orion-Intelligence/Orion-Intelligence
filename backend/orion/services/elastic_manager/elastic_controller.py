@@ -174,6 +174,9 @@ class elastic_controller:
         try:
             conn = self.__conn_for_index(document)
             m_data = await conn.search(index=document, body=data_filter, request_timeout=220)
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+            print(m_data, flush=True)
+            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")

@@ -816,6 +816,11 @@ class elastic_request_generator:
             m_page_number=m_page_number,
             date_field="m_leak_date")
 
+        print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(query_statement, flush=True)
+        print(ELASTIC_INDEX.S_LEAK_INDEX, flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     def on_search_exploitdata(self, p_query_model, pfilter=None):
