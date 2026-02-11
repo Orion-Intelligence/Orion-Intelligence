@@ -121,7 +121,8 @@ export class WorldHeatmapComponent
 
     this.ensureLegendDefs();
 
-    const max = Math.max(...this.mapData.map(d => d.value), 1);
+    const values = this.mapData.map(d => d.value).filter(v => v != null);
+    const max = Math.max(...values, 1);
 
     const legend = this.svg.selectAll<SVGGElement, any>('g.legend').data([0]).join('g').attr('class', 'legend');
 
@@ -252,12 +253,15 @@ export class WorldHeatmapComponent
   }
 
   private getColorScale() {
-    const max = Math.max(...this.mapData.map(d => d.value), 1);
-    return d3
-      .scaleSequential(
-        d3.interpolateHslLong('hsl(0,30%,20%)', 'hsl(0,55%,40%)')
-      )
-      .domain([0, max]);
+    const values = this.mapData.map(d => d.value).filter(v => v != null).sort(d3.ascending);
+    const q = d3.scaleQuantile<number, number>()
+      .domain(values)
+      .range(d3.range(0, 7));
+
+    return (v: number) => {
+      const t = q(v) / 6;
+      return d3.interpolateHslLong('hsl(0,30%,20%)', 'hsl(0,55%,40%)')(t);
+    };
   }
 
   private updateColors(): void {
