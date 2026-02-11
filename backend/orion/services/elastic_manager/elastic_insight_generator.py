@@ -13,13 +13,13 @@ class elastic_insight_generator:
     @staticmethod
     def on_insight_leakdata():
         from_ = 0
-        size = 500
+        size = CONSTANTS.S_SETTINGS_COUNTRY_DOCUMENT_SIZE
         query_statement = {
             "query": {
                 "bool": {
                     "must": [
-                        {"exists": {"field": "m_domain"}},
-                        {"script": {"script": {"lang": "painless", "source": "doc['m_domain'].size()==1"}}},
+                        {"exists": {"field": "m_domain.keyword"}},
+                        {"script": {"script": {"lang": "painless", "source": "doc['m_domain.keyword'].size()==1"}}},
                     ],
                     "must_not": [
                         {"terms": {"m_content_type": ["news", "tracking"]}}
@@ -30,17 +30,18 @@ class elastic_insight_generator:
             "from": from_,
             "size": size,
             "track_total_hits": True,
-            "collapse": {"field": "m_domain"},
+            "collapse": {"field": "m_domain.keyword"},
         }
         return "leak_model", query_statement
 
     @staticmethod
     def on_insight_leakdata_country():
         from_ = 0
-        size_ = CONSTANTS.S_SETTINGS_COUNTRY_DOCUMENT_SIZE
+        size_ = 500
 
         query_statement = {
-            "size": size_,  
+            "size": size_,
+            "_source": {"excludes": ["m_embedding"]},
             "query": {
                 "bool": {
                     "must": [
@@ -52,16 +53,12 @@ class elastic_insight_generator:
                 }
             },
             "sort": [
-                {"m_update_date": {"order": "desc"}}  
+                {"m_update_date": {"order": "desc"}}
             ],
-            "track_total_hits": True 
+            "track_total_hits": True
         }
 
-        print("::::::::::::::::::::::::::::::::::::", flush=True)
-        print(query_statement, flush=True)
-        print("::::::::::::::::::::::::::::::::::::", flush=True)
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
-
 
     @staticmethod
     def on_shared_data_query():
