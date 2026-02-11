@@ -14,13 +14,13 @@ type ApiEnvelope<T> = {
   providedIn: 'root'
 })
 export class SocialScanService {
-  private useMockData = true;
+  private useMockData = false;
 
   constructor(private api: ApiService) {}
 
   private extractMetadata(platformName: string, data: any): Partial<PlatformResult> {
     if (!data) return { allMetadata: {} };
-    
+
     const platformData = data;
 
     if (!platformData || !platformData.ids) {
@@ -170,7 +170,7 @@ export class SocialScanService {
                 isSelected: false,
                 ...extractedData
               } as PlatformResult;
-              
+
               if (!platformResult.allMetadata || Object.keys(platformResult.allMetadata).length === 0) {
                   platformResult.allMetadata = item.metadata;
               }
