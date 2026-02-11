@@ -56,16 +56,17 @@
           <div class="pt-4">
             <div *ngIf="activeTab() === 'history'; else entitiesBlock">
               <div class="flex flex-col gap-3">
-                <div *ngFor="let job of filteredJobs()">
+                <div *ngFor="let job of filteredJobs(); trackBy: trackByJobId">
                   <div [class]="getJobClasses(job)" (click)="jobClicked.emit(job)">
                     <div class="flex justify-between items-start">
                       <div class="flex items-center gap-3 min-w-0">
                         <div [ngSwitch]="job.status">
-                          <div *ngSwitchCase="'in_progress'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-400" role="status"></div>
+                          <div *ngSwitchCase="'in_progress'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" role="status"></div>
                           <i *ngSwitchCase="'completed'" class="bi bi-check-circle-fill w-4 h-4 text-green-500"></i>
                           <i *ngSwitchCase="'failed'" class="bi bi-x-circle-fill w-4 h-4 text-red-500"></i>
                         </div>
                         <p class="font-bold mb-0 truncate text-indigo-300">{{ job.username }}</p>
+                        <div *ngIf="isProfileFetching(job.username)" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400 shrink-0" role="status"></div>
                       </div>
                       <div *ngIf="job.status === 'in_progress'" class="flex items-center gap-2 shrink-0">
                         <div class="font-mono text-xs text-slate-400">{{ job.progress }}%</div>
@@ -75,8 +76,8 @@
                       </div>
                     </div>
                     
-                    <div *ngIf="job.status === 'in_progress'" class="w-full bg-slate-700 rounded-full h-1.5 mt-2">
-                      <div class="progress-bar bg-indigo-500 h-1.5 rounded-full transition-all duration-500 ease-out" [style.--progress-width.%]="job.progress"></div>
+                    <div *ngIf="job.status === 'in_progress'" class="w-full bg-slate-700 rounded-full h-1.5 mt-2 overflow-hidden">
+                      <div class="progress-bar bg-orange-500 h-full" [style.width.%]="job.progress"></div>
                     </div>
                     <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ job.step }}</p>
 
@@ -95,6 +96,10 @@
                       </ng-template>
 
                       <div class="flex items-center gap-2">
+                        <button *ngIf="job.status === 'completed'" (click)="$event.stopPropagation(); manageProfiles.emit(job.username)" title="Manage social profiles" 
+                                class="p-1.5 rounded-md text-slate-400 bg-slate-700/50 hover:bg-slate-700 hover:text-white transition-colors">
+                            <i class="bi bi-person-lines-fill w-4 h-4"></i>
+                        </button>
                         <button *ngIf="activeUsernames().has(job.username) && viewMode() === 'graph'" (click)="$event.stopPropagation(); focusUser.emit(job.username)" title="Focus on graph" 
                                 class="p-1.5 rounded-md text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors">
                             <i class="bi bi-bullseye w-4 h-4"></i>

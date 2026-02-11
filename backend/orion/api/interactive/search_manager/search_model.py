@@ -63,11 +63,11 @@ class search_model:
                 status_code=500, content={"detail": "Something happened while calling parse/" + api})
 
     @staticmethod
-    async def social_search(model):
+    async def social_search(model, key):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-social-api:8020/social/recon", json=model.model_dump(), timeout=120)
+                    "http://trusted-social-api:8020/social/"+key, json=model.model_dump(), timeout=120)
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,

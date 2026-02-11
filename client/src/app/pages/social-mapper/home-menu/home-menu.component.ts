@@ -19,6 +19,7 @@ export class HomeMenuComponent {
   activeUsernames = input.required<Set<string>>();
   viewMode = input.required<'graph' | 'list'>();
   isSmallScreen = input.required<boolean>();
+  profileFetchingState = input.required<{ [platformNodeId: string]: boolean }>();
 
   toggle = output<void>();
   tabSelected = output<'history' | 'entities'>();
@@ -28,6 +29,7 @@ export class HomeMenuComponent {
   focusUser = output<string>();
   deleteUser = output<string>();
   cancelScan = output<string>();
+  manageProfiles = output<string>();
 
   filteredJobs = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -71,5 +73,15 @@ export class HomeMenuComponent {
       case 'email': return 'bi bi-envelope-at text-yellow-400';
       case 'domain': return 'bi bi-globe text-sky-400';
     }
+  }
+
+  trackByJobId(index: number, job: Job): string {
+    return job.id;
+  }
+
+  isProfileFetching(username: string): boolean {
+    const state = this.profileFetchingState();
+    const userPrefix = `${username}-`;
+    return Object.keys(state).some(key => key.startsWith(userPrefix) && state[key]);
   }
 }

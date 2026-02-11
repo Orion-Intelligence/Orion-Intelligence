@@ -1,0 +1,87 @@
+<div (click)="closeMenus()">
+  <header class="flex-shrink-0 bg-slate-800/50 border-b border-slate-700">
+    <div class="flex items-center justify-between pl-2">
+      <nav class="flex items-center gap-1">
+        <div *ngFor="let tab of tabManager.tabs()"
+          (click)="tabManager.editingTabId() !== tab.id && tabManager.selectTab(tab.id)"
+          [class]="'group relative flex items-center cursor-pointer pr-2 pl-3 text-sm font-medium border-b-2 ' + 
+                   (tabManager.activeTabId() === tab.id 
+                     ? 'border-indigo-400 bg-slate-800 text-white pt-2 pb-1.5 rounded-t-md' 
+                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 pt-2 pb-1.5 rounded-t-md')">
+
+          <div *ngIf="tabManager.editingTabId() === tab.id; else tabNameBlock">
+            <input #renameInput
+              appAutofocus
+              type="text"
+              [value]="tab.name"
+              [attr.data-tab-id]="tab.id"
+              (blur)="handleRename(tab.id, renameInput)"
+              (keydown.enter)="handleRename(tab.id, renameInput)"
+              (keydown.escape)="cancelRename()"
+              (click)="$event.stopPropagation()"
+              class="bg-slate-700 text-white p-1 rounded-md outline-none ring-2 ring-indigo-500 w-32"
+            />
+          </div>
+          <ng-template #tabNameBlock>
+            <span (dblclick)="$event.stopPropagation(); tabManager.startEditing(tab.id)" class="py-1 pr-1" title="Double-click to rename">{{ tab.name }}</span>
+          </ng-template>
+          
+          <button *ngIf="tabManager.tabs().length > 1"
+            (click)="$event.stopPropagation(); tabManager.closeTab(tab.id)"
+            [class]="'ml-1 p-1 rounded-full text-slate-500 hover:bg-slate-600 hover:text-white transition-colors ' + 
+                     (tabManager.activeTabId() === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+            <i class="bi bi-x-lg text-xs"></i>
+          </button>
+        </div>
+
+        <div class="pl-1">
+          <div class="relative">
+            <input type="file" class="hidden" id="fileInput" (change)="onFileSelected($event)" accept=".json">
+            <button 
+              (click)="toggleAddMenu($event)" 
+              [disabled]="tabManager.tabs().length >= 4"
+              class="flex items-center justify-center h-8 w-8 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="New Session">
+              <i class="bi bi-plus-lg text-lg"></i>
+            </button>
+
+            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full left-0 mt-2 w-48 bg-slate-700 rounded-md shadow-lg border border-slate-600 z-20 animate-dropdown p-1">
+                <button (click)="createNewTab()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
+                    <i class="bi bi-plus-square w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                    <span>New Session</span>
+                </button>
+                <label for="fileInput" (click)="closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group cursor-pointer">
+                    <i class="bi bi-upload w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                    <span>Import Session</span>
+                </label>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div class="pr-2">
+        <div class="relative">
+            <button (click)="toggleHeaderMenu($event)" 
+                    class="flex items-center justify-center h-8 w-8 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors" 
+                    title="Session Menu">
+                <i class="bi bi-three-dots-vertical text-lg"></i>
+            </button>
+            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full right-0 mt-2 w-56 bg-slate-700 rounded-md shadow-lg border border-slate-600 z-20 animate-dropdown-right p-1">
+                <button (click)="tabManager.exportActiveTab(); closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
+                    <i class="bi bi-download w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                    <span>Export Current Session</span>
+                </button>
+                <label for="fileInput" (click)="closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group cursor-pointer">
+                    <i class="bi bi-upload w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                    <span>Import Session</span>
+                </label>
+                <div class="my-1 h-px bg-slate-600"></div>
+                <button (click)="createNewTab()" [disabled]="tabManager.tabs().length >= 4" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-slate-200 disabled:cursor-not-allowed">
+                    <i class="bi bi-plus-square w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                    <span>New Session</span>
+                </button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>

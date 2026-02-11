@@ -18,3 +18,14 @@ class search_social_param_model(BaseModel):
 
 class SocialReconRequest(BaseModel):
     query: str = Field(..., min_length=1)
+
+class SearchEngineMetaRequest(BaseModel):
+    username: str = Field(..., min_length=1)
+
+class SocialProfileRequest(BaseModel):
+    platform: str = Field(..., min_length=1, examples=["Tiktok"])
+    username: str = Field(..., min_length=1, examples=["@msmannan00"])
+
+class SocialPostRequest(BaseModel):
+    platform: str = Field(..., min_length=1, examples=["Tiktok"])
+    username: str = Field(..., min_length=1, examples=["@msmannan00"])

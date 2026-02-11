@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PlatformResult } from '../../../shared/model/social/social-scan.models';
+import { PlatformResult, SocialImage } from '../../../shared/model/social/social-scan.models';
 import { getPlatformColor, formatFollowers, formatKey, isUrl, isImageUrl } from '../../../shared/utils/formatters';
 
 @Component({
@@ -15,9 +15,19 @@ export class ProfileSummaryPopupComponent {
   username = input.required<string>();
   platforms = input.required<PlatformResult[]>();
   email = input<string | undefined>();
-  close = output<void>();
+  images = input<SocialImage[] | undefined>();
+  fetchingState = input.required<{ [platformNodeId: string]: boolean }>();
+  isFetchingImages = input<boolean>(false);
+  isFetchingPosts = input.required<{ [platformNodeId: string]: boolean }>();
+  isScanInProgress = input<boolean>(false);
 
-  expandedPlatform = signal<PlatformResult | null>(null);
+  close = output<void>();
+  fetchProfile = output<PlatformResult>();
+  fetchImages = output<string>();
+  fetchPosts = output<PlatformResult>();
+  rescan = output<string>();
+
+  expandedPlatformName = signal<string | null>(null);
 
   public getPlatformColor = getPlatformColor;
   public formatFollowers = formatFollowers;
@@ -30,10 +40,10 @@ export class ProfileSummaryPopupComponent {
   }
 
   onPlatformClick(platform: PlatformResult) {
-    if (this.expandedPlatform() === platform) {
-      this.expandedPlatform.set(null);
+    if (this.expandedPlatformName() === platform.platform) {
+      this.expandedPlatformName.set(null);
     } else {
-      this.expandedPlatform.set(platform);
+      this.expandedPlatformName.set(platform.platform);
     }
   }
 
@@ -41,5 +51,13 @@ export class ProfileSummaryPopupComponent {
     const metadata = platform.allMetadata;
     if (!metadata) return [];
     return Object.entries(metadata).map(([key, value]) => ({ key, value }));
+  }
+
+  getProfileDetailEntries(platform: PlatformResult): { key: string, value: any }[] {
+    const details = platform.profileDetails;
+    if (!details) return [];
+    return Object.entries(details)
+      .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+      .map(([key, value]) => ({ key, value }));
   }
 }

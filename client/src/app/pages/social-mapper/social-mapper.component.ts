@@ -1,21 +1,10 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  signal,
-  computed,
-  DestroyRef,
-  OnDestroy,
-  Inject,
-  PLATFORM_ID,
-  effect,
-  OnInit
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, Inject, PLATFORM_ID, effect, OnInit } from '@angular/core';
 import { CommonModule, TitleCasePipe, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NetworkGraphComponent } from './network-graph/network-graph.component';
 import { MetadataPopupComponent } from './metadata-popup/metadata-popup.component';
 import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-summary-popup.component';
-import { NetworkData, Job, PlatformResult, CustomEntity, NetworkNode, TabState } from '../../shared/model/social/social-scan.models';
+import { NetworkData, Job, PlatformResult, CustomEntity, NetworkNode, TabState, ProfileDetails, SocialImage } from '../../shared/model/social/social-scan.models';
 import { SocialScanService } from './social-scan.service';
 import { TabManagerService } from '../../shared/services/tab-manager.service';
 import { ToolbarComponent } from './toolbar/toolbar.component';
@@ -23,15 +12,14 @@ import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { EntityMenuComponent } from './entity-menu/entity-menu.component';
 import { ListViewComponent } from './list-view/list-view.component';
 import { getPlatformColor } from '../../shared/utils/formatters';
-import { socialMapperAnimations } from '../../shared/animations/social-mapper.animations';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { TabBarComponent } from './tab-bar/tab-bar.component';
 
 @Component({
   selector: 'app-social-mapper',
   templateUrl: './social-mapper.component.html',
   styleUrls: ['./social-mapper.component.css'],
-  styles: [socialMapperAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -43,7 +31,8 @@ import { takeUntil } from 'rxjs/operators';
     ToolbarComponent,
     HomeMenuComponent,
     EntityMenuComponent,
-    ListViewComponent
+    ListViewComponent,
+    TabBarComponent,
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
@@ -58,6 +47,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map());
   activeUsernames = computed(() => this.activeTabState()?.activeUsernames() ?? new Set<string>());
   customEntities = computed(() => this.activeTabState()?.customEntities() ?? []);
+  socialImages = computed(() => this.activeTabState()?.socialImages() ?? new Map());
   isEditMode = computed(() => this.activeTabState()?.isEditMode() ?? false);
   isHomeMenuCollapsed = computed(() => this.activeTabState()?.isHomeMenuCollapsed() ?? false);
   isEntityMenuCollapsed = computed(() => this.activeTabState()?.isEntityMenuCollapsed() ?? false);
@@ -70,9 +60,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   isMetadataPopupVisible = signal(false);
   selectedPlatformData = signal<PlatformResult | null>(null);
   isSummaryPopupVisible = signal(false);
-  summaryPopupData = signal<{ username: string; platforms: PlatformResult[]; email?: string; } | null>(null);
+  summaryPopupData = signal<{ username: string; platforms: PlatformResult[]; email?: string; images?: SocialImage[] } | null>(null);
   showAlreadyAddedNotification = signal(false);
   showAlreadyScannedNotification = signal(false);
+  showAlreadyScanningNotification = signal(false);
   private notificationTimeout: any;
   nodeToFocus = signal<string | null>(null);
   contextMenu = signal({
@@ -87,6 +78,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     username: null as string | null,
   });
   isAddEntityModalVisible = signal(false);
+  isUpcomingFeaturePopupVisible = signal(false);
   entityToAdd = signal<{ type: 'wallet' | 'email' | 'domain', value: string } | null>(null);
   expandedPlatformNodeId = signal<string | null>(null);
   isMobileEntityPanelOpen = signal(false);
@@ -97,9 +89,19 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.isSmallScreen.set(event.matches);
   };
 
-  twReady = signal(false);
-  private twLink: HTMLLinkElement | null = null;
-  private rafId: number | null = null;
+  profileFetchingState = signal<{ [platformNodeId: string]: boolean }>({});
+  modalSearchTerm = signal('');
+  imageFetchingState = signal<{ [username: string]: boolean }>({});
+  postFetchingState = signal<{ [platformNodeId: string]: boolean }>({});
+
+  filteredModalPlatforms = computed(() => {
+    const platforms = this.modalResults().platforms;
+    const term = this.modalSearchTerm().toLowerCase();
+    if (!term) {
+        return platforms;
+    }
+    return platforms.filter(p => p.platform.toLowerCase().includes(term));
+  });
 
   contextMenuUsername = computed(() => {
     const { type, nodeId } = this.contextMenu();
@@ -108,12 +110,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
     return null;
   });
-
-  isSearchDisabled = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-    if (term.length === 0) return true;
-    return this.jobs().some(job => job.username.toLowerCase() === term);
-  });
+  
+  isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
 
   canEditConnections = computed(() => {
     const nodes = this.networkData().nodes;
@@ -122,11 +120,27 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const connectableNodesCount = userNodeCount + customEntityOnGraphCount;
     return connectableNodesCount >= 2;
   });
+  
+  isUserScanInProgress = computed(() => {
+    const username = this.summaryPopupData()?.username;
+    if (!username) {
+        return false;
+    }
+    const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
+    return userJob?.status === 'in_progress';
+  });
+  
+  isMetadataUserScanInProgress = computed(() => {
+    const username = this.selectedPlatformData()?.keyUsername;
+    if (!username) return false;
+    const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
+    return userJob?.status === 'in_progress';
+  });
 
   constructor(
     private scanService: SocialScanService,
     private destroyRef: DestroyRef,
-    private tabManager: TabManagerService,
+    public tabManager: TabManagerService,
     @Inject(PLATFORM_ID) private platformId: object
   ) {
     if (isPlatformBrowser(this.platformId)) {
@@ -146,83 +160,20 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      const existing = document.getElementById(this.twId) as HTMLLinkElement | null;
-
-      if (existing) {
-        this.twLink = existing;
-      } else {
-        const link = document.createElement('link');
-        link.id = this.twId;
-        link.rel = 'stylesheet';
-        link.href = 'tailwind-social.css';
-        link.media = 'print';
-        this.twLink = link;
-        document.head.appendChild(link);
-      }
-
-      this.waitForTailwindAndEnable();
-    } else {
-      this.twReady.set(true);
+    if (isPlatformBrowser(this.platformId) && !document.getElementById(this.twId)) {
+      const link = document.createElement('link');
+      link.id = this.twId;
+      link.rel = 'stylesheet';
+      link.href = 'tailwind-social.css';
+      document.head.appendChild(link);
     }
-
     this.resumeIncompleteScans();
-  }
-
-  private waitForTailwindAndEnable() {
-    if (!this.twLink) return;
-
-    const done = () => {
-      if (!this.twLink) return;
-      this.twLink.media = 'all';
-      requestAnimationFrame(() => this.twReady.set(true));
-    };
-
-    const onLoad = () => {
-      cleanup();
-      this.pollForPaint(done);
-    };
-
-    const cleanup = () => {
-      this.twLink?.removeEventListener('load', onLoad);
-      this.twLink?.removeEventListener('error', onLoad);
-    };
-
-    this.twLink.addEventListener('load', onLoad);
-    this.twLink.addEventListener('error', onLoad);
-
-    if ((this.twLink as any).sheet) {
-      cleanup();
-      this.pollForPaint(done);
-    }
-  }
-
-  private pollForPaint(done: () => void) {
-    let tries = 0;
-    const maxTries = 60;
-
-    const tick = () => {
-      tries++;
-      if (tries >= maxTries) {
-        done();
-        return;
-      }
-      const sheetOk = !!(this.twLink as any)?.sheet;
-      if (!sheetOk) {
-        this.rafId = requestAnimationFrame(tick);
-        return;
-      }
-      requestAnimationFrame(() => requestAnimationFrame(done));
-    };
-
-    this.rafId = requestAnimationFrame(tick);
   }
 
   ngOnDestroy(): void {
     if (isPlatformBrowser(this.platformId) && this.mediaQueryList) {
       this.mediaQueryList.removeEventListener('change', this.mediaQueryListener);
     }
-    if (this.rafId != null) cancelAnimationFrame(this.rafId);
     if (isPlatformBrowser(this.platformId)) {
       document.getElementById(this.twId)?.remove();
     }
@@ -246,6 +197,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   onViewModeChanged(mode: 'graph' | 'list') {
     this.updateState(state => state.viewMode.set(mode));
+  }
+
+  onModalSearchChanged(event: Event) {
+    this.modalSearchTerm.set((event.target as HTMLInputElement).value);
   }
 
   onPhysicsToggled() {
@@ -272,13 +227,29 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   triggerScan() {
     const username = this.searchTerm().trim();
-    if (!username) return;
+    if (username) {
+        this.initiateScan(username);
+        this.updateState(state => state.searchTerm.set(''));
+    }
+  }
 
-    if (this.jobs().some(job => job.username.toLowerCase() === username.toLowerCase())) {
-      this.showNotification('scanned');
-      return;
+  private initiateScan(username: string) {
+    const normalizedUsername = username.toLowerCase();
+
+    const isInProgress = this.jobs().some(job => 
+        job.username.toLowerCase() === normalizedUsername && job.status === 'in_progress'
+    );
+    if (isInProgress) {
+        this.showNotification('scanning');
+        return;
     }
 
+    // Instead of removing all data, just remove the old job entry to allow re-scanning.
+    // The scan results (including fetched profile details) will be preserved and merged.
+    this.updateState(state => {
+      state.jobs.update(currentJobs => currentJobs.filter(j => j.username.toLowerCase() !== normalizedUsername));
+    });
+    
     const newJob: Job = {
       id: self.crypto.randomUUID(),
       username: username,
@@ -289,11 +260,15 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
     this.updateState(state => {
       state.jobs.update(currentJobs => [newJob, ...currentJobs]);
-      state.searchTerm.set('');
     });
     this.runScan(newJob);
   }
 
+  handleRescan(username: string) {
+    this.initiateScan(username);
+    this.closeSummaryPopup();
+  }
+  
   cancelScan(jobId: string) {
     const cancelSubject = this.cancelScanSubjects.get(jobId);
     if (cancelSubject) {
@@ -330,38 +305,42 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   confirmDeletion() {
     const usernameToDelete = this.deleteConfirmation().username;
     if (usernameToDelete) {
-      this.updateState(state => {
-        state.jobs.update(currentJobs => currentJobs.filter(job => job.username.toLowerCase() !== usernameToDelete.toLowerCase()));
+      this.removeUserScanData(usernameToDelete);
+    }
+    this.closeDeleteConfirmation();
+  }
+
+  private removeUserScanData(username: string) {
+    const normalizedUsername = username.toLowerCase();
+    this.updateState(state => {
+        state.jobs.update(currentJobs => currentJobs.filter(job => job.username.toLowerCase() !== normalizedUsername));
 
         state.networkData.update(currentData => {
-          const centralNodeId = `user-${usernameToDelete}`;
-          const nodesToRemove = new Set<string | number>();
-          currentData.nodes.forEach(node => {
-            if (node.id === centralNodeId || node.id.toString().startsWith(`${usernameToDelete}-`)) {
-              nodesToRemove.add(node.id);
-            }
-          });
+            const centralNodeId = `user-${username}`;
+            const nodesToRemove = new Set<string | number>(
+                currentData.nodes
+                    .filter(node => node.id === centralNodeId || node.id.toString().startsWith(`${username}-`))
+                    .map(node => node.id)
+            );
 
-          return {
-            nodes: currentData.nodes.filter((n: NetworkNode) => !nodesToRemove.has(n.id)),
-            edges: currentData.edges.filter((e: any) => e.from !== centralNodeId)
-          };
+            return {
+                nodes: currentData.nodes.filter((n: NetworkNode) => !nodesToRemove.has(n.id)),
+                edges: currentData.edges.filter((e: any) => !nodesToRemove.has(e.from) && !nodesToRemove.has(e.to))
+            };
         });
 
         state.activeUsernames.update((currentSet: Set<string>) => {
-          const newSet = new Set(currentSet);
-          newSet.delete(usernameToDelete);
-          return newSet;
+            const newSet = new Set(currentSet);
+            newSet.delete(username);
+            return newSet;
         });
 
         state.scanResults.update(currentMap => {
-          const newMap = new Map(currentMap);
-          newMap.delete(usernameToDelete);
-          return newMap;
+            const newMap = new Map(currentMap);
+            newMap.delete(username);
+            return newMap;
         });
-      });
-    }
-    this.closeDeleteConfirmation();
+    });
   }
 
   private resumeIncompleteScans() {
@@ -373,17 +352,19 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
   }
 
-  private showNotification(type: 'added' | 'scanned') {
+  private showNotification(type: 'added' | 'scanned' | 'scanning') {
     if (this.notificationTimeout) {
       clearTimeout(this.notificationTimeout);
     }
 
     this.showAlreadyAddedNotification.set(type === 'added');
     this.showAlreadyScannedNotification.set(type === 'scanned');
+    this.showAlreadyScanningNotification.set(type === 'scanning');
 
     this.notificationTimeout = setTimeout(() => {
       this.showAlreadyAddedNotification.set(false);
       this.showAlreadyScannedNotification.set(false);
+      this.showAlreadyScanningNotification.set(false);
     }, 3000);
   }
 
@@ -408,7 +389,22 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           } else if (event.type === 'complete') {
             const finalPlatforms = event.payload;
             this.updateState(state => {
-              state.scanResults.update(currentMap => new Map(currentMap).set(job.username, finalPlatforms));
+              state.scanResults.update(currentMap => {
+                const newMap = new Map(currentMap);
+                const existingPlatforms = newMap.get(job.username) || [];
+
+                const mergedPlatforms = finalPlatforms.map((newPlatform: PlatformResult) => {
+                  const existingData = existingPlatforms.find(p => p.platform === newPlatform.platform);
+                  // If profile details exist on the old data, preserve them
+                  if (existingData && typeof existingData.profileDetails !== 'undefined') {
+                    return { ...newPlatform, profileDetails: existingData.profileDetails };
+                  }
+                  return newPlatform;
+                });
+
+                newMap.set(job.username, mergedPlatforms);
+                return newMap;
+              });
               state.jobs.update(jobs => jobs.map(j =>
                 j.id === job.id
                   ? { ...j, status: 'completed', progress: 100, step: 'Completed' }
@@ -435,10 +431,20 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   onNodeClicked(nodeId: string) {
     if (!nodeId.startsWith('user-')) return;
     const username = nodeId.replace('user-', '');
-    const userPlatforms = this.scanResults().get(username);
-    if (userPlatforms) {
-      const email = userPlatforms.find((p: PlatformResult) => p.email)?.email;
-      this.summaryPopupData.set({ username, platforms: userPlatforms, email: email });
+    const allUserPlatforms = this.scanResults().get(username);
+    
+    if (allUserPlatforms) {
+      const platformNodesOnGraph = this.networkData().nodes
+          .filter(node => node.id.toString().startsWith(`${username}-`))
+          .map(node => node.label);
+      
+      const platformsOnGraphSet = new Set(platformNodesOnGraph);
+
+      const platformsToShow = allUserPlatforms.filter((p: PlatformResult) => platformsOnGraphSet.has(p.platform));
+
+      const email = platformsToShow.find((p: PlatformResult) => p.email)?.email;
+      const images = this.socialImages().get(username);
+      this.summaryPopupData.set({ username, platforms: platformsToShow, email: email, images });
       this.isSummaryPopupVisible.set(true);
     }
   }
@@ -458,12 +464,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       isSelected: currentGraphNodes.has(p.platform)
     }));
 
+    this.modalSearchTerm.set('');
     this.modalResults.set({ username, platforms: platformsWithSelection });
     this.isModalVisible.set(true);
   }
 
   closeModal() {
     this.isModalVisible.set(false);
+    this.modalSearchTerm.set('');
   }
 
   onPlatformNodeClicked(nodeId: string) {
@@ -681,6 +689,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.entityToAdd.set(null);
   }
 
+  showUpcomingFeaturePopup() {
+    this.isUpcomingFeaturePopupVisible.set(true);
+  }
+
+  closeUpcomingFeaturePopup() {
+    this.isUpcomingFeaturePopupVisible.set(false);
+  }
+
   onEntityValueChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.entityToAdd.update(e => e ? { ...e, value } : null);
@@ -717,7 +733,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.scanService.addEntity(entityPayload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (newEntity) => {
+        next: (newEntity: CustomEntity) => {
           this.updateState(state => state.customEntities.update((entities: CustomEntity[]) =>
             entities.map((e: CustomEntity) => e.id === tempId ? newEntity : e)
           ));
@@ -825,5 +841,142 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       case 'email': return 'bi bi-envelope-at text-yellow-400';
       case 'domain': return 'bi bi-globe text-sky-400';
     }
+  }
+
+  fetchProfileDetails(platformResult: PlatformResult) {
+    const platformNodeId = `${platformResult.keyUsername}-${platformResult.platform}`;
+    if (this.profileFetchingState()[platformNodeId]) {
+      return; // Already fetching
+    }
+
+    this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: true }));
+    
+    this.scanService.fetchProfileInfo(platformResult.platform, platformResult.username)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response: { profile: ProfileDetails }) => {
+          const profileData = response.profile;
+          const hasData = profileData && Object.keys(profileData).length > 0;
+          const newProfileDetails = hasData ? profileData : null;
+
+          this.updateState(state => {
+            state.scanResults.update(currentMap => {
+              const newMap = new Map(currentMap);
+              const userResults = newMap.get(platformResult.keyUsername);
+              if (userResults) {
+                const updatedResults = userResults.map(p => 
+                  p.platform === platformResult.platform ? { ...p, profileDetails: newProfileDetails } : p
+                );
+                newMap.set(platformResult.keyUsername, updatedResults);
+              }
+              return newMap;
+            });
+          });
+
+          if (this.selectedPlatformData()?.platform === platformResult.platform && this.selectedPlatformData()?.username === platformResult.username) {
+            this.selectedPlatformData.update(current => current ? { ...current, profileDetails: newProfileDetails } : null);
+          }
+
+          if (this.summaryPopupData()?.username === platformResult.keyUsername) {
+            this.summaryPopupData.update(current => {
+              if (!current) return null;
+              const updatedPlatforms = current.platforms.map(p => 
+                p.platform === platformResult.platform ? { ...p, profileDetails: newProfileDetails } : p
+              );
+              return { ...current, platforms: updatedPlatforms };
+            });
+          }
+
+          this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+        },
+        error: (err) => {
+          console.error('Failed to fetch profile info:', err);
+          this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+        }
+      });
+  }
+
+  handleFetchImagesForUser(username: string) {
+    if (this.imageFetchingState()[username]) return;
+
+    this.imageFetchingState.update(s => ({ ...s, [username]: true }));
+
+    this.scanService.fetchSocialImages(username)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const fetchedImages = response.images;
+          this.updateState(state => {
+            state.socialImages.update(currentMap => {
+              const newMap = new Map(currentMap);
+              newMap.set(username, fetchedImages);
+              return newMap;
+            });
+          });
+          
+          if (this.summaryPopupData()?.username === username) {
+            this.summaryPopupData.update(current => current ? { ...current, images: fetchedImages } : null);
+          }
+
+          this.imageFetchingState.update(s => ({ ...s, [username]: false }));
+        },
+        error: (err) => {
+          console.error('Failed to fetch social images:', err);
+          this.imageFetchingState.update(s => ({ ...s, [username]: false }));
+        }
+      });
+  }
+
+  handleFetchSocialPosts(platformResult: PlatformResult) {
+    const platformNodeId = `${platformResult.keyUsername}-${platformResult.platform}`;
+    if (this.postFetchingState()[platformNodeId]) {
+      return; // Already fetching
+    }
+
+    this.postFetchingState.update(s => ({ ...s, [platformNodeId]: true }));
+
+    this.scanService.fetchSocialPosts(platformResult.platform, platformResult.username)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const fetchedPosts = response.posts;
+          const hasPosts = fetchedPosts && fetchedPosts.length > 0;
+          const newPosts = hasPosts ? fetchedPosts : null;
+
+          this.updateState(state => {
+            state.scanResults.update(currentMap => {
+              const newMap = new Map(currentMap);
+              const userResults = newMap.get(platformResult.keyUsername);
+              if (userResults) {
+                const updatedResults = userResults.map(p =>
+                  p.platform === platformResult.platform ? { ...p, posts: newPosts } : p
+                );
+                newMap.set(platformResult.keyUsername, updatedResults);
+              }
+              return newMap;
+            });
+          });
+
+          if (this.selectedPlatformData()?.platform === platformResult.platform && this.selectedPlatformData()?.username === platformResult.username) {
+            this.selectedPlatformData.update(current => current ? { ...current, posts: newPosts } : null);
+          }
+
+          if (this.summaryPopupData()?.username === platformResult.keyUsername) {
+            this.summaryPopupData.update(current => {
+              if (!current) return null;
+              const updatedPlatforms = current.platforms.map(p =>
+                p.platform === platformResult.platform ? { ...p, posts: newPosts } : p
+              );
+              return { ...current, platforms: updatedPlatforms };
+            });
+          }
+
+          this.postFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+        },
+        error: (err) => {
+          console.error('Failed to fetch social posts:', err);
+          this.postFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+        }
+      });
   }
 }

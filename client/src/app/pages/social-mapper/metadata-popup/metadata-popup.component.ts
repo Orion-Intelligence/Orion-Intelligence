@@ -13,7 +13,12 @@ import { getPlatformColor, formatFollowers, formatKey, isUrl, isImageUrl } from 
 })
 export class MetadataPopupComponent {
   data = input.required<PlatformResult>();
+  isFetching = input<boolean>(false);
+  isFetchingPosts = input<boolean>(false);
+  isScanInProgress = input<boolean>(false);
   close = output<void>();
+  fetchProfile = output<PlatformResult>();
+  fetchPosts = output<PlatformResult>();
 
   public getPlatformColor = getPlatformColor;
   public formatFollowers = formatFollowers;
@@ -29,5 +34,13 @@ export class MetadataPopupComponent {
     const metadata = this.data().allMetadata;
     if (!metadata) return [];
     return Object.entries(metadata).map(([key, value]) => ({ key, value }));
+  }
+
+  getProfileDetailEntries(): { key: string, value: any }[] {
+    const details = this.data().profileDetails;
+    if (!details) return [];
+    return Object.entries(details)
+      .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+      .map(([key, value]) => ({ key, value }));
   }
 }

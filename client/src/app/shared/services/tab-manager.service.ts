@@ -29,6 +29,7 @@ export class TabManagerService {
       scanResults: signal(new Map()),
       activeUsernames: signal(new Set()),
       customEntities: signal([]),
+      socialImages: signal(new Map()),
       isEditMode: signal(false),
       isHomeMenuCollapsed: signal(false),
       isEntityMenuCollapsed: signal(true),

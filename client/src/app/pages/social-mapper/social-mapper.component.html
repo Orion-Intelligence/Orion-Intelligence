@@ -1,333 +1,400 @@
-<div *ngIf="twReady(); else twLoading"
-     class="social-scanner-main h-full w-full flex flex-col overflow-hidden text-slate-200"
-     (click)="closeContextMenu(); closeMobileEntityPanel()">
+<div class="social-scanner-main w-screen flex flex-col bg-slate-900">
+  <app-tab-bar></app-tab-bar>
 
-  <div class="flex-grow flex flex-col lg:flex-row relative">
+  <main *ngIf="tabManager.activeTab(); else loadingBlock" class="flex-grow relative">
+    <div class="h-full w-full flex flex-col overflow-hidden text-slate-200" (click)="closeContextMenu(); closeMobileEntityPanel()">
 
-    <app-home-menu
-      class="border-b lg:border-r border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
-      [isCollapsed]="isHomeMenuCollapsed()"
-      [activeTab]="activeHomeMenuTab()"
-      [searchTerm]="homeMenuSearchTerm()"
-      [jobs]="jobs()"
-      [customEntities]="customEntities()"
-      [activeUsernames]="activeUsernames()"
-      [viewMode]="viewMode()"
-      [isSmallScreen]="isSmallScreen()"
-      (toggle)="onHomeMenuToggled()"
-      (tabSelected)="onHomeMenuTabSelected($event)"
-      (searchChanged)="onHomeMenuSearchChanged($event)"
-      (jobClicked)="handleCompletedJobClick($event)"
-      (entityClicked)="addEntityToGraph($event)"
-      (focusUser)="focusOnUser($event)"
-      (deleteUser)="openDeleteConfirmation($event)"
-      (cancelScan)="cancelScan($event)">
-    </app-home-menu>
-
-    <main class="flex-grow flex flex-col main-bg-grid">
-
-      <app-toolbar
-        [searchTerm]="searchTerm()"
-        [isSearchDisabled]="isSearchDisabled()"
-        [viewMode]="viewMode()"
-        [isPhysicsEnabled]="isPhysicsEnabled()"
-        [isEditMode]="isEditMode()"
-        [canEditConnections]="canEditConnections()"
-        (searchChanged)="onSearchChanged($event)"
-        (scanTriggered)="triggerScan()"
-        (viewModeChanged)="onViewModeChanged($event)"
-        (physicsToggled)="onPhysicsToggled()"
-        (editModeToggled)="onEditModeToggled()">
-      </app-toolbar>
-
-      <div class="flex-grow w-full relative overflow-hidden">
-        <ng-container *ngIf="viewMode() === 'graph'; else listViewBlock">
-          <app-network-graph
-            [data]="networkData()"
-            [focusNodeId]="nodeToFocus()"
-            [editMode]="isEditMode()"
-            [physicsEnabled]="isPhysicsEnabled()"
-            (nodeClicked)="onNodeClicked($event)"
-            (platformNodeClicked)="onPlatformNodeClicked($event)"
-            (nodeRightClicked)="onNodeRightClicked($event)"
-            (dragStart)="closeContextMenu()"
-            (zoom)="closeContextMenu()"
-            (edgeAdded)="handleEdgeAdded($event)"
-            (edgeDeleted)="handleEdgeDeleted($event)">
-          </app-network-graph>
-
-          <div *ngIf="networkData().nodes.length === 0" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-600 select-none">
-            <div class="text-center">
-              <i class="bi bi-share text-5xl text-slate-800 mx-auto"></i>
-              <p class="text-2xl font-semibold mt-3 text-slate-700">Graph is Waiting for Data</p>
-              <p class="text-slate-700/80">Complete a scan or add an entity to begin visualization.</p>
-            </div>
-          </div>
-
-          <div *ngIf="networkData().nodes.length > 0" class="absolute bottom-4 left-4 bg-slate-800/70 backdrop-blur-sm border border-slate-700 rounded-lg p-3 shadow-lg select-none animate-fade-in">
-            <h3 class="font-semibold text-slate-300 text-sm mb-2 border-b border-slate-700 pb-1">Legend</h3>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-2">
-                <div class="w-4 h-4 rounded-full border-2 border-indigo-400 bg-indigo-800 flex-shrink-0"></div>
-                <span class="text-xs text-slate-400">User Profile</span>
+      <div class="flex-grow flex flex-col lg:flex-row relative">
+    
+        <app-home-menu
+          class="border-b lg:border-r border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
+          [isCollapsed]="isHomeMenuCollapsed()"
+          [activeTab]="activeHomeMenuTab()"
+          [searchTerm]="homeMenuSearchTerm()"
+          [jobs]="jobs()"
+          [customEntities]="customEntities()"
+          [activeUsernames]="activeUsernames()"
+          [viewMode]="viewMode()"
+          [isSmallScreen]="isSmallScreen()"
+          [profileFetchingState]="profileFetchingState()"
+          (toggle)="onHomeMenuToggled()"
+          (tabSelected)="onHomeMenuTabSelected($event)"
+          (searchChanged)="onHomeMenuSearchChanged($event)"
+          (jobClicked)="handleCompletedJobClick($event)"
+          (entityClicked)="showUpcomingFeaturePopup()"
+          (focusUser)="focusOnUser($event)"
+          (deleteUser)="openDeleteConfirmation($event)"
+          (cancelScan)="cancelScan($event)"
+          (manageProfiles)="openModalForJob($event)">
+        </app-home-menu>
+    
+        <main class="flex-grow flex flex-col main-bg-grid">
+    
+          <app-toolbar
+            [searchTerm]="searchTerm()"
+            [isSearchDisabled]="isSearchDisabled()"
+            [viewMode]="viewMode()"
+            [isPhysicsEnabled]="isPhysicsEnabled()"
+            [isEditMode]="isEditMode()"
+            [canEditConnections]="canEditConnections()"
+            (searchChanged)="onSearchChanged($event)"
+            (scanTriggered)="triggerScan()"
+            (viewModeChanged)="onViewModeChanged($event)"
+            (physicsToggled)="onPhysicsToggled()"
+            (editModeToggled)="onEditModeToggled()">
+          </app-toolbar>
+    
+          <div class="flex-grow w-full relative overflow-hidden">
+            <ng-container *ngIf="viewMode() === 'graph'; else listViewBlock">
+              <app-network-graph
+                [data]="networkData()"
+                [focusNodeId]="nodeToFocus()"
+                [editMode]="isEditMode()"
+                [physicsEnabled]="isPhysicsEnabled()"
+                (nodeClicked)="onNodeClicked($event)"
+                (platformNodeClicked)="onPlatformNodeClicked($event)"
+                (nodeRightClicked)="onNodeRightClicked($event)"
+                (dragStart)="closeContextMenu()"
+                (zoom)="closeContextMenu()"
+                (edgeAdded)="handleEdgeAdded($event)"
+                (edgeDeleted)="handleEdgeDeleted($event)">
+              </app-network-graph>
+              <div *ngIf="networkData().nodes.length === 0" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-600 select-none">
+                  <div class="text-center">
+                      <i class="bi bi-share text-5xl text-slate-800 mx-auto"></i>
+                      <p class="text-2xl font-semibold mt-3 text-slate-700">Graph is Waiting for Data</p>
+                      <p class="text-slate-700/80">Complete a scan or add an entity to begin visualization.</p>
+                  </div>
               </div>
-              <div class="flex items-center gap-2">
-                <div class="w-4 h-4 rounded-full border-2 border-teal-500 bg-teal-700 flex-shrink-0"></div>
-                <span class="text-xs text-slate-400">Social Platform</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="w-4 h-4 rounded-md border-2 border-green-400 bg-green-800 flex-shrink-0"></div>
-                <span class="text-xs text-slate-400">Custom Entity</span>
-              </div>
-              <div class="my-1 h-px bg-slate-700"></div>
-              <div class="flex items-center gap-2">
-                <div class="w-4 flex items-center">
-                  <div class="w-full h-px border-t-2 border-dashed border-user-connection"></div>
+    
+              <div *ngIf="networkData().nodes.length > 0" class="absolute bottom-4 left-4 bg-slate-800/70 backdrop-blur-sm border border-slate-700 rounded-lg p-3 shadow-lg select-none animate-fade-in">
+                <h3 class="font-semibold text-slate-300 text-sm mb-2 border-b border-slate-700 pb-1">Legend</h3>
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full border-2 border-indigo-400 bg-indigo-800 flex-shrink-0"></div>
+                    <span class="text-xs text-slate-400">User Profile</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full border-2 border-teal-500 bg-teal-700 flex-shrink-0"></div>
+                    <span class="text-xs text-slate-400">Social Platform</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-md border-2 border-green-400 bg-green-800 flex-shrink-0"></div>
+                    <span class="text-xs text-slate-400">Custom Entity</span>
+                  </div>
+                  <div class="my-1 h-px bg-slate-700"></div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 flex items-center">
+                        <div class="w-full h-px border-t-2 border-dashed border-user-connection"></div>
+                    </div>
+                    <span class="text-xs text-slate-400">User Connection</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 flex items-center">
+                        <div class="w-full h-px border-t-2 border-dashed border-entity-connection"></div>
+                    </div>
+                    <span class="text-xs text-slate-400">Entity Connection</span>
+                  </div>
                 </div>
-                <span class="text-xs text-slate-400">User Connection</span>
               </div>
-              <div class="flex items-center gap-2">
-                <div class="w-4 flex items-center">
-                  <div class="w-full h-px border-t-2 border-dashed border-entity-connection"></div>
-                </div>
-                <span class="text-xs text-slate-400">Entity Connection</span>
-              </div>
-            </div>
+            </ng-container>
+            <ng-template #listViewBlock>
+              <app-list-view *ngIf="viewMode() === 'list'"
+                [networkData]="networkData()"
+                [scanResults]="scanResults()"
+                [customEntities]="customEntities()"
+                [isSmallScreen]="isSmallScreen()"
+                [expandedPlatformNodeId]="expandedPlatformNodeId()"
+                (nodeClicked)="onNodeClicked($event)"
+                (platformNodeClicked)="onPlatformNodeClicked($event)"
+                (openManageProfiles)="openModalForJob($event)"
+                (openDeleteConfirmation)="openDeleteConfirmation($event)"
+                (deleteCustomEntity)="deleteCustomEntity($event)">
+              </app-list-view>
+            </ng-template>
           </div>
-        </ng-container>
-
-        <ng-template #listViewBlock>
-          <app-list-view *ngIf="viewMode() === 'list'"
-            [networkData]="networkData()"
-            [scanResults]="scanResults()"
-            [customEntities]="customEntities()"
-            [isSmallScreen]="isSmallScreen()"
-            [expandedPlatformNodeId]="expandedPlatformNodeId()"
-            (nodeClicked)="onNodeClicked($event)"
-            (platformNodeClicked)="onPlatformNodeClicked($event)"
-            (openManageProfiles)="openModalForJob($event)"
-            (openDeleteConfirmation)="openDeleteConfirmation($event)"
-            (deleteCustomEntity)="deleteCustomEntity($event)">
-          </app-list-view>
-        </ng-template>
+        </main>
+    
+        <app-entity-menu
+          class="border-t lg:border-l border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
+          [isCollapsed]="isEntityMenuCollapsed()"
+          (toggle)="onEntityMenuToggled()"
+          (addEntityClicked)="showUpcomingFeaturePopup()">
+        </app-entity-menu>
       </div>
-    </main>
-
-    <app-entity-menu
-      class="border-t lg:border-l border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
-      [isCollapsed]="isEntityMenuCollapsed()"
-      (toggle)="onEntityMenuToggled()"
-      (addEntityClicked)="openAddEntityModal($event)">
-    </app-entity-menu>
-  </div>
-
-  <ng-container *ngIf="isSmallScreen()">
-    <div *ngIf="isMobileEntityPanelOpen()" (click)="closeMobileEntityPanel()" class="fixed inset-0 bg-slate-900/60 z-30 animate-fade-in"></div>
-
-    <aside class="fixed inset-y-0 right-0 z-40 w-72 bg-slate-900 border-l border-slate-700 shadow-xl transition-transform duration-300 ease-in-out flex flex-col"
-          [class.translate-x-0]="isMobileEntityPanelOpen()"
-          [class.translate-x-full]="!isMobileEntityPanelOpen()"
-          (click)="$event.stopPropagation()">
-      <div class="p-3 border-b border-slate-800 flex items-center justify-between shrink-0">
-        <h2 class="text-md font-semibold text-slate-300 whitespace-nowrap">Add Entity</h2>
-        <button (click)="closeMobileEntityPanel()" class="p-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
-          <i class="bi bi-x-lg text-xl"></i>
-        </button>
-      </div>
-      <div class="p-3 flex flex-col gap-2 overflow-y-auto">
-        <button (click)="openAddEntityModal('wallet'); closeMobileEntityPanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
-          <i class="bi bi-wallet2 w-5 h-5 text-green-400"></i>
-          <span>Add Wallet</span>
-        </button>
-        <button (click)="openAddEntityModal('email'); closeMobileEntityPanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
-          <i class="bi bi-envelope-at w-5 h-5 text-yellow-400"></i>
-          <span>Add Email</span>
-        </button>
-        <button (click)="openAddEntityModal('domain'); closeMobileEntityPanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
-          <i class="bi bi-globe w-5 h-5 text-sky-400"></i>
-          <span>Add Domain</span>
-        </button>
-      </div>
-    </aside>
-
-    <button (click)="toggleMobileEntityPanel($event)"
-            class="fixed bottom-6 right-6 z-20 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-500 transition-transform active:scale-95 duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-indigo-500">
-      <i class="bi bi-diagram-3-fill text-2xl"></i>
-    </button>
-  </ng-container>
-
-  <div *ngIf="showAlreadyAddedNotification() || showAlreadyScannedNotification()" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] animate-fade-in-scale">
-    <div *ngIf="showAlreadyAddedNotification()" class="flex items-center gap-3 bg-yellow-500/90 text-slate-900 text-sm font-medium px-4 py-2 rounded-full shadow-lg border border-yellow-400 backdrop-blur-sm">
-      <i class="bi bi-exclamation-triangle-fill w-5 h-5"></i>
-      <span>User is already on the graph.</span>
-    </div>
-    <div *ngIf="showAlreadyScannedNotification()" class="flex items-center gap-3 bg-blue-500/90 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg border border-blue-400 backdrop-blur-sm">
-      <i class="bi bi-info-circle-fill w-5 h-5"></i>
-      <span>A scan for this user already exists.</span>
-    </div>
-  </div>
-
-  <div *ngIf="isModalVisible()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeModal()">
-    <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-md animate-fade-in-scale" (click)="$event.stopPropagation()">
-      <div class="p-4 flex justify-between items-start border-b border-slate-700">
-        <div>
-          <h3 class="text-lg font-semibold leading-6 text-white">Manage Profiles for <span class="text-indigo-400">{{ modalResults().username }}</span></h3>
-          <p class="text-sm text-slate-400 mt-1">Select profiles to display on the graph.</p>
-        </div>
-        <button (click)="closeModal()" type="button" class="p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
-          <i class="bi bi-x-lg w-6 h-6"></i>
-        </button>
-      </div>
-
-      <div class="p-2 max-h-96 overflow-y-auto">
-        <div class="flex flex-col">
-          <label *ngFor="let platform of modalResults().platforms" class="flex items-center p-3 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors">
-            <input type="checkbox" class="sr-only peer" [checked]="platform.isSelected" (change)="togglePlatformSelection(platform.platform)" />
-            <div class="flex items-center justify-center mr-3 w-5 h-5 rounded border-2 border-slate-500 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-colors">
-              <i class="bi bi-check-lg text-white transform transition-transform" [class.scale-100]="platform.isSelected" [class.scale-0]="!platform.isSelected"></i>
+    
+      <ng-container *ngIf="isSmallScreen()">
+        <div *ngIf="isMobileEntityPanelOpen()" (click)="closeMobileEntityPanel()" class="fixed inset-0 bg-slate-900/60 z-30 animate-fade-in"></div>
+    
+        <aside class="fixed inset-y-0 right-0 z-40 w-72 bg-slate-900 border-l border-slate-700 shadow-xl transition-transform duration-300 ease-in-out flex flex-col"
+              [class.translate-x-0]="isMobileEntityPanelOpen()"
+              [class.translate-x-full]="!isMobileEntityPanelOpen()"
+              (click)="$event.stopPropagation()">
+            <div class="p-3 border-b border-slate-800 flex items-center justify-between shrink-0">
+                <h2 class="text-md font-semibold text-slate-300 whitespace-nowrap">Add Entity</h2>
+                <button (click)="closeMobileEntityPanel()" class="p-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                  <i class="bi bi-x-lg text-xl"></i>
+                </button>
             </div>
-            <div class="platform-icon mr-3 rounded-full h-6 w-6 flex-shrink-0 flex items-center justify-center text-sm font-bold text-white"
-                 [style.--platform-color]="getPlatformColor(platform.platform)">
-              {{ platform.platform.charAt(0).toUpperCase() }}
+            <div class="p-3 flex flex-col gap-2 overflow-y-auto">
+                <button (click)="showUpcomingFeaturePopup(); closeMobileEntityPanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+                  <i class="bi bi-wallet2 w-5 h-5 text-green-400"></i>
+                  <span>Add Wallet</span>
+                </button>
+                <button (click)="showUpcomingFeaturePopup(); closeMobileEntityPanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+                  <i class="bi bi-envelope-at w-5 h-5 text-yellow-400"></i>
+                  <span>Add Email</span>
+                </button>
+                <button (click)="showUpcomingFeaturePopup(); closeMobileEntityPanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+                  <i class="bi bi-globe w-5 h-5 text-sky-400"></i>
+                  <span>Add Domain</span>
+                </button>
             </div>
-            <span class="font-medium text-slate-200">{{ platform.platform }}</span>
-          </label>
+        </aside>
+    
+        <button (click)="toggleMobileEntityPanel($event)"
+                class="fixed bottom-6 right-6 z-20 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center
+                       hover:bg-indigo-500 transition-transform active:scale-95 duration-200 ease-in-out
+                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-indigo-500">
+          <i class="bi bi-diagram-3-fill text-2xl"></i>
+        </button>
+      </ng-container>
+    
+      <div *ngIf="showAlreadyAddedNotification() || showAlreadyScannedNotification() || showAlreadyScanningNotification()" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] animate-fade-in-scale">
+        <div *ngIf="showAlreadyAddedNotification()" class="flex items-center gap-3 bg-yellow-500/90 text-slate-900 text-sm font-medium px-4 py-2 rounded-full shadow-lg border border-yellow-400 backdrop-blur-sm">
+          <i class="bi bi-exclamation-triangle-fill w-5 h-5"></i>
+          <span>User is already on the graph.</span>
+        </div>
+        <div *ngIf="showAlreadyScannedNotification()" class="flex items-center gap-3 bg-blue-500/90 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg border border-blue-400 backdrop-blur-sm">
+          <i class="bi bi-info-circle-fill w-5 h-5"></i>
+          <span>A scan for this user already exists.</span>
+        </div>
+        <div *ngIf="showAlreadyScanningNotification()" class="flex items-center gap-3 bg-orange-500/90 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg border border-orange-400 backdrop-blur-sm">
+          <i class="bi bi-hourglass-split w-5 h-5"></i>
+          <span>A scan for this user is already in progress.</span>
         </div>
       </div>
-
-      <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
-        <button (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">Cancel</button>
-        <button (click)="updateGraphFromModal()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">Update Graph</button>
-      </div>
-    </div>
-  </div>
-
-  <div *ngIf="contextMenu().visible"
-       class="context-menu-wrapper w-56 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none animate-context-menu-in"
-       [style.--menu-x.px]="contextMenu().x"
-       [style.--menu-y.px]="contextMenu().y"
-       (click)="$event.stopPropagation()">
-    <div [ngSwitch]="contextMenu().type">
-      <div *ngSwitchCase="'user'">
-        <div class="p-1">
-          <div class="px-2 pt-2 pb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">Analysis</div>
-          <button (click)="closeContextMenu()" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-slate-700 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
-            <i class="bi bi-images w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
-            <span class="flex-grow">Fetch social media images</span>
-          </button>
-          <button (click)="closeContextMenu()" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-slate-700 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
-            <i class="bi bi-link-45deg w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
-            <span class="flex-grow">Fetch exposed post links</span>
-          </button>
-          <div class="my-1 h-px bg-slate-200"></div>
-          <button (click)="removeAllPlatformNodes()" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-slate-700 rounded-md hover:bg-slate-100 hover:text-slate-900 transition-colors group">
-            <i class="bi bi-x-circle w-5 h-5 text-slate-400 group-hover:text-slate-500 transition-colors"></i>
-            <span class="flex-grow">Clear Connections</span>
-          </button>
-          <button (click)="openDeleteConfirmation(contextMenuUsername()!)" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors group">
-            <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-600 transition-colors"></i>
-            <span class="flex-grow">Delete Profile</span>
-          </button>
-        </div>
-      </div>
-
-      <div *ngSwitchCase="'platform'">
-        <div class="p-1">
-          <button (click)="removePlatformNode()" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors group">
-            <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-600 transition-colors"></i>
-            <span>Remove from Graph</span>
-          </button>
-        </div>
-      </div>
-
-      <div *ngSwitchCase="'customEntity'">
-        <div class="p-1">
-          <button (click)="deleteCustomEntity(contextMenu().nodeId!)" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors group">
-            <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-600 transition-colors"></i>
-            <span>Delete Entity</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div *ngIf="deleteConfirmation().visible" class="fixed inset-0 z-[101] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeDeleteConfirmation()">
-    <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-sm animate-fade-in-scale" (click)="$event.stopPropagation()">
-      <div class="p-5 text-center">
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
-          <i class="bi bi-exclamation-triangle h-6 w-6 text-red-500"></i>
-        </div>
-        <h3 class="mt-4 text-lg font-semibold text-white">Delete Profile</h3>
-        <p class="mt-2 text-sm text-slate-400">
-          Are you sure you want to delete the profile for <strong class="text-indigo-400">{{ deleteConfirmation().username }}</strong>? This will remove all associated data and cannot be undone.
-        </p>
-      </div>
-      <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
-        <button (click)="closeDeleteConfirmation()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">Cancel</button>
-        <button (click)="confirmDeletion()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Confirm Delete</button>
-      </div>
-    </div>
-  </div>
-
-  <div *ngIf="isAddEntityModalVisible()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeAddEntityModal()">
-    <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-sm animate-fade-in-scale" (click)="$event.stopPropagation()">
-      <div>
-        <div class="p-4 flex justify-between items-start border-b border-slate-700">
-          <div class="flex items-start gap-3">
-            <i [class]="getIconForEntityType(entityToAdd()!.type) + ' text-2xl w-8 text-center'"></i>
+    
+      <div *ngIf="isModalVisible()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeModal()">
+        <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-md animate-fade-in-scale flex flex-col" (click)="$event.stopPropagation()">
+          <div class="p-4 flex justify-between items-start border-b border-slate-700">
             <div>
-              <h3 class="text-lg font-semibold leading-6 text-white">Add {{ entityToAdd()?.type | titlecase }}</h3>
-              <p class="text-sm text-slate-400 mt-1">Enter the details for the new entity.</p>
+              <h3 class="text-lg font-semibold leading-6 text-white">Manage Profiles for <span class="text-indigo-400">{{ modalResults().username }}</span></h3>
+              <p class="text-sm text-slate-400 mt-1">Select profiles to display on the graph.</p>
+            </div>
+             <button (click)="closeModal()" type="button" class="p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
+              <i class="bi bi-x-lg w-6 h-6"></i>
+             </button>
+          </div>
+          
+          <div class="p-4 border-b border-slate-700">
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <i class="bi bi-search w-5 h-5 text-slate-400"></i>
+              </div>
+              <input 
+                type="text" 
+                placeholder="Search platforms..."
+                [value]="modalSearchTerm()"
+                (input)="onModalSearchChanged($event)"
+                class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-10 pr-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              />
             </div>
           </div>
-          <button (click)="closeAddEntityModal()" type="button" class="p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
-            <i class="bi bi-x-lg w-6 h-6"></i>
-          </button>
-        </div>
-        <div class="p-5">
-          <label for="entityValue" class="block text-sm font-medium leading-6 text-slate-300">{{ entityToAdd()?.type | titlecase }} Value</label>
-          <div class="mt-2">
-            <input type="text" id="entityValue" name="entityValue"
-                   autocomplete="off"
-                   [placeholder]="'Enter ' + (entityToAdd()?.type | titlecase)"
-                   [value]="entityToAdd()?.value || ''"
-                   (input)="onEntityValueChange($event)"
-                   (keyup.enter)="confirmAddEntity()"
-                   class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 px-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+    
+          <div class="p-2 max-h-80 overflow-y-auto">
+            <div class="flex flex-col">
+              <label *ngFor="let platform of filteredModalPlatforms()" class="flex items-center p-3 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  class="sr-only peer"
+                  [checked]="platform.isSelected"
+                  (change)="togglePlatformSelection(platform.platform)"
+                />
+                <div class="flex items-center justify-center mr-3 w-5 h-5 rounded border-2 border-slate-500 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-colors">
+                  <i class="bi bi-check-lg text-white transform transition-transform" [class.scale-100]="platform.isSelected" [class.scale-0]="!platform.isSelected"></i>
+                </div>
+                <div class="platform-icon mr-3 rounded-full h-6 w-6 flex-shrink-0 flex items-center justify-center text-sm font-bold text-white"
+                    [style.--platform-color]="getPlatformColor(platform.platform)">
+                    {{ platform.platform.charAt(0).toUpperCase() }}
+                </div>
+                <span class="font-medium text-slate-200">{{ platform.platform }}</span>
+              </label>
+            </div>
+            <div *ngIf="filteredModalPlatforms().length === 0" class="text-center py-8 text-slate-500">
+              <p class="text-sm">No platforms match your search.</p>
+            </div>
+          </div>
+    
+          <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
+            <button (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
+              Cancel
+            </button>
+            <button (click)="updateGraphFromModal()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+              Update Graph
+            </button>
           </div>
         </div>
-        <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
-          <button (click)="closeAddEntityModal()" type="button" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">Cancel</button>
-          <button type="button"
-                  (click)="confirmAddEntity()"
-                  [disabled]="!entityToAdd()?.value?.trim()"
-                  class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-            Add Entity
-          </button>
+      </div>
+    
+      <div *ngIf="contextMenu().visible"
+          class="context-menu-wrapper w-56 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none animate-context-menu-in"
+          [style.--menu-x.px]="contextMenu().x"
+          [style.--menu-y.px]="contextMenu().y"
+          (click)="$event.stopPropagation()">
+    
+        <div [ngSwitch]="contextMenu().type">
+          <div *ngSwitchCase="'user'">
+            <div class="p-1">
+              <div class="px-2 pt-2 pb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">Analysis</div>
+              <button (click)="closeContextMenu()" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-slate-700 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
+                <i class="bi bi-link-45deg w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
+                <span class="flex-grow">Fetch exposed post links</span>
+              </button>
+              <div class="my-1 h-px bg-slate-200"></div>
+              <button (click)="removeAllPlatformNodes()" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-slate-700 rounded-md hover:bg-slate-100 hover:text-slate-900 transition-colors group">
+                <i class="bi bi-x-circle w-5 h-5 text-slate-400 group-hover:text-slate-500 transition-colors"></i>
+                <span class="flex-grow">Clear Connections</span>
+              </button>
+              <button (click)="openDeleteConfirmation(contextMenuUsername()!)" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors group">
+                <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-600 transition-colors"></i>
+                <span class="flex-grow">Delete Profile</span>
+              </button>
+            </div>
+          </div>
+          <div *ngSwitchCase="'platform'">
+            <div class="p-1">
+              <button (click)="removePlatformNode()" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors group">
+                <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-600 transition-colors"></i>
+                <span>Remove from Graph</span>
+              </button>
+            </div>
+          </div>
+          <div *ngSwitchCase="'customEntity'">
+            <div class="p-1">
+                <button (click)="deleteCustomEntity(contextMenu().nodeId!)" class="w-full text-left flex items-center gap-3 px-3 py-1.5 text-sm text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors group">
+                    <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-600 transition-colors"></i>
+                    <span>Delete Entity</span>
+                </button>
+            </div>
+          </div>
         </div>
       </div>
+    
+      <div *ngIf="deleteConfirmation().visible" class="fixed inset-0 z-[101] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeDeleteConfirmation()">
+        <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-sm animate-fade-in-scale" (click)="$event.stopPropagation()">
+          <div class="p-5 text-center">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+              <i class="bi bi-exclamation-triangle h-6 w-6 text-red-500"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-white">Delete Profile</h3>
+            <p class="mt-2 text-sm text-slate-400">
+              Are you sure you want to delete the profile for <strong class="text-indigo-400">{{ deleteConfirmation().username }}</strong>? This will remove all associated data and cannot be undone.
+            </p>
+          </div>
+          <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
+            <button (click)="closeDeleteConfirmation()" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
+              Cancel
+            </button>
+            <button (click)="confirmDeletion()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
+              Confirm Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isUpcomingFeaturePopupVisible()" class="fixed inset-0 z-[101] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeUpcomingFeaturePopup()">
+        <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-sm animate-fade-in-scale" (click)="$event.stopPropagation()">
+          <div class="p-5 text-center">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10">
+              <i class="bi bi-cone-striped h-6 w-6 text-indigo-400"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-white">Feature Coming Soon</h3>
+            <p class="mt-2 text-sm text-slate-400">
+              We're hard at work building this feature. Stay tuned for updates!
+            </p>
+          </div>
+          <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
+            <button (click)="closeUpcomingFeaturePopup()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+              Got it!
+            </button>
+          </div>
+        </div>
+      </div>
+    
+      <div *ngIf="isAddEntityModalVisible()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="closeAddEntityModal()">
+        <div class="bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-sm animate-fade-in-scale" (click)="$event.stopPropagation()">
+            <div>
+                <div class="p-4 flex justify-between items-start border-b border-slate-700">
+                    <div class="flex items-start gap-3">
+                      <i [class]="getIconForEntityType(entityToAdd()!.type) + ' text-2xl w-8 text-center'"></i>
+                      <div>
+                        <h3 class="text-lg font-semibold leading-6 text-white">Add {{ entityToAdd()?.type | titlecase }}</h3>
+                        <p class="text-sm text-slate-400 mt-1">Enter the details for the new entity.</p>
+                      </div>
+                    </div>
+                     <button (click)="closeAddEntityModal()" type="button" class="p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
+                      <i class="bi bi-x-lg w-6 h-6"></i>
+                     </button>
+                </div>
+                <div class="p-5">
+                    <label for="entityValue" class="block text-sm font-medium leading-6 text-slate-300">{{ entityToAdd()?.type | titlecase }} Value</label>
+                    <div class="mt-2">
+                        <input type="text" id="entityValue" name="entityValue"
+                               autocomplete="off"
+                               [placeholder]="'Enter ' + (entityToAdd()?.type | titlecase)"
+                               [value]="entityToAdd()?.value || ''"
+                               (input)="onEntityValueChange($event)"
+                               (keyup.enter)="confirmAddEntity()"
+                               class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 px-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    </div>
+                </div>
+                <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-3 rounded-b-lg">
+                  <button (click)="closeAddEntityModal()" type="button" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
+                    Cancel
+                  </button>
+                  <button type="button"
+                          (click)="confirmAddEntity()"
+                          [disabled]="!entityToAdd()?.value?.trim()"
+                          class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                    Add Entity
+                  </button>
+                </div>
+            </div>
+        </div>
+      </div>
+    
+      <app-metadata-popup *ngIf="isMetadataPopupVisible() && selectedPlatformData()"
+        [data]="selectedPlatformData()!"
+        [isFetching]="profileFetchingState()[selectedPlatformData()!.keyUsername + '-' + selectedPlatformData()!.platform]"
+        [isFetchingPosts]="postFetchingState()[selectedPlatformData()!.keyUsername + '-' + selectedPlatformData()!.platform]"
+        [isScanInProgress]="isMetadataUserScanInProgress()"
+        (close)="closeMetadataPopup()"
+        (fetchProfile)="fetchProfileDetails($event)"
+        (fetchPosts)="handleFetchSocialPosts($event)">
+      </app-metadata-popup>
+    
+      <app-profile-summary-popup *ngIf="isSummaryPopupVisible() && summaryPopupData()"
+        [username]="summaryPopupData()!.username"
+        [platforms]="summaryPopupData()!.platforms"
+        [email]="summaryPopupData()!.email"
+        [images]="summaryPopupData()!.images"
+        [fetchingState]="profileFetchingState()"
+        [isFetchingImages]="!!imageFetchingState()[summaryPopupData()!.username]"
+        [isFetchingPosts]="postFetchingState()"
+        [isScanInProgress]="isUserScanInProgress()"
+        (close)="closeSummaryPopup()"
+        (fetchProfile)="fetchProfileDetails($event)"
+        (fetchImages)="handleFetchImagesForUser($event)"
+        (fetchPosts)="handleFetchSocialPosts($event)"
+        (rescan)="handleRescan($event)">
+      </app-profile-summary-popup>
+
     </div>
-  </div>
-
-  <app-metadata-popup *ngIf="isMetadataPopupVisible() && selectedPlatformData()"
-    [data]="selectedPlatformData()!"
-    (close)="closeMetadataPopup()">
-  </app-metadata-popup>
-
-  <app-profile-summary-popup *ngIf="isSummaryPopupVisible() && summaryPopupData()"
-    [username]="summaryPopupData()!.username"
-    [platforms]="summaryPopupData()!.platforms"
-    [email]="summaryPopupData()!.email"
-    (close)="closeSummaryPopup()">
-  </app-profile-summary-popup>
+  </main>
+  <ng-template #loadingBlock>
+    <div class="flex-grow flex items-center justify-center text-slate-500">
+      <p>Loading session...</p>
+    </div>
+  </ng-template>
 </div>
-
-<ng-template #twLoading>
-  <div class="social-scanner-main h-full w-full flex flex-col overflow-hidden text-slate-200">
-    <div class="flex-grow flex flex-col lg:flex-row relative">
-      <main class="flex-grow flex flex-col main-bg-grid">
-        <div class="flex-grow w-full relative overflow-hidden"></div>
-      </main>
-    </div>
-  </div>
-</ng-template>

@@ -25,7 +25,38 @@ export interface Job {
   step: string;
 }
 
+export interface ProfileDetails {
+  real_name?: string;
+  bio?: string;
+  total_posts?: string;
+  total_followers?: string;
+  total_following?: string;
+  profile_url?: string;
+  location?: string;
+  total_likes?: string;
+}
+
+export interface SocialImage {
+  image_url: string;
+  thumbnail: string;
+  title: string;
+  source: string;
+}
+
+export interface SocialPost {
+  post_url: string;
+  datetime: string;
+  caption: string;
+  likes: string;
+  comments: string;
+  shares: string;
+  views: string;
+  media_type: string;
+  media_url: string;
+}
+
 export interface PlatformResult {
+  keyUsername: string;
   platform: string;
   username: string;
   url: string;
@@ -35,6 +66,8 @@ export interface PlatformResult {
   joiningDate?: string;
   email?: string;
   allMetadata: Record<string, any>;
+  profileDetails?: ProfileDetails | null;
+  posts?: SocialPost[] | null;
 }
 
 export type ScanEvent =
@@ -58,6 +91,7 @@ export interface TabState {
   scanResults: WritableSignal<Map<string, PlatformResult[]>>;
   activeUsernames: WritableSignal<Set<string>>;
   customEntities: WritableSignal<CustomEntity[]>;
+  socialImages: WritableSignal<Map<string, SocialImage[]>>;
   isEditMode: WritableSignal<boolean>;
   isHomeMenuCollapsed: WritableSignal<boolean>;
   isEntityMenuCollapsed: WritableSignal<boolean>;

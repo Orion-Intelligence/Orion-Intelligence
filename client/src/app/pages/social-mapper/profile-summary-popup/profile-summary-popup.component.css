@@ -10,3 +10,21 @@
 .popup-content {
     max-height: 65vh;
 }
+
+.image-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.image-scrollbar::-webkit-scrollbar-track {
+  background: #334155; /* slate-700 */
+  border-radius: 3px;
+}
+
+.image-scrollbar::-webkit-scrollbar-thumb {
+  background: #64748b; /* slate-500 */
+  border-radius: 3px;
+}
+
+.image-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* slate-400 */
+}
