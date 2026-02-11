@@ -103,8 +103,8 @@ export class WorldHeatmapComponent
       .attr('y2', '0%');
 
     const stops: Array<{ o: number; c: string }> = [
-      {o: 0, c: 'hsl(0,30%,20%)'},
-      {o: 100, c: 'hsl(0,55%,40%)'}
+      {o: 0, c: 'hsl(0,28%,16%)'},
+      {o: 100, c: 'hsl(0,45%,28%)'}
     ];
 
     grad.selectAll<SVGStopElement, { o: number; c: string }>('stop')
@@ -260,7 +260,7 @@ export class WorldHeatmapComponent
 
     return (v: number) => {
       const t = q(v) / 6;
-      return d3.interpolateHslLong('hsl(0,30%,20%)', 'hsl(0,55%,40%)')(t);
+      return d3.interpolateHslLong('hsl(0,28%,16%)', 'hsl(0,45%,28%)')(t);
     };
   }
 
