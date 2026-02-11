@@ -141,6 +141,7 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true
     }
+    this.onFormSubmit()
   }
 
   onFormSubmit() {
@@ -148,6 +149,7 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
     }
     this.dashboardService.consolidatedParamModel.page = 1
+    this.dashboardService.consolidatedParamModel.tab = ""
     let query = this.local_query;
     this.searchInputRef?.nativeElement.blur();
     this.searchQuery = query;

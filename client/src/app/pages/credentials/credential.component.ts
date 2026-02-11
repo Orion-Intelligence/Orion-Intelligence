@@ -18,7 +18,7 @@ import { CredentialsSearchBarComponent } from "./credentials-search-bar/credenti
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
-import {ScanHelperMethods} from '../../shared/partials/scan-helper-methods/scan-helper-methods.component';
+import { ScanHelperMethods } from '../../shared/partials/scan-helper-methods/scan-helper-methods.component';
 
 @Component({
   selector: 'app-credential',
@@ -93,7 +93,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.url = params['url'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
 
-        if(this.firstTrigger){
+        if (this.firstTrigger) {
           this.firstTrigger = false;
           this.fetchSearchResults(false);
           this.fetchRanked();
@@ -130,7 +130,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
     this.dashboardService.consolidatedParamModel.ioc = this.searchQuery;
     this.dashboardService.consolidatedParamModel.url ??= '';
-    this.dashboardService.consolidatedParamModel.q = '';
 
     const startTime = performance.now();
 

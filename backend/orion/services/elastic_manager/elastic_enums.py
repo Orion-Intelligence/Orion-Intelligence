@@ -94,7 +94,7 @@ class ELASTIC_ENUMS:
         "m_username": "username.keyword",
         "m_email": "email.keyword",
         "m_ip": "ip.keyword",
-        "m_search_all": ["domain.keyword", "url.keyword", "username.keyword", "email.keyword"]
+        "m_search_all": ["domain.keyword", "username.keyword", "email.keyword"]
     }
 
     mapping_consolidated_iocs = {
@@ -148,7 +148,6 @@ class ELASTIC_ENUMS:
         ],
         "m_search_all": [
             "m_title",
-            "m_title.keyword",
 
             "m_content",
             "m_important_content",
