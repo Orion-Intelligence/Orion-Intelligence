@@ -1,4 +1,15 @@
-import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, Inject, PLATFORM_ID, effect, OnInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  DestroyRef,
+  OnDestroy,
+  Inject,
+  PLATFORM_ID,
+  effect,
+  OnInit
+} from '@angular/core';
 import { CommonModule, TitleCasePipe, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NetworkGraphComponent } from './network-graph/network-graph.component';
@@ -12,7 +23,7 @@ import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { EntityMenuComponent } from './entity-menu/entity-menu.component';
 import { ListViewComponent } from './list-view/list-view.component';
 import { getPlatformColor } from '../../shared/utils/formatters';
-import { socialMapperAnimations } from './social-mapper.animations';
+import { socialMapperAnimations } from '../../shared/animations/social-mapper.animations';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -86,6 +97,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.isSmallScreen.set(event.matches);
   };
 
+  twReady = signal(false);
+  private twLink: HTMLLinkElement | null = null;
+  private rafId: number | null = null;
+
   contextMenuUsername = computed(() => {
     const { type, nodeId } = this.contextMenu();
     if (type === 'user' && nodeId) {
@@ -131,20 +146,83 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId) && !document.getElementById(this.twId)) {
-      const link = document.createElement('link');
-      link.id = this.twId;
-      link.rel = 'stylesheet';
-      link.href = 'tailwind-social.css';
-      document.head.appendChild(link);
+    if (isPlatformBrowser(this.platformId)) {
+      const existing = document.getElementById(this.twId) as HTMLLinkElement | null;
+
+      if (existing) {
+        this.twLink = existing;
+      } else {
+        const link = document.createElement('link');
+        link.id = this.twId;
+        link.rel = 'stylesheet';
+        link.href = 'tailwind-social.css';
+        link.media = 'print';
+        this.twLink = link;
+        document.head.appendChild(link);
+      }
+
+      this.waitForTailwindAndEnable();
+    } else {
+      this.twReady.set(true);
     }
+
     this.resumeIncompleteScans();
+  }
+
+  private waitForTailwindAndEnable() {
+    if (!this.twLink) return;
+
+    const done = () => {
+      if (!this.twLink) return;
+      this.twLink.media = 'all';
+      requestAnimationFrame(() => this.twReady.set(true));
+    };
+
+    const onLoad = () => {
+      cleanup();
+      this.pollForPaint(done);
+    };
+
+    const cleanup = () => {
+      this.twLink?.removeEventListener('load', onLoad);
+      this.twLink?.removeEventListener('error', onLoad);
+    };
+
+    this.twLink.addEventListener('load', onLoad);
+    this.twLink.addEventListener('error', onLoad);
+
+    if ((this.twLink as any).sheet) {
+      cleanup();
+      this.pollForPaint(done);
+    }
+  }
+
+  private pollForPaint(done: () => void) {
+    let tries = 0;
+    const maxTries = 60;
+
+    const tick = () => {
+      tries++;
+      if (tries >= maxTries) {
+        done();
+        return;
+      }
+      const sheetOk = !!(this.twLink as any)?.sheet;
+      if (!sheetOk) {
+        this.rafId = requestAnimationFrame(tick);
+        return;
+      }
+      requestAnimationFrame(() => requestAnimationFrame(done));
+    };
+
+    this.rafId = requestAnimationFrame(tick);
   }
 
   ngOnDestroy(): void {
     if (isPlatformBrowser(this.platformId) && this.mediaQueryList) {
       this.mediaQueryList.removeEventListener('change', this.mediaQueryListener);
     }
+    if (this.rafId != null) cancelAnimationFrame(this.rafId);
     if (isPlatformBrowser(this.platformId)) {
       document.getElementById(this.twId)?.remove();
     }
@@ -215,7 +293,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     });
     this.runScan(newJob);
   }
-  
+
   cancelScan(jobId: string) {
     const cancelSubject = this.cancelScanSubjects.get(jobId);
     if (cancelSubject) {
