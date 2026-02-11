@@ -35,7 +35,7 @@ class elastic_controller:
             f"http://{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
             http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
         self.__m_dump_connection = AsyncElasticsearch(
-            f"http://{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
+            f"http://{ELASTIC_CONNECTIONS.S_STEALER_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
             http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
         await self.__initialize_mappings()
 
@@ -174,11 +174,6 @@ class elastic_controller:
         try:
             conn = self.__conn_for_index(document)
             m_data = await conn.search(index=document, body=data_filter, request_timeout=220)
-            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
-            print(document, flush=True)
-            print(data_filter, flush=True)
-            print(m_data, flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
