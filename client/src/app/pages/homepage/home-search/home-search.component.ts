@@ -1,16 +1,16 @@
-import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {ActivatedRoute, Router} from '@angular/router';
-import {FormsModule} from '@angular/forms';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {ConsolidatedCallbackModel} from '../../../shared/model/results/consolidated/consolidated.callback.model';
-import {SearchFiltersComponent} from "../search-filters/search-filters.component";
-import {AppService} from '../../../services/core/app/app.service';
-import {HomeInsightComponent} from "../home-insight/home-insight.component";
-import {AuthService} from '../../../services/authetication/auth.service';
-import {LicenseService} from '../../../services/licenses/licenses.service';
-import {HomeSearchService} from '../../../services/home_search/home.search.service';
-import {WorldHeatmapComponent} from "../world-heatmap/world-heatmap.component";
+import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
+import { SearchFiltersComponent } from "../search-filters/search-filters.component";
+import { AppService } from '../../../services/core/app/app.service';
+import { HomeInsightComponent } from "../home-insight/home-insight.component";
+import { AuthService } from '../../../services/authetication/auth.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
+import { HomeSearchService } from '../../../services/home_search/home.search.service';
+import { WorldHeatmapComponent } from "../world-heatmap/world-heatmap.component";
 
 @Component({
   selector: 'app-home-search',
@@ -22,8 +22,8 @@ export class HomeSearchComponent implements OnInit {
   @Input() isRoleAdmin: boolean = true;
   searchQuery = '';
   selectedSearchBy = 'Match any term';
-  @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
+  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
   homeInsightExpanded = false;
 

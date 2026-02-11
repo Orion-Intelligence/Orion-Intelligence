@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import {NgClass, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import { NgClass, NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
 type TelemetryGroup = { key: string; label: string; values: string[] };
@@ -51,7 +51,11 @@ export class ExpandedRowComponent implements OnChanges {
   }
 
   isTelemetryMatched(group: TelemetryGroup): boolean {
-    return group.values.some(value => this.matchedValues.includes(value));
+    return group.values.some(groupValue =>
+      this.matchedValues.some(matched =>
+        groupValue.toLowerCase().includes(matched.toLowerCase())
+      )
+    );
   }
 
   isValueMatched(value: string): boolean {
@@ -368,5 +372,8 @@ export class ExpandedRowComponent implements OnChanges {
       .sort((a, b) => a.label.localeCompare(b.label));
 
     return [...core, ...rest];
+  }
+  _console(value: string) {
+    console.log(value)
   }
 }
