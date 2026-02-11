@@ -61,11 +61,6 @@ class elastic_request_generator:
             if tag == "m_search_all" and allowed_keys:
                 fields = list(dict.fromkeys(fields + list(allowed_keys)))
 
-            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
-            print(fields, flush=True)
-            print(allowed_keys, flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::", flush=True)
-
         if not fields:
             return {"match_none": {}}
 
@@ -815,11 +810,6 @@ class elastic_request_generator:
             must_not_clause=must_not_clause,
             m_page_number=m_page_number,
             date_field="m_leak_date")
-
-        print(":::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(query_statement, flush=True)
-        print(ELASTIC_INDEX.S_LEAK_INDEX, flush=True)
-        print(":::::::::::::::::::::::::::::::::::::::", flush=True)
 
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 

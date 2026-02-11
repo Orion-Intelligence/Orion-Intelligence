@@ -175,6 +175,8 @@ class elastic_controller:
             conn = self.__conn_for_index(document)
             m_data = await conn.search(index=document, body=data_filter, request_timeout=220)
             print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+            print(document, flush=True)
+            print(data_filter, flush=True)
             print(m_data, flush=True)
             print(":::::::::::::::::::::::::::::::::::::::", flush=True)
             return True, m_data
