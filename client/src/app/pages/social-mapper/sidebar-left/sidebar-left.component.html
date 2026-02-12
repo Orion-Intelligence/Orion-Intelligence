@@ -5,14 +5,28 @@
         [class.gap-3]="!isCollapsed()"
         [class.justify-between]="!isCollapsed()" 
         [class.justify-center]="isCollapsed()">
-      <div class="hidden lg:flex items-center gap-3 overflow-hidden transition-all duration-300"
-           [class.flex-grow]="!isCollapsed()"
-           [class.w-0]="isCollapsed()"
-           [class.opacity-0]="isCollapsed()"
-           [class.pointer-events-none]="isCollapsed()">
-        <i class="bi bi-bullseye text-3xl text-indigo-400 flex-shrink-0"></i>
-        <h1 class="text-xl font-bold mb-0 text-slate-200 whitespace-nowrap">VisuScan</h1>
-      </div>
+      <a href="/" title="Orion Intelligence Home" class="hidden lg:flex items-center gap-3 overflow-hidden transition-all duration-300 group"
+        [class.flex-grow]="!isCollapsed()"
+        [class.w-0]="isCollapsed()"
+        [class.opacity-0]="isCollapsed()"
+        [class.pointer-events-none]="isCollapsed()">
+        <div class="w-8 h-8 flex-shrink-0">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer arcs -->
+            <path d="M 20 20 A 42.42 42.42 0 0 1 20 80" stroke="#3B82F6" stroke-width="7" fill="none" stroke-linecap="round" />
+            <path d="M 80 80 A 42.42 42.42 0 0 1 80 20" stroke="#3B82F6" stroke-width="7" fill="none" stroke-linecap="round" />
+            
+            <!-- Inner arcs -->
+            <path d="M 30 30 A 28.28 28.28 0 0 1 30 70" stroke="#60A5FA" stroke-width="7" fill="none" stroke-linecap="round" />
+            <path d="M 70 70 A 28.28 28.28 0 0 1 70 30" stroke="#60A5FA" stroke-width="7" fill="none" stroke-linecap="round" />
+            
+            <!-- Stylized N -->
+            <path d="M 40 75 L 40 25 L 50 50 Z" fill="#E2E8F0" />
+            <path d="M 60 25 L 60 75 L 50 50 Z" fill="#A5B4FC" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold mb-0 text-slate-200 whitespace-nowrap group-hover:text-white transition-colors">Orion Intelligence</h1>
+      </a>
       <button (click)="toggle.emit()" class="p-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
         <i class="bi bi-list text-2xl"></i>
       </button>

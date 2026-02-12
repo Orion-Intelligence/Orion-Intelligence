@@ -1,10 +1,11 @@
-import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, Inject, PLATFORM_ID, effect, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, PLATFORM_ID, effect, OnInit, inject } from '@angular/core';
 import { CommonModule, TitleCasePipe, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NetworkGraphComponent } from './network-graph/network-graph.component';
 import { MetadataPopupComponent } from './metadata-popup/metadata-popup.component';
 import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-summary-popup.component';
-import { NetworkData, Job, PlatformResult, CustomEntity, NetworkNode, TabState, ProfileDetails, SocialImage } from '../../shared/model/social/social-scan.models';
+// FIX: Add SocialPost and ScanEvent to imports for improved type safety.
+import { NetworkData, Job, PlatformResult, CustomEntity, NetworkNode, TabState, ProfileDetails, SocialImage, ScanEvent, SocialPost } from '../../shared/model/social/social-scan.models';
 import { SocialScanService } from './social-scan.service';
 import { TabManagerService } from '../../shared/services/tab-manager.service';
 import { ToolbarComponent } from './toolbar/toolbar.component';
@@ -17,11 +18,13 @@ import { takeUntil } from 'rxjs/operators';
 import { TabBarComponent } from './tab-bar/tab-bar.component';
 import { IconService } from '../../shared/services/icon.service';
 import { SocialIconComponent } from '../../shared/components/social-icon/social-icon.component';
+import { socialMapperAnimations } from '../../shared/animations/social-mapper.animations';
 
 @Component({
   selector: 'app-social-mapper',
   templateUrl: './social-mapper.component.html',
   styleUrls: ['./social-mapper.component.css'],
+  styles: [socialMapperAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -42,15 +45,20 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   private readonly twId = 'tw-social';
   private activeTabState = computed(() => this.tabManager.activeTab()?.state);
   private cancelScanSubjects = new Map<string, Subject<void>>();
+  private cancelProfileFetchSubjects = new Map<string, Subject<void>>();
+  private cancelPostFetchSubjects = new Map<string, Subject<void>>();
+  private cancelImageFetchSubjects = new Map<string, Subject<void>>();
 
   searchTerm = computed(() => this.activeTabState()?.searchTerm() ?? '');
   homeMenuSearchTerm = computed(() => this.activeTabState()?.homeMenuSearchTerm() ?? '');
   jobs = computed(() => this.activeTabState()?.jobs() ?? []);
   networkData = computed(() => this.activeTabState()?.networkData() ?? { nodes: [], edges: [] });
-  scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map());
+  // FIX: Provide explicit type for the Map to ensure correct type inference downstream, which resolves the error at line 405.
+  scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map<string, PlatformResult[]>());
   activeUsernames = computed(() => this.activeTabState()?.activeUsernames() ?? new Set<string>());
   customEntities = computed(() => this.activeTabState()?.customEntities() ?? []);
-  socialImages = computed(() => this.activeTabState()?.socialImages() ?? new Map());
+  // FIX: Provide explicit type for the Map to ensure correct type inference downstream.
+  socialImages = computed(() => this.activeTabState()?.socialImages() ?? new Map<string, SocialImage[]>());
   isEditMode = computed(() => this.activeTabState()?.isEditMode() ?? false);
   isHomeMenuCollapsed = computed(() => this.activeTabState()?.isHomeMenuCollapsed() ?? false);
   isEntityMenuCollapsed = computed(() => this.activeTabState()?.isEntityMenuCollapsed() ?? false);
@@ -67,6 +75,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   showAlreadyAddedNotification = signal(false);
   showAlreadyScannedNotification = signal(false);
   showAlreadyScanningNotification = signal(false);
+  showUserBusyNotification = signal(false);
   private notificationTimeout: any;
   nodeToFocus = signal<string | null>(null);
   contextMenu = signal({
@@ -97,13 +106,29 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   imageFetchingState = signal<{ [username: string]: boolean }>({});
   postFetchingState = signal<{ [platformNodeId: string]: boolean }>({});
 
-  filteredModalPlatforms = computed(() => {
+  modalPlatformsWithFilter = computed(() => {
     const platforms = this.modalResults().platforms;
     const term = this.modalSearchTerm().toLowerCase();
-    if (!term) {
-        return platforms;
-    }
-    return platforms.filter(p => p.platform.toLowerCase().includes(term));
+    return platforms.map(p => ({
+      ...p,
+      matches: !term || p.platform.toLowerCase().includes(term) || p.username.toLowerCase().includes(term)
+    }));
+  });
+
+  hasModalMatches = computed(() => {
+    return this.modalPlatformsWithFilter().some(p => p.matches);
+  });
+
+  areAllVisiblePlatformsSelected = computed(() => {
+      const visible = this.modalPlatformsWithFilter().filter(p => p.matches);
+      if (visible.length === 0) return false;
+      return visible.every(p => p.isSelected);
+  });
+
+  areAllVisiblePlatformsDeselected = computed(() => {
+      const visible = this.modalPlatformsWithFilter().filter(p => p.matches);
+      if (visible.length === 0) return true;
+      return visible.every(p => !p.isSelected);
   });
 
   contextMenuUsername = computed(() => {
@@ -113,7 +138,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
     return null;
   });
-  
+
   isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
 
   canEditConnections = computed(() => {
@@ -123,7 +148,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const connectableNodesCount = userNodeCount + customEntityOnGraphCount;
     return connectableNodesCount >= 2;
   });
-  
+
   isUserScanInProgress = computed(() => {
     const username = this.summaryPopupData()?.username;
     if (!username) {
@@ -132,7 +157,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
     return userJob?.status === 'in_progress';
   });
-  
+
   isMetadataUserScanInProgress = computed(() => {
     const username = this.selectedPlatformData()?.keyUsername;
     if (!username) return false;
@@ -207,6 +232,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.modalSearchTerm.set((event.target as HTMLInputElement).value);
   }
 
+  clearModalSearch() {
+    this.modalSearchTerm.set('');
+  }
+
   onPhysicsToggled() {
     this.updateState(state => state.isPhysicsEnabled.update(v => !v));
   }
@@ -240,7 +269,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   private initiateScan(username: string) {
     const normalizedUsername = username.toLowerCase();
 
-    const isInProgress = this.jobs().some(job => 
+    const isInProgress = this.jobs().some(job =>
         job.username.toLowerCase() === normalizedUsername && job.status === 'in_progress'
     );
     if (isInProgress) {
@@ -253,13 +282,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.updateState(state => {
       state.jobs.update(currentJobs => currentJobs.filter(j => j.username.toLowerCase() !== normalizedUsername));
     });
-    
+
     const newJob: Job = {
       id: self.crypto.randomUUID(),
       username: username,
       status: 'in_progress',
-      progress: 0,
-      step: 'Queued...'
+      progress: 5,
+      step: 'Starting'
     };
 
     this.updateState(state => {
@@ -272,7 +301,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.initiateScan(username);
     this.closeSummaryPopup();
   }
-  
+
   cancelScan(jobId: string) {
     const cancelSubject = this.cancelScanSubjects.get(jobId);
     if (cancelSubject) {
@@ -309,6 +338,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   confirmDeletion() {
     const usernameToDelete = this.deleteConfirmation().username;
     if (usernameToDelete) {
+      this.cancelAllFetchesForUser(usernameToDelete);
       this.removeUserScanData(usernameToDelete);
     }
     this.closeDeleteConfirmation();
@@ -356,7 +386,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
   }
 
-  private showNotification(type: 'added' | 'scanned' | 'scanning') {
+  private showNotification(type: 'added' | 'scanned' | 'scanning' | 'busy') {
     if (this.notificationTimeout) {
       clearTimeout(this.notificationTimeout);
     }
@@ -364,11 +394,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.showAlreadyAddedNotification.set(type === 'added');
     this.showAlreadyScannedNotification.set(type === 'scanned');
     this.showAlreadyScanningNotification.set(type === 'scanning');
+    this.showUserBusyNotification.set(type === 'busy');
 
     this.notificationTimeout = setTimeout(() => {
       this.showAlreadyAddedNotification.set(false);
       this.showAlreadyScannedNotification.set(false);
       this.showAlreadyScanningNotification.set(false);
+      this.showUserBusyNotification.set(false);
     }, 3000);
   }
 
@@ -382,7 +414,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: (event: any) => {
+        // FIX: Replaced `any` with the specific `ScanEvent` type for better type safety.
+        next: (event: ScanEvent) => {
           if (event.type === 'progress') {
             const progressUpdate = event.payload;
             this.updateState(state => state.jobs.update(jobs => jobs.map(j =>
@@ -436,12 +469,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (!nodeId.startsWith('user-')) return;
     const username = nodeId.replace('user-', '');
     const allUserPlatforms = this.scanResults().get(username);
-    
-    if (allUserPlatforms) {
+
+    // FIX: Add an Array.isArray check to ensure allUserPlatforms is an array before calling array methods on it.
+    if (Array.isArray(allUserPlatforms)) {
       const platformNodesOnGraph = this.networkData().nodes
           .filter(node => node.id.toString().startsWith(`${username}-`))
           .map(node => node.label);
-      
+
       const platformsOnGraphSet = new Set(platformNodesOnGraph);
 
       const platformsToShow = allUserPlatforms.filter((p: PlatformResult) => platformsOnGraphSet.has(p.platform));
@@ -488,7 +522,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
     const [username, platformName] = nodeId.split('-');
     const userResults = this.scanResults().get(username);
-    if (!userResults) return;
+    if (!Array.isArray(userResults)) return;
 
     const platformData = userResults.find((p: PlatformResult) => p.platform === platformName);
     if (platformData) {
@@ -510,10 +544,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   async updateGraphFromModal() {
     const { username, platforms } = this.modalResults();
     this.closeModal();
-  
+
     const selectedPlatforms = platforms.filter(p => p.isSelected);
     const centralNodeId = `user-${username}`;
-  
+
     if (selectedPlatforms.length === 0) {
       this.updateState(state => {
         state.networkData.update(currentData => ({
@@ -528,34 +562,39 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       });
       return;
     }
-  
+
     const currentNetworkData = this.networkData();
     const existingPlatformNames = new Set(
       currentNetworkData.nodes
         .filter(n => n.id.toString().startsWith(`${username}-`))
         .map(n => n.label)
     );
-  
+
     const platformsToAdd = selectedPlatforms.filter(p => !existingPlatformNames.has(p.platform));
-    
+
     const iconUrlMap = new Map<string, string>();
     if (platformsToAdd.length > 0) {
-      const iconUrlPromises = platformsToAdd.map(p => this.iconService.getWhiteIconDataUrl(p.platform));
+      const iconUrlPromises = platformsToAdd.map(p => this.iconService.getWhiteIconDataUrl(p.platform, { type: 'graph' }));
       const iconUrls = await Promise.all(iconUrlPromises);
       platformsToAdd.forEach((p, i) => iconUrlMap.set(p.platform, iconUrls[i]));
     }
-  
+
     this.updateState(state => {
       state.networkData.update(currentData => {
         let newNodes = [...currentData.nodes];
         let newEdges = [...currentData.edges];
-  
+
         if (!currentData.nodes.some(n => n.id === centralNodeId)) {
           newNodes.push({
             id: centralNodeId,
             label: username,
-            shape: 'circularImage',
-            image: `https://i.pravatar.cc/150?u=${username}`,
+            shape: 'icon',
+            icon: {
+              face: 'bootstrap-icons',
+              code: '\uf4d7',
+              size: 60,
+              color: '#a5b4fc'
+            },
             size: 40,
             font: { color: '#ffffff' },
             color: {
@@ -569,15 +608,15 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           });
           state.activeUsernames.update(currentSet => new Set(currentSet).add(username));
         }
-  
+
         const selectedPlatformNames = new Set(selectedPlatforms.map(p => p.platform));
-        const platformsToRemove = currentData.nodes.filter(n => 
+        const platformsToRemove = currentData.nodes.filter(n =>
           n.id.toString().startsWith(`${username}-`) && !selectedPlatformNames.has(n.label)
         );
         const nodeIdsToRemove = new Set(platformsToRemove.map(node => node.id));
         newNodes = newNodes.filter(node => !nodeIdsToRemove.has(node.id));
         newEdges = newEdges.filter(edge => !nodeIdsToRemove.has(edge.to));
-  
+
         platformsToAdd.forEach(platform => {
           const platformNodeId = `${username}-${platform.platform}`;
           newNodes.push({
@@ -597,7 +636,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           });
           newEdges.push({ from: centralNodeId, to: platformNodeId });
         });
-  
+
         return { nodes: newNodes, edges: newEdges };
       });
     });
@@ -608,6 +647,28 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       const updatedPlatforms = current.platforms.map(p =>
         p.platform === platformName ? { ...p, isSelected: !p.isSelected } : p
       );
+      return { ...current, platforms: updatedPlatforms };
+    });
+  }
+
+  selectAllVisiblePlatforms() {
+    this.modalResults.update(current => {
+      const term = this.modalSearchTerm().toLowerCase();
+      const updatedPlatforms = current.platforms.map(p => {
+        const isVisible = !term || p.platform.toLowerCase().includes(term) || p.username.toLowerCase().includes(term);
+        return isVisible ? { ...p, isSelected: true } : p;
+      });
+      return { ...current, platforms: updatedPlatforms };
+    });
+  }
+
+  deselectAllVisiblePlatforms() {
+    this.modalResults.update(current => {
+      const term = this.modalSearchTerm().toLowerCase();
+      const updatedPlatforms = current.platforms.map(p => {
+        const isVisible = !term || p.platform.toLowerCase().includes(term) || p.username.toLowerCase().includes(term);
+        return isVisible ? { ...p, isSelected: false } : p;
+      });
       return { ...current, platforms: updatedPlatforms };
     });
   }
@@ -860,16 +921,80 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
   }
 
-  fetchProfileDetails(platformResult: PlatformResult) {
-    const platformNodeId = `${platformResult.keyUsername}-${platformResult.platform}`;
-    if (this.profileFetchingState()[platformNodeId]) {
-      return; // Already fetching
+  private isUserBusy(username: string): boolean {
+    const profileState = this.profileFetchingState();
+    const postState = this.postFetchingState();
+    const imageState = this.imageFetchingState();
+
+    if (imageState[username]) {
+      return true;
     }
 
+    const userPrefix = `${username}-`;
+    const isFetchingProfile = Object.keys(profileState).some(key => key.startsWith(userPrefix) && profileState[key]);
+    if (isFetchingProfile) {
+      return true;
+    }
+
+    const isFetchingPosts = Object.keys(postState).some(key => key.startsWith(userPrefix) && postState[key]);
+    if (isFetchingPosts) {
+      return true;
+    }
+
+    return false;
+  }
+
+  cancelAllFetchesForUser(username: string) {
+    this.cancelFetchImages(username);
+    const userPlatforms = this.scanResults().get(username);
+    if (userPlatforms) {
+        for (const platform of userPlatforms) {
+            this.cancelFetchProfileDetails(platform);
+            this.handleCancelFetchSocialPosts(platform);
+        }
+    }
+  }
+
+  private cleanupCancelSubject(map: Map<string, Subject<void>>, key: string) {
+    const subject = map.get(key);
+    if (subject) {
+      subject.next();
+      subject.complete();
+      map.delete(key);
+    }
+  }
+  
+  cancelFetchProfileDetails(platformResult: PlatformResult) {
+    const platformNodeId = `${platformResult.keyUsername}-${platformResult.platform}`;
+    this.cleanupCancelSubject(this.cancelProfileFetchSubjects, platformNodeId);
+    this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+  }
+
+  handleCancelFetchSocialPosts(platformResult: PlatformResult) {
+    const platformNodeId = `${platformResult.keyUsername}-${platformResult.platform}`;
+    this.cleanupCancelSubject(this.cancelPostFetchSubjects, platformNodeId);
+    this.postFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+  }
+
+  cancelFetchImages(username: string) {
+    this.cleanupCancelSubject(this.cancelImageFetchSubjects, username);
+    this.imageFetchingState.update(s => ({ ...s, [username]: false }));
+  }
+
+  fetchProfileDetails(platformResult: PlatformResult) {
+    const platformNodeId = `${platformResult.keyUsername}-${platformResult.platform}`;
+    if (this.isUserBusy(platformResult.keyUsername)) {
+      this.showNotification('busy');
+      return;
+    }
+    if (this.cancelProfileFetchSubjects.has(platformNodeId)) return;
+
     this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: true }));
-    
+    const cancel$ = new Subject<void>();
+    this.cancelProfileFetchSubjects.set(platformNodeId, cancel$);
+
     this.scanService.fetchProfileInfo(platformResult.platform, platformResult.username)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response: { profile: ProfileDetails }) => {
           const profileData = response.profile;
@@ -880,8 +1005,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
             state.scanResults.update(currentMap => {
               const newMap = new Map(currentMap);
               const userResults = newMap.get(platformResult.keyUsername);
-              if (userResults) {
-                const updatedResults = userResults.map(p => 
+              if (Array.isArray(userResults)) {
+                const updatedResults = userResults.map(p =>
                   p.platform === platformResult.platform ? { ...p, profileDetails: newProfileDetails } : p
                 );
                 newMap.set(platformResult.keyUsername, updatedResults);
@@ -897,31 +1022,40 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           if (this.summaryPopupData()?.username === platformResult.keyUsername) {
             this.summaryPopupData.update(current => {
               if (!current) return null;
-              const updatedPlatforms = current.platforms.map(p => 
+              const updatedPlatforms = current.platforms.map(p =>
                 p.platform === platformResult.platform ? { ...p, profileDetails: newProfileDetails } : p
               );
               return { ...current, platforms: updatedPlatforms };
             });
           }
-
-          this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
         },
         error: (err) => {
           console.error('Failed to fetch profile info:', err);
           this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+          this.cleanupCancelSubject(this.cancelProfileFetchSubjects, platformNodeId);
+        },
+        complete: () => {
+          this.profileFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+          this.cleanupCancelSubject(this.cancelProfileFetchSubjects, platformNodeId);
         }
       });
   }
 
   handleFetchImagesForUser(username: string) {
-    if (this.imageFetchingState()[username]) return;
+    if (this.isUserBusy(username)) {
+      this.showNotification('busy');
+      return;
+    }
+    if (this.cancelImageFetchSubjects.has(username)) return;
 
     this.imageFetchingState.update(s => ({ ...s, [username]: true }));
+    const cancel$ = new Subject<void>();
+    this.cancelImageFetchSubjects.set(username, cancel$);
 
     this.scanService.fetchSocialImages(username)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
+        next: (response: { images: SocialImage[] }) => {
           const fetchedImages = response.images;
           this.updateState(state => {
             state.socialImages.update(currentMap => {
@@ -930,32 +1064,39 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
               return newMap;
             });
           });
-          
+
           if (this.summaryPopupData()?.username === username) {
             this.summaryPopupData.update(current => current ? { ...current, images: fetchedImages } : null);
           }
-
-          this.imageFetchingState.update(s => ({ ...s, [username]: false }));
         },
         error: (err) => {
           console.error('Failed to fetch social images:', err);
           this.imageFetchingState.update(s => ({ ...s, [username]: false }));
+          this.cleanupCancelSubject(this.cancelImageFetchSubjects, username);
+        },
+        complete: () => {
+          this.imageFetchingState.update(s => ({ ...s, [username]: false }));
+          this.cleanupCancelSubject(this.cancelImageFetchSubjects, username);
         }
       });
   }
 
   handleFetchSocialPosts(platformResult: PlatformResult) {
     const platformNodeId = `${platformResult.keyUsername}-${platformResult.platform}`;
-    if (this.postFetchingState()[platformNodeId]) {
-      return; // Already fetching
+     if (this.isUserBusy(platformResult.keyUsername)) {
+      this.showNotification('busy');
+      return;
     }
+    if (this.cancelPostFetchSubjects.has(platformNodeId)) return;
 
     this.postFetchingState.update(s => ({ ...s, [platformNodeId]: true }));
+    const cancel$ = new Subject<void>();
+    this.cancelPostFetchSubjects.set(platformNodeId, cancel$);
 
     this.scanService.fetchSocialPosts(platformResult.platform, platformResult.username)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
+        next: (response: { posts: SocialPost[] }) => {
           const fetchedPosts = response.posts;
           const hasPosts = fetchedPosts && fetchedPosts.length > 0;
           const newPosts = hasPosts ? fetchedPosts : null;
@@ -964,7 +1105,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
             state.scanResults.update(currentMap => {
               const newMap = new Map(currentMap);
               const userResults = newMap.get(platformResult.keyUsername);
-              if (userResults) {
+              if (Array.isArray(userResults)) {
                 const updatedResults = userResults.map(p =>
                   p.platform === platformResult.platform ? { ...p, posts: newPosts } : p
                 );
@@ -987,12 +1128,15 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
               return { ...current, platforms: updatedPlatforms };
             });
           }
-
-          this.postFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
         },
         error: (err) => {
           console.error('Failed to fetch social posts:', err);
           this.postFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+          this.cleanupCancelSubject(this.cancelPostFetchSubjects, platformNodeId);
+        },
+        complete: () => {
+          this.postFetchingState.update(s => ({ ...s, [platformNodeId]: false }));
+          this.cleanupCancelSubject(this.cancelPostFetchSubjects, platformNodeId);
         }
       });
   }

@@ -20,6 +20,8 @@ export class HomeMenuComponent {
   viewMode = input.required<'graph' | 'list'>();
   isSmallScreen = input.required<boolean>();
   profileFetchingState = input.required<{ [platformNodeId: string]: boolean }>();
+  postFetchingState = input.required<{ [platformNodeId: string]: boolean }>();
+  imageFetchingState = input.required<{ [username: string]: boolean }>();
 
   toggle = output<void>();
   tabSelected = output<'history' | 'entities'>();
@@ -30,11 +32,18 @@ export class HomeMenuComponent {
   deleteUser = output<string>();
   cancelScan = output<string>();
   manageProfiles = output<string>();
+  cancelAllFetches = output<string>();
 
-  filteredJobs = computed(() => {
+  jobsWithFilter = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    if (!term) return this.jobs();
-    return this.jobs().filter(job => job.username.toLowerCase().includes(term));
+    return this.jobs().map(job => ({
+      ...job,
+      matches: !term || job.username.toLowerCase().includes(term)
+    }));
+  });
+
+  hasJobMatches = computed(() => {
+    return this.jobsWithFilter().some(j => j.matches);
   });
 
   filteredEntities = computed(() => {
@@ -51,10 +60,9 @@ export class HomeMenuComponent {
   }
 
   getJobClasses(job: Job): string {
-    const baseClasses = 'p-3 rounded-lg relative border bg-slate-800/50 transition-colors';
+    const baseClasses = 'p-3 rounded-lg relative border bg-slate-800/50 transition-all duration-200';
     if (job.status === 'completed') {
-      const isActive = this.activeUsernames().has(job.username);
-       return `${baseClasses} border-slate-700 ${!isActive ? 'cursor-pointer hover:border-indigo-500' : ''}`;
+      return `${baseClasses} border-slate-700 cursor-pointer hover:border-indigo-500 hover:bg-slate-800`;
     }
     if (job.status === 'in_progress') return `${baseClasses} border-indigo-500/50`;
     if (job.status === 'failed') return `${baseClasses} border-red-500/50`;
@@ -62,9 +70,9 @@ export class HomeMenuComponent {
   }
   
   getEntityClasses(entity: CustomEntity): string {
-    const baseClasses = 'p-3 rounded-lg relative border bg-slate-800/50 transition-colors';
+    const baseClasses = 'p-3 rounded-lg relative border bg-slate-800/50 transition-all duration-200';
     const canInteract = !entity.onGraph && entity.status === 'added';
-    return `${baseClasses} border-slate-700 ${canInteract ? 'cursor-pointer hover:border-green-500' : ''}`;
+    return `${baseClasses} border-slate-700 ${canInteract ? 'cursor-pointer hover:border-green-500 hover:bg-slate-800' : ''}`;
   }
 
   getIconForEntityType(type: CustomEntity['type']): string {
@@ -79,9 +87,26 @@ export class HomeMenuComponent {
     return job.id;
   }
 
-  isProfileFetching(username: string): boolean {
-    const state = this.profileFetchingState();
+  isUserBusy(username: string): boolean {
+    const profileState = this.profileFetchingState();
+    const postState = this.postFetchingState();
+    const imageState = this.imageFetchingState();
+
+    if (imageState[username]) {
+        return true;
+    }
+
     const userPrefix = `${username}-`;
-    return Object.keys(state).some(key => key.startsWith(userPrefix) && state[key]);
+    const isFetchingProfile = Object.keys(profileState).some(key => key.startsWith(userPrefix) && profileState[key]);
+    if (isFetchingProfile) {
+        return true;
+    }
+    
+    const isFetchingPosts = Object.keys(postState).some(key => key.startsWith(userPrefix) && postState[key]);
+    if (isFetchingPosts) {
+        return true;
+    }
+    
+    return false;
   }
 }

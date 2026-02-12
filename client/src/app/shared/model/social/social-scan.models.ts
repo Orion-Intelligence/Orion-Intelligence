@@ -5,6 +5,13 @@ export interface NetworkNode {
   label: string;
   shape: string;
   image?: string;
+  // FIX: Add optional 'icon' property to support icon shapes in vis-network.
+  icon?: {
+    face: string;
+    code: string;
+    size: number;
+    color: string;
+  };
   size: number;
   font: { color: string; size?: number };
   color: { border: string; background:string; highlight?: { border: string; background: string }, hover?: { border: string; background: string } };

@@ -34,18 +34,20 @@
           <i class="bi bi-list-ul"></i> List
         </button>
      </div>
-     <ng-container *ngIf="viewMode() === 'graph'">
+     @if (viewMode() === 'graph') {
        <button (click)="physicsToggled.emit()"
                [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')"
                [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
            <i [class]="'bi ' + (isPhysicsEnabled() ? 'bi-pause-fill' : 'bi-play-fill')"></i>
            <span>Physics</span>
        </button>
-       <button *ngIf="canEditConnections()" (click)="editModeToggled.emit()"
-               [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')">
-           <i [class]="'bi ' + (isEditMode() ? 'bi-check-circle-fill' : 'bi-pencil-fill')"></i>
-           <span>{{ isEditMode() ? 'Done Editing' : 'Edit Connections' }}</span>
-       </button>
-     </ng-container>
+       @if (canEditConnections()) {
+         <button (click)="editModeToggled.emit()"
+                 [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')">
+             <i [class]="'bi ' + (isEditMode() ? 'bi-check-circle-fill' : 'bi-pencil-fill')"></i>
+             <span>{{ isEditMode() ? 'Done Editing' : 'Edit Connections' }}</span>
+         </button>
+       }
+     }
    </div>
  </div>

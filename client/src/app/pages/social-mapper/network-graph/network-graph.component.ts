@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, viewChild, ElementRef, effect, signal, OnDestroy, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, viewChild, ElementRef, effect, signal, OnDestroy, output, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Network, Options } from 'vis-network';
 import { NetworkData } from '../../../shared/model/social/social-scan.models';
@@ -14,12 +14,17 @@ import { NetworkData } from '../../../shared/model/social/social-scan.models';
     '[class.manipulation-active]': 'isManipulating()',
   }
 })
-export class NetworkGraphComponent implements OnDestroy {
+export class NetworkGraphComponent implements OnInit, OnDestroy {
   data = input.required<NetworkData>();
   focusNodeId = input<string | null>(null);
   editMode = input(false);
   physicsEnabled = input(false);
+  profileFetchingState = input<{ [platformNodeId: string]: boolean }>({});
+  postFetchingState = input<{ [platformNodeId: string]: boolean }>({});
+  imageFetchingState = input<{ [username: string]: boolean }>({});
+
   container = viewChild.required<ElementRef>('networkContainer');
+
   nodeClicked = output<string>();
   platformNodeClicked = output<string>();
   nodeRightClicked = output<{ nodeId: string; event: MouseEvent }>();
@@ -37,6 +42,46 @@ export class NetworkGraphComponent implements OnDestroy {
   });
   private hideButtonTimeout: any;
   isManipulating = signal(false);
+  
+  private animationFrameId: number | null = null;
+  private animationAngle = 0;
+
+  loadingNodeIds = computed(() => {
+    const loadingIds = new Set<string>();
+    const profileState = this.profileFetchingState();
+    const postState = this.postFetchingState();
+    const imageState = this.imageFetchingState();
+
+    if (profileState) {
+      for (const key in profileState) {
+        if (profileState[key]) {
+            loadingIds.add(key);
+            const username = key.split('-')[0];
+            loadingIds.add(`user-${username}`);
+        }
+      }
+    }
+
+    if (postState) {
+      for (const key in postState) {
+        if (postState[key]) {
+            loadingIds.add(key);
+            const username = key.split('-')[0];
+            loadingIds.add(`user-${username}`);
+        }
+      }
+    }
+
+    if (imageState) {
+      for (const key in imageState) {
+        if (imageState[key]) {
+            loadingIds.add(`user-${key}`);
+        }
+      }
+    }
+
+    return loadingIds;
+  });
 
   constructor() {
     effect(() => {
@@ -90,6 +135,26 @@ export class NetworkGraphComponent implements OnDestroy {
         network.setOptions({ physics: { enabled: enabled } });
       }
     });
+  }
+  
+  ngOnInit(): void {
+    this.startAnimationLoop();
+  }
+
+  private startAnimationLoop(): void {
+    const animate = () => {
+      this.animationAngle = (this.animationAngle + 0.07) % (2 * Math.PI);
+      
+      const network = this.networkInstance();
+      const loadingIds = this.loadingNodeIds();
+
+      if (network && loadingIds.size > 0) {
+        network.redraw();
+      }
+
+      this.animationFrameId = requestAnimationFrame(animate);
+    };
+    this.animationFrameId = requestAnimationFrame(animate);
   }
 
   private createNetwork(containerEl: HTMLElement, networkData: NetworkData) {
@@ -183,6 +248,29 @@ export class NetworkGraphComponent implements OnDestroy {
 
     const network = new Network(containerEl, networkData, options);
     
+    network.on('afterDrawing', (ctx) => {
+      const loadingIds = this.loadingNodeIds();
+      if (loadingIds.size === 0) return;
+    
+      const positions = network.getPositions([...loadingIds]);
+      
+      ctx.strokeStyle = '#818cf8';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+
+      for (const nodeId of loadingIds) {
+          const pos = positions[nodeId];
+          if (pos) {
+              const boundingBox = network.getBoundingBox(nodeId);
+              const radius = (boundingBox.right - boundingBox.left) / 2 + 2;
+              
+              ctx.beginPath();
+              ctx.arc(pos.x, pos.y, radius, this.animationAngle, this.animationAngle + (Math.PI * 1.5));
+              ctx.stroke();
+          }
+      }
+    });
+
     network.on('click', (properties) => {
       if (this.editMode()) {
         return;
@@ -261,6 +349,9 @@ export class NetworkGraphComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyNetwork();
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
   }
 
   private destroyNetwork(): void {

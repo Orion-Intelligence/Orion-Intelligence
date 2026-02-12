@@ -1,22 +1,22 @@
 export const socialMapperAnimations = `
-  @keyframes scaleInDropdown {
+  @keyframes slideDown {
     from {
       opacity: 0;
-      transform: scale(0.95);
+      transform: translateY(-10px);
     }
     to {
       opacity: 1;
-      transform: scale(1);
+      transform: translateY(0);
     }
   }
 
   .animate-dropdown {
-      animation: scaleInDropdown 0.1s ease-out forwards;
+      animation: slideDown 0.1s ease-out forwards;
       transform-origin: top left;
   }
 
   .animate-dropdown-right {
-      animation: scaleInDropdown 0.1s ease-out forwards;
+      animation: slideDown 0.1s ease-out forwards;
       transform-origin: top right;
   }
 
@@ -30,26 +30,41 @@ export const socialMapperAnimations = `
   }
 
   .animate-fade-in {
-      animation: fadeIn 0.3s ease-in-out;
+      animation: fadeIn 0.4s ease-in-out;
   }
 
-  @keyframes fadeInScale {
+  @keyframes slideInUp {
     from {
         opacity: 0;
-        transform: scale(0.95);
+        transform: translateY(1rem) scale(0.98);
     }
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0) scale(1);
     }
   }
 
   .animate-fade-in-scale {
-      animation: fadeInScale 0.15s ease-out forwards;
+      animation: slideInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
   .animate-context-menu-in {
-    animation: fadeInScale 0.1s ease-out forwards;
+    animation: slideDown 0.1s ease-out forwards;
     transform-origin: top left;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.4s ease-out backwards;
   }
 `;

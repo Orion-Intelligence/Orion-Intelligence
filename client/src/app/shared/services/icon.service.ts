@@ -59,14 +59,18 @@ const iconMap: { [key: string]: string } = {
   'wordpress': 'wordpress',
 };
 
+export interface IconOptions {
+  type?: 'default' | 'graph';
+}
 
 @Injectable({ providedIn: 'root' })
 export class IconService {
     private iconCache = new Map<string, string>();
 
-    async getWhiteIconDataUrl(platformName: string): Promise<string> {
-        if (this.iconCache.has(platformName)) {
-            return this.iconCache.get(platformName)!;
+    async getWhiteIconDataUrl(platformName: string, options: IconOptions = { type: 'default' }): Promise<string> {
+        const cacheKey = `${platformName}-${options.type}`;
+        if (this.iconCache.has(cacheKey)) {
+            return this.iconCache.get(cacheKey)!;
         }
 
         const lowerCasePlatform = platformName.toLowerCase();
@@ -89,17 +93,23 @@ export class IconService {
             // Lighter color (slate-200) for a softer look
             const fillColor = '#e2e8f0'; 
             
+            const padding = options.type === 'graph' ? 4 : 3;
+            const viewBoxSize = 24 + (2 * padding);
+
             // Wrap in a new SVG with padding via viewBox and apply the fill color
-            const newSvgText = `<svg viewBox="-3 -3 30 30" xmlns="http://www.w3.org/2000/svg" fill="${fillColor}">${innerContent}</svg>`;
+            const newSvgText = `<svg viewBox="-${padding} -${padding} ${viewBoxSize} ${viewBoxSize}" xmlns="http://www.w3.org/2000/svg" fill="${fillColor}">${innerContent}</svg>`;
 
             const dataUrl = `data:image/svg+xml;base64,${btoa(newSvgText)}`;
-            this.iconCache.set(platformName, dataUrl);
+            this.iconCache.set(cacheKey, dataUrl);
             return dataUrl;
         } catch (error) {
             console.warn(`Could not load icon for ${platformName} (slug: ${slug}):`, error);
-            const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v2h-2zm0 4h2v6h-2z"/></svg>`;
+            const firstLetter = platformName.charAt(0).toUpperCase();
+            const fillColor = '#e2e8f0'; // Use same color as successful icons
+            const fontSize = options.type === 'graph' ? 18 : 20;
+            const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="${fillColor}">${firstLetter}</text></svg>`;
             const fallbackDataUrl = `data:image/svg+xml;base64,${btoa(fallbackSvg)}`;
-            this.iconCache.set(platformName, fallbackDataUrl);
+            this.iconCache.set(cacheKey, fallbackDataUrl);
             return fallbackDataUrl;
         }
     }

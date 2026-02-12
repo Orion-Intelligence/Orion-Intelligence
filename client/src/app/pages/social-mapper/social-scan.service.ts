@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PlatformResult, ScanEvent, CustomEntity, ProfileDetails, SocialImage, SocialPost } from '../../shared/model/social/social-scan.models';
 import { Observable, timer, throwError } from 'rxjs';
-import { switchMap, map, filter, take, catchError, tap } from 'rxjs';
+import { switchMap, map, filter, take, catchError, tap, retry } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 
 type ApiEnvelope<T> = {
@@ -159,9 +159,9 @@ export class SocialScanService {
         PlatformResult[]
       >({
         request: () => this.api.post<any>('social/recon', { query: username }),
-        isReady: (res) => !!(res as any)?.result,
+        isReady: (res) => res && 'result' in (res as any),
         mapResult: (res) =>
-          (res as any).result.reduce((acc: PlatformResult[], item: any) => {
+          ((res as any).result || []).reduce((acc: PlatformResult[], item: any) => {
             let platform = item.metadata.platform;
 
             // Heuristic to correct platform name when API returns username as platform
@@ -239,7 +239,11 @@ export class SocialScanService {
       });
     }
 
-    return this.api.post<{ profile: ProfileDetails }>('social/profile', { platform, username });
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<{ profile: ProfileDetails }>>('social/profile', { platform, username }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ profile: res.result?.profile ?? {} as ProfileDetails }),
+    }).pipe(retry(3));
   }
 
   fetchSocialImages(username: string): Observable<{ images: SocialImage[] }> {
@@ -252,9 +256,11 @@ export class SocialScanService {
       });
     }
 
-    return this.api.post<ApiEnvelope<{ images: SocialImage[] } & any>>('social/duckduckgo/images', { username }).pipe(
-      map(response => ({ images: response.result?.images ?? [] }))
-    );
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<{ images: SocialImage[] }>>('social/duckduckgo/images', { username }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ images: res.result?.images ?? [] }),
+    }).pipe(retry(3));
   }
 
   fetchSocialPosts(platform: string, username: string): Observable<{ posts: SocialPost[] }> {
@@ -267,9 +273,11 @@ export class SocialScanService {
       });
     }
 
-    return this.api.post<ApiEnvelope<SocialPost[]>>('social/posts', { platform, username }).pipe(
-      map(response => ({ posts: response.result ?? [] }))
-    );
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[]>>('social/posts', { platform, username }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ posts: res.result ?? [] }),
+    }).pipe(retry(3));
   }
 
   addEntity(entity: { type: 'wallet' | 'email' | 'domain'; value: string; label: string }): Observable<CustomEntity> {

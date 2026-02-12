@@ -1,221 +1,508 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in" (click)="onClose()">
-  <div class="flex flex-col bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-lg animate-fade-in-scale overflow-hidden" (click)="$event.stopPropagation()">
-    
-    <div class="p-4 flex items-center gap-4 border-b border-slate-700 bg-slate-900/50 flex-shrink-0 relative">
-      <button (click)="onClose()" type="button" class="absolute top-3 right-3 p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors z-10">
-          <i class="bi bi-x-lg w-5 h-5"></i>
-      </button>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md animate-fade-in p-[30px]" (click)="onClose()">
+  <div class="flex flex-col bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-5xl max-h-[90vh] min-h-[70vh] animate-fade-in-scale overflow-hidden" (click)="closeActionsMenu(); $event.stopPropagation()">
 
-      <img [src]="'https://i.pravatar.cc/150?u=' + username()" class="avatar-img rounded-full ring-2 ring-slate-600 flex-shrink-0"/>
-      
-      <div class="min-w-0">
-          <h3 class="text-xl font-bold text-slate-100 truncate">{{ username() }}</h3>
-          <p *ngIf="email()" class="text-sm text-indigo-400 font-mono truncate mb-1">{{ email() }}</p>
-          <span class="inline-block bg-slate-700 text-slate-300 text-xs font-medium px-2 py-0.5 rounded-full">
-              {{ platforms().length }} platforms found
-          </span>
+    <!-- HEADER -->
+    <div class="p-3 flex items-center justify-between gap-3 border-b border-slate-700 bg-slate-900 flex-shrink-0 rounded-t-lg">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="h-12 w-12 rounded-full ring-2 ring-slate-600 flex-shrink-0 flex items-center justify-center bg-slate-700">
+          <i class="bi bi-person-fill text-3xl text-slate-400"></i>
+        </div>
+        <div class="min-w-0">
+            <h3 class="text-xl font-bold text-slate-100 truncate">{{ username() }}</h3>
+            @if (email()) {
+              <p class="text-sm text-indigo-400 font-mono truncate">{{ email() }}</p>
+            }
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+            (click)="handleRescan()"
+            [disabled]="isScanInProgress()"
+            title="Re-scan profile"
+            class="h-8 w-8 flex items-center justify-center rounded-md text-slate-300 bg-slate-700/50 hover:bg-slate-700 hover:text-white transition-colors group disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="bi bi-arrow-clockwise text-lg" [class.animate-spin]="isScanInProgress()"></i>
+        </button>
+        <button
+            (click)="handleFetchAllData()"
+            [disabled]="isAnythingFetching()"
+            [title]="hasAllDataBeenFetchedOnce() ? 'Refresh All Data' : 'Fetch All Data'"
+            class="h-8 w-8 flex items-center justify-center rounded-md text-slate-300 bg-slate-700/50 hover:bg-slate-700 hover:text-white transition-colors group disabled:opacity-50 disabled:cursor-wait">
+            <i class="bi bi-cloud-download text-lg"></i>
+        </button>
+        <button (click)="onClose()" type="button" class="h-8 w-8 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
+          <i class="bi bi-x-lg text-lg"></i>
+        </button>
       </div>
     </div>
 
-    <div class="p-3 overflow-auto popup-content">
-      <div class="flex flex-col gap-2">
-        <div *ngFor="let platform of platforms()" class="rounded-lg overflow-hidden bg-slate-700/50 transition-colors duration-300"
-              [class.bg-slate-700]="expandedPlatformName() === platform.platform">
-          <div (click)="onPlatformClick(platform)" class="group flex items-center p-3 transition-colors cursor-pointer">
-            <div class="platform-icon flex-shrink-0 rounded-full mr-4 flex items-center justify-center text-lg font-bold text-white h-10 w-10 p-2" 
-                 [style.background-color]="getPlatformColor(platform.platform)">
-              <app-social-icon [platformName]="platform.platform"></app-social-icon>
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow flex min-h-0">
+      <!-- Left Sidebar: Platform List -->
+      <div class="w-1/3 max-w-xs flex flex-col border-r border-slate-700 bg-slate-800/50">
+        <div class="p-3 border-b border-slate-700 flex-shrink-0">
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <i class="bi bi-search text-slate-400"></i>
             </div>
-            <div class="flex-grow min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-slate-200 truncate">{{ platform.platform }}</span>
-                <span class="px-2 py-0.5 text-xs bg-slate-600 text-slate-300 rounded-full truncate">{{ platform.username }}</span>
-              </div>
-              <p class="text-sm text-slate-400 truncate mb-0">{{ platform.description }}</p>
-            </div>
-            <div *ngIf="platform.followers !== undefined" class="text-right flex-shrink-0 ml-4">
-              <div class="font-bold text-lg text-indigo-400">{{ formatFollowers(platform.followers) }}</div>
-              <div class="text-xs text-slate-500">Followers</div>
-            </div>
-            <div class="flex items-center ml-4 flex-shrink-0">
-                <a [href]="platform.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="p-1 rounded-full hover:bg-slate-600 text-slate-500 group-hover:text-slate-300 transition-colors" title="Visit profile">
-                  <i class="bi bi-box-arrow-up-right w-4 h-4"></i>
-                </a>
-                <ng-container *ngIf="fetchingState()[username() + '-' + platform.platform]; else chevronDown">
-                  <div class="ml-2 w-6 h-6 flex items-center justify-center">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-                  </div>
-                </ng-container>
-                <ng-template #chevronDown>
-                  <i class="bi bi-chevron-down text-slate-400 ml-2 transition-transform duration-300" [class.rotate-180]="expandedPlatformName() === platform.platform"></i>
-                </ng-template>
-            </div>
+            <input type="text"
+                   placeholder="Filter platforms..."
+                   [value]="platformSearchTerm()"
+                   (input)="onSearchTermChange($event)"
+                   class="block w-full rounded-md border-0 bg-slate-900/50 py-2 pl-10 pr-10 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            @if (platformSearchTerm()) {
+              <button (click)="clearSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors">
+                  <i class="bi bi-x-circle-fill"></i>
+              </button>
+            }
           </div>
-          <div class="transition-[max-height] duration-500 ease-in-out overflow-hidden" 
-              [class.max-h-[60rem]]="expandedPlatformName() === platform.platform"
-              [class.max-h-0]="expandedPlatformName() !== platform.platform">
-            <div class="border-t border-slate-600/50">
-              <div *ngIf="expandedPlatformName() === platform.platform">
-                <div class="p-4">
-                  <p *ngIf="platform.description" class="text-slate-300 text-sm mb-4 whitespace-pre-wrap">{{ platform.description }}</p>
-                  <div class="flex items-center gap-6 text-slate-400 text-sm mb-4">
-                    <div *ngIf="platform.joiningDate" class="flex items-center gap-1.5">
-                      <i class="bi bi-calendar3 w-4 h-4"></i>
-                      <span>Joined {{ platform.joiningDate }}</span>
-                    </div>
-                    <div *ngIf="platform.followers !== undefined" class="flex items-center gap-1.5">
-                      <i class="bi bi-people w-4 h-4"></i>
-                      <span><strong class="font-medium text-slate-200">{{ formatFollowers(platform.followers) }}</strong> followers</span>
-                    </div>
-                  </div>
-
-                  <h4 class="text-sm font-semibold text-slate-400 border-b border-slate-700 pb-2 mb-3">All Available Data</h4>
-                  <dl class="text-sm">
-                    <ng-container *ngFor="let item of getMetadataEntries(platform)">
-                      <div class="grid grid-cols-3 gap-4 py-2 border-b border-slate-700/50">
-                        <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
-                        <dd class="col-span-2 text-slate-200 break-words">
-                          <ng-container *ngIf="isImageUrl(item.value); else urlCheck">
-                            <img [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40" [alt]="item.key"/>
-                          </ng-container>
-                          <ng-template #urlCheck>
-                            <ng-container *ngIf="isUrl(item.value); else plainText">
-                              <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">{{ item.value }}</a>
-                            </ng-container>
-                          </ng-template>
-                          <ng-template #plainText>
-                            {{ item.value }}
-                          </ng-template>
-                        </dd>
-                      </div>
-                    </ng-container>
-                    <div *ngIf="getMetadataEntries(platform).length === 0" class="text-center py-4 text-slate-500">
-                      No additional metadata available.
-                    </div>
-                  </dl>
-
-                  <h4 class="text-sm font-semibold text-slate-400 border-b border-slate-700 pb-2 my-3">Profile Details</h4>
-
-                  <div *ngIf="platform.profileDetails === undefined">
-                      <button (click)="fetchProfile.emit(platform)" 
-                              [disabled]="isScanInProgress() || fetchingState()[username() + '-' + platform.platform]"
-                              class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                          <ng-container *ngIf="!fetchingState()[username() + '-' + platform.platform]; else fetchingSpinner">
-                            <i class="bi bi-person-lines-fill"></i>
-                            <span>Fetch Profile Info</span>
-                          </ng-container>
-                          <ng-template #fetchingSpinner>
-                              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white" role="status"></div>
-                              <span>Fetching...</span>
-                          </ng-template>
-                      </button>
-                  </div>
-
-                  <div *ngIf="platform.profileDetails === null && !fetchingState()[username() + '-' + platform.platform]" class="text-center py-4 text-slate-500">
-                      <i class="bi bi-x-circle text-xl"></i>
-                      <p class="mt-1 text-sm">No additional profile data found.</p>
-                  </div>
-
-                  <dl *ngIf="platform.profileDetails && getProfileDetailEntries(platform).length > 0" class="text-sm">
-                      <ng-container *ngFor="let item of getProfileDetailEntries(platform)">
-                        <div class="grid grid-cols-3 gap-4 py-2 border-b border-slate-700/50">
-                          <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
-                          <dd class="col-span-2 text-slate-200 break-words">
-                            {{ item.value }}
-                          </dd>
-                        </div>
-                      </ng-container>
-                  </dl>
-
-                  <h4 class="text-sm font-semibold text-slate-400 border-b border-slate-700 pb-2 my-3">Recent Posts</h4>
-                  <div *ngIf="platform.posts === undefined">
-                      <button (click)="fetchPosts.emit(platform)" 
-                              [disabled]="isScanInProgress() || isFetchingPosts()[username() + '-' + platform.platform]"
-                              class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                          <ng-container *ngIf="!isFetchingPosts()[username() + '-' + platform.platform]; else fetchingPostsSpinner">
-                            <i class="bi bi-file-post"></i>
-                            <span>Fetch Posts</span>
-                          </ng-container>
-                          <ng-template #fetchingPostsSpinner>
-                              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white" role="status"></div>
-                              <span>Fetching...</span>
-                          </ng-template>
-                      </button>
-                  </div>
-                  <div *ngIf="platform.posts === null" class="text-center py-4 text-slate-500">
-                      <i class="bi bi-x-circle text-xl"></i>
-                      <p class="mt-1 text-sm">No posts found.</p>
-                  </div>
-                  <div *ngIf="platform.posts && platform.posts.length > 0" class="space-y-2">
-                    <div *ngFor="let post of platform.posts" class="bg-slate-900/40 p-2 rounded-md text-xs">
-                      <p class="text-slate-300 mb-1 line-clamp-2">{{ post.caption || 'No caption' }}</p>
-                      <div class="flex items-center justify-between text-slate-400">
-                        <div class="flex items-center gap-3">
-                          <span title="Likes"><i class="bi bi-heart"></i> {{ post.likes }}</span>
-                          <span title="Comments"><i class="bi bi-chat-dots"></i> {{ post.comments }}</span>
-                        </div>
-                        <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">View</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        </div>
+        <div class="overflow-y-auto flex-grow custom-scrollbar">
+          <div class="flex flex-col p-2">
+            <div (click)="onAllPlatformsClick()"
+                 class="group flex items-center p-2 rounded-md transition-colors cursor-pointer"
+                 [class.bg-slate-700]="selectedPlatform() === 'all'">
+              <div class="flex-shrink-0 rounded-md mr-3 flex items-center justify-center text-lg font-bold text-white h-8 w-8 p-1.5 bg-slate-600">
+                <i class="bi bi-collection-fill"></i>
+              </div>
+              <div class="flex-grow min-w-0">
+                <p class="font-semibold text-sm text-slate-200 truncate">All Platforms</p>
+                <p class="text-xs text-slate-400 truncate mb-0">{{ platforms().length }} platforms</p>
               </div>
             </div>
+            <div class="my-2 h-px bg-slate-700/50 mx-2"></div>
+            @if (filteredPlatforms().length > 0) {
+              <div class="flex flex-col">
+                  @for (platform of filteredPlatforms(); track platform.platform) {
+                    <div
+                        (click)="onPlatformClick(platform)"
+                        class="group flex items-center p-2 rounded-md transition-colors cursor-pointer"
+                        [class.bg-slate-700]="isSelected(platform)">
+                    <div class="platform-icon flex-shrink-0 rounded-md mr-3 flex items-center justify-center text-lg font-bold text-white h-8 w-8 p-1.5"
+                        [style.background-color]="getPlatformColor(platform.platform)">
+                        <app-social-icon [platformName]="platform.platform"></app-social-icon>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <p class="font-semibold text-sm text-slate-200 truncate">{{ platform.platform }}</p>
+                        <p class="text-xs text-slate-400 truncate mb-0">{{ platform.username }}</p>
+                    </div>
+                    </div>
+                  }
+              </div>
+            } @else {
+              @if (platformSearchTerm()) {
+                <div class="p-8 text-center text-slate-500">
+                    <p class="text-sm">No platforms match your filter.</p>
+                </div>
+              }
+            }
           </div>
         </div>
       </div>
-      
-      <div *ngIf="images() as imageList" class="mt-1 p-3">
-          <h4 class="text-sm font-semibold text-slate-400 border-t border-slate-700 pt-4 mb-3">Associated Images</h4>
-          <div *ngIf="imageList.length > 0; else noImagesFound" 
-              class="flex overflow-x-auto gap-2 pb-2 image-scrollbar">
-              <div *ngFor="let image of imageList" class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors w-32 flex-shrink-0">
-                  <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
-                      <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
-                  </a>
-              </div>
-          </div>
-          <ng-template #noImagesFound>
-              <div class="text-center py-4 text-slate-500">
-                  <p>No associated images found.</p>
-              </div>
-          </ng-template>
-      </div>
-    </div>
 
-    <div class="p-4 bg-slate-900/50 flex justify-between items-center gap-4 flex-shrink-0 rounded-b-lg border-t border-slate-700">
-      <div class="flex items-center gap-2">
-        <button
-            (click)="rescan.emit(username())"
-            [disabled]="isScanInProgress()"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors group
-                    disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-400
-                    bg-slate-700 text-slate-300 hover:bg-slate-600"
-            title="Start a new scan for this user">
-          <i class="bi bi-arrow-clockwise w-4 h-4"></i>
-          <span>Re-scan</span>
-        </button>
-        <button *ngIf="!images()"
-            (click)="fetchImages.emit(username())"
-            [disabled]="isFetchingImages()"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors group
-                    disabled:cursor-wait disabled:bg-slate-600 disabled:text-slate-400
-                    bg-slate-700 text-slate-300 hover:bg-slate-600"
-            title="Fetch social media images for this user">
-            <ng-container *ngIf="!isFetchingImages(); else fetchingImagesSpinner">
-                <i class="bi bi-images w-4 h-4"></i>
-                <span>Fetch Images</span>
-            </ng-container>
-            <ng-template #fetchingImagesSpinner>
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-300" role="status"></div>
-                <span>Fetching...</span>
-            </ng-template>
-        </button>
+      <!-- Right Panel: Platform Details -->
+      <div class="flex-grow overflow-y-auto custom-scrollbar p-4">
+        @if (selectedPlatformDetails(); as platform) {
+          <!-- Platform Header -->
+          <div class="flex items-start gap-4 mb-4">
+            <div class="platform-icon rounded-lg flex-shrink-0 flex items-center justify-center text-4xl font-bold text-white w-16 h-16 p-3"
+                 [style.background-color]="getPlatformColor(platform.platform)">
+              <app-social-icon [platformName]="platform.platform"></app-social-icon>
+            </div>
+            <div class="flex-grow">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="text-2xl font-bold text-slate-100">{{ platform.platform }}</h3>
+                  <p class="font-mono text-sm text-indigo-400">{{ '@' + platform.username }}</p>
+                </div>
+                <a [href]="platform.url" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-indigo-400 transition-colors">
+                  <span>Visit</span>
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+              </div>
+              <div class="flex items-center gap-4 text-slate-400 text-sm mt-2">
+                @if (platform.joiningDate) {
+                  <div class="flex items-center gap-2">
+                    <i class="bi bi-calendar3"></i>
+                    <span>Joined {{ platform.joiningDate }}</span>
+                  </div>
+                }
+                @if (platform.followers !== undefined) {
+                  <div class="flex items-center gap-2">
+                    <i class="bi bi-people"></i>
+                    <strong class="text-slate-200">{{ formatFollowers(platform.followers) }}</strong> followers
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+          @if (platform.description) {
+            <p class="text-slate-400 text-sm mb-4">{{ platform.description }}</p>
+          }
+
+          <!-- Collapsible Sections -->
+          <div class="space-y-3">
+              <!-- Profile Details -->
+              <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
+                <summary class="p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+                  Profile Details
+                  @if (platform.profileDetails !== undefined) {
+                    <button
+                            (click)="$event.preventDefault(); fetchProfile.emit(platform)"
+                            [disabled]="isScanInProgress() || fetchingState()[username() + '-' + platform.platform]"
+                            class="reloading-btn p-1.5 rounded-md text-slate-300 bg-slate-700/50 border border-slate-600 hover:bg-slate-700 hover:border-slate-500 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 float-right -mt-1.5"
+                            title="Refresh profile details">
+                      <i class="bi bi-arrow-clockwise" [class.animate-spin]="fetchingState()[username() + '-' + platform.platform]"></i>
+                    </button>
+                  }
+                </summary>
+                <div class="p-3 border-t border-slate-700">
+                    @if (platform.profileDetails === undefined && !fetchingState()[username() + '-' + platform.platform]) {
+                      <div>
+                          <button (click)="fetchProfile.emit(platform)" [disabled]="isScanInProgress()"
+                                  class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                              <i class="bi bi-person-lines-fill"></i>
+                              <span>Fetch Profile Info</span>
+                          </button>
+                      </div>
+                    }
+
+                    @if (fetchingState()[username() + '-' + platform.platform]) {
+                      <div class="flex items-center justify-center py-4 text-slate-400 gap-4">
+                          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                          <p class="text-sm">Fetching...</p>
+                          <button (click)="cancelFetchProfile.emit(platform)"
+                                  class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                            Cancel
+                          </button>
+                      </div>
+                    }
+
+                    @if (!fetchingState()[username() + '-' + platform.platform] && platform.profileDetails !== undefined) {
+                        @if (platform.profileDetails === null || getProfileDetailEntries(platform).length === 0) {
+                          <div class="text-center py-4 text-slate-500">
+                              <i class="bi bi-x-circle text-2xl"></i>
+                              <p class="mt-1 text-sm">No additional profile data found.</p>
+                          </div>
+                        }
+                        @if (platform.profileDetails && getProfileDetailEntries(platform).length > 0) {
+                          <dl class="text-sm">
+                              @for (item of getProfileDetailEntries(platform); track item.key) {
+                                <div class="py-3 border-b border-slate-700/30 last:border-b-0">
+                                  <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
+                                  <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+                                </div>
+                              }
+                          </dl>
+                        }
+                    }
+                </div>
+              </details>
+
+              <!-- Recent Posts -->
+              <details class="bg-slate-900/30 rounded-lg border border-slate-700">
+                  <summary class="p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+                    Recent Posts
+                    @if (platform.posts !== undefined) {
+                      <button
+                              (click)="$event.preventDefault(); fetchPosts.emit(platform)"
+                              [disabled]="isScanInProgress() || isFetchingPosts()[username() + '-' + platform.platform]"
+                              class="reloading-btn p-1.5 rounded-md text-slate-300 bg-slate-700/50 border border-slate-600 hover:bg-slate-700 hover:border-slate-500 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 float-right -mt-1.5"
+                              title="Refresh posts">
+                        <i class="bi bi-arrow-clockwise" [class.animate-spin]="isFetchingPosts()[username() + '-' + platform.platform]"></i>
+                      </button>
+                    }
+                  </summary>
+                  <div class="p-3 border-t border-slate-700">
+                      @if (platform.posts === undefined && !isFetchingPosts()[username() + '-' + platform.platform]) {
+                        <div>
+                            <button (click)="fetchPosts.emit(platform)" [disabled]="isScanInProgress()"
+                                    class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                                <i class="bi bi-file-post"></i>
+                                <span>Fetch Posts</span>
+                            </button>
+                        </div>
+                      }
+
+                      @if (isFetchingPosts()[username() + '-' + platform.platform]) {
+                        <div class="flex items-center justify-center py-4 text-slate-400 gap-4">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                            <p class="text-sm">Fetching...</p>
+                            <button (click)="cancelFetchPosts.emit(platform)"
+                                    class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                              Cancel
+                            </button>
+                        </div>
+                      }
+
+                      @if (!isFetchingPosts()[username() + '-' + platform.platform] && platform.posts !== undefined) {
+                          @if (!platform.posts || platform.posts.length === 0) {
+                            <div class="text-center py-4 text-slate-500">
+                                <i class="bi bi-x-circle text-2xl"></i>
+                                <p class="mt-1 text-sm">No posts found for this account.</p>
+                            </div>
+                          }
+                          @if (platform.posts && platform.posts.length > 0) {
+                            <div class="space-y-3">
+                              @for (post of platform.posts; track post.post_url) {
+                                <div class="bg-slate-700/50 p-3 rounded-lg text-sm">
+                                  <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
+                                  <div class="flex items-center justify-between text-slate-400">
+                                    <div class="flex items-center gap-4">
+                                      <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
+                                      <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
+                                    </div>
+                                    <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">View Post <i class="bi bi-box-arrow-up-right text-xs"></i></a>
+                                  </div>
+                                </div>
+                              }
+                            </div>
+                          }
+                      }
+                  </div>
+              </details>
+
+              <!-- Associated Images -->
+              <details class="bg-slate-900/30 rounded-lg border border-slate-700">
+                  <summary class="p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+                    Associated Images
+                    @if (images() !== undefined) {
+                      <button (click)="$event.preventDefault(); fetchImages.emit(username())"
+                              [disabled]="isFetchingImages()"
+                              class="reloading-btn p-1.5 rounded-md text-slate-300 bg-slate-700/50 border border-slate-600 hover:bg-slate-700 hover:border-slate-500 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 float-right -mt-1.5"
+                              title="Refresh Images">
+                          <i class="bi bi-arrow-clockwise" [class.animate-spin]="isFetchingImages()"></i>
+                      </button>
+                    }
+                  </summary>
+                  <div class="p-3 border-t border-slate-700">
+                      @if (isFetchingImages()) {
+                        <div class="flex items-center justify-center py-4 text-slate-400 gap-4">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                            <p class="text-sm">Fetching...</p>
+                            <button (click)="cancelFetchImages.emit(username())"
+                                    class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                              Cancel
+                            </button>
+                        </div>
+                      }
+
+                      @if (!isFetchingImages()) {
+                          @if (images() === undefined) {
+                            <div>
+                                 <button (click)="fetchImages.emit(username())"
+                                        class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+                                    <i class="bi bi-images"></i>
+                                    <span>Fetch Images</span>
+                                </button>
+                            </div>
+                          }
+                          @if (images() && images()!.length === 0) {
+                            <div class="text-center py-4 text-slate-500">
+                                <i class="bi bi-image-alt text-2xl"></i>
+                                <p class="mt-1 text-sm">No associated images were found.</p>
+                            </div>
+                          }
+                          @if (images(); as imageList) {
+                              @if (imageList.length > 0) {
+                                <div class="max-h-80 overflow-y-auto custom-scrollbar pr-1">
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        @for (image of imageList; track image.image_url) {
+                                          <div class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors">
+                                              <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
+                                                  <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
+                                              </a>
+                                          </div>
+                                        }
+                                    </div>
+                                </div>
+                              }
+                          }
+                      }
+                  </div>
+              </details>
+          </div>
+        } @else {
+          @if (isAllPlatformsSelected()) {
+            <!-- All Platforms Header -->
+            <div class="flex items-start gap-4 mb-4">
+              <div class="rounded-lg flex-shrink-0 flex items-center justify-center text-4xl font-bold text-white w-16 h-16 p-3 bg-slate-700">
+                <i class="bi bi-collection-fill"></i>
+              </div>
+              <div class="flex-grow">
+                <h3 class="text-2xl font-bold text-slate-100">All Platforms Summary</h3>
+                <p class="text-sm text-slate-400">Aggregated information for {{ username() }}</p>
+              </div>
+            </div>
+
+            <!-- Collapsible Sections for All Platforms -->
+            <div class="space-y-3">
+              <!-- Profile Details from All Platforms -->
+              <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
+                <summary class="p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+                  Profile Details
+                </summary>
+                <div class="p-3 border-t border-slate-700 space-y-4">
+                  @if (isFetchingAnyProfileDetails()) {
+                    <div class="flex items-center justify-center py-4 text-slate-400 gap-4">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                        <p class="text-sm">Fetching profile details...</p>
+                        <button (click)="cancelAllFetches.emit(username())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                          Cancel
+                        </button>
+                    </div>
+                  } @else {
+                    @for (platform of platforms(); track platform.platform) {
+                      @if (platform.profileDetails) {
+                        <div class="bg-slate-800/50 rounded-lg p-3">
+                          <div class="flex items-center gap-2 mb-2">
+                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)">
+                              <app-social-icon [platformName]="platform.platform"></app-social-icon>
+                            </div>
+                            <h4 class="font-semibold text-slate-200">{{ platform.platform }}</h4>
+                          </div>
+                          <dl class="text-sm">
+                            @for (item of getProfileDetailEntries(platform); track item.key) {
+                              <div class="py-2 border-b border-slate-700/30 last:border-b-0">
+                                <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
+                                <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+                              </div>
+                            }
+                          </dl>
+                        </div>
+                      }
+                    }
+                    @if (!hasAnyProfileDetails()) {
+                      <div class="text-center py-4">
+                        <p class="text-sm text-slate-500 mb-3">No detailed profile information has been fetched yet.</p>
+                        <button (click)="handleFetchAllData()" [disabled]="isAnythingFetching()"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                            <i class="bi bi-cloud-download"></i>
+                            <span>Fetch All Missing Data</span>
+                        </button>
+                      </div>
+                    }
+                  }
+                </div>
+              </details>
+
+              <!-- Recent Posts from All Platforms -->
+              <details class="bg-slate-900/30 rounded-lg border border-slate-700">
+                <summary class="p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+                  Recent Posts
+                </summary>
+                <div class="p-3 border-t border-slate-700">
+                  @if (isFetchingAnyPosts()) {
+                    <div class="flex items-center justify-center py-4 text-slate-400 gap-4">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                        <p class="text-sm">Fetching posts...</p>
+                        <button (click)="cancelAllFetches.emit(username())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                          Cancel
+                        </button>
+                    </div>
+                  } @else {
+                    @if (allPosts().length > 0) {
+                      <div class="space-y-3">
+                        @for (post of allPosts(); track post.post_url) {
+                          <div class="bg-slate-700/50 p-3 rounded-lg text-sm">
+                            <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
+                            <div class="flex items-center justify-between text-slate-400">
+                              <div class="flex items-center gap-4">
+                                <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
+                                <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
+                                <span [title]="post.platform" class="flex items-center gap-1.5">
+                                  <div class="platform-icon flex-shrink-0 rounded-sm flex items-center justify-center text-xs font-bold text-white h-4 w-4 p-0.5" [style.background-color]="getPlatformColor(post.platform)">
+                                    <app-social-icon [platformName]="post.platform"></app-social-icon>
+                                  </div>
+                                  {{ post.platform }}
+                                </span>
+                              </div>
+                              <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">View Post <i class="bi bi-box-arrow-up-right text-xs"></i></a>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      @if (hasAnyPostsBeenFetched()) {
+                        <div class="text-center py-4 text-slate-500">
+                          <i class="bi bi-x-circle text-2xl"></i>
+                          <p class="mt-1 text-sm">No posts found across all accounts.</p>
+                        </div>
+                      } @else {
+                        <div class="text-center py-4">
+                          <p class="text-sm text-slate-500 mb-3">Post data has not been fetched yet.</p>
+                          <button (click)="handleFetchAllData()" [disabled]="isAnythingFetching()"
+                                  class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                              <i class="bi bi-cloud-download"></i>
+                              <span>Fetch All Missing Data</span>
+                          </button>
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+              </details>
+
+              <!-- Associated Images -->
+              <details class="bg-slate-900/30 rounded-lg border border-slate-700">
+                <summary class="p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+                  Associated Images
+                  @if (images() !== undefined) {
+                    <button (click)="$event.preventDefault(); fetchImages.emit(username())"
+                            [disabled]="isFetchingImages()"
+                            class="reloading-btn p-1.5 rounded-md text-slate-300 bg-slate-700/50 border border-slate-600 hover:bg-slate-700 hover:border-slate-500 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 float-right -mt-1.5"
+                            title="Refresh Images">
+                      <i class="bi bi-arrow-clockwise" [class.animate-spin]="isFetchingImages()"></i>
+                    </button>
+                  }
+                </summary>
+                <div class="p-3 border-t border-slate-700">
+                  @if (isFetchingImages()) {
+                    <div class="flex items-center justify-center py-4 text-slate-400 gap-4">
+                      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                      <p class="text-sm">Fetching...</p>
+                      <button (click)="cancelFetchImages.emit(username())"
+                              class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                        Cancel
+                      </button>
+                    </div>
+                  }
+                  @if (!isFetchingImages()) {
+                    @if (images() === undefined) {
+                      <div>
+                        <button (click)="fetchImages.emit(username())" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+                          <i class="bi bi-images"></i>
+                          <span>Fetch Images</span>
+                        </button>
+                      </div>
+                    }
+                    @if (images() && images()!.length === 0) {
+                      <div class="text-center py-4 text-slate-500">
+                        <i class="bi bi-image-alt text-2xl"></i>
+                        <p class="mt-1 text-sm">No associated images were found.</p>
+                      </div>
+                    }
+                    @if (images(); as imageList) {
+                      @if (imageList.length > 0) {
+                        <div class="max-h-80 overflow-y-auto custom-scrollbar pr-1">
+                          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                            @for (image of imageList; track image.image_url) {
+                              <div class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors">
+                                <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
+                                  <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
+                                </a>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+              </details>
+            </div>
+          }
+        }
       </div>
-      
-      <button (click)="onClose()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
-        Close
-      </button>
     </div>
   </div>
 </div>

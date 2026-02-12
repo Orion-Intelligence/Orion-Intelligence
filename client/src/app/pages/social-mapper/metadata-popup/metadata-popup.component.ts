@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { PlatformResult } from '../../../shared/model/social/social-scan.models';
 import { getPlatformColor, formatFollowers, formatKey, isUrl, isImageUrl } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/components/social-icon/social-icon.component';
+import { socialMapperAnimations } from '../../../shared/animations/social-mapper.animations';
 
 @Component({
   selector: 'app-metadata-popup',
   templateUrl: './metadata-popup.component.html',
   styleUrls: ['./metadata-popup.component.css'],
+  styles: [socialMapperAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, SocialIconComponent],
@@ -20,6 +22,8 @@ export class MetadataPopupComponent {
   close = output<void>();
   fetchProfile = output<PlatformResult>();
   fetchPosts = output<PlatformResult>();
+  cancelFetchProfile = output<PlatformResult>();
+  cancelFetchPosts = output<PlatformResult>();
 
   public getPlatformColor = getPlatformColor;
   public formatFollowers = formatFollowers;

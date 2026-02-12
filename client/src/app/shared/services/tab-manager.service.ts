@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, WritableSignal } from '@angular/core';
-import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab } from '../model/social/social-scan.models';
+import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, SocialImage } from '../model/social/social-scan.models';
 
-const STORAGE_KEY = 'visuscan-sessions';
+const STORAGE_KEY = 'orion-intelligence-sessions';
 
 @Injectable({
   providedIn: 'root',
@@ -21,21 +21,22 @@ export class TabManagerService {
   }
 
   private createNewState(): TabState {
+    // FIX: Provide explicit types for all signals to ensure type safety and proper inference.
     return {
       searchTerm: signal(''),
       homeMenuSearchTerm: signal(''),
-      jobs: signal([]),
-      networkData: signal({ nodes: [], edges: [] }),
-      scanResults: signal(new Map()),
-      activeUsernames: signal(new Set()),
-      customEntities: signal([]),
-      socialImages: signal(new Map()),
+      jobs: signal<Job[]>([]),
+      networkData: signal<NetworkData>({ nodes: [], edges: [] }),
+      scanResults: signal(new Map<string, PlatformResult[]>()),
+      activeUsernames: signal(new Set<string>()),
+      customEntities: signal<CustomEntity[]>([]),
+      socialImages: signal(new Map<string, SocialImage[]>()),
       isEditMode: signal(false),
       isHomeMenuCollapsed: signal(false),
       isEntityMenuCollapsed: signal(true),
-      activeHomeMenuTab: signal('history'),
+      activeHomeMenuTab: signal<'history' | 'entities'>('history'),
       isPhysicsEnabled: signal(false),
-      viewMode: signal('graph'),
+      viewMode: signal<'graph' | 'list'>('graph'),
     };
   }
 
@@ -112,7 +113,7 @@ export class TabManagerService {
     const a = document.createElement('a');
     a.href = url;
     const safeFilename = active.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    a.download = `visuscan-session-${safeFilename}.json`;
+    a.download = `orion-intelligence-session-${safeFilename}.json`;
     
     document.body.appendChild(a);
     a.click();
