@@ -20,7 +20,7 @@ export class SocialScanService {
 
   private extractMetadata(platformName: string, data: any): Partial<PlatformResult> {
     if (!data) return { allMetadata: {} };
-    
+
     const platformData = data;
 
     if (!platformData || !platformData.ids) {
@@ -153,14 +153,12 @@ export class SocialScanService {
 
     return new Observable(subscriber => {
       subscriber.next({ type: 'progress', payload: { progress: 10, step: 'Submitting job to API...' } });
-      
-      const platformsToScan = ['instagram', 'facebook', 'behance', 'vimeo', 'twitter', 'tiktok'];
 
       const pollingSub = this.pollForResult<
         { data?: any[] } | any,
         PlatformResult[]
       >({
-        request: () => this.api.post<any>('social/recon', { query: username, platforms: platformsToScan }),
+        request: () => this.api.post<any>('social/recon', { query: username }),
         isReady: (res) => !!(res as any)?.result,
         mapResult: (res) =>
           (res as any).result.reduce((acc: PlatformResult[], item: any) => {
@@ -172,7 +170,7 @@ export class SocialScanService {
                 const url = new URL(item.metadata.url);
                 const hostname = url.hostname.replace(/^www\./, '');
                 const parts = hostname.split('.');
-                
+
                 if (parts.length > 2 && hostname.toLowerCase().startsWith(username.toLowerCase().replace(/_/g, ''))) {
                     platform = parts.slice(1).join('.');
                 } else if (parts.length >= 2) {
@@ -181,11 +179,6 @@ export class SocialScanService {
               } catch (e) {
                   console.error('Error parsing URL for platform name:', e);
               }
-            }
-            
-            // Filter out platforms not in our target list
-            if (!platformsToScan.includes(platform.toLowerCase())) {
-                return acc; // Skip this item
             }
 
             const capitalizedPlatform = platform.charAt(0).toUpperCase() + platform.slice(1);
@@ -199,12 +192,12 @@ export class SocialScanService {
               isSelected: false,
               ...extractedData
             } as PlatformResult;
-            
+
             if (!platformResult.allMetadata || Object.keys(platformResult.allMetadata).length === 0) {
                 platformResult.allMetadata = item.metadata;
                 platformResult.allMetadata['platform'] = capitalizedPlatform;
             }
-            
+
             acc.push(platformResult);
             return acc;
           }, []),
@@ -239,16 +232,16 @@ export class SocialScanService {
           if (mock) {
             subscriber.next(mock);
           } else {
-            subscriber.next({ profile: {} }); 
+            subscriber.next({ profile: {} });
           }
           subscriber.complete();
         }, 1000);
       });
     }
-    
+
     return this.api.post<{ profile: ProfileDetails }>('social/profile', { platform, username });
   }
-  
+
   fetchSocialImages(username: string): Observable<{ images: SocialImage[] }> {
     if (this.useMockData) {
       return new Observable(subscriber => {

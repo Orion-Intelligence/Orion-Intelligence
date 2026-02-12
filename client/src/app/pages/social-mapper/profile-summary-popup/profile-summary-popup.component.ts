@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, signal } from '@angu
 import { CommonModule } from '@angular/common';
 import { PlatformResult, SocialImage } from '../../../shared/model/social/social-scan.models';
 import { getPlatformColor, formatFollowers, formatKey, isUrl, isImageUrl } from '../../../shared/utils/formatters';
+import { SocialIconComponent } from '../../../shared/components/social-icon/social-icon.component';
 
 @Component({
   selector: 'app-profile-summary-popup',
@@ -9,7 +10,7 @@ import { getPlatformColor, formatFollowers, formatKey, isUrl, isImageUrl } from 
   styleUrls: ['./profile-summary-popup.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SocialIconComponent],
 })
 export class ProfileSummaryPopupComponent {
   username = input.required<string>();

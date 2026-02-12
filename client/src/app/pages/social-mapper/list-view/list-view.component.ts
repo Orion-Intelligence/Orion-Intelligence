@@ -2,13 +2,14 @@ import { Component, ChangeDetectionStrategy, input, output, computed } from '@an
 import { CommonModule } from '@angular/common';
 import { NetworkData, PlatformResult, CustomEntity, NetworkNode } from '../../../shared/model/social/social-scan.models';
 import { getPlatformColor, formatFollowers, formatKey, isUrl, isImageUrl } from '../../../shared/utils/formatters';
+import { SocialIconComponent } from '../../../shared/components/social-icon/social-icon.component';
 
 @Component({
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
   styleUrls: ['./list-view.component.css'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SocialIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListViewComponent {

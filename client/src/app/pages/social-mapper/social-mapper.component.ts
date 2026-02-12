@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, Inject, PLATFORM_ID, effect, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, Inject, PLATFORM_ID, effect, OnInit, inject } from '@angular/core';
 import { CommonModule, TitleCasePipe, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NetworkGraphComponent } from './network-graph/network-graph.component';
@@ -15,6 +15,8 @@ import { getPlatformColor } from '../../shared/utils/formatters';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TabBarComponent } from './tab-bar/tab-bar.component';
+import { IconService } from '../../shared/services/icon.service';
+import { SocialIconComponent } from '../../shared/components/social-icon/social-icon.component';
 
 @Component({
   selector: 'app-social-mapper',
@@ -33,6 +35,7 @@ import { TabBarComponent } from './tab-bar/tab-bar.component';
     EntityMenuComponent,
     ListViewComponent,
     TabBarComponent,
+    SocialIconComponent,
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
@@ -137,12 +140,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return userJob?.status === 'in_progress';
   });
 
-  constructor(
-    private scanService: SocialScanService,
-    private destroyRef: DestroyRef,
-    public tabManager: TabManagerService,
-    @Inject(PLATFORM_ID) private platformId: object
-  ) {
+  private scanService = inject(SocialScanService);
+  private destroyRef = inject(DestroyRef);
+  public tabManager = inject(TabManagerService);
+  private platformId = inject(PLATFORM_ID);
+  private iconService = inject(IconService);
+
+  constructor() {
     if (isPlatformBrowser(this.platformId)) {
       this.mediaQueryList = window.matchMedia('(max-width: 1023px)');
       this.isSmallScreen.set(this.mediaQueryList.matches);
@@ -503,11 +507,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.summaryPopupData.set(null);
   }
 
-  updateGraphFromModal() {
+  async updateGraphFromModal() {
     const { username, platforms } = this.modalResults();
-    const centralNodeId = `user-${username}`;
+    this.closeModal();
+  
     const selectedPlatforms = platforms.filter(p => p.isSelected);
-
+    const centralNodeId = `user-${username}`;
+  
     if (selectedPlatforms.length === 0) {
       this.updateState(state => {
         state.networkData.update(currentData => ({
@@ -520,15 +526,30 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           return newSet;
         });
       });
-      this.closeModal();
       return;
     }
-
+  
+    const currentNetworkData = this.networkData();
+    const existingPlatformNames = new Set(
+      currentNetworkData.nodes
+        .filter(n => n.id.toString().startsWith(`${username}-`))
+        .map(n => n.label)
+    );
+  
+    const platformsToAdd = selectedPlatforms.filter(p => !existingPlatformNames.has(p.platform));
+    
+    const iconUrlMap = new Map<string, string>();
+    if (platformsToAdd.length > 0) {
+      const iconUrlPromises = platformsToAdd.map(p => this.iconService.getWhiteIconDataUrl(p.platform));
+      const iconUrls = await Promise.all(iconUrlPromises);
+      platformsToAdd.forEach((p, i) => iconUrlMap.set(p.platform, iconUrls[i]));
+    }
+  
     this.updateState(state => {
       state.networkData.update(currentData => {
         let newNodes = [...currentData.nodes];
         let newEdges = [...currentData.edges];
-
+  
         if (!currentData.nodes.some(n => n.id === centralNodeId)) {
           newNodes.push({
             id: centralNodeId,
@@ -548,42 +569,38 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           });
           state.activeUsernames.update(currentSet => new Set(currentSet).add(username));
         }
-
+  
         const selectedPlatformNames = new Set(selectedPlatforms.map(p => p.platform));
-        const existingPlatformNodes = currentData.nodes.filter(n => n.id.toString().startsWith(`${username}-`));
-        const existingPlatformNames = new Set(existingPlatformNodes.map(n => n.label));
-
-        const platformsToRemove = existingPlatformNodes.filter(node => !selectedPlatformNames.has(node.label));
+        const platformsToRemove = currentData.nodes.filter(n => 
+          n.id.toString().startsWith(`${username}-`) && !selectedPlatformNames.has(n.label)
+        );
         const nodeIdsToRemove = new Set(platformsToRemove.map(node => node.id));
         newNodes = newNodes.filter(node => !nodeIdsToRemove.has(node.id));
         newEdges = newEdges.filter(edge => !nodeIdsToRemove.has(edge.to));
-
-        selectedPlatforms.forEach(platform => {
-          if (!existingPlatformNames.has(platform.platform)) {
-            const platformNodeId = `${username}-${platform.platform}`;
-            newNodes.push({
-              id: platformNodeId,
-              label: platform.platform,
-              shape: 'dot',
-              size: 25,
-              font: { color: '#e5e7eb' },
-              color: {
-                border: '#14b8a6',
-                background: getPlatformColor(platform.platform),
-                highlight: { border: '#5eead4', background: '#0d9488' },
-                hover: { border: '#2dd4bf', background: '#0f766e' }
-              },
-              title: `<b>${platform.platform}</b><br>Click for details`
-            });
-            newEdges.push({ from: centralNodeId, to: platformNodeId });
-          }
+  
+        platformsToAdd.forEach(platform => {
+          const platformNodeId = `${username}-${platform.platform}`;
+          newNodes.push({
+            id: platformNodeId,
+            label: platform.platform,
+            shape: 'circularImage',
+            image: iconUrlMap.get(platform.platform),
+            size: 25,
+            font: { color: '#e5e7eb' },
+            color: {
+              border: getPlatformColor(platform.platform),
+              background: '#334155',
+              highlight: { border: '#5eead4', background: '#475569' },
+              hover: { border: '#2dd4bf', background: '#475569' }
+            },
+            title: `<b>${platform.platform}</b><br>Click for details`
+          });
+          newEdges.push({ from: centralNodeId, to: platformNodeId });
         });
-
+  
         return { nodes: newNodes, edges: newEdges };
       });
     });
-
-    this.closeModal();
   }
 
   togglePlatformSelection(platformName: string) {

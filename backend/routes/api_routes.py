@@ -821,4 +821,4 @@ async def search_dynamic_email(param: SearchEngineMetaRequest = Body(...)):
     "/api/social/posts",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "profile")
+    return await search_model.getInstance().social_search(param, "posts")

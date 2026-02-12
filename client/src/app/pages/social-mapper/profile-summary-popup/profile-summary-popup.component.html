@@ -22,9 +22,9 @@
         <div *ngFor="let platform of platforms()" class="rounded-lg overflow-hidden bg-slate-700/50 transition-colors duration-300"
               [class.bg-slate-700]="expandedPlatformName() === platform.platform">
           <div (click)="onPlatformClick(platform)" class="group flex items-center p-3 transition-colors cursor-pointer">
-            <div class="platform-icon flex-shrink-0 rounded-full mr-4 flex items-center justify-center text-lg font-bold text-white h-10 w-10" 
-                 [style.--platform-color]="getPlatformColor(platform.platform)">
-              {{ platform.platform.charAt(0).toUpperCase() }}
+            <div class="platform-icon flex-shrink-0 rounded-full mr-4 flex items-center justify-center text-lg font-bold text-white h-10 w-10 p-2" 
+                 [style.background-color]="getPlatformColor(platform.platform)">
+              <app-social-icon [platformName]="platform.platform"></app-social-icon>
             </div>
             <div class="flex-grow min-w-0">
               <div class="flex items-center gap-2">

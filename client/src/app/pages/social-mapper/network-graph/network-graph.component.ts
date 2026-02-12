@@ -95,11 +95,14 @@ export class NetworkGraphComponent implements OnDestroy {
   private createNetwork(containerEl: HTMLElement, networkData: NetworkData) {
     this.destroyNetwork(); 
     
+    const fallbackIcon = 'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%23475569"/></svg>';
+
     const options: Options = {
       autoResize: true,
       height: '100%',
       width: '100%',
       nodes: {
+        brokenImage: fallbackIcon,
         borderWidth: 2,
         shadow: {
           enabled: true,

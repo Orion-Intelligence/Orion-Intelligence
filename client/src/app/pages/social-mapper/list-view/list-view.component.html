@@ -38,7 +38,9 @@
                           <ng-container *ngIf="getPlatformData(platformNode.id.toString()) as platformData">
                             <div class="bg-slate-700/50 rounded-lg overflow-hidden transition-all duration-300">
                                 <div (click)="platformNodeClicked.emit(platformNode.id.toString())" class="p-3 flex items-center gap-3 cursor-pointer hover:bg-slate-700 transition-colors">
-                                    <div class="platform-icon w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-white" [style.--platform-color]="getPlatformColor(platformNode.label)">{{platformNode.label.charAt(0).toUpperCase()}}</div>
+                                    <div class="platform-icon w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-white p-1" [style.background-color]="getPlatformColor(platformNode.label)">
+                                      <app-social-icon [platformName]="platformNode.label"></app-social-icon>
+                                    </div>
                                     <div class="flex-grow min-w-0">
                                         <p class="font-semibold text-slate-200 truncate">{{platformNode.label}}</p>
                                         <p class="text-xs text-slate-400 truncate">{{ platformData?.followers ? (formatFollowers(platformData.followers) + ' followers') : 'Followers N/A' }}</p>
