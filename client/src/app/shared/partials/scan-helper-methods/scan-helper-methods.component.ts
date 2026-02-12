@@ -100,6 +100,8 @@ export class ScanHelperMethods implements OnDestroy {
         } else if (res.status === 'error') {
           this.errorMessage = res.error || 'Resolution failed';
           this.statusMessage = 'Failed';
+        } else {
+          this.statusMessage = 'No records found';
         }
       } else if (this.activeTab === 'wayback') {
         if (status === 'success') {
@@ -139,6 +141,7 @@ export class ScanHelperMethods implements OnDestroy {
     this.activeTab = tab;
     this.errorMessage = '';
     this.showInvalid = false;
+    this.statusMessage = "";
   }
 
   onEnterKey(): void {
