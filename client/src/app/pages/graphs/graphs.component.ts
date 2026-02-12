@@ -422,7 +422,6 @@ export class GraphComponent implements OnInit {
     if (!extNode.isGroup || !extNode.subNodes) return;
 
     const nodeId = extNode.id as string;
-    const subNodes = extNode.subNodes ?? [];
     const isExpanded = this.groupExpandedState[nodeId] || false;
 
     if (enabled && !isExpanded) {

@@ -10,6 +10,7 @@ from .log_model import LogModel, LogBatchModel
 from .nlp_data_model import nlp_data_model
 from .report_chat_data_model import ReportChatRequest
 from .social_model import social_data_model
+from .social_scrape_request_model import SocialScrapeRequest
 from ..crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 
 __all__ = [
@@ -26,6 +27,7 @@ __all__ = [
     "nlp_data_model",
     "ReportChatRequest",
     "social_data_model",
+    "SocialScrapeRequest",
     "CRAWL_PATHS",
     "CRAWL_CALLBACK_RESPONSES",
 ]

@@ -32,10 +32,10 @@ class elastic_controller:
 
     async def __link_connection(self):
         self.__m_core_connection = AsyncElasticsearch(
-            f"http://elasticsearch:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
+            f"http://{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
             http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
         self.__m_dump_connection = AsyncElasticsearch(
-            f"http://{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
+            f"http://{ELASTIC_CONNECTIONS.S_STEALER_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
             http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
         await self.__initialize_mappings()
 
@@ -185,8 +185,27 @@ class elastic_controller:
 
     async def search_consolidated_ranked_query(self, indices, query, indices_boost=None):
         try:
+            def _apply_case_insensitive(q):
+                if isinstance(q, list):
+                    for x in q:
+                        _apply_case_insensitive(x)
+                    return
+                if not isinstance(q, dict):
+                    return
+
+                for k, v in list(q.items()):
+                    if k in ("term", "wildcard", "prefix", "regexp") and isinstance(v, dict):
+                        for field, spec in list(v.items()):
+                            if isinstance(spec, dict):
+                                spec.setdefault("case_insensitive", True)
+                            else:
+                                v[field] = {"value": spec, "case_insensitive": True}
+                    _apply_case_insensitive(v)
+
             if indices_boost:
                 query["indices_boost"] = indices_boost
+
+            _apply_case_insensitive(query)
 
             read_indices = [self._read_index(i) for i in indices]
             only_stealer = all(i == ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
@@ -198,7 +217,8 @@ class elastic_controller:
                     body=query,
                     request_timeout=220,
                     allow_no_indices=True,
-                    ignore_unavailable=True, )
+                    ignore_unavailable=True,
+                )
 
             if none_stealer:
                 return await self.__m_core_connection.search(
@@ -206,7 +226,8 @@ class elastic_controller:
                     body=query,
                     request_timeout=220,
                     allow_no_indices=True,
-                    ignore_unavailable=True, )
+                    ignore_unavailable=True,
+                )
 
             core_indices = [self._read_index(i) for i in indices if i != ELASTIC_INDEX.S_STEALERLOGS_INDEX]
             dump_indices = ["stealer_model,stealer_model-*"]
@@ -216,14 +237,16 @@ class elastic_controller:
                 body=query,
                 request_timeout=220,
                 allow_no_indices=True,
-                ignore_unavailable=True, ) if core_indices else {"hits": {"hits": []}}
+                ignore_unavailable=True,
+            ) if core_indices else {"hits": {"hits": []}}
 
             dump_res = await self.__m_dump_connection.search(
                 index=",".join(dump_indices),
                 body=query,
                 request_timeout=220,
                 allow_no_indices=True,
-                ignore_unavailable=True, )
+                ignore_unavailable=True,
+            )
 
             merged = core_res if core_indices else dump_res
             core_hits = core_res.get("hits", {}).get("hits", []) if core_res else []
@@ -249,6 +272,16 @@ class elastic_controller:
                 log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
                 results.append(None)
         return results
+    
+    async def search_country_insight_query(self, index, query):
+        try:
+            conn = self.__conn_for_index(index)
+            res = await conn.search(index=index, body=query, request_timeout=220)
+            return res
+        except Exception as ex:
+            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+            return None
+
 
     async def generate_graph(self):
         try:

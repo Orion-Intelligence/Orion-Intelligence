@@ -7,10 +7,12 @@ export class ConsolidatedParamModel {
   content = "all";
   email?: string;
   username?: string;
-  must=true
+  must = true
   url = "";
   user = "";
+  ioc = "";
   fullsearch = false;
+  tab = "";
 
 
   reset(): void {
@@ -23,6 +25,8 @@ export class ConsolidatedParamModel {
     this.username = undefined;
     this.url = "";
     this.user = "";
+    this.ioc = "";
     this.fullsearch = false;
+    this.tab = "";
   }
 }

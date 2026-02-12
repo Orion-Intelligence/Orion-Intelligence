@@ -272,7 +272,23 @@
   flex: 0 0 auto;
 }
 
-@media (max-width: 1200px) {
+.consolidated-search_tag-header {
+  padding: 15px 30px;
+  display: flex;
+}
+
+.consolidated-search_tag-btn {
+  font-size: 13px;
+  font-weight: 400;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #fff;
+  background-color: #172235;
+}
+
+
+@media (width <= 1200px) {
   .search-filter-d-flex {
     display: block !important;
   }

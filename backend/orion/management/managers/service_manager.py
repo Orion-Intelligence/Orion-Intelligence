@@ -29,8 +29,6 @@ class service_manager:
         self._is_available = False
 
     async def init_services(self):
-        await test_manager.get_instance().apply_test_overrides()
-
         while not self._is_available:
             try:
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
@@ -39,18 +37,21 @@ class service_manager:
 
                 await elastic_controller.get_instance().initialize()
                 await mongo_controller.get_instance().link_connection()
+
+                await test_manager.get_instance().reset_test_mongo_and_import_mocks()
+
                 await mongo_controller.get_instance().ensure_indexes()
                 await mongo_controller.get_instance().initialize()
 
-                await test_manager.get_instance().reset_test_mongo_and_import_mocks()
                 await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
                 await redis_controller.getInstance().initialize()
                 await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)
 
-                arango_controller.get_instance().link_connection()
-                arango_controller.get_instance().initialize()
+                await arango_controller.get_instance().link_connection()
+                await arango_controller.get_instance().initialize()
+                await test_manager.get_instance().reset_test_arango_and_import_mocks()
 
                 self._is_available = True
                 return True

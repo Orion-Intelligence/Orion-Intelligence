@@ -65,8 +65,6 @@ class config_controller:
             fresh_config["logo_wide_light"] = asset("logo_wide_light")
             fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
 
-            print(asset, flush=True)
-
             return config_data(settings=fresh_config)
 
         except Exception as ex:

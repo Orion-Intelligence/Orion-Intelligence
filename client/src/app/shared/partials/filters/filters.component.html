@@ -39,10 +39,6 @@
       </ul>
     </div>
     </ng-container>
-    <ng-container *ngIf="filterModel.filters[key].type === 'multiSelection'">
-      <app-multiple-selection (selectedFiltersChange)="updateFilter($event)" [filterModel]="filterModel" [key]="key"
-        [mSelectedFilters]="selectedFilters"></app-multiple-selection>
-    </ng-container>
     <ng-container *ngIf="filterModel.filters[key].type === 'text'">
       <div class="mb-2">
         <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]"

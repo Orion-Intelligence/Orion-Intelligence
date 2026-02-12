@@ -1,0 +1,181 @@
+<div class="homebar h-full flex flex-col"
+    [class.w-80]="!isCollapsed()"
+    [class.w-20]="isCollapsed()">
+    <div class="p-3 border-b border-slate-800 flex items-center shrink-0" 
+        [class.gap-3]="!isCollapsed()"
+        [class.justify-between]="!isCollapsed()" 
+        [class.justify-center]="isCollapsed()">
+      <a href="/" title="Orion Intelligence Home" class="hidden lg:flex items-center gap-3 overflow-hidden transition-all duration-300 group"
+        [class.flex-grow]="!isCollapsed()"
+        [class.w-0]="isCollapsed()"
+        [class.opacity-0]="isCollapsed()"
+        [class.pointer-events-none]="isCollapsed()">
+        <div class="w-8 h-8 flex-shrink-0">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer arcs -->
+            <path d="M 20 20 A 42.42 42.42 0 0 1 20 80" stroke="#3B82F6" stroke-width="7" fill="none" stroke-linecap="round" />
+            <path d="M 80 80 A 42.42 42.42 0 0 1 80 20" stroke="#3B82F6" stroke-width="7" fill="none" stroke-linecap="round" />
+            
+            <!-- Inner arcs -->
+            <path d="M 30 30 A 28.28 28.28 0 0 1 30 70" stroke="#60A5FA" stroke-width="7" fill="none" stroke-linecap="round" />
+            <path d="M 70 70 A 28.28 28.28 0 0 1 70 30" stroke="#60A5FA" stroke-width="7" fill="none" stroke-linecap="round" />
+            
+            <!-- Stylized N -->
+            <path d="M 40 75 L 40 25 L 50 50 Z" fill="#E2E8F0" />
+            <path d="M 60 25 L 60 75 L 50 50 Z" fill="#A5B4FC" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold mb-0 text-slate-200 whitespace-nowrap group-hover:text-white transition-colors">Orion Intelligence</h1>
+      </a>
+      <button (click)="toggle.emit()" class="p-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+        <i class="bi bi-list text-2xl"></i>
+      </button>
+    </div>
+
+    <div class="relative flex-grow">
+      <!-- Expanded Content -->
+      <div class="absolute inset-0 flex flex-col transition-opacity duration-150 overflow-hidden"
+           [class.opacity-100]="!isCollapsed()"
+           [class.opacity-0]="isCollapsed()"
+           [class.pointer-events-none]="isCollapsed()"
+           [class.delay-150]="!isCollapsed()">
+        <div class="p-3 border-b border-slate-800 shrink-0">
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <i class="bi bi-search w-5 h-5 text-slate-400"></i>
+            </div>
+            <input 
+              type="text" 
+              placeholder="Filter items..."
+              [value]="searchTerm()"
+              (input)="onSearchInput($event)"
+              class="block w-full rounded-md border-0 bg-slate-800 py-1.5 pl-10 pr-3 text-slate-200 ring-1 ring-inset ring-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+        
+        <div class="flex-grow p-3 flex flex-col overflow-y-auto">
+          <div class="border-b border-slate-700 shrink-0">
+            <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+              <button (click)="tabSelected.emit('history')" 
+                      [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">
+                Scan History
+              </button>
+              <button *ngIf="!isSmallScreen()" (click)="tabSelected.emit('entities')" 
+                      [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">
+                Entities
+              </button>
+            </nav>
+          </div>
+
+          <div class="pt-4">
+            <div *ngIf="activeTab() === 'history'; else entitiesBlock">
+              <div class="flex flex-col gap-3">
+                <div *ngFor="let job of filteredJobs()">
+                  <div [class]="getJobClasses(job)" (click)="jobClicked.emit(job)">
+                    <div class="flex justify-between items-start">
+                      <div class="flex items-center gap-3 min-w-0">
+                        <div [ngSwitch]="job.status">
+                          <div *ngSwitchCase="'in_progress'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-400" role="status"></div>
+                          <i *ngSwitchCase="'completed'" class="bi bi-check-circle-fill w-4 h-4 text-green-500"></i>
+                          <i *ngSwitchCase="'failed'" class="bi bi-x-circle-fill w-4 h-4 text-red-500"></i>
+                        </div>
+                        <p class="font-bold mb-0 truncate text-indigo-300">{{ job.username }}</p>
+                      </div>
+                      <div *ngIf="job.status === 'in_progress'" class="font-mono text-xs text-slate-400">{{ job.progress }}%</div>
+                    </div>
+                    
+                    <div *ngIf="job.status === 'in_progress'" class="w-full bg-slate-700 rounded-full h-1.5 mt-2">
+                      <div class="progress-bar bg-indigo-500 h-1.5 rounded-full transition-all duration-500 ease-out" [style.--progress-width.%]="job.progress"></div>
+                    </div>
+                    <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ job.step }}</p>
+
+                    <div *ngIf="job.status === 'completed'" class="flex justify-between items-center mt-3">
+                      <div *ngIf="activeUsernames().has(job.username); else notOnGraph">
+                        <div class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
+                          <i class="bi bi-check-circle-fill"></i>
+                          <span>On Graph</span>
+                        </div>
+                      </div>
+                      <ng-template #notOnGraph>
+                        <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-full">
+                          <i class="bi bi-node-minus"></i>
+                          <span>Not on Graph</span>
+                        </div>
+                      </ng-template>
+
+                      <div class="flex items-center gap-2">
+                        <button *ngIf="activeUsernames().has(job.username) && viewMode() === 'graph'" (click)="$event.stopPropagation(); focusUser.emit(job.username)" title="Focus on graph" 
+                                class="p-1.5 rounded-md text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors">
+                            <i class="bi bi-bullseye w-4 h-4"></i>
+                        </button>
+                        <button (click)="$event.stopPropagation(); deleteUser.emit(job.username)" title="Delete Profile"
+                                class="p-1.5 rounded-md text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                          <i class="bi bi-trash3 w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="jobs().length === 0" class="text-center text-slate-500 py-8 flex flex-col items-center opacity-50">
+                <p class="text-sm">Scan history is empty.</p>
+              </div>
+              <div *ngIf="filteredJobs().length === 0 && jobs().length > 0" class="text-center text-slate-500 py-8 flex flex-col items-center">
+                  <i class="bi bi-search text-4xl text-slate-600"></i>
+                  <h3 class="mt-2 text-md font-semibold text-slate-300">No Results Found</h3>
+                  <p class="text-sm">Filter "{{ searchTerm() }}" did not match any scans.</p>
+              </div>
+            </div>
+            <ng-template #entitiesBlock>
+              <div *ngIf="activeTab() === 'entities'">
+                <div class="flex flex-col gap-2">
+                  <div *ngFor="let entity of filteredEntities()">
+                    <div [class]="getEntityClasses(entity)" (click)="entityClicked.emit(entity.id)">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3 min-w-0">
+                              <i [class]="getIconForEntityType(entity.type) + ' w-4 h-4'"></i>
+                              <p class="font-medium mb-0 truncate text-slate-300">{{ entity.label }}</p>
+                              <div *ngIf="entity.status === 'pending'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                            </div>
+                            <div *ngIf="entity.onGraph && entity.status === 'added'" class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap">
+                              <i class="bi bi-check-circle-fill"></i>
+                              <span>On Graph</span>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                  <div *ngIf="customEntities().length === 0" class="text-center text-slate-500 py-8 flex flex-col items-center opacity-50">
+                    <p class="text-sm">No custom entities added.</p>
+                  </div>
+                  <div *ngIf="filteredEntities().length === 0 && customEntities().length > 0" class="text-center text-slate-500 py-8 flex flex-col items-center">
+                      <i class="bi bi-search text-4xl text-slate-600"></i>
+                      <h3 class="mt-2 text-md font-semibold text-slate-300">No Results Found</h3>
+                      <p class="text-sm">Filter "{{ searchTerm() }}" did not match any entities.</p>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsed Content -->
+      <div class="absolute inset-0 flex flex-col items-center py-4 gap-4 transition-opacity duration-150"
+           [class.opacity-100]="isCollapsed()"
+           [class.opacity-0]="!isCollapsed()"
+           [class.pointer-events-none]="!isCollapsed()"
+           [class.delay-150]="isCollapsed()">
+        <button (click)="tabSelected.emit('history')" 
+                [class]="'p-3 rounded-lg ' + (activeTab() === 'history' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-700 hover:text-white')"
+                title="Scan History">
+            <i class="bi bi-clock-history text-2xl"></i>
+        </button>
+        <button *ngIf="!isSmallScreen()" (click)="tabSelected.emit('entities')"
+                [class]="'p-3 rounded-lg ' + (activeTab() === 'entities' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-700 hover:text-white')"
+                title="Entities">
+            <i class="bi bi-diagram-3 text-2xl"></i>
+        </button>
+      </div>
+    </div>
+</div>

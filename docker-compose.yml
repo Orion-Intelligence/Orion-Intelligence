@@ -8,18 +8,22 @@ services:
       - .env
     environment:
       BLOOM_DIR: /app
+      COVERAGE_PROCESS_START: /app/.coveragerc
+      PYTHONPATH: /app
     working_dir: /app
     depends_on:
       - elasticsearch
+      - mailpit
       - mongo
       - arangodb
     volumes:
+      - ./backend/.coveragerc:/app/.coveragerc:ro
+      - ./backend/sitecustomize.py:/app/sitecustomize.py:ro
       - ./backend/orion:/app/orion:cached
       - ./backend/routes:/app/routes:cached
       - ./backend/static:/app/static:cached
       - ./backend/migrations:/app/migrations:cached
       - ./client/build:/app/build:delegated
-      - ./bloom_data:/app/bloom_data
     expose:
       - "8070"
     networks:
@@ -32,7 +36,7 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+      sh -c "python3 /app/cronjobs.py & exec gunicorn --preload -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
 
   arangodb:
     container_name: trusted-web-arangodb
@@ -44,7 +48,7 @@ services:
     ports:
       - "8529:8529"
     volumes:
-      - arangodb:/var/lib/arangodbx
+      - arangodb:/var/lib/arangodb3
     networks:
       backend:
         ipv4_address: 172.20.1.15
@@ -119,7 +123,6 @@ services:
         limits:
           memory: 5G
 
-
   redis_server:
     container_name: trusted-web-redis
     image: redis:7.4.0
@@ -145,6 +148,21 @@ services:
           memory: 512M
         reservations:
           memory: 128M
+
+  mailpit:
+    container_name: trustly-web-mailpit
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+      MP_SMTP_AUTH_USERNAME: accounts@example.com
+      MP_SMTP_AUTH_PASSWORD: test
+    networks:
+      - backend
 
   mongo:
     image: mongo:latest
@@ -208,3 +226,5 @@ volumes:
   static_volume:
   media_volume:
   arangodb:
+
+

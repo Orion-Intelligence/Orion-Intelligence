@@ -13,11 +13,51 @@ class elastic_insight_generator:
     @staticmethod
     def on_insight_leakdata():
         from_ = 0
-        size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
-        query_statement = {"query": {"bool": {"must": [{"exists": {"field": "m_domain"}},
-            {"script": {"script": "doc['m_domain'].size()==1"}}], "must_not": [
-            {"terms": {"m_content_type": ["news", "tracking"]}}]}}, "sort": [
-            {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True, "collapse": {"field": "m_domain"}}
+        size = CONSTANTS.S_SETTINGS_COUNTRY_DOCUMENT_SIZE
+        query_statement = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_domain.keyword"}},
+                        {"script": {"script": {"lang": "painless", "source": "doc['m_domain.keyword'].size()==1"}}},
+                    ],
+                    "must_not": [
+                        {"terms": {"m_content_type": ["news", "tracking"]}}
+                    ],
+                }
+            },
+            "sort": [{"m_update_date": {"order": "desc"}}],
+            "from": from_,
+            "size": size,
+            "track_total_hits": True,
+            "collapse": {"field": "m_domain.keyword"},
+        }
+        return "leak_model", query_statement
+
+    @staticmethod
+    def on_insight_leakdata_country():
+        from_ = 0
+        size_ = 500
+
+        query_statement = {
+            "size": size_,
+            "_source": {"excludes": ["m_embedding"]},
+            "query": {
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_country"}}
+                    ],
+                    "must_not": [
+                        {"terms": {"m_content_type": ["news", "tracking"]}}
+                    ]
+                }
+            },
+            "sort": [
+                {"m_update_date": {"order": "desc"}}
+            ],
+            "track_total_hits": True
+        }
+
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod

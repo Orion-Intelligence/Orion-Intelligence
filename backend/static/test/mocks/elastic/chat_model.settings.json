@@ -1,0 +1,1 @@
+{"chat_model":{"settings":{"index":{"routing":{"allocation":{"include":{"_tier_preference":"data_content"}}},"number_of_shards":"1","provided_name":"chat_model","creation_date":"1769294975955","number_of_replicas":"1","uuid":"v7l0A8prQPiG7fY0aKxoXg","version":{"created":"8536000"}}}}}

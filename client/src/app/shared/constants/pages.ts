@@ -15,7 +15,7 @@ export enum Category {
   STEALERLOGS = 'Stealerlogs',
   SCANNER = 'Scanner',
   TENANT = 'Tenant',
-  PROFILE = 'Profile'
+  PROFILE = 'Profile',
 }
 
 export enum GeneralSubCategory {
@@ -72,6 +72,8 @@ export enum ApiSubCategory {
   SOCIAL = 'Social-Scanner',
   CRACKED = 'Playstore-Scanner',
   SOFTWARE = 'Software-Scanner',
+  FILE = 'File-Scanner',
+  CRYPTO = 'Crypto-Scanner',
 }
 
 export enum SocialSubCategory {
@@ -100,6 +102,7 @@ export enum ScannerSubCategory {
   FULL = 'Port-Scan',
   REPOSITORY = 'Repository-Scan',
   SEO = 'SEO-Scan',
+  APK= 'APK-Scan',
 }
 
 export enum DumpSubCategory {
@@ -107,8 +110,7 @@ export enum DumpSubCategory {
 }
 
 export enum StealerlogsSubCategory {
-  CREDENTIAL = 'Credential',
-  LOGS = 'Logs',
+  IOC = 'IOCS'
 }
 export enum TenantSubCategory {
   VIEW_PROFILE = 'View-Profiles',
@@ -125,4 +127,8 @@ export enum ProfileSubCategory {
   AUDITLOG = 'Auditlog',
   TENANT = 'Tenant',
   SYSTEM_SETTINGS = 'System-Settings',
+}
+
+export enum ExtractorSubCategory {
+  IOC_EXTRACTOR = 'IOC-Extractor',
 }

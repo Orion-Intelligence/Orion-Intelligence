@@ -1,0 +1,32 @@
+{
+  "result": [
+    {
+      "m_title": "Records for provided queries",
+      "m_url": "http://breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd.onion",
+      "m_base_url": "http://breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd.onion",
+      "m_content": "",
+      "m_important_content": "Records were found in a data breach.",
+      "m_network": "onion",
+      "m_section": [],
+      "m_content_type": ["stolen"],
+      "m_screenshot": "",
+      "m_weblink": [],
+      "m_dumplink": [
+        "Canva",
+        "000WebHost.com",
+        "Breach Compilation",
+        "Exploit.In",
+        "Collection #2",
+        "Mathway (v2)",
+        "Collection #5",
+        "Slideteam.net",
+        "Mathway (v1)"
+      ],
+      "m_websites": [],
+      "m_logo_or_images": [],
+      "m_leak_date": null,
+      "m_data_size": null,
+      "m_revenue": null
+    }
+  ]
+}

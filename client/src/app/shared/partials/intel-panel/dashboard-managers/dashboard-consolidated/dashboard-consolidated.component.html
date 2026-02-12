@@ -1,8 +1,8 @@
 <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false" [showNoResult]="false"
   (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
-  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading()" [searchQuery]="query"
-  [result_count_enabled]="false" [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
-  (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)"
+  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [activeTab]="isIOC ? 'IOCs' : 'Group'"
+  [isLoading]="isLoading()" [searchQuery]="query" [result_count_enabled]="false" [result_count]="getTotalResultCount()"
+  [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)"
   [showSelectedFilters]="true"></app-result>
 
 <br>
@@ -79,7 +79,8 @@
         </div>
         <div class="dashboard__layout-right">
           <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="response"
-            [rankedResults]="rankedResult" [isGrouped]="isGrouped" [result_count]="getTotalResultCount()"></app-result-insights>
+            [rankedResults]="rankedResult" [isGrouped]="isGrouped"
+            [result_count]="getTotalResultCount()"></app-result-insights>
         </div>
       </div>
     </ng-container>
@@ -108,8 +109,8 @@
   </ng-container>
 
   <ng-template #showIOC>
-    <app-consolidated-ioc [rankedResult]="rankedResult" [apiElapsedTime]="rankedApiTime"
-      [resultsFound]="getTotalResultCount()">
-    </app-consolidated-ioc>
+    <div class="ioc-fullwidth">
+      <app-consolidated-ioc></app-consolidated-ioc>
+    </div>
   </ng-template>
 </ng-template>

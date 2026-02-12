@@ -106,7 +106,7 @@
             <div class="consolidated-scans-col-url">Action</div>
           </div>
 
-          <div class="consolidated-scans-table-row" *ngFor="let row of liveApiRows">
+          <div class="consolidated-scans-table-row" *ngFor="let row of liveApiRows.slice(0,3)">
             <div class="consolidated-scans-col-platform consolidated-scans-col-platform-extended">
               {{ (row.url || 'Details').replace('https://', '').replace('http://', '').replace('www.', '') }}
             </div>

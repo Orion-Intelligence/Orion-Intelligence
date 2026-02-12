@@ -2,7 +2,7 @@
   width: 100vw;
   height: 100vh;
   padding-left: 251px;
-  background-color: #051320;
+  background-color: var(--color-blue-850);
 }
 
 .graph_container-empty {
@@ -113,4 +113,52 @@
   animation: searchMotion 3s linear infinite;
   transform-origin: center center;
   display: inline-block;
+}
+
+.blocked-media {
+  width: 100vw;
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  box-sizing: border-box;
+}
+
+.blocked-card {
+  width: 100%;
+  padding: 32px 24px;
+  background: #0b1220;
+  border-radius: 20px;
+  border: 1px solid rgb(148 163 184 / 15%);
+  text-align: center;
+  box-shadow: 0 20px 40px rgb(0 0 0 / 50%);
+}
+
+.blocked-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgb(239 68 68 / 12%);
+  color: #ef4444;
+  font-size: 28px;
+}
+
+.blocked-card h5 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.blocked-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #9ca3af;
 }

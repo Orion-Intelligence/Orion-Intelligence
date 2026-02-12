@@ -1,8 +1,7 @@
 <nav *ngIf="this.sidebar_default" class="sidebar">
   <div class="sidebar__header">
-    <a href=""> <img alt="Logo" height="35"
-        [src]="appService.getConfig().appSettings.logo_wide_dark"
-        width="197" /> </a>
+    <a href=""> <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
+    </a>
     <button (click)="onToggleSidebar(false)" class="sidebar__header-menu">
       <img alt="Menu" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
     </button>
@@ -15,6 +14,11 @@
       [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
       [title]="this.appService.userSessionData().user.username">
     </app-dashboard-sidebar-items>
+    <ng-container
+      *ngIf=" licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced')|| licenseService.canUseModule('enterprise')">
+      <div class="dashboard_sidebar_heading">Search API's</div>
+      <div class="sidebar__item_break_light_color"></div>
+    </ng-container>
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('general')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
@@ -57,6 +61,12 @@
         [icon]="'assets/images/sidebar/news.svg'" [items]="newsCategories" [routePrefix]="'feed'"
         [title]="'Feed'"></app-dashboard-sidebar-items>
     </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseScanning()|| licenseService.canUseModule('stealer_logs')">
+      <div class="dashboard_sidebar_heading">Webscans</div>
+      <div class="sidebar__item_break_light_color"></div>
+    </ng-container>
+
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('stealer_logs')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS"
@@ -74,12 +84,19 @@
         [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
         [title]="'Live APIs'"></app-dashboard-sidebar-items>
     </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseScanning()|| licenseService.canUseModule('stealer_logs')">
+      <div class="dashboard_sidebar_heading">Data Collection</div>
+      <div class="sidebar__item_break_light_color"></div>
+    </ng-container>
+
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'"
         [title]="'Dump'"></app-dashboard-sidebar-items>
     </ng-container>
+
     <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <div class="sidebar__item">
         <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph" target="_blank">
@@ -88,16 +105,29 @@
         </a>
       </div>
     </ng-container>
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
+      <div class="sidebar__item">
+        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/social-mapper"
+          target="_blank">
+          <img alt="Social Mapper" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/social.svg"
+            width="20"> Social
+          Mapper
+        </a>
+      </div>
+    </ng-container>
     <ng-container>
       <div class="sidebar__item">
-        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/" target="_blank">
+        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/"
+          target="_blank">
           <img alt="Links" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/whistle.svg" width="20">
           Whistle Blowing
         </a>
       </div>
     </ng-container>
 
-    <hr class="sidebar__item_break">
+    <div class="dashboard_sidebar_heading">Help & Support</div>
+    <div class="sidebar__item_break_light_color"></div>
+
     <a class="gc-clear-selection" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion"
       target="_blank">
       <div class="sidebar__item">
@@ -229,12 +259,12 @@
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph"
         target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/graph.svg"
-          width="19"> </a>
+          width="19"> </a>SCANNER
     </div>
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
-      <a appTooltip="Whistle Blowing" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/"
-        target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/whistle.svg"
-          width="19"> </a>
+      <a appTooltip="Whistle Blowing" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+        href="https://orionleaks.com/#/" target="_blank"> <img alt="Links" class="sidebar__icon" height="19"
+          ngSrc="assets/images/sidebar/whistle.svg" width="19"> </a>
     </div>
 
     <hr class="sidebar__item_break">

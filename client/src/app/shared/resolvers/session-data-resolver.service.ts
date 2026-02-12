@@ -17,8 +17,7 @@ export class NodeResolver implements Resolve<userSessionData> {
     return this.apiService
     .post<userSessionData>('get/tenant/node', {})
     .pipe(
-      catchError(err => {
-        console.error('Failed to load session data', err);
+      catchError(_ => {
         return of(null as any);
       }),
       tap(sessionData => {

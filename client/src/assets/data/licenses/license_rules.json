@@ -34,7 +34,8 @@
             "social",
             "feed",
             "dumps",
-            "stealer_logs"
+            "stealer_logs",
+            "social_mapper"
         ],
         "cti_graph": true,
         "mapping": true,

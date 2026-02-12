@@ -88,6 +88,20 @@ class homepage_model:
         return display_data
 
     @staticmethod
+    async def get_country_specific_insights():
+        indice, query = elastic_insight_generator().on_insight_leakdata_country()
+        response = await elastic_controller.get_instance().search_country_insight_query(indice, query)
+        if not response:
+            return []
+
+        country_documents = [
+            hit["_source"]
+            for hit in response.get("hits", {}).get("hits", [])
+            if hit.get("_source", {}).get("m_country")
+        ]
+        return country_documents
+
+    @staticmethod
     def transform_for_display(model_key: str, item: dict) -> dict:
 
         m_hash = item["m_hash"] or item.get("m_message_id")

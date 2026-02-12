@@ -1,19 +1,31 @@
-import {Component, Input} from '@angular/core';
-import {CommonModule, NgFor} from '@angular/common';
-import {GraphModel} from '../../model/charts/charts.model';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {dashboardTooltips} from '../../constants/shared-enums';
+import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule, NgFor } from '@angular/common';
+import { GraphModel } from '../../model/charts/charts.model';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { dashboardTooltips } from '../../constants/shared-enums';
 
 @Component({
   selector: 'app-customize-bar-chart',
   imports: [NgFor, CommonModule, TooltipDirective],
   templateUrl: './customize-bar-chart.component.html'
 })
-export class CustomizeBarChartComponent {
+export class CustomizeBarChartComponent implements OnInit {
   @Input() graphModel!: GraphModel;
 
+  displayData: { name: string; value: number }[] = [];
+
+  ngOnInit(): void {
+    const data = this.graphModel?.data;
+    this.displayData =
+      data && data.length > 0
+        ? data
+        : [{ name: '-', value: 0 }, { name: '-', value: 0 }];
+  }
+
+
   get roundedMaxValue(): number {
-    const max = Math.max(...this.graphModel.data.map(d => d.value), 1);
+    const values = this.displayData.map(d => d.value);
+    const max = Math.max(...values, 1);
 
     if (max === 0) return 100;
 
@@ -28,8 +40,8 @@ export class CustomizeBarChartComponent {
     else if (rawStep / magnitude > 1) niceFactor = 2;
 
     const stepSize = niceFactor * magnitude;
-    let val = Math.ceil(max / stepSize) * stepSize
-    val = val + val * 0.15
+    let val = Math.ceil(max / stepSize) * stepSize;
+    val = val + val * 0.15;
     return val;
   }
 

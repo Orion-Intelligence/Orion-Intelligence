@@ -18,8 +18,7 @@ export class IocResolver implements Resolve<TenantModel> {
                     this.appService.tenantData.set(_tenantData);
                 }),
                 shareReplay(1),
-                catchError(err => {
-                    console.error('Failed to load tenant data iocs', err);
+                catchError(_ => {
                     return of(null as any);
                 })
             );

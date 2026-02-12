@@ -15,6 +15,7 @@ import { HelperService } from '../../shared/services/helper.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppService } from '../core/app/app.service';
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
+import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,14 @@ export class DashboardService {
   socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
   showSubscription = signal<boolean>(false);
   selectedFilters = signal<Record<string, string | null>>({});
+  passwordSchemeFilter: PasswordSchemaFilter = {
+    minLength: null,
+    maxLength: null,
+    hasAlphabets: false,
+    hasNumbers: false,
+    hasSpecialChars: false
+  };
+
 
   private cancelRequest$ = new Subject<void>();
 
@@ -61,7 +70,6 @@ export class DashboardService {
     paramModel.page = this.consolidatedParamModel.page
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
 
-    // EXACT SAME navigate behavior, now via shared helper
     this.syncQueryParamsToUrl(baseParams);
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
@@ -74,7 +82,6 @@ export class DashboardService {
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
 
-    // EXACT SAME navigate behavior, now via shared helper
     this.syncQueryParamsToUrl(baseParams);
 
     if (entityCategories) {
@@ -82,7 +89,18 @@ export class DashboardService {
         Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true)
       );
     }
+    const passwordScheme = this.passwordSchemeFilter;
 
+    if (passwordScheme && Object.values(passwordScheme).some(v => v !== null && v !== false)) {
+      baseParams['password_scheme'] = passwordScheme;
+    }
+    this.passwordSchemeFilter = {
+      minLength: null,
+      maxLength: null,
+      hasAlphabets: false,
+      hasNumbers: false,
+      hasSpecialChars: false
+    };
     return this.apiService.post<T>(apiEndpoint, baseParams).pipe(
       takeUntil(this.cancelRequest$),
       map((response: T) => ({
@@ -92,7 +110,6 @@ export class DashboardService {
         data: response
       })),
       catchError((error) => {
-        console.error('Search API call failed:', error);
         return of({ success: false, isEmpty: false, data: null });
       })
     );

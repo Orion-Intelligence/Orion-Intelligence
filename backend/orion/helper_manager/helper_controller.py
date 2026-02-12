@@ -70,17 +70,27 @@ class helper_controller:
         should_filter_clauses = []
 
         if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys or k == "m_search_all"}
+            allowed_filtered = {
+                k: (v if isinstance(v, list) else [v])
+                for k, v in pfilter.items()
+                if k in allowed_keys or k == "m_search_all"
+            }
             clauses = []
 
             for k, vals in allowed_filtered.items():
-                if k == "m_search_all":
-                    for val in vals:
-                        search_all_clause = {"bool": {"should": [{"term": {field: val}} for field in
-                            allowed_keys], "minimum_should_match": 1}}
-                        clauses.append(search_all_clause)
-                else:
-                    clauses.extend([{"term": {k: val}} for val in vals])
+                for val in vals:
+                    fields = allowed_keys if k == "m_search_all" else [k]
+                    clauses.append({
+                        "bool": {
+                            "should": (
+                                    [{"term": {f: {"value": val, "case_insensitive": True}}} for f in fields] +
+                                    [{"match": {f: val}} for f in fields] +
+                                    [{"match_phrase": {f: val}} for f in fields] +
+                                    [{"prefix": {f: val}} for f in fields]
+                            ),
+                            "minimum_should_match": 1
+                        }
+                    })
 
             if p_query_model.must:
                 must_filter_clauses = clauses
@@ -220,3 +230,43 @@ class helper_controller:
 
         result_parts = ['"{}"'.format(p) for p in quoted_phrases] + filtered_tokens
         return ' '.join(result_parts)
+    
+    @staticmethod
+    def parse_tagged_logic_query_for_iocs(query: str):
+        query = query.replace("&&", " AND ").replace("||", " OR ")
+        tokens = query.split()
+
+        output = []
+        current = []
+        op = None
+
+        for token in tokens:
+            t = token.upper()
+            if t in ("AND", "OR"):
+                op = t
+                continue
+
+            if ":" not in token:
+                continue
+
+            tag, value = token.split(":", 1)
+            node = {"tag": tag.strip(), "value": value.strip()}
+
+            if op == "AND":
+                if current:
+                    last = current.pop()
+                    current.append({"AND": [last, node]})
+                else:
+                    current.append(node)
+            elif op == "OR":
+                if current:
+                    output.append(current)
+                current = [node]
+            else:
+                current.append(node)
+
+            op = None
+
+        if output:
+            return {"OR": [item for sub in output for item in sub] + current}
+        return current[0] if len(current) == 1 else current

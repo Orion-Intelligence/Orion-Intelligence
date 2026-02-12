@@ -205,6 +205,8 @@ class AccountManager:
             user.preferences = request.preferences
         if request.twofa_enabled is not None:
             user.twofa_enabled = request.twofa_enabled
+            if not request.twofa_enabled:
+                user.twofa_secret = None
 
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(

@@ -2,7 +2,6 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "orion-client",
-  "defaultProject": "client",
   "projects": {
     "client": {
       "projectType": "application",
@@ -35,7 +34,12 @@
             ],
             "styles": [
               "node_modules/vis-network/styles/vis-network.css",
-              "src/styles.scss"
+              "src/styles.scss",
+              {
+                "input": "src/tailwind.css",
+                "bundleName": "tailwind-social",
+                "inject": false
+              }
             ],
             "scripts": [
               "src/assets/libs/bootstrap.min.js"
@@ -79,7 +83,12 @@
               ],
               "styles": [
                 "node_modules/vis-network/styles/vis-network.css",
-                "src/styles.scss"
+                "src/styles.scss",
+                {
+                  "input": "src/tailwind.css",
+                  "bundleName": "tailwind-social",
+                  "inject": false
+                }
               ],
               "scripts": [
                 "src/assets/libs/bootstrap.min.js"
@@ -149,7 +158,12 @@
             ],
             "styles": [
               "node_modules/vis-network/styles/vis-network.css",
-              "src/styles.scss"
+              "src/styles.scss",
+              {
+                "input": "src/tailwind.css",
+                "bundleName": "tailwind-social",
+                "inject": false
+              }
             ],
             "scripts": [
               "src/assets/libs/bootstrap.min.js"

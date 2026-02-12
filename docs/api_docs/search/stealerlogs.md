@@ -17,13 +17,14 @@ Request body (`search_credential_param_model`):
 Minimal example request for a credential (stealer log) search:
 ```json
 {
-  "q": "gmail.com",
-  "url": "accounts.epicgames.com",
+  "q": "",
+  "url": "",
   "user": "uzzalsen2530",
   "type": "c",
   "page": 1,
   "fullsearch": false,
-  "daterange": ""
+  "daterange": "",
+  "password_scheme":""
 }
 ```
 Example full wildcard search over a password value:

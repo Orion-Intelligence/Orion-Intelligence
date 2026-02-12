@@ -28,6 +28,7 @@ export class DirectoryComponent implements OnInit {
   filterModel: FilterModel = directory_filters;
   selectedFilters: Record<string, string | null> = {};
   totalPages = 0;
+  isLoaded = false
 
   constructor(private router: Router, private route: ActivatedRoute, private sidebarService: SidebarService, private directoryService: DirectoryService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -75,7 +76,10 @@ export class DirectoryComponent implements OnInit {
       const currentPage = parseInt(params['page'], 10) || 1;
       this.directoryService.setCurrentPage(currentPage);
 
-      this.reloadDirectory();
+      if (!this.isLoaded) {
+        this.reloadDirectory();
+      }
+      this.isLoaded = true
     });
   }
 
@@ -143,7 +147,10 @@ export class DirectoryComponent implements OnInit {
 
   private reloadDirectory(): void {
     const filteredParams = this.getFilteredParams();
-    this.directoryService.reloadDirectoryData(filteredParams);
+    this.directoryService.reloadDirectoryData({
+      ...filteredParams,
+      page: this.directoryService.getCurrentPage()
+    });
   }
 
   private getFilteredParams(): Record<string, string> {

@@ -1,10 +1,9 @@
 from typing import Any, Dict, List, Optional
-
 import httpx
 from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
-
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model as SearchChatCallbackModel, search_chat_callback_model
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
@@ -63,6 +62,21 @@ class search_model:
             return JSONResponse(
                 status_code=500, content={"detail": "Something happened while calling parse/" + api})
 
+    @staticmethod
+    async def social_search(model, key):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-social-api:8020/social/"+key, json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content=str(response))
+                return response.json()
+        except Exception as ex:
+            return JSONResponse(
+                status_code=500, content=str(ex))
+
     async def _request_doc(self, index, doc_id, lang: Optional[str] = None, translate_fields: Optional[List[str]] = None):
         if translate_fields is None:
             translate_fields = []
@@ -109,7 +123,8 @@ class search_model:
     async def search_consolidated_ranked_result(param: search_consolidated_param_model,
             base_index,
             blocked_categories,
-            allowed_categories):
+            allowed_categories
+    ):
         filter_dict = param.entity_filter if param.entity_filter else {}
 
         indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
@@ -137,7 +152,83 @@ class search_model:
         size = int(query.get("size", 10))
         total_pages = (total + size - 1) // size if size > 0 else 0
 
-        return {"Result": ranked_results, "Page_Count": total_pages,"Total_Hits": total}
+        return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
+    
+    @staticmethod
+    async def search_consolidated_iocs(
+        param: search_consolidated_param_model,
+        base_index,
+        blocked_categories,
+        allowed_categories,
+    ):
+        filter_dict = {}
+
+        indices, query, indices_boost = (
+            elastic_request_generator()
+            .on_search_consolidated_iocs(
+                param, filter_dict, base_index
+            )
+        )
+
+        response = await elastic_controller.get_instance().search_consolidated_ranked_query(
+            indices, query, indices_boost
+        )
+
+        ranked_results = []
+        if response and "hits" in response and "hits" in response["hits"]:
+            for rank, hit in enumerate(response["hits"]["hits"]):
+                source = hit.get("_source", {})
+                source.pop("m_embedding", None)
+                source["rank_index"] = hit.get("_index")
+                source["_score"] = hit.get("_score", 0)
+                source["_rank"] = rank + 1
+                ranked_results.append(source)
+
+        total = 0
+        if response and "hits" in response:
+            total_field = response["hits"].get("total", 0)
+            total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
+
+        size = int(query.get("size", 15))
+        total_pages = (total + size - 1) // size if size > 0 else 0
+
+        return {
+            "Result": ranked_results,
+            "Page_Count": total_pages,
+            "Total_Hits": total,
+        }
+
+
+    async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
+        document, data_filter = elastic_request_generator().on_search_persona(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        body = m_documents.body if hasattr(m_documents, "body") else m_documents
+        aggs = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        ch = aggs.get("channels", {}).get("buckets", [])
+        ty = aggs.get("types", {}).get("buckets", [])
+
+        total_exposures = sum(b.get("doc_count", 0) for b in ch)
+        primary_channel = ch[0] if ch else {}
+        primary_type = ty[0] if ty else {}
+
+        risk_score = min(100, (total_exposures * 20) + (len(ch) * 10))
+        severity = "NONE" if total_exposures == 0 else ("LOW" if risk_score < 30 else "MEDIUM" if risk_score < 70 else "HIGH")
+
+        m_documents = {
+            "breach_found": total_exposures > 0,
+            "total_exposures": total_exposures,
+            "unique_channels": len(ch),
+            "unique_types": len(ty),
+            "primary_channel": primary_channel.get("key"),
+            "primary_channel_hits": primary_channel.get("doc_count", 0),
+            "primary_type": primary_type.get("key"),
+            "primary_type_hits": primary_type.get("doc_count", 0),
+            "risk_score": risk_score,
+            "severity": severity
+        }
+
+        return m_documents
 
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
@@ -234,7 +325,8 @@ class search_model:
 
     async def search_credential_result(self,
             param: search_credential_param_model,
-            search_credential_callback_model=None):
+            search_credential_callback_model=None
+    ):
         document, data_filter = elastic_request_generator().on_search_credentials_data(param)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
@@ -243,7 +335,7 @@ class search_model:
 
     async def search_stealerlogs_result(self, param: search_credential_param_model, alert=False):
 
-        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, param.entity_filter, alert = alert)
+        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, param.entity_filter, alert=alert)
 
         if not data_filter:
             return False, []
@@ -260,6 +352,49 @@ class search_model:
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
 
+    async def search_stealer_iocs(self, param: search_credential_param_model, alert=False):
+
+        document, data_filter = elastic_request_generator().on_search_stealer_iocs(param, alert=alert)
+
+        if not data_filter:
+            return False, []
+
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        return await self.__search_callback.search_handler(
+            m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
+
+    async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
+        document, data_filter = elastic_request_generator().on_search_persona(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        body = m_documents.body if hasattr(m_documents, "body") else m_documents
+        aggs = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        ch = aggs.get("channels", {}).get("buckets", [])
+        ty = aggs.get("types", {}).get("buckets", [])
+
+        total_exposures = sum(b.get("doc_count", 0) for b in ch)
+        primary_channel = ch[0] if ch else {}
+        primary_type = ty[0] if ty else {}
+
+        risk_score = min(100, (total_exposures * 20) + (len(ch) * 10))
+        severity = "NONE" if total_exposures == 0 else ("LOW" if risk_score < 30 else "MEDIUM" if risk_score < 70 else "HIGH")
+
+        m_documents = {
+            "breach_found": total_exposures > 0,
+            "total_exposures": total_exposures,
+            "unique_channels": len(ch),
+            "unique_types": len(ty),
+            "primary_channel": primary_channel.get("key"),
+            "primary_channel_hits": primary_channel.get("doc_count", 0),
+            "primary_type": primary_type.get("key"),
+            "primary_type_hits": primary_type.get("doc_count", 0),
+            "risk_score": risk_score,
+            "severity": severity
+        }
+
+        return m_documents
+
     async def search_defacement_result(self, param: search_defacement_param_model):
         document, data_filter = elastic_request_generator().on_search_defacement_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
@@ -268,7 +403,8 @@ class search_model:
 
     @staticmethod
     def _process_entity_filters_generic(filters: Optional[List[entity_filter_param_model]],
-            field_mapping: Dict[str, str]) -> List[Dict[str, Any]]:
+            field_mapping: Dict[str, str]
+    ) -> List[Dict[str, Any]]:
         es_clauses = []
 
         if not filters:
@@ -287,3 +423,45 @@ class search_model:
                     else:
                         es_clauses.append({"terms": {es_field_name: tags}})
         return es_clauses
+
+
+
+    async def extract_ioc_from_file(self, file_content: bytes, filename: str):
+
+        async with httpx.AsyncClient(timeout=120) as client:
+            files = {
+                "file": (filename, file_content)
+            }
+
+            response = await client.post(
+                "http://trusted-micros-api:8010/ioc/extract",
+                files=files
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+
+        return response.json()
+
+    async def scan_apk(self, file_content: bytes, filename: str):
+
+        async with httpx.AsyncClient(timeout=120) as client:
+            files = {
+                "file": (filename, file_content)
+            }
+
+            response = await client.post(
+                "http://trusted-micros-api:8010/apk/scan",
+                files=files
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+
+        return response.json()

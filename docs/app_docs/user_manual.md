@@ -17,27 +17,25 @@ illustrates the secure and straightforward login process for the admin panel, wh
 personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that
 provide full control over the system's functionality, ensuring smooth and efficient management of operations.
 
-<img width="1918" height="858" alt="login" src="https://github.com/user-attachments/assets/34afd0d9-2ef3-42b1-984b-5c54bc81201c" />
+<img width="1916" height="905" alt="adminlogin" src="https://github.com/user-attachments/assets/ac750d71-a920-4d35-a545-341731e856e6" />
+
 
 
 ## Homepage Page
 
 The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlinedaccess to its wide range of features. When we  log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
-
-<img width="1920" height="1233" alt="Homepage" src="https://github.com/user-attachments/assets/156d58b2-5845-43a2-88df-4fd8b8a5f9db" />
-
+<img width="1919" height="1079" alt="homepage" src="https://github.com/user-attachments/assets/022963ba-4c8e-41df-85aa-d719ca881edb" />
 
 ## Directory Page
 
 Here’s an overview of the interface components
 
-### Navbar Filter
+### Navbar
 
 The navigation bar has been moved to the left side of the page. This adjustment enhances accessibility for users. It also creates a cleaner and more efficient workflow.
 
-
-<img width="420" height="893" alt="sidebar" src="https://github.com/user-attachments/assets/2a7dd05b-8a34-4e87-b3de-42357f4663a2" />
+<img width="568" height="700" alt="menu" src="https://github.com/user-attachments/assets/a5e649d3-dd30-47e2-9fd7-45c842ba3a54" />
 
 
 It consists of the following main menu items:
@@ -278,6 +276,109 @@ strategies and mitigating future risks associated with web defacements.
 <img width="1647" height="203" alt="defacement" src="https://github.com/user-attachments/assets/9b4ce4c0-9bfd-46e8-b68a-15405d3fd0aa" />
 
 
+
+### Homepage Menu
+![hompagemenu](https://github.com/user-attachments/assets/c1da6427-81d7-478d-9e1e-03e08214df40)
+
+
+**Account**
+
+The Account Settings module allows users to manage and customize their personal account preferences. Within this section, users are provided with several configuration options related to security and appearance.
+
+Firstly, users can manage their login and security settings, including the ability to enable or disable Two-Factor Authentication (2FA) to enhance account security. This allows users to choose the level of protection they require for their accounts.
+
+Secondly, users can customize the application interface according to their preferences. The system provides an option to change the theme, allowing users to switch between Light Mode and Dark Mode for better usability and visual comfort.
+
+These settings are designed to give users greater control over their account security and user experience, ensuring flexibility and convenience while using the system.
+
+<img width="1918" height="652" alt="account" src="https://github.com/user-attachments/assets/7915872b-5c3d-4f65-bcd7-a4b8727ee743" />
+
+**Users**
+
+  The Users module provides functionality to view and manage all users who have been added to the system. In this section, authorized personnel (such as an administrator or tenant manager) can see detailed information about each user.
+
+The displayed information includes:
+
+- User Email Address
+
+- Assigned Role within the system
+
+- Account Status (Active or Inactive)
+
+- Subscription Plan associated with the user
+
+- In addition to viewing user details, the module also provides View and Edit options.
+
+The View option allows administrators to open and review complete user information without making changes. The Edit option allows administrators to modify user details, such as role, status, or other relevant information, as permitted by system policies. This feature helps administrators efficiently monitor, manage, and update user accounts while ensuring proper access control and subscription management.
+   ![users](https://github.com/user-attachments/assets/c2ba3864-7d71-4b13-8cf9-36bc9375f1f3)
+
+ 
+
+   **Adduser**
+The Add User feature allows an administrator to manually create and register a new user in the system. When the administrator clicks on the “Add User” option, a user registration form is displayed.
+
+This form requires the administrator to enter the necessary details, including:
+
+- Username
+
+- Email Address
+
+- Password
+
+- Role (as defined in the system)
+
+- Licensing or Subscription Options (to assign the appropriate plan or permissions)
+
+After filling in the required information and submitting the form, the system creates the new user account and assigns the selected role and licensing configuration. This feature ensures that administrators can efficiently onboard new users and configure their access and subscription settings according to organizational requirements.
+
+   
+   <img width="1918" height="803" alt="add" src="https://github.com/user-attachments/assets/364b9515-25fa-4f66-83ae-de08162bcb33" />
+
+
+   **Viewuser**
+
+In this section, we can view all information related to a user. This includes details such as the username, email address, account status (active or inactive), and subscription or license information. It provides a complete overview of each user’s account and access details.
+   
+   ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
+
+
+
+   **Edituser**
+
+In this section, user details can be modified as needed. The admin has the option to edit, delete, or manage all users displayed in the list. User accounts can be activated or disabled, and their license category or subscription type can also be updated according to requirements. This allows the administrator to fully manage user accounts and their access.
+   
+   <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
+
+
+
+   **Auditlog**
+
+   In this section, we can view all users who have logged into the system. It maintains a complete record of login activity, including the details of each user, the date of login, and the exact time they accessed the system.The audit log serves as a comprehensive history of user access, allowing administrators to monitor system usage, track user activity, and review when and by whom the system was accessed. This log is automatically maintained to ensure transparency, security, and accountability.
+   
+   ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
+
+  
+   
+
+   **Tenant**
+
+In this system, the concept of a tenant refers to an independent company or organization that is provided with its own isolated environment. Each company (tenant) will have the ability to create, manage, and maintain its own users internally.
+Under this feature, the company will be fully responsible for adding, updating, or removing its users according to its operational requirements. These activities will be performed within the company’s tenant environment, and no involvement from the system’s central administrator will be required. Furthermore, the administrator will not have visibility into or control over the internal user management of each tenant. This functionality is specifically designed to give companies flexibility and autonomy, allowing them to customize the system usage according to their internal structure, workflows, and policies. The tenant-based approach ensures that each company can configure and utilize the platform independently, without interference, while maintaining proper isolation and data privacy between different tenants.
+
+   <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
+
+ 
+   
+
+**System Settings**
+
+In the System Settings section, users can modify the default configuration of the system according to their requirements. This includes options such as changing the theme, updating the system logo, renaming the application, and selecting or changing the system language. This feature is particularly useful for organizations or clients who want to customize and integrate the system in their own way, such as implementing white labeling, branding the platform with their identity, and adjusting the interface to match their preferences.
+
+![systemsetting](https://github.com/user-attachments/assets/aad4a8de-b8bf-4a78-85df-dcc60c4265b7)
+
+
+
+
 ## General Intellignece
 
 This is the second option in the navigation bar, designed to give users easy access to a wide range of data categories.
@@ -375,31 +476,39 @@ company data, or proprietary tools that have been exposed.
 ## Data Breach
 The Data Breach section in the navigation bar includes six categories:
 
-<img width="1918" height="585" alt="data breach" src="https://github.com/user-attachments/assets/05a60160-0bd1-412e-98e5-b77b1cf19c4b" />
+<img width="1916" height="746" alt="databreach" src="https://github.com/user-attachments/assets/864f5b1c-7f61-433f-9824-0fe23fabff97" />
 
-
-**Discussion** 
-
-In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
-
-<img width="1917" height="630" alt="image" src="https://github.com/user-attachments/assets/aee08d43-1e09-4ec2-ab34-4fe201686255" />
-
-
-1. ### Databases
+ **Databases**
 
 This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
 
-2. ### Email
-This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
+<img width="1917" height="891" alt="database" src="https://github.com/user-attachments/assets/234263fe-87c8-44f9-b62b-14c31ac1632e" />
 
-3. ### Logs
-The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
+ **Tracking**
+
+ This module enables users to verify whether specific email addresses have been exposed in public or underground data breaches. Orion scans and compares the provided email addresses against known leak databases and identifies any matches. If a breach is detected, the system provides detailed information, including the source of the breach, the date of exposure, and the type of data that may have been leaked. This helps users and administrators assess potential risks, take necessary security measures, and protect sensitive information.
+ 
+ ![tracking](https://github.com/user-attachments/assets/b7719919-c665-4068-b382-bd4f73b959cc)
+
+
+## Discussion
+
+In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
+
+<img width="1913" height="650" alt="discussion" src="https://github.com/user-attachments/assets/f69db8d6-2305-488a-9eb5-46e6d93c2b16" />
 
 4. ### Warfare
 This section provides curated intelligence on cyber warfare activities, including attacks on critical infrastructure, state-sponsored campaigns, and geopolitical cyber threats. Orion continuously monitors sources for warfare-related incidents, offering organizations timely insights into high-level threats with global implications.
 
 5. ### Cloud
 The Cloud module focuses on identifying misconfigurations, leaked credentials, and potential vulnerabilities in cloud environments. Orion scans for exposed cloud assets, such as open buckets, API keys, or improperly secured services, helping teams secure their cloud infrastructure proactively.
+
+2. ### Tracking
+This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
+
+3. ### Logs
+The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
+
 
 ## Defacement
 
@@ -472,23 +581,6 @@ Orion can use Reddit to collect data on user discussions, emerging issues, and n
 <img width="1912" height="855" alt="social" src="https://github.com/user-attachments/assets/230e62db-50e4-4b09-baf7-cd274edee76b" />
 
 
-## Live APIs
-
-The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
-It can also include many other features and possibilities. Within this section:
-
-### Email Lookup:
-
-By selecting the email option, users can input any email address to retrieve related breach information. This tool helps
-identify where and how the data associated with the entered email may have been leaked or exposed, offering valuable
-insights into potential security incidents or data breaches.
-
-### Breach Records:
-
-Below the lookup interface, a list of data breach records is displayed. These records offer additional context and
-reference points, allowing users to explore known breaches and validate the exposure of specific information.
-
-<img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
 
 
 ## Exploit
@@ -527,6 +619,24 @@ Feed mainly contains news items that may cover any topic or be related to a spec
 You can also plot any result on the CTI graph to see its relationships and context. This lets analysts examine single items and explore their connections visually.
 
 <img width="1913" height="907" alt="feed" src="https://github.com/user-attachments/assets/28ed9fa1-df82-4f31-97ad-3de95c1b26dc" />
+
+## Live APIs
+
+The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
+It can also include many other features and possibilities. Within this section:
+
+### Email Lookup:
+
+By selecting the email option, users can input any email address to retrieve related breach information. This tool helps
+identify where and how the data associated with the entered email may have been leaked or exposed, offering valuable
+insights into potential security incidents or data breaches.
+
+### Breach Records:
+
+Below the lookup interface, a list of data breach records is displayed. These records offer additional context and
+reference points, allowing users to explore known breaches and validate the exposure of specific information.
+
+<img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
 
 
 ## Data Dump

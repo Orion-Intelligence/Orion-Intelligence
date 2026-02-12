@@ -1,0 +1,138 @@
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgb(2 6 23 / 75%);
+  backdrop-filter:blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+
+.popup{
+  width:620px;
+  max-height:80vh;
+  background:var(--color-blue-900);
+  border-radius:12px;
+  border:1px solid rgb(148 163 184 / 20%);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.header{
+  padding:14px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid rgb(148 163 184 / 15%);
+}
+
+.header h3{
+  margin:0;
+  font-size:1.1rem;
+  color:#e5e7eb;
+  font-weight:600;
+}
+
+.close-btn{
+  background:transparent;
+  border:1px solid rgb(148 163 184 / 25%);
+  color:#cbd5e1;
+  width:30px;
+  height:30px;
+  border-radius:8px;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.close-btn:hover{
+  background:rgb(148 163 184 / 15%);
+}
+
+.report-list{
+  padding:16px;
+  overflow-y:auto;
+  background:var(--color-blue-900);
+}
+
+.report-card{
+  background:#fff;
+  border:1px solid rgb(148 163 184 / 15%);
+  border-radius:8px;
+  margin-bottom:12px;
+}
+
+.card-header{
+  padding:10px 14px;
+  border-bottom:1px solid rgb(148 163 184 / 12%);
+}
+
+.card-header h4{
+  margin:0;
+  font-size:.95rem;
+  color:#93c5fd;
+  font-weight:600;
+}
+
+.card-body{
+  padding:12px 14px;
+}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.label{
+  display:block;
+  font-size:.7rem;
+  color:#94a3b8 !important;
+  margin-bottom:2px;
+}
+
+.value{
+  font-size:.85rem;
+  color:#e5e7eb;
+  font-weight:600;
+}
+
+.domain-section{
+  margin-top:12px;
+}
+
+.chip-container{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:6px;
+}
+
+.chip{
+  background:var(--color-blue-900);
+  color:#93c5fd;
+  border:1px solid rgb(148 163 184 / 20%);
+  padding:2px 10px;
+  border-radius:999px;
+  font-size:.7rem;
+  font-weight:600;
+}
+
+@media (width <= 768px){
+  .overlay{
+    align-items:flex-start;
+    padding:16px;
+  }
+
+  .popup{
+    width:100%;
+    max-width:100%;
+    margin-top:16px;
+    border-radius:12px;
+  }
+
+  .info-grid{
+    grid-template-columns:1fr;
+  }
+}

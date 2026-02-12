@@ -96,6 +96,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.type = this.route.snapshot.data['type'];
 
+    this.rankedResult = this.dashboardService.rankedResult
     this.generalCallbackModel = {...this.dashboardService.generalCallbackModel} as GeneralCallbackModel;
     this.leakCallbackModel = {...this.dashboardService.leakCallbackModel} as LeakCallbackModel;
 
@@ -103,17 +104,26 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, urlSegments]) => {
+
+
+        const route: string = this.router.url.split('?')[0];
+        if (String(route) != this.dashboardService.m_current_route) {
+          this.dashboardService.rankedResult = new RankedCallbackModel()
+          this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
+          this.dashboardService.leakCallbackModel = new LeakCallbackModel()
+        }
+
         this.query = params['q'];
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
 
         this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
-        if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && (this.type == Category.BREACH || this.type == Category.FEED)))) {
 
+        if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && (this.type == Category.BREACH || this.type == Category.FEED)))) {
           this.isResponseLoading.set(false);
           if (this.dashboardService.consolidatedParamModel.q)
             this.query = this.dashboardService.consolidatedParamModel.q
-        } else {
+        } else if(this.dashboardService.rankedResult.result.length==0 && this.dashboardService.leakCallbackModel.Result.length==0 && this.dashboardService.generalCallbackModel.Result.length==0){
           this.cdr.detectChanges();
           this.fetchSearchResults()
         }
@@ -144,7 +154,9 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.isResponseLoading.set(true);
 
     this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
+    this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
     this.rankedResult = new RankedCallbackModel()
+
     if (this.isConsolidatedResult()) {
       const lastSegment = this.route.snapshot.url.at(-1)?.path;
       if (lastSegment) {
@@ -161,6 +173,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         .subscribe(response => {
           if (response.success && response.data) {
             this.rankedResult = new RankedCallbackModel(response.data);
+            this.dashboardService.rankedResult = response.data
           }
           this.isResponseLoading.set(false);
         });

@@ -112,6 +112,11 @@ export const httpInterceptor: HttpInterceptorFn = (
         if (!isSilentLogout) {
           msg.show(message);
         }
+      }else
+      if (error instanceof HttpErrorResponse && error.status === 401) {
+        localStorage.clear();
+        sessionStorage.clear();
+        router.navigate(['/login']).then();
       }
 
       if (error instanceof TimeoutError) {

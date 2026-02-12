@@ -1,3 +1,7 @@
+<span class="login-header">
+  <app-dashboard-header data-cy="dashboard-header" *ngIf="twofaRequired"></app-dashboard-header >
+</span>
+
 <div class="" id="content" *ngIf="!twofaRequired">
   <div class="login-page-container">
     <div class="login-form-side">
@@ -9,7 +13,9 @@
       </div>
       <div class="center-content-wrapper">
         <div class="login-content">
-          <img [src]="appService.getConfig().appSettings.logo_wide_light" width="80px" height="54px" alt="logo" class="orion-logo" />
+          <div *ngIf="!twofaRequired">
+            <img [src]="appService.getConfig().appSettings.logo_wide_light" width="80px" height="54px" alt="logo" class="orion-logo" />
+          </div>
 
           <div class="login-heading">Login to get started!</div>
 
@@ -76,35 +82,49 @@
 <div *ngIf="twofaRequired" class="login_container" [class.twofaextend]="otpSecret" id="content">
   <div class="login_box">
     <div class="login_header">
-      <img alt="logo" height="41" src="assets/images/shared/home-logo.svg" width="232">
+      <a class="home_chip" href="/">
+        <img alt="back" src="assets/images/shared/theme/arrow.svg">
+        <span>Homepage</span>
+      </a>
     </div>
 
-    <p *ngIf="errorMessage" class="text-warning"><b>{{ errorMessage }}</b></p>
+    <p *ngIf="errorMessage" class="text-warning text-start"><b>{{ errorMessage }}</b></p>
+
     <div *ngIf="otpDataUrl" class="login_form-group twofa-center">
       <img [src]="otpDataUrl" alt="2FA QR" width="200" height="200">
+      <div class="twofa_note">Scan QR in your authenticator app</div>
     </div>
 
-    <p *ngIf="otpSecret" class="text-white mt-4"><b>Keep your secret key safe in case you lose access to your
-        authenticator app</b></p>
+    <p *ngIf="otpSecret" class="text-white mt-3 text-center"><b>Backup key (tap to copy)</b></p>
     <div *ngIf="otpSecret" class="alert alert-warning cursor-pointer" role="alert" (click)="copyToClipboard(otpSecret)">
-      <div class="d-flex align-items-center">
-        <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="20px" height="20px" class="copy-icon"> <strong
-          class="me-2 ml-3">{{ otpSecret }}</strong> <span *ngIf="copied" class="ml-2">Copied!</span>
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="18" height="18" class="copy-icon">
+          <strong class="ms-2">{{ otpSecret }}</strong>
+        </div>
+        <span *ngIf="copied" class="fw-bold">Copied!</span>
       </div>
     </div>
+
+    <div class="twofa_title">Enter 2FA code</div>
+    <div class="twofa_subtitle">Type the 6-digit code from your authenticator app</div>
 
     <form (ngSubmit)="submitOtp()">
       <div class="login_form-group">
-        <label class="login_hidden-label" for="id_otp">OTP</label> <input [(ngModel)]="otpCode" name="otpCode"
-          class="login_input" id="id_otp" placeholder="Authentication code" required minlength="6" maxlength="6"
-          type="text">
+        <label class="login_hidden-label" for="id_otp">2FA Code</label>
+        <input [(ngModel)]="otpCode" name="otpCode"
+               class="login_input twofa_code-input" id="id_otp"
+               placeholder="••••••" required
+               minlength="6" maxlength="6"
+               inputmode="numeric" autocomplete="one-time-code"
+               type="text">
       </div>
 
       <div class="login-button-container">
-        <button type="submit" [disabled]="!otpCode || otpCode.length < 6"
-          [class.login_btn-submit]="otpCode && otpCode.length === 6"
-          [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
-          Verify OTP
+        <button type="submit" class="mt-4" [disabled]="!otpCode || otpCode.length < 6"
+                [class.login_btn-submit]="otpCode && otpCode.length === 6"
+                [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
+          Verify 2FA
         </button>
       </div>
     </form>

@@ -1,6 +1,9 @@
 .sidebar {
   width: 300px;
-  height: 300px;
+}
+
+.login-header .sidebar__header {
+  margin-top: 0;
 }
 
 .sidebar__header {
@@ -82,6 +85,20 @@
   margin: 20px 0;
 }
 
+.sidebar__item_break_light_color {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, #ffffff15 0%, #ffffff15 70%, transparent 100%);
+  margin: 10px 0;
+}
+
+.dashboard_sidebar_heading {
+  margin-top: 20px;
+  font-weight: bold;
+  font-size: 13px;
+  color: white;
+}
+
 .sidebar__item {
   margin: 6px 0 0;
   border-radius: 8px;
@@ -106,9 +123,9 @@
   max-height: 0;
   transform: translateY(-10px);
   transition: opacity 0.2s ease,
-  max-height 0.2s ease-out,
-  transform 0.2s ease-out,
-  margin-top 0.2s ease-out;
+    max-height 0.2s ease-out,
+    transform 0.2s ease-out,
+    margin-top 0.2s ease-out;
 }
 
 .sidebar__subitems.show {
@@ -124,9 +141,9 @@
   margin-top: 0 !important;
   pointer-events: none;
   transition: opacity 0.3s ease,
-  max-height 0.3s ease-in,
-  transform 0.3s ease-in,
-  margin-top 0.3s ease-in;
+    max-height 0.3s ease-in,
+    transform 0.3s ease-in,
+    margin-top 0.3s ease-in;
 }
 
 .sidebar__subitems-fast:not(.show) {
@@ -369,13 +386,13 @@
   height: 40px !important;
 }
 
-@media only screen and (width <= 700px) {
+@media only screen and (width <=700px) {
   .sidebar__content-container {
     max-width: 350px;
   }
 }
 
-@media only screen and (width <= 1050px) {
+@media only screen and (width <=1050px) {
   .sidebar__logo-container p {
     margin-left: 40px;
   }
@@ -396,14 +413,14 @@
     left: 24px;
   }
 
-  #sidebar__container-main .sidebar__menu-checkbox:checked + .sidebar__container {
+  #sidebar__container-main .sidebar__menu-checkbox:checked+.sidebar__container {
     right: 0;
     transition: right 1s ease;
   }
 
 }
 
-@media only screen and (height <= 943px) {
+@media only screen and (height <=943px) {
   .sidebar__items {
     list-style: none;
     overflow-y: auto;
@@ -417,7 +434,7 @@
 
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .sidebar__item .sidebar__item-dropdown {
     width: 100% !important;
   }
@@ -428,7 +445,7 @@
   }
 }
 
-@media only screen and (width <= 600px) {
+@media only screen and (width <=600px) {
   .sidebar__content-container {
     max-width: 100vw;
     height: 100vh;
@@ -440,7 +457,7 @@
   }
 }
 
-@media (height <= 749px) {
+@media (height <=749px) {
   .sidebar-hotlinks {
     display: none !important;
   }

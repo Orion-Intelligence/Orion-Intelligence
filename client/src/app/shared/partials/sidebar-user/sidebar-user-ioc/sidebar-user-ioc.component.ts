@@ -94,7 +94,6 @@ export class SidebarUserIocComponent implements OnInit {
         this.appService.setOnboardingStatus(true);
       },
       error: (err) => {
-        console.error(err);
       },
     });
   }
@@ -130,7 +129,6 @@ export class SidebarUserIocComponent implements OnInit {
           this.appService.setOnboardingStatus(true);
         },
         error: (err) => {
-          console.error(err);
         },
       });
       this.isConfirmationOpen = false;

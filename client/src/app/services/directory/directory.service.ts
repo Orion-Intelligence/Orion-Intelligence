@@ -20,6 +20,10 @@ export class DirectoryService {
     });
   }
 
+  getCurrentPage(): number {
+    return this.currentPageSubject.getValue();
+  }
+
   setCurrentPage(page: number): void {
     if (page > 0) {
       this.currentPageSubject.next(page);

@@ -10,7 +10,7 @@ from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account, UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, db_user_account, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
@@ -232,7 +232,10 @@ class session_manager:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
-
+            
+            maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
+            if not maintainer_user:
+                raise HTTPException(status_code=401, detail="Maintainer user not found")
             session_id = payload.get("sid")
             if user.role not in user_role.CRAWLER:
                 if not session_id:
@@ -255,7 +258,7 @@ class session_manager:
                         [redis_key, redis_sid, self._session_ttl])
 
             role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
-            acct_at = user.account_verify_at
+            acct_at = maintainer_user.account_verify_at
             if isinstance(acct_at, datetime):
                 acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
             if role_name == "member" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (

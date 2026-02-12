@@ -39,7 +39,9 @@ client_build() {
 }
 
 use_compose_file() {
-    if [ "$1" = "production" ]; then
+    if [ "$1" = "-t" ]; then
+        COMPOSE_FILE="docker-compose-testing.yml"
+    elif [ "$1" = "production" ]; then
         COMPOSE_FILE="docker-compose-production.yml"
     else
         COMPOSE_FILE="docker-compose.yml"
@@ -93,13 +95,12 @@ set_testing_enabled "$FLAG"
 
 if [ "$COMMAND" = "build" ]; then
     docker pull python:3.11-slim
-    docker volume prune -f
 
     case "$FLAG" in
         -t)
             client_build "-t"
             cp nginx/nginx-dev.conf nginx/nginx.conf
-            use_compose_file "default"
+            use_compose_file "-t"
             ;;
         -c)
             client_build "$FLAG"
@@ -128,7 +129,9 @@ if [ "$COMMAND" = "build" ]; then
             exit 1
             ;;
     esac
+
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
+
 elif [ "$COMMAND" = "production" ]; then
     use_compose_file "production"
 else
@@ -145,3 +148,4 @@ fi
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
     wait_for_test_service
 fi
+

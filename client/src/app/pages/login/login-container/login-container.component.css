@@ -18,12 +18,19 @@
 
 .twofaextend .login_box {
   width: 700px;
-  margin-top: -15vh;
+  margin-top: 100px;
+}
+
+.login_container {
+  min-height: 70vh;
+}
+
+.twofaextend .login_box {
+  margin-top: 0;
 }
 
 .login_container {
   background: var(--color-blue-830);
-  height: 100vh;
   position: relative;
   color: white;
   overflow: hidden;
@@ -44,8 +51,6 @@
   padding: 42px 32px;
   border-radius: 16px;
   border: 1px solid #ffffff15;
-  width: 420px;
-  margin-top: -30vh;
 }
 
 .login-error-message {
@@ -59,7 +64,7 @@
 .login_header {
   display: flex;
   justify-content: left;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .login_error-message {
@@ -144,8 +149,8 @@
 
 .login-page-container {
   display: flex;
-  height: 100vh;
   min-height: 750px;
+  height: 100vh;
   font-family: Roboto, sans-serif;
 }
 
@@ -423,6 +428,45 @@ input.login-input:-webkit-autofill:active {
   font-size: 20px;
 }
 
+.login_header {
+  display: flex;
+  align-items: center;
+}
+
+.home_chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 20%);
+  border: 1px solid rgb(255 255 255 / 35%);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #fff;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.home_chip:hover {
+  background: rgb(255 255 255 / 30%);
+  border-color: rgb(255 255 255 / 60%);
+}
+
+.home_chip img {
+  width: 18px;
+  height: 18px;
+}
+
+.home_chip,
+.home_chip:visited,
+.home_chip:hover,
+.home_chip:active,
+.home_chip:focus {
+  text-decoration: none;
+  color: #fff;
+}
+
 @media only screen and (width <=943px) {
   .login_box {
     margin: -30vh 20px 0;
@@ -439,8 +483,70 @@ input.login-input:-webkit-autofill:active {
     width: 175%;
     height: 175%;
   }
+
+  .twofaextend .login_box {
+    margin-top: 20px;
+  }
 }
 
+.twofa_note {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 70%);
+}
 
+.twofa_title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
 
+.twofa_subtitle {
+  margin-top: 6px;
+  margin-bottom: 14px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 70%);
+}
 
+.twofa_code-input::placeholder {
+  letter-spacing: 0;
+}
+
+.twofa_code-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(78 162 241 / 35%);
+}
+
+.twofa_code-input {
+  height: 44px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  background: linear-gradient(180deg, #fff 0%, #f2f4f6 100%);
+  border: 1px solid rgb(0 0 0 / 15%);
+}
+
+.login_box {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgb(255 255 255 / 4%) 0,
+      rgb(255 255 255 / 4%) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    radial-gradient(circle at 20% 20%, rgb(255 255 255 / 6%) 0%, transparent 40%),
+    radial-gradient(circle at 80% 0%, rgb(255 255 255 / 4%) 0%, transparent 45%),
+    linear-gradient(90deg, rgb(21 52 84 / 55%) 0%, rgb(22 56 88 / 55%) 100%);
+  padding: 42px 32px;
+  border-radius: 16px;
+  border: 1px solid rgb(255 255 255 / 12%);
+}

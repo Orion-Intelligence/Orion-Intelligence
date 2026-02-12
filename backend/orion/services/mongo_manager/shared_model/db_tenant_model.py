@@ -10,15 +10,10 @@ class IocCategory(EmbeddedModel):
     name: Optional[str] = ""
     values: List[str] = []
 
-    def __str__(self):
-        return f"{self.name} ({len(self.values)} values)"
-
-
 class TenantStatus(str, Enum):
     ONBOARDING = "onboarding"
     ACTIVE = "active"
     DISABLE = "disable"
-
 
 class db_tenant_model(Model):
     iocs: List[IocCategory] = []
@@ -39,7 +34,6 @@ class db_tenant_model(Model):
     @classmethod
     def validate_all(cls, values):
         return values
-
 
 class TenantRequest(BaseModel):
     id: str = "-1"

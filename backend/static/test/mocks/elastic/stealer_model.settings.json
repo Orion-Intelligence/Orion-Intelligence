@@ -1,1 +1,1 @@
-"{\"stealer_model\":{\"settings\":{\"index\":{\"routing\":{\"allocation\":{\"include\":{\"_tier_preference\":\"data_content\"}}},\"number_of_shards\":\"1\",\"number_of_replicas\":\"1\"}}}}"
+{"stealer_model":{"settings":{"index":{"routing":{"allocation":{"include":{"_tier_preference":"data_content"}}},"number_of_shards":"1","provided_name":"stealer_model","creation_date":"1769294981275","number_of_replicas":"1","uuid":"S7rn7AEuTS2eeTbJvFwM8Q","version":{"created":"8536000"}}}}}

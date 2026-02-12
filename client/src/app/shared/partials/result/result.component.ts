@@ -56,6 +56,8 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() filterModel!: FilterModel;
   @Input() showSorting: boolean = true;
   @Input() showSelectedFilters: boolean = true;
+  @Input() activeTab: string = 'Group';
+
 
   @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
@@ -139,6 +141,7 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true
     }
+    this.onFormSubmit()
   }
 
   onFormSubmit() {
@@ -146,6 +149,7 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
     }
     this.dashboardService.consolidatedParamModel.page = 1
+    this.dashboardService.consolidatedParamModel.tab = ""
     let query = this.local_query;
     this.searchInputRef?.nativeElement.blur();
     this.searchQuery = query;
@@ -187,8 +191,9 @@ export class ResultComponent implements OnInit, OnChanges {
     this.onToggleAnalytics(target.textContent?.trim() || '');
   }
 
-  onToggleAnalytics(tab: string) {
-    this.onToggleSwitch.emit(tab);
+  onToggleAnalytics(_tab: string) {
+    this.activeTab = _tab;
+    this.onToggleSwitch.emit(_tab);
   }
 
   onToolToggle(event: Event): void {
@@ -248,10 +253,7 @@ export class ResultComponent implements OnInit, OnChanges {
     );
     window.open(url, '_blank');
   }
-  onEntityFilterToggle(newValue: boolean): void {
-    this.app_service.set('entityFilterCondition', newValue);
-    this.onFormSubmit();
-  }
+
   checkMember(): boolean {
     return this.app_service.userSessionData().user.role === 'member';
   }

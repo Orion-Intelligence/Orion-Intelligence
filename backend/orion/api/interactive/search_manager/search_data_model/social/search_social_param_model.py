@@ -15,3 +15,17 @@ class search_social_param_model(BaseModel):
     platform: Optional[str] = ""
     entity_filter: Optional[Dict[str, List[str]]] = Field(
         default=None, examples=[{"m_country": ["pakistan"]}])
+
+class SocialReconRequest(BaseModel):
+    query: str = Field(..., min_length=1)
+
+class SearchEngineMetaRequest(BaseModel):
+    username: str = Field(..., min_length=1)
+
+class SocialProfileRequest(BaseModel):
+    platform: str = Field(..., min_length=1, examples=["Tiktok"])
+    username: str = Field(..., min_length=1, examples=["@msmannan00"])
+
+class SocialPostRequest(BaseModel):
+    platform: str = Field(..., min_length=1, examples=["Tiktok"])
+    username: str = Field(..., min_length=1, examples=["@msmannan00"])

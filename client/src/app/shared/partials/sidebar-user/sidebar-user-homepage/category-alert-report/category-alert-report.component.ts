@@ -134,7 +134,6 @@ export class CategoryAlertReportComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Unhandled Error:', err);
       }
     });
 
@@ -200,7 +199,6 @@ export class CategoryAlertReportComponent implements OnInit {
     if (this.alertToShowReport) {
       this.alertToShowReport.report_seen = true;
       this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
-        error: err => console.error(err),
       });
 
       setTimeout(() => {
@@ -297,7 +295,6 @@ export class CategoryAlertReportComponent implements OnInit {
             next: () => {
             },
             error: (err) => {
-              console.error(err);
             },
           });
         }

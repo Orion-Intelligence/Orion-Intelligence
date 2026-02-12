@@ -16,7 +16,6 @@ class ELASTIC_INDEX:
     S_DEFACEMENT_INDEX = "defacement_model"
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
-    S_CREDENTIAL_INDEX = "credential_model"
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
 
@@ -31,6 +30,7 @@ class ELASTIC_CONNECTIONS:
     S_DATABASE_NAME = 'orion-elastic-search'
     S_DATABASE_PORT = 9400
     S_DATABASE_IP = env_handler.get_instance().env('ELASTIC_ROOT_IP')
+    S_STEALER_IP = env_handler.get_instance().env('ELASTIC_STEALER_IP')
     S_ELASTIC_USERNAME = env_handler.get_instance().env('ELASTIC_ROOT_USERNAME')
     S_ELASTIC_PASSWORD = env_handler.get_instance().env('ELASTIC_ROOT_PASSWORD')
 
@@ -82,12 +82,131 @@ class ELASTIC_ENUMS:
 
         "m_message_date": {"type": "date"}, "m_time": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_id": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_sharable_link": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_channel_id": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_views": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_size": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_sender_username": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_channel_url": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_type": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_media_url": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_reply_to_message_id": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_message_status": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_saved_as": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_path": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_weblink": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_file_name": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_users": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_hashtags": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
 
-    mapping_credential_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000, "codec": "best_compression", "analysis": {"filter": {"autocomplete_filter": {"type": "edge_ngram", "min_gram": 1, "max_gram": 20}}, "analyzer": {"autocomplete": {"type": "custom", "tokenizer": "standard", "filter": [
-        "lowercase",
-        "autocomplete_filter"]}}}}, "mappings": {"_source": {"enabled": True}, "properties": {"u": {"type": "text", "analyzer": "autocomplete", "search_analyzer": "standard"}, "l": {"type": "keyword", "index": False, "doc_values": False}, "fn": {"type": "keyword", "index": False, "doc_values": False}, "s": {"type": "byte", "index": False, "doc_values": False}, "g": {"type": "byte", "index": False, "doc_values": False}}}}
-
     mapping_stealer_log_model = {"settings": {"number_of_shards": 150, "number_of_replicas": 0, "analysis": {"analyzer": {"url_path_analyzer": {"type": "custom", "tokenizer": "custom_url_tokenizer", "filter": [
         "lowercase"]}}, "tokenizer": {"custom_url_tokenizer": {"type": "pattern", "pattern": "/[^/]+", "group": 0}}}}, "mappings": {"dynamic": True, "properties": {"type": {"type": "keyword"}, "raw": {"type": "text"}, "channel": {"type": "keyword"}, "filename": {"type": "keyword"}}}}
 
     mapping_social_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1_000_000, "codec": "best_compression", "blocks": {"read_only_allow_delete": False}}, "mappings": {"dynamic": True, "dynamic_templates": [
         {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_sender_name": {"type": "keyword"}, "m_message_sharable_link": {"type": "keyword"}, "m_weblink": {"type": "keyword"}, "m_code_snippet": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 600}}}, "m_title": {"type": "text"}, "m_content": {"type": "text"}, "m_content_type": {"type": "keyword"}, "m_message_date": {"type": "date"}, "m_network": {"type": "keyword"}, "m_message_id": {"type": "keyword"}, "m_platform": {"type": "keyword"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
+
+    mapping_stealer_log_field = {
+        "m_domain": "domain.keyword",
+        "m_url": "url.keyword",
+        "m_username": "username.keyword",
+        "m_email": "email.keyword",
+        "m_ip": "ip.keyword",
+        "m_search_all": ["domain.keyword", "username.keyword", "email.keyword"]
+    }
+
+    mapping_consolidated_iocs = {
+        "m_domain": [
+            "m_base_url",
+            "m_websites",
+
+            "m_domain",
+
+            "m_base_url",
+            "m_websites",
+
+            "m_weblink",
+            "m_channel_url",
+        ],
+        "m_email": [
+            "m_email",
+
+            "m_users",
+
+            "m_content",
+        ],
+
+        "m_channel": [
+            "m_channel_name.keyword",
+            "m_channel_name",
+            "channel",
+            "m_channel",
+            "source_channel",
+            "m_source_channel",
+            "source_channel",
+            "m_source_channel",
+
+            "m_sender_name",
+        ],
+
+        "m_ip": [
+            "m_ip",
+
+            "m_ip",
+        ],
+
+        "m_username": [
+            "m_sender_username",
+            "m_sender_name",
+            "m_users",
+
+            "m_sender_name",
+
+            "m_username",
+        ],
+        "m_search_all": [
+            "m_title",
+
+            "m_content",
+            "m_important_content",
+
+            "m_url",
+            "m_base_url",
+            "m_web_url",
+            "m_weblink",
+
+            "m_caption",
+            "m_media_caption",
+            "m_ref_html",
+
+            "m_sender_name",
+            "m_channel_name",
+            "m_attacker",
+            "m_team",
+
+            "m_email",
+            "m_users",
+            "m_ip",
+            "m_domain",
+        ],
+    }
+
+    ioc_field_mapping = {
+        "m_phone_number": ["m_phone_number"],
+        "m_email": ["m_email"],
+        "m_domain": ["m_domain", "m_domain.raw"],
+        "m_country": ["m_country"],
+        "m_url": ["m_url", "m_url.raw"],
+        "m_cve": ["m_cve", "m_cwe"],
+        "m_ip": ["m_ip"],
+        "m_yara_rule": ["m_yara_rule"],
+        "m_encoded_urls": ["m_encoded_urls"],
+        "m_file_paths": ["m_file_paths"],
+        "m_credit_card": ["m_credit_card"],
+        "m_org": ["m_org", "m_organization"],
+        "m_company_name": ["m_company_name"],
+        "m_person": ["m_person"],
+        "m_location": ["m_location"],
+        "m_language": ["m_language"],
+        "m_user_agents": ["m_user_agents"],
+        "m_asns": ["m_asns"],
+        "m_team": ["m_team"],
+        "m_hashtag": ["m_hashtag"],
+        "m_mention": ["m_mention"],
+        "m_social_media_profiles": ["m_social_media_profiles"],
+        "m_currencies": ["m_currencies"],
+        "m_crypto_address": ["m_crypto_address"],
+        "m_xmpp_addresses": ["m_xmpp_addresses"],
+        "m_enterprise_attack_tactics": ["m_enterprise_attack_tactics"],
+        "m_enterprise_attack_techniques": ["m_enterprise_attack_techniques"],
+        "m_document_id": ["m_document_id"],
+        "m_au_abn": ["m_au_abn"],
+        "m_us_passport": ["m_us_passport"],
+        "m_us_bank_number": ["m_us_bank_number"],
+        "m_platform": ["m_platform","m_platforms"],
+        "m_author": ["m_author"],
+        "m_industry": ["m_industry"],
+        "m_scrap_file": ["m_scrap_file"],
+    }

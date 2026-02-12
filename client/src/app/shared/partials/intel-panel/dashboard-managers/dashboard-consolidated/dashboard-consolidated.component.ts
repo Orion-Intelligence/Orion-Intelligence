@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, 
 import { AppService } from '../../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import {combineLatest, map, switchMap, take, timer} from 'rxjs';
+import { combineLatest, map, switchMap, take, timer } from 'rxjs';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { ResultComponent } from '../../../result/result.component';
@@ -109,16 +109,22 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         }
         this.firstTrigger = false;
       });
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'];
+
+      if (tab) {
+        this.onToggleMenu(tab);
+      }
+    });
   }
 
   fetchSearchResults(_ = false): void {
-    this.domainScanComponent.clearResults()
+    if (this.domainScanComponent) { this.domainScanComponent.clearResults() }
     if (!this.isGrouped) {
       this.fetchRanked()
       return
     }
-    if (this.licenseService.canUseScanning()) {
-        console.log("xxxxx2")
+    if (this.licenseService.canUseScanning() && this.domainScanComponent) {
       this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
 
@@ -336,6 +342,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   onToggleMenu(tab: string): void {
+    this.dashboardService.consolidatedParamModel.tab = tab;
+
     if (tab == "Group") {
       this.isGrouped = true
       this.isIOC = false
@@ -347,7 +355,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     } else if (tab == "IOCs") {
       this.isIOC = true;
       this.isGrouped = false
-      this.fetchRanked()
     }
   }
 

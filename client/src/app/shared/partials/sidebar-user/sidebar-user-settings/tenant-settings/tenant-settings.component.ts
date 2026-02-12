@@ -75,8 +75,7 @@ export class TenantSettingsComponent implements OnInit {
     this.apiService.post(route, tenantData).subscribe({
       next: () => {
       },
-      error: (err) => {
-        console.error(err);
+      error: (_) => {
       },
     });
   }

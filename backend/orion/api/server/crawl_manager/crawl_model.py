@@ -2,12 +2,10 @@ import base64
 import hashlib
 import os
 from datetime import datetime, timezone
-
 import httpx
 import requests
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
-
 from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -17,6 +15,8 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
+
+
 
 
 class crawl_model:
@@ -116,6 +116,60 @@ class crawl_model:
         except Exception:
             return JSONResponse(
                 status_code=500, content={"detail": "Something happened while calling urlscan/domain"})
+
+    @staticmethod
+    async def scan_ip(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/urlscan/ip",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling urlscan/ip"}
+                    )
+
+                return response.json()
+
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling urlscan/ip"}
+            )
+
+    @staticmethod
+    async def scrape_social(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/social/scrape", json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling social/scrape"})
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling social/scrape"})
+
+    @staticmethod
+    async def ioc_extract(model):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/ioc/extract", json=model.model_dump(), timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling /ioc/extract"})
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling /ioc/extract"})
 
     @staticmethod
     async def parse_chat_ai(model: ReportChatRequest):

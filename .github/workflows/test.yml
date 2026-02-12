@@ -122,13 +122,34 @@ jobs:
 
       - run: |
           set -euo pipefail
-          test -f client/coverage/lcov.info
+          test -s client/coverage/lcov.info
 
-      - name: Upload coverage to Codacy
+      - run: |
+          set -euo pipefail
+          docker stop -t 30 trusted-web-main
+          mkdir -p backend_cov_app
+          docker cp trusted-web-main:/app/. backend_cov_app
+          python3 -m pip install --no-cache-dir --upgrade pip "coverage<7.13"
+          cp backend_cov_app/.coveragerc .coveragerc
+          test "$(find backend_cov_app -maxdepth 1 -name ".coverage.*" | wc -l)" -gt 0
+          python3 -m coverage combine backend_cov_app/.coverage.*
+          python3 -m coverage xml -o backend-coverage.xml
+          test -s backend-coverage.xml
+          grep -m 5 'filename=' backend-coverage.xml
+
+      - name: Upload frontend coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: client/coverage/lcov.info
+          language: TypeScript
+
+      - name: Upload backend coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: backend-coverage.xml
+          language: Python
 
       - if: always()
         uses: actions/upload-artifact@v4

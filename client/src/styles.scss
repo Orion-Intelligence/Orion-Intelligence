@@ -10,6 +10,8 @@
 @use 'app/pages/homepage/home-insight/home-insight.component.css';
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
+@use 'app/pages/homepage/world-heatmap/heatmap-report/heatmap-report.component.css';
+@use 'app/pages/homepage/world-heatmap/world-heatmap.component.css';
 @use 'app/pages/tenant/tenant.component.css';
 @use 'app/pages/tenant/tenant-management/view-tenant.component-shared.css';
 @use 'app/pages/tenant/tenant-management/view-profile/manage-profile.component.css';
@@ -27,7 +29,6 @@
 @use 'app/shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
-@use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
 @use 'app/pages/login/login-container/login-container.component.css';
 @use 'app/pages/signup/signup.component.css';
 @use 'assets/styles/shared/listing/list.component.css';
@@ -42,6 +43,8 @@
 @use 'app/shared/partials/customize-bar-chart/customize-bar-chart.component.css';
 @use 'app/pages/dashboard/dashboard.component.css';
 @use 'app/pages/credentials/credential.component.css';
+@use 'app/pages/credentials/credentials-search-bar/credentials-search-bar.component.css';
+@use 'app/pages/credentials/password-schema/password-schema.component.css';
 @use 'app/shared/partials/suggestion/suggestion.component.css';
 @use 'app/shared/partials/loading-form/loading-form.component.css';
 @use 'assets/styles/shared/report.component.css';
@@ -62,22 +65,27 @@
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-scan/consolidated-scan.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/defacement-results/threat-results.component.css';
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
-@use 'app/shared/partials/security-scan-results/security-scan-export-component/security-scan-export-component.component.css';
 @use 'app/shared/partials/trail-notification/trail-notification.component.css';
 @use 'app/shared/partials/message-notification/message-notification.component.css';
 @use 'app/pages/graphs/graphs.component.css';
 @use 'app/pages/graphs/graph-info/graph-info.component.css';
 @use 'app/pages/graphs/listings/graph-listings.component.css';
 @use 'app/pages/graphs/sidebar/sidebar.component.css';
+@use 'app/pages/social-mapper/social-mapper.component.css';
 @use 'app/shared/partials/report/report-chat/report-chat.component.css';
 @use 'app/shared/partials/filters/date-picker/date-picker.component.css';
-@use 'app/shared/partials/filters/multiple-selection/multiple-selection.component.css';
 @use 'app/shared/partials/json-api-viewer/json-viewer/json-viewer.component.css';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-day-view';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-month';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
+@use 'app/pages/credentials/expanded-row/expanded-row.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-managers/ioc-extractor/file-scanner.component.css';
+@use 'app/pages/security-scan/security-scan.component.css';
+@use 'app/pages/security-scan/security-scan-export-component/security-scan-export-component.component.css';
+@use 'app/shared/partials/scan-helper-methods/scan-helper-methods.component.css';
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
 
 :root {
@@ -104,6 +112,7 @@
   --color-blue-730: #fff;
   --color-blue-720: #ffffff;
   --color-blue-710: #F6F8FB;
+  --color-blue-715: linear-gradient(to right, #cccccc50 50%, #cccccc40 70%, #cccccc30 80%, #cccccc20 100%);;
   --color-blue-700: #ffffff;
   --color-blue-690: #E4E7EC;
   --color-blue-680: #ffffff;
@@ -136,6 +145,7 @@
   --color-text6: #37363675;
   --color-text7: #8E1E1E;
   --color-text8: #969696;
+  --color-text9: #000000;
   --color-pagination: #ffffff;
   --color-pagination-hover: #E3E8EE;
   --color-scan-light: #c2c2c2;
@@ -188,6 +198,7 @@
   --color-blue-730: #172235;
   --color-blue-720: #131E30;
   --color-blue-710: #172235;
+  --color-blue-715: #172235;
   --color-blue-700: #131E30;
   --color-blue-690: #1D2A41;
   --color-blue-680: #1f2e47;
@@ -220,6 +231,7 @@
   --color-text6: #A0B8D190;
   --color-text7: #fff;
   --color-text8: #D0D0D0;
+  --color-text9: #a0b8d1;
   --color-pagination: #15345475;
   --color-pagination-hover: #102A4685;
   --color-scan-light: #172235;
@@ -279,6 +291,18 @@ body {
 
 body.dark-theme {
   background-color: #0E1626;
+}
+
+.social-scanner-main{
+  min-height: 100vh !important;
+  height: auto !important;
+}
+
+.social-home .h-full{
+  height: 100vh !important;
+}
+.social-home{
+  height: 100vh !important;
 }
 
 body.light-theme {

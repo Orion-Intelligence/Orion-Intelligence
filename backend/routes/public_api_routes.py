@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body, Query
 from fastapi import Request, HTTPException
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
+from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
 
 public_routes = APIRouter(tags=["Public"])
@@ -39,10 +41,19 @@ async def get_system_resource():
 
 @public_routes.get("/api/s/static/system/{id}", include_in_schema=False)
 async def get_system_resource(request: Request, id: str):
-    if not id.lower().endswith("logo_wide_light_default.png") and not id.lower().endswith("logo_url_default.png") and not id.lower().endswith("logo_url_custom.png"):
+    if not id.lower().endswith("logo_wide_dark_default.png") and not id.lower().endswith("logo_wide_light_default.png") and not id.lower().endswith("logo_url_default.png") and not id.lower().endswith("logo_url_custom.png"):
         cookie_required(request)
     return await ResourceManager.get_instance().get_system_image(id)
 
 @public_routes.get("/robots.txt", include_in_schema=False)
 async def robots_txt():
     return await ResourceManager.get_instance().get_robots_txt()
+
+@public_routes.get(
+    "/api/search/stealerlogs",
+    include_in_schema=False,
+    status_code=200
+)
+async def search_stealerlog(q: str = Query(...)):
+    param = search_credential_param_model(q=q)
+    return await search_model.getInstance().search_stealerlogs_persona_breach(param)

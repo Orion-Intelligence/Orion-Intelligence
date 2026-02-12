@@ -9,7 +9,6 @@ import {EmptyResultComponent} from '../../../empty-result/empty-result.component
 import {LoadingFormComponent} from '../../../loading-form/loading-form.component';
 import {EmptyQueryComponent} from '../../../empty-query/empty-query.component';
 import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
-import {CardData, SearchDynamicEmailCallbackModel} from '../../../../model/api/email/search_dynamic_email_callback_model';
 
 @Component({
   selector: 'app-dashboard-api',
@@ -23,14 +22,46 @@ export class DashboardApiComponent implements OnInit {
   displayQ1 = '';
   displayQ2 = '';
   loading = false;
-  breachData: CardData | null = null;
+  breachData: any | null = null;
   query_triggered = false;
   apiType: string | null = null;
   progress = 0;
   currentStep = '';
-  emailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {
+  responseData: any = null;
+
+  txDrilldown = false;
+  prevResponseData: any = null;
+  prevQ1 = '';
+  prevQ2 = '';
+  prevDisplayQ1 = '';
+  prevDisplayQ2 = '';
+  prevBreachData: any | null = null;
+
+  constructor(private route: ActivatedRoute, private http: HttpClient) {}
+
+  get cardsData(): any[] {
+    const r = this.responseData;
+    if (!r) return [];
+    if (Array.isArray(r)) return r;
+    if (Array.isArray(r?.cards_data)) return r.cards_data;
+    if (Array.isArray(r?.result)) return r.result;
+    if (Array.isArray(r?.data?.cards_data)) return r.data.cards_data;
+    if (Array.isArray(r?.result?.cards_data)) return r.result.cards_data;
+    return [];
+  }
+
+  get cryptoResult(): any | null {
+    const r = this.responseData;
+    if (!r) return null;
+    if (r?.result && typeof r.result === 'object') return r.result;
+    if (typeof r === 'object') return r;
+    return null;
+  }
+
+  get hasResults(): boolean {
+    if (this.apiType === 'crypto') return !!this.cryptoResult;
+    return this.cardsData.length > 0;
   }
 
   ngOnInit(): void {
@@ -53,6 +84,9 @@ export class DashboardApiComponent implements OnInit {
       } else if (this.apiType === 'software') {
         if (params['name']) this.q1 = params['name'];
         this.q2 = '';
+      } else if (this.apiType === 'crypto') {
+        if (params['text']) this.q1 = params['text'];
+        this.q2 = '';
       } else {
         if (params['q1']) this.q1 = params['q1'];
         if (params['q2']) this.q2 = params['q2'];
@@ -61,15 +95,57 @@ export class DashboardApiComponent implements OnInit {
     });
   }
 
+  openTx(txid: string | null | undefined) {
+    const t = (txid || '').trim();
+    if (!t) return;
+    if (this.apiType !== 'crypto') return;
+
+    if (!this.txDrilldown) {
+      this.prevResponseData = this.responseData;
+      this.prevQ1 = this.q1;
+      this.prevQ2 = this.q2;
+      this.prevDisplayQ1 = this.displayQ1;
+      this.prevDisplayQ2 = this.displayQ2;
+      this.prevBreachData = this.breachData;
+    }
+
+    this.txDrilldown = true;
+    this.q1 = t;
+    this.displayQ1 = t;
+    this.onSearchSubmit(null);
+  }
+
+  openAddr(addr: string | null | undefined) {
+    const a = (addr || '').trim();
+    if (!a) return;
+    this.openTx(a);
+  }
+
+  backFromTx() {
+    this.txDrilldown = false;
+    this.responseData = this.prevResponseData;
+    this.q1 = this.prevQ1;
+    this.q2 = this.prevQ2;
+    this.displayQ1 = this.prevDisplayQ1;
+    this.displayQ2 = this.prevDisplayQ2;
+    this.breachData = this.prevBreachData;
+    this.loading = false;
+    this.progress = 0;
+    this.currentStep = '';
+    this.query_triggered = true;
+  }
+
   onSearchSubmit($event: SubmitEvent | null) {
     if ($event) $event.preventDefault();
     this.loading = true;
-    this.emailCallbackbackModel.cards_data = [];
+    this.responseData = null;
     this.breachData = null;
     this.progress = 0;
     this.currentStep = '';
+    this.query_triggered = true;
 
     let payload: any;
+
     if (this.apiType === 'user') {
       payload = {text: {username: this.q1, email: this.q2}};
     } else if (this.apiType === 'social') {
@@ -78,6 +154,10 @@ export class DashboardApiComponent implements OnInit {
       payload = {text: {playstore: this.q1}};
     } else if (this.apiType === 'software') {
       payload = {text: {name: this.q1}};
+    } else if (this.apiType === 'crypto') {
+      const t = (this.q1 || '').trim();
+      const isHash = /^(0x)?[a-fA-F0-9]{64}$/.test(t);
+      payload = {text: isHash ? {hash: t} : {wallet: t}};
     } else {
       payload = {text: {q1: this.q1, q2: this.q2}};
     }
@@ -89,67 +169,52 @@ export class DashboardApiComponent implements OnInit {
           ? '/api/dynamic/social'
           : this.apiType === 'cracked'
             ? '/api/dynamic/cracked'
-          : this.apiType === 'software'
-            ? '/api/dynamic/software'
-            : '/api/dynamic/';
+            : this.apiType === 'software'
+              ? '/api/dynamic/software'
+              : this.apiType === 'crypto'
+                ? '/api/crypto/scan'
+                : '/api/dynamic/';
 
-    this.query_triggered = true;
-    this.fetchSearchResults(endpoint, payload).pipe(finalize(() => {
-      this.loading = false;
-    })).subscribe({
-      next: res => {
-        const pending = res?.status === 'pending' || res?.result?.status === 'busy' || res?.result?.status === 'pending';
-        const failedPending =
-          (res?.status === 'pending' || res?.result?.status === 'pending') &&
-          ((res?.result?.progress ?? res?.progress) === 0) &&
-          ((res?.result?.step ?? res?.step) === 'failed');
+    this.fetchSearchResults(endpoint, payload)
+      .pipe(finalize(() => {
+        this.loading = false;
+      }))
+      .subscribe({
+        next: res => {
+          const pending = res?.status === 'pending' || res?.result?.status === 'busy' || res?.result?.status === 'pending';
+          const failedPending =
+            (res?.status === 'pending' || res?.result?.status === 'pending') &&
+            ((res?.result?.progress ?? res?.progress) === 0) &&
+            ((res?.result?.step ?? res?.step) === 'failed');
 
-        if (pending) {
-          const p = res?.result?.progress ?? res?.progress;
-          if (typeof p === 'number' && !Number.isNaN(p)) this.progress = p;
-          const st = res?.result?.step ?? res?.step;
-          if (typeof st === 'string' && st) this.currentStep = st;
-          if (failedPending) return;
-          return;
-        }
+          if (pending) {
+            const p = res?.result?.progress ?? res?.progress;
+            if (typeof p === 'number' && !Number.isNaN(p)) this.progress = p;
+            const st = res?.result?.step ?? res?.step;
+            if (typeof st === 'string' && st) this.currentStep = st;
+            if (failedPending) return;
+            return;
+          }
 
-        if (Array.isArray(res?.result)) {
-          (this.emailCallbackbackModel as any).cards_data = res.result;
-          this.breachData = (this.emailCallbackbackModel as any).cards_data?.[0] ?? null;
+          if (this.apiType === 'crypto') {
+            this.responseData = res;
+          } else {
+            const normalized =
+              (res && typeof res === 'object')
+                ? ((res as any).data ?? (res as any).result ?? res)
+                : res;
+
+            this.responseData = normalized;
+            this.breachData = (this.cardsData && this.cardsData.length > 0) ? this.cardsData[0] : null;
+          }
+
           this.displayQ1 = this.q1;
           this.displayQ2 = this.q2;
-          return;
+        },
+        error: () => {
+          this.loading = false;
         }
-
-        if (res?.success && res?.data) {
-          this.emailCallbackbackModel = res.data;
-          this.breachData = res.data.cards_data?.length > 0 ? res.data.cards_data[0] : null;
-          this.displayQ1 =
-            this.apiType === 'user' ? ((res.data as any)?.username ?? this.q1)
-              : this.apiType === 'cracked' ? ((res.data as any)?.playstore ?? this.q1)
-                : this.q1;
-          this.displayQ2 =
-            this.apiType === 'user' ? ((res.data as any)?.email ?? this.q2)
-              : this.q2;
-        } else {
-          const data = res as SearchDynamicEmailCallbackModel;
-          if ((data as any)?.cards_data) {
-            this.emailCallbackbackModel = data;
-            this.breachData = (data as any).cards_data?.length > 0 ? (data as any).cards_data[0] : null;
-            this.displayQ1 = this.q1;
-            this.displayQ2 = this.q2;
-          } else {
-            this.emailCallbackbackModel = new SearchDynamicEmailCallbackModel();
-            this.breachData = null;
-            this.displayQ1 = '';
-            this.displayQ2 = '';
-          }
-        }
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+      });
   }
 
   get crackedValid(): boolean {
@@ -159,6 +224,16 @@ export class DashboardApiComponent implements OnInit {
     } catch {
       return /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(this.q1);
     }
+  }
+
+  get cryptoTextValid(): boolean {
+    const t = (this.q1 || '').trim();
+    if (!t) return false;
+    const txHashPattern = /^(0x)?[a-fA-F0-9]{64}$/;
+    const btcLegacy = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+    const btcSegwit = /^bc1[a-z0-9]{39,59}$/;
+    const eth = /^0x[a-fA-F0-9]{40}$/;
+    return txHashPattern.test(t) || btcLegacy.test(t) || btcSegwit.test(t) || eth.test(t);
   }
 
   private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
@@ -181,10 +256,7 @@ export class DashboardApiComponent implements OnInit {
           ((res?.result?.step ?? res?.step) === 'failed');
         return isPending && !isFailedPending;
       }, true),
-      catchError(error => {
-        console.error('Search API call failed:', error);
-        return of(null);
-      })
+      catchError(_ => of(null))
     );
   }
 }
