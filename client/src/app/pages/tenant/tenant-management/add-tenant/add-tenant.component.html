@@ -54,13 +54,13 @@
             <div class="license-grid" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
                 <ng-container *ngFor="let license of licenseList">
                     <div class="license-card"
-                        *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && getLicenseLabel(license) !== 'maintainer'"
+                        *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && licenseService.getLicenseLabel(license) !== 'maintainer'"
                         [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')"
                         (click)="toggleTenantLicense(model, license)">
                         <input type="checkbox" class="license-checkbox"
                             [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
                         <span class="license-label">
-                            {{ getLicenseLabel(license) }}
+                            {{ licenseService.getLicenseLabel(license) }}
                         </span>
                     </div>
                 </ng-container>

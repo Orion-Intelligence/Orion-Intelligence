@@ -13,6 +13,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { finalize, switchMap, tap } from 'rxjs';
 import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver.service';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-view-profile',
@@ -31,7 +32,7 @@ export class ManageProfileComponent implements OnInit {
   isDeleteConfirmationOpen = signal<boolean>(false);
   userToDelete: User | null = null;
 
-  constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver) {
+  constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService) {
   }
 
   ngOnInit(): void {
@@ -74,18 +75,6 @@ export class ManageProfileComponent implements OnInit {
     const target = event.target as HTMLElement;
     if (!target.closest('.action-menu')) {
       this.selectedUserId = null;
-    }
-  }
-
-  getLicenseLabel(license: LicenseName | string) {
-    switch (license as LicenseName) {
-      case LicenseName.FREE: return 'Free';
-      case LicenseName.OSINT_BASIC: return 'OSINT Basic';
-      case LicenseName.OSINT_ADVANCED: return 'OSINT Advanced';
-      case LicenseName.PENTESTER: return 'Pentester';
-      case LicenseName.MAINTAINER: return 'Maintainer';
-      case LicenseName.ENTERPRISE: return 'Enterprise';
-      default: return license;
     }
   }
 
@@ -150,7 +139,7 @@ export class ManageProfileComponent implements OnInit {
 
   getUserLicensesLabel(user: any): string {
     if (!user.licenses || user.licenses.length === 0) return 'None';
-    const names = user.licenses.map((l: LicenseName) => this.getLicenseLabel(l)).join(', ');
+    const names = user.licenses.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
     return (names.length <= 15) ? names : names.slice(0, 15) + ('...');
   }
 

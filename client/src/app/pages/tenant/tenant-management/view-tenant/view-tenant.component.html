@@ -157,8 +157,9 @@
 
                               <div *ngIf="tenant.licenses?.length; else noLicenses">
                                 <ng-container *ngFor="let license of tenant.licenses">
-                                  <span *ngIf="getLicenseLabel(license) !== 'Maintainer'" class="badge-license">
-                                    {{ getLicenseLabel(license) }}
+                                  <span *ngIf="licenseService.getLicenseLabel(license) !== 'Maintainer'"
+                                    class="badge-license">
+                                    {{ licenseService.getLicenseLabel(license) }}
                                   </span>
                                 </ng-container>
                               </div>
@@ -233,7 +234,8 @@
 
                               <div class="license-grid">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <div class="license-card" *ngIf="getLicenseLabel(license) !== 'maintainer'"
+                                  <div class="license-card"
+                                    *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'"
                                     [class.license-selected]="tenant.licenses?.includes(license)"
                                     (click)="toggleTenantLicense(tenant, license)">
 
@@ -241,7 +243,7 @@
                                       [checked]="tenant.licenses?.includes(license)" />
 
                                     <span class="license-label">
-                                      {{ getLicenseLabel(license) }}
+                                      {{ licenseService.getLicenseLabel(license) }}
                                     </span>
 
                                   </div>

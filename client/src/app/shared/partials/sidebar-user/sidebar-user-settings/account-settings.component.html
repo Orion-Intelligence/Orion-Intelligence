@@ -21,7 +21,8 @@
         <div class="user-avatar">
           <div class="avatar-wrapper">
             <app-user-image-picker [imageUrl]="userSessionData.user.image || ''"
-              (onImageSelected)="updateUserResource($event)" [defaultImage]="'/api/s/static/user/logo_url_default.png'" (onClear)="deleteUserResource()">
+              (onImageSelected)="updateUserResource($event)" [defaultImage]="'/api/s/static/user/logo_url_default.png'"
+              (onClear)="deleteUserResource()">
             </app-user-image-picker>
           </div>
         </div>
@@ -47,7 +48,7 @@
             </div>
 
             <div class="user-settings_company-location">
-              Licenses〡{{ userSessionData.user.preferences?.['licenses']?.join(', ') || 'No licenses assigned' }}
+              Licenses〡{{ getUserLicensesLabel(userSessionData.user) || 'No licenses assigned' }}
             </div>
           </ng-template>
         </div>

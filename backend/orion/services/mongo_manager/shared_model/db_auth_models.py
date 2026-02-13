@@ -30,6 +30,7 @@ class LicenseName(str, Enum):
     FREE = "free"
     ONSIT_BASIC = "osint_basic"
     ONSIT_ADVANCED = "osint_advanced"
+    SOCIAL_MAPPER = 'social_mapper'
     PENTESTER = "pentester"
     MAINTAINER = "maintainer"
     ENTERPRISE = "enterprise"

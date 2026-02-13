@@ -4,8 +4,8 @@
     <div class="col-md-12 col-sm-12 col-xs-12 default-input-container-mobile">
       <div class="mobile-backdrop" *ngIf="homeSearchService.showFiltersOverlay"></div>
 
-      <ng-container
-        *ngIf="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')">
+      <ng-container *ngIf="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise') || 
+        app_service.userSessionData().user.role === 'analyst'">
         <div class="input-group default-input-sub-container"
           [ngClass]="{'mobile-overlay-active': homeSearchService.showFiltersOverlay,'mobile-overlay-inactive': !homeSearchService.showFiltersOverlay }">
 

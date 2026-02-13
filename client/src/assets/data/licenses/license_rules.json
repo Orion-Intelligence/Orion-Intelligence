@@ -34,12 +34,20 @@
             "social",
             "feed",
             "dumps",
-            "stealer_logs",
-            "social_mapper"
+            "stealer_logs"
         ],
         "cti_graph": true,
         "mapping": true,
         "scanning": false,
+        "maintainer": false
+    },
+    "social_mapper": {
+        "modules": [
+            "stealer_logs",
+            "social_mapper"
+        ],
+        "scanning": false,
+        "cti_graph": false,
         "maintainer": false
     },
     "pentester": {
