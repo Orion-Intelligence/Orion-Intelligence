@@ -25,7 +25,7 @@
         <button
             (click)="handleFetchAllData()"
             [disabled]="isAnythingFetching()"
-            [title]="hasAllDataBeenFetchedOnce() ? 'Refresh All Data' : 'Fetch All Data'"
+            [title]="hasAllDataBeenFetchedOnce() ? 'Refresh All Data' : 'Fetch All Missing Data'"
             class="h-8 w-8 flex items-center justify-center rounded-md text-slate-300 bg-slate-700/50 hover:bg-slate-700 hover:text-white transition-colors group disabled:opacity-50 disabled:cursor-wait">
             <i class="bi bi-cloud-download text-lg"></i>
         </button>
@@ -351,33 +351,34 @@
                         </button>
                     </div>
                   } @else {
-                    @for (platform of platforms(); track platform.platform) {
-                      @if (platform.profileDetails) {
-                        <div class="bg-slate-800/50 rounded-lg p-3">
-                          <div class="flex items-center gap-2 mb-2">
-                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)">
-                              <app-social-icon [platformName]="platform.platform"></app-social-icon>
-                            </div>
-                            <h4 class="font-semibold text-slate-200">{{ platform.platform }}</h4>
-                          </div>
-                          <dl class="text-sm">
-                            @for (item of getProfileDetailEntries(platform); track item.key) {
-                              <div class="py-2 border-b border-slate-700/30 last:border-b-0">
-                                <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
-                                <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+                    @if (hasAnyProfileDetails()) {
+                      @for (platform of platforms(); track platform.platform) {
+                        @if (platform.profileDetails) {
+                          <div class="bg-slate-800/50 rounded-lg p-3">
+                            <div class="flex items-center gap-2 mb-2">
+                              <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)">
+                                <app-social-icon [platformName]="platform.platform"></app-social-icon>
                               </div>
-                            }
-                          </dl>
-                        </div>
+                              <h4 class="font-semibold text-slate-200">{{ platform.platform }}</h4>
+                            </div>
+                            <dl class="text-sm">
+                              @for (item of getProfileDetailEntries(platform); track item.key) {
+                                <div class="py-2 border-b border-slate-700/30 last:border-b-0">
+                                  <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
+                                  <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+                                </div>
+                              }
+                            </dl>
+                          </div>
+                        }
                       }
-                    }
-                    @if (!hasAnyProfileDetails()) {
+                    } @else {
                       <div class="text-center py-4">
                         <p class="text-sm text-slate-500 mb-3">No detailed profile information has been fetched yet.</p>
-                        <button (click)="handleFetchAllData()" [disabled]="isAnythingFetching()"
+                        <button (click)="handleFetchAllProfiles()" [disabled]="isFetchingAnyProfileDetails() || isScanInProgress()"
                                 class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                            <i class="bi bi-cloud-download"></i>
-                            <span>Fetch All Missing Data</span>
+                            <i class="bi bi-person-lines-fill"></i>
+                            <span>Fetch All Profile Details</span>
                         </button>
                       </div>
                     }
@@ -430,10 +431,10 @@
                       } @else {
                         <div class="text-center py-4">
                           <p class="text-sm text-slate-500 mb-3">Post data has not been fetched yet.</p>
-                          <button (click)="handleFetchAllData()" [disabled]="isAnythingFetching()"
+                          <button (click)="handleFetchAllPosts()" [disabled]="isFetchingAnyPosts() || isScanInProgress()"
                                   class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                              <i class="bi bi-cloud-download"></i>
-                              <span>Fetch All Missing Data</span>
+                              <i class="bi bi-file-post"></i>
+                              <span>Fetch All Recent Posts</span>
                           </button>
                         </div>
                       }

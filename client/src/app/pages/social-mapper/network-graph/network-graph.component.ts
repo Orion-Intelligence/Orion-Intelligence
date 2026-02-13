@@ -44,7 +44,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   isManipulating = signal(false);
   
   private animationFrameId: number | null = null;
-  private animationAngle = 0;
+  private animationStartTime: number | null = null;
 
   loadingNodeIds = computed(() => {
     const loadingIds = new Set<string>();
@@ -142,14 +142,18 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   }
 
   private startAnimationLoop(): void {
-    const animate = () => {
-      this.animationAngle = (this.animationAngle + 0.07) % (2 * Math.PI);
+    const animate = (timestamp: number) => {
+      if (!this.animationStartTime) {
+        this.animationStartTime = timestamp;
+      }
       
       const network = this.networkInstance();
       const loadingIds = this.loadingNodeIds();
 
       if (network && loadingIds.size > 0) {
         network.redraw();
+      } else {
+        this.animationStartTime = null;
       }
 
       this.animationFrameId = requestAnimationFrame(animate);
@@ -251,22 +255,50 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     network.on('afterDrawing', (ctx) => {
       const loadingIds = this.loadingNodeIds();
       if (loadingIds.size === 0) return;
+
+      const timestamp = performance.now();
+      if (!this.animationStartTime) {
+        this.animationStartTime = timestamp;
+      }
+      const elapsedTime = timestamp - this.animationStartTime;
     
       const positions = network.getPositions([...loadingIds]);
       
-      ctx.strokeStyle = '#818cf8';
-      ctx.lineWidth = 5;
-      ctx.lineCap = 'round';
-
       for (const nodeId of loadingIds) {
           const pos = positions[nodeId];
           if (pos) {
               const boundingBox = network.getBoundingBox(nodeId);
-              const radius = (boundingBox.right - boundingBox.left) / 2 + 2;
+              const radius = (boundingBox.right - boundingBox.left) / 2 + 5; 
+              const lineWidth = 4;
+
+              const gradient = ctx.createConicGradient(0, pos.x, pos.y);
+              gradient.addColorStop(0, 'rgba(34, 211, 238, 0)');
+              gradient.addColorStop(0.15, 'rgba(34, 211, 238, 1)');
+              gradient.addColorStop(0.6, 'rgba(129, 140, 248, 1)');
+              gradient.addColorStop(1, 'rgba(129, 140, 248, 0)');
+              
+              ctx.strokeStyle = gradient;
+              ctx.lineWidth = lineWidth;
+              ctx.lineCap = 'round';
+              
+              const baseArcLength = Math.PI * 1.3;
+              const pulse = Math.sin(elapsedTime / 450) * 0.5;
+              const arcLength = baseArcLength + pulse;
+
+              const rotationSpeed = 0.0025;
+              const rotation = (elapsedTime * rotationSpeed);
+
+              ctx.save();
+              
+              ctx.translate(pos.x, pos.y);
+              ctx.rotate(rotation);
+              ctx.translate(-pos.x, -pos.y);
               
               ctx.beginPath();
-              ctx.arc(pos.x, pos.y, radius, this.animationAngle, this.animationAngle + (Math.PI * 1.5));
+              ctx.arc(pos.x, pos.y, radius, 0, arcLength);
               ctx.stroke();
+
+              ctx.restore();
           }
       }
     });

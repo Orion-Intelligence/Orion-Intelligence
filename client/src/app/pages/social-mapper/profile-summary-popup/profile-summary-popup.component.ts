@@ -163,11 +163,21 @@ export class ProfileSummaryPopupComponent {
   }
 
   fetchAllData() {
+    this.handleFetchAllProfiles();
+    this.handleFetchAllPosts();
+    if (this.images() === undefined) this.fetchImages.emit(this.username());
+  }
+
+  handleFetchAllProfiles() {
     for (const platform of this.platforms()) {
       if (platform.profileDetails === undefined) this.fetchProfile.emit(platform);
+    }
+  }
+
+  handleFetchAllPosts() {
+    for (const platform of this.platforms()) {
       if (platform.posts === undefined) this.fetchPosts.emit(platform);
     }
-    if (this.images() === undefined) this.fetchImages.emit(this.username());
   }
   
   onClose() {
