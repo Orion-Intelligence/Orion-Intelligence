@@ -112,7 +112,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return platforms.map(p => ({
       ...p,
       matches: !term || p.platform.toLowerCase().includes(term) || p.username.toLowerCase().includes(term)
-    }));
+    })).sort((a, b) => {
+        if (a.status === 'active' && b.status !== 'active') return -1;
+        if (a.status !== 'active' && b.status === 'active') return 1;
+        return a.platform.localeCompare(b.platform);
+    });
   });
 
   hasModalMatches = computed(() => {

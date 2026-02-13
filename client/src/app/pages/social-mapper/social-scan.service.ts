@@ -14,7 +14,7 @@ type ApiEnvelope<T> = {
   providedIn: 'root'
 })
 export class SocialScanService {
-  private useMockData = false;
+  private useMockData = true;
 
   constructor(private api: ApiService) {}
 
@@ -122,6 +122,7 @@ export class SocialScanService {
                     username: item.metadata.username,
                     url: item.metadata.url,
                     isSelected: false,
+                    status: item.metadata.status,
                     ...extractedData
                   } as PlatformResult;
 
@@ -190,6 +191,7 @@ export class SocialScanService {
               username: item.metadata.username,
               url: item.metadata.url,
               isSelected: false,
+              status: item.metadata.status,
               ...extractedData
             } as PlatformResult;
 
@@ -435,7 +437,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://allmylinks.com/msmannan00",
-        "timestamp": "2026-02-07 17:39:29"
+        "timestamp": "2026-02-07 17:39:29",
+        "status": "active"
       },
       "data": null
     },
@@ -445,7 +448,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://www.artstation.com/msmannan00",
-        "timestamp": "2026-02-07 17:39:29"
+        "timestamp": "2026-02-07 17:39:29",
+        "status": "active"
       },
       "data": null
     },
@@ -455,7 +459,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://audiojungle.net/user/msmannan00",
-        "timestamp": "2026-02-07 17:39:29"
+        "timestamp": "2026-02-07 17:39:29",
+        "status": "active"
       },
       "data": null
     },
@@ -465,7 +470,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://bitbucket.org/msmannan00",
-        "timestamp": "2026-02-07 17:39:36"
+        "timestamp": "2026-02-07 17:39:36",
+        "status": "active"
       },
       "data": {
         "url": "https://bitbucket.org/msmannan00/",
@@ -492,7 +498,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://www.cgtrader.com/msmannan00",
-        "timestamp": "2026-02-07 17:39:36"
+        "timestamp": "2026-02-07 17:39:36",
+        "status": "suggested"
       },
       "data": null
     },
@@ -502,7 +509,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://crowdin.com/profile/msmannan00",
-        "timestamp": "2026-02-07 17:39:36"
+        "timestamp": "2026-02-07 17:39:36",
+        "status": "suggested"
       },
       "data": null
     },
@@ -512,7 +520,8 @@ const MOCK_API_RESPONSE = {
         "username": "discord.com",
         "social_handle": "discord.com",
         "url": "https://discord.com",
-        "timestamp": "2026-02-07 17:39:36"
+        "timestamp": "2026-02-07 17:39:36",
+        "status": "suggested"
       },
       "data": null
     },
@@ -522,7 +531,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://hub.docker.com/u/msmannan00",
-        "timestamp": "2026-02-07 17:39:36"
+        "timestamp": "2026-02-07 17:39:36",
+        "status": "suggested"
       },
       "data": null
     },
@@ -532,7 +542,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://dribbble.com/msmannan00",
-        "timestamp": "2026-02-07 17:39:36"
+        "timestamp": "2026-02-07 17:39:36",
+        "status": "suggested"
       },
       "data": null
     },
@@ -542,7 +553,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://gitlab.com/msmannan00",
-        "timestamp": "2026-02-07 17:39:40"
+        "timestamp": "2026-02-07 17:39:40",
+        "status": "suggested"
       },
       "data": {
         "url": "https://gitlab.com/msmannan00",
@@ -569,7 +581,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "http://en.gravatar.com/msmannan00",
-        "timestamp": "2026-02-07 17:39:40"
+        "timestamp": "2026-02-07 17:39:40",
+        "status": "suggested"
       },
       "data": null
     },
@@ -579,7 +592,8 @@ const MOCK_API_RESPONSE = {
         "username": "@msmannan00",
         "social_handle": "@msmannan00",
         "url": "https://medium.com/@msmannan00",
-        "timestamp": "2026-02-07 17:39:40"
+        "timestamp": "2026-02-07 17:39:40",
+        "status": "suggested"
       },
       "data": null
     },
@@ -589,7 +603,8 @@ const MOCK_API_RESPONSE = {
         "username": "@msmannan00",
         "social_handle": "@msmannan00",
         "url": "https://replit.com/@msmannan00",
-        "timestamp": "2026-02-07 17:39:40"
+        "timestamp": "2026-02-07 17:39:40",
+        "status": "suggested"
       },
       "data": null
     },
@@ -599,7 +614,8 @@ const MOCK_API_RESPONSE = {
         "username": "@msmannan00",
         "social_handle": "@msmannan00",
         "url": "https://www.tiktok.com/@msmannan00",
-        "timestamp": "2026-02-07 17:39:51"
+        "timestamp": "2026-02-07 17:39:51",
+        "status": "suggested"
       },
       "data": {}
     },
@@ -609,7 +625,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://themeforest.net/user/msmannan00",
-        "timestamp": "2026-02-07 17:39:51"
+        "timestamp": "2026-02-07 17:39:51",
+        "status": "suggested"
       },
       "data": null
     },
@@ -619,7 +636,8 @@ const MOCK_API_RESPONSE = {
         "username": "msmannan00",
         "social_handle": "msmannan00",
         "url": "https://www.pinterest.com/msmannan00",
-        "timestamp": "2026-02-07 17:39:56"
+        "timestamp": "2026-02-07 17:39:56",
+        "status": "suggested"
       },
       "data": {}
     }

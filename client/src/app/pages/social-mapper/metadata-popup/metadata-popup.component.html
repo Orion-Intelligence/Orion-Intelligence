@@ -148,16 +148,16 @@
               </div>
             }
 
-            @if (!isFetchingPosts() && data()?.posts !== undefined) {
-                @if (!data()?.posts?.length) {
+            @if (!isFetchingPosts() && data().posts !== undefined) {
+                @if (!data().posts?.length) {
                   <div class="text-center py-4 text-slate-500">
                     <i class="bi bi-x-circle text-2xl"></i>
                     <p class="mt-1 text-sm">No posts found for this account.</p>
                   </div>
                 }
-                @if (data()?.posts?.length) {
+                @if (data().posts?.length) {
                   <div class="space-y-3">
-                    @for (post of data()?.posts; track post.post_url) {
+                    @for (post of data().posts; track post.post_url) {
                       <div class="bg-slate-700/50 p-3 rounded-lg text-sm">
                         <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
                         <div class="flex items-center justify-between text-slate-400">

@@ -67,4 +67,19 @@ export const socialMapperAnimations = `
   .animate-fade-in-up {
     animation: fadeInUp 0.4s ease-out backwards;
   }
+
+  @keyframes fadeOutDown {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+
+  .animate-fade-out-down {
+    animation: fadeOutDown 0.4s ease-in forwards;
+  }
 `;
