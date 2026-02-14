@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional
 import httpx
 from fastapi import HTTPException
-from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
 from orion.api.interactive.search_manager.search_callback_model import search_callback
@@ -66,8 +65,17 @@ class search_model:
     async def social_search(model, key):
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "http://trusted-social-api:8020/social/"+key, json=model.model_dump(), timeout=120)
+                if isinstance(model, dict) and "file_bytes" in model:
+                    response = await client.post(
+                        "http://trusted-social-api:8020/social/" + key,
+                        files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
+                        timeout=120)
+                else:
+                    response = await client.post(
+                        "http://trusted-social-api:8020/social/" + key,
+                        json=model.model_dump(),
+                        timeout=120)
+
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,

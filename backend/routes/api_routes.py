@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import re
 from pathlib import Path
 from typing import Optional
@@ -18,7 +19,7 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import (search_exploit_param_model, )
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import (search_general_param_model, )
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import (search_leak_param_model, search_news_internal_param_model, search_news_param_model, )
-from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (search_social_param_model, SocialReconRequest, SocialProfileRequest, SearchEngineMetaRequest, )
+from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (search_social_param_model, SocialReconRequest, SocialProfileRequest, SearchEngineMetaRequest, SocialFollowersRequest, SocialFollowingRequest, SocialOnlineImages, )
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
@@ -812,10 +813,41 @@ async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
     return await search_model.getInstance().social_search(param, "profile")
 
 @api_routes.post(
-    "/api/social/duckduckgo/images",
+    "/api/social/online/images",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_email(param: SearchEngineMetaRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "duckduckgo/images")
+async def search_dynamic_email(param: SocialOnlineImages = Body(...)):
+    return await search_model.getInstance().social_search(param, "online/images")
+
+@api_routes.post(
+    "/api/social/recon/image",
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+    ],
+)
+async def search_dynamic_image(payload: dict = Body(...)):
+    image_base64 = payload.get("image_base64")
+    if not image_base64:
+        return {"status": "error", "message": "image_base64_required"}
+
+    file_bytes = base64.b64decode(image_base64)
+
+    return await search_model.getInstance().social_search(
+        {"file_bytes": file_bytes, "filename": "upload.png"},
+        "recon/image",
+    )
+
+@api_routes.post(
+    "/api/social/followers",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_email(param: SocialFollowersRequest = Body(...)):
+    return await search_model.getInstance().social_search(param, "followers")
+
+@api_routes.post(
+    "/api/social/following",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_email(param: SocialFollowingRequest = Body(...)):
+    return await search_model.getInstance().social_search(param, "following")
 
 @api_routes.post(
     "/api/social/posts",
