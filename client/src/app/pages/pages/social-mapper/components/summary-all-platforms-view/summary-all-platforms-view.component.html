@@ -1,0 +1,202 @@
+<!-- All Platforms Header -->
+<div class="flex items-start gap-4 mb-4">
+    <div class="rounded-lg flex-shrink-0 flex items-center justify-center text-4xl font-bold text-white w-16 h-16 p-3 bg-slate-700">
+        <i class="bi bi-collection-fill"></i>
+    </div>
+    <div class="flex-grow">
+        <h3 class="text-2xl font-bold text-slate-100">All Platforms Summary</h3>
+        <p class="text-sm text-slate-400">Aggregated information for {{ username() }}</p>
+    </div>
+</div>
+
+<!-- Collapsible Sections for All Platforms -->
+<div class="space-y-3">
+    <!-- Profile Details from All Platforms -->
+    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
+        <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+            <span>Profile Details</span>
+        </summary>
+        <div class="p-3 border-t border-slate-700 space-y-4">
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"> <i class="bi bi-search w-4 h-4 text-slate-400"></i> </div>
+                <input type="text" placeholder="Filter platforms..." [value]="detailsSearchTerm()" (input)="onDetailsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                <ng-container *ngIf="detailsSearchTerm()"> <button (click)="clearDetailsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button> </ng-container>
+            </div>
+
+            <div class="space-y-2">
+                <ng-container *ngFor="let platform of displayPlatformsForDetails(); let i = index">
+                    <div class="animate-list-item-in" [style.animation-delay.ms]="i * 30">
+                    <ng-container *ngIf="platform.profileDetails !== undefined; else __else_3">
+                        <div class="bg-slate-800/50 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)"> <app-social-icon [platformName]="platform.platform"></app-social-icon> </div>
+                            <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                            <ng-container *ngIf="fetchingState.profile()[getPlatformUniqueKey(platform)]"> <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div> </ng-container>
+                        </div>
+                        <ng-container *ngIf="platform.profileDetails && getProfileDetailEntries(platform).length > 0; else __else_1">
+                            <dl class="text-sm">
+                            <ng-container *ngFor="let item of getProfileDetailEntries(platform)">
+                                <div class="py-2 border-b border-slate-700/30 last:border-b-0">
+                                <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
+                                <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+                                </div>
+                            </ng-container>
+                            </dl>
+                        </ng-container><ng-template #__else_1>
+                            <p class="text-center text-sm text-slate-500 py-2">No additional profile data found.</p>
+                        </ng-template>
+                        </div>
+                    </ng-container><ng-template #__else_3>
+                        <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)"> <app-social-icon [platformName]="platform.platform"></app-social-icon> </div>
+                            <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+                        </div>
+                        <ng-container *ngIf="fetchingState.profile()[getPlatformUniqueKey(platform)]; else __else_2">
+                            <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
+                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                            <span>Fetching...</span>
+                            </div>
+                        </ng-container><ng-template #__else_2>
+                            <button (click)="fetchProfile.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                            <i class="bi bi-person-lines-fill"></i><span>Fetch</span>
+                            </button>
+                        </ng-template>
+                        </div>
+                    </ng-template>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="filteredPlatformsForDetails().length === 0"> <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p> </ng-container>
+            </div>
+            <ng-container *ngIf="displayPlatformsForDetails().length < filteredPlatformsForDetails().length">
+                <button (click)="loadMoreDetailsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">
+                    Load More Platforms
+                </button>
+            </ng-container>
+        </div>
+    </details>
+
+    <!-- Recent Posts from All Platforms -->
+    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
+        <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+            <span>Recent Posts</span>
+        </summary>
+        <div class="p-3 border-t border-slate-700 space-y-4">
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"> <i class="bi bi-search w-4 h-4 text-slate-400"></i> </div>
+                <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                <ng-container *ngIf="postsSearchTerm()"> <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button> </ng-container>
+            </div>
+
+            <div class="space-y-2">
+                <ng-container *ngFor="let platform of displayPlatformsForPosts(); let i = index">
+                    <div class="animate-list-item-in" [style.animation-delay.ms]="i * 30">
+                    <ng-container *ngIf="platform.posts !== undefined; else __else_6">
+                        <div class="bg-slate-800/50 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)"> <app-social-icon [platformName]="platform.platform"></app-social-icon> </div>
+                            <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                                <ng-container *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]"> <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div> </ng-container>
+                        </div>
+                        <ng-container *ngIf="platform.posts?.length; else __else_4">
+                            <div class="space-y-3">
+                            <ng-container *ngFor="let post of platform.posts!.slice(0, 3)">
+                                <div class="bg-slate-700/50 p-3 rounded-lg text-sm"><p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p><div class="flex items-center justify-between text-slate-400"><div class="flex items-center gap-4"><span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span><span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span></div><a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">View Post <i class="bi bi-box-arrow-up-right text-xs"></i></a></div></div>
+                            </ng-container>
+                            </div>
+                        </ng-container><ng-template #__else_4> <p class="text-center text-sm text-slate-500 py-2">No posts found for this account.</p> </ng-template>
+                        </div>
+                    </ng-container><ng-template #__else_6>
+                        <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)"> <app-social-icon [platformName]="platform.platform"></app-social-icon> </div>
+                            <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+                        </div>
+                        <ng-container *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]; else __else_5">
+                            <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                                <span>Fetching...</span>
+                            </div>
+                        </ng-container><ng-template #__else_5>
+                            <button (click)="fetchPosts.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                                <i class="bi bi-file-post"></i><span>Fetch</span>
+                            </button>
+                        </ng-template>
+                        </div>
+                    </ng-template>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="filteredPlatformsForPosts().length === 0"> <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p> </ng-container>
+            </div>
+            <ng-container *ngIf="displayPlatformsForPosts().length < filteredPlatformsForPosts().length">
+                <button (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">
+                    Load More Platforms
+                </button>
+            </ng-container>
+        </div>
+    </details>
+
+    <!-- Associated Images -->
+    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
+        <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer list-item-custom">
+            <span>Associated Images</span>
+        </summary>
+            <div class="p-3 border-t border-slate-700 space-y-4">
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"> <i class="bi bi-search w-4 h-4 text-slate-400"></i> </div>
+                <input type="text" placeholder="Filter platforms..." [value]="imagesSearchTerm()" (input)="onImagesSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                <ng-container *ngIf="imagesSearchTerm()"> <button (click)="clearImagesSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button> </ng-container>
+            </div>
+
+            <div class="space-y-2">
+                <ng-container *ngFor="let platform of displayPlatformsForImages(); let i = index">
+                    <div class="animate-list-item-in" [style.animation-delay.ms]="i * 30">
+                    <ng-container *ngIf="platform.images !== undefined; else __else_9">
+                        <div class="bg-slate-800/50 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)"> <app-social-icon [platformName]="platform.platform"></app-social-icon> </div>
+                            <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                            <ng-container *ngIf="fetchingState.platformImages()[getPlatformUniqueKey(platform)]"> <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div> </ng-container>
+                        </div>
+                        <ng-container *ngIf="platform.images?.length; else __else_7">
+                            <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                                <ng-container *ngFor="let image of platform.images">
+                                <div class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors">
+                                    <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title"> <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-20 object-cover transition-transform duration-300 group-hover:scale-105"> </a>
+                                </div>
+                                </ng-container>
+                            </div>
+                        </ng-container><ng-template #__else_7>
+                            <p class="text-center text-sm text-slate-500 py-2">No images found for this platform.</p>
+                        </ng-template>
+                        </div>
+                    </ng-container><ng-template #__else_9>
+                        <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1" [style.background-color]="getPlatformColor(platform.platform)"> <app-social-icon [platformName]="platform.platform"></app-social-icon> </div>
+                            <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+                        </div>
+                        <ng-container *ngIf="fetchingState.platformImages()[getPlatformUniqueKey(platform)]; else __else_8">
+                            <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                                <span>Fetching...</span>
+                            </div>
+                        </ng-container><ng-template #__else_8>
+                            <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                                <i class="bi bi-images"></i><span>Fetch</span>
+                            </button>
+                        </ng-template>
+                        </div>
+                    </ng-template>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="filteredPlatformsForImages().length === 0"> <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p> </ng-container>
+            </div>
+            <ng-container *ngIf="displayPlatformsForImages().length < filteredPlatformsForImages().length">
+                <button (click)="loadMoreImagesPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">
+                    Load More Platforms
+                </button>
+            </ng-container>
+        </div>
+    </details>
+</div>

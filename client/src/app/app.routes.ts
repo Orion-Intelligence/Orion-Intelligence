@@ -78,7 +78,7 @@ import {OnboardingGuard} from './shared/guards/onboarding-guar';
 import {
   FileScannerComponent
 } from './shared/partials/intel-panel/dashboard-managers/ioc-extractor/file-scanner.component';
-import {SocialMapperComponent} from './pages/social-mapper/social-mapper.component';
+import {SocialMapperComponent} from './pages/pages/social-mapper/social-mapper.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: {reportdata: ReportConsolidatedResolver},

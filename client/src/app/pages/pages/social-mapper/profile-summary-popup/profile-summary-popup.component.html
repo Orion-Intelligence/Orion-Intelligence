@@ -1,0 +1,126 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in p-[30px]" (click)="onClose()">
+  <div class="flex flex-col bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-5xl max-h-[90vh] min-h-[70vh] animate-fade-in-scale overflow-hidden" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="p-3 flex items-center justify-between gap-3 border-b border-slate-700 bg-slate-900 flex-shrink-0 rounded-t-lg">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="h-12 w-12 rounded-full ring-2 ring-slate-600 flex-shrink-0 flex items-center justify-center bg-slate-700">
+          <i class="bi bi-person-fill text-3xl text-slate-400"></i>
+        </div>
+        <div class="min-w-0">
+            <h3 class="text-xl font-bold text-slate-100 truncate">{{ username() }}</h3>
+            <p *ngIf="email()" class="text-sm text-indigo-400 font-mono truncate">{{ email() }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button *ngIf="isAnythingFetching()"
+              (click)="cancelAllFetches.emit(username())"
+              title="Cancel all active fetches"
+              class="h-8 flex items-center justify-center gap-2 px-3 rounded-full text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors group">
+            <i class="bi bi-x-octagon text-lg"></i>
+            <span class="text-xs font-semibold hidden sm:inline">Cancel All</span>
+        </button>
+        <button
+            (click)="rescan.emit(username())"
+            [disabled]="isScanInProgress()"
+            title="Re-scan profile"
+            class="h-8 w-8 flex items-center justify-center rounded-full text-slate-300 bg-slate-700/50 hover:bg-slate-700 hover:text-white transition-colors group disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="bi bi-arrow-clockwise text-lg" [class.animate-spin]="isScanInProgress()"></i>
+        </button>
+        <button (click)="onClose()" type="button" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
+          <i class="bi bi-x-lg text-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow flex min-h-0">
+      <!-- Left Sidebar: Platform List -->
+      <div class="w-72 flex-shrink-0 flex flex-col border-r border-slate-700 bg-slate-800/50">
+        <div class="p-3 border-b border-slate-700 flex-shrink-0">
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <i class="bi bi-search w-5 h-5 text-slate-400"></i>
+            </div>
+            <input type="text"
+                   placeholder="Filter platforms..."
+                   [value]="platformSearchTerm()"
+                   (input)="onSearchTermChange($event)"
+                   class="block w-full rounded-md border-0 bg-slate-900/50 py-2 pl-10 pr-10 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            <button *ngIf="platformSearchTerm()" (click)="clearSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+          </div>
+        </div>
+        <div class="overflow-y-auto flex-grow custom-scrollbar">
+          <div class="flex flex-col p-2">
+            <div (click)="onAllPlatformsClick()"
+                 class="group flex items-center p-2 rounded-md transition-colors cursor-pointer"
+                 [class.bg-slate-700]="selectedPlatform() === 'all'">
+              <div class="flex-shrink-0 rounded-md mr-3 flex items-center justify-center text-lg font-bold text-white h-8 w-8 p-1.5 bg-slate-600">
+                <i class="bi bi-collection-fill"></i>
+              </div>
+              <div class="flex-grow min-w-0">
+                <p class="font-semibold text-sm text-slate-200 truncate">All Platforms</p>
+                <p class="text-xs text-slate-400 truncate mb-0">{{ platforms().length }} platforms</p>
+              </div>
+            </div>
+            <div class="my-2 h-px bg-slate-700/50 mx-2"></div>
+            <div *ngIf="filteredPlatforms().length > 0; else noPlatformMatches">
+              <div class="flex flex-col">
+                  <div *ngFor="let platform of filteredPlatforms()">
+                    <div
+                        (click)="onPlatformClick(platform)"
+                        class="group flex items-center p-2 rounded-md transition-colors cursor-pointer"
+                        [class.bg-slate-700]="isSelected(platform)">
+                    <div class="platform-icon flex-shrink-0 rounded-md mr-3 flex items-center justify-center text-lg font-bold text-white h-8 w-8 p-1.5"
+                        [style.background-color]="getPlatformColor(platform.platform)">
+                        <app-social-icon [platformName]="platform.platform"></app-social-icon>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <p class="font-semibold text-sm text-slate-200 truncate">{{ platform.platform }}</p>
+                        <p class="text-xs text-slate-400 truncate mb-0">{{ platform.username }}</p>
+                    </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            <ng-template #noPlatformMatches>
+                <div *ngIf="platformSearchTerm()" class="p-8 text-center text-slate-500">
+                    <p class="text-sm">No platforms match your filter.</p>
+                </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Platform Details -->
+      <div class="flex-grow overflow-y-auto custom-scrollbar p-4">
+        <ng-container *ngIf="selectedPlatformDetails() as platform; else allPlatformsView">
+            <app-summary-platform-view
+                [platform]="platform"
+                [isScanInProgress]="isScanInProgress()"
+                (fetchProfile)="fetchProfile.emit($event)"
+                (fetchPosts)="fetchPosts.emit($event)"
+                (fetchFollowers)="fetchFollowers.emit($event)"
+                (fetchFollowing)="fetchFollowing.emit($event)"
+                (fetchPlatformImages)="fetchPlatformImages.emit($event)"
+                (cancelFetchProfile)="cancelFetchProfile.emit($event)"
+                (cancelFetchPosts)="cancelFetchPosts.emit($event)"
+                (cancelFetchFollowers)="cancelFetchFollowers.emit($event)"
+                (cancelFetchFollowing)="cancelFetchFollowing.emit($event)"
+                (cancelFetchPlatformImages)="cancelFetchPlatformImages.emit($event)"
+            />
+        </ng-container>
+        <ng-template #allPlatformsView>
+            <app-summary-all-platforms-view *ngIf="isAllPlatformsSelected()"
+                [username]="username()"
+                [platforms]="platforms()"
+                [isScanInProgress]="isScanInProgress()"
+                (fetchProfile)="fetchProfile.emit($event)"
+                (fetchPosts)="fetchPosts.emit($event)"
+                (fetchPlatformImages)="fetchPlatformImages.emit($event)"
+            />
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

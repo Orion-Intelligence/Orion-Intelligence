@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, WritableSignal } from '@angular/core';
-import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, SocialImage, NetworkNode, GraphPlatformBatch } from '../model/social/social-scan.models';
+import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, SocialImage, NetworkNode, GraphPlatformBatch } from '../../shared/model/social/social-scan.models';
 
 const STORAGE_KEY = 'orion-intelligence-sessions';
 
@@ -21,7 +21,6 @@ export class TabManagerService {
   }
 
   private createNewState(): TabState {
-    // FIX: Provide explicit types for all signals to ensure type safety and proper inference.
     return {
       searchTerm: signal(''),
       homeMenuSearchTerm: signal(''),
@@ -35,7 +34,7 @@ export class TabManagerService {
       isHomeMenuCollapsed: signal(false),
       isEntityMenuCollapsed: signal(true),
       activeHomeMenuTab: signal<'history' | 'entities'>('history'),
-      isPhysicsEnabled: signal(false),
+      isPhysicsEnabled: signal(true),
       viewMode: signal<'graph' | 'list'>('graph'),
       expandedGroupDataByUser: signal<{ [username: string]: NetworkNode | null }>({}),
       graphPlatformBatches: signal(new Map<string, GraphPlatformBatch>()),
