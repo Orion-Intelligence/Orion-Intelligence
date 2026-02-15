@@ -1,0 +1,9 @@
+:host(.manipulation-active) {
+  cursor: pointer;
+}
+
+.network-graph-delete-edge-button {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}

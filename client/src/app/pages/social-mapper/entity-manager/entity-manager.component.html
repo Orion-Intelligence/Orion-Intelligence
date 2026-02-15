@@ -1,0 +1,9 @@
+<app-entity-menu
+  [isCollapsed]="isCollapsed()"
+  [isSmallScreen]="isSmallScreen()"
+  [customEntities]="activeTabState().customEntities()"
+  (toggle)="toggle.emit()"
+  (addEntityClicked)="openAddEntityModal($event)"
+  (entityClicked)="addEntityToGraph($event)"
+  (deleteEntityClicked)="deleteCustomEntity($event)">
+</app-entity-menu>

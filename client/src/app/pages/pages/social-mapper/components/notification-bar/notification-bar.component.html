@@ -1,9 +1,0 @@
-<div class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] animate-fade-in-scale">
-    <ng-container *ngIf="data() as notification">
-      <div class="flex items-center gap-3 text-sm font-medium px-4 py-2 rounded-full shadow-lg backdrop-blur-sm"
-            [ngClass]="notification.style">
-        <i class="w-5 h-5" [ngClass]="notification.icon"></i>
-        <span>{{ notification.message }}</span>
-      </div>
-    </ng-container>
-</div>

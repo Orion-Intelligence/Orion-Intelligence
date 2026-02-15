@@ -87,6 +87,16 @@ export interface PlatformResult {
   following_list?: string[] | null;
 }
 
+export type ManagedPlatform = PlatformResult & {
+  stableKey: string;
+  matches: boolean;
+};
+
+export interface ManageProfilesModalData {
+  username: string;
+  platforms: PlatformResult[];
+}
+
 export type ScanEvent =
   | { type: 'progress'; payload: Partial<Job> }
   | { type: 'complete'; payload: PlatformResult[] };
@@ -111,7 +121,6 @@ export interface TabState {
   jobs: WritableSignal<Job[]>;
   networkData: WritableSignal<NetworkData>;
   scanResults: WritableSignal<Map<string, PlatformResult[]>>;
-  socialImages: WritableSignal<Map<string, SocialImage[]>>;
   activeUsernames: WritableSignal<Set<string>>;
   customEntities: WritableSignal<CustomEntity[]>;
   isEditMode: WritableSignal<boolean>;

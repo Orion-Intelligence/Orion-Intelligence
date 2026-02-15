@@ -1,0 +1,17 @@
+.social-mapper-custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.social-mapper-custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.social-mapper-custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.social-mapper-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

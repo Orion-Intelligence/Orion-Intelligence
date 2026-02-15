@@ -1,0 +1,21 @@
+.social-mapper-main-bg-grid {
+    background-image: radial-gradient(circle, rgb(100 116 139 / 15%) 1px, transparent 1px);
+    background-size: 2rem 2rem;
+}
+
+.social-mapper-border-user-connection {
+    border-color: #fb923c;
+}
+
+.social-mapper-border-entity-connection {
+    border-color: #a78bfa;
+}
+
+.social-mapper-context-menu-wrapper {
+    position: fixed;
+    z-index: 100;
+}
+
+.social-mapper-platform-icon {
+    background-color: #475569;
+}

@@ -1,0 +1,6 @@
+<div class="w-full h-full relative">
+  <button *ngIf="deleteButtonState().visible" (click)="deleteEdge(deleteButtonState().edgeId!)" (mouseenter)="cancelHideDeleteButton()" (mouseleave)="hideDeleteButton()" class="network-graph-delete-edge-button z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-red-500" title="Remove connection">
+    <i class="bi bi-x-lg text-sm font-bold"></i>
+  </button>
+  <div #networkContainer class="w-full h-full absolute top-0 left-0"></div>
+</div>

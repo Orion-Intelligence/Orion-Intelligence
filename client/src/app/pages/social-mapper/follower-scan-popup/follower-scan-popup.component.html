@@ -1,0 +1,82 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in p-[30px]" (click)="close.emit()">
+  <div class="flex flex-col bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-lg h-[80vh] animate-fade-in-scale overflow-hidden" (click)="$event.stopPropagation()">
+    <div class="p-3 flex items-start justify-between gap-3 border-b border-slate-700 bg-slate-900 flex-shrink-0 rounded-t-lg">
+      <div class="flex items-center gap-3 min-w-0">
+        <div [socialMapperPlatformBg]="platform().platform" class="social-mapper-platform-icon rounded-lg flex-shrink-0 flex items-center justify-center text-3xl font-bold text-white w-12 h-12 p-2">
+          <app-social-icon [platformName]="platform().platform"></app-social-icon>
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-xl font-bold text-slate-100">Scan Connections</h3>
+          <p class="font-mono text-sm text-indigo-400 truncate">{{ platform().platform }} / {{ '@' + platform().username }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="close.emit()" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"><i class="bi bi-x-lg text-lg"></i></button>
+    </div>
+
+    <div class="flex-grow p-4 flex flex-col min-h-0">
+      <div class="relative mb-3">
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-5 h-5 text-slate-400"></i></div>
+        <input type="text" placeholder="Filter profiles..." [value]="searchTerm()" (input)="onSearchInput($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-2 pl-10 pr-4 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+      </div>
+
+      <div class="border-b border-slate-700 shrink-0">
+        <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+          <button type="button" (click)="activeTab.set('followers')" [class]="'flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'followers' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">
+            <span>Followers</span>
+            <span *ngIf="platform().followers_list" class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'followers' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-700 text-slate-300'">{{ followers().length }}</span>
+          </button>
+          <button type="button" (click)="activeTab.set('following')" [class]="'flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'following' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">
+            <span>Following</span>
+            <span *ngIf="platform().following_list" class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'following' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-700 text-slate-300'">{{ following().length }}</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="flex-grow mt-3 min-h-0">
+        <ng-container *ngIf="activeTab() === 'followers'; else followingPanel">
+          <div *ngIf="followers().length > 0; else fetchFollowersState" class="h-full flex flex-col">
+            <div class="flex-grow overflow-y-auto social-mapper-custom-scrollbar pr-1 space-y-1">
+              <button type="button" *ngFor="let username of displayFollowers()" (click)="toggleSelection(username)" class="w-full flex items-center justify-between rounded-md px-3 py-2 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'bg-slate-700/40 border border-slate-700 text-slate-200 hover:bg-slate-700'">
+                <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
+                <i *ngIf="isSelected(username)" class="bi bi-check-circle-fill text-indigo-400"></i>
+              </button>
+            </div>
+            <button type="button" *ngIf="displayFollowers().length < filteredFollowers().length" (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="mt-3 w-full rounded-md bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-200 py-2 text-sm">{{ isLoadingMoreFollowers() ? 'Loading...' : 'Load More' }}</button>
+          </div>
+        </ng-container>
+
+        <ng-template #followingPanel>
+          <div *ngIf="following().length > 0; else fetchFollowingState" class="h-full flex flex-col">
+            <div class="flex-grow overflow-y-auto social-mapper-custom-scrollbar pr-1 space-y-1">
+              <button type="button" *ngFor="let username of displayFollowing()" (click)="toggleSelection(username)" class="w-full flex items-center justify-between rounded-md px-3 py-2 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'bg-slate-700/40 border border-slate-700 text-slate-200 hover:bg-slate-700'">
+                <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
+                <i *ngIf="isSelected(username)" class="bi bi-check-circle-fill text-indigo-400"></i>
+              </button>
+            </div>
+            <button type="button" *ngIf="displayFollowing().length < filteredFollowing().length" (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="mt-3 w-full rounded-md bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-200 py-2 text-sm">{{ isLoadingMoreFollowing() ? 'Loading...' : 'Load More' }}</button>
+          </div>
+        </ng-template>
+
+        <ng-template #fetchFollowersState>
+          <div class="h-full flex items-center justify-center">
+            <button type="button" (click)="fetchFollowers.emit()" [disabled]="isFetchingFollowers()" class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 text-sm">{{ isFetchingFollowers() ? 'Fetching followers...' : 'Fetch Followers' }}</button>
+          </div>
+        </ng-template>
+
+        <ng-template #fetchFollowingState>
+          <div class="h-full flex items-center justify-center">
+            <button type="button" (click)="fetchFollowing.emit()" [disabled]="isFetchingFollowing()" class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 text-sm">{{ isFetchingFollowing() ? 'Fetching following...' : 'Fetch Following' }}</button>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <div class="p-3 border-t border-slate-700 bg-slate-900 flex items-center justify-between gap-3">
+      <div class="text-sm text-slate-300">Selected: <span class="text-indigo-400 font-semibold">{{ selectedUsernames().size }}</span> / {{ MAX_SELECTION }}</div>
+      <div class="flex items-center gap-2">
+        <button type="button" (click)="close.emit()" class="rounded-md border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700">Cancel</button>
+        <button type="button" (click)="confirmScan()" [disabled]="selectedUsernames().size === 0" class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm text-white">Scan Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
