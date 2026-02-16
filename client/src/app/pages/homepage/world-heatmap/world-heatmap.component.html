@@ -1,9 +1,6 @@
 <div class="heatmap-shell">
   <div #mapContainer class="map-container"></div>
 
-  <app-heatmap-report
-    *ngIf="isOpenCountryReport"
-    [reports]="selectedCountryReports"
-    (close)="closeCountryReport()"
-  ></app-heatmap-report>
+  <app-heatmap-report *ngIf="isOpenCountryReport" [reports]="selectedCountryReports"
+    (close)="closeCountryReport()"></app-heatmap-report>
 </div>

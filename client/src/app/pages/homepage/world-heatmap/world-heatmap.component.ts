@@ -1,20 +1,10 @@
-import {
-  Component,
-  ElementRef,
-  ViewChild,
-  AfterViewInit,
-  OnChanges,
-  SimpleChanges,
-  HostListener,
-  OnInit,
-  OnDestroy
-} from '@angular/core';
-import {NgIf} from '@angular/common';
+import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { NgIf } from '@angular/common';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
-import {ActivatedRoute} from '@angular/router';
-import {HeatmapReportComponent} from './heatmap-report/heatmap-report.component';
-import {AppService} from '../../../services/core/app/app.service';
+import { ActivatedRoute } from '@angular/router';
+import { HeatmapReportComponent } from './heatmap-report/heatmap-report.component';
+import { AppService } from '../../../services/core/app/app.service';
 
 type CountryData = { id: string; name: string; value: number };
 
@@ -29,7 +19,10 @@ export class WorldHeatmapComponent
 
   @ViewChild('mapContainer') private chartContainer!: ElementRef;
 
-  public leakCountryReports: any;
+  public activeCountryReports: any;
+  private allCategoryReports: any;
+  public activeCategoryKey: string | null = null;
+  private rotationTimer: any;
   public selectedCountryReports: any;
   public mapData: CountryData[] = [];
   public isOpenCountryReport = false;
@@ -40,6 +33,14 @@ export class WorldHeatmapComponent
   private path!: d3.GeoPath<any, d3.GeoPermissibleObjects>;
   private tooltip!: d3.Selection<HTMLDivElement, unknown, null, undefined>;
   private worldData: any;
+  private categoryOrder = [
+    'leak',
+    'generic',
+    'exploit',
+    'chat',
+    'social',
+    'defacement'
+  ];
 
   private valueByName = new Map<string, number>();
   private selectedName: string | null = null;
@@ -54,17 +55,22 @@ export class WorldHeatmapComponent
 
   ngOnInit(): void {
     const data = this.route.snapshot.data['insights'];
-    this.leakCountryReports = data.country_insight;
-    this.mapData = this.gettingUniqueCountrys();
+    this.allCategoryReports = data.country_insight;
+    this.activeCategoryKey = null;
     this.buildIndex();
   }
 
   ngAfterViewInit(): void {
     this.createChart();
+    this.startCategoryRotation();
+
   }
 
   ngOnDestroy(): void {
     this.tooltip?.remove();
+    if (this.rotationTimer) {
+      clearInterval(this.rotationTimer);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -79,6 +85,12 @@ export class WorldHeatmapComponent
   onResize(): void {
     this.createChart();
   }
+  private getAvailableCategories(): string[] {
+    return this.categoryOrder.filter(cat =>
+      this.allCategoryReports?.[cat] &&
+      this.allCategoryReports[cat].length > 0
+    );
+  }
 
   private buildIndex(): void {
     this.valueByName.clear();
@@ -87,31 +99,52 @@ export class WorldHeatmapComponent
       if (key) this.valueByName.set(key, d.value);
     }
   }
+  private startCategoryRotation(): void {
+    const available = this.getAvailableCategories();
+    if (!available.length) return;
+
+    let index = 0;
+
+    const switchCategory = () => {
+      this.activeCategoryKey = available[index];
+      this.activeCountryReports = this.allCategoryReports[this.activeCategoryKey];
+
+      this.mapData = this.gettingUniqueCountrys();
+      this.buildIndex();
+      this.animateMapTransition();
+      this.updateLegend();
+
+      index = (index + 1) % available.length;
+    };
+
+    switchCategory();
+
+    this.rotationTimer = setInterval(() => {
+      switchCategory();
+    }, 15000);
+  }
 
   private ensureLegendDefs(): void {
     const defs = this.svg.select('defs').empty()
       ? this.svg.append('defs')
       : this.svg.select('defs');
 
-    defs.select('#legend-gradient').remove();
+    if (defs.select('#legend-gradient').empty()) {
+      const grad = defs.append('linearGradient')
+        .attr('id', 'legend-gradient')
+        .attr('x1', '0%')
+        .attr('y1', '0%')
+        .attr('x2', '100%')
+        .attr('y2', '0%');
 
-    const grad = defs.append('linearGradient')
-      .attr('id', 'legend-gradient')
-      .attr('x1', '0%')
-      .attr('y1', '0%')
-      .attr('x2', '100%')
-      .attr('y2', '0%');
+      grad.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', '#fde0e0');
 
-    const stops: Array<{ o: number; c: string }> = [
-      {o: 0, c: 'hsl(0,28%,16%)'},
-      {o: 100, c: 'hsl(0,45%,28%)'}
-    ];
-
-    grad.selectAll<SVGStopElement, { o: number; c: string }>('stop')
-      .data(stops)
-      .join('stop')
-      .attr('offset', d => `${d.o}%`)
-      .attr('stop-color', d => d.c);
+      grad.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', '#7a0000');
+    }
   }
 
   private updateLegend(): void {
@@ -132,13 +165,21 @@ export class WorldHeatmapComponent
 
     legend.attr('transform', `translate(${width - pad - barW - 25},${pad + 6})`);
 
-    legend.selectAll<SVGTextElement, any>('text.legend-title')
-      .data([0])
+    const title = legend.selectAll<SVGTextElement, any>('text.legend-title')
+      .data([this.activeCategoryKey])
       .join('text')
       .attr('class', 'legend-title')
       .attr('x', 0)
-      .attr('y', 0)
-      .text('Leaks');
+      .attr('y', 0);
+
+    title
+      .transition()
+      .duration(400)
+      .style('opacity', 0)
+      .transition()
+      .duration(400)
+      .style('opacity', 1)
+      .text(d => d?.toUpperCase() ?? '');
 
     legend.selectAll<SVGRectElement, any>('rect.legend-bar')
       .data([0])
@@ -154,23 +195,53 @@ export class WorldHeatmapComponent
 
     const ticks = [0, Math.round(max * 0.33), Math.round(max * 0.66), max];
 
-    legend.selectAll<SVGLineElement, number>('line.legend-tick')
-      .data(ticks)
-      .join('line')
-      .attr('class', 'legend-tick')
-      .attr('x1', d => (d / max) * barW)
-      .attr('x2', d => (d / max) * barW)
-      .attr('y1', 8 + barH)
-      .attr('y2', 8 + barH + 6);
+    const tickSelection = legend
+      .selectAll<SVGLineElement, number>('line.legend-tick')
+      .data(ticks);
+
+    tickSelection.join(
+      enter => enter.append('line')
+        .attr('class', 'legend-tick')
+        .attr('y1', 8 + barH)
+        .attr('y2', 8 + barH + 6)
+        .attr('x1', 0)
+        .attr('x2', 0)
+        .transition()
+        .duration(600)
+        .attr('x1', d => (d / max) * barW)
+        .attr('x2', d => (d / max) * barW),
+
+      update => update
+        .transition()
+        .duration(600)
+        .attr('x1', d => (d / max) * barW)
+        .attr('x2', d => (d / max) * barW),
+
+      exit => exit.remove()
+    );
 
     legend.selectAll<SVGTextElement, number>('text.legend-tick-label')
       .data(ticks)
-      .join('text')
-      .attr('class', 'aend-tick-label')
-      .attr('x', d => (d / max) * barW)
-      .attr('y', 8 + barH + 18)
-      .attr('text-anchor', (d, i) => i === 0 ? 'start' : i === ticks.length - 1 ? 'end' : 'middle')
-      .text(d => String(d));
+      .join(
+        enter => enter.append('text')
+          .attr('class', 'legend-tick-label')
+          .attr('y', 8 + barH + 18)
+          .attr('text-anchor', 'middle')
+          .attr('opacity', 0)
+          .transition()
+          .duration(600)
+          .attr('opacity', 1)
+          .attr('x', d => (d / max) * barW)
+          .text(d => String(d)),
+
+        update => update
+          .transition()
+          .duration(600)
+          .attr('x', d => (d / max) * barW)
+          .text(d => String(d)),
+
+        exit => exit.remove()
+      );
   }
 
   private createChart(): void {
@@ -260,7 +331,7 @@ export class WorldHeatmapComponent
 
     return (v: number) => {
       const t = q(v) / 6;
-      return d3.interpolateHslLong('hsl(0,28%,16%)', 'hsl(0,45%,28%)')(t);
+      return d3.interpolateRgb('#fde0e0', '#7a0000')(t);
     };
   }
 
@@ -304,13 +375,17 @@ export class WorldHeatmapComponent
 
   private gettingUniqueCountrys(): CountryData[] {
     const counts: Record<string, number> = {};
-    this.leakCountryReports?.forEach((doc: any) => {
+
+    this.activeCountryReports?.forEach((doc: any) => {
+
       doc?.m_country?.forEach((c: string) => {
         c.split(',').map(x => x.trim()).forEach(cc => {
           counts[cc] = (counts[cc] || 0) + 1;
         });
       });
+
     });
+
     return Object.entries(counts).map(([name, value]) => ({
       id: name,
       name,
@@ -325,7 +400,7 @@ export class WorldHeatmapComponent
 
   getReportsByCountry(country: string): any[] {
     const key = country.toLowerCase();
-    return this.leakCountryReports?.filter((r: any) =>
+    return this.activeCountryReports?.filter((r: any) =>
       r?.m_country?.some((c: string) =>
         c.split(',').some(p => p.trim().toLowerCase() === key)
       )
@@ -336,4 +411,24 @@ export class WorldHeatmapComponent
     this.isOpenCountryReport = false;
     this.selectedName = null;
   }
+  private animateMapTransition(): void {
+    if (!this.mapG) return;
+
+    const color = this.getColorScale();
+
+    const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
+
+    countries
+      .transition()
+      .duration(300)
+      .style('opacity', 0.4)
+      .transition()
+      .duration(800)
+      .style('opacity', 1)
+      .attr('fill', (d: any) => {
+        const v = this.getValueForFeature(d);
+        return v == null ? this.neutralFill : color(v);
+      });
+  }
+
 }

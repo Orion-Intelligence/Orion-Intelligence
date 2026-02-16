@@ -35,8 +35,7 @@ class elastic_insight_generator:
         return "leak_model", query_statement
 
     @staticmethod
-    def on_insight_leakdata_country():
-        from_ = 0
+    def on_insight_consolidated_country():
         size_ = 500
 
         query_statement = {
@@ -58,7 +57,17 @@ class elastic_insight_generator:
             "track_total_hits": True
         }
 
-        return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
+        base_indices = [
+            ELASTIC_INDEX.S_LEAK_INDEX,
+            ELASTIC_INDEX.S_GENERIC_INDEX,
+            ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            ELASTIC_INDEX.S_CHATS_INDEX,
+            ELASTIC_INDEX.S_SOCIAL_INDEX,
+            ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        ]
+
+        return base_indices, query_statement
+
 
     @staticmethod
     def on_shared_data_query():
