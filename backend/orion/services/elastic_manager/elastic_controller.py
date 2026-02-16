@@ -272,16 +272,6 @@ class elastic_controller:
                 log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
                 results.append(None)
         return results
-    
-    async def search_country_insight_query(self, index, query):
-        try:
-            conn = self.__conn_for_index(index)
-            res = await conn.search(index=index, body=query, request_timeout=220)
-            return res
-        except Exception as ex:
-            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return None
-
 
     async def generate_graph(self):
         try:

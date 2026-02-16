@@ -1202,7 +1202,7 @@ class elastic_request_generator:
     from datetime import datetime
 
     @staticmethod
-    def on_search_stealer_iocs(p_query_model, alert=False):
+    def on_search_stealer_iocs(p_query_model):
         is_match_all = not p_query_model.ioc
 
         if is_match_all:

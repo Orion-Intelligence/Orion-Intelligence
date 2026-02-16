@@ -352,9 +352,9 @@ class search_model:
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
 
-    async def search_stealer_iocs(self, param: search_credential_param_model, alert=False):
+    async def search_stealer_iocs(self, param: search_credential_param_model):
 
-        document, data_filter = elastic_request_generator().on_search_stealer_iocs(param, alert=alert)
+        document, data_filter = elastic_request_generator().on_search_stealer_iocs(param)
 
         if not data_filter:
             return False, []

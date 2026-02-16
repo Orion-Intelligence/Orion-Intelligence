@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.management.models.insight_model_comparison import InsightComparisonModel
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -89,17 +90,46 @@ class homepage_model:
 
     @staticmethod
     async def get_country_specific_insights():
-        indice, query = elastic_insight_generator().on_insight_leakdata_country()
-        response = await elastic_controller.get_instance().search_country_insight_query(indice, query)
+        indices, query = elastic_insight_generator().on_insight_consolidated_country()
+        response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices,query,indices_boost=None)
         if not response:
             return []
 
-        country_documents = [
-            hit["_source"]
-            for hit in response.get("hits", {}).get("hits", [])
-            if hit.get("_source", {}).get("m_country")
-        ]
-        return country_documents
+        grouped_results = {
+            "leak": [],
+            "generic": [],
+            "exploit": [],
+            "chat": [],
+            "social": [],
+            "defacement": []
+        }
+
+        for hit in response.get("hits", {}).get("hits", []):
+            source = hit.get("_source", {})
+            index_name = hit.get("_index", "")
+
+            if not source.get("m_country"):
+                continue
+
+            if ELASTIC_INDEX.S_LEAK_INDEX in index_name:
+                grouped_results["leak"].append(source)
+
+            elif ELASTIC_INDEX.S_GENERIC_INDEX in index_name:
+                grouped_results["generic"].append(source)
+
+            elif ELASTIC_INDEX.S_EXPLOIT_INDEX in index_name:
+                grouped_results["exploit"].append(source)
+
+            elif ELASTIC_INDEX.S_CHATS_INDEX in index_name:
+                grouped_results["chat"].append(source)
+
+            elif ELASTIC_INDEX.S_SOCIAL_INDEX in index_name:
+                grouped_results["social"].append(source)
+
+            elif ELASTIC_INDEX.S_DEFACEMENT_INDEX in index_name:
+                grouped_results["defacement"].append(source)
+
+        return grouped_results
 
     @staticmethod
     def transform_for_display(model_key: str, item: dict) -> dict:
