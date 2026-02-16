@@ -42,6 +42,74 @@ export class ListViewComponent {
     return this.networkData().nodes.filter(n => n.id.toString().startsWith(`platform-${username}|`));
   }
 
+  getFollowers(platformData: PlatformResult): string[] {
+    return platformData.followers_list || [];
+  }
+
+  getFollowing(platformData: PlatformResult): string[] {
+    return platformData.following_list || [];
+  }
+
+  getFollowerPreview(platformData: PlatformResult): string[] {
+    const followers = this.getFollowers(platformData);
+    return followers.slice(0, 3);
+  }
+
+  getFollowingPreview(platformData: PlatformResult): string[] {
+    const following = this.getFollowing(platformData);
+    return following.slice(0, 3);
+  }
+
+  getFollowerSummary(platformData: PlatformResult): string {
+    const followersCount = this.getFollowers(platformData).length;
+    const followingCount = this.getFollowing(platformData).length;
+    if (followersCount === 0 && followingCount === 0) {
+      return 'Followers and following not fetched';
+    }
+    if (followersCount > 0 && followingCount > 0) {
+      return `${followersCount} followers, ${followingCount} following`;
+    }
+    if (followersCount > 0) {
+      return `${followersCount} followers`;
+    }
+    return `${followingCount} following`;
+  }
+
+  getProfileUrl(platformData: PlatformResult, username: string): string {
+    let normalizedUsername = username.trim();
+    const platform = platformData.platform.toLowerCase();
+    if (normalizedUsername.startsWith('@')) {
+      normalizedUsername = normalizedUsername.substring(1);
+    }
+    if (platform === 'twitter' || platform === 'x') {
+      return `https://x.com/${normalizedUsername}`;
+    }
+    if (platform === 'instagram') {
+      return `https://www.instagram.com/${normalizedUsername}`;
+    }
+    if (platform === 'tiktok') {
+      return `https://www.tiktok.com/@${normalizedUsername}`;
+    }
+    if (platform === 'facebook') {
+      return `https://www.facebook.com/${normalizedUsername}`;
+    }
+    if (platform === 'youtube') {
+      return `https://www.youtube.com/@${normalizedUsername}`;
+    }
+    const baseUrl = platformData.url?.trim();
+    if (!baseUrl) {
+      return '#';
+    }
+    try {
+      const parsedUrl = new URL(baseUrl);
+      const hasTrailingSlash = parsedUrl.pathname.endsWith('/');
+      parsedUrl.pathname = hasTrailingSlash ? `${parsedUrl.pathname}${normalizedUsername}` : `${parsedUrl.pathname}/${normalizedUsername}`;
+      return parsedUrl.toString();
+    } catch {
+      return baseUrl;
+    }
+  }
+
   getPlatformData(platformNodeId: string): PlatformResult | undefined {
     if (!platformNodeId.startsWith('platform-')) {
       return undefined;
@@ -113,6 +181,10 @@ export class ListViewComponent {
 
   trackByKey(_index: number, item: { key: string }): string {
     return item.key;
+  }
+
+  trackByUsername(_index: number, username: string): string {
+    return username;
   }
 
   trackConnectionById(_index: number, item: { node: NetworkNode }): string | number {

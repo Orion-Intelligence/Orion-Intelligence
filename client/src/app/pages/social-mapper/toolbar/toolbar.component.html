@@ -1,4 +1,4 @@
-<div class="flex-shrink-0 p-2 sm:p-4 z-10 flex flex-col lg:flex-row justify-start items-start gap-2">
+<div class="flex-shrink-0 p-2 sm:p-4 z-10 flex flex-col lg:flex-row justify-start items-start lg:items-center gap-2">
     <div class="relative w-full lg:w-full lg:max-w-md focus-within:w-full focus-within:lg:max-w-xl transition-all duration-300">
       <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
          <i class="bi bi-search w-5 h-5 text-slate-400 leading-none"></i>
@@ -13,10 +13,10 @@
         </button>
      </div>
    </div>
-   <div class="w-full lg:w-auto flex items-center justify-start gap-2">
+   <div class="w-full lg:w-full lg:max-w-md flex items-center justify-start gap-2">
      <div class="hidden lg:flex relative items-center bg-slate-800/80 rounded-full p-1 shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm">
         <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 shadow-md transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
-        
+
         <button (click)="viewModeChanged.emit(viewMode() === 'graph' ? 'list' : 'graph')" [class]="'relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-slate-300 hover:text-white')" title="Graph View">
           <i class="bi bi-share-fill"></i> Graph
         </button>

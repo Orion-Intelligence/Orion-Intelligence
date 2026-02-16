@@ -10,7 +10,7 @@ export interface ContextMenuData {
     type: ContextMenuType;
 }
 
-export type ContextMenuAction = 'fetchLinks' | 'clearConnections' | 'deleteProfile' | 'removeNode' | 'deleteEntity';
+export type ContextMenuAction = 'fetchLinks' | 'clearConnections' | 'deleteProfile' | 'removeNode' | 'deleteEntity' | 'setAlias';
 
 @Component({
   selector: 'app-context-menu',

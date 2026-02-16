@@ -41,7 +41,15 @@
                                   </div>
                                   <div class="flex-grow min-w-0">
                                       <p class="font-semibold text-slate-200 truncate">{{platformNode.label}}</p>
-                                      <p class="text-xs text-slate-400 truncate">{{ platformData?.followers ? (formatFollowers(platformData.followers) + ' followers') : 'Followers N/A' }}</p>
+                                      <p class="text-xs text-slate-400 truncate">{{ getFollowerSummary(platformData) }}</p>
+                                  </div>
+                                  <div class="flex items-center gap-1.5">
+                                    <a [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-7 h-7 rounded-full flex items-center justify-center text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Open account in new tab">
+                                      <i class="bi bi-link-45deg text-sm leading-none"></i>
+                                    </a>
+                                    <button (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Followers and Following">
+                                      <i class="bi bi-people-fill text-[11px] leading-none"></i>
+                                    </button>
                                   </div>
                                   <i class="bi bi-chevron-down text-slate-400 ml-2 transition-transform duration-300" [class.rotate-180]="expandedPlatformNodeId() === platformNode.id.toString()"></i>
                               </div>
@@ -67,7 +75,41 @@
                                           </ng-container>
                                         </div>
                                         
-                                        <a [href]="platformData?.url" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 font-semibold">
+                                        <div *ngIf="getFollowers(platformData).length > 0 || getFollowing(platformData).length > 0" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          <div class="rounded-lg border border-slate-700 bg-slate-800/40 p-3">
+                                            <div class="flex items-center justify-between mb-2">
+                                              <p class="text-xs font-semibold uppercase tracking-wide text-indigo-300 mb-0">Followers</p>
+                                              <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-200">{{ getFollowers(platformData).length }}</span>
+                                            </div>
+                                            <div class="space-y-1.5">
+                                              <div *ngFor="let username of getFollowerPreview(platformData); trackBy: trackByUsername" class="flex items-center justify-between gap-2 text-xs rounded-md bg-slate-900/50 border border-slate-700 px-2 py-1.5">
+                                                <span class="font-mono text-slate-200 truncate">{{ '@' + username }}</span>
+                                                <a [href]="getProfileUrl(platformData, username)" target="_blank" rel="noopener noreferrer" class="w-6 h-6 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-xs leading-none"></i></a>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="rounded-lg border border-slate-700 bg-slate-800/40 p-3">
+                                            <div class="flex items-center justify-between mb-2">
+                                              <p class="text-xs font-semibold uppercase tracking-wide text-cyan-300 mb-0">Following</p>
+                                              <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200">{{ getFollowing(platformData).length }}</span>
+                                            </div>
+                                            <div class="space-y-1.5">
+                                              <div *ngFor="let username of getFollowingPreview(platformData); trackBy: trackByUsername" class="flex items-center justify-between gap-2 text-xs rounded-md bg-slate-900/50 border border-slate-700 px-2 py-1.5">
+                                                <span class="font-mono text-slate-200 truncate">{{ '@' + username }}</span>
+                                                <a [href]="getProfileUrl(platformData, username)" target="_blank" rel="noopener noreferrer" class="w-6 h-6 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-xs leading-none"></i></a>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div class="mt-4 flex flex-wrap items-center gap-3">
+                                          <button (click)="state.openFollowerScanPopup(platformNode.id.toString())" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-cyan-500/40 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 text-xs font-semibold transition-colors">
+                                            <i class="bi bi-people-fill"></i>
+                                            <span>Followers and Following</span>
+                                          </button>
+                                        </div>
+
+                                        <a [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 font-semibold">
                                           <span>Visit Profile</span>
                                           <i class="bi bi-link-45deg"></i>
                                         </a>

@@ -6,6 +6,7 @@ import { SocialIconComponent } from '../../../shared/components/social-icon/soci
 import { socialMapperAnimations } from '../../../shared/animations/social-mapper.animations';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
+import { buildSocialProfileUrl } from '../utils/profile-url.util';
 
 @Component({
   selector: 'app-metadata-popup',
@@ -150,5 +151,10 @@ export class MetadataPopupComponent {
 
   trackByImageUrl(_index: number, image: SocialImage): string {
     return image.image_url;
+  }
+
+  getAccountUrl(): string {
+    const platformData = this.data();
+    return buildSocialProfileUrl(platformData.platform, platformData.username, platformData.url);
   }
 }

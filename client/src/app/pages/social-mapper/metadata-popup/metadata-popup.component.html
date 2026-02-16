@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <a [href]="data().url" target="_blank" rel="noopener noreferrer" title="Visit Profile" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-300 bg-slate-700/50 hover:bg-slate-700 hover:text-white transition-colors">
+        <a [href]="getAccountUrl()" target="_blank" rel="noopener noreferrer" title="Visit Profile" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-300 bg-slate-700/50 hover:bg-slate-700 hover:text-white transition-colors">
           <i class="bi bi-link-45deg text-lg"></i>
         </a>
         <button (click)="onClose()" type="button" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">

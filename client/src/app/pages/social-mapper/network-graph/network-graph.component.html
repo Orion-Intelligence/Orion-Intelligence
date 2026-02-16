@@ -2,5 +2,10 @@
   <button *ngIf="deleteButtonState().visible" (click)="deleteEdge(deleteButtonState().edgeId!)" (mouseenter)="cancelHideDeleteButton()" (mouseleave)="hideDeleteButton()" class="network-graph-delete-edge-button z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-red-500" title="Remove connection">
     <i class="bi bi-x-lg text-sm font-bold"></i>
   </button>
+  <div class="absolute inset-0 z-10 pointer-events-none">
+    <button *ngFor="let overlay of iconOverlayNodes(); trackBy: trackByOverlayNodeId" (click)="onFollowersShortcutClick($event, overlay.nodeId)" [style.left.px]="overlay.x - 10" [style.top.px]="overlay.y - 10" class="absolute pointer-events-auto w-5 h-5 rounded-full bg-cyan-500 text-white border border-cyan-200 flex items-center justify-center shadow-[0_0_0_2px_rgba(15,23,42,0.92),0_4px_10px_rgba(6,182,212,0.38)] hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-300/80" title="Followers and Following">
+      <i class="bi bi-people-fill leading-none text-[10px] block"></i>
+    </button>
+  </div>
   <div #networkContainer class="w-full h-full absolute top-0 left-0"></div>
 </div>

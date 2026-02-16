@@ -1,0 +1,30 @@
+<div class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4" (click)="close.emit()">
+  <div class="w-full max-w-3xl max-h-[85vh] bg-slate-800 border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden" (click)="$event.stopPropagation()">
+    <div class="px-4 py-3 border-b border-slate-700 bg-slate-900 flex items-center justify-between gap-4">
+      <div>
+        <h3 class="text-lg font-semibold text-slate-100 mb-0">Relationship Details</h3>
+        <p class="text-sm text-slate-300 mb-0">{{ data().userA }} and {{ data().userB }} | <span class="text-amber-300">{{ data().count }}</span> detector profile(s)</p>
+      </div>
+      <button type="button" class="w-8 h-8 rounded-full text-slate-300 hover:text-white hover:bg-slate-700 transition-colors flex items-center justify-center" (click)="close.emit()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="flex-grow overflow-y-auto p-4 space-y-3 social-mapper-custom-scrollbar">
+      <div *ngIf="data().connections.length === 0" class="text-slate-400 text-sm p-4 rounded-lg bg-slate-900/50 border border-slate-700">No account-level matches available for this relationship.</div>
+
+      <div *ngFor="let item of data().connections; trackBy: trackByConnection" class="rounded-lg border border-slate-700 bg-slate-900/50 p-3">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-amber-300 mb-1">{{ relationLabel(item) }}</p>
+            <p class="text-sm text-slate-200 mb-1"><span class="text-slate-400">Source Account:</span> {{ item.sourcePlatform }} / {{ '@' + item.sourceUsername }}</p>
+            <p class="text-xs text-slate-400 mb-0">Source Profile: {{ item.sourceUser }}</p>
+          </div>
+          <a [href]="getAccountUrl(item)" target="_blank" rel="noopener noreferrer" class="h-8 px-3 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-400/40 hover:bg-cyan-500/25 transition-colors text-xs font-semibold inline-flex items-center gap-1.5"><i class="bi bi-link-45deg"></i><span>Open Account</span></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 py-3 border-t border-slate-700 bg-slate-900 flex justify-end">
+      <button type="button" class="px-3 py-1.5 rounded-md bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors text-sm" (click)="close.emit()">Close</button>
+    </div>
+  </div>
+</div>

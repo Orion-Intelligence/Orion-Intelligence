@@ -1,8 +1,6 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CustomEntity, TabState } from '../../../shared/model/social/social-scan.models';
-import { SocialScanService } from '../services/social-scan.service';
 import { GraphOrchestratorService } from '../services/graph-orchestrator.service';
 import { EntityMenuComponent } from '../entity-menu/entity-menu.component';
 import { AddEntityData } from './add-entity-modal/add-entity-modal.component';
@@ -21,9 +19,7 @@ export class EntityManagerComponent {
 
   toggle = output<void>();
 
-  private scanService = inject(SocialScanService);
   private graphOrchestrator = inject(GraphOrchestratorService);
-  private destroyRef = inject(DestroyRef);
 
   addEntityModalData = signal<AddEntityData | null>(null);
 
@@ -31,7 +27,25 @@ export class EntityManagerComponent {
     const state = this.activeTabState();
     state.activeHomeMenuTab.set('entities');
     state.homeMenuSearchTerm.set('');
-    this.addEntityModalData.set({ type, value: '' });
+    this.addEntityModalData.set({ type, value: '', label: '', mode: 'add' });
+  }
+
+  openEditEntityModal(entityId: string) {
+    const state = this.activeTabState();
+    const entity = state.customEntities().find(current => current.id === entityId);
+    if (!entity)
+    {
+      return;
+    }
+    state.activeHomeMenuTab.set('entities');
+    state.homeMenuSearchTerm.set('');
+    this.addEntityModalData.set({
+      type: entity.type,
+      value: entity.value,
+      label: entity.label === entity.value ? '' : entity.label,
+      mode: 'edit',
+      entityId: entity.id
+    });
   }
 
   closeAddEntityModal() {
@@ -39,28 +53,63 @@ export class EntityManagerComponent {
   }
 
   confirmAddEntity(entityData: AddEntityData) {
-    const { type, value } = entityData;
-    const label = value.trim();
-    if (!label) {
-        this.closeAddEntityModal();
-        return;
+    const { type, value, label } = entityData;
+    const normalizedValue = value.trim();
+    const displayLabel = label.trim() || normalizedValue;
+    if (!normalizedValue)
+    {
+      this.closeAddEntityModal();
+      return;
     }
-    const tempId = `pending-${self.crypto.randomUUID()}`;
-    const pendingEntity: CustomEntity = { id: tempId, type, label, value, onGraph: false, status: 'pending' };
 
     const state = this.activeTabState();
-    state.customEntities.update(entities => [pendingEntity, ...entities]);
+    if (entityData.mode === 'edit' && entityData.entityId)
+    {
+      state.customEntities.update(entities =>
+        entities.map(entity => {
+          if (entity.id === entityData.entityId)
+          {
+            return { ...entity, label: displayLabel, value: normalizedValue };
+          }
+          return entity;
+        })
+      );
+      state.networkData.update(networkData => ({
+        ...networkData,
+        nodes: networkData.nodes.map(node => {
+          if (node.id.toString() === entityData.entityId)
+          {
+            const existingTitle = node.title ? `${node.title}` : '';
+            const titleParts = existingTitle.split('|');
+            const typeTitle = titleParts.length > 0 && titleParts[0].trim() ? titleParts[0].trim() : type.toUpperCase();
+            return {
+              ...node,
+              label: displayLabel,
+              title: `${typeTitle} | ${displayLabel} | ${normalizedValue}`
+            };
+          }
+          return node;
+        })
+      }));
+      state.activeHomeMenuTab.set('entities');
+      state.homeMenuSearchTerm.set('');
+      this.closeAddEntityModal();
+      return;
+    }
+
+    const newEntity: CustomEntity = {
+      id: `custom-${type}-${self.crypto.randomUUID()}`,
+      type,
+      label: displayLabel,
+      value: normalizedValue,
+      onGraph: false,
+      status: 'added'
+    };
+
+    state.customEntities.update(entities => [newEntity, ...entities]);
     state.activeHomeMenuTab.set('entities');
     state.homeMenuSearchTerm.set('');
     this.closeAddEntityModal();
-
-    this.scanService.addEntity({ type, label, value }).pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (newEntity: CustomEntity) => state.customEntities.update(e => e.map(entity => entity.id === tempId ? newEntity : entity)),
-        error: () => {
-          state.customEntities.update(e => e.filter(entity => entity.id !== tempId));
-        }
-      });
   }
 
   public addEntityToGraph(entityId: string) {

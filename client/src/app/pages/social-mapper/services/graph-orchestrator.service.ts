@@ -21,28 +21,20 @@ export class GraphOrchestratorService {
     });
   }
 
-  private async animateNodeScale(state: TabState, nodeId: string, fromSize: number, toSize: number, steps: number, delayMs: number): Promise<void> {
-    const totalSteps = Math.max(1, steps);
-
-    for (let step = 1; step <= totalSteps; step++) {
-      const progress = step / totalSteps;
-      const nextSize = fromSize + ((toSize - fromSize) * progress);
-
-      state.networkData.update(d => ({
-        nodes: d.nodes.map(n => n.id.toString() === nodeId ? { ...n, size: nextSize } : n),
-        edges: d.edges
-      }));
-
-      await this.wait(delayMs);
-    }
-  }
-
   private getExpandedGroupNode(groupNode: NetworkNode): NetworkNode {
     return {
       ...groupNode,
       image: this.graphManager.createGroupNodeSvg(groupNode.groupedPlatforms?.length ?? 0, true),
+      size: 50,
       borderWidth: 3,
       borderWidthSelected: 4,
+      shadow: {
+        enabled: true,
+        color: 'rgba(250, 204, 21, 0.75)',
+        size: 24,
+        x: 0,
+        y: 0
+      },
       color: {
         border: '#facc15',
         background: 'transparent',
@@ -182,12 +174,7 @@ export class GraphOrchestratorService {
 	return;
 
 }
-    const colors = { wallet: { border: '#4ade80', bg: '#166534' }, email: { border: '#facc15', bg: '#854d0e' }, domain: { border: '#38bdf8', bg: '#075985' } };
-    const newNode: NetworkNode = {
-      id: entity.id, label: entity.label, shape: 'box', size: 25, font: { color: '#e5e7eb' },
-      color: { border: colors[entity.type].border, background: colors[entity.type].bg, highlight: { border: '#facc15', background: colors[entity.type].bg }, hover: { border: '#ffffff', background: colors[entity.type].bg } },
-      title: `${entity.type.toUpperCase()} | ${entity.label}`, borderWidth: 2, borderWidthSelected: 4
-    };
+    const newNode = this.graphManager.createEntityNode(entity);
 
     state.networkData.update(d => ({ ...d, nodes: [...d.nodes, newNode] }));
     state.customEntities.update(e => e.map(en => en.id === entityId ? { ...en, onGraph: true } : en));
@@ -255,19 +242,18 @@ export class GraphOrchestratorService {
       }
 
       const platformIdsToRemove = groupToCollapse.groupedPlatforms.map(p => this.fetchingState.getPlatformUniqueKey(p));
+      const chunkSize = 6;
 
-      for (let index = platformIdsToRemove.length - 1; index >= 0; index--) {
-        const platformNodeId = platformIdsToRemove[index];
-        const currentNode = currentState.networkData().nodes.find(n => n.id.toString() === platformNodeId);
-        const currentSize = typeof currentNode?.size === 'number' ? currentNode.size : 25;
-
-        await this.animateNodeScale(currentState, platformNodeId, currentSize, 5, 5, 14);
+      for (let index = platformIdsToRemove.length - 1; index >= 0; index -= chunkSize) {
+        const currentChunk = platformIdsToRemove.slice(Math.max(0, index - chunkSize + 1), index + 1);
+        const removeIds = new Set(currentChunk);
 
         currentState.networkData.update(d => ({
-          nodes: d.nodes.filter(n => n.id.toString() !== platformNodeId),
-          edges: d.edges.filter(e => !(e.from === centralNodeId && e.to.toString() === platformNodeId))
+          nodes: d.nodes.filter(n => !removeIds.has(n.id.toString())),
+          edges: d.edges.filter(e => !(e.from === centralNodeId && removeIds.has(e.to.toString())))
         }));
-        await this.wait(18);
+
+        await this.wait(16);
       }
 
       currentState.networkData.update(d => ({
@@ -299,16 +285,20 @@ export class GraphOrchestratorService {
         }));
         state.expandedGroupDataByUser.update(c => ({ ...c, [username]: groupNodeToExpand }));
 
-        for (const platform of platformsToAdd) {
-          const platformNode = { ...this.graphManager.createPlatformNode(platform, iconUrlMap), x: position?.x, y: position?.y, size: 5 };
-          const platformNodeId = this.fetchingState.getPlatformUniqueKey(platform);
-          const edge = { from: centralNodeId, to: platformNodeId };
+        const platformNodes = platformsToAdd.map(platform => ({ ...this.graphManager.createPlatformNode(platform, iconUrlMap), x: position?.x, y: position?.y }));
+        const newEdges = platformsToAdd.map(platform => ({ from: centralNodeId, to: this.fetchingState.getPlatformUniqueKey(platform) }));
+        const chunkSize = 6;
+
+        for (let index = 0; index < platformNodes.length; index += chunkSize) {
+          const nodeChunk = platformNodes.slice(index, index + chunkSize);
+          const edgeChunk = newEdges.slice(index, index + chunkSize);
+
           state.networkData.update(d => ({
-            nodes: [...d.nodes, platformNode],
-            edges: [...d.edges, edge]
+            nodes: [...d.nodes, ...nodeChunk],
+            edges: [...d.edges, ...edgeChunk]
           }));
-          await this.animateNodeScale(state, platformNodeId, 5, 25, 6, 14);
-          await this.wait(10);
+
+          await this.wait(16);
         }
       }
     }
@@ -318,48 +308,197 @@ export class GraphOrchestratorService {
     const activeUsers = Array.from(state.activeUsernames());
     const scanResults = state.scanResults();
     const currentNetworkData = state.networkData();
-    const allNodeIdsOnGraph = new Set(currentNetworkData.nodes.map(n => n.id));
-
-    const edgesToKeep = currentNetworkData.edges.filter(edge => !edge.id?.toString().startsWith('relationship-'));
+    const allNodeIdsOnGraph = new Set(currentNetworkData.nodes.map(node => node.id.toString()));
+    const nodesToKeep = currentNetworkData.nodes.filter(node => !node.id.toString().startsWith('relationship-node-'));
+    const edgesToKeep = currentNetworkData.edges.filter(edge => !edge.id?.toString().startsWith('relationship-user-') && !edge.id?.toString().startsWith('relationship-edge-'));
+    const newRelationshipNodes: NetworkNode[] = [];
     const newRelationshipEdges: any[] = [];
-    const processedConnections = new Set<string>();
 
-    for (let i = 0; i < activeUsers.length; i++) {
-      for (let j = i + 1; j < activeUsers.length; j++) {
-        const userA_platforms = scanResults.get(activeUsers[i]) || [];
-        const userB_platforms = scanResults.get(activeUsers[j]) || [];
+    const normalizeHandle = (value: string): string => {
+      let normalized = value.trim().toLowerCase();
+      if (!normalized) {
+        return '';
+      }
+      if (normalized.includes('://')) {
+        try {
+          const parsedUrl = new URL(normalized);
+          const segments = parsedUrl.pathname.split('/').filter(Boolean);
+          if (segments.length > 0) {
+            normalized = segments[segments.length - 1];
+          }
+        } catch {
+        }
+      }
+      normalized = normalized.replace(/^@+/, '');
+      normalized = normalized.replace(/[?#].*$/, '');
+      normalized = normalized.replace(/\/+$/, '');
+      return normalized;
+    };
 
-        for (const pA of userA_platforms) for (const pB of userB_platforms) {
-          if (pA.platform.toLowerCase() !== pB.platform.toLowerCase())
-continue;
-          const aFollowsB = pA.following_list?.some(f => f.toLowerCase() === pB.username.toLowerCase()) || pB.followers_list?.some(f => f.toLowerCase() === pA.username.toLowerCase());
-          const bFollowsA = pB.following_list?.some(f => f.toLowerCase() === pA.username.toLowerCase()) || pA.followers_list?.some(f => f.toLowerCase() === pB.username.toLowerCase());
-          if (aFollowsB || bFollowsA) {
-            const nodeA_id = this.fetchingState.getPlatformUniqueKey(pA);
-            const nodeB_id = this.fetchingState.getPlatformUniqueKey(pB);
-            if (allNodeIdsOnGraph.has(nodeA_id) && allNodeIdsOnGraph.has(nodeB_id))
-{
-              const edgeId = `relationship-${pA.platform}-${[nodeA_id, nodeB_id].sort().join('--')}`;
-              if (processedConnections.has(edgeId)) {
-	continue;
-}
-              processedConnections.add(edgeId);
+    const toCompactHandle = (value: string): string => {
+      return value.replace(/[^a-z0-9]/g, '');
+    };
 
-              const isMutual = aFollowsB && bFollowsA;
-              const title = isMutual ? `Mutual connection on ${pA.platform}` : (aFollowsB ? `${pA.username} follows ${pB.username}` : `${pB.username} follows ${pA.username}`) + ` on ${pA.platform}`;
-              const edge: any = { id: edgeId, from: nodeA_id, to: nodeB_id, title, color: { color: '#fb923c', highlight: '#fdba74', hover: '#f97316' }, width: 2.5, smooth: { type: 'curvedCW', roundness: 0.15 }, dashes: [5, 5] };
-              if (!isMutual) {
-                edge.arrows = { to: { enabled: true, scaleFactor: 0.8, type: 'arrow' } };
-                if (bFollowsA) {
-                  [edge.from, edge.to] = [edge.to, edge.from];
-                }
-              }
-              newRelationshipEdges.push(edge);
-            }
+    const getHandleVariants = (value: string): Set<string> => {
+      const variants = new Set<string>();
+      const normalized = normalizeHandle(value);
+      if (!normalized) {
+        return variants;
+      }
+      variants.add(normalized);
+      const compact = toCompactHandle(normalized);
+      if (compact) {
+        variants.add(compact);
+      }
+      return variants;
+    };
+
+    const getUserKnownHandles = (username: string, platforms: PlatformResult[]): Set<string> => {
+      const handles = new Set<string>();
+      for (const variant of getHandleVariants(username)) {
+        handles.add(variant);
+      }
+      for (const platform of platforms) {
+        for (const variant of getHandleVariants(platform.username || '')) {
+          handles.add(variant);
+        }
+        for (const variant of getHandleVariants(platform.url || '')) {
+          handles.add(variant);
+        }
+      }
+      return handles;
+    };
+
+    const hasHandleMatch = (list: string[] | null | undefined, handles: Set<string>): boolean => {
+      if (!list || list.length === 0) {
+        return false;
+      }
+      for (const rawHandle of list) {
+        const variants = getHandleVariants(rawHandle);
+        for (const variant of variants) {
+          if (handles.has(variant)) {
+            return true;
           }
         }
       }
+      return false;
+    };
+
+    for (let i = 0; i < activeUsers.length; i++) {
+      for (let j = i + 1; j < activeUsers.length; j++) {
+        const userA = activeUsers[i];
+        const userB = activeUsers[j];
+        const userANodeId = `user-${userA}`;
+        const userBNodeId = `user-${userB}`;
+        if (!allNodeIdsOnGraph.has(userANodeId) || !allNodeIdsOnGraph.has(userBNodeId)) {
+          continue;
+        }
+
+        const userAPlatforms = scanResults.get(userA) || [];
+        const userBPlatforms = scanResults.get(userB) || [];
+        const userAHandles = getUserKnownHandles(userA, userAPlatforms);
+        const userBHandles = getUserKnownHandles(userB, userBPlatforms);
+
+        let followsAtoB = false;
+        let followsBtoA = false;
+        const matchedPlatforms = new Set<string>();
+        const detectorProfiles = new Set<string>();
+
+        for (const platformA of userAPlatforms) {
+          const aToBDetected = hasHandleMatch(platformA.following_list, userBHandles) || hasHandleMatch(platformA.followers_list, userBHandles);
+          if (aToBDetected) {
+            followsAtoB = true;
+            matchedPlatforms.add(platformA.platform);
+            detectorProfiles.add(`${userA}|${platformA.platform}|${platformA.username}`);
+          }
+        }
+
+        for (const platformB of userBPlatforms) {
+          const bToADetected = hasHandleMatch(platformB.following_list, userAHandles) || hasHandleMatch(platformB.followers_list, userAHandles);
+          if (bToADetected) {
+            followsBtoA = true;
+            matchedPlatforms.add(platformB.platform);
+            detectorProfiles.add(`${userB}|${platformB.platform}|${platformB.username}`);
+          }
+        }
+
+        if (!followsAtoB && !followsBtoA) {
+          continue;
+        }
+
+        const relationshipKey = [userA, userB].sort().join('--');
+        const relationshipNodeId = `relationship-node-${relationshipKey}`;
+        const detectorProfileCount = detectorProfiles.size;
+        const matchedPlatformsText = Array.from(matchedPlatforms).sort().join(', ') || 'Unknown';
+        const isMutual = followsAtoB && followsBtoA;
+        const directionTitle = isMutual ? `${userA} and ${userB} follow each other` : (followsAtoB ? `${userA} follows ${userB}` : `${userB} follows ${userA}`);
+
+        newRelationshipNodes.push({
+          id: relationshipNodeId,
+          label: `${detectorProfileCount}`,
+          shape: 'dot',
+          size: 14,
+          font: { color: '#ffffff', size: 10 },
+          color: {
+            border: '#fbbf24',
+            background: '#78350f',
+            highlight: { border: '#fde68a', background: '#92400e' },
+            hover: { border: '#fde68a', background: '#92400e' }
+          },
+          borderWidth: 2,
+          borderWidthSelected: 3,
+          title: `${directionTitle}\nDetected by ${detectorProfileCount} social profile(s)\nPlatforms: ${matchedPlatformsText}`
+        });
+
+        const edgeStyle = {
+          color: { color: '#f59e0b', highlight: '#fbbf24', hover: '#f59e0b' },
+          width: 2.5,
+          smooth: { type: 'dynamic', roundness: 0.18 }
+        };
+
+        if (isMutual) {
+          newRelationshipEdges.push({
+            id: `relationship-edge-${relationshipKey}-a`,
+            from: userANodeId,
+            to: relationshipNodeId,
+            arrows: { from: { enabled: true, scaleFactor: 0.75, type: 'arrow' }, to: { enabled: true, scaleFactor: 0.75, type: 'arrow' } },
+            ...edgeStyle
+          });
+          newRelationshipEdges.push({
+            id: `relationship-edge-${relationshipKey}-b`,
+            from: relationshipNodeId,
+            to: userBNodeId,
+            arrows: { from: { enabled: true, scaleFactor: 0.75, type: 'arrow' }, to: { enabled: true, scaleFactor: 0.75, type: 'arrow' } },
+            ...edgeStyle
+          });
+        } else {
+          let sourceUserNodeId = userANodeId;
+          let targetUserNodeId = userBNodeId;
+          if (followsBtoA) {
+            sourceUserNodeId = userBNodeId;
+            targetUserNodeId = userANodeId;
+          }
+          newRelationshipEdges.push({
+            id: `relationship-edge-${relationshipKey}-a`,
+            from: sourceUserNodeId,
+            to: relationshipNodeId,
+            arrows: { to: { enabled: true, scaleFactor: 0.85, type: 'arrow' } },
+            ...edgeStyle
+          });
+          newRelationshipEdges.push({
+            id: `relationship-edge-${relationshipKey}-b`,
+            from: relationshipNodeId,
+            to: targetUserNodeId,
+            arrows: { to: { enabled: true, scaleFactor: 0.85, type: 'arrow' } },
+            ...edgeStyle
+          });
+        }
+      }
     }
-    state.networkData.set({ nodes: state.networkData().nodes, edges: [...edgesToKeep, ...newRelationshipEdges] });
+
+    state.networkData.set({
+      nodes: [...nodesToKeep, ...newRelationshipNodes],
+      edges: [...edgesToKeep, ...newRelationshipEdges]
+    });
   }
 }

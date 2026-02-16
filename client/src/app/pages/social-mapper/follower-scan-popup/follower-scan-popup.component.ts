@@ -98,28 +98,68 @@ export class FollowerScanPopupComponent {
     this.scan.emit(Array.from(this.selectedUsernames()));
   }
 
+  scanSingle(username: string) {
+    this.scan.emit([username]);
+  }
+
   loadMoreFollowers() {
     this._loadMore(this.isLoadingMoreFollowers, this.displayFollowers, this.filteredFollowers(), this.increment);
   }
+
   loadMoreFollowing() {
     this._loadMore(this.isLoadingMoreFollowing, this.displayFollowing, this.filteredFollowing(), this.increment);
   }
 
-  private addItemsIncrementally(displaySignal: WritableSignal<string[]>, itemsToAdd: string[], onComplete: () => void) {
+  trackByUsername(_index: number, username: string): string {
+    return username;
+  }
+
+  getProfileUrl(username: string): string {
+    let normalizedUsername = username.trim();
+    const platform = this.platform().platform.toLowerCase();
+    if (normalizedUsername.startsWith('@')) {
+      normalizedUsername = normalizedUsername.substring(1);
+    }
+    if (platform === 'twitter' || platform === 'x') {
+      return `https://x.com/${normalizedUsername}`;
+    }
+    if (platform === 'instagram') {
+      return `https://www.instagram.com/${normalizedUsername}`;
+    }
+    if (platform === 'tiktok') {
+      return `https://www.tiktok.com/@${normalizedUsername}`;
+    }
+    if (platform === 'facebook') {
+      return `https://www.facebook.com/${normalizedUsername}`;
+    }
+    if (platform === 'youtube') {
+      return `https://www.youtube.com/@${normalizedUsername}`;
+    }
+    const baseUrl = this.platform().url?.trim();
+    if (!baseUrl) {
+      return '#';
+    }
+    try {
+      const parsedUrl = new URL(baseUrl);
+      const hasTrailingSlash = parsedUrl.pathname.endsWith('/');
+      parsedUrl.pathname = hasTrailingSlash ? `${parsedUrl.pathname}${normalizedUsername}` : `${parsedUrl.pathname}/${normalizedUsername}`;
+      return parsedUrl.toString();
+    } catch {
+      return baseUrl;
+    }
+  }
+
+  getCurrentAccountUrl(): string {
+    return this.platform().url || '#';
+  }
+
+  private addItems(displaySignal: WritableSignal<string[]>, itemsToAdd: string[], onComplete: () => void) {
     if (itemsToAdd.length === 0) {
       onComplete();
       return;
     }
-    let i = 0;
-    const intervalId = setInterval(() => {
-      if (i < itemsToAdd.length) {
-        displaySignal.update(current => [...current, itemsToAdd[i]]);
-        i++;
-      } else {
-        clearInterval(intervalId);
-        onComplete();
-      }
-    }, 20);
+    displaySignal.update(current => [...current, ...itemsToAdd]);
+    onComplete();
   }
 
   private _loadMore(isLoadingSignal: WritableSignal<boolean>, displaySignal: WritableSignal<string[]>, allItems: string[], increment: number) {
@@ -131,6 +171,6 @@ export class FollowerScanPopupComponent {
     const currentCount = displaySignal().length;
     const nextItems = allItems.slice(currentCount, currentCount + increment);
 
-    this.addItemsIncrementally(displaySignal, nextItems, () => isLoadingSignal.set(false));
+    this.addItems(displaySignal, nextItems, () => isLoadingSignal.set(false));
   }
 }

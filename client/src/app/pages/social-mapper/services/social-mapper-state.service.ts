@@ -16,6 +16,22 @@ interface InfoPopupData {
     confirmText: string;
 }
 
+export interface RelationshipConnectionItem {
+    sourceUser: string;
+    sourcePlatform: string;
+    sourceUsername: string;
+    sourceUrl: string;
+    targetUser: string;
+    relation: 'follows' | 'followed_by';
+}
+
+export interface RelationshipPopupData {
+    userA: string;
+    userB: string;
+    count: number;
+    connections: RelationshipConnectionItem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class SocialMapperStateService {
     private tabManager = inject(TabManagerService);
@@ -34,6 +50,7 @@ export class SocialMapperStateService {
     manageProfilesModalData = signal<ManageProfilesModalData | null>(null);
     isFollowerScanPopupVisible = signal(false);
     followerScanPopupData = signal<{ platform: PlatformResult } | null>(null);
+    relationshipPopupData = signal<RelationshipPopupData | null>(null);
 
     private activeTabState = computed(() => this.tabManager.activeTab()?.state);
     private jobs = computed(() => this.activeTabState()?.jobs() ?? []);
@@ -111,6 +128,14 @@ export class SocialMapperStateService {
     }
     
     closeFollowerScanPopup() { this.followerScanPopupData.set(null); this.isFollowerScanPopupVisible.set(false); }
+
+    openRelationshipPopup(data: RelationshipPopupData) {
+        this.relationshipPopupData.set(data);
+    }
+
+    closeRelationshipPopup() {
+        this.relationshipPopupData.set(null);
+    }
 
     focusOnUser(username: string): void {
         this.nodeToFocus.set(`user-${username}`);

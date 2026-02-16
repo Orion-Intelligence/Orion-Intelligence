@@ -297,16 +297,6 @@ export class SocialScanService {
 
   addEntity(entity: { type: 'wallet' | 'email' | 'domain'; value: string; label: string }): Observable<CustomEntity>
   {
-    if (this.useMockData) {
-      return mockAddEntity(entity);
-    }
-
-    return this.pollForResult<CustomEntity | any, CustomEntity>({
-      request: () => this.api.post<any>('social/entity', entity),
-      isReady: (res) => !!(res as any)?.result,
-      mapResult: (res) => (res as any).result as CustomEntity,
-      initialDelayMs: 1000,
-      intervalMs: 2000
-    });
+    return mockAddEntity(entity);
   }
 }

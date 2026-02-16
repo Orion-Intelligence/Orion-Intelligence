@@ -28,7 +28,9 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
 
   nodeClicked = output<string>();
   platformNodeClicked = output<string>();
+  relationshipNodeClicked = output<string>();
   groupClicked = output<{ nodeId: string, position: Position }>();
+  followersShortcutClicked = output<string>();
   dragStart = output<void>();
   zoom = output<void>();
   edgeAdded = output<{ from: string, to: string }>();
@@ -350,6 +352,9 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     if (nodesToAdd.length > 0) {
       this.visData.nodes.add(nodesToAdd);
     }
+
+    this.visData.nodes.update(newNodes);
+
     const currentEdgeIds = this.visData.edges.getIds();
     this.visData.edges.remove(currentEdgeIds);
     this.visData.edges.add(newEdges);
@@ -519,7 +524,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         if (nodePosition) {
             const boundingBox = network.getBoundingBox(nodeId as string);
             const radius = (boundingBox.right - boundingBox.left) / 2;
-
             const iconCanvasPos = {
                 x: nodePosition.x + radius * 0.707,
                 y: nodePosition.y - radius * 0.707,
@@ -541,6 +545,8 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         const clickedNodeId = nodes[0] as string;
         if (clickedNodeId.startsWith('user-')) {
           this.nodeClicked.emit(clickedNodeId);
+        } else if (clickedNodeId.startsWith('relationship-node-')) {
+          this.relationshipNodeClicked.emit(clickedNodeId);
         } else if (!clickedNodeId.startsWith('group-')) {
           this.platformNodeClicked.emit(clickedNodeId);
         }
@@ -669,5 +675,14 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         this.deleteButtonState.set({ visible: false, x: 0, y: 0, edgeId: null });
       }, 200);
     }
+  }
+
+  onFollowersShortcutClick(event: MouseEvent, nodeId: string) {
+    event.stopPropagation();
+    this.followersShortcutClicked.emit(nodeId);
+  }
+
+  trackByOverlayNodeId(_index: number, item: { nodeId: string }): string {
+    return item.nodeId;
   }
 }

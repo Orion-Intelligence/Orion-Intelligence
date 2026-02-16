@@ -25,8 +25,10 @@ import { GraphOrchestratorService } from './services/graph-orchestrator.service'
 import { EntityManagerComponent } from './entity-manager/entity-manager.component';
 import { AddEntityModalComponent } from './entity-manager/add-entity-modal/add-entity-modal.component';
 import { SocialMapperStateService } from './services/social-mapper-state.service';
+import { RelationshipConnectionItem } from './services/social-mapper-state.service';
 import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { MessagePopupComponent } from '../../shared/partials/message-popup/message-popup.component';
+import { RelationshipDetailsPopupComponent } from './relationship-details-popup/relationship-details-popup.component';
 
 
 @Component({
@@ -43,7 +45,7 @@ import { MessagePopupComponent } from '../../shared/partials/message-popup/messa
     ListViewComponent, TabBarComponent,
     FollowerScanPopupComponent, ManageProfilesModalComponent, ConfirmationPopupComponent,
     MessagePopupComponent, ContextMenuComponent, NotificationBarComponent,
-    EntityManagerComponent, AddEntityModalComponent,
+    EntityManagerComponent, AddEntityModalComponent, RelationshipDetailsPopupComponent,
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
@@ -76,6 +78,9 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   graphSearchTerm = signal('');
   isGraphSearchExpanded = signal(false);
   isSmallScreen = signal(false);
+  userNodeAliases = signal<Record<string, string>>({});
+  platformAliasModalData = signal<{ nodeId: string; username: string } | null>(null);
+  platformAliasInput = signal('');
 
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   entityManager = viewChild(EntityManagerComponent);
@@ -144,6 +149,34 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
             state.viewMode.set('list');
             state.activeHomeMenuTab.set('history');
           });
+        }
+      });
+      effect(() => {
+        const aliases = this.userNodeAliases();
+        const currentData = this.networkData();
+        let hasChanges = false;
+        const updatedNodes = currentData.nodes.map(node => {
+          const nodeId = node.id.toString();
+          if (!nodeId.startsWith('user-')) {
+            return node;
+          }
+          const alias = (aliases[nodeId] || '').trim();
+          if (alias.length > 0) {
+            if (node.label === alias) {
+              return node;
+            }
+            hasChanges = true;
+            return { ...node, label: alias };
+          }
+          const defaultLabel = nodeId.substring('user-'.length);
+          if (!defaultLabel || node.label === defaultLabel) {
+            return node;
+          }
+          hasChanges = true;
+          return { ...node, label: defaultLabel };
+        });
+        if (hasChanges) {
+          this.updateState(state => state.networkData.set({ ...currentData, nodes: updatedNodes }));
         }
       });
     } else {
@@ -231,6 +264,33 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.isGraphSearchExpanded.set(false);
   }
 
+  onPlatformAliasInputChanged(event: Event) {
+    this.platformAliasInput.set((event.target as HTMLInputElement).value);
+  }
+
+  closePlatformAliasModal() {
+    this.platformAliasModalData.set(null);
+    this.platformAliasInput.set('');
+  }
+
+  savePlatformAlias() {
+    const modalData = this.platformAliasModalData();
+    if (!modalData) {
+      return;
+    }
+    const alias = this.platformAliasInput().trim();
+    this.userNodeAliases.update(current => {
+      const next = { ...current };
+      if (alias.length > 0) {
+        next[modalData.nodeId] = alias;
+      } else {
+        delete next[modalData.nodeId];
+      }
+      return next;
+    });
+    this.closePlatformAliasModal();
+  }
+
   triggerScan() {
     let username = this.searchTerm().trim();
     if (username.startsWith('@')) {
@@ -283,11 +343,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleCompletedJobClick(job: Job) {
-    if (job.status === 'completed' && !this.activeUsernames().has(job.username)) {
+    if (job.status === 'completed') {
       this.state.openManageProfilesModal(job.username);
     }
   }
   handleFollowerScan(usernames: string[]) { usernames.forEach(username => this.initiateScan(username)); }
+  openFollowerScanFromNode(nodeId: string) {
+    this.state.openFollowerScanPopup(nodeId);
+  }
   handleRescan(username: string) { this.initiateScan(username); this.state.closeSummaryPopup(); }
 
   private initiateScan(username: string) {
@@ -374,6 +437,16 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   handleFetchFollowers(p: PlatformResult) { this.fetchData(p, 'followers', this.scanService.fetchFollowers(p.platform, p.username), this.cancelFollowersFetchSubjects); }
   handleFetchFollowing(p: PlatformResult) { this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects); }
 
+  private getPlatformIdentityKey(platform: PlatformResult): string
+  {
+    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
+  }
+
+  private isSamePlatformIdentity(left: PlatformResult, right: PlatformResult): boolean
+  {
+    return this.getPlatformIdentityKey(left) === this.getPlatformIdentityKey(right);
+  }
+
   private fetchData(platformResult: PlatformResult, stateKey: keyof FetchingStateService, request$: Observable<any>, cancelMap: Map<string, Subject<void>>) {
     const key = this.fetchingState.getPlatformUniqueKey(platformResult);
     if (this.fetchingState.isUserBusy(platformResult.keyUsername)) {
@@ -400,7 +473,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
             state.scanResults.update(currentMap => {
               const newMap = new Map(currentMap);
               const userResults = newMap.get(platformResult.keyUsername)?.map(p =>
-                p.url === platformResult.url ? { ...p, ...newData } : p
+                this.isSamePlatformIdentity(p, platformResult) ? { ...p, ...newData } : p
               );
               if (userResults) {
                 newMap.set(platformResult.keyUsername, userResults);
@@ -441,7 +514,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   private updateUIPopups(p: PlatformResult, data: Partial<PlatformResult>) {
-    if (this.state.selectedPlatformData()?.url === p.url) {
+    const selectedPlatform = this.state.selectedPlatformData();
+    if (selectedPlatform && this.isSamePlatformIdentity(selectedPlatform, p)) {
       this.state.selectedPlatformData.update(current => current ? { ...current, ...data } : null);
     }
     if (this.state.summaryPopupData()?.username === p.keyUsername) {
@@ -449,10 +523,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         if (!current) {
           return null;
         }
-        return { ...current, platforms: current.platforms.map(platform => platform.url === p.url ? { ...platform, ...data } : platform) };
+        return { ...current, platforms: current.platforms.map(platform => this.isSamePlatformIdentity(platform, p) ? { ...platform, ...data } : platform) };
       });
     }
-    if (this.state.followerScanPopupData()?.platform.url === p.url) {
+    const followerPopupPlatform = this.state.followerScanPopupData()?.platform;
+    if (followerPopupPlatform && this.isSamePlatformIdentity(followerPopupPlatform, p)) {
       this.state.followerScanPopupData.update(current => current ? { platform: { ...current.platform, ...data } } : null);
     }
   }
@@ -466,31 +541,41 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (!allUserPlatforms) {
       return;
     }
-    const platformMapByUrl = new Map<string, PlatformResult>(allUserPlatforms.map(p => [p.url, p]));
-    const platformUrlsOnGraph = new Set<string>();
+    const platformMapByIdentity = new Map<string, PlatformResult>(allUserPlatforms.map(p => [this.getPlatformIdentityKey(p), p]));
+    const platformIdentitiesOnGraph = new Set<string>();
     this.networkData().edges.forEach(edge => {
       let otherNodeId = edge.from === nodeId ? edge.to : (edge.to === nodeId ? edge.from : null);
       if (otherNodeId) {
         const connectedNode = this.networkData().nodes.find(n => n.id === otherNodeId);
         if (connectedNode) {
           if (connectedNode.id.toString().startsWith('group-')) {
-            connectedNode.groupedPlatforms?.forEach(p => platformUrlsOnGraph.add(p.url));
+            connectedNode.groupedPlatforms?.forEach(platform => {
+              const identity = this.getPlatformIdentityKey(platform);
+              platformIdentitiesOnGraph.add(identity);
+            });
           } else if (connectedNode.id.toString().startsWith('platform-')) {
             const key = connectedNode.id.toString().substring('platform-'.length);
             const [keyUsername, platformName, platformUsername] = key.split('|');
-            allUserPlatforms.find(p => p.username === platformUsername && p.platform === platformName && p.keyUsername === keyUsername)
-              ?.url && platformUrlsOnGraph.add(allUserPlatforms.find(p => p.username === platformUsername && p.platform === platformName && p.keyUsername === keyUsername)!.url);
+            const platform = allUserPlatforms.find(p => p.username === platformUsername && p.platform === platformName && p.keyUsername === keyUsername);
+            if (platform) {
+              platformIdentitiesOnGraph.add(this.getPlatformIdentityKey(platform));
+            }
           }
         }
       }
     });
-    const platformsToShow = Array.from(platformUrlsOnGraph).map(url => platformMapByUrl.get(url)).filter((p): p is PlatformResult => !!p);
+    const platformsToShow = Array.from(platformIdentitiesOnGraph).map(identity => platformMapByIdentity.get(identity)).filter((platform): platform is PlatformResult => !!platform);
     const email = platformsToShow.find(p => p.email)?.email;
     this.state.summaryPopupData.set({ username, platforms: platformsToShow, email });
   }
 
   onPlatformNodeClicked(nodeId: string) {
-    if (this.isCustomEntityNode(nodeId) || !nodeId.startsWith('platform-')) {
+    if (this.isCustomEntityNode(nodeId))
+    {
+      this.entityManager()?.openEditEntityModal(nodeId);
+      return;
+    }
+    if (!nodeId.startsWith('platform-')) {
       return;
     }
     if (this.viewMode() === 'list') {
@@ -498,6 +583,175 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return;
     }
     this.state.openPlatformNodePopup(nodeId);
+  }
+
+  onRelationshipNodeClicked(nodeId: string) {
+    const relationshipNode = this.networkData().nodes.find(node => node.id.toString() === nodeId);
+    if (!relationshipNode) {
+      return;
+    }
+    const pairKey = nodeId.replace('relationship-node-', '');
+    const users = pairKey.split('--');
+    if (users.length !== 2) {
+      return;
+    }
+    const userA = users[0];
+    const userB = users[1];
+    const connections = this.buildRelationshipConnections(userA, userB);
+    const fallbackCount = Number(relationshipNode.label || 0);
+    const resolvedCount = connections.length > 0 ? connections.length : fallbackCount;
+    this.state.openRelationshipPopup({
+      userA,
+      userB,
+      count: resolvedCount,
+      connections
+    });
+  }
+
+  private normalizeHandle(value: string): string {
+    let normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      return '';
+    }
+    if (normalized.includes('://')) {
+      try {
+        const parsedUrl = new URL(normalized);
+        const segments = parsedUrl.pathname.split('/').filter(Boolean);
+        if (segments.length > 0) {
+          normalized = segments[segments.length - 1];
+        }
+      } catch {
+      }
+    }
+    normalized = normalized.replace(/^@+/, '');
+    normalized = normalized.replace(/[?#].*$/, '');
+    normalized = normalized.replace(/\/+$/, '');
+    return normalized;
+  }
+
+  private compactHandle(value: string): string {
+    return value.replace(/[^a-z0-9]/g, '');
+  }
+
+  private getHandleVariants(value: string): Set<string> {
+    const variants = new Set<string>();
+    const normalized = this.normalizeHandle(value);
+    if (!normalized) {
+      return variants;
+    }
+    variants.add(normalized);
+    const compact = this.compactHandle(normalized);
+    if (compact) {
+      variants.add(compact);
+    }
+    return variants;
+  }
+
+  private getUserHandleSet(username: string, platforms: PlatformResult[]): Set<string> {
+    const handles = new Set<string>();
+    for (const variant of this.getHandleVariants(username)) {
+      handles.add(variant);
+    }
+    for (const platform of platforms) {
+      for (const variant of this.getHandleVariants(platform.username || '')) {
+        handles.add(variant);
+      }
+      for (const variant of this.getHandleVariants(platform.url || '')) {
+        handles.add(variant);
+      }
+    }
+    return handles;
+  }
+
+  private containsAnyHandle(list: string[] | null | undefined, targets: Set<string>): boolean {
+    if (!list || list.length === 0) {
+      return false;
+    }
+    for (const handle of list) {
+      for (const variant of this.getHandleVariants(handle)) {
+        if (targets.has(variant)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private buildRelationshipConnections(userA: string, userB: string): RelationshipConnectionItem[] {
+    const userAPlatforms = this.scanResults().get(userA) || [];
+    const userBPlatforms = this.scanResults().get(userB) || [];
+    const userAHandles = this.getUserHandleSet(userA, userAPlatforms);
+    const userBHandles = this.getUserHandleSet(userB, userBPlatforms);
+    const unique = new Set<string>();
+    const connections: RelationshipConnectionItem[] = [];
+
+    for (const platform of userAPlatforms) {
+      const follows = this.containsAnyHandle(platform.following_list, userBHandles);
+      if (follows) {
+        const key = `${userA}|${platform.platform}|${platform.username}|${userB}|follows`;
+        if (!unique.has(key)) {
+          unique.add(key);
+          connections.push({
+            sourceUser: userA,
+            sourcePlatform: platform.platform,
+            sourceUsername: platform.username,
+            sourceUrl: platform.url,
+            targetUser: userB,
+            relation: 'follows'
+          });
+        }
+      }
+      const followedBy = this.containsAnyHandle(platform.followers_list, userBHandles);
+      if (followedBy) {
+        const key = `${userA}|${platform.platform}|${platform.username}|${userB}|followed_by`;
+        if (!unique.has(key)) {
+          unique.add(key);
+          connections.push({
+            sourceUser: userA,
+            sourcePlatform: platform.platform,
+            sourceUsername: platform.username,
+            sourceUrl: platform.url,
+            targetUser: userB,
+            relation: 'followed_by'
+          });
+        }
+      }
+    }
+
+    for (const platform of userBPlatforms) {
+      const follows = this.containsAnyHandle(platform.following_list, userAHandles);
+      if (follows) {
+        const key = `${userB}|${platform.platform}|${platform.username}|${userA}|follows`;
+        if (!unique.has(key)) {
+          unique.add(key);
+          connections.push({
+            sourceUser: userB,
+            sourcePlatform: platform.platform,
+            sourceUsername: platform.username,
+            sourceUrl: platform.url,
+            targetUser: userA,
+            relation: 'follows'
+          });
+        }
+      }
+      const followedBy = this.containsAnyHandle(platform.followers_list, userAHandles);
+      if (followedBy) {
+        const key = `${userB}|${platform.platform}|${platform.username}|${userA}|followed_by`;
+        if (!unique.has(key)) {
+          unique.add(key);
+          connections.push({
+            sourceUser: userB,
+            sourcePlatform: platform.platform,
+            sourceUsername: platform.username,
+            sourceUrl: platform.url,
+            targetUser: userA,
+            relation: 'followed_by'
+          });
+        }
+      }
+    }
+
+    return connections;
   }
 
   async updateGraphFromModal(selectedPlatforms: PlatformResult[]) {
@@ -525,6 +779,16 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         case 'fetchLinks': this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'); break;
         case 'clearConnections': this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username); break;
         case 'deleteProfile': this.state.openDeleteConfirmation(username); break;
+        case 'setAlias': {
+          if (!nodeId.startsWith('user-')) {
+            break;
+          }
+          const profileUsername = nodeId.substring('user-'.length);
+          const currentAlias = this.userNodeAliases()[nodeId] || '';
+          this.platformAliasModalData.set({ nodeId, username: profileUsername });
+          this.platformAliasInput.set(currentAlias);
+          break;
+        }
         case 'removeNode': this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId); break;
         case 'deleteEntity': this.deleteCustomEntity(nodeId); break;
     }

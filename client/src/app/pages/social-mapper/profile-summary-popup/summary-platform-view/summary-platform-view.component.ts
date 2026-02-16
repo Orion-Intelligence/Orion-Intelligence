@@ -6,6 +6,7 @@ import { SocialIconComponent } from '../../../../shared/components/social-icon/s
 import { socialMapperAnimations } from '../../../../shared/animations/social-mapper.animations';
 import { FetchingStateService } from '../../services/fetching-state.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
+import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 
 @Component({
   selector: 'app-summary-platform-view',
@@ -115,5 +116,9 @@ export class SummaryPlatformViewComponent {
     return Object.entries(details)
       .filter(([_, value]) => value !== null && value !== undefined && value !== '')
       .map(([key, value]) => ({ key, value }));
+  }
+
+  getAccountUrl(platform: PlatformResult): string {
+    return buildSocialProfileUrl(platform.platform, platform.username, platform.url);
   }
 }
