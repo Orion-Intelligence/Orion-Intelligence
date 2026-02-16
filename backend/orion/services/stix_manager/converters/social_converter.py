@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List
-from orion.api.interactive.search_manager.search_data_model.social.search_social_callback_model import result_item as SocialResultItem
+from orion.api.interactive.social_manager.social_models.search_social_callback_model import result_item as SocialResultItem
 from orion.services.stix_manager.converters.stix_converter_base import stix_converter_base
 from orion.services.stix_manager.stix_helper import stix_helper
 

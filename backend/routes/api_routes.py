@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
-from configs.app_dependency import license_required, role_required, status_required
+from configs.app_dependency import license_required, role_required, status_required, get_current_user
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (directory_param_model, )
@@ -19,8 +19,9 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import (search_exploit_param_model, )
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import (search_general_param_model, )
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import (search_leak_param_model, search_news_internal_param_model, search_news_param_model, )
-from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (search_social_param_model, SocialReconRequest, SocialProfileRequest, SearchEngineMetaRequest, SocialFollowersRequest, SocialFollowingRequest, SocialOnlineImages, )
+from orion.api.interactive.social_manager.social_models.search_social_param_model import (search_social_param_model, SocialReconRequest, SocialProfileRequest, SocialFollowersRequest, SocialFollowingRequest, SocialOnlineImages, )
 from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.social_manager.social_model import social_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
@@ -59,7 +60,7 @@ SYSTEM_INFO_DOCS = {"directory": _doc("system-info/directory.md"), "dumps": _doc
 
 REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("reports/breach.md"), "news": _doc(
     "reports/news.md"), "exploit": _doc("reports/exploit.md"), "strategic": _doc("reports/strategic.md"), "chat": _doc(
-    "reports/chat.md"), "social": _doc("reports/social.md"), "breach_screenshot": _doc(
+    "reports/chat.md"), "social_models": _doc("reports/social_models.md"), "breach_screenshot": _doc(
     "reports/breach_screenshot.md"), "stix": _doc("reports/stix.md"), }
 
 DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dynamic_cracked": _doc(
@@ -71,8 +72,8 @@ CRYPTO_DOCS = {"crypto_scan": _doc("dynamic/crypto_scan.md"),}
 
 SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
     "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
-    "search/consolidated_ranked.md"), "telegram": _doc("search/telegram.md"), "social": _doc(
-    "search/social.md"), "breach": _doc("search/breach.md"), "exploit": _doc("search/exploit.md"), "defacement": _doc(
+    "search/consolidated_ranked.md"), "telegram": _doc("search/telegram.md"), "social_models": _doc(
+    "search/social_models.md"), "breach": _doc("search/breach.md"), "exploit": _doc("search/exploit.md"), "defacement": _doc(
     "search/defacement.md"), }
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
@@ -266,7 +267,7 @@ async def search_telegram(param: search_chat_param_model = Body(...)):
 @api_routes.post(
     "/api/search/discussion",
     summary="Search threat discussion reports",
-    description="Search threat actor discussion reports from chat and social sources using parameters such as company, country, or hash.",
+    description="Search threat actor discussion reports from chat and social_models sources using parameters such as company, country, or hash.",
     tags=["Search"],
     operation_id="searchThreatDiscussionReports",
     response_description="Threat actor discussion search results with metadata for matching discussion reports.",
@@ -489,11 +490,11 @@ async def get_chat_document(doc_id: str, lang: Optional[str] = Query(
 
 @api_routes.get(
     "/api/search/social/{doc_id}",
-    summary="Get social media intelligence report",
-    description=REPORT_DOCS["social"]["description"],
+    summary="Get social_models media intelligence report",
+    description=REPORT_DOCS["social_models"]["description"],
     tags=["Reports"],
     operation_id="getSocialReport",
-    response_description=REPORT_DOCS["social"]["response_description"],
+    response_description=REPORT_DOCS["social_models"]["response_description"],
     status_code=200,
     dependencies=[Depends(
         role_required(
@@ -609,7 +610,7 @@ async def scrape_social(payload: SocialScrapeRequest):
 
 @api_routes.post(
     "/api/dynamic/social",
-    summary="Dynamic social identifier exposure search",
+    summary="Dynamic social_models identifier exposure search",
     description=DYNAMIC_DOCS["dynamic_social"]["description"],
     tags=["Live Dynamic Scan"],
     operation_id="dynamicSocialIdentifierExposureSearch",
@@ -619,7 +620,7 @@ async def scrape_social(payload: SocialScrapeRequest):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_social(param: search_dynamic_social_model = Body(...)):
-    return await search_model.getInstance().dynamic_search(param, "social")
+    return await search_model.getInstance().dynamic_search(param, "social_models")
 
 
 @api_routes.get(
@@ -687,7 +688,7 @@ async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(
 
 @api_routes.get(
     "/api/search/social/stix/{doc_id}",
-    summary="Get social media intelligence report in stix format",
+    summary="Get social_models media intelligence report in stix format",
     description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getSocialStixReport",
@@ -703,7 +704,7 @@ async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(
 
 @api_routes.get(
     "/api/search/chat/stix/{doc_id}",
-    summary="Get social media intelligence report in stix format",
+    summary="Get social_models media intelligence report in stix format",
     description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getSocialStixReport",
@@ -836,27 +837,47 @@ async def search_dynamic_image(payload: dict = Body(...)):
         {"file_bytes": file_bytes, "filename": "upload.png"},
         "recon/image",
     )
-
 @api_routes.post(
     "/api/social/followers",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialFollowersRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "followers")
+    return await social_model.getInstance().social_search(param, "followers")
 
 @api_routes.post(
     "/api/social/following",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialFollowingRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "following")
+    return await social_model.getInstance().social_search(param, "following")
 
 @api_routes.post(
     "/api/social/posts",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "posts")
+    return await social_model.getInstance().social_search(param, "posts")
 
 @api_routes.post(
     "/api/social/entity",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "entity")
+    return await social_model.getInstance().social_search(param, "entity")
+
+
+@api_routes.post(
+    "/api/social/session/upsert",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def upsert_social_session(data: dict = Body(...), current_user=Depends(get_current_user)):
+    return await social_model.getInstance().upsert_data(current_user.id, data)
+
+
+@api_routes.get(
+    "/api/social/session/tabs",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def get_social_tabs(current_user=Depends(get_current_user)):
+    return await social_model.getInstance().get_tabs_summary(current_user.id)
+
+
+@api_routes.post(
+    "/api/social/session/tab/add",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def add_social_tab(tab: dict = Body(...), current_user=Depends(get_current_user)):
+    return await social_model.getInstance().add_tab(current_user.id, tab)
