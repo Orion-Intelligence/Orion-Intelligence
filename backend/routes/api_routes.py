@@ -866,18 +866,18 @@ async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
     "/api/social/session/upsert",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def upsert_social_session(data: dict = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().upsert_data(current_user.id, data)
+    return await social_model.getInstance().upsert_data(str(current_user.id), data)
 
 
 @api_routes.get(
     "/api/social/session/tabs",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def get_social_tabs(current_user=Depends(get_current_user)):
-    return await social_model.getInstance().get_tabs_summary(current_user.id)
+    return await social_model.getInstance().get_tabs_summary(str(current_user.id))
 
 
 @api_routes.post(
     "/api/social/session/tab/add",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def add_social_tab(tab: dict = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().add_tab(current_user.id, tab)
+    return await social_model.getInstance().add_tab(str(current_user.id), tab)

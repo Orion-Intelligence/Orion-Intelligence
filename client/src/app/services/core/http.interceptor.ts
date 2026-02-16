@@ -5,13 +5,13 @@ import {
   HttpInterceptorFn,
   HttpRequest,
 } from '@angular/common/http';
-import { inject, Injector } from '@angular/core';
-import { Router } from '@angular/router';
-import { Observable, throwError, TimeoutError, Subject } from 'rxjs';
-import { catchError, finalize, timeout, takeUntil } from 'rxjs/operators';
-import { LoadingService } from '../../shared/services/loading.service';
-import { MessageNotificationService } from '../message_notification/message-notification.service';
-import { AuthService } from '../authetication/auth.service';
+import {inject, Injector} from '@angular/core';
+import {Router} from '@angular/router';
+import {Observable, throwError, TimeoutError, Subject} from 'rxjs';
+import {catchError, finalize, timeout, takeUntil} from 'rxjs/operators';
+import {LoadingService} from '../../shared/services/loading.service';
+import {MessageNotificationService} from '../message_notification/message-notification.service';
+import {AuthService} from '../authetication/auth.service';
 
 let activeRequests = 0;
 let hideTimeout: any = null;
@@ -44,8 +44,8 @@ export const httpInterceptor: HttpInterceptorFn = (
 
   const token = localStorage.getItem('token');
   const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` }, withCredentials: true })
-    : req.clone({ withCredentials: true });
+    ? req.clone({setHeaders: {Authorization: `Bearer ${token}`}, withCredentials: true})
+    : req.clone({withCredentials: true});
 
   const key = authReq.url.startsWith('api/') ? authReq.url : null;
   let cancel$: Subject<void> | null = null;
@@ -112,8 +112,7 @@ export const httpInterceptor: HttpInterceptorFn = (
         if (!isSilentLogout) {
           msg.show(message);
         }
-      }else
-      if (error instanceof HttpErrorResponse && error.status === 401) {
+      } else if (error instanceof HttpErrorResponse && error.status === 401) {
         localStorage.clear();
         sessionStorage.clear();
         router.navigate(['/login']).then();

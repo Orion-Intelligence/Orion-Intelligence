@@ -1,14 +1,16 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, NetworkNode, GraphPlatformBatch } from '../../../shared/model/social/social-scan.models';
-
-const STORAGE_KEY = 'orion-intelligence-sessions';
+import { ApiService } from '../../../shared/services/api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TabManagerService {
+  private readonly maxTabsAllowed = 5;
   private static tabCounter = 1;
-  private saveTimeout: any;
+  private hasLoadedState = false;
+  private autosaveIntervalId: any;
+  private lastSavedSignature = '';
 
   tabs = signal<Tab[]>([]);
   activeTabId = signal<string>('');
@@ -16,7 +18,8 @@ export class TabManagerService {
 
   activeTab = computed(() => this.tabs().find(t => t.id === this.activeTabId()));
 
-  constructor() {
+  constructor(private api: ApiService) {
+    this.startPeriodicSave();
     this.loadState();
   }
 
@@ -41,10 +44,9 @@ export class TabManagerService {
   }
 
   addTab() {
-    if (this.tabs().length >= 4) {
-	return;
-
-}
+    if (this.tabs().length >= this.maxTabsAllowed) {
+      return;
+    }
     const newTab: Tab = {
       id: self.crypto.randomUUID(),
       name: `Session ${TabManagerService.tabCounter++}`,
@@ -52,6 +54,7 @@ export class TabManagerService {
     };
 
     this.tabs.update(tabs => [...tabs, newTab]);
+    this.persistAddedTab(newTab);
     this.selectTab(newTab.id);
   }
 
@@ -63,14 +66,12 @@ export class TabManagerService {
   closeTab(id: string) {
     const tabs = this.tabs();
     if (tabs.length <= 1) {
-	return;
-
-}
+      return;
+    }
     const tabIndex = tabs.findIndex(t => t.id === id);
     this.tabs.update(currentTabs => currentTabs.filter(t => t.id !== id));
 
-    if (this.activeTabId() === id)
-{
+    if (this.activeTabId() === id) {
       const newActiveTab = tabs[tabIndex - 1] || tabs[tabIndex + 1];
       this.selectTab(newActiveTab.id);
     } else {
@@ -127,7 +128,7 @@ export class TabManagerService {
   }
 
   importTab(jsonString: string): void {
-    if (this.tabs().length >= 4) {
+    if (this.tabs().length >= this.maxTabsAllowed) {
       return;
     }
 
@@ -145,6 +146,7 @@ export class TabManagerService {
       };
 
       this.tabs.update(tabs => [...tabs, newTab]);
+      this.persistAddedTab(newTab);
       this.selectTab(newTab.id);
 
     } catch {
@@ -153,48 +155,90 @@ export class TabManagerService {
   }
 
   scheduleSave() {
-    clearTimeout(this.saveTimeout);
-    this.saveTimeout = setTimeout(() => this.saveState(), 500);
+    this.tryPeriodicSave();
   }
 
-  private saveState() {
-    const serializableState = {
-      activeTabId: this.activeTabId(),
-      tabCounter: TabManagerService.tabCounter,
+  private buildSerializableState() {
+    return {
+      active_tab_id: this.activeTabId(),
+      tab_counter: TabManagerService.tabCounter,
       tabs: this.tabs().map(tab => ({
         id: tab.id,
         name: tab.name,
         state: this.serializeTabState(tab.state),
       })),
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(serializableState));
+  }
+
+  private startPeriodicSave() {
+    this.autosaveIntervalId = setInterval(() => this.tryPeriodicSave(), 5000);
+  }
+
+  private tryPeriodicSave() {
+    if (!this.hasLoadedState) {
+      return;
+    }
+    const serializableState = this.buildSerializableState();
+    const nextSignature = JSON.stringify(serializableState);
+    if (nextSignature === this.lastSavedSignature) {
+      return;
+    }
+    this.api.post<any>('social/session/upsert', serializableState).subscribe({
+      next: () => {
+        this.lastSavedSignature = nextSignature;
+      },
+      error: () => {},
+    });
+  }
+
+  private persistAddedTab(tab: Tab) {
+    if (!this.hasLoadedState) {
+      return;
+    }
+    const tabPayload = {
+      id: tab.id,
+      name: tab.name,
+      state: this.serializeTabState(tab.state),
+    };
+    this.api.post<any>('social/session/tab/add', tabPayload).subscribe({
+      next: () => {},
+      error: () => {},
+    });
   }
 
   private loadState() {
-    const savedStateJSON = localStorage.getItem(STORAGE_KEY);
-    if (savedStateJSON) {
-      try {
-        const savedState = JSON.parse(savedStateJSON);
-        TabManagerService.tabCounter = savedState.tabCounter || 1;
+    this.api.get<any>('social/session/tabs').subscribe({
+      next: (savedState) => {
+        const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
 
-        const loadedTabs = savedState.tabs.map((savedTab: any) => ({
-            id: savedTab.id,
-            name: savedTab.name,
-            state: this.deserializeTabState(savedTab.state),
-        }));
+        if (savedTabs.length === 0) {
+          this.hasLoadedState = true;
+          this.addTab();
+          return;
+        }
+
+        const loadedTabs: Tab[] = savedTabs.map((savedTab: any, index: number) => {
+          const tabId = typeof savedTab?.id === 'string' && savedTab.id.length > 0 ? savedTab.id : self.crypto.randomUUID();
+          const tabName = typeof savedTab?.name === 'string' && savedTab.name.trim().length > 0 ? savedTab.name : `Session ${index + 1}`;
+          const tabState = savedTab?.state && typeof savedTab.state === 'object' ? this.deserializeTabState(savedTab.state as SerializableTabState) : this.createNewState();
+          return {
+            id: tabId,
+            name: tabName,
+            state: tabState,
+          } as Tab;
+        });
 
         this.tabs.set(loadedTabs);
-        this.activeTabId.set(savedState.activeTabId);
-
-        if (!this.activeTab()) {
-          this.selectTab(this.tabs()[0]?.id);
-        }
-      } catch {
+        this.activeTabId.set(loadedTabs[0]?.id || '');
+        TabManagerService.tabCounter = loadedTabs.length + 1;
+        this.hasLoadedState = true;
+        this.lastSavedSignature = JSON.stringify(this.buildSerializableState());
+      },
+      error: () => {
+        this.hasLoadedState = true;
         this.addTab();
-      }
-    } else {
-      this.addTab();
-    }
+      },
+    });
   }
 
   private serializeTabState(state: TabState): SerializableTabState {
@@ -203,8 +247,7 @@ export class TabManagerService {
       let value = (state as any)[key]();
       if (value instanceof Map) {
         value = { __type: 'Map', value: Array.from(value.entries()) };
-      } else if (value instanceof Set)
-{
+      } else if (value instanceof Set) {
         value = { __type: 'Set', value: Array.from(value.values()) };
       }
       plainState[key] = value;
@@ -216,15 +259,13 @@ export class TabManagerService {
     const newState = this.createNewState();
     for (const key in plainState) {
         let value = (plainState as any)[key];
-        if (value && value.__type === 'Map') {
-            (newState as any)[key].set(new Map(value.value));
-        } else if (value && value.__type === 'Set')
-{
-            (newState as any)[key].set(new Set(value.value));
-        } else if ((newState as any)[key])
-{
-            (newState as any)[key].set(value);
-        }
+      if (value && value.__type === 'Map') {
+        (newState as any)[key].set(new Map(value.value));
+      } else if (value && value.__type === 'Set') {
+        (newState as any)[key].set(new Set(value.value));
+      } else if ((newState as any)[key]) {
+        (newState as any)[key].set(value);
+      }
     }
     return newState;
   }

@@ -5,8 +5,6 @@ from odmantic import Model, Field
 
 
 class db_social_sessions_model(Model):
-    id: Optional[str] = Field(primary_field=True)
-
     user_id: str = Field(index=True)
     active_tab_id: Optional[str] = None
     tab_counter: int = 1
