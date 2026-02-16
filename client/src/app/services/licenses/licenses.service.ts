@@ -115,4 +115,25 @@ export class LicenseService {
     isMaintainer(): boolean {
         return this.getCombinedRule().maintainer;
     }
+
+    getLicenseLabel(license: LicenseName | string): string {
+        switch (license) {
+            case LicenseName.MAINTAINER:
+                return 'Maintainer';
+            case LicenseName.FREE:
+                return 'Free';
+            case LicenseName.OSINT_BASIC:
+                return 'OSINT Basic';
+            case LicenseName.OSINT_ADVANCED:
+                return 'OSINT Advanced';
+            case LicenseName.SOCIAL_MAPPER:
+                return 'Social Mapper';
+            case LicenseName.PENTESTER:
+                return 'Pentester';
+            case LicenseName.ENTERPRISE:
+                return 'Enterprise';
+            default:
+                return license;
+        }
+    }
 }

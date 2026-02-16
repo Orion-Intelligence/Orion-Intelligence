@@ -1,15 +1,16 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {NgIf} from '@angular/common';
-import {ApiService} from '../../../services/api.service';
-import {userMetaData, userSessionData} from '../../../model/company-profile/node.model';
-import {UserImagePickerComponent} from "./user-image-picker/user-image-picker.component";
-import {AppStorageService} from '../../../../services/core/app/app-storage.service';
-import {AppService} from '../../../../services/core/app/app.service';
-import {AuthService} from '../../../../services/authetication/auth.service';
-import {LicenseService} from '../../../../services/licenses/licenses.service';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgIf } from '@angular/common';
+import { ApiService } from '../../../services/api.service';
+import { userMetaData, userSessionData } from '../../../model/company-profile/node.model';
+import { UserImagePickerComponent } from "./user-image-picker/user-image-picker.component";
+import { AppStorageService } from '../../../../services/core/app/app-storage.service';
+import { AppService } from '../../../../services/core/app/app.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { LicenseName } from '../../../model/licenses/license.rules';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
@@ -112,7 +113,7 @@ export class AccountSettingsComponent implements OnInit {
     const tenant = this.userSessionData.tenant;
     if (!tenant) return '';
 
-    const {city, country} = tenant;
+    const { city, country } = tenant;
     if (city && country) return `${city}, ${country}`;
     if (city) return city;
     if (country) return country;
@@ -151,6 +152,13 @@ export class AccountSettingsComponent implements OnInit {
     return this.apiService.delete<any>('user/image').subscribe(() => {
       this.appService.userSessionData().user.image = `/api/s/static/user/default.png`
     });
+  }
+  getUserLicensesLabel(user: any): string {
+    if (!user?.license?.length) {
+      return '';
+    }
+    const names = user.license.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
+    return names;
   }
 
   protected readonly JSON = JSON;

@@ -84,21 +84,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onDropdownOpen() {
     const rawLicenses = this.appService.userSessionData().user.license;
-    this.licences = rawLicenses.map(l => this.getLicenseLabel(l)).join(', ');
+    this.licences = rawLicenses.map(l => this.licenseService.getLicenseLabel(l)).join(', ');
     this.profile_image = this.appService.userSessionData().user.image || ""
-  }
-
-  getLicenseLabel(name: string): string {
-    const labels: Record<string, string> = {
-      free: 'Free',
-      osint_basic: 'OSINT Basic',
-      osint_advanced: 'OSINT Advanced',
-      pentester: 'Pentester',
-      maintainer: 'Maintainer',
-      enterprise: 'Enterprise'
-    };
-
-    return labels[name] ?? name;
   }
 
   toggleThemeByClick() {

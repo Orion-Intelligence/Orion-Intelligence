@@ -125,7 +125,7 @@
                               <div class="tenant-title">Licenses</div>
                               <div *ngIf="user.licenses?.length; else noUserLicenses">
                                 <ng-container *ngFor="let license of user.licenses">
-                                  <span class="badge-license">{{ getLicenseLabel(license) }}</span>
+                                  <span class="badge-license">{{ licenseService.getLicenseLabel(license) }}</span>
                                 </ng-container>
                               </div>
                               <ng-template #noUserLicenses>
@@ -181,7 +181,7 @@
                                     [class.license-selected]="(user.licenses || []).indexOf(license) > -1"
                                     [class.license-disabled]="isLicenseDisabled(user, license)"
                                     (click)="!isLicenseDisabled(user, license) && toggleUserLicense(user, license)">
-                                    <span class="license-label">{{ getLicenseLabel(license) }}</span>
+                                    <span class="license-label">{{ licenseService.getLicenseLabel(license) }}</span>
                                   </div>
                                 </ng-container>
                               </div>

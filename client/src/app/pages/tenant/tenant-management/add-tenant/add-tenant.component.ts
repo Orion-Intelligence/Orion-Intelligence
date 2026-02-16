@@ -6,6 +6,7 @@ import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
 import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 import { AppService } from '../../../../services/core/app/app.service';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-add-tenant',
@@ -18,7 +19,7 @@ export class AddTenantComponent implements OnInit {
   @Output() accountAdded = new EventEmitter<void>();
 
   licenseList = Object.values(LicenseName);
-  licenses = ['free', 'osint_basic', 'osint_advanced', 'pentester', 'maintainer', 'enterprise'];
+  licenses = ['free', 'osint_basic', 'osint_advanced', 'social_mapper', 'pentester', 'maintainer', 'enterprise'];
   isAdmin: boolean = false;
 
   model: TenantTeamModel = {
@@ -36,7 +37,8 @@ export class AddTenantComponent implements OnInit {
 
   constructor(
     public apiService: ApiService,
-    private appService: AppService
+    private appService: AppService,
+    protected licenseService: LicenseService
   ) {
   }
 
@@ -118,23 +120,6 @@ export class AddTenantComponent implements OnInit {
     this.closs.emit();
   }
 
-  getLicenseLabel(license: LicenseName): string {
-    switch (license) {
-      case LicenseName.FREE:
-        return 'Free';
-      case LicenseName.OSINT_BASIC:
-        return 'OSINT Basic';
-      case LicenseName.OSINT_ADVANCED:
-        return 'OSINT Advanced';
-      case LicenseName.PENTESTER:
-        return 'Pentester';
-      case LicenseName.ENTERPRISE:
-        return 'Enterprise';
-      default:
-        return license;
-    }
-  }
-
   get hasFullLicenseAccess(): boolean {
     return this.appService.userSessionData()?.user?.role === 'admin';
   }
@@ -146,14 +131,14 @@ export class AddTenantComponent implements OnInit {
   get visibleTenantLicensesCount(): number {
     if (this.hasFullLicenseAccess) {
       return this.licenseList.filter(
-        license => this.getLicenseLabel(license) !== 'maintainer'
+        license => this.licenseService.getLicenseLabel(license) !== 'maintainer'
       ).length;
     }
 
     return this.licenseList.filter(
       license =>
         this.tenantLicenses.includes(license) &&
-        this.getLicenseLabel(license) !== 'maintainer'
+        this.licenseService.getLicenseLabel(license) !== 'maintainer'
     ).length;
   }
 

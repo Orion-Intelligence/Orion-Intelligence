@@ -8,6 +8,7 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-view-tenant',
@@ -23,7 +24,7 @@ export class ViewTenantComponent implements OnInit {
   selectedTenantId: string | null = null;
   TenantStatus = TenantStatusValues;
 
-  constructor(public apiService: ApiService) {
+  constructor(public apiService: ApiService, protected licenseService: LicenseService) {
   }
 
   ngOnInit(): void {
@@ -101,23 +102,6 @@ export class ViewTenantComponent implements OnInit {
     }
   }
 
-  getLicenseLabel(license: LicenseName): string {
-    switch (license) {
-      case LicenseName.FREE:
-        return 'Free';
-      case LicenseName.OSINT_BASIC:
-        return 'OSINT Basic';
-      case LicenseName.OSINT_ADVANCED:
-        return 'OSINT Advanced';
-      case LicenseName.PENTESTER:
-        return 'Pentester';
-      case LicenseName.ENTERPRISE:
-        return 'Enterprise';
-      default:
-        return license;
-    }
-  }
-
   toggleTenantLicense(tenant: any, license: LicenseName): void {
     if (!tenant.licenses) {
       tenant.licenses = [];
@@ -137,7 +121,7 @@ export class ViewTenantComponent implements OnInit {
     }
 
     const names = tenant.licenses
-      .map((l: LicenseName) => this.getLicenseLabel(l))
+      .map((l: LicenseName) => this.licenseService.getLicenseLabel(l))
       .join(', ');
 
     return names.length <= 15 ? names : names.slice(0, 15) + '...';

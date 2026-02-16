@@ -138,9 +138,14 @@
     </div>
 
     <ng-template #showFree>
-        <div class="sidebar-profile-statistics-container">
-            <app-home-insight></app-home-insight>
+        <div *ngIf="isAnalyst()&&licenseService.getLicenses().includes('enterprise'); else notAnalyst">
+            <app-home-search></app-home-search>
         </div>
+        <ng-template #notAnalyst>
+            <div class="sidebar-profile-statistics-container">
+                <app-home-insight></app-home-insight>
+            </div>
+        </ng-template>
     </ng-template>
     <ng-container *ngIf="isConfirmationOpen()">
         <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
