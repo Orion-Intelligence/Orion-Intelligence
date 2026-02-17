@@ -3,7 +3,7 @@ from typing import Optional
 
 class DomainScanRequest(BaseModel):
     domain: str
-    scanType: str
+    scanType: Optional[str]
     checkLive: Optional[bool] = False
 
 

@@ -1220,20 +1220,6 @@ class elastic_request_generator:
             }
         }
 
-        password_filter = getattr(p_query_model, "password_scheme", None)
-        if password_filter:
-            min_l = password_filter.minLength or 0
-            max_l = password_filter.maxLength or 1000
-            es_query["bool"]["filter"].append({
-                "regexp": {"password.keyword": f".{{{min_l},{max_l}}}"}
-            })
-            if getattr(password_filter, "hasAlphabets", False):
-                es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[a-zA-Z].*"}})
-            if getattr(password_filter, "hasNumbers", False):
-                es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[0-9].*"}})
-            if getattr(password_filter, "hasSpecialChars", False):
-                es_query["bool"]["filter"].append({"regexp": {"password.keyword": ".*[^a-zA-Z0-9].*"}})
-
         date_field = "date"
         date_range = getattr(p_query_model, "daterange", None)
 

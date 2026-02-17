@@ -76,6 +76,9 @@ SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
     "search/social_models.md"), "breach": _doc("search/breach.md"), "exploit": _doc("search/exploit.md"), "defacement": _doc(
     "search/defacement.md"), }
 
+SUPPORT_METHOD_DOCS={"subdomain_scan": _doc("support/subdomain_scan.md"), "dns_scan": _doc(
+    "support/dns_scan.md"), "wayback_scan": _doc("support/wayback_scan.md")}
+
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
 
@@ -579,6 +582,53 @@ async def search_dynamic_software(param: search_dynamic_crack_model = Body(...))
 async def parse_text(payload: DomainScanRequest):
     return await crawl_model.getInstance().scan_domain(payload)
 
+@api_routes.post(
+    "/api/urlscan/subdomains",
+    summary="Returns the list of associated subdomains",
+    description=SUPPORT_METHOD_DOCS["subdomain_scan"]["description"],
+    tags=["Support Method"],
+    operation_id="scanSubdomains",
+    response_description=SUPPORT_METHOD_DOCS["subdomain_scan"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
+        Depends(license_required("scanning")), ], )
+async def parse_text(payload: DomainScanRequest):
+    payload.scanType='subdomains'
+    return await crawl_model.getInstance().scan_domain(payload)
+
+@api_routes.post(
+    "/api/urlscan/dns",
+    summary="Reverse DNS and ping check",
+    description=SUPPORT_METHOD_DOCS["dns_scan"]["description"],
+    tags=["Support Method"],
+    operation_id="scanDns",
+    response_description=SUPPORT_METHOD_DOCS["dns_scan"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
+        Depends(license_required("scanning")), ], )
+async def parse_text(payload: DomainScanRequest):
+    payload.scanType='dns'
+    return await crawl_model.getInstance().scan_domain(payload)
+
+@api_routes.post(
+    "/api/urlscan/wayback",
+    summary="Fetches archived snapshots and timestamps",
+    description=SUPPORT_METHOD_DOCS["wayback_scan"]["description"],
+    tags=["Support Method"],
+    operation_id="scanWaybackDomain",
+    response_description=SUPPORT_METHOD_DOCS["wayback_scan"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
+        Depends(license_required("scanning")), ], )
+async def parse_text(payload: DomainScanRequest):
+    payload.scanType='wayback'
+    return await crawl_model.getInstance().scan_domain(payload)
 
 @api_routes.post(
     "/api/urlscan/ip",
