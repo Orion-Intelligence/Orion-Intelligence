@@ -109,7 +109,7 @@
 
         <div class="home-insight-wrapper" [class.expanded]="homeInsightExpanded" [class.dragging]="insightDragging"
           [style.transform]="insightDragging ? 'translateY(' + insightDragY + 'px)' : null">
-          <div class="home-insight-toggle" (click)="$event.preventDefault(); $event.stopPropagation()"
+          <div class="home-insight-toggle" (click)="onInsightToggleClick($event)"
             (pointerdown)="onInsightPointerDown($event)" (pointermove)="onInsightPointerMove($event)"
             (pointerup)="onInsightPointerUp($event)" (pointercancel)="onInsightPointerCancel($event)"></div>
           <app-home-insight></app-home-insight>

@@ -40,23 +40,38 @@
   justify-content:center;
   gap:10px;
   cursor:pointer;
-  min-width:150px;
-  padding:5px 24px;
-  border-radius:8px;
-  background:
-    linear-gradient(
-      to bottom,
-      rgb(21 52 84 / 40%),
-      rgb(16 42 70 / 48%)
-    );
-  color:#c7d2fe;
-  font-size:14px;
+  min-width:84px;
+  min-height:22px;
+  padding:0;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgb(56 189 248 / 30%), rgb(99 102 241 / 34%));
+  border:1px solid rgb(148 163 184 / 42%);
+  color:transparent;
+  font-size:0;
   font-weight:600;
-  letter-spacing:.3px;
+  letter-spacing:0;
   box-shadow:
-    0 10px 26px rgb(0 0 0 / 25%),
-    inset 0 1px 0 rgb(255 255 255 / 5.1%);
+    0 8px 18px rgb(0 0 0 / 24%),
+    inset 0 1px 0 rgb(255 255 255 / 8%);
+  transition:background .2s ease, border-color .2s ease, box-shadow .2s ease;
   z-index:20;
+}
+
+.home-insight-toggle::before{
+  content:'';
+  width:26px;
+  height:6px;
+  border-radius:999px;
+  background:
+    radial-gradient(circle, rgb(226 232 240 / 92%) 2px, transparent 2.5px) 0 50% / 8px 6px repeat-x;
+}
+
+.home-insight-toggle:hover{
+  background:linear-gradient(90deg, rgb(56 189 248 / 40%), rgb(99 102 241 / 44%));
+  border-color:rgb(148 163 184 / 58%);
+  box-shadow:
+    0 10px 22px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 
 .home-insight-toggle::after{
@@ -103,4 +118,3 @@
 .home-insight-toggle{
   touch-action:none;
 }
-

@@ -78,6 +78,7 @@ export class WorldHeatmapComponent
       this.buildIndex();
       this.updateColors();
       this.updateLegend();
+      this.updateActiveCategoryLabel();
     }
   }
 
@@ -113,6 +114,7 @@ export class WorldHeatmapComponent
       this.buildIndex();
       this.animateMapTransition();
       this.updateLegend();
+      this.updateActiveCategoryLabel();
 
       index = (index + 1) % available.length;
     };
@@ -121,7 +123,7 @@ export class WorldHeatmapComponent
 
     this.rotationTimer = setInterval(() => {
       switchCategory();
-    }, 15000);
+    }, 8000);
   }
 
   private ensureLegendDefs(): void {
@@ -129,21 +131,26 @@ export class WorldHeatmapComponent
       ? this.svg.append('defs')
       : this.svg.select('defs');
 
-    if (defs.select('#legend-gradient').empty()) {
-      const grad = defs.append('linearGradient')
-        .attr('id', 'legend-gradient')
-        .attr('x1', '0%')
-        .attr('y1', '0%')
-        .attr('x2', '100%')
-        .attr('y2', '0%');
+    defs.select('#legend-gradient').remove();
+    const grad = defs.append('linearGradient')
+      .attr('id', 'legend-gradient')
+      .attr('x1', '0%')
+      .attr('y1', '0%')
+      .attr('x2', '100%')
+      .attr('y2', '0%');
 
-      grad.append('stop')
-        .attr('offset', '0%')
-        .attr('stop-color', '#fde0e0');
+    const stops = [
+      { offset: '0%', color: '#4a2530' },
+      { offset: '25%', color: '#682636' },
+      { offset: '50%', color: '#8a273d' },
+      { offset: '75%', color: '#b22945' },
+      { offset: '100%', color: '#df2d4f' },
+    ];
 
+    for (const stop of stops) {
       grad.append('stop')
-        .attr('offset', '100%')
-        .attr('stop-color', '#7a0000');
+        .attr('offset', stop.offset)
+        .attr('stop-color', stop.color);
     }
   }
 
@@ -244,6 +251,23 @@ export class WorldHeatmapComponent
       );
   }
 
+  private updateActiveCategoryLabel(): void {
+    const labelG = this.svg.selectAll<SVGGElement, any>('g.map-type').data([0]).join('g').attr('class', 'map-type');
+    labelG.attr('transform', `translate(${33},${28})`).style('pointer-events', 'none');
+    labelG.selectAll<SVGTextElement, any>('text.map-type-text')
+      .data([this.activeCategoryKey])
+      .join('text')
+      .attr('class', 'map-type-text')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', 14)
+      .attr('font-weight', 700)
+      .attr('letter-spacing', 0.8)
+      .attr('fill', '#ffe4e6')
+      .text(d => `HEATMAP: ${(d ?? '').toUpperCase()}`);
+  }
+
   private createChart(): void {
     this.worldData = this.appService.worldJson();
     if (!this.worldData) return;
@@ -316,6 +340,7 @@ export class WorldHeatmapComponent
 
     this.updateColors();
     this.updateLegend();
+    this.updateActiveCategoryLabel();
   }
 
   private getValueForFeature(d: any): number | null {
@@ -329,9 +354,11 @@ export class WorldHeatmapComponent
       .domain(values)
       .range(d3.range(0, 7));
 
+    const ramp = ['#4a2530', '#5a2533', '#6d2637', '#82273b', '#9a2840', '#b62a46', '#d92d4d'];
+
     return (v: number) => {
-      const t = q(v) / 6;
-      return d3.interpolateRgb('#fde0e0', '#7a0000')(t);
+      const index = q(v);
+      return ramp[index];
     };
   }
 
@@ -415,19 +442,21 @@ export class WorldHeatmapComponent
     if (!this.mapG) return;
 
     const color = this.getColorScale();
+    const getValueForFeature = this.getValueForFeature.bind(this);
+    const neutralFill = this.neutralFill;
 
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
 
     countries
       .transition()
-      .duration(300)
-      .style('opacity', 0.4)
-      .transition()
-      .duration(800)
-      .style('opacity', 1)
-      .attr('fill', (d: any) => {
-        const v = this.getValueForFeature(d);
-        return v == null ? this.neutralFill : color(v);
+      .duration(1100)
+      .ease(d3.easeCubicInOut)
+      .attrTween('fill', function (this: SVGPathElement, d: any) {
+        const v = getValueForFeature(d);
+        const nextFill = v == null ? neutralFill : color(v);
+        const currentFill = d3.select(this).attr('fill') || neutralFill;
+        const interpolateFill = d3.interpolateRgb(currentFill, nextFill);
+        return (t: number) => interpolateFill(t);
       });
   }
 

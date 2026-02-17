@@ -156,3 +156,8 @@ svg .legend-tick-label {
   font-size: 10px;
   fill: rgb(226 232 240 / 75%);
 }
+
+svg .map-type .map-type-text {
+  text-transform: uppercase;
+  filter: drop-shadow(0 3px 8px rgb(0 0 0 / 42%));
+}
