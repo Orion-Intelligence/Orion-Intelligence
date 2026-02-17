@@ -43,7 +43,7 @@
           </div>
         </div>
       </nav>
-      <div class="pr-2">
+      <div class="flex items-center gap-1 pr-2">
         <div class="relative">
             <button (click)="toggleHeaderMenu($event)" class="flex items-center justify-center h-8 w-8 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors" title="Session Menu">
                 <i class="bi bi-three-dots-vertical text-lg"></i>
@@ -64,6 +64,7 @@
                 </button>
             </div>
         </div>
+        <app-profile class="topbar-profile-compact"></app-profile>
       </div>
     </div>
   </header>

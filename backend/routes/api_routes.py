@@ -10,6 +10,8 @@ from orion.api.interactive.directory_manager.directory_model import directory_mo
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (directory_param_model, )
 from orion.api.interactive.dump_manager.dump_model import dump_model
 from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model import dump_param_model
+from orion.api.interactive.graph_manager.graph_models.search_social_param_model import search_social_param_model, SocialFollowersRequest, SocialFollowingRequest, SocialProfileRequest, SocialOnlineImages, SocialReconRequest
+from orion.api.interactive.graph_manager.graphs_model import graphs_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import (search_chat_param_model, )
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (search_consolidated_param_model, )
@@ -19,11 +21,10 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import (search_exploit_param_model, )
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import (search_general_param_model, )
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import (search_leak_param_model, search_news_internal_param_model, search_news_param_model, )
-from orion.api.interactive.social_manager.social_models.search_social_param_model import (search_social_param_model, SocialReconRequest, SocialProfileRequest, SocialFollowersRequest, SocialFollowingRequest, SocialOnlineImages, )
 from orion.api.interactive.search_manager.search_model import search_model
-from orion.api.interactive.social_manager.social_model import social_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
+from orion.api.server.crawl_manager.class_model.social_model import social_model
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -912,22 +913,25 @@ async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
     return await social_model.getInstance().social_search(param, "entity")
 
 
+
 @api_routes.post(
     "/api/social/session/upsert",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def upsert_social_session(data: dict = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().upsert_data(str(current_user.id), data)
+async def upsert_social_session(data: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
+    gt = (data or {}).get("graph_type") or graph_type or "social"
+    return await graphs_model.getInstance().upsert_data(str(current_user.id), gt, data)
 
 
 @api_routes.get(
     "/api/social/session/tabs",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def get_social_tabs(current_user=Depends(get_current_user)):
-    return await social_model.getInstance().get_tabs_summary(str(current_user.id))
+async def get_social_tabs(graph_type: str = Query("social"), current_user=Depends(get_current_user)):
+    return await graphs_model.getInstance().get_tabs_summary(str(current_user.id), graph_type)
 
 
 @api_routes.post(
     "/api/social/session/tab/add",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def add_social_tab(tab: dict = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().add_tab(str(current_user.id), tab)
+async def add_social_tab(tab: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
+    gt = (tab or {}).get("graph_type") or graph_type or "social"
+    return await graphs_model.getInstance().add_tab(str(current_user.id), gt, tab)

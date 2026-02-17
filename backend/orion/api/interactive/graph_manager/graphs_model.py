@@ -2,17 +2,17 @@ import httpx
 from datetime import datetime, UTC
 from fastapi.responses import JSONResponse
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_social_sessions_model import db_social_sessions_model
+from orion.services.mongo_manager.shared_model.db_graph_sessions_model import db_graph_sessions_model
 
 
-class social_model:
+class graphs_model:
     __instance = None
 
     @staticmethod
     def getInstance():
-        if social_model.__instance is None:
-            social_model.__instance = social_model()
-        return social_model.__instance
+        if graphs_model.__instance is None:
+            graphs_model.__instance = graphs_model()
+        return graphs_model.__instance
 
     def __init__(self):
         self._engine = mongo_controller.get_instance().get_engine()
@@ -50,15 +50,16 @@ class social_model:
         except Exception as ex:
             return JSONResponse(status_code=500, content=str(ex))
 
-    async def get_tabs_summary(self, user_id: str):
+    async def get_tabs_summary(self, user_id: str, graph_type: str = "social"):
         try:
             existing = await self._engine.find_one(
-                db_social_sessions_model, {"user_id": user_id}
+                db_graph_sessions_model, {"user_id": user_id, "graph_type": graph_type}
             )
 
             if existing is None:
                 return {
                     "user_id": user_id,
+                    "graph_type": graph_type,
                     "total_tabs": 0,
                     "max_tabs_allowed": 5,
                     "tabs": [],
@@ -68,6 +69,7 @@ class social_model:
 
             return {
                 "user_id": user_id,
+                "graph_type": existing.graph_type,
                 "total_tabs": len(tabs),
                 "max_tabs_allowed": 5,
                 "tabs": tabs,
@@ -76,18 +78,22 @@ class social_model:
         except Exception as ex:
             return JSONResponse(status_code=500, content=str(ex))
 
-    async def add_tab(self, user_id: str, tab: dict):
+    async def add_tab(self, user_id: str, graph_type: str, tab: dict):
         try:
             existing = await self._engine.find_one(
-                db_social_sessions_model, {"user_id": user_id}
+                db_graph_sessions_model, {"user_id": user_id, "graph_type": graph_type}
             )
 
             now_utc = datetime.now(UTC)
 
+            safe_tab = dict(tab or {})
+            safe_tab.pop("graph_type", None)
+
             if existing is None:
-                new_doc = db_social_sessions_model(
+                new_doc = db_graph_sessions_model(
                     user_id=user_id,
-                    tabs=[tab],
+                    graph_type=graph_type,
+                    tabs=[safe_tab],
                     tab_counter=1,
                     created_at=now_utc,
                     updated_at=now_utc,
@@ -95,6 +101,7 @@ class social_model:
                 saved = await self._engine.save(new_doc)
                 return {
                     "user_id": user_id,
+                    "graph_type": saved.graph_type,
                     "total_tabs": len(saved.tabs or []),
                     "max_tabs_allowed": 5,
                 }
@@ -106,13 +113,14 @@ class social_model:
                     content="Maximum 5 tabs are allowed for a single user",
                 )
 
-            existing.tabs = tabs + [tab]
+            existing.tabs = tabs + [safe_tab]
             existing.tab_counter = existing.tab_counter + 1
             existing.updated_at = now_utc
 
             saved = await self._engine.save(existing)
             return {
                 "user_id": user_id,
+                "graph_type": saved.graph_type,
                 "total_tabs": len(saved.tabs or []),
                 "max_tabs_allowed": 5,
             }
@@ -120,10 +128,10 @@ class social_model:
         except Exception as ex:
             return JSONResponse(status_code=500, content=str(ex))
 
-    async def upsert_data(self, user_id: str, data: dict):
+    async def upsert_data(self, user_id: str, graph_type: str, data: dict):
         try:
             existing = await self._engine.find_one(
-                db_social_sessions_model, {"user_id": user_id}
+                db_graph_sessions_model, {"user_id": user_id, "graph_type": graph_type}
             )
 
             now_utc = datetime.now(UTC)
@@ -134,6 +142,7 @@ class social_model:
             safe_data.pop("user_id", None)
             safe_data.pop("created_at", None)
             safe_data.pop("updated_at", None)
+            safe_data.pop("graph_type", None)
 
             if "tabs" in safe_data:
                 if safe_data["tabs"] is None:
@@ -157,6 +166,7 @@ class social_model:
                     existing.schema_version = safe_data["schema_version"]
 
                 existing.user_id = user_id
+                existing.graph_type = graph_type
                 existing.updated_at = now_utc
 
                 if existing.tabs is None:
@@ -170,8 +180,9 @@ class social_model:
                 saved = await self._engine.save(existing)
                 return saved
 
-            new_doc = db_social_sessions_model(
+            new_doc = db_graph_sessions_model(
                 user_id=user_id,
+                graph_type=graph_type,
                 created_at=now_utc,
                 updated_at=now_utc,
                 active_tab_id=safe_data.get("active_tab_id", None),

@@ -68,8 +68,6 @@
 @use 'app/shared/partials/trail-notification/trail-notification.component.css';
 @use 'app/shared/partials/message-notification/message-notification.component.css';
 @use 'app/pages/graphs/graphs.component.css';
-@use 'app/pages/graphs/graph-info/graph-info.component.css';
-@use 'app/pages/graphs/listings/graph-listings.component.css';
 @use 'app/pages/graphs/sidebar/sidebar.component.css';
 @use 'app/shared/partials/report/report-chat/report-chat.component.css';
 @use 'app/shared/partials/filters/date-picker/date-picker.component.css';
@@ -257,6 +255,33 @@
       rgba(14, 22, 38, 0) 100%);
 
   --filter-dropdown-icon: url('/assets/images/shared/theme/filter-dropdown-dark-icon.svg');
+}
+
+app-profile.topbar-profile-compact .profile {
+  gap: 0;
+}
+
+app-profile.topbar-profile-compact .profile_category {
+  padding: 0;
+}
+
+app-profile.topbar-profile-compact {
+  margin-right: 0;
+}
+
+app-profile.topbar-profile-compact .profile {
+  margin: 0;
+}
+
+app-profile.topbar-profile-compact .profile-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+app-profile.topbar-profile-compact .profile_logout_icon img {
+  width: 20px;
+  height: 20px;
 }
 
 img[src*="assets/images/shared/theme"]:not([data-ph]),

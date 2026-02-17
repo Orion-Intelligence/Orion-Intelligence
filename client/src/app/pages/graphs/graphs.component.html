@@ -1,75 +1,246 @@
-<div class="position-fixed">
-  <div #networkContainer class="graph_container d-none d-md-block"></div>
+<ng-container *ngIf="isTailwindReady; else tailwindLoading">
+<div class="fixed inset-0" (click)="closeMenus()">
+  <header class="absolute left-0 right-0 top-0 z-50 flex-shrink-0 border-b border-slate-700 bg-slate-800/50">
+    <div class="flex items-center justify-between pl-2">
+      <nav class="flex items-center gap-1">
+        <div *ngFor="let tab of tabs" (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center border-b-2 pl-3 pr-2 text-sm font-medium ' + (activeTabId === tab.id ? 'border-indigo-400 bg-slate-800 text-white pt-2 pb-1.5 rounded-t-md' : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 pt-2 pb-1.5 rounded-t-md')">
+          <div *ngIf="editingTabId === tab.id; else graphTabName">
+            <input #renameInput type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-slate-700 p-1 text-white outline-none ring-2 ring-indigo-500">
+          </div>
+          <ng-template #graphTabName>
+            <span (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1">{{ tab.name }}</span>
+          </ng-template>
+          <button *ngIf="tabs.length> 1"
+            (click)="$event.stopPropagation(); closeSession(tab.id)"
+            [class]="'ml-1 rounded-full p-1 text-slate-500 transition-colors hover:bg-slate-600 hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+            <i class="bi bi-x-lg text-xs"></i>
+          </button>
+        </div>
 
-  <graph-sidebar (filtersApplied)="onSidebarApply($event)" class="d-none d-md-block"></graph-sidebar>
-
-  <app-graph-info (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()"
-                  (physicsToggled)="onPhysicsToggled($event)" (ruleSetChange)="ruleSetChange($event)"
-                  [(ruleSet)]="ruleSet" [expandEnabledTemp]="expandEnabled" [physicsEnabled]=physicsEnabled
-                  [propertyType]="propertyType" [propertyValue]="propertyValue" [result]="flattenedDocuments"
-                  [selectedType]="selectedType" [singleInput]="singleInput" class="d-none d-md-block"></app-graph-info>
-
-
-  <div class="graph_context-menu" id="customContextMenu">
-    <button (click)="expandGroupNode()" class="dropdown-item graph_button-content">
-      <img alt="expand" class="graph-filters_listing-margin" height="15" src="assets/images/shared/expand.svg"
-           width="15"> Expand
-    </button>
-
-    <hr class="dropdown-divider mx-3">
-
-    <button (click)="collapseGroupNode()" class="dropdown-item graph_button-content">
-      <img alt="collapse" class="graph-filters_listing-margin" height="15" src="assets/images/shared/collapse.svg"
-           width="15"> Collapse
-    </button>
-    <hr class="dropdown-divider mx-3">
-
-    <button (click)="openCTI()" class="dropdown-item graph_button-content">
-      <img alt="share" class="graph_share-wrapper graph-filters_listing-margin" height="15"
-           src="assets/images/shared/share-black.svg" width="15"> Open CTI
-    </button>
-    <hr class="dropdown-divider mx-3">
-    <button (click)="copyNodeLabel($event)" class="dropdown-item graph_button-content">
-      <img alt="label" class="graph_share-wrapper graph-filters_listing-margin" height="15"
-           src="assets/images/shared/label.svg" width="15"> Copy Label
-    </button>
-    <hr class="dropdown-divider mx-3">
-    <button (click)="viewReport()" class="dropdown-item graph_button-content">
-      <img alt="redirect" class="graph_share-wrapper graph-filters_listing-margin" height="15"
-           src="assets/images/shared/redirect-black.svg" width="15"> Open Report
-    </button>
-
-  </div>
-  <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="graph-filters_floating-copied ">Copied!</span>
-
-
-  <div *ngIf="maxEdge>50" class="graph_notification">
-    <div class="default-notification-banner default-notification-banner-cti">
-    <span>
-      <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg">
-      <span>
-        You can see {{ maxEdge }} nodes at a time, avoid using extreme values for better performance
-      </span>
-    </span>
-    </div>
-  </div>
-
-  <div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph_container-empty d-none d-md-block">
-    <img *ngIf="loading" alt="No Data" class="img-fluid w-auto" src="assets/images/shared/cti-empty.svg"/> <img
-    *ngIf="!loading" alt="No Data" class="graph-magnify-animation img-fluid w-auto"
-    src="assets/images/shared/magnifying_search.svg"/>
-  </div>
-
-  <div class="blocked-media d-block d-md-none">
-    <div class="blocked-card">
-      <div class="blocked-icon">
-        <i class="bi bi-phone-slash"></i>
+        <div class="pl-1">
+          <div class="relative">
+            <input type="file" class="hidden" id="graphSessionFileInput" (change)="importSessionFile($event)" accept=".json">
+            <button (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-700 hover:text-white" title="New Session">
+              <i class="bi bi-plus-lg text-lg"></i>
+            </button>
+            <div *ngIf="isAddMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg">
+              <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
+                <i class="bi bi-plus-square h-5 w-5 text-slate-400 group-hover:text-white"></i>
+                <span>New Session</span>
+              </button>
+              <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
+                <i class="bi bi-upload h-5 w-5 text-slate-400 group-hover:text-white"></i>
+                <span>Import Session</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div class="flex items-center gap-1 pr-2">
+        <div class="relative">
+          <button (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-700 hover:text-white" title="Session Menu">
+            <i class="bi bi-three-dots-vertical text-lg"></i>
+          </button>
+          <div *ngIf="isHeaderMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg">
+            <button (click)="exportActiveSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
+              <i class="bi bi-download h-5 w-5 text-slate-400 group-hover:text-white"></i>
+              <span>Export Current Session</span>
+            </button>
+            <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
+              <i class="bi bi-upload h-5 w-5 text-slate-400 group-hover:text-white"></i>
+              <span>Import Session</span>
+            </label>
+            <div class="my-1 h-px bg-slate-600"></div>
+            <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
+              <i class="bi bi-plus-square h-5 w-5 text-slate-400 group-hover:text-white"></i>
+              <span>New Session</span>
+            </button>
+          </div>
+        </div>
+        <app-profile class="topbar-profile-compact"></app-profile>
       </div>
-      <h5>Mobile Not Supported</h5>
-      <p>
-        This CTI Graph is designed for desktop use.<br>
-        Please switch to a larger screen to continue.
-      </p>
+    </div>
+  </header>
+
+  <div class="pointer-events-none absolute left-0 right-0 top-12 z-30 px-2 pt-2 sm:px-4 sm:pt-2" [ngClass]="{ 'pl-16': isSidebarCollapsed, 'pl-2 sm:pl-4': !isSidebarCollapsed, 'md:pl-[344px]': !isSidebarCollapsed, 'md:pl-[104px]': isSidebarCollapsed }">
+    <div class="pointer-events-auto flex flex-col items-start justify-start gap-2 lg:flex-row lg:items-center">
+      <div class="w-full lg:w-full lg:max-w-md">
+        <div class="relative transition-all duration-300 focus-within:w-full focus-within:lg:max-w-xl">
+          <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
+            <i class="bi bi-search w-5 h-5 leading-none text-slate-400"></i>
+          </div>
+          <input [(ngModel)]="nodeSearchText" (ngModelChange)="onNodeSearchChange($event)" name="graphNodeSearch" type="text" placeholder="Search nodes to highlight..." class="relative z-0 block w-full rounded-full border-0 bg-slate-800/85 py-3 pl-11 pr-24 text-slate-200 shadow-lg ring-1 ring-inset ring-slate-700/60 backdrop-blur-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+          <div class="absolute inset-y-1.5 right-1.5 flex items-center rounded-full bg-slate-700/50 p-1">
+            <button type="button" title="Clear search" (click)="onNodeSearchChange('')" class="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-slate-700">
+              <i class="bi bi-x"></i>
+            </button>
+            <button type="button" class="ml-1 flex h-7 items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex w-full items-center justify-start gap-2 lg:w-full lg:max-w-md">
+        <div class="relative hidden items-center rounded-full bg-slate-800/80 p-1 shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm lg:flex">
+          <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 shadow-md transition-transform duration-300 ease-in-out" [class.translate-x-full]="!isGraphView">
+          </div>
+          <button type="button" title="Graph View" (click)="toggleViewMode()" class="relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors" [ngClass]="{ 'text-white': isGraphView, 'text-slate-300 hover:text-white': !isGraphView }">
+            <i class="bi bi-share-fill"></i>
+            Graph
+          </button>
+          <button type="button" title="List View" (click)="toggleViewMode()" class="relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors" [ngClass]="{ 'text-white': !isGraphView, 'text-slate-300 hover:text-white': isGraphView }">
+            <i class="bi bi-list-ul"></i>
+            List
+          </button>
+        </div>
+
+        <ng-container *ngIf="isGraphView">
+          <button type="button" (click)="togglePhysics()" [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (physicsEnabled ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')" [title]="physicsEnabled ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
+            <i [class]="'bi ' + (physicsEnabled ? 'bi-pause-fill' : 'bi-play-fill')"></i>
+            <span>Physics</span>
+          </button>
+
+        </ng-container>
+      </div>
+    </div>
+    <button *ngIf="isGraphView" type="button" (click)="toggleExpandCollapseAll()" [class]="'pointer-events-auto mt-2 flex w-fit items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (expandEnabled ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')" [title]="expandEnabled ? 'Collapse Groups' : 'Expand Groups'">
+      <i [class]="'bi ' + (expandEnabled ? 'bi-arrows-collapse' : 'bi-arrows-expand')"></i>
+      <span>{{ expandEnabled ? 'Collapse' : 'Expand' }}</span>
+    </button>
+    <div *ngIf="nodeSearchText.trim().length> 0" class="mt-2 text-xs text-slate-300">
+      {{ searchMatchedCount }} node(s) highlighted
     </div>
   </div>
+
+  <div class="absolute inset-x-0 bottom-0 top-12">
+    <div #networkContainer class="h-screen w-screen bg-slate-900 [background-image:radial-gradient(circle,_rgb(100_116_139_/_15%)_1px,_transparent_1px)] [background-size:2rem_2rem] transition-all duration-300 md:pl-80" [ngClass]="{ 'lg:pr-[20rem]': isGraphView && !isListingsCollapsed, 'lg:pr-16': isGraphView && isListingsCollapsed, 'lg:pr-0': !isGraphView }" [class.opacity-100]="isGraphView" [class.translate-y-0]="isGraphView" [class.pointer-events-auto]="isGraphView" [class.opacity-0]="!isGraphView" [class.-translate-y-2]="!isGraphView" [class.pointer-events-none]="!isGraphView" [class.md:pl-20]="isSidebarCollapsed">
+    </div>
+
+    <aside *ngIf="isGraphView" class="absolute inset-y-0 right-0 z-40 hidden overflow-hidden border-l border-slate-700/80 bg-slate-900/95 shadow-2xl backdrop-blur-sm transition-all duration-300 lg:block" [class.w-[20rem]]="!isListingsCollapsed" [class.w-16]="isListingsCollapsed">
+      <div class="flex h-full flex-col">
+        <div class="flex shrink-0 items-center border-b border-slate-800 p-2" [class.gap-3]="!isListingsCollapsed" [class.justify-between]="!isListingsCollapsed" [class.justify-center]="isListingsCollapsed">
+          <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isListingsCollapsed" [class.w-0]="isListingsCollapsed" [class.opacity-0]="isListingsCollapsed">
+            <h2 class="whitespace-nowrap text-md font-semibold text-slate-300">Listings</h2>
+          </div>
+          <button type="button" (click)="toggleListingsCollapsed()" class="active:bg-slate-600 flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="isListingsCollapsed ? 'Expand listings' : 'Collapse listings'">
+            <i class="bi bi-list text-xl leading-none"></i>
+          </button>
+        </div>
+        <div *ngIf="!isListingsCollapsed" class="border-b border-slate-700/60 px-4 py-2 text-xs text-slate-400">{{ listRows.length }} documents</div>
+
+        <div *ngIf="isListingsCollapsed" class="flex flex-1 items-start justify-center pt-3">
+          <div class="flex h-10 min-w-10 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-slate-300 ring-1 ring-inset ring-slate-700/80">
+            {{ listRows.length }}
+          </div>
+        </div>
+
+        <div *ngIf="!isListingsCollapsed" class="flex-1 overflow-y-auto">
+          <div class="grid grid-cols-[1.6fr_1fr] border-b border-slate-700 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span>Document</span>
+            <span>Type</span>
+          </div>
+          <div *ngFor="let row of listRows" class="grid grid-cols-[1.6fr_1fr] border-b border-slate-800 px-4 py-3 text-sm text-slate-200 last:border-b-0">
+            <span class="truncate">{{ row.label || row.id }}</span>
+            <span class="text-slate-400">{{ row.cluster }}</span>
+          </div>
+          <div *ngIf="listRows.length === 0" class="px-4 py-6 text-sm text-slate-400">
+            No listings available for current filters.
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div *ngIf="!isGraphView" class="absolute inset-0 overflow-y-auto bg-slate-900/95" [ngClass]="{ 'md:pl-[344px]': !isSidebarCollapsed, 'md:pl-[104px]': isSidebarCollapsed }">
+      <div class="mx-auto max-w-6xl px-4 pt-24 pb-10">
+        <div class="rounded-xl border border-slate-700 bg-slate-800/70 shadow-lg backdrop-blur-sm">
+          <div class="grid grid-cols-[1.6fr_1fr] border-b border-slate-700 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span>Document</span>
+            <span>Type</span>
+          </div>
+          <div *ngFor="let row of listRows" class="grid grid-cols-[1.6fr_1fr] border-b border-slate-800 px-4 py-3 text-sm text-slate-200 last:border-b-0">
+            <span class="truncate">{{ row.label || row.id }}</span>
+            <span class="text-slate-400">{{ row.cluster }}</span>
+          </div>
+          <div *ngIf="listRows.length === 0" class="px-4 py-6 text-sm text-slate-400">
+            No listings available for current filters.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-cti-sidebar
+    (filtersApplied)="onSidebarApply($event)"
+    (collapsedChange)="onSidebarCollapsedChange($event)">
+  </app-cti-sidebar>
+
+  <app-graph-context-menu
+    [nodeId]="contextMenuNodeId"
+    (expand)="expandGroupNode()"
+    (collapse)="collapseGroupNode()"
+    (openCti)="openCTI()"
+      (copyLabel)="copyNodeLabel($event)"
+      (openReport)="viewReport()">
+  </app-graph-context-menu>
+
+  <span *ngIf="copied" class="fixed right-4 top-4 z-[1001] rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+    Copied!
+  </span>
+
+  <div *ngIf="this.isEmpty" @fadeInDashboardItem class="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
+    <img *ngIf="loading" alt="No Data" class="h-40 w-auto" src="assets/images/shared/cti-empty.svg"/>
+    <img *ngIf="!loading" alt="No Data" class="h-40 w-auto animate-pulse" src="assets/images/shared/magnifying_search.svg"/>
+  </div>
+
+  <div *ngIf="isGraphView && maxEdge> 50 && showMaxEdgeNotice" class="absolute bottom-4 z-30 ml-64 rounded-xl border border-slate-700/70 bg-slate-900/90 px-3 py-2 text-sm text-slate-200 shadow-2xl backdrop-blur-sm" [ngClass]="{ 'left-[344px]': !isSidebarCollapsed, 'left-[104px]': isSidebarCollapsed }">
+    <div class="flex items-start gap-2">
+      <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
+      <span>You can see {{ maxEdge }} nodes at a time, avoid using extreme values for better performance</span>
+      <button type="button" class="ml-1 text-slate-400 hover:text-white" (click)="showMaxEdgeNotice=false" title="Hide">
+        <i class="bi bi-x-lg text-xs"></i>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="rawNodes.length> 0 && isGraphView"
+    class="pointer-events-none absolute bottom-4 z-20 rounded-lg border border-slate-700 bg-slate-800/70 p-3 shadow-lg backdrop-blur-sm select-none"
+    [ngClass]="{ 'left-[344px]': !isSidebarCollapsed, 'left-[104px]': isSidebarCollapsed }">
+    <h3 class="mb-2 border-b border-slate-700 pb-1 text-sm font-semibold text-slate-300">Legend</h3>
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-2">
+        <div class="h-4 w-4 rounded-full border-2 border-[#f59e0b] bg-slate-700"></div>
+        <span class="text-xs text-slate-400">Cluster</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="h-4 w-4 rounded-full border-2 border-[#f97316] bg-slate-700"></div>
+        <span class="text-xs text-slate-400">Document</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="h-4 w-4 rounded-full border-2 border-[#38bdf8] bg-slate-700"></div>
+        <span class="text-xs text-slate-400">Property</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="h-4 w-4 rounded-full border-2 border-[#7dd3fc] bg-transparent"></div>
+        <span class="text-xs text-slate-400">Group Node</span>
+      </div>
+      <div class="my-1 h-px bg-slate-700"></div>
+      <div class="flex items-center gap-2">
+        <div class="h-px w-4 bg-slate-500"></div>
+        <span class="text-xs text-slate-400">Connection</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-4 text-slate-500">&rarr;</div>
+        <span class="text-xs text-slate-400">Connection Direction</span>
+      </div>
+    </div>
+  </div>
+
 </div>
+</ng-container>
+
+<ng-template #tailwindLoading>
+  <div class="fixed inset-0 flex items-center justify-center bg-slate-900 text-slate-400">
+    <p>Loading graph styles...</p>
+  </div>
+</ng-template>

@@ -2,13 +2,14 @@ import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabManagerService } from '../services/tab-manager.service';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
+import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 
 @Component({
   selector: 'app-tab-bar',
   templateUrl: './tab-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, AutofocusDirective],
+  imports: [CommonModule, AutofocusDirective, ProfileComponent],
 })
 export class TabBarComponent {
   isAddMenuVisible = signal(false);

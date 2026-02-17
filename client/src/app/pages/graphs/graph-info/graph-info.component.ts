@@ -15,6 +15,7 @@ export class GraphInfoComponent implements OnInit {
   @Input() singleInput!: string;
   @Input() propertyType!: string;
   @Input() propertyValue!: string;
+  @Input() sidebarCollapsed = false;
   @Input() physicsEnabled!: boolean;
   @Input() expandEnabled!: boolean;
   @Input() expandEnabledTemp!: boolean;

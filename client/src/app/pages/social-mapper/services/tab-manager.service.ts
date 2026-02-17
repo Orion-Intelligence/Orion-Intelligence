@@ -7,6 +7,7 @@ import { ApiService } from '../../../shared/services/api.service';
 })
 export class TabManagerService {
   private readonly maxTabsAllowed = 5;
+  private readonly graphType = 'social';
   private static tabCounter = 1;
   private hasLoadedState = false;
   private hasPendingSave = false;
@@ -191,7 +192,7 @@ export class TabManagerService {
       this.hasPendingSave = false;
       return;
     }
-    this.api.post<any>('social/session/upsert', serializableState).subscribe({
+    this.api.post<any>(`social/session/upsert?graph_type=${this.graphType}`, serializableState).subscribe({
       next: () => {
         this.lastSavedSignature = nextSignature;
         this.hasPendingSave = false;
@@ -209,14 +210,14 @@ export class TabManagerService {
       name: tab.name,
       state: this.serializeTabState(tab.state),
     };
-    this.api.post<any>('social/session/tab/add', tabPayload).subscribe({
+    this.api.post<any>(`social/session/tab/add?graph_type=${this.graphType}`, tabPayload).subscribe({
       next: () => {},
       error: () => {},
     });
   }
 
   private loadState() {
-    this.api.get<any>('social/session/tabs').subscribe({
+    this.api.get<any>(`social/session/tabs?graph_type=${this.graphType}`).subscribe({
       next: (savedState) => {
         const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
 

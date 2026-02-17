@@ -20,8 +20,8 @@ from orion.api.interactive.search_manager.search_data_model.general.search_gener
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import search_leak_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
-from orion.api.interactive.social_manager.social_models.search_social_callback_model import search_social_callback_model
-from orion.api.interactive.social_manager.social_models.search_social_param_model import search_social_param_model
+from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import search_social_callback_model
+from orion.api.interactive.graph_manager.graph_models.search_social_param_model import search_social_param_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX

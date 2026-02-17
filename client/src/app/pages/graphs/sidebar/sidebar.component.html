@@ -1,78 +1,117 @@
-<div class="graph-sidebar__container">
-  <a href="#"><img [src]="appService.getConfig().appSettings.logo_wide_dark" alt="Logo" class="graph-sidebar__container-logo img-fluid graph-sidebar__container-logo-padded" height="35" width="197"/></a>
-  <form class="sidebar_form">
-    <div class="sidebar_content">
+<div
+  *ngIf="isMobile && !isCollapsed"
+  class="fixed inset-x-0 bottom-0 top-12 z-30 bg-slate-950/60 backdrop-blur-sm md:hidden"
+  (click)="onMobileBackdropClick()">
+</div>
 
-      <label class="sidebar_label mt-1">Type</label>
-      <div class="dropdown mb-3">
-        <button aria-expanded="false" class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdownType" type="button">
-          {{ selectedType | titlecase }}
-        </button>
-        <ul aria-labelledby="dropdownType" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
-          <li *ngFor="let type of graphTypeOptions">
-            <a (click)="onTypeChange(type)" class="dropdown-item py-0 d-flex align-items-center">{{
-                type | titlecase
-              }}</a>
-            <ng-container *ngIf="type !== graphTypeOptions[graphTypeOptions.length - 1]">
-              <li class="dropdown-divider m-0 mx-3"></li>
-            </ng-container>
-          </li>
-        </ul>
-      </div>
+<aside class="fixed bottom-0 left-0 top-12 z-40 border-r border-slate-800 bg-slate-900/90 backdrop-blur-md transition-all duration-300 ease-in-out"
+  [class.w-80]="!isCollapsed"
+  [class.w-20]="isCollapsed && !isMobile"
+  [class.w-16]="isCollapsed && isMobile">
+  <div class="h-full w-full flex flex-col transition-all duration-300 ease-in-out">
+    <div class="p-3 border-b border-slate-800 flex items-center shrink-0"
+      [class.gap-3]="!isCollapsed"
+      [class.justify-between]="!isCollapsed"
+      [class.justify-center]="isCollapsed">
+      <a href="/" title="Orion Intelligence Home"
+        class="hidden lg:flex items-center overflow-hidden transition-all duration-300"
+        [class.flex-grow]="!isCollapsed"
+        [class.w-0]="isCollapsed"
+        [class.opacity-0]="isCollapsed"
+        [class.pointer-events-none]="isCollapsed">
+        <img [src]="appService.getConfig().appSettings.logo_wide_dark" alt="Orion Intelligence" class="h-8 object-contain">
+      </a>
+      <button (click)="toggleCollapsed()"
+        [class]="isCollapsed ? 'w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
+        <i class="bi bi-list text-xl leading-none"></i>
+      </button>
+    </div>
 
-      <ng-container *ngIf="selectedType === 'cluster'">
-        <label class="sidebar_label mt-1">Cluster Type</label>
-        <div class="dropdown">
-          <button aria-expanded="false" class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdownCluster" type="button">
-            {{ singleInput | titlecase }}
+    <div class="relative flex-grow overflow-hidden">
+      <form class="absolute top-0 left-0 h-full w-80 p-3 flex flex-col gap-3 overflow-y-auto transition-all duration-300 ease-out"
+        [class.opacity-100]="!isCollapsed"
+        [class.opacity-0]="isCollapsed"
+        [class.translate-x-0]="!isCollapsed"
+        [class.-translate-x-3]="isCollapsed"
+        [class.pointer-events-none]="isCollapsed">
+        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+          <label class="text-xs uppercase tracking-wider text-slate-500">Type</label>
+          <select [(ngModel)]="selectedType" (ngModelChange)="onTypeChange($event)" name="selectedType"
+            class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option *ngFor="let type of graphTypeOptions" [ngValue]="type">{{ type | titlecase }}</option>
+          </select>
+        </div>
+
+        <div *ngIf="selectedType === 'cluster'" class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+          <label class="text-xs uppercase tracking-wider text-slate-500">Cluster Type</label>
+          <select [(ngModel)]="singleInput" name="singleInputCluster"
+            class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option *ngFor="let option of graphClusterOptions" [ngValue]="option">{{ option | titlecase }}</option>
+          </select>
+        </div>
+
+        <div *ngIf="selectedType === 'property'" class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+          <label class="text-xs uppercase tracking-wider text-slate-500">Property Type</label>
+          <select [(ngModel)]="propertyType" name="propertyType"
+            class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="all">All</option>
+            <option *ngFor="let property of graphAllowedProperties" [ngValue]="property.key">{{ property.label }}</option>
+          </select>
+
+          <label class="mt-3 block text-xs uppercase tracking-wider text-slate-500">Property Value</label>
+          <input [(ngModel)]="propertyValue" name="propertyValue" type="text" placeholder="Enter value"
+            class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div *ngIf="selectedType === 'document'" class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+          <label class="text-xs uppercase tracking-wider text-slate-500">Document ID</label>
+          <input [(ngModel)]="singleInput" name="singleInputDoc" type="text" placeholder="Enter ID"
+            class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+          <label class="text-xs uppercase tracking-wider text-slate-500">Maximum Nodes (20-800)</label>
+          <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" name="maxNodes" type="number" min="20" max="800"
+            class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+          <label class="mt-3 block text-xs uppercase tracking-wider text-slate-500">Maximum Depth (1-5)</label>
+          <input (blur)="validateMaxDepth()" [(ngModel)]="maxDepth" name="maxDepth" type="number" min="1" max="5"
+            class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="mt-auto flex gap-2">
+          <button (click)="applyFilters()" type="button"
+            class="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500">
+            Apply
           </button>
-          <ul aria-labelledby="dropdownCluster" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
-            <li *ngFor="let option of graphClusterOptions">
-              <a (click)="singleInput = option" class="dropdown-item py-0 d-flex align-items-center">{{ option }}</a>
-              <ng-container *ngIf="option !== graphClusterOptions[graphClusterOptions.length - 1]">
-                <li class="dropdown-divider m-0 mx-3"></li>
-              </ng-container>
-            </li>
-          </ul>
-        </div>
-      </ng-container>
-
-      <ng-container *ngIf="selectedType === 'property'">
-        <label class="sidebar_label mt-1">Property Type</label>
-        <div class="dropdown">
-          <button aria-expanded="false" class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdownProperty" type="button">
-            {{ onFormatPropertyType(propertyType) | titlecase }}
+          <button (click)="resetFilters()" type="button"
+            class="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700">
+            Reset
           </button>
-          <ul aria-labelledby="dropdownProperty" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
-            <li *ngFor="let property of graphAllowedProperties">
-              <a (click)="propertyType = property.key" class="dropdown-item py-0 d-flex align-items-center">{{
-                  property.label
-                }}</a>
-              <ng-container *ngIf="property !== graphAllowedProperties[graphAllowedProperties.length - 1]">
-                <li class="dropdown-divider m-0 mx-3"></li>
-              </ng-container>
-            </li>
-          </ul>
         </div>
-        <label class="sidebar_label mt-1">Property Value</label> <input [(ngModel)]="propertyValue" class="form-control sidebar_input filter__input-form" name="propertyValue" placeholder="Enter value" type="text"/>
-      </ng-container>
+      </form>
 
-      <ng-container *ngIf="selectedType === 'document'">
-        <label class="sidebar_label mt-1">Document ID</label> <input [(ngModel)]="singleInput" class="form-control sidebar_input" name="singleInput" placeholder="Enter ID" type="text"/>
-      </ng-container>
-
-      <label class="sidebar_label mt-1">Maximum Nodes (max 5)</label> <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" class="form-control sidebar_input" max="800" min="20" name="maxNodes" placeholder="Enter maximum nodes" required type="number"/>
-
-      <label class="sidebar_label mt-3">Maximum Depth (max 800)</label> <input (blur)="validateMaxDepth()" [(ngModel)]="maxDepth" class="form-control sidebar_input" max="5" min="1" name="maxDepth" placeholder="Enter maximum depth" required type="number"/>
-
-      <div class="sidebar_submit">
-        <div class="sidebar_submit d-flex flex-column mt-4">
-          <button (click)="applyFilters()" class="btn btn-primary sidebar_submit-button" type="button">Apply</button>
+      <div class="absolute top-0 left-0 h-full w-20 flex flex-col items-center transition-all duration-300 ease-in"
+        [class.opacity-100]="isCollapsed"
+        [class.opacity-0]="!isCollapsed"
+        [class.translate-x-0]="isCollapsed"
+        [class.translate-x-2]="!isCollapsed"
+        [class.pointer-events-none]="!isCollapsed">
+        <div class="py-4 flex flex-col items-center gap-4">
+          <button (click)="onTypeChange('cluster')" [class]="selectedType === 'cluster' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white'" title="Cluster">
+            <i class="bi bi-diagram-3 text-lg leading-none"></i>
+          </button>
+          <button (click)="onTypeChange('document')" [class]="selectedType === 'document' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white'" title="Document">
+            <i class="bi bi-file-earmark-text text-lg leading-none"></i>
+          </button>
+          <button (click)="onTypeChange('property')" [class]="selectedType === 'property' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white'" title="Property">
+            <i class="bi bi-tags text-lg leading-none"></i>
+          </button>
+          <button (click)="applyFilters()" class="w-9 h-9 flex items-center justify-center rounded-xl text-indigo-300 bg-indigo-500/20 hover:bg-indigo-500/30" title="Apply">
+            <i class="bi bi-play-fill text-lg leading-none"></i>
+          </button>
         </div>
-        <button (click)="resetFilters()" class="btn btn-secondary mb-4 sidebar_submit-button" type="button">
-          Reset
-        </button>
       </div>
     </div>
-  </form>
-</div>
+  </div>
+</aside>

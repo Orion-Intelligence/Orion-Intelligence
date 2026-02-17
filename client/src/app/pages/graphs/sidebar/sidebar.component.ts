@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, HostListener, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
@@ -20,7 +20,10 @@ export class SidebarComponent implements OnInit {
     maxEdge: number;
     maxDepth: number;
   }>();
+  @Output() collapsedChange = new EventEmitter<boolean>();
 
+  isCollapsed = false;
+  isMobile = false;
   selectedType = 'cluster';
   singleInput = 'all';
   propertyType = 'all';
@@ -58,6 +61,7 @@ export class SidebarComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.updateViewportState();
     this.route.queryParams.subscribe(params => {
       this.selectedType = params['selectedType'] || 'cluster';
       this.singleInput = params['singleInput'] || 'all';
@@ -70,9 +74,42 @@ export class SidebarComponent implements OnInit {
     });
   }
 
+  private updateViewportState(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const nextIsMobile = window.innerWidth < 768;
+    if (nextIsMobile !== this.isMobile) {
+      this.isMobile = nextIsMobile;
+      if (this.isMobile) {
+        this.isCollapsed = true;
+        this.collapsedChange.emit(this.isCollapsed);
+      }
+    }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateViewportState();
+  }
+
   applyFilters() {
     this.navigateWithFilters();
     this.emitFilters();
+  }
+
+  toggleCollapsed() {
+    this.isCollapsed = !this.isCollapsed;
+    this.collapsedChange.emit(this.isCollapsed);
+  }
+
+  onMobileBackdropClick(): void {
+    if (!this.isMobile) {
+      return;
+    }
+    this.isCollapsed = true;
+    this.collapsedChange.emit(this.isCollapsed);
   }
 
   resetFilters() {

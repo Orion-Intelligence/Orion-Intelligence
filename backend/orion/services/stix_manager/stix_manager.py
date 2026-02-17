@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import result_item as DefacementResultItem
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_callback_model import result_item as ExploitResultItem
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import result_item as LeakResultItem
-from orion.api.interactive.social_manager.social_models.search_social_callback_model import result_item as SocialResultItem
+from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import result_item as SocialResultItem
 from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import result_item as GeneralResultItem
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import result_item as ChatResultItem
 from orion.api.interactive.search_manager.search_model import search_model

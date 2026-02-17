@@ -8,7 +8,7 @@ from orion.api.interactive.search_manager.search_data_model.exploit.search_explo
 from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import search_general_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import search_leak_callback_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import search_defacement_callback_model
-from orion.api.interactive.social_manager.social_models.search_social_callback_model import search_social_callback_model
+from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import search_social_callback_model
 
 
 class grouped_consolidated_search_callback_model(BaseModel):
