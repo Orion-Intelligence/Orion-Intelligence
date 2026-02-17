@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { PlatformResult, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
-import { socialMapperAnimations } from '../../../../shared/animations/social-mapper.animations';
 import { FetchingStateService } from '../../services/fetching-state.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
@@ -13,7 +12,6 @@ import { buildSocialProfileUrl } from '../../utils/profile-url.util';
   standalone: true,
   imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective],
   templateUrl: './summary-platform-view.component.html',
-  styles: [socialMapperAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryPlatformViewComponent {

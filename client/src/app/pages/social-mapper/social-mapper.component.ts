@@ -13,7 +13,6 @@ import { ListViewComponent } from './list-view/list-view.component';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TabBarComponent } from './tab-bar/tab-bar.component';
-import { socialMapperAnimations } from '../../shared/animations/social-mapper.animations';
 import { Position } from 'vis-network';
 import { FollowerScanPopupComponent } from './follower-scan-popup/follower-scan-popup.component';
 
@@ -34,8 +33,6 @@ import { RelationshipDetailsPopupComponent } from './relationship-details-popup/
 @Component({
   selector: 'app-social-mapper',
   templateUrl: './social-mapper.component.html',
-  styleUrl: './social-mapper.scss',
-  styles: [socialMapperAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   standalone: true,

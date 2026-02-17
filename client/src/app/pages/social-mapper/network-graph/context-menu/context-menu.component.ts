@@ -69,7 +69,7 @@ export class ContextMenuComponent {
 
   menuPositionClass = computed(() => {
     const data = this.data();
-    const fallbackClass = 'top-2 left-2';
+    const fallbackClass = 'social-mapper-context-menu-x-50 social-mapper-context-menu-y-50 social-mapper-context-menu-anchor-left-top';
 
     if (!data) {
       return fallbackClass;
@@ -79,21 +79,14 @@ export class ContextMenuComponent {
       return fallbackClass;
     }
 
-    const isRightHalf = data.x > window.innerWidth / 2;
-    const isBottomHalf = data.y > window.innerHeight / 2;
+    const xPercentRaw = (data.x / window.innerWidth) * 100;
+    const yPercentRaw = (data.y / window.innerHeight) * 100;
+    const xPercent = Math.max(2, Math.min(98, Math.round(xPercentRaw)));
+    const yPercent = Math.max(2, Math.min(98, Math.round(yPercentRaw)));
 
-    if (isRightHalf && isBottomHalf) {
-      return 'bottom-2 right-2';
-    }
+    const horizontalAnchor = data.x < window.innerWidth / 2 ? 'left' : 'right';
+    const verticalAnchor = data.y < window.innerHeight / 2 ? 'top' : 'bottom';
 
-    if (isRightHalf) {
-      return 'top-2 right-2';
-    }
-
-    if (isBottomHalf) {
-      return 'bottom-2 left-2';
-    }
-
-    return 'top-2 left-2';
+    return `social-mapper-context-menu-x-${xPercent} social-mapper-context-menu-y-${yPercent} social-mapper-context-menu-anchor-${horizontalAnchor}-${verticalAnchor}`;
   });
 }

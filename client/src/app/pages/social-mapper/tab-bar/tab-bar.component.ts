@@ -1,13 +1,11 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabManagerService } from '../services/tab-manager.service';
-import { socialMapperAnimations } from '../../../shared/animations/social-mapper.animations';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
 
 @Component({
   selector: 'app-tab-bar',
   templateUrl: './tab-bar.component.html',
-  styles: [socialMapperAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, AutofocusDirective],
