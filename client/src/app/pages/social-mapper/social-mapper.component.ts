@@ -148,7 +148,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           this.updateState(state => {
             state.viewMode.set('list');
             state.activeHomeMenuTab.set('history');
-          });
+          }, false);
         }
       });
       effect(() => {
@@ -176,7 +176,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           return { ...node, label: defaultLabel };
         });
         if (hasChanges) {
-          this.updateState(state => state.networkData.set({ ...currentData, nodes: updatedNodes }));
+          this.updateState(state => state.networkData.set({ ...currentData, nodes: updatedNodes }), false);
         }
       });
     } else {
@@ -191,7 +191,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
     this.loadTailwindSocialStyles();
     if (!this.isSmallScreen()) {
-      this.updateState(state => state.isEntityMenuCollapsed.set(false));
+      this.updateState(state => state.isEntityMenuCollapsed.set(false), false);
     }
     this.resumeIncompleteScans();
   }
@@ -233,23 +233,25 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.ownsTailwindLink = true;
   }
 
-  private updateState(updater: (state: TabState) => void) {
+  private updateState(updater: (state: TabState) => void, shouldScheduleSave: boolean = true) {
     const state = this.activeTabState();
     if (state) {
       updater(state);
-      this.tabManager.scheduleSave();
+      if (shouldScheduleSave) {
+        this.tabManager.scheduleSave();
+      }
     }
   }
 
-  onSearchChanged(term: string) { this.updateState(state => state.searchTerm.set(term)); }
-  onViewModeChanged(mode: 'graph' | 'list') { this.updateState(state => state.viewMode.set(mode)); }
-  onPhysicsToggled() { this.updateState(state => state.isPhysicsEnabled.update(v => !v)); }
-  onEditModeToggled() { this.updateState(state => state.isEditMode.update(v => !v)); }
+  onSearchChanged(term: string) { this.updateState(state => state.searchTerm.set(term), false); }
+  onViewModeChanged(mode: 'graph' | 'list') { this.updateState(state => state.viewMode.set(mode), false); }
+  onPhysicsToggled() { this.updateState(state => state.isPhysicsEnabled.update(v => !v), false); }
+  onEditModeToggled() { this.updateState(state => state.isEditMode.update(v => !v), false); }
 
-  onHomeMenuSearchChanged(term: string) { this.updateState(state => state.homeMenuSearchTerm.set(term)); }
-  onHomeMenuToggled() { this.updateState(state => state.isHomeMenuCollapsed.update(v => !v)); }
-  onEntityMenuToggled() { this.updateState(state => state.isEntityMenuCollapsed.update(v => !v)); }
-  onHomeMenuTabSelected(tab: 'history' | 'entities') { this.updateState(state => state.activeHomeMenuTab.set(tab)); }
+  onHomeMenuSearchChanged(term: string) { this.updateState(state => state.homeMenuSearchTerm.set(term), false); }
+  onHomeMenuToggled() { this.updateState(state => state.isHomeMenuCollapsed.update(v => !v), false); }
+  onEntityMenuToggled() { this.updateState(state => state.isEntityMenuCollapsed.update(v => !v), false); }
+  onHomeMenuTabSelected(tab: 'history' | 'entities') { this.updateState(state => state.activeHomeMenuTab.set(tab), false); }
 
   onGraphSearchChanged(event: Event) { this.graphSearchTerm.set((event.target as HTMLInputElement).value); }
   toggleGraphSearch() { this.isGraphSearchExpanded.update(v => !v); }
@@ -298,7 +300,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
     if (username) {
       this.initiateScan(username);
-      this.updateState(state => state.searchTerm.set(''));
+      this.updateState(state => state.searchTerm.set(''), false);
     }
   }
 
@@ -359,9 +361,9 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       this.state.showNotification('scanning');
       return;
     }
-    this.updateState(state => state.jobs.update(currentJobs => currentJobs.filter(j => j.username.toLowerCase() !== normalizedUsername)));
+    this.updateState(state => state.jobs.update(currentJobs => currentJobs.filter(j => j.username.toLowerCase() !== normalizedUsername)), false);
     const newJob: Job = { id: self.crypto.randomUUID(), username, status: 'in_progress', progress: 5, step: 'Starting' };
-    this.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]));
+    this.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]), false);
     this.runScan(newJob);
   }
 
@@ -369,7 +371,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const displayName = `Image Scan: ${fileName}`;
     const jobName = `${displayName} #${self.crypto.randomUUID().substring(0, 4)}`;
     const newJob: Job = { id: self.crypto.randomUUID(), username: jobName, displayName, status: 'in_progress', progress: 5, step: `Scanning ${fileName}` };
-    this.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]));
+    this.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]), false);
     this.runImageScan(newJob, base64Image);
   }
 
@@ -389,7 +391,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return {
       next: (event: ScanEvent) => {
         if (event.type === 'progress') {
-          this.updateState(state => state.jobs.update(jobs => jobs.map(j => j.id === job.id ? { ...j, ...event.payload } : j)));
+          this.updateState(state => state.jobs.update(jobs => jobs.map(j => j.id === job.id ? { ...j, ...event.payload } : j)), false);
         } else if (event.type === 'complete') {
           const finalPlatforms = event.payload.map(p => ({ ...p, keyUsername: job.username }));
           this.updateState(state => {
@@ -770,6 +772,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
 
     await this.graphOrchestrator.updateGraphFromModal(this.activeTabState()!, username, selectedPlatforms);
+    this.tabManager.scheduleSave();
   }
 
   handleContextMenuAction(action: ContextMenuAction) {
@@ -777,7 +780,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const username = nodeId.replace('user-', '');
     switch(action) {
         case 'fetchLinks': this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'); break;
-        case 'clearConnections': this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username); break;
+        case 'clearConnections': this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username); this.tabManager.scheduleSave(); break;
         case 'deleteProfile': this.state.openDeleteConfirmation(username); break;
         case 'setAlias': {
           if (!nodeId.startsWith('user-')) {
@@ -789,7 +792,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
           this.platformAliasInput.set(currentAlias);
           break;
         }
-        case 'removeNode': this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId); break;
+        case 'removeNode': this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId); this.tabManager.scheduleSave(); break;
         case 'deleteEntity': this.deleteCustomEntity(nodeId); break;
     }
     this.state.closeContextMenu();
@@ -808,22 +811,25 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   handleEdgeAdded(edge: { from: string, to: string }) {
     this.graphOrchestrator.addEdge(this.activeTabState()!, edge);
+    this.tabManager.scheduleSave();
   }
 
   handleEdgeDeleted({ edges }: { edges: string[] }) {
     this.graphOrchestrator.deleteEdges(this.activeTabState()!, edges);
+    this.tabManager.scheduleSave();
   }
 
   async handleGroupNodeClicked({ nodeId, position }: { nodeId: string, position: Position }) {
     const wasPhysicsEnabled = this.isPhysicsEnabled();
     if (!wasPhysicsEnabled) {
-      this.updateState(state => state.isPhysicsEnabled.set(true));
+      this.updateState(state => state.isPhysicsEnabled.set(true), false);
     }
 
     await this.graphOrchestrator.handleGroupNodeClicked(this.activeTabState()!, { nodeId, position });
+    this.tabManager.scheduleSave();
 
     if (!wasPhysicsEnabled) {
-      setTimeout(() => this.updateState(state => state.isPhysicsEnabled.set(false)), 2500);
+      setTimeout(() => this.updateState(state => state.isPhysicsEnabled.set(false), false), 2500);
     }
   }
 }

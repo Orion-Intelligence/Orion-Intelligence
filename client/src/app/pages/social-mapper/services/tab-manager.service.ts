@@ -9,6 +9,7 @@ export class TabManagerService {
   private readonly maxTabsAllowed = 5;
   private static tabCounter = 1;
   private hasLoadedState = false;
+  private hasPendingSave = false;
   private autosaveIntervalId: any;
   private lastSavedSignature = '';
 
@@ -155,7 +156,10 @@ export class TabManagerService {
   }
 
   scheduleSave() {
-    this.tryPeriodicSave();
+    if (!this.hasLoadedState) {
+      return;
+    }
+    this.hasPendingSave = true;
   }
 
   private buildSerializableState() {
@@ -178,14 +182,19 @@ export class TabManagerService {
     if (!this.hasLoadedState) {
       return;
     }
+    if (!this.hasPendingSave) {
+      return;
+    }
     const serializableState = this.buildSerializableState();
     const nextSignature = JSON.stringify(serializableState);
     if (nextSignature === this.lastSavedSignature) {
+      this.hasPendingSave = false;
       return;
     }
     this.api.post<any>('social/session/upsert', serializableState).subscribe({
       next: () => {
         this.lastSavedSignature = nextSignature;
+        this.hasPendingSave = false;
       },
       error: () => {},
     });
@@ -232,10 +241,12 @@ export class TabManagerService {
         this.activeTabId.set(loadedTabs[0]?.id || '');
         TabManagerService.tabCounter = loadedTabs.length + 1;
         this.hasLoadedState = true;
+        this.hasPendingSave = false;
         this.lastSavedSignature = JSON.stringify(this.buildSerializableState());
       },
       error: () => {
         this.hasLoadedState = true;
+        this.hasPendingSave = false;
         this.addTab();
       },
     });

@@ -120,7 +120,7 @@ export class SocialScanService {
             }
           }
 
-          const capitalizedPlatform = platform.charAt(0).toUpfperCase() + platform.slice(1);
+          const capitalizedPlatform = platform.charAt(0).toUpperCase() + platform.slice(1);
           const extractedData = this.extractMetadata(capitalizedPlatform, item.data);
 
           const platformResult = {
