@@ -270,3 +270,28 @@ class helper_controller:
         if output:
             return {"OR": [item for sub in output for item in sub] + current}
         return current[0] if len(current) == 1 else current
+    
+    @staticmethod
+    def password_matches_schema(password: str, schema) -> bool:
+        if not password:
+            return False
+
+        min_l = schema.minLength or 0
+        max_l = schema.maxLength or 10_000
+
+        if not (min_l <= len(password) <= max_l):
+            return False
+
+        if getattr(schema, "hasAlphabets", False):
+            if not re.search(r"[a-zA-Z]", password):
+                return False
+
+        if getattr(schema, "hasNumbers", False):
+            if not re.search(r"[0-9]", password):
+                return False
+
+        if getattr(schema, "hasSpecialChars", False):
+            if not re.search(r"[^a-zA-Z0-9]", password):
+                return False
+
+        return True

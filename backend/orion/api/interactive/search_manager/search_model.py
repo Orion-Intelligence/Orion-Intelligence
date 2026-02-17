@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional
 import httpx
+import json
 from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
@@ -362,15 +363,25 @@ class search_model:
 
     async def search_stealer_iocs(self, param: search_credential_param_model):
 
-        document, data_filter = elastic_request_generator().on_search_stealer_iocs(param)
+        document, data_filter  = elastic_request_generator().on_search_stealer_iocs(param)
 
         if not data_filter:
             return False, []
 
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+        response = await self.__search_callback.search_handler( m_status, m_documents,search_stealerlog_callback_model, {}, data_limit=False)
 
-        return await self.__search_callback.search_handler(
-            m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
+
+        password_filter = getattr(param, "password_scheme", None)
+        if password_filter and response and hasattr(response, "Result"):
+            filtered_results = [
+            item for item in response.Result
+            if getattr(item, "password", None) and 
+               helper_controller.password_matches_schema(item.password, password_filter)
+            ]
+            response.Result = filtered_results
+
+        return response
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
         document, data_filter = elastic_request_generator().on_search_persona(param)

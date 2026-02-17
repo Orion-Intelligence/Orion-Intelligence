@@ -81,7 +81,7 @@ export class ScanHelperMethodsService {
   }
 
   scanSubdomains(resolved: string, checkLive: boolean): Subscription {
-    const call = () => this.api.post<SubdomainResponse>('urlscan/domain', { domain: resolved, scanType: 'subdomains', checkLive });
+    const call = () => this.api.post<SubdomainResponse>('urlscan/subdomains', { domain: resolved, scanType: 'subdomains', checkLive });
     const getStatus = (res: SubdomainResponse) => (res?.result?.status || res?.status) as any;
     const enhanced = (res: SubdomainResponse) => {
       const p = (res as any)?.progress;
@@ -92,7 +92,7 @@ export class ScanHelperMethodsService {
   }
 
   scanDns(ip: string): Subscription {
-    const call = () => this.api.post<DnsResponse>('urlscan/domain', { domain: ip, scanType: 'dns' });
+    const call = () => this.api.post<DnsResponse>('urlscan/dns', { domain: ip, scanType: 'dns' });
     const getStatus = (res: DnsResponse) => res?.status;
     const enhanced = (res: DnsResponse) => {
       const p = res?.progress;
@@ -103,7 +103,7 @@ export class ScanHelperMethodsService {
   }
 
   scanWayback(resolved: string): Subscription {
-    const call = () => this.api.post<WaybackResponse>('urlscan/domain', { domain: resolved, scanType: 'wayback' });
+    const call = () => this.api.post<WaybackResponse>('urlscan/wayback', { domain: resolved, scanType: 'wayback' });
     const getStatus = (res: WaybackResponse) => (res?.result?.status || res?.status) as any;
     const enhanced = (res: WaybackResponse) => {
       const p = (res as any)?.progress;
