@@ -36,7 +36,7 @@ class elastic_insight_generator:
 
     @staticmethod
     def on_insight_consolidated_country():
-        size_ = 500
+        size_ = 2500
 
         query_statement = {
             "size": size_,
