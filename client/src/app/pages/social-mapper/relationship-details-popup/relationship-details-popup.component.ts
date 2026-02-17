@@ -8,7 +8,6 @@ import { buildSocialProfileUrl } from '../utils/profile-url.util';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './relationship-details-popup.component.html',
-  styleUrl: './relationship-details-popup.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RelationshipDetailsPopupComponent {

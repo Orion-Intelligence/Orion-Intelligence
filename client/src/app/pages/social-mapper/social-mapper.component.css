@@ -18,4 +18,6 @@
 
 .social-mapper-platform-icon {
     background-color: #475569;
+    border: 1px solid #64748b;
+    box-shadow: inset 0 0 0 1px #64748b;
 }

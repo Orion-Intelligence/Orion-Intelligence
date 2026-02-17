@@ -67,35 +67,33 @@ export class ContextMenuComponent {
     return 'Custom entity';
   });
 
-  menuPosition = computed(() => {
+  menuPositionClass = computed(() => {
     const data = this.data();
-    const fallbackPosition = { left: '8px', top: '8px' };
+    const fallbackClass = 'top-2 left-2';
 
     if (!data) {
-      return fallbackPosition;
+      return fallbackClass;
     }
 
     if (typeof window === 'undefined') {
-      return fallbackPosition;
+      return fallbackClass;
     }
 
-    const menuWidth = 256;
-    const menuHeight = 280;
-    const margin = 8;
-    let x = data.x + margin;
-    let y = data.y + margin;
+    const isRightHalf = data.x > window.innerWidth / 2;
+    const isBottomHalf = data.y > window.innerHeight / 2;
 
-    const maxX = window.innerWidth - menuWidth - margin;
-    const maxY = window.innerHeight - menuHeight - margin;
-
-    if (x > maxX) {
-      x = Math.max(margin, maxX);
+    if (isRightHalf && isBottomHalf) {
+      return 'bottom-2 right-2';
     }
 
-    if (y > maxY) {
-      y = Math.max(margin, maxY);
+    if (isRightHalf) {
+      return 'top-2 right-2';
     }
 
-    return { left: `${x}px`, top: `${y}px` };
+    if (isBottomHalf) {
+      return 'bottom-2 left-2';
+    }
+
+    return 'top-2 left-2';
   });
 }

@@ -7,3 +7,18 @@
   right: 1rem;
   top: 1rem;
 }
+
+.network-graph-followers-overlay-circle {
+  fill: rgb(6 182 212);
+  stroke: rgb(165 243 252);
+  stroke-width: 1;
+}
+
+.network-graph-followers-overlay-icon {
+  fill: rgb(15 23 42);
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  user-select: none;
+}
