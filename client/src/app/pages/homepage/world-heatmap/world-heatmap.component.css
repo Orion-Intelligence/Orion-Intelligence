@@ -161,3 +161,31 @@ svg .map-type .map-type-text {
   text-transform: uppercase;
   filter: drop-shadow(0 3px 8px rgb(0 0 0 / 42%));
 }
+
+.heatmap-tooltip {
+  opacity: 0;
+}
+
+.heatmap-tooltip-visible {
+  opacity: 1;
+}
+
+.heatmap-tooltip-x-left {
+  left: 12px;
+  right: auto;
+}
+
+.heatmap-tooltip-x-right {
+  right: 12px;
+  left: auto;
+}
+
+.heatmap-tooltip-y-top {
+  top: 12px;
+  bottom: auto;
+}
+
+.heatmap-tooltip-y-bottom {
+  bottom: 12px;
+  top: auto;
+}

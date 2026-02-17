@@ -183,10 +183,10 @@ export class WorldHeatmapComponent
     title
       .transition()
       .duration(400)
-      .style('opacity', 0)
+      .attr('opacity', 0)
       .transition()
       .duration(400)
-      .style('opacity', 1)
+      .attr('opacity', 1)
       .text(d => d?.toUpperCase() ?? '');
 
     legend.selectAll<SVGRectElement, any>('rect.legend-bar')
@@ -254,7 +254,7 @@ export class WorldHeatmapComponent
 
   private updateActiveCategoryLabel(): void {
     const labelG = this.svg.selectAll<SVGGElement, any>('g.map-type').data([0]).join('g').attr('class', 'map-type');
-    labelG.attr('transform', `translate(${33},${28})`).style('pointer-events', 'none');
+    labelG.attr('transform', `translate(${33},${28})`).attr('pointer-events', 'none');
     labelG.selectAll<SVGTextElement, any>('text.map-type-text')
       .data([this.activeCategoryKey])
       .join('text')
@@ -282,8 +282,7 @@ export class WorldHeatmapComponent
     this.tooltip = d3
       .select(el)
       .append<HTMLDivElement>('div')
-      .attr('class', 'heatmap-tooltip')
-      .style('opacity', '0');
+      .attr('class', 'heatmap-tooltip');
 
     this.svg = d3
       .select(el)
@@ -383,15 +382,19 @@ export class WorldHeatmapComponent
     this.tooltip.append('div').text(name);
     this.tooltip.append('div').text(`Leaks: ${v ?? 'N/A'}`);
 
+    const container = this.chartContainer.nativeElement as HTMLElement;
+    const isRightSide = event.offsetX > (container.offsetWidth / 2);
+    const isBottomSide = event.offsetY > (container.offsetHeight / 2);
+    const tooltipXClass = isRightSide ? 'heatmap-tooltip-x-right' : 'heatmap-tooltip-x-left';
+    const tooltipYClass = isBottomSide ? 'heatmap-tooltip-y-bottom' : 'heatmap-tooltip-y-top';
+
     this.tooltip
-      .style('opacity', '1')
-      .style('left', `${event.offsetX + 12}px`)
-      .style('top', `${event.offsetY - 28}px`);
+      .attr('class', `heatmap-tooltip heatmap-tooltip-visible ${tooltipXClass} ${tooltipYClass}`);
   }
 
   private onHoverOut(event: MouseEvent): void {
     d3.select(event.currentTarget as SVGPathElement).classed('hovered', false);
-    this.tooltip.style('opacity', '0');
+    this.tooltip.attr('class', 'heatmap-tooltip');
   }
 
   private onCountryClick(d: any): void {
