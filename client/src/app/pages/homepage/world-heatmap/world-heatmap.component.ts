@@ -113,7 +113,6 @@ export class WorldHeatmapComponent
       this.mapData = this.gettingUniqueCountrys();
       this.buildIndex();
       this.animateMapTransition();
-      this.updateColors();
       this.updateLegend();
       this.updateActiveCategoryLabel();
 
@@ -365,6 +364,7 @@ export class WorldHeatmapComponent
   private updateColors(): void {
     const color = this.getColorScale();
     this.mapG.selectAll<SVGPathElement, any>('path.country')
+      .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
       .attr('fill', (d: any) => {
         const v = this.getValueForFeature(d);
         return v == null ? this.neutralFill : color(v);
@@ -383,18 +383,31 @@ export class WorldHeatmapComponent
     this.tooltip.append('div').text(`Leaks: ${v ?? 'N/A'}`);
 
     const container = this.chartContainer.nativeElement as HTMLElement;
-    const isRightSide = event.offsetX > (container.offsetWidth / 2);
-    const isBottomSide = event.offsetY > (container.offsetHeight / 2);
-    const tooltipXClass = isRightSide ? 'heatmap-tooltip-x-right' : 'heatmap-tooltip-x-left';
-    const tooltipYClass = isBottomSide ? 'heatmap-tooltip-y-bottom' : 'heatmap-tooltip-y-top';
+    const rect = container.getBoundingClientRect();
+    const tipEl = this.tooltip.node() as HTMLDivElement | null;
+    const tipW = tipEl?.offsetWidth ?? 160;
+    const tipH = tipEl?.offsetHeight ?? 44;
+
+    let x = event.clientX - rect.left + 12;
+    let y = event.clientY - rect.top + 12;
+
+    if (x + tipW > rect.width - 8) x = event.clientX - rect.left - tipW - 12;
+    if (y + tipH > rect.height - 8) y = event.clientY - rect.top - tipH - 12;
+    if (x < 8) x = 8;
+    if (y < 8) y = 8;
 
     this.tooltip
-      .attr('class', `heatmap-tooltip heatmap-tooltip-visible ${tooltipXClass} ${tooltipYClass}`);
+      .attr('class', 'heatmap-tooltip heatmap-tooltip-visible')
+      .style('left', `${x}px`)
+      .style('top', `${y}px`);
   }
 
   private onHoverOut(event: MouseEvent): void {
     d3.select(event.currentTarget as SVGPathElement).classed('hovered', false);
-    this.tooltip.attr('class', 'heatmap-tooltip');
+    this.tooltip
+      .attr('class', 'heatmap-tooltip')
+      .style('left', null)
+      .style('top', null);
   }
 
   private onCountryClick(d: any): void {
@@ -452,6 +465,7 @@ export class WorldHeatmapComponent
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
 
     countries
+      .classed('has-data', (d: any) => getValueForFeature(d) != null)
       .transition()
       .duration(1100)
       .ease(d3.easeCubicInOut)
