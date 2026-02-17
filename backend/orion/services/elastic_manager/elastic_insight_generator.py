@@ -36,9 +36,11 @@ class elastic_insight_generator:
 
     @staticmethod
     def on_insight_consolidated_country():
+        size_ = 500
+
         query_statement = {
-            "size": 0,
-            "_source": False,
+            "size": size_,
+            "_source": {"excludes": ["m_embedding"]},
             "query": {
                 "bool": {
                     "must": [
@@ -49,14 +51,9 @@ class elastic_insight_generator:
                     ]
                 }
             },
-            "aggs": {
-                "records_per_index": {
-                    "terms": {
-                        "field": "_index",
-                        "size": 5000
-                    }
-                }
-            },
+            "sort": [
+                {"m_update_date": {"order": "desc"}}
+            ],
             "track_total_hits": False
         }
 
@@ -70,6 +67,7 @@ class elastic_insight_generator:
         ]
 
         return base_indices, query_statement
+
 
     @staticmethod
     def on_shared_data_query():

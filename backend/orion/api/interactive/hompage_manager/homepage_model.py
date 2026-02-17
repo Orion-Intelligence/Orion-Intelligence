@@ -91,9 +91,8 @@ class homepage_model:
     @staticmethod
     async def get_country_specific_insights():
         indices, query = elastic_insight_generator().on_insight_consolidated_country()
-        response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices,query,indices_boost=None)
-        if not response:
-            return []
+        queries = [query.copy() for _ in indices]
+        responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         grouped_results = {
             "leak": [],
@@ -104,30 +103,22 @@ class homepage_model:
             "defacement": []
         }
 
-        for hit in response.get("hits", {}).get("hits", []):
-            source = hit.get("_source", {})
-            index_name = hit.get("_index", "")
+        for index_name, response in zip(indices, responses):
+            hits = response.get("hits", {}).get("hits", []) if response else []
+            sources = [hit.get("_source", {}) for hit in hits if hit.get("_source", {}).get("m_country")]
 
-            if not source.get("m_country"):
-                continue
-
-            if ELASTIC_INDEX.S_LEAK_INDEX in index_name:
-                grouped_results["leak"].append(source)
-
-            elif ELASTIC_INDEX.S_GENERIC_INDEX in index_name:
-                grouped_results["generic"].append(source)
-
-            elif ELASTIC_INDEX.S_EXPLOIT_INDEX in index_name:
-                grouped_results["exploit"].append(source)
-
-            elif ELASTIC_INDEX.S_CHATS_INDEX in index_name:
-                grouped_results["chat"].append(source)
-
-            elif ELASTIC_INDEX.S_SOCIAL_INDEX in index_name:
-                grouped_results["social"].append(source)
-
-            elif ELASTIC_INDEX.S_DEFACEMENT_INDEX in index_name:
-                grouped_results["defacement"].append(source)
+            if index_name == ELASTIC_INDEX.S_LEAK_INDEX:
+                grouped_results["leak"] = sources
+            elif index_name == ELASTIC_INDEX.S_GENERIC_INDEX:
+                grouped_results["generic"] = sources
+            elif index_name == ELASTIC_INDEX.S_EXPLOIT_INDEX:
+                grouped_results["exploit"] = sources
+            elif index_name == ELASTIC_INDEX.S_CHATS_INDEX:
+                grouped_results["chat"] = sources
+            elif index_name == ELASTIC_INDEX.S_SOCIAL_INDEX:
+                grouped_results["social"] = sources
+            elif index_name == ELASTIC_INDEX.S_DEFACEMENT_INDEX:
+                grouped_results["defacement"] = sources
 
         return grouped_results
 
