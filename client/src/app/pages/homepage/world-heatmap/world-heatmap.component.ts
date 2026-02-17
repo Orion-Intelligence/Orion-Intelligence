@@ -113,6 +113,7 @@ export class WorldHeatmapComponent
       this.mapData = this.gettingUniqueCountrys();
       this.buildIndex();
       this.animateMapTransition();
+      this.updateColors();
       this.updateLegend();
       this.updateActiveCategoryLabel();
 
