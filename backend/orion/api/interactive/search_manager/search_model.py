@@ -372,7 +372,7 @@ class search_model:
         response = await self.__search_callback.search_handler( m_status, m_documents,search_stealerlog_callback_model, {}, data_limit=False)
 
 
-        password_filter = getattr(param, "password_scheme", None)
+        password_filter = getattr(param, "password_schema", None)
         if password_filter and response and hasattr(response, "Result"):
             filtered_results = [
             item for item in response.Result

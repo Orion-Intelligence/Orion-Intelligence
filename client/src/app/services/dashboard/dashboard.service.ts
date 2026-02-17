@@ -92,7 +92,7 @@ export class DashboardService {
     const passwordScheme = this.passwordSchemeFilter;
 
     if (passwordScheme && Object.values(passwordScheme).some(v => v !== null && v !== false)) {
-      baseParams['password_scheme'] = passwordScheme;
+      baseParams['password_schema'] = passwordScheme;
     }
     this.passwordSchemeFilter = {
       minLength: null,
