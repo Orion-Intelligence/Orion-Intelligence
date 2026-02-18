@@ -112,13 +112,6 @@ async def test_parse_text(payload: DomainScanRequest):
     return json.loads((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json").read_text(encoding="utf-8"))
 
 @test_routes.post(
-    "/api/ioc/extract",
-    dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
-    ],
-)
-
-@test_routes.post(
     "/api/urlscan/subdomains",
     dependencies=[Depends(
         role_required(
@@ -138,7 +131,7 @@ async def test_parse_text(payload: DomainScanRequest):
     ],
 )
 
-async def extract_ioc(file: UploadFile = File(...)):
+async def extract_ioc():
     step = _mock_step(f"ioc_file_extract")
     if step:
         return step
