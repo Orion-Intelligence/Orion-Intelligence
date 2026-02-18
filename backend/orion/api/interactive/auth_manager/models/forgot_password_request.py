@@ -8,8 +8,3 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPassword(BaseModel):
     token: str
     password: str
-
-class SupportRequest(BaseModel):
-    mail:str
-    subject:str
-    message:str
