@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, Output, EventEmitter } from '@angular/core';
 import { NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -9,6 +9,7 @@ import { ConfigSettings } from '../../model/app/config';
 import { AppStorageService } from '../../../services/core/app/app-storage.service';
 import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 
 
 @Component({
@@ -19,7 +20,8 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
     NgIf,
     TooltipDirective,
     NgClass,
-    AlertNotificationComponent
+    AlertNotificationComponent,
+    NgbCarouselModule
   ],
   templateUrl: './profile.component.html'
 })
@@ -32,6 +34,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   licences: string = '';
   dropdownOpen = signal(false);
   isDarkTheme = true;
+  @Output() openPopup = new EventEmitter<void>();
+
 
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler = () => {
@@ -157,6 +161,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   getUnseenAlertCount(): number {
     return this.appService.userSessionData().alerts.filter(alert => !alert.report_seen).length;
+  }
+  openSupportPopup() {
+    this.openPopup.emit();
   }
 
   protected readonly Date = Date;

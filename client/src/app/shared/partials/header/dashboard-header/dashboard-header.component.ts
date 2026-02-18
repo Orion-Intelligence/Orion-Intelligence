@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
@@ -6,16 +6,17 @@ import { filter } from 'rxjs';
 import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { SupportComponent } from "../../support/support.component";
 
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [FormsModule, ProfileComponent, NgIf, NgForOf, TitleCasePipe, NgOptimizedImage],
+  imports: [FormsModule, ProfileComponent, NgIf, NgForOf, TitleCasePipe, NgOptimizedImage, SupportComponent],
   templateUrl: './dashboard-header.component.html',
 })
 export class DashboardHeaderComponent implements OnInit {
   breadcrumb: { path: string; label: string }[] = [];
-
+  supportPopup = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService) {
   }
@@ -81,5 +82,12 @@ export class DashboardHeaderComponent implements OnInit {
 
       this.router.navigateByUrl(fullPath).then();
     }
+  }
+  supportOpenPopup() {
+    this.supportPopup = true; // open popup
+  }
+
+  supportClosePopup() {
+    this.supportPopup = false; // close popup
   }
 }

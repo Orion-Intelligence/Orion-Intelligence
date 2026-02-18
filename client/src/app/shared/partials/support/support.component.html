@@ -1,0 +1,47 @@
+<div class="support_overlay">
+    <div class="support_popup">
+
+        <div class="support_header">
+            <h2>Contact Support</h2>
+            <button class="support_close_icon" (click)="close()">✕</button>
+        </div>
+
+        <div class="support_body">
+
+            <label>Email</label>
+            <input type="email" name="email" [(ngModel)]="supportModel.email" #emailInput="ngModel" required
+                pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" placeholder="your@gmail.com" />
+
+
+            <label>Subject</label>
+            <input type="text" [(ngModel)]="supportModel.subject" #subjectInput="ngModel" required
+                placeholder="Write your subject" />
+
+            <div *ngIf="subjectInput.invalid && subjectInput.touched" class="support_error">
+                Subject cannot be empty
+            </div>
+
+            <label>Message</label>
+            <textarea rows="4" [(ngModel)]="supportModel.message" #messageInput="ngModel" required
+                placeholder="Write your message...">
+      </textarea>
+
+            <div *ngIf="messageInput.invalid && messageInput.touched" class="support_error">
+                Message cannot be empty
+            </div>
+
+        </div>
+
+        <div class="support_footer">
+            <button class="support_send_btn" (click)="submit()"
+                [disabled]="!supportModel.email || !supportModel.subject || !supportModel.message">
+                Send Message
+            </button>
+
+            <button class="support_cancel_btn" (click)="close()">
+                Cancel
+            </button>
+        </div>
+
+    </div>
+</div>
