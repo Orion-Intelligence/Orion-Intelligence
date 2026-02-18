@@ -1,0 +1,121 @@
+.support_overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.support_popup {
+    width: 420px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    animation: support_fadeIn 0.25s ease-in-out;
+}
+
+.support_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.support_header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.support_close_icon {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #777;
+}
+
+.support_body {
+    display: flex;
+    flex-direction: column;
+}
+
+.support_body label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    margin-top: 10px;
+}
+
+.support_body input,
+.support_body textarea {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.support_body input:focus,
+.support_body textarea:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.15);
+}
+
+.support_error {
+    color: #e53935;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.support_footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.support_send_btn {
+    background: #4a90e2;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.support_send_btn:hover {
+    background: #357abd;
+}
+
+.support_cancel_btn {
+    background: #f44336;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.support_send_btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+@keyframes support_fadeIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

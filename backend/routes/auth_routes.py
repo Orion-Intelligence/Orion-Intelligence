@@ -7,7 +7,7 @@ from orion.api.interactive.payment_manager.model.payment_param_model import Paym
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager
 from orion.helper_manager.env_handler import env_handler
 from orion.services.session_manager.session_manager import session_manager
-from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
+from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest,SupportRequest
 from orion.api.interactive.signup_manager.signup_manager import SignupManager
 from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest, ResetPassword
 
@@ -117,3 +117,7 @@ async def subscriptionRequest(request: PaymentParamModel):
 @auth_router.post("/api/updatePassword")
 async def updatePassword(data: ResetPassword):
     return await auth_manager.update_password(data.token, data.password)
+
+@auth_router.post("/api/support")
+async def support(data: SupportRequest):
+    return await SignupManager.send_support_mail(data)

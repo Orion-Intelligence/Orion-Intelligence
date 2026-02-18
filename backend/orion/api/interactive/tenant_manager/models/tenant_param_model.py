@@ -20,3 +20,9 @@ class tenant_param_model(BaseModel):
     preferences: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(extra="allow")
+
+
+class SupportRequest(BaseModel):
+    mail:str
+    subject:str
+    message:str

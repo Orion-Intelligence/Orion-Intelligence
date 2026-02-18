@@ -10,7 +10,7 @@ from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, LicenseName
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
-from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
+from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest, SupportRequest
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
@@ -162,3 +162,36 @@ class SignupManager:
     @staticmethod
     def get_email_domain(email: str) -> str:
         return email.split("@")[1].lower()
+    
+    @staticmethod
+    async def send_support_mail(data: SupportRequest):
+        engine = mongo_controller.get_instance().get_engine()
+        email=data.email or ""
+        subject=data.subject or ""
+        message=data.message or ""
+            
+
+        domain = email.split("@")[-1].lower()
+        PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
+        if PRODUCTION == "1":
+            non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me",
+                "protonmail.com", "mail.ru", "aol.com", "icloud.com", "msn.com", "live.com", "zoho.com", "gmx.com",
+                "gmx.net", "yandex.com", "yandex.ru", "fastmail.com", "pm.me", "me.com", "mail.com", "inbox.com"]
+
+            if domain in non_company_domains:
+                raise HTTPException(
+                    status_code=400, detail="Please enter your company email (Gmail, Yahoo, etc. not allowed).")
+
+        company = email.split("@")[1].split(".")[0]
+        if not company:
+            raise HTTPException(status_code=422, detail="Invalid email")
+        APP_URL = env_handler.get_instance().env("APP_URL")
+        html_content = constant.mail_template.render(
+            # username=user.username,
+            email=email,
+            subject=subject,
+            lurlHeading=MailUrlHeading.SUPPORT.value,
+            url=message)
+        await mail_manager.get_instance().send_verification_mail(
+            to=email, subject=MailSubject.SUPPORT.value, body=html_content)
+        return {"message": "Signup successful. Your account is under verification.", "status": "pending", "email": email}

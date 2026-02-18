@@ -37,6 +37,7 @@
   </ng-container>
 
   <div class="header-bar_profile" *ngIf="!authService.getIsMobileDemo()">
-    <app-profile></app-profile>
+    <app-profile (openPopup)="supportOpenPopup()"></app-profile>
   </div>
 </div>
+<app-support *ngIf="supportPopup" (closePopup)="supportClosePopup()"></app-support>
