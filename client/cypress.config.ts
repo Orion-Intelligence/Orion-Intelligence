@@ -53,13 +53,11 @@ export default defineConfig({
 
       return config;
     },
-    baseUrl: process.env.CYPRESS_BASE_URL || process.env.BASE_URL || "http://127.0.0.1:8080",
+    baseUrl: "http://127.0.0.1:4200",
     viewportWidth: 1780,
     viewportHeight: 1720,
     defaultCommandTimeout: 15000,
   },
-
-
 
   component: {
     devServer: {

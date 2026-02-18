@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { isPlatformBrowser, NgIf } from '@angular/common';
+import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output, PLATFORM_ID, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
@@ -9,10 +9,15 @@ import { MessageNotificationService } from '../../../services/message_notificati
   selector: 'app-support',
   imports: [NgIf, FormsModule],
   templateUrl: './support.component.html',
-  styleUrl: './support.component.css'
 })
-export class SupportComponent {
+export class SupportComponent implements OnInit, OnDestroy {
   @Output() closePopup = new EventEmitter<void>();
+
+  isTailwindReady = signal(false);
+
+  private readonly twId = 'tailwind-support-styles';
+  private tailwindLinkEl: HTMLLinkElement | null = null;
+  private ownsTailwindLink = false;
 
   supportModel = {
     email: '',
@@ -21,9 +26,25 @@ export class SupportComponent {
   };
 
   constructor(
+    @Inject(PLATFORM_ID) private readonly platformId: object,
     private apiService: ApiService,
     private messageNotificationService: MessageNotificationService
   ) { }
+
+  ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.isTailwindReady.set(true);
+      return;
+    }
+    this.loadTailwindStyles();
+  }
+
+  ngOnDestroy(): void {
+    if (isPlatformBrowser(this.platformId) && this.ownsTailwindLink) {
+      this.tailwindLinkEl?.remove();
+      this.tailwindLinkEl = null;
+    }
+  }
 
   close() {
     this.resetForm();
@@ -36,11 +57,8 @@ export class SupportComponent {
       !this.supportModel.subject ||
       !this.supportModel.message) return;
 
-    console.log(this.supportModel.email);
-
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(this.supportModel.email)) {
-
       return;
     }
 
@@ -65,4 +83,30 @@ export class SupportComponent {
     };
   }
 
+  private loadTailwindStyles(): void {
+    const existingLink = document.getElementById(this.twId) as HTMLLinkElement | null;
+    if (existingLink) {
+      this.tailwindLinkEl = existingLink;
+      if (existingLink.dataset['ready'] === 'true' || !!existingLink.sheet) {
+        this.isTailwindReady.set(true);
+        return;
+      }
+      existingLink.addEventListener('load', () => this.isTailwindReady.set(true), { once: true });
+      existingLink.addEventListener('error', () => this.isTailwindReady.set(true), { once: true });
+      return;
+    }
+
+    const link = document.createElement('link');
+    link.id = this.twId;
+    link.rel = 'stylesheet';
+    link.href = 'tailwind-social.css';
+    link.addEventListener('load', () => {
+      link.dataset['ready'] = 'true';
+      this.isTailwindReady.set(true);
+    }, { once: true });
+    link.addEventListener('error', () => this.isTailwindReady.set(true), { once: true });
+    document.head.appendChild(link);
+    this.tailwindLinkEl = link;
+    this.ownsTailwindLink = true;
+  }
 }
