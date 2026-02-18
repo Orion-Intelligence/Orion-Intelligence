@@ -65,6 +65,7 @@ class elastic_controller:
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
             mapping_stealer_model = ELASTIC_ENUMS.mapping_stealer_log_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
+            sanction_model = ELASTIC_ENUMS.mapping_opensanctions_model
 
             if not await self.__m_core_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX, request_timeout=220):
                 await self.__m_core_connection.indices.create(
@@ -81,6 +82,19 @@ class elastic_controller:
                     index=ELASTIC_INDEX.S_GENERIC_INDEX, body=mapping_generic_model, request_timeout=220)
                 await self.__m_core_connection.indices.put_settings(
                     index=ELASTIC_INDEX.S_GENERIC_INDEX,
+                    body={"index.blocks.read_only_allow_delete": False},
+                    request_timeout=220)
+
+            print("::::::::::::::::::::::::::::::: 1", flush==True)
+            if not await self.__m_core_connection.indices.exists(
+                    index=ELASTIC_INDEX.S_OPENSANCTIONS_INDEX,
+                    request_timeout=220):
+                print("::::::::::::::::::::::::::::::: 2", flush == True)
+                await self.__m_core_connection.indices.create(
+                    index=ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, body=sanction_model, request_timeout=220)
+                print("::::::::::::::::::::::::::::::: 3", flush == True)
+                await self.__m_core_connection.indices.put_settings(
+                    index=ELASTIC_INDEX.S_OPENSANCTIONS_INDEX,
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 
@@ -134,7 +148,7 @@ class elastic_controller:
                     request_timeout=220)
 
         except Exception as ex:
-            log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
+            log.g().e(f"11111111111111111111111111111111111111111111ELASTIC : Initialization failed: {str(ex)}")
 
     async def purge_old_records(self):
         try:
