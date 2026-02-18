@@ -134,6 +134,31 @@ jobs:
           test "$(find backend_cov_app -maxdepth 1 -name ".coverage.*" | wc -l)" -gt 0
           python3 -m coverage combine backend_cov_app/.coverage.*
           python3 -m coverage xml -o backend-coverage.xml
+          python3 - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+
+          xml_path = "backend-coverage.xml"
+          tree = ET.parse(xml_path)
+          root = tree.getroot()
+
+          updated = 0
+          for cls in root.findall(".//class"):
+            filename = cls.get("filename", "")
+            if not filename or filename.startswith("backend/"):
+              continue
+
+            candidate = os.path.join("backend", filename)
+            if os.path.exists(candidate) and not os.path.exists(filename):
+              cls.set("filename", candidate)
+              updated += 1
+
+          if updated:
+            tree.write(xml_path, encoding="utf-8", xml_declaration=True)
+            print(f"normalized backend coverage paths: {updated}")
+          else:
+            print("no backend coverage path normalization required")
+          PY
           test -s backend-coverage.xml
           grep -m 5 'filename=' backend-coverage.xml
 

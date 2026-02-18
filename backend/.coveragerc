@@ -3,9 +3,17 @@ branch = True
 parallel = True
 sigterm = True
 source =
+    backend
     /app
 omit =
     */site-packages/*
+    backend/migrations/*
+    backend/static/*
+    backend/build/*
+    backend/docs/*
+    backend/bloom_data/*
+    backend/__pycache__/*
+    backend/cronjobs.py
     /app/migrations/*
     /app/static/*
     /app/build/*
