@@ -16,6 +16,7 @@ export enum Category {
   SCANNER = 'Scanner',
   TENANT = 'Tenant',
   PROFILE = 'Profile',
+  SHODAN = 'Shodan'
 }
 
 export enum GeneralSubCategory {
@@ -74,6 +75,11 @@ export enum ApiSubCategory {
   SOFTWARE = 'Software-Scanner',
   FILE = 'File-Scanner',
 }
+
+export enum ShodanSubCategory {
+  SEARCH = 'Search'
+}
+
 
 export enum SocialSubCategory {
   ALL = 'All',

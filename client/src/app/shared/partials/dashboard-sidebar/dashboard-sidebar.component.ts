@@ -9,7 +9,7 @@ import {
   GeneralSubCategory, FeedSubCategory,
   SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory,
   TenantSubCategory,
-  ProfileSubCategory, DiscussionSubCategory
+  ProfileSubCategory, DiscussionSubCategory,ShodanSubCategory
 
 } from '../../constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -40,6 +40,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   mobile_menu_status = false
 
   apiCategories = Object.values(ApiSubCategory);
+  shodanCategories = Object.values(ShodanSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
   newsCategories = Object.values(FeedSubCategory);
@@ -151,6 +152,10 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.PROFILE:
           firstSubcategory = this.profileCategories[0];
           break;
+          case Category.SHODAN:
+          firstSubcategory = this.shodanCategories[0];
+          break;
+
       }
       if (firstSubcategory) {
         this.selectionStore.setSelectedOption(firstSubcategory);

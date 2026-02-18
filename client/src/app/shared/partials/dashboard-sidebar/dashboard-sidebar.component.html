@@ -115,6 +115,15 @@
         </a>
       </div>
     </ng-container>
+  <ng-container *ngIf="isAdmin() || licenseService.canUseModule('shodan')">
+  <div class="sidebar__item">
+    <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/shodan" target="_blank">
+      <img alt="Shodan" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/defacement.svg" width="20">
+      Shodan
+    </a>
+  </div>
+</ng-container>
+
     <ng-container>
       <div class="sidebar__item">
         <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/"
@@ -255,6 +264,15 @@
         [selectionStore]="selectionStore" [title]="'Dump'">
       </app-dashboard-sidebar-collapsed>
     </ng-container>
+    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('shodan')">
+  <div class="sidebar__item">
+    <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+       href="/dashboard/shodan" target="_blank">
+      <img alt="Shodan" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/defacement.svg" width="20">
+    </a>
+  </div>
+</ng-container>
+
 
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph"

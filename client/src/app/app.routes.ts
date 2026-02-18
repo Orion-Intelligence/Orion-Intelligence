@@ -81,6 +81,7 @@ import {
 import {
   SocialMapperComponent
 } from './shared/partials/intel-panel/dashboard-managers/social-mapper/social-mapper.component';
+import {ShodanComponent} from './pages/shodan/shodan.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: {reportdata: ReportConsolidatedResolver},
@@ -212,6 +213,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/graphs/graphs.component').then(m => m.GraphComponent),
         data: {animation: 'ctigraph'}
+      },
+      {
+        path: 'shodan',
+        component: ShodanComponent,
+        data: { animation: 'ShodanPage' }
       },
       {
         path: 'social-mapper',
