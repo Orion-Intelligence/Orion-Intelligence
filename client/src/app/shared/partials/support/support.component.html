@@ -1,6 +1,6 @@
-<ng-container *ngIf="isTailwindReady(); else tailwindLoading">
-  <div class="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
-    <div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
+<ng-container *ngIf="isTailwindReady; else tailwindLoading">
+  <div class="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4" @overlayAnimation>
+    <div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl" @popupAnimation>
       <div class="flex items-center justify-between border-b border-slate-700 px-5 py-4">
         <h2 class="text-lg font-semibold text-slate-100">Contact Support</h2>
         <button type="button" (click)="close()" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200" title="Close">
@@ -11,32 +11,39 @@
       <div class="space-y-4 px-5 py-4">
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-200">Email</label>
-          <input type="email" name="email" [(ngModel)]="supportModel.email" #emailInput="ngModel" required placeholder="your@email.com" class="block w-full rounded-lg border-0 bg-slate-800 px-3 py-2.5 text-slate-100 ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm" />
+          <input type="email" name="email" [(ngModel)]="supportModel.email" #emailInput="ngModel" required email placeholder="your@email.com" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': emailInput.invalid && submitAttempted }" class="block w-full rounded-lg border-0 bg-slate-800 px-3 py-2.5 text-slate-100 ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm" />
+          <div *ngIf="emailInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-400">
+            <span *ngIf="emailInput.errors?.['required']">Email cannot be empty</span>
+            <span *ngIf="emailInput.errors?.['email']">Enter a valid email address</span>
+          </div>
         </div>
 
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-200">Subject</label>
-          <input type="text" [(ngModel)]="supportModel.subject" #subjectInput="ngModel" required placeholder="Write your subject" class="block w-full rounded-lg border-0 bg-slate-800 px-3 py-2.5 text-slate-100 ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm" />
-          <div *ngIf="subjectInput.invalid && subjectInput.touched" class="mt-1 text-xs text-rose-400">
+          <input type="text" [(ngModel)]="supportModel.subject" #subjectInput="ngModel" required placeholder="Write your subject" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': subjectInput.invalid && submitAttempted }" class="block w-full rounded-lg border-0 bg-slate-800 px-3 py-2.5 text-slate-100 ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm" />
+          <div *ngIf="subjectInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-400">
             Subject cannot be empty
           </div>
         </div>
 
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-200">Message</label>
-          <textarea rows="5" [(ngModel)]="supportModel.message" #messageInput="ngModel" required placeholder="Write your message..." class="block w-full rounded-lg border-0 bg-slate-800 px-3 py-2.5 text-slate-100 ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm"></textarea>
-          <div *ngIf="messageInput.invalid && messageInput.touched" class="mt-1 text-xs text-rose-400">
+          <textarea rows="5" [(ngModel)]="supportModel.message" #messageInput="ngModel" required placeholder="Write your message..." [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': messageInput.invalid && submitAttempted }" class="block w-full rounded-lg border-0 bg-slate-800 px-3 py-2.5 text-slate-100 ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm"></textarea>
+          <div *ngIf="messageInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-400">
             Message cannot be empty
           </div>
         </div>
       </div>
 
       <div class="flex items-center justify-end gap-2 border-t border-slate-700 px-5 py-4">
+        <div *ngIf="errorMessage" class="mr-auto text-xs text-rose-400">
+          {{ errorMessage }}
+        </div>
         <button type="button" (click)="close()" class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600">
           Cancel
         </button>
-        <button type="button" (click)="submit()" [disabled]="!supportModel.email || !supportModel.subject || !supportModel.message" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300">
-          Send Message
+        <button type="button" (click)="submit()" [disabled]="isSubmitting" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300">
+          {{ isSubmitting ? 'Sending...' : 'Send Message' }}
         </button>
       </div>
     </div>

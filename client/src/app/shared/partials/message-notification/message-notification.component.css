@@ -15,12 +15,12 @@
     padding: 12px 24px;
     color: #fff;
     border-radius: 8px;
-    border: 1px solid #ffcccc55;
+    border: 1px solid #fcc5;
     font-weight: 500;
     opacity: 0;
     transform: translateY(-10px);
     animation: fadeInOut 3s forwards ease-in-out;
-    box-shadow: 0 4px 12px rgba(183, 28, 28, 0.4);
+    box-shadow: 0 4px 12px rgb(183 28 28 / 40%);
 }
 
 @keyframes fadeInOut {
@@ -47,6 +47,6 @@
 
 .notification-card.success {
   background: #1b5e20;
-  border: 1px solid #ccffcc55;
-  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.4);
+  border: 1px solid #cfc5;
+  box-shadow: 0 4px 12px rgb(27 94 32 / 40%);
 }
