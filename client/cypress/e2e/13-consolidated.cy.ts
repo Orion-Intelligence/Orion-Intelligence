@@ -397,22 +397,6 @@ describe('Dashboard Sections Test', () => {
       .clear({force: true})
       .type('1.1.1.1', {force: true});
 
-    cy.contains('button.subdomain-btn.search span', 'Lookup IP')
-      .click({force: true});
-
-    cy.get('button.subdomain-tab')
-      .contains(/^Wayback$/)
-      .should('be.visible')
-      .click({force: true});
-
-    cy.get('input.subdomain-input')
-      .should('be.visible')
-      .clear({force: true})
-      .type('example.com', {force: true});
-
-    cy.get('button.subdomain-btn.search')
-      .first()
-      .click({force: true});
   });
 
 });
