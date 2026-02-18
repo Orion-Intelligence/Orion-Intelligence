@@ -1,0 +1,23 @@
+{
+  "job_id": "mock-social-posts",
+  "result": {
+    "posts": [
+      {
+        "id": "mock-post-1",
+        "caption": "Mock post 1",
+        "url": "https://x.com/msmannan00/status/1",
+        "likes": 120,
+        "comments": 14,
+        "timestamp": "2026-02-01T10:00:00Z"
+      },
+      {
+        "id": "mock-post-2",
+        "caption": "Mock post 2",
+        "url": "https://x.com/msmannan00/status/2",
+        "likes": 95,
+        "comments": 10,
+        "timestamp": "2026-02-02T10:00:00Z"
+      }
+    ]
+  }
+}

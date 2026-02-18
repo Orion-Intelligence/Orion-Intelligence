@@ -1,0 +1,15 @@
+{
+  "job_id": "mock-social-followers",
+  "result": {
+    "followers": [
+      "follower1",
+      "follower2",
+      "follower3",
+      "follower4",
+      "follower5"
+    ],
+    "platform": "twitter",
+    "username": "msmannan00",
+    "status": "active"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "job_id": "mock-social-recon-image",
+  "result": [
+    {
+      "metadata": {
+        "platform": "Tiktok",
+        "username": "image_scan_result",
+        "social_handle": "image_scan_result",
+        "url": "https://www.tiktok.com/@image_scan_result",
+        "timestamp": "2026-02-07 17:39:29",
+        "status": "active"
+      },
+      "data": null
+    },
+    {
+      "metadata": {
+        "platform": "Instagram",
+        "username": "image_scan_result",
+        "social_handle": "image_scan_result",
+        "url": "https://www.instagram.com/image_scan_result",
+        "timestamp": "2026-02-07 17:39:31",
+        "status": "suggested"
+      },
+      "data": null
+    }
+  ]
+}

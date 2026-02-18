@@ -1,0 +1,19 @@
+{
+  "active_tab_id": "graph-tab-1",
+  "tab_counter": 2,
+  "tabs": [
+    {
+      "id": "graph-tab-1",
+      "name": "Session 1",
+      "state": {
+        "selectedType": "cluster",
+        "singleInput": "all",
+        "maxEdge": 25,
+        "maxDepth": 1,
+        "nodeSearchText": "",
+        "physicsEnabled": true,
+        "isGraphView": true
+      }
+    }
+  ]
+}

@@ -400,7 +400,8 @@ describe('Dashboard Sections Test', () => {
     cy.contains('button.subdomain-btn.search span', 'Lookup IP')
       .click({force: true});
 
-    cy.contains('button.subdomain-tab', 'Wayback')
+    cy.get('button.subdomain-tab')
+      .contains(/^Wayback$/)
       .should('be.visible')
       .click({force: true});
 
@@ -409,7 +410,8 @@ describe('Dashboard Sections Test', () => {
       .clear({force: true})
       .type('example.com', {force: true});
 
-    cy.contains('button.subdomain-btn.search span', 'Search Wayback')
+    cy.get('button.subdomain-btn.search')
+      .first()
       .click({force: true});
   });
 

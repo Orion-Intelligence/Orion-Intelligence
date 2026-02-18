@@ -1,0 +1,19 @@
+{
+  "job_id": "mock-social-images",
+  "result": {
+    "images": [
+      {
+        "image_url": "https://avatars.githubusercontent.com/u/9531531?v=4?s=400",
+        "thumbnail": "https://avatars.githubusercontent.com/u/9531531?v=4?s=200",
+        "title": "profile image",
+        "source": "mock"
+      },
+      {
+        "image_url": "https://www.tiktok.com/api/img/?itemId=7544736024065232144&location=0&aid=1988",
+        "thumbnail": "https://tse3.mm.bing.net/th/id/OIP.FNuyHkglAtSpU-5vTlH-9AHaNK?pid=Api",
+        "title": "platform image",
+        "source": "mock"
+      }
+    ]
+  }
+}

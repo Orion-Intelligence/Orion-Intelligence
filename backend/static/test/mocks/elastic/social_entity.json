@@ -1,0 +1,10 @@
+{
+  "job_id": "mock-social-entity",
+  "result": {
+    "id": "entity-mock-1",
+    "type": "email",
+    "value": "mock@example.com",
+    "label": "mock@example.com",
+    "status": "added"
+  }
+}

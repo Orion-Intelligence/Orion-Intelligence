@@ -1,0 +1,15 @@
+{
+  "job_id": "mock-social-following",
+  "result": {
+    "following": [
+      "elonmusk",
+      "troyhunt",
+      "reactnative",
+      "pycoders",
+      "geoffkeighley"
+    ],
+    "platform": "twitter",
+    "username": "msmannan00",
+    "status": "active"
+  }
+}

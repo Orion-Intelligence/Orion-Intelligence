@@ -1,0 +1,19 @@
+{
+  "active_tab_id": "social-tab-1",
+  "tab_counter": 2,
+  "tabs": [
+    {
+      "id": "social-tab-1",
+      "name": "Session 1",
+      "state": {
+        "searchTerm": "",
+        "viewMode": "graph",
+        "isPhysicsEnabled": true,
+        "networkData": {
+          "nodes": [],
+          "edges": []
+        }
+      }
+    }
+  ]
+}
