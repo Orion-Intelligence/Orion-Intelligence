@@ -1,0 +1,88 @@
+<div class="flex-shrink-0 z-10 flex flex-col lg:flex-row justify-start items-start lg:items-center gap-2"
+  [ngClass]="{ 'p-2 sm:p-4': applyOuterPadding() }">
+  <div class="relative w-full lg:w-full lg:max-w-md focus-within:w-full focus-within:lg:max-w-xl transition-all duration-300">
+    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
+      <i class="bi bi-search w-5 h-5 text-slate-400 leading-none"></i>
+    </div>
+    <input
+      type="text"
+      [placeholder]="searchPlaceholder()"
+      [value]="searchTerm()"
+      (input)="onSearchInput($event)"
+      (keyup.enter)="searchSubmitted.emit()"
+      class="relative z-0 block w-full rounded-full border-0 bg-slate-800/85 py-3 pl-11 pr-40 text-slate-200 shadow-lg ring-1 ring-inset ring-slate-700/60 backdrop-blur-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
+    />
+    <div class="absolute inset-y-1.5 right-1.5 flex items-center p-1 bg-slate-700/50 rounded-full">
+      <button
+        *ngIf="showImageButton()"
+        type="button"
+        title="Search by image"
+        (click)="imageSearchClicked.emit()"
+        class="flex items-center justify-center h-7 w-7 rounded-full text-slate-300 hover:bg-slate-700 transition-colors">
+        <i class="bi bi-image"></i>
+      </button>
+      <button
+        *ngIf="showClearButton()"
+        type="button"
+        title="Clear search"
+        (click)="clearSearchClicked.emit()"
+        class="flex items-center justify-center h-7 w-7 rounded-full text-slate-300 hover:bg-slate-700 transition-colors"
+        [class.ml-1]="showImageButton()">
+        <i class="bi bi-x"></i>
+      </button>
+      <button
+        *ngIf="showSearchActionButton()"
+        type="button"
+        (click)="searchSubmitted.emit()"
+        [disabled]="isSearchDisabled()"
+        class="flex items-center rounded-full bg-indigo-600 px-4 h-7 ml-1 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed">
+        {{ searchActionLabel() }}
+      </button>
+    </div>
+  </div>
+
+  <div class="w-full lg:w-full lg:max-w-md flex items-center justify-start gap-2">
+    <div
+      *ngIf="showViewModeToggle()"
+      class="hidden lg:flex relative items-center bg-slate-800/80 rounded-full p-1 shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm">
+      <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 shadow-md transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
+
+      <button
+        type="button"
+        title="Graph View"
+        (click)="onSetViewMode('graph')"
+        [class]="'relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-slate-300 hover:text-white')">
+        <i class="bi bi-share-fill"></i> Graph
+      </button>
+      <button
+        type="button"
+        title="List View"
+        (click)="onSetViewMode('list')"
+        [class]="'relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-slate-300 hover:text-white')">
+        <i class="bi bi-list-ul"></i> List
+      </button>
+    </div>
+
+    <ng-container *ngIf="viewMode() === 'graph'">
+      <button
+        *ngIf="showPhysicsToggle()"
+        type="button"
+        (click)="physicsToggled.emit()"
+        [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')"
+        [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
+        <i [class]="'bi ' + (isPhysicsEnabled() ? 'bi-pause-fill' : 'bi-play-fill')"></i>
+        <span>Physics</span>
+      </button>
+
+      <button
+        *ngIf="showEditToggle() && canEditConnections()"
+        type="button"
+        (click)="editModeToggled.emit()"
+        [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')">
+        <i [class]="'bi ' + (isEditMode() ? 'bi-check-circle-fill' : 'bi-pencil-fill')"></i>
+        <span>{{ isEditMode() ? 'Done Editing' : 'Edit Connections' }}</span>
+      </button>
+      <ng-content select="[toolbarExtraActions]"></ng-content>
+    </ng-container>
+  </div>
+</div>

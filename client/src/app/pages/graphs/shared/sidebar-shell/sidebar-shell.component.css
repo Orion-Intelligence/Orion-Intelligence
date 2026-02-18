@@ -1,0 +1,14 @@
+:host {
+  display: block;
+  height: calc(100vh - 3rem);
+  width: 100%;
+  min-height: 0;
+}
+
+.graph-sidebar-shell-header {
+  padding: 0.75rem;
+}
+
+.graph-sidebar-shell-toggle {
+  flex-shrink: 0;
+}

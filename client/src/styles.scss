@@ -67,8 +67,8 @@
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
 @use 'app/shared/partials/trail-notification/trail-notification.component.css';
 @use 'app/shared/partials/message-notification/message-notification.component.css';
-@use 'app/pages/graphs/graphs.component.css';
-@use 'app/pages/graphs/sidebar/sidebar.component.css';
+@use 'app/pages/graphs/cti-graph/graphs.component.css';
+@use 'app/pages/graphs/cti-graph/sidebar/sidebar.component.css';
 @use 'app/shared/partials/report/report-chat/report-chat.component.css';
 @use 'app/shared/partials/filters/date-picker/date-picker.component.css';
 @use 'app/shared/partials/json-api-viewer/json-viewer/json-viewer.component.css';
@@ -82,7 +82,7 @@
 @use 'app/pages/security-scan/security-scan.component.css';
 @use 'app/pages/security-scan/security-scan-export-component/security-scan-export-component.component.css';
 @use 'app/shared/partials/scan-helper-methods/scan-helper-methods.component.css';
-@use 'app/pages/social-mapper/social-mapper.scss';
+@use 'app/pages/graphs/social-graph/social-mapper.scss';
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
 

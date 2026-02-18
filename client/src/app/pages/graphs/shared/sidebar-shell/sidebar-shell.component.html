@@ -1,0 +1,20 @@
+<div class="h-full w-full flex flex-col transition-all duration-300 ease-in-out">
+  <div class="graph-sidebar-shell-header p-3 border-b border-slate-800 flex items-center shrink-0" [class.gap-3]="!isCollapsed()" [class.justify-between]="!isCollapsed()" [class.justify-center]="isCollapsed()">
+    <a [href]="homeHref()" [title]="logoAlt()" class="hidden lg:flex items-center overflow-hidden transition-all duration-300" [class.flex-grow]="!isCollapsed()" [class.w-0]="isCollapsed()" [class.opacity-0]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
+      <img [src]="logoSrc()" [alt]="logoAlt()" class="h-8 object-contain">
+    </a>
+    <button (click)="toggleClicked.emit()" [class]="isCollapsed() ? 'graph-sidebar-shell-toggle w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'graph-sidebar-shell-toggle w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
+      <i class="bi bi-list text-xl leading-none"></i>
+    </button>
+  </div>
+
+  <div class="relative flex-grow overflow-hidden">
+    <div class="absolute top-0 left-0 w-80 h-full transition-all duration-300 ease-out" [class.opacity-100]="!isCollapsed()" [class.opacity-0]="isCollapsed()" [class.translate-x-0]="!isCollapsed()" [class.-translate-x-3]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
+      <ng-content select="[sidebar-expanded]"></ng-content>
+    </div>
+
+    <div class="absolute top-0 left-0 w-20 h-full transition-all duration-300 ease-in" [class.opacity-100]="isCollapsed()" [class.opacity-0]="!isCollapsed()" [class.translate-x-0]="isCollapsed()" [class.translate-x-2]="!isCollapsed()" [class.pointer-events-none]="!isCollapsed()">
+      <ng-content select="[sidebar-collapsed]"></ng-content>
+    </div>
+  </div>
+</div>

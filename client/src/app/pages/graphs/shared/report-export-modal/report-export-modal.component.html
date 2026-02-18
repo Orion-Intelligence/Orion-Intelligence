@@ -1,0 +1,29 @@
+<div *ngIf="visible" class="report-export-overlay fixed inset-0 z-[1200] flex items-center justify-center bg-black/50 p-4" (click)="onOverlayClick($event)">
+  <div class="w-full max-w-lg rounded-xl border border-slate-600 bg-slate-800 p-4 shadow-2xl">
+    <div class="mb-3 flex items-center justify-between">
+      <h3 class="text-base font-semibold text-white">{{ title }}</h3>
+      <button type="button" class="rounded-md p-1 text-slate-300 hover:bg-slate-700 hover:text-white" (click)="closed.emit()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <p class="mb-4 text-sm text-slate-300">Choose report format:</p>
+
+    <div class="grid gap-2">
+      <button type="button" class="w-full rounded-lg border border-slate-600 bg-slate-700/60 px-3 py-3 text-left hover:border-indigo-400 hover:bg-slate-700" (click)="select('json')">
+        <div class="text-sm font-semibold text-white">1. JSON (Raw Graph Data)</div>
+        <div class="text-xs text-slate-300">Machine-readable nodes, edges, summary, and metadata.</div>
+      </button>
+
+      <button type="button" class="w-full rounded-lg border border-slate-600 bg-slate-700/60 px-3 py-3 text-left hover:border-indigo-400 hover:bg-slate-700" (click)="select('graph_pdf')">
+        <div class="text-sm font-semibold text-white">2. PDF Graph Report</div>
+        <div class="text-xs text-slate-300">Visual graph-focused PDF with composition and key connections.</div>
+      </button>
+
+      <button type="button" class="w-full rounded-lg border border-slate-600 bg-slate-700/60 px-3 py-3 text-left hover:border-indigo-400 hover:bg-slate-700" (click)="select('doc_pdf')">
+        <div class="text-sm font-semibold text-white">3. PDF Document Report</div>
+        <div class="text-xs text-slate-300">Text-rich investigative report with findings, node/edge tables, and context snapshot.</div>
+      </button>
+    </div>
+  </div>
+</div>

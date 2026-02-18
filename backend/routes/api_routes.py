@@ -24,7 +24,6 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_par
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
-from orion.api.server.crawl_manager.class_model.social_model import social_model
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -892,25 +891,25 @@ async def search_dynamic_image(payload: dict = Body(...)):
     "/api/social/followers",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialFollowersRequest = Body(...)):
-    return await social_model.getInstance().social_search(param, "followers")
+    return await graphs_model.getInstance().social_search(param, "followers")
 
 @api_routes.post(
     "/api/social/following",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialFollowingRequest = Body(...)):
-    return await social_model.getInstance().social_search(param, "following")
+    return await graphs_model.getInstance().social_search(param, "following")
 
 @api_routes.post(
     "/api/social/posts",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
-    return await social_model.getInstance().social_search(param, "posts")
+    return await graphs_model.getInstance().social_search(param, "posts")
 
 @api_routes.post(
     "/api/social/entity",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
-    return await social_model.getInstance().social_search(param, "entity")
+    return await graphs_model.getInstance().social_search(param, "entity")
 
 
 

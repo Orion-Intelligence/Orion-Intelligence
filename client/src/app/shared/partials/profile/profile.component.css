@@ -91,6 +91,16 @@
   position: relative;
 }
 
+:host(.topbar-profile-compact) .profile_category {
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+}
+
 .profile_logout_icon {
   background: none;
   border: none;

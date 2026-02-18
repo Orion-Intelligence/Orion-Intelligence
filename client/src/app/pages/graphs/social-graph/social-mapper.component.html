@@ -1,0 +1,276 @@
+<div class="social-scanner-main w-screen h-screen flex flex-col bg-slate-900 overflow-hidden">
+  <ng-container *ngIf="isTailwindReady(); else tailwindLoading">
+    <app-tab-bar></app-tab-bar>
+
+    <ng-container *ngIf="tabManager.activeTab() as activeTab; else loading">
+      <main class="flex-grow min-h-0 relative">
+        <input type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
+        <div class="h-full w-full min-h-0 flex flex-col overflow-hidden text-slate-200" (click)="state.closeContextMenu()">
+
+        <div class="flex-grow min-h-0 flex flex-col lg:flex-row relative">
+
+          <app-home-menu
+            class="border-b lg:border-r border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
+            [isCollapsed]="isHomeMenuCollapsed()"
+            [activeTab]="activeHomeMenuTab()"
+            [searchTerm]="homeMenuSearchTerm()"
+            [jobs]="jobs()"
+            [customEntities]="customEntities()"
+            [activeUsernames]="activeUsernames()"
+            [viewMode]="viewMode()"
+            [isSmallScreen]="isSmallScreen()"
+            (toggle)="onHomeMenuToggled()"
+            (tabSelected)="onHomeMenuTabSelected($event)"
+            (searchChanged)="onHomeMenuSearchChanged($event)"
+            (jobClicked)="handleCompletedJobClick($event)"
+            (entityClicked)="addEntityToGraph($event)"
+            (cancelScan)="cancelScan($event)"
+            (cancelAllFetches)="cancelAllFetchesForUser($event)">
+          </app-home-menu>
+
+          <main class="flex-grow min-h-0 flex flex-col social-mapper-main-bg-grid relative">
+
+            <app-graph-toolbar
+              [searchTerm]="searchTerm()"
+              [isSearchDisabled]="isSearchDisabled()"
+              [searchPlaceholder]="'Enter username to scan...'"
+              [searchActionLabel]="'Scan'"
+              [showImageButton]="true"
+              [showEditToggle]="true"
+              [viewMode]="viewMode()"
+              [isPhysicsEnabled]="isPhysicsEnabled()"
+              [isEditMode]="isEditMode()"
+              [canEditConnections]="canEditConnections()"
+              (searchChanged)="onSearchChanged($event)"
+              (searchSubmitted)="triggerScan()"
+              (imageSearchClicked)="triggerImageUpload()"
+              (viewModeChanged)="onViewModeChanged($event)"
+              (physicsToggled)="onPhysicsToggled()"
+              (editModeToggled)="onEditModeToggled()">
+            </app-graph-toolbar>
+
+            <div class="flex-grow min-h-0 w-full relative overflow-hidden">
+              <ng-container *ngIf="viewMode() === 'graph'; else listView">
+                <div *ngIf="networkData().nodes.length > 0" class="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 animate-fade-in">
+                  <div class="relative h-10">
+                    <app-graph-search-trigger [isExpanded]="isGraphSearchExpanded()" (triggered)="expandGraphSearch()"></app-graph-search-trigger>
+                    <div class="absolute top-0 left-0 w-[22rem] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-out origin-top-left" [class.opacity-100]="isGraphSearchExpanded()" [class.opacity-0]="!isGraphSearchExpanded()" [class.scale-100]="isGraphSearchExpanded()" [class.scale-95]="!isGraphSearchExpanded()" [class.pointer-events-auto]="isGraphSearchExpanded()" [class.pointer-events-none]="!isGraphSearchExpanded()">
+                      <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
+                        <i class="bi bi-search w-5 h-5 text-slate-400 leading-none"></i>
+                      </div>
+                      <input type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border-0 bg-slate-800/85 py-2.5 pl-11 pr-10 text-slate-200 shadow-lg ring-1 ring-inset ring-slate-700/60 backdrop-blur-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+                      <button *ngIf="graphSearchTerm()" (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors">
+                        <i class="bi bi-x-circle-fill"></i>
+                      </button>
+                      <button *ngIf="!graphSearchTerm()" (click)="toggleGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors">
+                        <i class="bi bi-x-lg text-sm"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <app-network-graph
+                  [data]="networkData()"
+                  [focusNodeId]="state.nodeToFocus()"
+                  [editMode]="isEditMode()"
+                  [physicsEnabled]="isPhysicsEnabled()"
+                  [searchTerm]="graphSearchTerm()"
+                  [nodesWithFollows]="nodesWithFollows()"
+                  (nodeClicked)="onNodeClicked($event)"
+                  (platformNodeClicked)="onPlatformNodeClicked($event)"
+                  (relationshipNodeClicked)="onRelationshipNodeClicked($event)"
+                  (groupClicked)="handleGroupNodeClicked($event)"
+                  (followersShortcutClicked)="openFollowerScanFromNode($event)"
+                  (dragStart)="state.closeContextMenu()"
+                  (zoom)="state.closeContextMenu()"
+                  (edgeAdded)="handleEdgeAdded($event)"
+                  (edgeDeleted)="handleEdgeDeleted($event)">
+                </app-network-graph>
+
+                <div *ngIf="networkData().nodes.length === 0" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-600 select-none">
+                  <div class="text-center">
+                    <i class="bi bi-share text-5xl text-slate-800 mx-auto"></i>
+                    <p class="text-2xl font-semibold mt-3 text-slate-700">Graph is Waiting for Data</p>
+                    <p class="text-slate-700/80">Complete a scan or add an entity to begin visualization.</p>
+                  </div>
+                </div>
+
+                <div *ngIf="networkData().nodes.length > 0" class="absolute bottom-4 left-4 bg-slate-800/70 backdrop-blur-sm border border-slate-700 rounded-lg p-3 shadow-lg select-none animate-fade-in">
+                  <h3 class="font-semibold text-slate-300 text-sm mb-2 border-b border-slate-700 pb-1">Legend</h3>
+                  <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 h-4 rounded-full border-2 border-indigo-400 bg-indigo-800 flex-shrink-0"></div>
+                      <span class="text-xs text-slate-400">User Profile</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 h-4 rounded-full border-2 border-teal-500 bg-slate-700 flex-shrink-0 flex items-center justify-center">
+                        <i class="bi bi-at text-white text-[10px]"></i>
+                      </div>
+                      <span class="text-xs text-slate-400">Social Platform</span>
+                    </div>
+                     <div class="flex items-center gap-2">
+                      <div class="w-4 h-4 flex items-center justify-center text-sky-400">
+                        <i class="bi bi-stack"></i>
+                      </div>
+                      <span class="text-xs text-slate-400">Platform Group</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 h-4 rounded-md border-2 border-green-400 bg-green-800 flex-shrink-0"></div>
+                      <span class="text-xs text-slate-400">Custom Entity</span>
+                    </div>
+                    <div class="my-1 h-px bg-slate-700"></div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 h-4 rounded-full border-2 border-sky-500 bg-slate-700 flex-shrink-0 flex items-center justify-center p-0.5">
+                         <i class="bi bi-twitter-x text-[8px] text-white"></i>
+                      </div>
+                      <span class="text-xs text-slate-400">Platform Connection</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 flex items-center text-slate-500">
+                        &rarr;
+                      </div>
+                      <span class="text-xs text-slate-400">Connection Direction</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 flex items-center">
+                        <div class="w-full h-px border-t-2 border-dashed social-mapper-border-entity-connection"></div>
+                      </div>
+                      <span class="text-xs text-slate-400">Entity Connection</span>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-template #listView>
+                  <app-list-view *ngIf="viewMode() === 'list'"
+                    [networkData]="networkData()"
+                    [scanResults]="scanResults()"
+                    [customEntities]="customEntities()"
+                    [isSmallScreen]="isSmallScreen()"
+                    [expandedPlatformNodeId]="expandedPlatformNodeId()"
+                    (nodeClicked)="onNodeClicked($event)"
+                    (platformNodeClicked)="onPlatformNodeClicked($event)"
+                    (deleteCustomEntity)="deleteCustomEntity($event)">
+                  </app-list-view>
+              </ng-template>
+            </div>
+          </main>
+
+          <app-entity-manager
+            class="border-t lg:border-l border-slate-800 flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-visible transition-all duration-300"
+            [isCollapsed]="isEntityMenuCollapsed()"
+            [isSmallScreen]="isSmallScreen()"
+            [activeTabState]="activeTab.state"
+            (toggle)="onEntityMenuToggled()">
+          </app-entity-manager>
+        </div>
+
+        <app-notification-bar *ngIf="state.notification()" [data]="state.notification()"></app-notification-bar>
+
+        <app-context-menu *ngIf="state.contextMenuData()" [data]="state.contextMenuData()" (action)="handleContextMenuAction($event)"></app-context-menu>
+
+        <div *ngIf="platformAliasModalData() as aliasData" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm" (click)="closePlatformAliasModal()">
+          <div class="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 shadow-2xl p-4" (click)="$event.stopPropagation()">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="text-base font-semibold text-slate-100 mb-1">Set Graph Alias</h3>
+                <p class="text-xs text-slate-400 truncate mb-0">Profile: &#64;{{ aliasData.username }}</p>
+              </div>
+              <button type="button" (click)="closePlatformAliasModal()" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"><i class="bi bi-x-lg text-sm"></i></button>
+            </div>
+            <div class="mt-4">
+              <label class="block text-xs font-medium text-slate-400 mb-1">Alias (graph label only)</label>
+              <input type="text" [value]="platformAliasInput()" (input)="onPlatformAliasInputChanged($event)" placeholder="Leave empty to reset" class="block w-full rounded-md border-0 bg-slate-800 py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none sm:text-sm sm:leading-6" />
+            </div>
+            <div class="mt-4 flex items-center justify-end gap-2">
+              <button type="button" (click)="closePlatformAliasModal()" class="px-3 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">Cancel</button>
+              <button type="button" (click)="savePlatformAlias()" class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 transition-colors">Save</button>
+            </div>
+          </div>
+        </div>
+
+        </div>
+      </main>
+    </ng-container>
+    <ng-template #loading>
+      <div class="flex-grow flex items-center justify-center text-slate-500">
+        <p>Loading session...</p>
+      </div>
+    </ng-template>
+
+    <app-metadata-popup *ngIf="state.isMetadataPopupVisible() && state.selectedPlatformData()"
+      [data]="state.selectedPlatformData()!"
+      [isScanInProgress]="isMetadataUserScanInProgress()"
+      (close)="state.closeMetadataPopup()"
+      (fetchProfile)="fetchProfileDetails($event)"
+      (fetchPosts)="handleFetchSocialPosts($event)"
+      (fetchImages)="handleFetchImagesForPlatform($event)"
+      (fetchFollowers)="handleFetchFollowers($event)"
+      (fetchFollowing)="handleFetchFollowing($event)"
+      (cancelFetchProfile)="cancelFetchProfileDetails($event)"
+      (cancelFetchPosts)="handleCancelFetchSocialPosts($event)"
+      (cancelFetchImages)="handleCancelFetchImagesForPlatform($event)"
+      (cancelFetchFollowers)="handleCancelFetchFollowers($event)"
+      (cancelFetchFollowing)="handleCancelFetchFollowing($event)">
+    </app-metadata-popup>
+
+    <app-profile-summary-popup *ngIf="state.summaryPopupData() as data"
+      [username]="data.username"
+      [platforms]="data.platforms"
+      [email]="data.email"
+      [isScanInProgress]="isUserScanInProgress()"
+      (close)="state.closeSummaryPopup()"
+      (fetchProfile)="fetchProfileDetails($event)"
+      (fetchPosts)="handleFetchSocialPosts($event)"
+      (fetchFollowers)="handleFetchFollowers($event)"
+      (fetchFollowing)="handleFetchFollowing($event)"
+      (fetchPlatformImages)="handleFetchImagesForPlatform($event)"
+      (rescan)="handleRescan($event)"
+      (cancelFetchProfile)="cancelFetchProfileDetails($event)"
+      (cancelFetchPosts)="handleCancelFetchSocialPosts($event)"
+      (cancelFetchFollowers)="handleCancelFetchFollowers($event)"
+      (cancelFetchFollowing)="handleCancelFetchFollowing($event)"
+      (cancelFetchPlatformImages)="handleCancelFetchImagesForPlatform($event)"
+      (cancelAllFetches)="cancelAllFetchesForUser($event)">
+    </app-profile-summary-popup>
+
+    <app-follower-scan-popup *ngIf="state.followerScanPopupData() as data"
+      [platform]="data.platform"
+      (close)="state.closeFollowerScanPopup()"
+      (scan)="handleFollowerScan($event)"
+      (fetchFollowers)="handleFetchFollowers(data.platform)"
+      (fetchFollowing)="handleFetchFollowing(data.platform)">
+    </app-follower-scan-popup>
+
+    <app-manage-profiles-modal *ngIf="state.manageProfilesModalData() as data"
+        [data]="data"
+        (close)="state.closeManageProfilesModal()"
+        (updateGraph)="updateGraphFromModal($event)">
+    </app-manage-profiles-modal>
+
+    <app-add-entity-modal *ngIf="entityManager()?.addEntityModalData() as data"
+      [data]="data"
+      (close)="entityManager()?.closeAddEntityModal()"
+      (addEntity)="entityManager()?.confirmAddEntity($event)">
+    </app-add-entity-modal>
+
+    <app-confirmation-popup *ngIf="state.deleteConfirmationData() as data"
+        [message]="data.message"
+        (confirmed)="onDeleteConfirmation($event)">
+    </app-confirmation-popup>
+
+    <app-message-popup *ngIf="state.infoModalData() as data"
+        [message]="data.message"
+        (confirmed)="onInfoPopupConfirmed($event)">
+    </app-message-popup>
+
+    <app-relationship-details-popup *ngIf="state.relationshipPopupData() as data"
+        [data]="data"
+        (close)="state.closeRelationshipPopup()">
+    </app-relationship-details-popup>
+  </ng-container>
+
+  <ng-template #tailwindLoading>
+    <div class="flex-grow flex items-center justify-center text-slate-500">
+      <p>Loading social mapper styles...</p>
+    </div>
+  </ng-template>
+</div>

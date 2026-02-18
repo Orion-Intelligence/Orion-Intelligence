@@ -78,7 +78,7 @@ import {OnboardingGuard} from './shared/guards/onboarding-guar';
 import {
   FileScannerComponent
 } from './shared/partials/intel-panel/dashboard-managers/ioc-extractor/file-scanner.component';
-import {SocialMapperComponent} from './pages/social-mapper/social-mapper.component';
+import {SocialMapperComponent} from './pages/graphs/social-graph/social-mapper.component';
 
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: {reportdata: ReportConsolidatedResolver},
@@ -208,8 +208,13 @@ export const routes: Routes = [
       {
         path: 'ctigraph',
         loadComponent: () =>
-          import('./pages/graphs/graphs.component').then(m => m.GraphComponent),
+          import('./pages/graphs/cti-graph/graphs.component').then(m => m.GraphComponent),
         data: {animation: 'ctigraph'}
+      },
+      {
+        path: 'social-graph',
+        component: SocialMapperComponent,
+        data: {animation: 'SocialMapper'}
       },
       {
         path: 'social-mapper',
