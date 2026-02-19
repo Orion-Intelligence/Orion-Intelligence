@@ -29,6 +29,7 @@ import { AuthService } from '../../../../../services/authetication/auth.service'
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
 import { scanAnimation } from '../../../../animations/scan.animations';
 import { DefacementCallbackModel } from '../../../../model/results/defacement/defacement.callback.model';
+import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manager.utils';
 
 
 @Component({
@@ -78,7 +79,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
-    if (this.router.url.split('?')[0] != this.dashboardService.m_current_route) {
+    if (isRouteChanged(this.router.url, this.dashboardService.m_current_route)) {
       this.ngOnInit()
     }
   }
@@ -93,9 +94,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(take(1))
       .subscribe(([params, urlSegments]) => {
-        this.query = params['q'];
-        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
+        this.query = applyQueryAndPageFromParams(params, this.dashboardService.consolidatedParamModel);
 
         this.dashboardService.consolidatedParamModel.category = urlSegments.length
           ? urlSegments[urlSegments.length - 1].path

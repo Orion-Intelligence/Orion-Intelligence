@@ -5,6 +5,7 @@ import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { popupAnimation, overlayAnimation } from '../../animations/popup.animations';
 import { finalize } from 'rxjs';
+import { ensureStylesheet } from '../../utils/stylesheet-loader.util';
 
 
 @Component({
@@ -109,29 +110,8 @@ export class SupportComponent implements OnInit, OnDestroy {
   }
 
   private loadTailwindStyles(): void {
-    const existingLink = document.getElementById(this.twId) as HTMLLinkElement | null;
-    if (existingLink) {
-      this.tailwindLinkEl = existingLink;
-      if (existingLink.dataset['ready'] === 'true' || !!existingLink.sheet) {
-        this.isTailwindReady = true;
-        return;
-      }
-      existingLink.addEventListener('load', () => this.isTailwindReady = true, { once: true });
-      existingLink.addEventListener('error', () => this.isTailwindReady = true, { once: true });
-      return;
-    }
-
-    const link = document.createElement('link');
-    link.id = this.twId;
-    link.rel = 'stylesheet';
-    link.href = 'tailwind-social.css';
-    link.addEventListener('load', () => {
-      link.dataset['ready'] = 'true';
-      this.isTailwindReady = true;
-    }, { once: true });
-    link.addEventListener('error', () => this.isTailwindReady = true, { once: true });
-    document.head.appendChild(link);
-    this.tailwindLinkEl = link;
-    this.ownsTailwindLink = true;
+    const stylesheet = ensureStylesheet(this.twId, 'tailwind-social.css', () => { this.isTailwindReady = true; });
+    this.tailwindLinkEl = stylesheet.linkEl;
+    this.ownsTailwindLink = stylesheet.ownsLink;
   }
 }

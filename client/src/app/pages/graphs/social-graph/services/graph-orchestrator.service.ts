@@ -4,6 +4,7 @@ import { GraphManagerService } from './graph-manager.service';
 import { IconService } from '../../../../shared/services/icon.service';
 import { FetchingStateService } from './fetching-state.service';
 import { PlatformResult, TabState, NetworkNode } from '../../../../shared/model/social/social-scan.models';
+import { RelationshipResolverService } from './relationship-resolver.service';
 
 const INITIAL_GRAPH_NODES = 30;
 const GROUPING_THRESHOLD = 30;
@@ -14,6 +15,7 @@ export class GraphOrchestratorService {
   private graphManager = inject(GraphManagerService);
   private iconService = inject(IconService);
   private fetchingState = inject(FetchingStateService);
+  private relationshipResolver = inject(RelationshipResolverService);
 
   private wait(milliseconds: number): Promise<void> {
     return new Promise(resolve => {
@@ -314,76 +316,6 @@ export class GraphOrchestratorService {
     const newRelationshipNodes: NetworkNode[] = [];
     const newRelationshipEdges: any[] = [];
 
-    const normalizeHandle = (value: string): string => {
-      let normalized = value.trim().toLowerCase();
-      if (!normalized) {
-        return '';
-      }
-      if (normalized.includes('://')) {
-        try {
-          const parsedUrl = new URL(normalized);
-          const segments = parsedUrl.pathname.split('/').filter(Boolean);
-          if (segments.length > 0) {
-            normalized = segments[segments.length - 1];
-          }
-        } catch {
-        }
-      }
-      normalized = normalized.replace(/^@+/, '');
-      normalized = normalized.replace(/[?#].*$/, '');
-      normalized = normalized.replace(/\/+$/, '');
-      return normalized;
-    };
-
-    const toCompactHandle = (value: string): string => {
-      return value.replace(/[^a-z0-9]/g, '');
-    };
-
-    const getHandleVariants = (value: string): Set<string> => {
-      const variants = new Set<string>();
-      const normalized = normalizeHandle(value);
-      if (!normalized) {
-        return variants;
-      }
-      variants.add(normalized);
-      const compact = toCompactHandle(normalized);
-      if (compact) {
-        variants.add(compact);
-      }
-      return variants;
-    };
-
-    const getUserKnownHandles = (username: string, platforms: PlatformResult[]): Set<string> => {
-      const handles = new Set<string>();
-      for (const variant of getHandleVariants(username)) {
-        handles.add(variant);
-      }
-      for (const platform of platforms) {
-        for (const variant of getHandleVariants(platform.username || '')) {
-          handles.add(variant);
-        }
-        for (const variant of getHandleVariants(platform.url || '')) {
-          handles.add(variant);
-        }
-      }
-      return handles;
-    };
-
-    const hasHandleMatch = (list: string[] | null | undefined, handles: Set<string>): boolean => {
-      if (!list || list.length === 0) {
-        return false;
-      }
-      for (const rawHandle of list) {
-        const variants = getHandleVariants(rawHandle);
-        for (const variant of variants) {
-          if (handles.has(variant)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-
     for (let i = 0; i < activeUsers.length; i++) {
       for (let j = i + 1; j < activeUsers.length; j++) {
         const userA = activeUsers[i];
@@ -396,8 +328,8 @@ export class GraphOrchestratorService {
 
         const userAPlatforms = scanResults.get(userA) || [];
         const userBPlatforms = scanResults.get(userB) || [];
-        const userAHandles = getUserKnownHandles(userA, userAPlatforms);
-        const userBHandles = getUserKnownHandles(userB, userBPlatforms);
+        const userAHandles = this.relationshipResolver.getUserHandleSet(userA, userAPlatforms);
+        const userBHandles = this.relationshipResolver.getUserHandleSet(userB, userBPlatforms);
 
         let followsAtoB = false;
         let followsBtoA = false;
@@ -405,7 +337,8 @@ export class GraphOrchestratorService {
         const detectorProfiles = new Set<string>();
 
         for (const platformA of userAPlatforms) {
-          const aToBDetected = hasHandleMatch(platformA.following_list, userBHandles) || hasHandleMatch(platformA.followers_list, userBHandles);
+          const aToBDetected = this.relationshipResolver.containsAnyHandle(platformA.following_list, userBHandles)
+            || this.relationshipResolver.containsAnyHandle(platformA.followers_list, userBHandles);
           if (aToBDetected) {
             followsAtoB = true;
             matchedPlatforms.add(platformA.platform);
@@ -414,7 +347,8 @@ export class GraphOrchestratorService {
         }
 
         for (const platformB of userBPlatforms) {
-          const bToADetected = hasHandleMatch(platformB.following_list, userAHandles) || hasHandleMatch(platformB.followers_list, userAHandles);
+          const bToADetected = this.relationshipResolver.containsAnyHandle(platformB.following_list, userAHandles)
+            || this.relationshipResolver.containsAnyHandle(platformB.followers_list, userAHandles);
           if (bToADetected) {
             followsBtoA = true;
             matchedPlatforms.add(platformB.platform);

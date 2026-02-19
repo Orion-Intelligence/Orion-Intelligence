@@ -5,6 +5,7 @@ import { AutofocusDirective } from '../../../../shared/directives/autofocus.dire
 import { ProfileComponent } from '../../../../shared/partials/profile/profile.component';
 import { ReportExportModalComponent } from '../report-export-modal/report-export-modal.component';
 import { GraphReportExportType } from '../services/graph-report-export.service';
+import { getFirstFileFromInputEvent, readFileAsText } from '../../../../shared/utils/file-input.util';
 
 @Component({
   selector: 'app-tab-bar',
@@ -56,20 +57,19 @@ export class TabBarComponent {
   }
 
   onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
+    const selected = getFirstFileFromInputEvent(event);
+    if (!selected) {
+      return;
+    }
+    const { input, file } = selected;
+    readFileAsText(file)
+      .then((content) => {
         try {
-          const content = e.target?.result as string;
           this.tabManager.importTab(content);
         } catch {
         }
-      };
-      reader.readAsText(file);
-      input.value = '';
-    }
+      })
+      .finally(() => { input.value = ''; });
   }
 
   handleRename(tabId: string, input: HTMLInputElement) {

@@ -1,16 +1,14 @@
 import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, PLATFORM_ID, effect, OnInit, viewChild, ElementRef, Inject, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NetworkGraphComponent } from './network-graph/network-graph.component';
 import { MetadataPopupComponent } from './metadata-popup/metadata-popup.component';
 import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-summary-popup.component';
-import { Job, PlatformResult, TabState, ScanEvent } from '../../../shared/model/social/social-scan.models';
+import { Job, PlatformResult, TabState } from '../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../shared/services/social-scan.service';
 import { TabManagerService } from '../shared/services/tab-manager.service';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { ListViewComponent } from './list-view/list-view.component';
-import { Subject, Observable } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { TabBarComponent } from '../shared/tab-bar/tab-bar.component';
 import { Position } from 'vis-network';
 import { FollowerScanPopupComponent } from './follower-scan-popup/follower-scan-popup.component';
@@ -29,6 +27,11 @@ import { MessagePopupComponent } from '../../../shared/partials/message-popup/me
 import { RelationshipDetailsPopupComponent } from './relationship-details-popup/relationship-details-popup.component';
 import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
 import { GraphSearchTriggerComponent } from './graph-search-trigger/graph-search-trigger.component';
+import { SocialScanJobService } from './services/social-scan-job.service';
+import { PlatformFetchService } from './services/platform-fetch.service';
+import { RelationshipResolverService } from './services/relationship-resolver.service';
+import { ensureStylesheet } from '../../../shared/utils/stylesheet-loader.util';
+import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 
 
 @Component({
@@ -95,21 +98,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   });
 
   isUserScanInProgress = computed(() => {
-    const username = this.state.summaryPopupData()?.username;
-    if (!username) {
-	return false;
-}
-    const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
-    return userJob?.status === 'in_progress';
+    return this.isScanInProgressForUsername(this.state.summaryPopupData()?.username);
   });
 
   isMetadataUserScanInProgress = computed(() => {
-    const username = this.state.selectedPlatformData()?.keyUsername;
-    if (!username) {
-	return false;
-}
-    const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
-    return userJob?.status === 'in_progress';
+    return this.isScanInProgressForUsername(this.state.selectedPlatformData()?.keyUsername);
   });
 
   nodesWithFollows = computed(() => {
@@ -137,7 +130,17 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   private ownsTailwindLink = false;
   private readonly mediaQueryListener = (event: MediaQueryListEvent) => this.isSmallScreen.set(event.matches);
 
-  constructor(private scanService: SocialScanService, private destroyRef: DestroyRef, public tabManager: TabManagerService, private fetchingState: FetchingStateService, private graphOrchestrator: GraphOrchestratorService, @Inject(PLATFORM_ID) private platformId: object) {
+  constructor(
+    private scanService: SocialScanService,
+    private destroyRef: DestroyRef,
+    public tabManager: TabManagerService,
+    private fetchingState: FetchingStateService,
+    private graphOrchestrator: GraphOrchestratorService,
+    private scanJobService: SocialScanJobService,
+    private platformFetchService: PlatformFetchService,
+    private relationshipResolver: RelationshipResolverService,
+    @Inject(PLATFORM_ID) private platformId: object
+  ) {
     if (isPlatformBrowser(this.platformId)) {
       this.mediaQueryList = window.matchMedia('(max-width: 1023px)');
       this.isSmallScreen.set(this.mediaQueryList.matches);
@@ -206,30 +209,17 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   private loadTailwindSocialStyles() {
-    const existingLink = document.getElementById(this.twId) as HTMLLinkElement | null;
-    if (existingLink) {
-      this.tailwindLinkEl = existingLink;
-      if (existingLink.dataset['ready'] === 'true' || !!existingLink.sheet) {
-        this.isTailwindReady.set(true);
-        return;
-      }
-      existingLink.addEventListener('load', () => this.isTailwindReady.set(true), { once: true });
-      existingLink.addEventListener('error', () => this.isTailwindReady.set(true), { once: true });
-      return;
-    }
+    const stylesheet = ensureStylesheet(this.twId, 'tailwind-social.css', () => this.isTailwindReady.set(true));
+    this.tailwindLinkEl = stylesheet.linkEl;
+    this.ownsTailwindLink = stylesheet.ownsLink;
+  }
 
-    const link = document.createElement('link');
-    link.id = this.twId;
-    link.rel = 'stylesheet';
-    link.href = 'tailwind-social.css';
-    link.addEventListener('load', () => {
-      link.dataset['ready'] = 'true';
-      this.isTailwindReady.set(true);
-    }, { once: true });
-    link.addEventListener('error', () => this.isTailwindReady.set(true), { once: true });
-    document.head.appendChild(link);
-    this.tailwindLinkEl = link;
-    this.ownsTailwindLink = true;
+  private isScanInProgressForUsername(username?: string): boolean {
+    if (!username) {
+      return false;
+    }
+    const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
+    return userJob?.status === 'in_progress';
   }
 
   private updateState(updater: (state: TabState) => void, shouldScheduleSave: boolean = true) {
@@ -306,19 +296,19 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   triggerImageUpload() { this.imageInput()?.nativeElement.click(); }
 
   onImageSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-            const base64Image = (e.target.result as string).split(',')[1];
-            this.initiateImageScan(base64Image, file.name);
-        }
-      };
-      reader.readAsDataURL(file);
-      input.value = '';
+    const selected = getFirstFileFromInputEvent(event);
+    if (!selected) {
+      return;
     }
+    const { input, file } = selected;
+    readFileAsDataUrl(file)
+      .then((dataUrl) => {
+        const base64Image = dataUrl.split(',')[1];
+        if (base64Image) {
+          this.initiateImageScan(base64Image, file.name);
+        }
+      })
+      .finally(() => { input.value = ''; });
   }
 
   confirmDeletion() {
@@ -355,71 +345,37 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   handleRescan(username: string) { this.initiateScan(username); this.state.closeSummaryPopup(); }
 
   private initiateScan(username: string) {
-    const normalizedUsername = username.toLowerCase();
-    if (this.jobs().some(job => job.username.toLowerCase() === normalizedUsername && job.status === 'in_progress')) {
-      this.state.showNotification('scanning');
-      return;
-    }
-    this.updateState(state => state.jobs.update(currentJobs => currentJobs.filter(j => j.username.toLowerCase() !== normalizedUsername)), false);
-    const newJob: Job = { id: self.crypto.randomUUID(), username, status: 'in_progress', progress: 5, step: 'Starting' };
-    this.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]), false);
-    this.runScan(newJob);
+    this.scanJobService.initiateScan(username, {
+      jobs: () => this.jobs(),
+      updateState: this.updateState.bind(this),
+      state: this.state,
+      scanService: this.scanService,
+      destroyRef: this.destroyRef,
+      cancelScanSubjects: this.cancelScanSubjects
+    });
   }
 
   private initiateImageScan(base64Image: string, fileName: string) {
-    const displayName = `Image Scan: ${fileName}`;
-    const jobName = `${displayName} #${self.crypto.randomUUID().substring(0, 4)}`;
-    const newJob: Job = { id: self.crypto.randomUUID(), username: jobName, displayName, status: 'in_progress', progress: 5, step: `Scanning ${fileName}` };
-    this.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]), false);
-    this.runImageScan(newJob, base64Image);
-  }
-
-  private runScan(job: Job) {
-    const cancel$ = new Subject<void>(); this.cancelScanSubjects.set(job.id, cancel$);
-    this.scanService.performScan(job.username).pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef))
-      .subscribe(this.getScanObserver(job));
-  }
-
-  private runImageScan(job: Job, base64Image: string) {
-    const cancel$ = new Subject<void>(); this.cancelScanSubjects.set(job.id, cancel$);
-    this.scanService.performImageScan(base64Image).pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef))
-      .subscribe(this.getScanObserver(job, true));
-  }
-
-  private getScanObserver(job: Job, isImageScan: boolean = false) {
-    return {
-      next: (event: ScanEvent) => {
-        if (event.type === 'progress') {
-          this.updateState(state => state.jobs.update(jobs => jobs.map(j => j.id === job.id ? { ...j, ...event.payload } : j)), false);
-        } else if (event.type === 'complete') {
-          const finalPlatforms = event.payload.map(p => ({ ...p, keyUsername: job.username }));
-          this.updateState(state => {
-            state.scanResults.update(currentMap => new Map(currentMap).set(job.username, finalPlatforms));
-            state.jobs.update(jobs => jobs.map(j => j.id === job.id ? { ...j, status: 'completed', progress: 100, step: 'Completed' } : j));
-          });
-          if (isImageScan) {
-            this.state.openManageProfilesModal(job.username);
-          }
-        }
-      },
-      error: () => {
-        this.updateState(state => state.jobs.update(jobs => jobs.map(j => j.id === job.id ? { ...j, status: 'failed', step: 'Scan failed' } : j)));
-        this.cancelScanSubjects.delete(job.id);
-      },
-      complete: () => this.cancelScanSubjects.delete(job.id)
-    };
+    this.scanJobService.initiateImageScan(base64Image, fileName, {
+      updateState: this.updateState.bind(this),
+      state: this.state,
+      scanService: this.scanService,
+      destroyRef: this.destroyRef,
+      cancelScanSubjects: this.cancelScanSubjects
+    });
   }
 
   cancelScan(jobId: string) {
-    this.cancelScanSubjects.get(jobId)?.next();
-    this.updateState(state => state.jobs.update(currentJobs => currentJobs.filter(job => job.id !== jobId)));
+    this.scanJobService.cancelScan(jobId, this.updateState.bind(this), this.cancelScanSubjects);
   }
 
   private resumeIncompleteScans() {
-    this.jobs().filter(job => job.status === 'in_progress').forEach(job => {
-      if (!this.cancelScanSubjects.has(job.id)) {
-        this.runScan(job);
-      }
+    this.scanJobService.resumeIncompleteScans(() => this.jobs(), {
+      updateState: this.updateState.bind(this),
+      state: this.state,
+      scanService: this.scanService,
+      destroyRef: this.destroyRef,
+      cancelScanSubjects: this.cancelScanSubjects
     });
   }
 
@@ -438,61 +394,19 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   handleFetchFollowers(p: PlatformResult) { this.fetchData(p, 'followers', this.scanService.fetchFollowers(p.platform, p.username), this.cancelFollowersFetchSubjects); }
   handleFetchFollowing(p: PlatformResult) { this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects); }
 
-  private getPlatformIdentityKey(platform: PlatformResult): string
-  {
-    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
-  }
-
-  private isSamePlatformIdentity(left: PlatformResult, right: PlatformResult): boolean
-  {
-    return this.getPlatformIdentityKey(left) === this.getPlatformIdentityKey(right);
-  }
-
-  private fetchData(platformResult: PlatformResult, stateKey: keyof FetchingStateService, request$: Observable<any>, cancelMap: Map<string, Subject<void>>) {
-    const key = this.fetchingState.getPlatformUniqueKey(platformResult);
-    if (this.fetchingState.isUserBusy(platformResult.keyUsername)) {
-      this.state.showNotification('busy');
-      return;
-    }
-    if (cancelMap.has(key)) {
-      return;
-    }
-    this.fetchingState.setFetching(this.fetchingState[stateKey] as any, key, true);
-    const cancel$ = new Subject<void>();
-    cancelMap.set(key, cancel$);
-
-    request$.pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response: any) => {
-          const propertyMap = { profile: 'profileDetails', posts: 'posts', platformImages: 'images', followers: 'followers_list', following: 'following_list' };
-          const dataKey = Object.keys(response)[0];
-          const data = response[dataKey];
-          const hasData = data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0);
-          const newData = { [(propertyMap as any)[stateKey]]: hasData ? data : null };
-
-          this.updateState(state => {
-            state.scanResults.update(currentMap => {
-              const newMap = new Map(currentMap);
-              const userResults = newMap.get(platformResult.keyUsername)?.map(p =>
-                this.isSamePlatformIdentity(p, platformResult) ? { ...p, ...newData } : p
-              );
-              if (userResults) {
-                newMap.set(platformResult.keyUsername, userResults);
-              }
-              return newMap;
-            });
-          });
-          this.updateUIPopups(platformResult, newData);
-          if (stateKey === 'followers' || stateKey === 'following') {
-            this.graphOrchestrator.updateUserConnections(this.activeTabState()!).then();
-          }
-        },
-        error: () => {},
-        complete: () => {
-          this.fetchingState.setFetching(this.fetchingState[stateKey] as any, key, false);
-          cancelMap.delete(key);
-        }
-      });
+  private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', request$: any, cancelMap: Map<string, Subject<void>>) {
+    this.platformFetchService.fetchData({
+      platformResult,
+      stateKey,
+      request$,
+      cancelMap,
+      fetchingState: this.fetchingState,
+      destroyRef: this.destroyRef,
+      updateState: this.updateState.bind(this),
+      state: this.state,
+      graphOrchestrator: this.graphOrchestrator,
+      activeTabState: () => this.activeTabState()
+    });
   }
 
   cancelFetchProfileDetails(p: PlatformResult) { this.cancelFetch(p, 'profile', this.cancelProfileFetchSubjects); }
@@ -501,36 +415,22 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   handleCancelFetchFollowers(p: PlatformResult) { this.cancelFetch(p, 'followers', this.cancelFollowersFetchSubjects); }
   handleCancelFetchFollowing(p: PlatformResult) { this.cancelFetch(p, 'following', this.cancelFollowingFetchSubjects); }
 
-  private cancelFetch(p: PlatformResult, stateKey: keyof FetchingStateService, cancelMap: Map<string, Subject<void>>) {
-    const key = this.fetchingState.getPlatformUniqueKey(p);
-    cancelMap.get(key)?.next();
-    this.fetchingState.setFetching(this.fetchingState[stateKey] as any, key, false);
+  private cancelFetch(p: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', cancelMap: Map<string, Subject<void>>) {
+    this.platformFetchService.cancelFetch(p, stateKey, cancelMap, this.fetchingState);
   }
 
   cancelAllFetchesForUser(username: string) {
-    this.scanResults().get(username)?.forEach(p => {
-      this.cancelFetchProfileDetails(p); this.handleCancelFetchSocialPosts(p); this.handleCancelFetchImagesForPlatform(p);
-      this.handleCancelFetchFollowers(p); this.handleCancelFetchFollowing(p);
+    this.platformFetchService.cancelAllFetchesForUser(username, this.scanResults(), {
+      profile: (p: PlatformResult) => this.cancelFetchProfileDetails(p),
+      posts: (p: PlatformResult) => this.handleCancelFetchSocialPosts(p),
+      images: (p: PlatformResult) => this.handleCancelFetchImagesForPlatform(p),
+      followers: (p: PlatformResult) => this.handleCancelFetchFollowers(p),
+      following: (p: PlatformResult) => this.handleCancelFetchFollowing(p)
     });
   }
 
-  private updateUIPopups(p: PlatformResult, data: Partial<PlatformResult>) {
-    const selectedPlatform = this.state.selectedPlatformData();
-    if (selectedPlatform && this.isSamePlatformIdentity(selectedPlatform, p)) {
-      this.state.selectedPlatformData.update(current => current ? { ...current, ...data } : null);
-    }
-    if (this.state.summaryPopupData()?.username === p.keyUsername) {
-      this.state.summaryPopupData.update(current => {
-        if (!current) {
-          return null;
-        }
-        return { ...current, platforms: current.platforms.map(platform => this.isSamePlatformIdentity(platform, p) ? { ...platform, ...data } : platform) };
-      });
-    }
-    const followerPopupPlatform = this.state.followerScanPopupData()?.platform;
-    if (followerPopupPlatform && this.isSamePlatformIdentity(followerPopupPlatform, p)) {
-      this.state.followerScanPopupData.update(current => current ? { platform: { ...current.platform, ...data } } : null);
-    }
+  private getPlatformIdentityKey(platform: PlatformResult): string {
+    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
   }
 
   onNodeClicked(nodeId: string) {
@@ -609,150 +509,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     });
   }
 
-  private normalizeHandle(value: string): string {
-    let normalized = value.trim().toLowerCase();
-    if (!normalized) {
-      return '';
-    }
-    if (normalized.includes('://')) {
-      try {
-        const parsedUrl = new URL(normalized);
-        const segments = parsedUrl.pathname.split('/').filter(Boolean);
-        if (segments.length > 0) {
-          normalized = segments[segments.length - 1];
-        }
-      } catch {
-      }
-    }
-    normalized = normalized.replace(/^@+/, '');
-    normalized = normalized.replace(/[?#].*$/, '');
-    normalized = normalized.replace(/\/+$/, '');
-    return normalized;
-  }
-
-  private compactHandle(value: string): string {
-    return value.replace(/[^a-z0-9]/g, '');
-  }
-
-  private getHandleVariants(value: string): Set<string> {
-    const variants = new Set<string>();
-    const normalized = this.normalizeHandle(value);
-    if (!normalized) {
-      return variants;
-    }
-    variants.add(normalized);
-    const compact = this.compactHandle(normalized);
-    if (compact) {
-      variants.add(compact);
-    }
-    return variants;
-  }
-
-  private getUserHandleSet(username: string, platforms: PlatformResult[]): Set<string> {
-    const handles = new Set<string>();
-    for (const variant of this.getHandleVariants(username)) {
-      handles.add(variant);
-    }
-    for (const platform of platforms) {
-      for (const variant of this.getHandleVariants(platform.username || '')) {
-        handles.add(variant);
-      }
-      for (const variant of this.getHandleVariants(platform.url || '')) {
-        handles.add(variant);
-      }
-    }
-    return handles;
-  }
-
-  private containsAnyHandle(list: string[] | null | undefined, targets: Set<string>): boolean {
-    if (!list || list.length === 0) {
-      return false;
-    }
-    for (const handle of list) {
-      for (const variant of this.getHandleVariants(handle)) {
-        if (targets.has(variant)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   private buildRelationshipConnections(userA: string, userB: string): RelationshipConnectionItem[] {
-    const userAPlatforms = this.scanResults().get(userA) || [];
-    const userBPlatforms = this.scanResults().get(userB) || [];
-    const userAHandles = this.getUserHandleSet(userA, userAPlatforms);
-    const userBHandles = this.getUserHandleSet(userB, userBPlatforms);
-    const unique = new Set<string>();
-    const connections: RelationshipConnectionItem[] = [];
-
-    for (const platform of userAPlatforms) {
-      const follows = this.containsAnyHandle(platform.following_list, userBHandles);
-      if (follows) {
-        const key = `${userA}|${platform.platform}|${platform.username}|${userB}|follows`;
-        if (!unique.has(key)) {
-          unique.add(key);
-          connections.push({
-            sourceUser: userA,
-            sourcePlatform: platform.platform,
-            sourceUsername: platform.username,
-            sourceUrl: platform.url,
-            targetUser: userB,
-            relation: 'follows'
-          });
-        }
-      }
-      const followedBy = this.containsAnyHandle(platform.followers_list, userBHandles);
-      if (followedBy) {
-        const key = `${userA}|${platform.platform}|${platform.username}|${userB}|followed_by`;
-        if (!unique.has(key)) {
-          unique.add(key);
-          connections.push({
-            sourceUser: userA,
-            sourcePlatform: platform.platform,
-            sourceUsername: platform.username,
-            sourceUrl: platform.url,
-            targetUser: userB,
-            relation: 'followed_by'
-          });
-        }
-      }
-    }
-
-    for (const platform of userBPlatforms) {
-      const follows = this.containsAnyHandle(platform.following_list, userAHandles);
-      if (follows) {
-        const key = `${userB}|${platform.platform}|${platform.username}|${userA}|follows`;
-        if (!unique.has(key)) {
-          unique.add(key);
-          connections.push({
-            sourceUser: userB,
-            sourcePlatform: platform.platform,
-            sourceUsername: platform.username,
-            sourceUrl: platform.url,
-            targetUser: userA,
-            relation: 'follows'
-          });
-        }
-      }
-      const followedBy = this.containsAnyHandle(platform.followers_list, userAHandles);
-      if (followedBy) {
-        const key = `${userB}|${platform.platform}|${platform.username}|${userA}|followed_by`;
-        if (!unique.has(key)) {
-          unique.add(key);
-          connections.push({
-            sourceUser: userB,
-            sourcePlatform: platform.platform,
-            sourceUsername: platform.username,
-            sourceUrl: platform.url,
-            targetUser: userA,
-            relation: 'followed_by'
-          });
-        }
-      }
-    }
-
-    return connections;
+    return this.relationshipResolver.buildRelationshipConnections(userA, userB, this.scanResults());
   }
 
   async updateGraphFromModal(selectedPlatforms: PlatformResult[]) {
@@ -777,23 +535,29 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   handleContextMenuAction(action: ContextMenuAction) {
     const { nodeId } = this.state.contextMenuData()!;
     const username = nodeId.replace('user-', '');
-    switch(action) {
-        case 'fetchLinks': this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'); break;
-        case 'clearConnections': this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username); this.tabManager.scheduleSave(); break;
-        case 'deleteProfile': this.state.openDeleteConfirmation(username); break;
-        case 'setAlias': {
-          if (!nodeId.startsWith('user-')) {
-            break;
-          }
-          const profileUsername = nodeId.substring('user-'.length);
-          const currentAlias = this.userNodeAliases()[nodeId] || '';
-          this.platformAliasModalData.set({ nodeId, username: profileUsername });
-          this.platformAliasInput.set(currentAlias);
-          break;
+    const handlers: Record<ContextMenuAction, () => void> = {
+      fetchLinks: () => this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'),
+      clearConnections: () => {
+        this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username);
+        this.tabManager.scheduleSave();
+      },
+      deleteProfile: () => this.state.openDeleteConfirmation(username),
+      setAlias: () => {
+        if (!nodeId.startsWith('user-')) {
+          return;
         }
-        case 'removeNode': this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId); this.tabManager.scheduleSave(); break;
-        case 'deleteEntity': this.deleteCustomEntity(nodeId); break;
-    }
+        const profileUsername = nodeId.substring('user-'.length);
+        const currentAlias = this.userNodeAliases()[nodeId] || '';
+        this.platformAliasModalData.set({ nodeId, username: profileUsername });
+        this.platformAliasInput.set(currentAlias);
+      },
+      removeNode: () => {
+        this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId);
+        this.tabManager.scheduleSave();
+      },
+      deleteEntity: () => this.deleteCustomEntity(nodeId),
+    };
+    handlers[action]();
     this.state.closeContextMenu();
   }
 

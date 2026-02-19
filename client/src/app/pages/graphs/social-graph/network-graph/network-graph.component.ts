@@ -157,159 +157,178 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       if (!network || this.visData.nodes.length === 0) {
         return;
       }
+      this.applySearchHighlight(network, term);
+    });
+  }
 
-      const originalNodes = this.data().nodes;
-      const updates: any[] = [];
-      const rawTerm = term ?? '';
-      const lowerCaseTerm = rawTerm.toLowerCase();
-      const normalizedTerm = this.normalizeSearchValue(rawTerm);
-      const matchedUserNodeIds = new Set<string>();
+  private applySearchHighlight(network: Network, term: string): void {
+    const originalNodes = this.data().nodes;
+    const updates: any[] = [];
+    const rawTerm = term ?? '';
+    const lowerCaseTerm = rawTerm.toLowerCase();
+    const normalizedTerm = this.normalizeSearchValue(rawTerm);
+    const matchedUserNodeIds = this.buildMatchedUserNodeIds(originalNodes, normalizedTerm);
 
-      network.unselectAll();
+    network.unselectAll();
 
-      if (normalizedTerm) {
-        for (const candidate of originalNodes) {
-          const candidateId = candidate.id.toString();
-
-          if (candidateId.startsWith('platform-')) {
-            const rawKey = candidateId.substring('platform-'.length);
-            const parts = rawKey.split('|');
-
-            if (parts.length >= 3) {
-              const keyUsername = parts[0];
-              const platformName = parts[1];
-              const platformUsername = parts.slice(2).join('|');
-              const normalizedPlatformName = this.normalizeSearchValue(platformName);
-              const normalizedPlatformUsername = this.normalizeSearchValue(platformUsername);
-
-              if (normalizedPlatformName.includes(normalizedTerm) || normalizedPlatformUsername.includes(normalizedTerm)) {
-                matchedUserNodeIds.add(`user-${keyUsername}`);
-              }
-            }
-          } else if (candidateId.startsWith('group-') && candidate.groupedPlatforms) {
-            const groupBody = candidateId.substring('group-'.length);
-            const lastDashIndex = groupBody.lastIndexOf('-');
-            const keyUsername = lastDashIndex > 0 ? groupBody.substring(0, lastDashIndex) : groupBody;
-            const hasGroupedMatch = candidate.groupedPlatforms.some((platform: PlatformResult) => {
-              const normalizedPlatformName = this.normalizeSearchValue(platform.platform ?? '');
-              const normalizedPlatformUsername = this.normalizeSearchValue(platform.username ?? '');
-              return normalizedPlatformName.includes(normalizedTerm) || normalizedPlatformUsername.includes(normalizedTerm);
-            });
-
-            if (hasGroupedMatch) {
-              matchedUserNodeIds.add(`user-${keyUsername}`);
-            }
-          }
-        }
-      }
-
-      if (!lowerCaseTerm.trim()) {
-        originalNodes.forEach(originalNode => {
-          updates.push({
-            id: originalNode.id,
-            color: originalNode.color,
-            borderWidth: originalNode.borderWidth
-          });
-        });
-      } else {
-        this.visData.nodes.forEach((node: any) => {
-          const originalNode = originalNodes.find(n => n.id === node.id);
-          if (!originalNode) {
-            return;
-          }
-
-          let isMatch = false;
-          const nodeLabel = typeof node.label === 'string' ? node.label : '';
-          const nodeTitle = typeof node.title === 'string' ? node.title : '';
-          const nodeId = typeof node.id === 'string' ? node.id : '';
-          const normalizedLabel = this.normalizeSearchValue(nodeLabel);
-          const normalizedTitle = this.normalizeSearchValue(nodeTitle);
-
-          if (nodeLabel.toLowerCase().includes(lowerCaseTerm) || nodeTitle.toLowerCase().includes(lowerCaseTerm)) {
-            isMatch = true;
-          }
-
-          if (!isMatch && normalizedTerm && (normalizedLabel.includes(normalizedTerm) || normalizedTitle.includes(normalizedTerm))) {
-            isMatch = true;
-          }
-
-          if (!isMatch && nodeId.startsWith('user-') && normalizedTerm) {
-            const profileNameRaw = nodeId.substring('user-'.length);
-            const normalizedProfileName = this.normalizeSearchValue(profileNameRaw);
-            if (normalizedProfileName.includes(normalizedTerm)) {
-              isMatch = true;
-            }
-          }
-
-          if (!isMatch && nodeId.startsWith('user-') && matchedUserNodeIds.has(nodeId)) {
-            isMatch = true;
-          }
-
-          if (!isMatch && nodeId.startsWith('user-') && normalizedTerm) {
-            const profileNameRaw = nodeId.substring('user-'.length);
-            for (const candidate of originalNodes) {
-              const candidateId = candidate.id.toString();
-              if (!candidateId.startsWith(`platform-${profileNameRaw}|`)) {
-                continue;
-              }
-              const parts = candidateId.split('|');
-              const platformUsername = parts.length > 2 ? this.normalizeSearchValue(parts[2]) : '';
-              if (platformUsername.includes(normalizedTerm)) {
-                isMatch = true;
-                break;
-              }
-            }
-          }
-
-          if (!isMatch && nodeId.startsWith('user-') && normalizedTerm) {
-            const profileNameRaw = nodeId.substring('user-'.length);
-            for (const candidate of originalNodes) {
-              const candidateId = candidate.id.toString();
-              if (!candidateId.startsWith(`group-${profileNameRaw}-`) || !candidate.groupedPlatforms) {
-                continue;
-              }
-              const hasGroupedMatch = candidate.groupedPlatforms.some((platform: PlatformResult) => {
-                const normalizedPlatformUsername = this.normalizeSearchValue(platform.username ?? '');
-                const normalizedPlatformName = this.normalizeSearchValue(platform.platform ?? '');
-                return normalizedPlatformUsername.includes(normalizedTerm) || normalizedPlatformName.includes(normalizedTerm);
-              });
-              if (hasGroupedMatch) {
-                isMatch = true;
-                break;
-              }
-            }
-          }
-
-          if (!isMatch && originalNode.groupedPlatforms) {
-            isMatch = originalNode.groupedPlatforms.some((p: PlatformResult) => {
-              const platformName = p.platform ? p.platform.toLowerCase() : '';
-              const platformUser = p.username ? p.username.toLowerCase() : '';
-              const normalizedPlatformName = this.normalizeSearchValue(p.platform ?? '');
-              const normalizedPlatformUser = this.normalizeSearchValue(p.username ?? '');
-              return platformName.includes(lowerCaseTerm) || platformUser.includes(lowerCaseTerm) || normalizedPlatformName.includes(normalizedTerm) || normalizedPlatformUser.includes(normalizedTerm);
-            });
-          }
-
-          if (isMatch) {
-            updates.push({
-              id: node.id,
-              color: { ...originalNode.color, border: '#facc15' },
-              borderWidth: originalNode.borderWidthSelected || (originalNode.borderWidth || 2) + 2,
-            });
-          } else {
-            updates.push({
-              id: node.id,
-              color: originalNode.color,
-              borderWidth: originalNode.borderWidth
-            });
-          }
-        });
-      }
-
+    if (!lowerCaseTerm.trim()) {
+      originalNodes.forEach(originalNode => updates.push({
+        id: originalNode.id,
+        color: originalNode.color,
+        borderWidth: originalNode.borderWidth
+      }));
       if (updates.length > 0) {
         this.visData.nodes.update(updates);
       }
+      return;
+    }
+
+    this.visData.nodes.forEach((node: any) => {
+      const originalNode = originalNodes.find(n => n.id === node.id);
+      if (!originalNode) {
+        return;
+      }
+      const isMatch = this.isNodeMatch(node, originalNode, originalNodes, lowerCaseTerm, normalizedTerm, matchedUserNodeIds);
+      if (isMatch) {
+        updates.push({
+          id: node.id,
+          color: { ...originalNode.color, border: '#facc15' },
+          borderWidth: originalNode.borderWidthSelected || (originalNode.borderWidth || 2) + 2,
+        });
+      } else {
+        updates.push({
+          id: node.id,
+          color: originalNode.color,
+          borderWidth: originalNode.borderWidth
+        });
+      }
     });
+
+    if (updates.length > 0) {
+      this.visData.nodes.update(updates);
+    }
+  }
+
+  private buildMatchedUserNodeIds(originalNodes: any[], normalizedTerm: string): Set<string> {
+    const matchedUserNodeIds = new Set<string>();
+    if (!normalizedTerm) {
+      return matchedUserNodeIds;
+    }
+
+    for (const candidate of originalNodes) {
+      const candidateId = candidate.id.toString();
+      if (candidateId.startsWith('platform-')) {
+        const rawKey = candidateId.substring('platform-'.length);
+        const parts = rawKey.split('|');
+        if (parts.length >= 3) {
+          const keyUsername = parts[0];
+          const platformName = parts[1];
+          const platformUsername = parts.slice(2).join('|');
+          const normalizedPlatformName = this.normalizeSearchValue(platformName);
+          const normalizedPlatformUsername = this.normalizeSearchValue(platformUsername);
+          if (normalizedPlatformName.includes(normalizedTerm) || normalizedPlatformUsername.includes(normalizedTerm)) {
+            matchedUserNodeIds.add(`user-${keyUsername}`);
+          }
+        }
+        continue;
+      }
+      if (candidateId.startsWith('group-') && candidate.groupedPlatforms) {
+        const groupBody = candidateId.substring('group-'.length);
+        const lastDashIndex = groupBody.lastIndexOf('-');
+        const keyUsername = lastDashIndex > 0 ? groupBody.substring(0, lastDashIndex) : groupBody;
+        const hasGroupedMatch = candidate.groupedPlatforms.some((platform: PlatformResult) => {
+          const normalizedPlatformName = this.normalizeSearchValue(platform.platform ?? '');
+          const normalizedPlatformUsername = this.normalizeSearchValue(platform.username ?? '');
+          return normalizedPlatformName.includes(normalizedTerm) || normalizedPlatformUsername.includes(normalizedTerm);
+        });
+        if (hasGroupedMatch) {
+          matchedUserNodeIds.add(`user-${keyUsername}`);
+        }
+      }
+    }
+    return matchedUserNodeIds;
+  }
+
+  private isNodeMatch(
+    node: any,
+    originalNode: any,
+    originalNodes: any[],
+    lowerCaseTerm: string,
+    normalizedTerm: string,
+    matchedUserNodeIds: Set<string>
+  ): boolean {
+    const nodeLabel = typeof node.label === 'string' ? node.label : '';
+    const nodeTitle = typeof node.title === 'string' ? node.title : '';
+    const nodeId = typeof node.id === 'string' ? node.id : '';
+    const normalizedLabel = this.normalizeSearchValue(nodeLabel);
+    const normalizedTitle = this.normalizeSearchValue(nodeTitle);
+
+    if (nodeLabel.toLowerCase().includes(lowerCaseTerm) || nodeTitle.toLowerCase().includes(lowerCaseTerm)) {
+      return true;
+    }
+    if (normalizedTerm && (normalizedLabel.includes(normalizedTerm) || normalizedTitle.includes(normalizedTerm))) {
+      return true;
+    }
+    if (nodeId.startsWith('user-') && normalizedTerm && this.normalizeSearchValue(nodeId.substring('user-'.length)).includes(normalizedTerm)) {
+      return true;
+    }
+    if (nodeId.startsWith('user-') && matchedUserNodeIds.has(nodeId)) {
+      return true;
+    }
+    if (nodeId.startsWith('user-') && normalizedTerm && this.matchesUserPlatformUsername(nodeId, originalNodes, normalizedTerm)) {
+      return true;
+    }
+    if (nodeId.startsWith('user-') && normalizedTerm && this.matchesUserGroupedPlatforms(nodeId, originalNodes, normalizedTerm)) {
+      return true;
+    }
+    if (originalNode.groupedPlatforms) {
+      return originalNode.groupedPlatforms.some((p: PlatformResult) => {
+        const platformName = p.platform ? p.platform.toLowerCase() : '';
+        const platformUser = p.username ? p.username.toLowerCase() : '';
+        const normalizedPlatformName = this.normalizeSearchValue(p.platform ?? '');
+        const normalizedPlatformUser = this.normalizeSearchValue(p.username ?? '');
+        return platformName.includes(lowerCaseTerm)
+          || platformUser.includes(lowerCaseTerm)
+          || normalizedPlatformName.includes(normalizedTerm)
+          || normalizedPlatformUser.includes(normalizedTerm);
+      });
+    }
+    return false;
+  }
+
+  private matchesUserPlatformUsername(userNodeId: string, originalNodes: any[], normalizedTerm: string): boolean {
+    const profileNameRaw = userNodeId.substring('user-'.length);
+    for (const candidate of originalNodes) {
+      const candidateId = candidate.id.toString();
+      if (!candidateId.startsWith(`platform-${profileNameRaw}|`)) {
+        continue;
+      }
+      const parts = candidateId.split('|');
+      const platformUsername = parts.length > 2 ? this.normalizeSearchValue(parts[2]) : '';
+      if (platformUsername.includes(normalizedTerm)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private matchesUserGroupedPlatforms(userNodeId: string, originalNodes: any[], normalizedTerm: string): boolean {
+    const profileNameRaw = userNodeId.substring('user-'.length);
+    for (const candidate of originalNodes) {
+      const candidateId = candidate.id.toString();
+      if (!candidateId.startsWith(`group-${profileNameRaw}-`) || !candidate.groupedPlatforms) {
+        continue;
+      }
+      const hasGroupedMatch = candidate.groupedPlatforms.some((platform: PlatformResult) => {
+        const normalizedPlatformUsername = this.normalizeSearchValue(platform.username ?? '');
+        const normalizedPlatformName = this.normalizeSearchValue(platform.platform ?? '');
+        return normalizedPlatformUsername.includes(normalizedTerm) || normalizedPlatformName.includes(normalizedTerm);
+      });
+      if (hasGroupedMatch) {
+        return true;
+      }
+    }
+    return false;
   }
 
   ngOnInit(): void {

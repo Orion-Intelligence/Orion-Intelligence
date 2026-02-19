@@ -15,6 +15,14 @@ import { HelperService } from '../../../../services/helper.service';
 import { RankedCallbackModel } from '../../../../model/results/consolidated/ranked.callback.model';
 import { DashboardResultSocialComponent } from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 import {SocialCallbackModel} from '../../../../model/results/social/social.callback.model';
+import {
+  applyQueryAndPageFromParams,
+  isRouteChanged,
+  resetPageAndFetch,
+  resolveSortOrder,
+  setPageAndFetch,
+  updateQuery
+} from '../dashboard-manager.utils';
 
 @Component({
   selector: 'app-dashboard-discussion',
@@ -55,7 +63,7 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if (this.router.url.split('?')[0] !== this.dashboardService.m_current_route) {
+    if (isRouteChanged(this.router.url, this.dashboardService.m_current_route)) {
       this.fetchSearchResults();
     }
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
@@ -69,9 +77,7 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
       .pipe(distinctUntilChanged())
       .subscribe(([params, url]) => {
         this.setCategoryFromUrl(url as UrlSegment[]);
-        this.query = params['q'];
-        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
+        this.query = applyQueryAndPageFromParams(params, this.dashboardService.consolidatedParamModel);
 
         const route: string = this.router.url.split('?')[0];
         if (String(route) != this.dashboardService.m_current_route) {
@@ -140,17 +146,15 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
   }
 
   onPageChange(step: number) {
-    this.dashboardService.consolidatedParamModel.page = step;
-    this.fetchSearchResults();
+    setPageAndFetch(this.dashboardService.consolidatedParamModel, step, () => this.fetchSearchResults());
   }
 
   onUpdateQuery(query: string) {
-    this.dashboardService.consolidatedParamModel.q = query;
+    updateQuery(this.dashboardService.consolidatedParamModel, query);
   }
 
   resetFilters(_: void) {
-    this.dashboardService.consolidatedParamModel.page = 1;
-    this.fetchSearchResults();
+    resetPageAndFetch(this.dashboardService.consolidatedParamModel, () => this.fetchSearchResults());
   }
 
   reloadFilters(_: Record<string, string | null>) {
@@ -158,21 +162,15 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
   }
 
   onToggleSort(sort: SortType) {
-    let key = 'm_message_date';
-    let order: 'asc' | 'desc' = 'asc';
-
-    if (sort === SortType.NEWEST_FIRST) {
-      order = 'desc';
-    } else if (sort === SortType.OLDEST_FIRST) {
-      order = 'asc';
-    } else if (sort === SortType.DEFAULT) {
+    const order = resolveSortOrder(sort);
+    if (!order) {
       this.fetchSearchResults();
       return;
     }
 
     this.discussionCallbackModel.result = this.helperService.sortByKey<any>(
       this.discussionCallbackModel.result,
-      key,
+      'm_message_date',
       order
     );
     this.cdr.detectChanges();

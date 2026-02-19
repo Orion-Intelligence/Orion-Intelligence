@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Type
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import result_item as DefacementResultItem
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_callback_model import result_item as ExploitResultItem
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import result_item as LeakResultItem
@@ -15,45 +16,91 @@ from orion.services.stix_manager.converters.leak_converter import leak_converter
 from orion.services.stix_manager.converters.social_converter import social_converter
 
 
+@dataclass(frozen=True)
+class _stix_spec:
+    fetch_method: str
+    model_cls: Type[Any]
+    converter_cls: Type[Any]
+    missing_error: str
+    accepts_lang: bool = True
+
+
 class stix_manager:
     __instance: stix_manager | None = None
+    _SPECS: Dict[str, _stix_spec] = {
+        "defacement": _stix_spec(
+            fetch_method="request_defacement_doc",
+            model_cls=DefacementResultItem,
+            converter_cls=defacement_converter,
+            missing_error="No defacement document found",
+            accepts_lang=False,
+        ),
+        "exploit": _stix_spec(
+            fetch_method="request_exploit_doc",
+            model_cls=ExploitResultItem,
+            converter_cls=exploit_converter,
+            missing_error="No exploit document found",
+        ),
+        "leak": _stix_spec(
+            fetch_method="request_leak_doc",
+            model_cls=LeakResultItem,
+            converter_cls=leak_converter,
+            missing_error="No leak document found",
+        ),
+        "social": _stix_spec(
+            fetch_method="request_social_doc",
+            model_cls=SocialResultItem,
+            converter_cls=social_converter,
+            missing_error="No social document found",
+        ),
+        "general": _stix_spec(
+            fetch_method="request_general_doc",
+            model_cls=GeneralResultItem,
+            converter_cls=general_converter,
+            missing_error="No general document found",
+        ),
+        "chat": _stix_spec(
+            fetch_method="request_chat_doc",
+            model_cls=ChatResultItem,
+            converter_cls=chat_converter,
+            missing_error="No chat document found",
+        ),
+    }
 
     def __init__(self) -> None:
-        if stix_manager.__instance is not None: raise Exception("This class is a singleton!")
+        if stix_manager.__instance is not None:
+            raise Exception("This class is a singleton!")
         self._search_model = search_model.getInstance()
         stix_manager.__instance = self
 
     @staticmethod
     def get_instance() -> stix_manager:
-        if stix_manager.__instance is None: stix_manager()
+        if stix_manager.__instance is None:
+            stix_manager()
         return stix_manager.__instance  # type: ignore[return-value]
 
+    async def _get_stix(self, kind: str, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
+        spec = self._SPECS[kind]
+        fetcher = getattr(self._search_model, spec.fetch_method)
+        raw = await (fetcher(doc_id, lang) if spec.accepts_lang else fetcher(doc_id))
+        if raw is None:
+            return {"error": spec.missing_error, "doc_id": doc_id}
+        return spec.converter_cls().convert(spec.model_cls(**raw))
+
     async def get_defacement_stix(self, doc_id: str) -> Dict[str, Any]:
-        raw = await self._search_model.request_defacement_doc(doc_id)
-        if raw is None: return {"error": "No defacement document found", "doc_id": doc_id}
-        return defacement_converter().convert(DefacementResultItem(**raw))
+        return await self._get_stix("defacement", doc_id)
 
     async def get_exploit_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw = await self._search_model.request_exploit_doc(doc_id, lang)
-        if raw is None: return {"error": "No exploit document found", "doc_id": doc_id}
-        return exploit_converter().convert(ExploitResultItem(**raw))
+        return await self._get_stix("exploit", doc_id, lang)
 
     async def get_leak_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw = await self._search_model.request_leak_doc(doc_id, lang)
-        if raw is None: return {"error": "No leak document found", "doc_id": doc_id}
-        return leak_converter().convert(LeakResultItem(**raw))
+        return await self._get_stix("leak", doc_id, lang)
 
     async def get_social_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw = await self._search_model.request_social_doc(doc_id, lang)
-        if raw is None: return {"error": "No social document found", "doc_id": doc_id}
-        return social_converter().convert(SocialResultItem(**raw))
+        return await self._get_stix("social", doc_id, lang)
 
     async def get_general_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw = await self._search_model.request_general_doc(doc_id, lang)
-        if raw is None: return {"error": "No general document found", "doc_id": doc_id}
-        return general_converter().convert(GeneralResultItem(**raw))
+        return await self._get_stix("general", doc_id, lang)
 
     async def get_chat_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw = await self._search_model.request_chat_doc(doc_id, lang)
-        if raw is None: return {"error": "No chat document found", "doc_id": doc_id}
-        return chat_converter().convert(ChatResultItem(**raw))
+        return await self._get_stix("chat", doc_id, lang)

@@ -12,6 +12,14 @@ import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animati
 import {chat_filters} from '../../../../constants/filters';
 import {ChannelTypeKeys, SortType} from '../../../../constants/shared-enums';
 import {HelperService} from '../../../../services/helper.service';
+import {
+  applyQueryAndPageFromParams,
+  isRouteChanged,
+  resetPageAndFetch,
+  resolveSortOrder,
+  setPageAndFetch,
+  updateQuery
+} from '../dashboard-manager.utils';
 
 @Component({
   selector: 'app-dashboard-chats',
@@ -43,7 +51,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
-    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
+    if (isRouteChanged(this.router.url, this.dashboardService.m_current_route)) {
       this.fetchSearchResults()
     }
   }
@@ -63,9 +71,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
-        this.query = params['q'];
-        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
+        this.query = applyQueryAndPageFromParams(params, this.dashboardService.consolidatedParamModel);
         if (!isDiscussion && this.firstTrigger && ((this.chatCallbackModel.Result.length > 0))) {
           this.isResponseLoading.set(false)
           this.query = this.dashboardService.consolidatedParamModel.q
@@ -105,17 +111,15 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   onPageChange(step: number) {
-    this.dashboardService.consolidatedParamModel.page = step;
-    this.fetchSearchResults();
+    setPageAndFetch(this.dashboardService.consolidatedParamModel, step, () => this.fetchSearchResults());
   }
 
   onUpdateQuery(query: string) {
-    this.dashboardService.consolidatedParamModel.q = query
+    updateQuery(this.dashboardService.consolidatedParamModel, query);
   }
 
   resetFilters(_: void) {
-    this.dashboardService.consolidatedParamModel.page = 1;
-    this.fetchSearchResults();
+    resetPageAndFetch(this.dashboardService.consolidatedParamModel, () => this.fetchSearchResults());
   }
 
   reloadFilters(_: Record<string, string | null>) {
@@ -123,23 +127,15 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   onToggleSort(sort: SortType) {
-    let key;
-    let order: 'asc' | 'desc' = 'asc';
-
-    key = 'm_message_date';
-
-    if (sort === SortType.NEWEST_FIRST) {
-      order = 'desc';
-    } else if (sort === SortType.OLDEST_FIRST) {
-      order = 'asc';
-    } else if (sort === SortType.DEFAULT) {
+    const order = resolveSortOrder(sort);
+    if (!order) {
       this.fetchSearchResults();
       return;
     }
 
     this.chatCallbackModel.Result = this.helperService.sortByKey<any>(
       this.chatCallbackModel.Result,
-      key,
+      'm_message_date',
       order
     );
     this.cdr.detectChanges();

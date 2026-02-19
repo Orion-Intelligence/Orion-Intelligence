@@ -15,6 +15,13 @@ import {social_filters} from '../../../../constants/filters';
 import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import {
+  applyQueryAndPageFromParams,
+  isRouteChanged,
+  resolveSortOrder,
+  setPageAndFetch,
+  updateQuery
+} from '../dashboard-manager.utils';
 
 @Component({
   selector: 'app-dashboard-socials',
@@ -70,15 +77,13 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
-        this.query = params['q'];
-        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['page'] || '1'
+        this.query = applyQueryAndPageFromParams(params, this.dashboardService.consolidatedParamModel);
 
         const lastSegment = this.route.snapshot.url.at(-1)?.path;
         if (lastSegment)
           this.dashboardService.consolidatedParamModel.platform = lastSegment
 
-        if (this.router.url.split('?')[0] != this.dashboardService.m_current_route) {
+        if (isRouteChanged(this.router.url, this.dashboardService.m_current_route)) {
           this.fetchSearchResults()
         } else if (this.firstTrigger && this.currentResultCount > 0) {
           this.isLoading.set(false);
@@ -159,12 +164,11 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   }
 
   onPageChange(step: number) {
-    this.dashboardService.consolidatedParamModel.page = step;
-    this.fetchSearchResults();
+    setPageAndFetch(this.dashboardService.consolidatedParamModel, step, () => this.fetchSearchResults());
   }
 
   onUpdateQuery(query: string) {
-    this.dashboardService.consolidatedParamModel.q = query;
+    updateQuery(this.dashboardService.consolidatedParamModel, query);
   }
 
   resetFilters(_: void) {
@@ -177,23 +181,15 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   }
 
   onToggleSort(sort: SortType) {
-    let key;
-    let order: 'asc' | 'desc' = 'asc';
-
-    key = 'm_message_date';
-
-    if (sort === SortType.NEWEST_FIRST) {
-      order = 'desc';
-    } else if (sort === SortType.OLDEST_FIRST) {
-      order = 'asc';
-    } else if (sort === SortType.DEFAULT) {
+    const order = resolveSortOrder(sort);
+    if (!order) {
       this.fetchSearchResults(true);
       return;
     }
 
     this.dashboardService.socialCallbackModel.Result = this.helperService.sortByKey<any>(
       this.dashboardService.socialCallbackModel.Result,
-      key,
+      'm_message_date',
       order
     );
     this.cdr.detectChanges();
