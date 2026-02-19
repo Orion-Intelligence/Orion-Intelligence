@@ -124,57 +124,12 @@ jobs:
           set -euo pipefail
           test -s client/coverage/lcov.info
 
-      - run: |
-          set -euo pipefail
-          docker stop -t 30 trusted-web-main
-          mkdir -p backend_cov_app
-          docker cp trusted-web-main:/app/. backend_cov_app
-          python3 -m pip install --no-cache-dir --upgrade pip "coverage<7.13"
-          cp backend_cov_app/.coveragerc .coveragerc
-          test "$(find backend_cov_app -maxdepth 1 -name ".coverage.*" | wc -l)" -gt 0
-          python3 -m coverage combine backend_cov_app/.coverage.*
-          python3 -m coverage xml -o backend-coverage.xml
-          python3 - <<'PY'
-          import os
-          import xml.etree.ElementTree as ET
-
-          xml_path = "backend-coverage.xml"
-          tree = ET.parse(xml_path)
-          root = tree.getroot()
-
-          updated = 0
-          for cls in root.findall(".//class"):
-            filename = cls.get("filename", "")
-            if not filename or filename.startswith("backend/"):
-              continue
-
-            candidate = os.path.join("backend", filename)
-            if os.path.exists(candidate) and not os.path.exists(filename):
-              cls.set("filename", candidate)
-              updated += 1
-
-          if updated:
-            tree.write(xml_path, encoding="utf-8", xml_declaration=True)
-            print(f"normalized backend coverage paths: {updated}")
-          else:
-            print("no backend coverage path normalization required")
-          PY
-          test -s backend-coverage.xml
-          grep -m 5 'filename=' backend-coverage.xml
-
       - name: Upload frontend coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: client/coverage/lcov.info
           language: TypeScript
-
-      - name: Upload backend coverage to Codacy
-        uses: codacy/codacy-coverage-reporter-action@v1
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: backend-coverage.xml
-          language: Python
 
       - if: always()
         uses: actions/upload-artifact@v4
