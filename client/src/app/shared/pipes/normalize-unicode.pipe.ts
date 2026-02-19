@@ -1,5 +1,4 @@
 const base = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
 const bold = "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
 const italic = "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔𝑕𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧";
 const boldItalic = "𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛";
@@ -13,58 +12,49 @@ const sansItalic = "𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖
 const sansBoldItalic = "𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯";
 const mono = "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿";
 const fullwidth = "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９";
-
 const sets = [
-  bold,
-  italic,
-  boldItalic,
-  script,
-  boldScript,
-  fraktur,
-  doubleStruck,
-  sans,
-  sansBold,
-  sansItalic,
-  sansBoldItalic,
-  mono,
-  fullwidth
+    bold,
+    italic,
+    boldItalic,
+    script,
+    boldScript,
+    fraktur,
+    doubleStruck,
+    sans,
+    sansBold,
+    sansItalic,
+    sansBoldItalic,
+    mono,
+    fullwidth
 ];
-
 const map: Record<string, string> = {};
-
 for (const set of sets) {
-  let i = 0;
-  for (const ch of set) {
-    if (i >= base.length) {
-      break;
+    let i = 0;
+    for (const ch of set) {
+        if (i >= base.length) {
+            break;
+        }
+        map[ch] = base[i];
+        i++;
     }
-    map[ch] = base[i];
-    i++;
-  }
 }
-
 map["　"] = " ";
-
 export function normalizeUnicode(input: string): string {
-  if (!input) {
-    return "";
-  }
-  let out = "";
-  for (const c of input) {
-    out += map[c] ?? c;
-  }
-  return out;
+    if (!input) {
+        return "";
+    }
+    let out = "";
+    for (const c of input) {
+        out += map[c] ?? c;
+    }
+    return out;
 }
-
 import { Pipe, PipeTransform } from '@angular/core';
-
 @Pipe({
-  name: 'normalizeUnicode'
+    name: 'normalizeUnicode'
 })
 export class NormalizeUnicodePipe implements PipeTransform {
-
-  transform(value: unknown): unknown {
-    return typeof value === 'string' ? normalizeUnicode(value) : value;
-  }
-
+    transform(value: unknown): unknown {
+        return typeof value === 'string' ? normalizeUnicode(value) : value;
+    }
 }

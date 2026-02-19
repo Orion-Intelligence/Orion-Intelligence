@@ -1,5 +1,4 @@
-<img alt="background" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover"
-    src="/assets/images/shared/Bg.webp">
+<img alt="background" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover" src="/assets/images/shared/Bg.webp">
 <ng-container>
     <app-header></app-header>
 </ng-container>
@@ -49,8 +48,7 @@
 
                     <div class="onboarding-box__form-group">
                         <label for="company" class="onboarding-box__form-label">Company name</label>
-                        <input type="text" id="company" class="onboarding-box__form-input"
-                            placeholder="Enter company name" [(ngModel)]="onboardingData.name" />
+                        <input type="text" id="company" class="onboarding-box__form-input" placeholder="Enter company name" [(ngModel)]="onboardingData.name" />
                     </div>
                 </div>
 
@@ -63,10 +61,8 @@
                             </p>
 
                             <div class="onboarding-step2__description-row">
-                                <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
-                                    placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
-                                <div class="btn-group report-menu-option-container m-0"
-                                    (click)="openConfirmationPopup()">
+                                <input type="text" class="onboarding-step2__search-input profile-ioc-search-input" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+                                <div class="btn-group report-menu-option-container m-0" (click)="openConfirmationPopup()">
                                     <button appTooltip="clear all" class="p-0 report-menu-option">
                                         <img alt="scan" src="assets/images/shared/theme/bin.svg" />
                                     </button>
@@ -85,9 +81,7 @@
 
                             <div class="onboarding-step2__category-scroll" #categoryScroll>
                                 <ng-container *ngIf="onboardingData.iocs.length>0; else noEntity">
-                                    <div *ngFor="let category of getFilteredIocs()" class="onboarding-step2__tab"
-                                        [class.selected]="category.ioc_id === selectedCategoryId"
-                                        (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+                                    <div *ngFor="let category of getFilteredIocs()" class="onboarding-step2__tab" [class.selected]="category.ioc_id === selectedCategoryId" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                                         {{ category.name }}
                                     </div>
                                 </ng-container>
@@ -110,10 +104,8 @@
 
                         <label class="onboarding-step2__label">Enter IOCs</label>
                         <div class="onboarding-step2__input-wrapper">
-                            <input type="text" class="onboarding-step2__input" placeholder="Type"
-                                (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-                            <button type="button" class="onboarding-step2__add-btn"
-                                (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
+                            <input type="text" class="onboarding-step2__input" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+                            <button type="button" class="onboarding-step2__add-btn" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
                         </div>
 
                         <div class="onboarding-step2__divider2"></div>
@@ -129,8 +121,7 @@
                                         <div class="onboarding-step2__chips">
                                             <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
                                                 <span>{{ value }}</span>
-                                                <span class="onboarding-step2__chip-remove"
-                                                    (click)="removeIoc(ioc.ioc_id, value)">
+                                                <span class="onboarding-step2__chip-remove" (click)="removeIoc(ioc.ioc_id, value)">
                                                     ✕
                                                 </span>
                                             </div>
@@ -169,8 +160,7 @@
                                         <div class="onboarding-step2__chips">
                                             <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
                                                 <span>{{ value }}</span>
-                                                <span class="onboarding-step2__chip-remove"
-                                                    (click)="removeIoc(ioc.ioc_id, value)">
+                                                <span class="onboarding-step2__chip-remove" (click)="removeIoc(ioc.ioc_id, value)">
                                                     ✕
                                                 </span>
                                             </div>
@@ -189,14 +179,12 @@
             </ng-container>
         </div>
         <div class="onboarding-box__actions">
-            <button class="onboarding-box__btn onboarding-box__btn--back" (click)="goBack()"
-                [disabled]="currentStep === 1">
+            <button class="onboarding-box__btn onboarding-box__btn--back" (click)="goBack()" [disabled]="currentStep === 1">
                 Back
             </button>
 
             <ng-container [ngSwitch]="currentStep">
-                <button *ngSwitchCase="1" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()"
-                    [disabled]="!onboardingData.name">
+                <button *ngSwitchCase="1" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()" [disabled]="!onboardingData.name">
                     Next
                 </button>
                 <button *ngSwitchCase="2" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()">

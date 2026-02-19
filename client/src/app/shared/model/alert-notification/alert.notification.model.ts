@@ -1,5 +1,4 @@
 import { AlertAllIoc } from "../company-profile/node.model";
-
 export interface AlertCategorySummary {
     categoryName: string;
     risk: string;
@@ -7,7 +6,6 @@ export interface AlertCategorySummary {
     detectedDate: Date | null;
     tags: string[];
 }
-
 export interface AlertNotification {
     categoryName: string;
     risk: string;

@@ -1,6 +1,5 @@
 <div class="dashboard__search-container dashboard__search-container-chat">
-  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))"
-    class="dashboard__search-card" [@fadeInDashboardItem]>
+  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="dashboard__search-card" [@fadeInDashboardItem]>
     <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
 
       <div class="dashboard__search-tags">
@@ -14,15 +13,12 @@
         </div>
 
         <div class="dashboard__buttons">
-          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph"
-            class="dashboard__search-button" data-cy="open-report">
+          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="dashboard__search-button" data-cy="open-report">
             <div class="dashboard__search-button-inner">
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
-          <div (click)="scrollService.saveSession(item.m_message_id ?? '')" [queryParams]="queryParams"
-            appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button"
-            data-cy="open-report">
+          <div (click)="scrollService.saveSession(item.m_message_id ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button" data-cy="open-report">
             <div class="dashboard__search-button-inner">
               <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
             </div>

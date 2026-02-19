@@ -16,8 +16,7 @@
         </div>
       </div>
 
-      <div #messagesContainer class="chat-support__messages chat-support__messages--scroll"
-        (scroll)="onMessagesScroll()">
+      <div #messagesContainer class="chat-support__messages chat-support__messages--scroll" (scroll)="onMessagesScroll()">
         <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
           <ng-container [ngSwitch]="msg.sender">
             <div *ngSwitchCase="'user'" class="chat-support__message-container">
@@ -39,8 +38,7 @@
             <div *ngSwitchCase="'error'">
               <div class="chat-support__error-box">
                 <p>{{ msg.text }}</p>
-                <button *ngIf="msg.retryPayload" class="chat-support__retry-btn"
-                  (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
+                <button *ngIf="msg.retryPayload" class="chat-support__retry-btn" (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
                   <img src="assets/images/shared/chat-support-retry.svg" alt="Retry" />
                 </button>
               </div>

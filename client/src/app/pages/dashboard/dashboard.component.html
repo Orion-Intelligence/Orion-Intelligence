@@ -9,18 +9,9 @@
 
   <div class="row dashboard_sidebar-main" id="dashboard__sidebar-main" data-cy="dashboard-sidebar-main">
 
-    <input
-      class="dashboard_menu-toggle"
-      id="dashboard__menu-toggle"
-      name="menu-input"
-      type="radio"
-      data-cy="menu-toggle">
+    <input class="dashboard_menu-toggle" id="dashboard__menu-toggle" name="menu-input" type="radio" data-cy="menu-toggle">
 
-    <div
-      [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }"
-      class="dashboard_sidebar"
-      *ngIf="!authService.getIsMobileDemo()"
-      data-cy="dashboard-sidebar">
+    <div [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }" class="dashboard_sidebar" *ngIf="!authService.getIsMobileDemo()" data-cy="dashboard-sidebar">
 
       <app-dashboard-sidebar
         (menuToggle)="toggleNavigation()"
@@ -29,17 +20,11 @@
     </div>
 
     <div class="dashboard_container" data-cy="dashboard-container">
-      <div
-        class="dashboard_sub-container dashboard_content-scroll"
-        id="dashboard-container"
-        data-cy="dashboard-sub-container">
+      <div class="dashboard_sub-container dashboard_content-scroll" id="dashboard-container" data-cy="dashboard-sub-container">
 
         <app-dashboard-header data-cy="dashboard-header"></app-dashboard-header>
 
-        <span
-          [@dashboard-global-animation]="prepareRoute(routerOutlet)"
-          class="dashboard_body"
-          data-cy="dashboard-body">
+        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard_body" data-cy="dashboard-body">
 
           <router-outlet #routerOutlet="outlet" data-cy="router-outlet"></router-outlet>
         </span>

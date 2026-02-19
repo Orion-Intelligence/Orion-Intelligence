@@ -37,15 +37,13 @@
               </app-defacement-results>
             </ng-template>
             <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
-              <div class="consolidated_container"
-                *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
+              <div class="consolidated_container" *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
                 <div class="category-heading-enforced">
                   <span class="left-text">
                     <div>{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
                     <div class="left-text-small">Result count {{ pageCounts[index.key] || 0 }}</div>
                   </span>
-                  <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content"
-                    *ngIf="!this.licenseService.isMaintainer()">
+                  <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content" *ngIf="!this.licenseService.isMaintainer()">
                     Explore
                     <button appTooltip="Open Page" class="p-0 expand-toggle-btn" [disabled]="!(index.value.length > 0)">
                       <img alt="background" height="20" src="/assets/images/shared/theme/explore_icon.svg" width="20">

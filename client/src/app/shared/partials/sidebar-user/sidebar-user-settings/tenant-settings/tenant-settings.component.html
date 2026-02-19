@@ -3,8 +3,7 @@
         <span class="user-settings_section-title">
             {{ 'Tenant Data' }}
         </span>
-        <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon"
-            [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
+        <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
     </div>
 
     <span class="user-settings_section-description">
@@ -24,8 +23,7 @@
                 <div>
 
                     <div class="user-settings_company-name">
-                        <input type="text" [(ngModel)]="userSessionData.tenant.name" class="user-settings_input"
-                            disabled placeholder="Enter company name" />
+                        <input type="text" [(ngModel)]="userSessionData.tenant.name" class="user-settings_input" disabled placeholder="Enter company name" />
                     </div>
 
                     <div class="user-settings_company-location">
@@ -39,8 +37,7 @@
                 </div>
             </div>
 
-            <div class="user-settings_action-buttons"
-                *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
+            <div class="user-settings_action-buttons" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
                 <button class="user-settings_edit-btn" *ngIf="isEditing" (click)="cancelEdit($event)">
                     Cancel
                 </button>
@@ -56,15 +53,12 @@
                 <div class="user-settings_row">
                     <div class="user-settings_info-item">
                         <div class="user-settings_info-label">Email address</div>
-                        <input type="email" [(ngModel)]="userSessionData.user.email" class="user-settings_info-value"
-                            disabled />
+                        <input type="email" [(ngModel)]="userSessionData.user.email" class="user-settings_info-value" disabled />
                     </div>
 
                     <div class="user-settings_info-item">
                         <div class="user-settings_info-label">Phone</div>
-                        <input type="text" [(ngModel)]="userSessionData.tenant.phone" class="user-settings_info-value"
-                            [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }"
-                            placeholder="Enter phone..." />
+                        <input type="text" [(ngModel)]="userSessionData.tenant.phone" class="user-settings_info-value" [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }" placeholder="Enter phone..." />
                     </div>
                 </div>
             </div>
@@ -88,16 +82,12 @@
                 <div class="user-settings_row">
                     <div class="user-settings_info-item">
                         <div class="user-settings_info-label">Country</div>
-                        <input type="text" [(ngModel)]="userSessionData.tenant.country" class="user-settings_info-value"
-                            [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }"
-                            placeholder="Enter country..." />
+                        <input type="text" [(ngModel)]="userSessionData.tenant.country" class="user-settings_info-value" [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }" placeholder="Enter country..." />
                     </div>
 
                     <div class="user-settings_info-item">
                         <div class="user-settings_info-label">City/State</div>
-                        <input type="text" [(ngModel)]="userSessionData.tenant .city" class="user-settings_info-value"
-                            [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }"
-                            placeholder="Enter city/state..." />
+                        <input type="text" [(ngModel)]="userSessionData.tenant .city" class="user-settings_info-value" [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }" placeholder="Enter city/state..." />
                     </div>
                 </div>
             </div>

@@ -3,8 +3,7 @@
     <span class="user-settings_section-title">
       {{ isAdmin() ? 'Admin Profile' : 'User Profile' }}
     </span>
-    <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon"
-      [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
+    <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
   </div>
 
   <span class="user-settings_section-description">
@@ -43,8 +42,7 @@
 
           <ng-template #companyProfileBlock>
             <div class="user-settings_company-name">
-              <input type="text" [(ngModel)]="userSessionData.user.username" class="user-settings_input" disabled
-                placeholder="Enter company name" />
+              <input type="text" [(ngModel)]="userSessionData.user.username" class="user-settings_input" disabled placeholder="Enter company name" />
             </div>
 
             <div class="user-settings_company-location">
@@ -60,8 +58,7 @@
 <div class="user-settings_section" @fadeInDashboardItem>
   <div class="user-settings_section-header" (click)="toggleSection('twoFA')">
     <span class="user-settings_section-title">2 Factor Authentication</span>
-    <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt="" />
+    <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt="" />
   </div>
 
   <span class="user-settings_section-description">
@@ -84,8 +81,7 @@
 <div class="user-settings_section" @fadeInDashboardItem>
   <div class="user-settings_section-header" (click)="toggleSection('theme')">
     <span class="user-settings_section-title">Theme</span>
-    <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt="" />
+    <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt="" />
   </div>
 
   <span class="user-settings_section-description">

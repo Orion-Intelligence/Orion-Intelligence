@@ -7,8 +7,6 @@ export enum LicenseName {
     MAINTAINER = 'maintainer',
     ENTERPRISE = 'enterprise'
 }
-
-
 export interface LicenseRuleModel {
     modules: string[] | 'all';
     cti_graph: boolean;

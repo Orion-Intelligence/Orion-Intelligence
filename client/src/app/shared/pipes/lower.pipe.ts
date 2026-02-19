@@ -1,10 +1,9 @@
-import {Pipe, PipeTransform} from '@angular/core';
-
+import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
-  name: 'lower'
+    name: 'lower'
 })
 export class LowerPipe implements PipeTransform {
-  transform(value: unknown): string {
-    return (value ?? '').toString().toLowerCase();
-  }
+    transform(value: unknown): string {
+        return (value ?? '').toString().toLowerCase();
+    }
 }

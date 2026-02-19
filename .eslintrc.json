@@ -41,10 +41,27 @@
       }
     ],
     "max-len": "off",
+    "brace-style": [
+      "error",
+      "1tbs",
+      {
+        "allowSingleLine": false
+      }
+    ],
+    "max-statements-per-line": [
+      "error",
+      {
+        "max": 1
+      }
+    ],
+    "nonblock-statement-body-position": [
+      "error",
+      "below"
+    ],
     "object-curly-newline": [
       "error",
       {
-        "ImportDeclaration": { "multiline": true, "minProperties": 1000 }
+        "ImportDeclaration": "never"
       }
     ],
     "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 10 }]

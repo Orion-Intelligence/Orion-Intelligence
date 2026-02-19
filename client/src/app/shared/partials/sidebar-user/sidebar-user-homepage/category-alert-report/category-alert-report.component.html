@@ -9,20 +9,16 @@
         </div>
         <div class="category_report_flex">
             <div class="btn-group report-menu-option-container mr-0">
-                <button *ngIf="licenseService.isMaintainer()" (click)="showAlertPopup('add','')" appTooltip="add alert"
-                    class="p-0 report-menu-option">
+                <button *ngIf="licenseService.isMaintainer()" (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option">
                     <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
                 </button>
                 <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
-                <button *ngIf="canExportstix()&& licenseService.isMaintainer()" type="button"
-                    (click)="fileInput.click()" appTooltip="import alert" class="p-0 report-menu-option">
-                    <img alt="add" height="30" width="30" src="/assets/images/shared/theme/print.svg"
-                        class="rotate-180" />
+                <button *ngIf="canExportstix()&& licenseService.isMaintainer()" type="button" (click)="fileInput.click()" appTooltip="import alert" class="p-0 report-menu-option">
+                    <img alt="add" height="30" width="30" src="/assets/images/shared/theme/print.svg" class="rotate-180" />
                 </button>
                 <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
                 <div *ngIf="canExportstix() && licenseService.isMaintainer()" class="vr report-menu-divider"></div>
-                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option"
-                    *ngIf="this.alerts.length>0 &&licenseService.isMaintainer()">
+                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="this.alerts.length>0 &&licenseService.isMaintainer()">
                     <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" />
                 </button>
                 <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
@@ -41,8 +37,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Total IOC</span>
-                <img src="/assets/images/shared/theme/info-light.svg" alt="Critical Alert"
-                    class="user-homepage_alerts-card-icon" appTooltip="Total unique IOCs found in alerts" />
+                <img src="/assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total unique IOCs found in alerts" />
             </div>
             <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(filteredAlerts)}}</span>
         </div>
@@ -50,8 +45,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Newly Found</span>
-                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert"
-                    class="user-homepage_alerts-card-icon" appTooltip="Total non seen alert report" />
+                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total non seen alert report" />
             </div>
             <span class="category_report_summary-card-value">{{getNewAlertCount()}}</span>
         </div>
@@ -59,8 +53,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Last Update</span>
-                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert"
-                    class="user-homepage_alerts-card-icon" appTooltip="Alerts update on" />
+                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Alerts update on" />
             </div>
             <span class="category_report_summary-card-value">{{getLatestDetectedDate(filteredAlerts)}}</span>
         </div>
@@ -68,8 +61,7 @@
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Sources</span>
-                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert"
-                    class="user-homepage_alerts-card-icon" appTooltip="Total sources found in alerts" />
+                <img src="../../../../../../assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total sources found in alerts" />
             </div>
             <span class="category_report_summary-card-value">{{countUniqueSources(filteredAlerts)}}</span>
         </div>
@@ -83,8 +75,7 @@
         <div class="category_report_alert-card" *ngFor="let item of filteredAlerts">
             <div class="category_report_searchbar">
                 <div class="category_report_alert-card-top">
-                    <span class="category_report_flex"
-                        [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
+                    <span class="category_report_flex" [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
                         <div *ngIf="!item.seen" class="category_report_status-icon">
                             <img src="/assets/images/shared/exclamation.svg" alt="report">
                         </div>
@@ -92,8 +83,7 @@
                     </span>
                 </div>
                 <div class="dropdown" *ngIf="canExportstix()||licenseService.isMaintainer()">
-                    <span class="category_report_burger-icon" role="button" id="dropdownMenu" data-bs-toggle="dropdown"
-                        aria-expanded="false">
+                    <span class="category_report_burger-icon" role="button" id="dropdownMenu" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="/assets/images/shared/theme/burger_icon.svg" alt="menu">
                     </span>
 
@@ -110,8 +100,7 @@
                             <hr class="dropdown-divider mx-3" />
                         </li>
                         <li>
-                            <a *ngIf="licenseService.isMaintainer()" class="dropdown-item"
-                                (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
+                            <a *ngIf="licenseService.isMaintainer()" class="dropdown-item" (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
                         </li>
                     </ul>
                 </div>
@@ -185,8 +174,7 @@
         [editAlertData]="selectedAlert"></app-add-custom-alert>
 </ng-container>
 
-<div *ngIf="filterModel" [class.sidebar_container-disable]="!(isFilterOpen$ | async)"
-    [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
+<div *ngIf="filterModel" [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
     <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel"
         (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>

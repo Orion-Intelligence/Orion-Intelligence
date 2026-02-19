@@ -80,10 +80,8 @@
             </span>
           </div>
           <div class="ioc-report-hero-sub">
-            <span class="ioc-report-pill"
-                  [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'status-success' : 'status-failed'">
-              <i class="bi"
-                 [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+            <span class="ioc-report-pill" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'status-success' : 'status-failed'">
+              <i class="bi" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
               {{ extractionResult?.status || apkResult?.status || 'completed' }}
             </span>
           </div>
@@ -92,11 +90,7 @@
         <div class="ioc-report-summary-grid" *ngIf="!isLoading; else metaGridSkeleton" @fadeInDashboardItem>
           <div class="ioc-report-stat" *ngFor="let s of getSummaryStats(); let idx = index" [ngClass]="'stat-' + idx">
             <div class="ioc-report-stat-icon">
-              <i class="bi" [ngClass]="s.label === 'Filename' ? 'bi-file-earmark-text' :
-                                         s.label === 'File Type' ? 'bi-code-slash' :
-                                         s.label === 'Extracted Text' ? 'bi-body-text' :
-                                         s.label === 'Total Findings' ? 'bi-shield-exclamation' :
-                                         'bi-check-circle'"></i>
+              <i class="bi" [ngClass]="s.label === 'Filename' ? 'bi-file-earmark-text' : s.label === 'File Type' ? 'bi-code-slash' : s.label === 'Extracted Text' ? 'bi-body-text' : s.label === 'Total Findings' ? 'bi-shield-exclamation' : 'bi-check-circle'"></i>
             </div>
             <div class="ioc-report-stat-body">
               <div class="ioc-report-stat-label">{{ s.label }}</div>

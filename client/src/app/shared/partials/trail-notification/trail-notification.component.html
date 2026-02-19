@@ -3,8 +3,7 @@
         *ngIf="!subscriptionService.accountExpirable()&&subscriptionService.getTrialDaysLeft()<30">
         <div class="trial-notification-container default-notification-banner default-notification-banner-stealer mb-0">
             <span>
-                <img alt="Info Icon" class="default-notification-banner-icon"
-                    src="assets/images/shared/hint.svg" />
+                <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg" />
                 <span>Your subscription is about to expire in {{subscriptionService.getTrialDaysLeft()}} days.</span>
             </span>
         </div>

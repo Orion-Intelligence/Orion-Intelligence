@@ -6,25 +6,16 @@
 
     <div class="home-defacement-result__actions">
       <ng-container *ngIf="results_defacement?.Result?.length && (threatTypeCounts | keyvalue).length > 0">
-        <div
-          class="home-defacement-result__filter-type"
-          *ngFor="let type of threatTypeCounts | keyvalue"
-          (click)="onFilterTypeClick(type.key, $event)">
+        <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue" (click)="onFilterTypeClick(type.key, $event)">
           {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
-          <img
-            src="assets/images/shared/theme/magnifyingglasswhite.svg"
-            alt="icon"
-            class="home-defacement-result__filter-type__filter-icon">
+          <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="icon" class="home-defacement-result__filter-type__filter-icon">
         </div>
       </ng-container>
 
       <ng-container *ngIf="results_stealerlog?.Result?.length as slCount">
         <div class="home-defacement-result__filter-type" (click)="onFilterTypeClick('stealerlog', $event)">
           stealerlog ({{ slCount >= 100 ? '100+' : slCount }})
-          <img
-            src="assets/images/shared/theme/magnifyingglasswhite.svg"
-            alt="icon"
-            class="home-defacement-result__filter-type__filter-icon">
+          <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="icon" class="home-defacement-result__filter-type__filter-icon">
         </div>
       </ng-container>
 
@@ -56,12 +47,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="webServerValue(item)">
                   {{ webServerValue(item) }}
                 </div>
-                <button
-                  *ngIf="webServerValue(item) && webServerValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(webServerValue(item), 'copy-webserver-' + i, $event)"
-                  [appTooltip]="isCopied('copy-webserver-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="webServerValue(item) && webServerValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(webServerValue(item), 'copy-webserver-' + i, $event)" [appTooltip]="isCopied('copy-webserver-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-webserver-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -73,12 +59,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="attackerValue(item)">
                   {{ attackerValue(item) }}
                 </div>
-                <button
-                  *ngIf="attackerValue(item) && attackerValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(attackerValue(item), 'copy-attacker-' + i, $event)"
-                  [appTooltip]="isCopied('copy-attacker-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="attackerValue(item) && attackerValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(attackerValue(item), 'copy-attacker-' + i, $event)" [appTooltip]="isCopied('copy-attacker-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-attacker-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -92,12 +73,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="teamValue(item)">
                   {{ teamValue(item) }}
                 </div>
-                <button
-                  *ngIf="teamValue(item) && teamValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(teamValue(item), 'copy-team-' + i, $event)"
-                  [appTooltip]="isCopied('copy-team-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="teamValue(item) && teamValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(teamValue(item), 'copy-team-' + i, $event)" [appTooltip]="isCopied('copy-team-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-team-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -109,12 +85,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="ipValue(item)">
                   {{ truncate(ipValue(item), 30) }}
                 </div>
-                <button
-                  *ngIf="ipValue(item) && ipValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(ipValue(item), 'copy-ips-' + i, $event)"
-                  [appTooltip]="isCopied('copy-ips-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="ipValue(item) && ipValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(ipValue(item), 'copy-ips-' + i, $event)" [appTooltip]="isCopied('copy-ips-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-ips-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -128,12 +99,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="urlValue(item)">
                   {{ truncate(urlValue(item), 30) }}
                 </div>
-                <button
-                  *ngIf="urlValue(item) && urlValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(urlValue(item), 'copy-url-' + i, $event)"
-                  [appTooltip]="isCopied('copy-url-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="urlValue(item) && urlValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(urlValue(item), 'copy-url-' + i, $event)" [appTooltip]="isCopied('copy-url-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -147,12 +113,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="dateValue(item)">
                   {{ dateValue(item) }}
                 </div>
-                <button
-                  *ngIf="dateValue(item) && dateValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(dateValue(item), 'copy-date-' + i, $event)"
-                  [appTooltip]="isCopied('copy-date-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="dateValue(item) && dateValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(dateValue(item), 'copy-date-' + i, $event)" [appTooltip]="isCopied('copy-date-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-date-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -163,8 +124,7 @@
     </ng-container>
 
     <ng-container *ngIf="defResults.length > showLimitDefacement">
-      <div class="see-more-wrapper ng-star-inserted p-0 mt-4" appTooltip="list more results"
-        (click)="onShowMore('defacement', $event)">
+      <div class="see-more-wrapper ng-star-inserted p-0 mt-4" appTooltip="list more results" (click)="onShowMore('defacement', $event)">
         <span class="see-more">
           See More
         </span>
@@ -196,12 +156,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="usernameValue(item)">
                   {{ usernameValue(item) }}
                 </div>
-                <button
-                  *ngIf="usernameValue(item) && usernameValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(usernameValue(item), 'copy-username-' + i, $event)"
-                  [appTooltip]="isCopied('copy-username-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="usernameValue(item) && usernameValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(usernameValue(item), 'copy-username-' + i, $event)" [appTooltip]="isCopied('copy-username-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-username-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -213,12 +168,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="passwordValue(item)">
                   {{ passwordValue(item) }}
                 </div>
-                <button
-                  *ngIf="passwordValue(item) && passwordValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(passwordValue(item), 'copy-password-' + i, $event)"
-                  [appTooltip]="isCopied('copy-password-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="passwordValue(item) && passwordValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(passwordValue(item), 'copy-password-' + i, $event)" [appTooltip]="isCopied('copy-password-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-password-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -232,12 +182,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="domainValue(item)">
                   {{ domainValue(item) }}
                 </div>
-                <button
-                  *ngIf="domainValue(item) && domainValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(domainValue(item), 'copy-domain-' + i, $event)"
-                  [appTooltip]="isCopied('copy-domain-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="domainValue(item) && domainValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(domainValue(item), 'copy-domain-' + i, $event)" [appTooltip]="isCopied('copy-domain-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-domain-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -249,12 +194,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="hashValue(item)">
                   {{ hashValue(item) }}
                 </div>
-                <button
-                  *ngIf="hashValue(item) && hashValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(hashValue(item), 'copy-hash-' + i, $event)"
-                  [appTooltip]="isCopied('copy-hash-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="hashValue(item) && hashValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(hashValue(item), 'copy-hash-' + i, $event)" [appTooltip]="isCopied('copy-hash-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-hash-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>
@@ -268,12 +208,7 @@
                 <div class="home-defacement-result-card-value" [appTooltip]="stealerUrlValue(item)">
                   {{ truncate(stealerUrlValue(item), 30) }}
                 </div>
-                <button
-                  *ngIf="stealerUrlValue(item) && stealerUrlValue(item) !== '-'"
-                  type="button"
-                  class="copy-ico"
-                  (click)="copyText(stealerUrlValue(item), 'copy-stealer-url-' + i, $event)"
-                  [appTooltip]="isCopied('copy-stealer-url-' + i) ? 'Copied' : 'Copy'">
+                <button *ngIf="stealerUrlValue(item) && stealerUrlValue(item) !== '-'" type="button" class="copy-ico" (click)="copyText(stealerUrlValue(item), 'copy-stealer-url-' + i, $event)" [appTooltip]="isCopied('copy-stealer-url-' + i) ? 'Copied' : 'Copy'">
                   <i class="bi" [ngClass]="isCopied('copy-stealer-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                 </button>
               </div>

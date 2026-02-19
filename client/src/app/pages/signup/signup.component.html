@@ -1,8 +1,7 @@
 <div class="login-page-container">
   <div class="login-form-side">
     <div class="header-links">
-      <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank"
-        class="header-link">Privacy Policy</a>
+      <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="header-link">Privacy Policy</a>
       <a href="https://orionintelligence.org/service/" target="_blank" class="header-link">Our Services</a>
       <a href="https://orionintelligence.org" target="_blank" class="header-link">About Us</a>
     </div>
@@ -16,8 +15,7 @@
           <label class="input-label">Username</label>
           <div class="input-with-icon">
             <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="input-icon" />
-            <input [(ngModel)]="user.username" placeholder="Enter your username" class="login-input" name="username"
-              required type="text" />
+            <input [(ngModel)]="user.username" placeholder="Enter your username" class="login-input" name="username" required type="text" />
           </div>
 
           <div class="username-suggestion" *ngIf="usernameSuggestion">
@@ -30,41 +28,31 @@
           <label class="input-label mt-2">Company Mail</label>
           <div class="input-with-icon">
             <img src="/assets/images/shared/email.svg" alt="profile icon" class="input-icon" />
-            <input [(ngModel)]="user.mail" placeholder="Enter your company mail" class="login-input" name="companymail"
-              required type="email" />
+            <input [(ngModel)]="user.mail" placeholder="Enter your company mail" class="login-input" name="companymail" required type="email" />
           </div>
 
           <label class="input-label mt-2 ">Password</label>
           <div class="input-with-icon mb-4">
             <img src="/assets/images/shared/lock.svg" alt="profile icon" class="input-icon" />
-            <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password"
-              type="password" placeholder="Enter your password" class="login-input" name="password" required />
+            <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password" type="password" placeholder="Enter your password" class="login-input" name="password" required />
           </div>
 
           <div *ngIf="showPasswordMeter">
             <div class="password-strength-bar">
-              <div class="strength-fill" [ngClass]="{
-                'bg-danger bg-opacity-50': passwordStrength === 'weak',
-                'bg-warning bg-opacity-50': passwordStrength === 'medium',
-                'bg-success bg-opacity-50': passwordStrength === 'strong'
-              }" [style.width.%]="passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100"></div>
+              <div class="strength-fill" [ngClass]="{ 'bg-danger bg-opacity-50': passwordStrength === 'weak', 'bg-warning bg-opacity-50': passwordStrength === 'medium', 'bg-success bg-opacity-50': passwordStrength === 'strong' }" [style.width.%]="passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100"></div>
             </div>
             <ul class="password-checklist">
               <li *ngIf="currentUnmetCheck">{{ currentUnmetCheck }}</li>
             </ul>
           </div>
 
-          <div *ngIf="errorMessage"
-               class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm text-center">
+          <div *ngIf="errorMessage" class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm text-center">
             <i class="bi bi-exclamation-diamond-fill me-2"></i>
             {{ errorMessage }}
           </div>
 
           <div>
-            <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet"
-              [class.login-button]="signUpForm.valid && allPasswordRequirementsMet"
-              [class.login-button-disable]="!signUpForm.valid || !allPasswordRequirementsMet" type="submit"
-              value="Sign Up" />
+            <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet" [class.login-button]="signUpForm.valid && allPasswordRequirementsMet" [class.login-button-disable]="!signUpForm.valid || !allPasswordRequirementsMet" type="submit" value="Sign Up" />
           </div>
         </form>
 

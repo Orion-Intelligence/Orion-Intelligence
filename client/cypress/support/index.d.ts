@@ -1,9 +1,8 @@
 export {};
-
 declare global {
-  namespace Cypress {
-    interface Chainable {
-      loginAsAdmin(): Chainable<void>;
+    namespace Cypress {
+        interface Chainable {
+            loginAsAdmin(): Chainable<void>;
+        }
     }
-  }
 }

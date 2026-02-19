@@ -1,69 +1,62 @@
 import { defineConfig } from "cypress";
 import registerCodeCoverageTasks from "@cypress/code-coverage/task";
-
 export default defineConfig({
-  env: {
-    coverage: true,
-    language: "en",
-    codeCoverage: {
-      enabled: true,
-    },
-    pgp: false,
-    ADMIN_USERNAME:"admin_test_username",
-    ADMIN_PASSWORD:"Zq9M#rX@e7W^B0T+f(ysG!kJc1d2mC&N%hAUEP)6Y4n$R8VbHS",
-    field_types: [
-      "Single-line text input",
-      "Multi-line text input",
-      "Selection box",
-      "Multiple choice input",
-      "Checkbox",
-      "Attachment",
-      "Terms of service",
-      "Date",
-      "Date range",
-      "Voice",
-      "Group of questions",
-    ],
-    takeScreenshots: true,
-  },
-
-  e2e: {
-    specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
-    supportFile: "cypress/support/e2e.ts",
-
-    setupNodeEvents(on, config) {
-      registerCodeCoverageTasks(on, config);
-
-      on("before:browser:launch", (browser, launchOptions) => {
-        if (browser.family === "chromium") {
-          launchOptions.args.push("--window-size=1920,1080");
-          launchOptions.args.push("--force-device-scale-factor=1");
-        }
-        return launchOptions;
-      });
-
-      on("task", {
-        log(message) {
-          return null;
+    env: {
+        coverage: true,
+        language: "en",
+        codeCoverage: {
+            enabled: true,
         },
-        table(message) {
-          return null;
+        pgp: false,
+        ADMIN_USERNAME: "admin_test_username",
+        ADMIN_PASSWORD: "Zq9M#rX@e7W^B0T+f(ysG!kJc1d2mC&N%hAUEP)6Y4n$R8VbHS",
+        field_types: [
+            "Single-line text input",
+            "Multi-line text input",
+            "Selection box",
+            "Multiple choice input",
+            "Checkbox",
+            "Attachment",
+            "Terms of service",
+            "Date",
+            "Date range",
+            "Voice",
+            "Group of questions",
+        ],
+        takeScreenshots: true,
+    },
+    e2e: {
+        specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
+        supportFile: "cypress/support/e2e.ts",
+        setupNodeEvents(on, config) {
+            registerCodeCoverageTasks(on, config);
+            on("before:browser:launch", (browser, launchOptions) => {
+                if (browser.family === "chromium") {
+                    launchOptions.args.push("--window-size=1920,1080");
+                    launchOptions.args.push("--force-device-scale-factor=1");
+                }
+                return launchOptions;
+            });
+            on("task", {
+                log(message) {
+                    return null;
+                },
+                table(message) {
+                    return null;
+                },
+            });
+            return config;
         },
-      });
-
-      return config;
+        baseUrl: process.env.CYPRESS_BASE_URL || "http://127.0.0.1:8080",
+        viewportWidth: 1780,
+        viewportHeight: 1720,
+        defaultCommandTimeout: 15000,
     },
-    baseUrl: process.env.CYPRESS_BASE_URL || "http://127.0.0.1:8080",
-    viewportWidth: 1780,
-    viewportHeight: 1720,
-    defaultCommandTimeout: 15000,
-  },
-
-  component: {
-    devServer: {
-      framework: "angular",
-      bundler: "webpack",
+    component: {
+        devServer: {
+            framework: "angular",
+            bundler: "webpack",
+        },
+        specPattern: "cypress/**/*.cy.ts",
     },
-    specPattern: "cypress/**/*.cy.ts",
-  },
 });

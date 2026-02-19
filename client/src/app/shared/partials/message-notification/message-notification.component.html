@@ -1,7 +1,5 @@
 <div class="notification-wrapper" *ngIf="notificationService.message() as message">
-  <div
-    class="notification-card"
-    [class.success]="notificationService.type() === 'success'">
+  <div class="notification-card" [class.success]="notificationService.type() === 'success'">
     {{ message }}
   </div>
 </div>

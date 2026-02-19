@@ -17,8 +17,7 @@
         <td>{{ item.source }}</td>
         <td>{{ item.group }}</td>
         <td>
-          <span [class.directory-list__status-inactive-pointer]="!item.parsed_status"
-                class="list__status-default-pointer">
+          <span [class.directory-list__status-inactive-pointer]="!item.parsed_status" class="list__status-default-pointer">
           </span>{{ item.parsed_status ? 'parsed' : 'unparsed' }}
         </td>
         <td>{{ item.created_at | date: 'MMM yyyy' }}</td>

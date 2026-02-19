@@ -1,15 +1,12 @@
 <div class="header-bar">
   <ng-container *ngIf="!authService.getIsMobileDemo()">
     <div class="header-bar_title-container">
-      <img (click)="goBack()" [class.disabled]="breadcrumb.length <= 2&& breadcrumb[0].label !== 'ctigraph'" alt="Back"
-        class="header-bar_left-arrow" height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
+      <img (click)="goBack()" [class.disabled]="breadcrumb.length <= 2&& breadcrumb[0].label !== 'ctigraph'" alt="Back" class="header-bar_left-arrow" height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
 
       <span *ngFor="let crumb of breadcrumb; let i = index; let last = last">
-        <span *ngIf="!last" (click)="navigateToCrumb(i)" [class.inactive]="breadcrumb.length <= 2"
-          class="breadcrumb-item">
+        <span *ngIf="!last" (click)="navigateToCrumb(i)" [class.inactive]="breadcrumb.length <= 2" class="breadcrumb-item">
           {{ crumb.label.replace('-', ' ') | titlecase }}
-          <img alt="breadcrumb" class="header-bar__breadcrum" height="20"
-            ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
+          <img alt="breadcrumb" class="header-bar__breadcrum" height="20" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
         </span>
 
         <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
@@ -20,8 +17,7 @@
 
         <ng-template #loginLogo>
           <div class="sidebar__header">
-            <a href=""><img alt="Logo" height="35" width="197"
-                [src]="appService.getConfig().appSettings.logo_wide_dark" /></a>
+            <a href=""><img alt="Logo" height="35" width="197" [src]="appService.getConfig().appSettings.logo_wide_dark" /></a>
           </div>
         </ng-template>
 

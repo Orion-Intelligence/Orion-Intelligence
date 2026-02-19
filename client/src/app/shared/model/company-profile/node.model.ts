@@ -3,7 +3,6 @@ export interface userSessionData {
     tenant: TenantDataModel;
     alerts: AlertModel[];
 }
-
 export interface UserDataModel {
     email: string;
     twofa_enabled: boolean;
@@ -18,7 +17,6 @@ export interface UserDataModel {
         [key: string]: any;
     };
 }
-
 export interface TenantDataModel {
     id: string;
     name: string;
@@ -35,7 +33,6 @@ export interface TenantDataModel {
     quotaExceeded: boolean;
     image?: string;
 }
-
 export interface userMetaData {
     username: string;
     twofa_enabled: boolean;
@@ -43,12 +40,10 @@ export interface userMetaData {
         [key: string]: any;
     };
 }
-
 export interface AlertAllIoc {
     name: string;
     values: string[];
 }
-
 export interface AlertModel {
     alert_id?: string;
     report_seen?: boolean;

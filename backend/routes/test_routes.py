@@ -41,6 +41,12 @@ def _pending_or_api_mock(step_key: str, filename: str):
         return step
     return _load_api_mock(filename)
 
+def _pending_or_elastic_mock(step_key: str, filename: str):
+    step = _mock_step(step_key)
+    if step:
+        return step
+    return _load_elastic_mock(filename)
+
 def _pending_or_dynamic_scan(scan_type: str):
     step_key = f"urlscan_domain_{scan_type}"
     step = _mock_step(step_key)
@@ -96,7 +102,7 @@ async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
+async def test_search_dynamic_ip_scan(param: search_dynamic_crack_model = Body(...)):
     return _pending_or_api_mock("dynamic_software", "urlscan_domain_iplookup.json")
 
 @test_routes.post(
@@ -116,7 +122,7 @@ async def test_search_dynamic_social(param: search_dynamic_social_model = Body(.
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
         Depends(license_required("scanning")), ], )
-async def test_parse_text(payload: DomainScanRequest):
+async def test_parse_domain(payload: DomainScanRequest):
     return _pending_or_dynamic_scan(payload.scanType)
 
 @test_routes.post(
@@ -125,7 +131,7 @@ async def test_parse_text(payload: DomainScanRequest):
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
         Depends(license_required("scanning")), ], )
-async def test_parse_text(payload: DomainScanRequest):
+async def test_parse_subdomains(payload: DomainScanRequest):
     return _pending_or_dynamic_scan(payload.scanType)
 
 @test_routes.post(
@@ -174,10 +180,7 @@ async def extract_crypto():
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_recon(payload: dict = Body(...)):
-    step = _mock_step("social_recon")
-    if step:
-        return step
-    return _load_elastic_mock("social_recon.json")
+    return _pending_or_elastic_mock("social_recon", "social_recon.json")
 
 
 @test_routes.post(
@@ -186,10 +189,7 @@ async def test_social_recon(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_recon_image(payload: dict = Body(...)):
-    step = _mock_step("social_recon_image")
-    if step:
-        return step
-    return _load_elastic_mock("social_recon_image.json")
+    return _pending_or_elastic_mock("social_recon_image", "social_recon_image.json")
 
 
 @test_routes.post(
@@ -198,10 +198,7 @@ async def test_social_recon_image(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_profile(payload: dict = Body(...)):
-    step = _mock_step("social_profile")
-    if step:
-        return step
-    return _load_elastic_mock("social_profile.json")
+    return _pending_or_elastic_mock("social_profile", "social_profile.json")
 
 
 @test_routes.post(
@@ -210,10 +207,7 @@ async def test_social_profile(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_online_images(payload: dict = Body(...)):
-    step = _mock_step("social_online_images")
-    if step:
-        return step
-    return _load_elastic_mock("social_online_images.json")
+    return _pending_or_elastic_mock("social_online_images", "social_online_images.json")
 
 
 @test_routes.post(
@@ -222,10 +216,7 @@ async def test_social_online_images(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_posts(payload: dict = Body(...)):
-    step = _mock_step("social_posts")
-    if step:
-        return step
-    return _load_elastic_mock("social_posts.json")
+    return _pending_or_elastic_mock("social_posts", "social_posts.json")
 
 
 @test_routes.post(
@@ -234,10 +225,7 @@ async def test_social_posts(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_followers(payload: dict = Body(...)):
-    step = _mock_step("social_followers")
-    if step:
-        return step
-    return _load_elastic_mock("social_followers.json")
+    return _pending_or_elastic_mock("social_followers", "social_followers.json")
 
 
 @test_routes.post(
@@ -246,10 +234,7 @@ async def test_social_followers(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_following(payload: dict = Body(...)):
-    step = _mock_step("social_following")
-    if step:
-        return step
-    return _load_elastic_mock("social_following.json")
+    return _pending_or_elastic_mock("social_following", "social_following.json")
 
 
 @test_routes.post(
@@ -258,10 +243,7 @@ async def test_social_following(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_entity(payload: dict = Body(...)):
-    step = _mock_step("social_entity")
-    if step:
-        return step
-    return _load_elastic_mock("social_entity.json")
+    return _pending_or_elastic_mock("social_entity", "social_entity.json")
 
 
 @test_routes.post(
@@ -270,10 +252,7 @@ async def test_social_entity(payload: dict = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_session_upsert(data: dict = Body(...), graph_type: str = Query("social")):
-    step = _mock_step(f"social_session_upsert_{graph_type}")
-    if step:
-        return step
-    return _load_elastic_mock("social_session_upsert.json")
+    return _pending_or_elastic_mock(f"social_session_upsert_{graph_type}", "social_session_upsert.json")
 
 
 @test_routes.get(
@@ -293,7 +272,4 @@ async def test_social_session_tabs(graph_type: str = Query("social")):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_social_session_tab_add(tab: dict = Body(...), graph_type: str = Query("social")):
-    step = _mock_step(f"social_session_tab_add_{graph_type}")
-    if step:
-        return step
-    return _load_elastic_mock("social_session_tab_add.json")
+    return _pending_or_elastic_mock(f"social_session_tab_add_{graph_type}", "social_session_tab_add.json")

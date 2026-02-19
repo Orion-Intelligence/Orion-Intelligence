@@ -33,9 +33,7 @@
   <ng-container *ngIf="resultItem?.m_url as url; else noUrl">
     <ng-container *ngIf="url.trim().length > 1; else noUrl">
       <p class="search__result-detail-url-p text-truncate">
-        <a [href]="url"
-          class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width"
-          target="_blank"> {{ url }} </a>
+        <a [href]="url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width" target="_blank"> {{ url }} </a>
       </p>
     </ng-container>
   </ng-container>
@@ -68,11 +66,7 @@
     <div class="search__result-detail-meta-divs">
       <p class="status">Status:</p>
       <div class="search__result-detail-meta-divs d-flex align-items-center">
-        <span [ngClass]="{
-        'bg-success': isWithinDays(resultItem!.m_creation_date, 5),
-        'bg-warning': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5),
-        'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}"
-          class="rounded-circle d-inline-block me-2 search__result-detail-status-circle">
+        <span [ngClass]="{ 'bg-success': isWithinDays(resultItem!.m_creation_date, 5), 'bg-warning': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5), 'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}" class="rounded-circle d-inline-block me-2 search__result-detail-status-circle">
         </span>
         <p class="status mb-0">{{ getStatusText(resultItem?.m_creation_date) }} </p>
       </div>
@@ -82,21 +76,17 @@
 <div class="search__result-detail">
   <div (click)="metaadataToggleContent()" class="search__result__section__heading">
     <div class="left-content">
-      Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon"
-        appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
+      Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
     </div>
     <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-      <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
-        src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 
   <div *ngIf="isExpandedMetadata">
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [class.active]="activeTab === key"
-          appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}"
-          class="search__result-tabs">
+        <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
           {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
         </button>
         <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
@@ -107,8 +97,7 @@
       [listItems]="[content]"></app-result-section>
     <app-result-section *ngIf="activeTab === 'm_section'" @fadeInDashboardItem
       [listItems]="listItems"></app-result-section>
-    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'"
-      class="report-mapping-empty-body report-mapping-empty-body-nopadding">
+    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
       Names of people, organizations, and entities are handled separately, but may overlap in the results.
     </div>
     <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" @fadeInDashboardItem
@@ -118,15 +107,12 @@
 
 <app-code-block [code]="resultItem?.m_code_snippet" *ngIf="resultItem?.m_code_snippet?.length"></app-code-block>
 
-<div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!=''"
-  class="search__result-detail">
+<div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!=''" class="search__result-detail">
   <div (click)="screenshootToggleContent()" class="search__result__section__heading">
-    <div class="left-content">Leak Screenshot <img src="/assets/images/shared/theme/info.svg" alt="Icon"
-        appTooltip="Leak Screenshot">
+    <div class="left-content">Leak Screenshot <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Leak Screenshot">
     </div>
     <div [attr.aria-label]="isExpandedScreenshoot ? 'Collapse' : 'Expand'" class="toggle-btn">
-      <img [ngClass]="{ 'rotated': !isExpandedScreenshoot }" alt="toggle icon"
-        src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      <img [ngClass]="{ 'rotated': !isExpandedScreenshoot }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
   <div *ngIf="isExpandedScreenshoot">
@@ -140,8 +126,7 @@
       <div class="report-mapping-empty-body">No screenshot is currently available. New breach or tracking data will
         appear here once detected.</div>
     </div>
-    <img (error)="onImageError()" (load)="onImageLoad()" *ngIf="imageSrc && !isImageError" [src]="imageSrc"
-      alt="Screenshot Preview" class="search__result-preview" />
+    <img (error)="onImageError()" (load)="onImageLoad()" *ngIf="imageSrc && !isImageError" [src]="imageSrc" alt="Screenshot Preview" class="search__result-preview" />
   </div>
 </div>
 

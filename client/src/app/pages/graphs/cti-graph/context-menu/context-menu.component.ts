@@ -1,11 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 @Component({
-  selector: 'app-graph-context-menu',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-graph-context-menu',
+    standalone: true,
+    imports: [CommonModule],
+    template: `
   <div id="customContextMenu" class="hidden fixed z-[1000] w-64 rounded-xl border border-slate-700/80 bg-slate-900/95 backdrop-blur-sm shadow-2xl focus:outline-none">
     <div class="px-3 py-2 border-b border-slate-700/70">
       <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-slate-400">Node Actions</p>
@@ -43,15 +42,26 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class GraphContextMenuComponent {
-  @Input() nodeId = '';
-  @Input() canExpand = false;
-  @Input() canCollapse = false;
-  @Input() showOpenCti = true;
-  @Input() showCopyLabel = true;
-  @Input() showOpenReport = true;
-  @Output() expand = new EventEmitter<void>();
-  @Output() collapse = new EventEmitter<void>();
-  @Output() openCti = new EventEmitter<void>();
-  @Output() copyLabel = new EventEmitter<MouseEvent>();
-  @Output() openReport = new EventEmitter<void>();
+    @Input()
+    nodeId = '';
+    @Input()
+    canExpand = false;
+    @Input()
+    canCollapse = false;
+    @Input()
+    showOpenCti = true;
+    @Input()
+    showCopyLabel = true;
+    @Input()
+    showOpenReport = true;
+    @Output()
+    expand = new EventEmitter<void>();
+    @Output()
+    collapse = new EventEmitter<void>();
+    @Output()
+    openCti = new EventEmitter<void>();
+    @Output()
+    copyLabel = new EventEmitter<MouseEvent>();
+    @Output()
+    openReport = new EventEmitter<void>();
 }

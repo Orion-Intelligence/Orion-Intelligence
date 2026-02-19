@@ -1,10 +1,6 @@
-<div id="analytics" [ngClass]="{
-    'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
-    'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen
-  }">
+<div id="analytics" [ngClass]="{ 'sidebar-open': appService.getConfig().localSettings.isSidebarOpen, 'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen }">
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
-    <div [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
-        'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen}">
+    <div [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen, 'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen}">
       <div class="home_insight__container home_insight__container-top mt-4">
         <div *ngFor="let item of getResultItems(modelKey);" class="home-insight-card-container">
           <div class="home-insight-card-header-section">
@@ -57,13 +53,10 @@
             </div>
           </div>
 
-          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')"
-            class="home_insight__divider"></div>
+          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')" class="home_insight__divider"></div>
 
-          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')"
-            class="home-insight-card-footer-section">
-            <p appTooltip="Open Report" (click)="openReport(modelKey, item.hash, item.title)"
-              class="home-insight-card-view-details-button">View Details</p>
+          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')" class="home-insight-card-footer-section">
+            <p appTooltip="Open Report" (click)="openReport(modelKey, item.hash, item.title)" class="home-insight-card-view-details-button">View Details</p>
           </div>
         </div>
       </div>
@@ -73,18 +66,11 @@
 
   <div *ngFor="let model of models">
 
-    <div class="home_insight__container" [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
-    'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen }">
+    <div class="home_insight__container" [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen, 'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen }">
       <div *ngFor="let key of getKeys(insights[model]); let first = first" class="home_insight__card">
         <div class="home_insight__content">
 
-          <div *ngIf="first" [appTooltip]="
-                 model === 'general'
-                   ? 'Track Data States/Crawl Insights Panel'
-                   : model === 'leak'
-                   ? 'This is the Leaked Data'
-                   : 'This is the Defacement'
-               " class="home_insight__header">
+          <div *ngIf="first" [appTooltip]=" model === 'general' ? 'Track Data States/Crawl Insights Panel' : model === 'leak' ? 'This is the Leaked Data' : 'This is the Defacement' " class="home_insight__header">
             {{
             model === 'general'
             ? 'Generic Index'
@@ -108,19 +94,11 @@
           </div>
 
           <div class="home_insight__percentage">
-            <div [ngClass]="{
-                  'text-success': String(insights[model][key].change_daily).startsWith('+'),
-                  'text-warning': String(insights[model][key].change_daily).startsWith('-'),
-                  'home_insight__percentage-default': !insights[model][key].change_daily
-                }" appTooltip="stat changes daily">
+            <div [ngClass]="{ 'text-success': String(insights[model][key].change_daily).startsWith('+'), 'text-warning': String(insights[model][key].change_daily).startsWith('-'), 'home_insight__percentage-default': !insights[model][key].change_daily }" appTooltip="stat changes daily">
               {{ insights[model][key].change_daily || '-' }}
             </div>
 
-            <div [ngClass]="{
-                  'text-success': String(insights[model][key].change_weekly).startsWith('+'),
-                  'text-warning': String(insights[model][key].change_weekly).startsWith('-'),
-                  'home_insight__percentage-default': !insights[model][key].change_weekly
-                }" appTooltip="stat changes weekly">
+            <div [ngClass]="{ 'text-success': String(insights[model][key].change_weekly).startsWith('+'), 'text-warning': String(insights[model][key].change_weekly).startsWith('-'), 'home_insight__percentage-default': !insights[model][key].change_weekly }" appTooltip="stat changes weekly">
               {{ insights[model][key].change_weekly || '-' }}
             </div>
           </div>

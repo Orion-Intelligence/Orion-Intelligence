@@ -6,10 +6,7 @@
   <div class="login-page-container">
     <div class="login-form-side">
       <div class="header-links">
-        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank"
-          class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank"
-          class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank"
-          class="header-link">About Us</a>
+        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank" class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank" class="header-link">About Us</a>
       </div>
       <div class="center-content-wrapper">
         <div class="login-content">
@@ -30,15 +27,13 @@
             <label for="username" class="input-label">Email</label>
             <div class="input-with-icon">
               <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="input-icon" />
-              <input [(ngModel)]="user.mail" placeholder="Enter email" class="login-input" name="username" required
-                type="text" />
+              <input [(ngModel)]="user.mail" placeholder="Enter email" class="login-input" name="username" required type="text" />
             </div>
 
             <label for=" word" class="input-label mt-2">Password</label>
             <div class="input-with-icon">
               <img src="/assets/images/shared/lock.svg" alt="profile icon" class="input-icon" />
-              <input [(ngModel)]="user.password" placeholder="Enter password" class="login-input" name="password"
-                required type="password" />
+              <input [(ngModel)]="user.password" placeholder="Enter password" class="login-input" name="password" required type="password" />
             </div>
 
             <span (click)="goToForgot()" class="reset-password">Reset password?</span>
@@ -56,8 +51,7 @@
             </div>
 
             <div>
-              <input [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid"
-                type="submit" value="Sign In" />
+              <input [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid" type="submit" value="Sign In" />
             </div>
           </form>
 
@@ -112,18 +106,11 @@
     <form (ngSubmit)="submitOtp()">
       <div class="login_form-group">
         <label class="login_hidden-label" for="id_otp">2FA Code</label>
-        <input [(ngModel)]="otpCode" name="otpCode"
-               class="login_input twofa_code-input" id="id_otp"
-               placeholder="••••••" required
-               minlength="6" maxlength="6"
-               inputmode="numeric" autocomplete="one-time-code"
-               type="text">
+        <input [(ngModel)]="otpCode" name="otpCode" class="login_input twofa_code-input" id="id_otp" placeholder="••••••" required minlength="6" maxlength="6" inputmode="numeric" autocomplete="one-time-code" type="text">
       </div>
 
       <div class="login-button-container">
-        <button type="submit" class="mt-4" [disabled]="!otpCode || otpCode.length < 6"
-                [class.login_btn-submit]="otpCode && otpCode.length === 6"
-                [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
+        <button type="submit" class="mt-4" [disabled]="!otpCode || otpCode.length < 6" [class.login_btn-submit]="otpCode && otpCode.length === 6" [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
           Verify 2FA
         </button>
       </div>

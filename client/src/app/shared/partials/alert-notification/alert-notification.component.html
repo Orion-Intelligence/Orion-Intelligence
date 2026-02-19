@@ -4,8 +4,7 @@
 
     <div class="notification_sidebar-header">
         <span class="notification_sidebar-title">Notifications</span>
-        <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" alt="close"
-            class="notification_sidebar-close-icon" (click)="close()" />
+        <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" alt="close" class="notification_sidebar-close-icon" (click)="close()" />
     </div>
 
     <div class="notification_sidebar-list">
@@ -20,8 +19,7 @@
                 <span class="notification_sidebar-item-category">{{ n.categoryName.charAt(0).toUpperCase() +
                     n.categoryName.slice(1) }}
                 </span>
-                <span class="notification_sidebar-item-risk_tag"
-                    [ngClass]="'notification_sidebar-item-risk_tag-' + n.risk.toLowerCase()">
+                <span class="notification_sidebar-item-risk_tag" [ngClass]="'notification_sidebar-item-risk_tag-' + n.risk.toLowerCase()">
                     {{ n.risk }} Risk
                 </span>
             </div>
@@ -42,8 +40,7 @@
             </div>
         </div>
     </div>
-    <div
-        class="sidebar_submit d-flex flex-column notification_sidebar-item-footer notification_sidebar-item-footer-padding">
+    <div class="sidebar_submit d-flex flex-column notification_sidebar-item-footer notification_sidebar-item-footer-padding">
         <button (click)="close()" class="btn btn-secondary mb-4 sidebar_submit-button" type="button">
             Close
         </button>

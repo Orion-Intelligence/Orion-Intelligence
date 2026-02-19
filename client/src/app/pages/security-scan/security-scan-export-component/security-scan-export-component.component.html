@@ -21,9 +21,7 @@
   <h2 class="security-report-h2">Findings</h2>
 
   <ng-container *ngIf="viewFindings.length; else noFindings">
-    <section *ngFor="let item of viewFindings"
-             class="security-report-card"
-             [ngClass]="riskClass(item.risk)">
+    <section *ngFor="let item of viewFindings" class="security-report-card" [ngClass]="riskClass(item.risk)">
       <header class="security-report-card-head">
         <div class="security-report-title">
           <span class="security-report-num">{{ item.n }}.</span>

@@ -1,32 +1,25 @@
 <div *ngIf="isList; else cardView" class="list__container-result" @fadeInDashboardItem>
   <div class="list__container list-container">
-    <table class="table table-striped directory-list__table clear-paddings"
-           *ngIf="isLoading || (!isLoading && searchResults.length>0)">
+    <table class="table table-striped directory-list__table clear-paddings" *ngIf="isLoading || (!isLoading && searchResults.length>0)">
       <thead>
       <tr>
-        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="list__container-sort list__column-id-min"
-            scope="col">#
+        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="list__container-sort list__column-id-min" scope="col">#
         </th>
-        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="list__container-sort"
-            scope="col">Base URL
+        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="list__container-sort" scope="col">Base URL
         </th>
         <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="list__container-sort" scope="col">IP
           Addresses
         </th>
-        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="list__container-sort"
-            scope="col">Attacker
+        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="list__container-sort" scope="col">Attacker
         </th>
         <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="list__container-sort" scope="col">
           Team
         </th>
-        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="list__container-sort"
-            scope="col">Web Server
+        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="list__container-sort" scope="col">Web Server
         </th>
-        <th (click)="sortTable('m_leak_date')" [ngClass]="getSortClass('m_leak_date')" class="list__container-sort"
-            scope="col">Leak Date
+        <th (click)="sortTable('m_leak_date')" [ngClass]="getSortClass('m_leak_date')" class="list__container-sort" scope="col">Leak Date
         </th>
-        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="list__container-sort"
-            scope="col">Web URL
+        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="list__container-sort" scope="col">Web URL
         </th>
         <th class="list__column-id-min" scope="col"></th>
       </tr>
@@ -94,11 +87,9 @@
       </ng-container>
 
       <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults : searchResults); let i = index">
-        <tr *ngIf="!isLoading" (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash"
-            [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem>
+        <tr *ngIf="!isLoading" (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem>
           <td class="list__cell-id">
-            <span>{{ i + 1 }}</span> <img class="list__cell-arrow" alt="click" width="15" height="15"
-                                          src="assets/images/shared/arrow-right-click.svg">
+            <span>{{ i + 1 }}</span> <img class="list__cell-arrow" alt="click" width="15" height="15" src="assets/images/shared/arrow-right-click.svg">
           </td>
           <td>{{ item.m_url || '-' }}</td>
           <td>{{ (item.m_ip || []).length ? (item.m_ip || []).join(', ') : '-' }}</td>
@@ -107,12 +98,9 @@
           <td>{{ (item.m_web_server || []).length ? (item.m_web_server || []).join(', ') : '-' }}</td>
           <td>{{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</td>
           <td>
-            <a *ngIf="item.m_source_url?.length" [href]="item.m_source_url[0]"
-               class="text-decoration-none text-reset">{{ item.m_source_url[0] }}</a> <span
-            *ngIf="!item.m_source_url?.length">-</span>
+            <a *ngIf="item.m_source_url?.length" [href]="item.m_source_url[0]" class="text-decoration-none text-reset">{{ item.m_source_url[0] }}</a> <span *ngIf="!item.m_source_url?.length">-</span>
           </td>
-          <td class="list__column-id-min"><img alt="click" width="15" height="15" class="ml-4"
-                                               src="assets/images/shared/arrow-right-click.svg"></td>
+          <td class="list__column-id-min"><img alt="click" width="15" height="15" class="ml-4" src="assets/images/shared/arrow-right-click.svg"></td>
         </tr>
       </ng-container>
       </tbody>
@@ -139,15 +127,13 @@
           </ng-template>
 
           <div class="dashboard__buttons" *ngIf="!isMobileMode()">
-            <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph"
-              class="dashboard__search-button">
+            <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph" class="dashboard__search-button">
               <div class="dashboard__search-button-inner">
                 <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
               </div>
             </div>
 
-            <div (click)="scrollService.saveSession(item.m_hash)" appTooltip="Open Report" [queryParams]="queryParams"
-              [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+            <div (click)="scrollService.saveSession(item.m_hash)" appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
               <div class="dashboard__search-button-inner">
                 <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
               </div>

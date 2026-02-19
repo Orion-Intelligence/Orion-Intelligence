@@ -1,63 +1,57 @@
 export interface IocCategory {
-  ioc_id: string;
-  name: string;
-  values: string[];
+    ioc_id: string;
+    name: string;
+    values: string[];
 }
-
 export type TenantStatus = 'onboarding' | 'active' | 'disable';
-
 export const TenantStatusValues = {
-  ONBOARDING: 'onboarding' as TenantStatus,
-  ACTIVE: 'active' as TenantStatus,
-  DISABLE: 'disable' as TenantStatus,
+    ONBOARDING: 'onboarding' as TenantStatus,
+    ACTIVE: 'active' as TenantStatus,
+    DISABLE: 'disable' as TenantStatus,
 };
-
 export interface TenantModel {
-  id?: string;
-  name: string;
-  iocs: IocCategory[];
-  phone?: string;
-  country?: string;
-  city?: string;
-  subscription?: boolean;
-  postal_code?: string;
-  verified?: boolean;
-  user_quota?: number;
-  status?: TenantStatus;
-  licenses?: string[];
-  quotaExceeded?: boolean;
-  email?: string;
+    id?: string;
+    name: string;
+    iocs: IocCategory[];
+    phone?: string;
+    country?: string;
+    city?: string;
+    subscription?: boolean;
+    postal_code?: string;
+    verified?: boolean;
+    user_quota?: number;
+    status?: TenantStatus;
+    licenses?: string[];
+    quotaExceeded?: boolean;
+    email?: string;
 }
 export interface TenantRequest {
-  companyName: string;
-  iocs: IocCategory[];
+    companyName: string;
+    iocs: IocCategory[];
 }
-
 export interface User {
-  username: string;
-  email: string;
-  role: string;
-  status: 'active' | 'disable';
-  subscription?: boolean;
-  verificationDate: string;
-  licenses?: string[] | null;
+    username: string;
+    email: string;
+    role: string;
+    status: 'active' | 'disable';
+    subscription?: boolean;
+    verificationDate: string;
+    licenses?: string[] | null;
 }
-
 export interface UserMeta {
-  username: string;
-  email: string;
-  preferences?: {
-    [key: string]: any;
-  };
+    username: string;
+    email: string;
+    preferences?: {
+        [key: string]: any;
+    };
 }
-
 export interface TenantTeamModel {
-  username: string;
-  email: string;
-  password: string;
-  role: 'member' | 'analyst' | 'demo';
-  status: 'active' | 'disable';
-  subscription: boolean;
-  licenses?: string[] | null;
-  quotaExceeded?: boolean;
+    username: string;
+    email: string;
+    password: string;
+    role: 'member' | 'analyst' | 'demo';
+    status: 'active' | 'disable';
+    subscription: boolean;
+    licenses?: string[] | null;
+    quotaExceeded?: boolean;
 }

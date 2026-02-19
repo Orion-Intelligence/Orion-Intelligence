@@ -1,4 +1,3 @@
-
 export enum StealerlogsSearchFilters {
     ALL = 'm_search_all',
     DOMAIN = 'm_domain',
@@ -7,9 +6,8 @@ export enum StealerlogsSearchFilters {
     CHANNEL = 'm_channel',
     FILE = 'm_file',
     EMAIL = 'm_email',
-    CREDITCARD = 'm_creditcard',
+    CREDITCARD = 'm_creditcard'
 }
-
 export const StealerlogsSearchFilterLabels: Record<StealerlogsSearchFilters, string> = {
     [StealerlogsSearchFilters.ALL]: 'All',
     [StealerlogsSearchFilters.DOMAIN]: 'Domain',
@@ -20,14 +18,12 @@ export const StealerlogsSearchFilterLabels: Record<StealerlogsSearchFilters, str
     [StealerlogsSearchFilters.EMAIL]: 'Email',
     [StealerlogsSearchFilters.CREDITCARD]: 'Credit Card'
 };
-
 export interface StealerlogsAdvancedFilter {
     id: string;
     tag: StealerlogsSearchFilters;
     value: string;
     operator: '&&' | '||';
 }
-
 export interface PasswordSchemaFilter {
     minLength: number | null;
     maxLength: number | null;

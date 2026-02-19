@@ -5,22 +5,15 @@ import { SubscriptionService } from '../../services/dashboard/subscription.servi
 import { LicenseService } from '../../services/licenses/licenses.service';
 import { AuthService } from '../../services/authetication/auth.service';
 import { AppService } from '../../services/core/app/app.service';
-
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class subscriptionGuard implements CanActivate {
-  constructor(
-    private subscriptionService: SubscriptionService,
-    private router: Router,
-    private appService: AppService,
-    protected dashboardService: DashboardService
-  ) { }
-
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
-    if (this.subscriptionService.accountExpirable() && !(this.subscriptionService.isDemo()) || (this.appService.userSessionData().user.license.length > 0 && "enterprise" == this.appService.userSessionData().user.license.at(0))) {
-      return true;
+    constructor(private subscriptionService: SubscriptionService, private router: Router, private appService: AppService, protected dashboardService: DashboardService) { }
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+        if (this.subscriptionService.accountExpirable() && !(this.subscriptionService.isDemo()) || (this.appService.userSessionData().user.license.length > 0 && "enterprise" == this.appService.userSessionData().user.license.at(0))) {
+            return true;
+        }
+        return true;
     }
-    return true;
-  }
 }

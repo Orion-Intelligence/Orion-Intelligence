@@ -7,8 +7,7 @@
     </div>
 
     <ng-container *ngIf="viewAlerts.length; else noAlerts">
-        <section *ngFor="let alert of viewAlerts; let i = index" class="alert-report-card"
-            [ngClass]="statusClass(alert.status)">
+        <section *ngFor="let alert of viewAlerts; let i = index" class="alert-report-card" [ngClass]="statusClass(alert.status)">
             <header class="alert-report-head">
                 <div class="alert-report-title">
                     <span class="alert-report-num">{{ i + 1 }}.</span>

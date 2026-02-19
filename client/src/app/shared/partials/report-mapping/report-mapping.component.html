@@ -2,12 +2,10 @@
   <div class="search__result-detail">
     <div (click)="toggleContent()" class="search__result__section__heading">
       <div class="left-content">
-        Related reports <img src="/assets/images/shared/theme/info.svg" alt="Icon"
-          appTooltip="list of reports that are either directly or indirectly linked to this document ">
+        Related reports <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="list of reports that are either directly or indirectly linked to this document ">
       </div>
       <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
-        <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
-          src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+        <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
       </div>
     </div>
     <div *ngIf="isExpanded" class="content pt-3">

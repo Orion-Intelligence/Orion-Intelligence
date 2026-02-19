@@ -107,18 +107,15 @@
     </ng-container>
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
       <div class="sidebar__item">
-        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/social-mapper"
-          target="_blank">
-          <img alt="Social Mapper" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/social.svg"
-            width="20"> Social
+        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/social-mapper" target="_blank">
+          <img alt="Social Mapper" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/social.svg" width="20"> Social
           Mapper
         </a>
       </div>
     </ng-container>
     <ng-container>
       <div class="sidebar__item">
-        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/"
-          target="_blank">
+        <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/" target="_blank">
           <img alt="Links" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/whistle.svg" width="20">
           Whistle Blowing
         </a>
@@ -128,31 +125,24 @@
     <div class="dashboard_sidebar_heading">Help & Support</div>
     <div class="sidebar__item_break_light_color"></div>
 
-    <a class="gc-clear-selection" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion"
-      target="_blank">
+    <a class="gc-clear-selection" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
       <div class="sidebar__item">
         <div class="sidebar__item-dropdown">
-          <img alt="Documentation" class="sidebar__icon sidebar__icon-lift" height="20"
-            ngSrc="assets/images/sidebar/tor.svg" width="20">Onion Link
+          <img alt="Documentation" class="sidebar__icon sidebar__icon-lift" height="20" ngSrc="assets/images/sidebar/tor.svg" width="20">Onion Link
         </div>
       </div>
     </a>
 
     <div class="sidebar__item">
-      <div (click)="onSectionSelected(category.DIRECTORY)"
-        [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
-        [routerLink]="'directory'" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink">
-        <img alt="Links" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/directory.svg"
-          width="20"> Links
+      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" [routerLink]="'directory'" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink">
+        <img alt="Links" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/directory.svg" width="20"> Links
       </div>
     </div>
 
-    <a class="gc-clear-selection"
-      href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+    <a class="gc-clear-selection" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="sidebar__item">
         <div class="sidebar__item-dropdown">
-          <img alt="Documentation" class="sidebar__icon" height="20"
-            ngSrc="../../../../assets/images/sidebar/documentation.svg" width="20">Documentation
+          <img alt="Documentation" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/documentation.svg" width="20">Documentation
         </div>
       </div>
     </a>
@@ -163,8 +153,7 @@
 <nav *ngIf="!this.sidebar_default" class="sidebar sidebar-collapsed">
   <button (click)="onToggleSidebar(true)" class="sidebar__header-menu">
     <img alt="Menu" height="20" ngSrc="../../../../assets/images/sidebar/menu-mini.svg" width="20" /></button>
-  <div class="sidebar__header sidebar__header-collapsed"><a href=""> <img alt="Logo" height="30"
-        ngSrc="../../../../assets/images/shared/logo-min.svg" priority width="30" />
+  <div class="sidebar__header sidebar__header-collapsed"><a href=""> <img alt="Logo" height="30" ngSrc="../../../../assets/images/shared/logo-min.svg" priority width="30" />
     </a>
   </div>
 
@@ -257,42 +246,31 @@
     </ng-container>
 
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
-      <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph"
-        target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/graph.svg"
-          width="19"> </a>SCANNER
+      <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph" target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/graph.svg" width="19"> </a>SCANNER
     </div>
     <div class="sidebar__item" *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
-      <a appTooltip="Whistle Blowing" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
-        href="https://orionleaks.com/#/" target="_blank"> <img alt="Links" class="sidebar__icon" height="19"
-          ngSrc="assets/images/sidebar/whistle.svg" width="19"> </a>
+      <a appTooltip="Whistle Blowing" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="https://orionleaks.com/#/" target="_blank"> <img alt="Links" class="sidebar__icon" height="19" ngSrc="assets/images/sidebar/whistle.svg" width="19"> </a>
     </div>
 
     <hr class="sidebar__item_break">
-    <a href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank"
-      class="gc-clear-selection sidebar__item-dropdown-max">
+    <a href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank" class="gc-clear-selection sidebar__item-dropdown-max">
       <div class="sidebar__item">
         <div class="sidebar__item-dropdown">
-          <img appTooltip="Onion Link" alt="Documentation" class="sidebar__icon sidebar__icon-collapse-lift" height="20"
-            ngSrc="assets/images/sidebar/tor.svg" width="20">
+          <img appTooltip="Onion Link" alt="Documentation" class="sidebar__icon sidebar__icon-collapse-lift" height="20" ngSrc="assets/images/sidebar/tor.svg" width="20">
         </div>
       </div>
     </a>
 
     <div class="sidebar__item">
-      <div (click)="onSectionSelected(category.DIRECTORY)"
-        [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
-        [routerLink]="'directory'" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink">
-        <img appTooltip="Active Links" alt="Links" class="sidebar__icon" height="20"
-          ngSrc="../../../../assets/images/sidebar/directory.svg" width="20">
+      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" [routerLink]="'directory'" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink">
+        <img appTooltip="Active Links" alt="Links" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/directory.svg" width="20">
       </div>
     </div>
 
-    <a class="gc-clear-selection"
-      href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+    <a class="gc-clear-selection" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="sidebar__item">
         <div class="sidebar__item-dropdown">
-          <img appTooltip="documentation" alt="Documentation" class="sidebar__icon" height="20"
-            ngSrc="../../../../assets/images/sidebar/documentation.svg" width="20">
+          <img appTooltip="documentation" alt="Documentation" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/documentation.svg" width="20">
         </div>
       </div>
     </a>

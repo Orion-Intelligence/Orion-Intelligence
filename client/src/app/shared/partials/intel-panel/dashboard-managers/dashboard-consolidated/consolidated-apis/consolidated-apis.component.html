@@ -1,9 +1,6 @@
 <div class="live-api-results-container mt-2" *ngIf="showComponent" [class.is-loading]="isProcessing">
 
-  <div class="live-api_report-section-main" *ngIf="!isLoading" [ngClass]="{
-                'scan_report-section-collapsed': !isExpanded,
-                'scan_report-section-loading': isProcessing,
-                'scan_report-section-loaded': !isProcessing && searchResults.length > 0
+  <div class="live-api_report-section-main" *ngIf="!isLoading" [ngClass]="{ 'scan_report-section-collapsed': !isExpanded, 'scan_report-section-loading': isProcessing, 'scan_report-section-loaded': !isProcessing && searchResults.length> 0
             }">
     <div class="scan_loading-header" *ngIf="!isLoading">
 
@@ -13,8 +10,7 @@
         Live API Data: {{ query }}
       </h3>
 
-      <button class="expand-collapse-btn" [ngClass]="{'is-disabled': isProcessing}" [disabled]="isProcessing"
-        (click)="toggleCollapse()">
+      <button class="expand-collapse-btn" [ngClass]="{'is-disabled': isProcessing}" [disabled]="isProcessing" (click)="toggleCollapse()">
         <img src="assets/images/shared/theme/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
       </button>
     </div>
@@ -92,8 +88,7 @@
                       Links
                     </div>
                     <div class="flex-wrap-gap-8">
-                      <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank"
-                        rel="noopener">{{ w }}</a>
+                      <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a>
                     </div>
 
                     <hr class="dashboard-header-divider" />
@@ -115,8 +110,7 @@
                     Username:
                   </div>
                   <span class="color-text1">{{ result.input.q1 || 'not found' }}</span>
-                  <div *ngIf="result.input.q2"
-                    class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+                  <div *ngIf="result.input.q2" class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
                     Email Address:
                   </div>
                   <span *ngIf="result.input.q2" class="color-text1">{{ result.input.q2 || 'not found' }}</span>

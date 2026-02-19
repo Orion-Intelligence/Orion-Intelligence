@@ -1,71 +1,67 @@
-import {Component, AfterViewInit, OnDestroy, ElementRef, ViewChild} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Observable, Subscription} from 'rxjs';
-import {DirectoryCallbackModel} from '../../../shared/model/directory/directory.model';
-import {DirectoryService} from '../../../services/directory/directory.service';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
-
+import { Component, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Observable, Subscription } from 'rxjs';
+import { DirectoryCallbackModel } from '../../../shared/model/directory/directory.model';
+import { DirectoryService } from '../../../services/directory/directory.service';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 @Component({
-  selector: 'app-directory-list',
-  templateUrl: './directory-list.component.html',
-  standalone: true,
-  imports: [CommonModule],
-  animations: [fadeInDashboardItem]
+    selector: 'app-directory-list',
+    templateUrl: './directory-list.component.html',
+    standalone: true,
+    imports: [CommonModule],
+    animations: [fadeInDashboardItem]
 })
 export class DirectoryListComponent implements AfterViewInit, OnDestroy {
-  directoryData$: Observable<DirectoryCallbackModel | null>;
-  visibleCount = 50;
-  totalItems = 0;
-  loadingMore = false;
-
-  private dataSub?: Subscription;
-  private observer?: IntersectionObserver;
-
-  @ViewChild('infiniteAnchor', { static: false }) infiniteAnchor!: ElementRef<HTMLDivElement>;
-
-  constructor(public directoryService: DirectoryService) {
-    this.directoryData$ = this.directoryService.directoryData$;
-    this.dataSub = this.directoryData$.subscribe(data => {
-      this.totalItems = data?.mDirectoryCallbackLinks?.length || 0;
-    });
-  }
-
-  isRecent(timestamp: any): boolean {
-    if (!timestamp) return false;
-    const date = new Date(timestamp);
-    const fifteenDaysAgo = new Date();
-    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
-    return date >= fifteenDaysAgo;
-  }
-
-  ngAfterViewInit(): void {
-    this.observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          this.loadMore();
-        }
-      });
-    }, { root: null, threshold: 0.1 });
-
-    if (this.infiniteAnchor?.nativeElement) {
-      this.observer.observe(this.infiniteAnchor.nativeElement);
+    directoryData$: Observable<DirectoryCallbackModel | null>;
+    visibleCount = 50;
+    totalItems = 0;
+    loadingMore = false;
+    private dataSub?: Subscription;
+    private observer?: IntersectionObserver;
+    @ViewChild('infiniteAnchor', { static: false })
+    infiniteAnchor!: ElementRef<HTMLDivElement>;
+    constructor(public directoryService: DirectoryService) {
+        this.directoryData$ = this.directoryService.directoryData$;
+        this.dataSub = this.directoryData$.subscribe(data => {
+            this.totalItems = data?.mDirectoryCallbackLinks?.length || 0;
+        });
     }
-  }
-
-  loadMore(): void {
-    if (this.loadingMore) return;
-    if (this.visibleCount >= this.totalItems) return;
-
-    this.loadingMore = true;
-
-    setTimeout(() => {
-      this.visibleCount += 50;
-      this.loadingMore = false;
-    }, 250);
-  }
-
-  ngOnDestroy(): void {
-    this.dataSub?.unsubscribe();
-    this.observer?.disconnect();
-  }
+    isRecent(timestamp: any): boolean {
+        if (!timestamp) {
+            return false;
+        }
+        const date = new Date(timestamp);
+        const fifteenDaysAgo = new Date();
+        fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+        return date >= fifteenDaysAgo;
+    }
+    ngAfterViewInit(): void {
+        this.observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.loadMore();
+                }
+            });
+        }, { root: null, threshold: 0.1 });
+        if (this.infiniteAnchor?.nativeElement) {
+            this.observer.observe(this.infiniteAnchor.nativeElement);
+        }
+    }
+    loadMore(): void {
+        if (this.loadingMore) {
+            return;
+        }
+        if (this.visibleCount >= this.totalItems) {
+            return;
+        }
+        this.loadingMore = true;
+        setTimeout(() => {
+            this.visibleCount += 50;
+            this.loadingMore = false;
+        }, 250);
+    }
+    ngOnDestroy(): void {
+        this.dataSub?.unsubscribe();
+        this.observer?.disconnect();
+    }
 }

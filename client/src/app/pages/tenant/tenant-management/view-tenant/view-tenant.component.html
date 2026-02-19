@@ -68,8 +68,7 @@
                       </td>
 
                       <td class="text-center col-action">
-                        <button id="edit-tenant" type="button" class="cursor-pointer bg-transparent border-0 p-0"
-                          (click)="tenant._expanded = !tenant._expanded">
+                        <button id="edit-tenant" type="button" class="cursor-pointer bg-transparent border-0 p-0" (click)="tenant._expanded = !tenant._expanded">
                           <img src="assets/images/shared/edit.svg" width="20" alt="edit" />
                         </button>
                       </td>
@@ -157,8 +156,7 @@
 
                               <div *ngIf="tenant.licenses?.length; else noLicenses">
                                 <ng-container *ngFor="let license of tenant.licenses">
-                                  <span *ngIf="licenseService.getLicenseLabel(license) !== 'Maintainer'"
-                                    class="badge-license">
+                                  <span *ngIf="licenseService.getLicenseLabel(license) !== 'Maintainer'" class="badge-license">
                                     {{ licenseService.getLicenseLabel(license) }}
                                   </span>
                                 </ng-container>
@@ -178,8 +176,7 @@
                               <div class="tenant-title">Verified</div>
 
                               <div class="tenant-edit-control">
-                                <button type="button" class="pill-toggle" [class.pill-on]="tenant.verified"
-                                  (click)="tenant.verified = !tenant.verified">
+                                <button type="button" class="pill-toggle" [class.pill-on]="tenant.verified" (click)="tenant.verified = !tenant.verified">
                                   <span class="pill-dot"></span>
                                   <span class="pill-text">
                                     {{ tenant.verified ? 'Verified' : 'Not Verified' }}
@@ -193,8 +190,7 @@
                             <div class="tenant-block">
                               <div class="tenant-title">User Quota</div>
                               <div class="tenant-edit-control field-equal">
-                                <input type="number" class="sidebar_input form-control form-control-sm tenant-input "
-                                  [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
+                                <input type="number" class="sidebar_input form-control form-control-sm tenant-input " [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                               </div>
                               <hr class="tenant-divider">
                             </div>
@@ -204,22 +200,18 @@
 
                               <div class="tenant-edit-control field-equal">
                                 <div class="dropdown w-100">
-                                  <button aria-expanded="false"
-                                    class="btn dropdown-toggle sidebar_input form-select form-select-sm tenant-input w-100 text-start d-flex justify-content-between align-items-center"
-                                    data-bs-toggle="dropdown" type="button">
+                                  <button aria-expanded="false" class="btn dropdown-toggle sidebar_input form-select form-select-sm tenant-input w-100 text-start d-flex justify-content-between align-items-center" data-bs-toggle="dropdown" type="button">
                                     {{ getStatusLabel(tenant.status) }}
                                   </button>
 
                                   <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow rounded-3">
                                     <li>
-                                      <a class="dropdown-item py-0 align-items-center"
-                                        (click)="tenant.status = TenantStatus.ACTIVE">Active</a>
+                                      <a class="dropdown-item py-0 align-items-center" (click)="tenant.status = TenantStatus.ACTIVE">Active</a>
                                     </li>
                                     <li class="dropdown-divider m-0 mx-3"></li>
 
                                     <li>
-                                      <a class="dropdown-item py-0 align-items-center"
-                                        (click)="tenant.status = TenantStatus.DISABLE">Disable</a>
+                                      <a class="dropdown-item py-0 align-items-center" (click)="tenant.status = TenantStatus.DISABLE">Disable</a>
                                     </li>
                                     <li class="dropdown-divider m-0 mx-3"></li>
                                   </ul>
@@ -234,13 +226,9 @@
 
                               <div class="license-grid">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <div class="license-card"
-                                    *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'"
-                                    [class.license-selected]="tenant.licenses?.includes(license)"
-                                    (click)="toggleTenantLicense(tenant, license)">
+                                  <div class="license-card" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
 
-                                    <input type="checkbox" class="license-checkbox"
-                                      [checked]="tenant.licenses?.includes(license)" />
+                                    <input type="checkbox" class="license-checkbox" [checked]="tenant.licenses?.includes(license)" />
 
                                     <span class="license-label">
                                       {{ licenseService.getLicenseLabel(license) }}
@@ -254,8 +242,7 @@
                             </div>
 
                             <div class="d-flex justify-content-end mt-3">
-                              <button type="button" class="btn btn-sm btn-primary expand-btn"
-                                (click)="updateTenant(tenant)">
+                              <button type="button" class="btn btn-sm btn-primary expand-btn" (click)="updateTenant(tenant)">
                                 Save changes
                               </button>
                             </div>

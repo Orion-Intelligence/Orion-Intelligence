@@ -4,8 +4,7 @@
         <div class="onboarding-step2__description-row">
             <h2 class="user-ioc-title">Manage IOCs</h2>
             <div class="onboarding-step2__description-row">
-                <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
-                    placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+                <input type="text" class="onboarding-step2__search-input profile-ioc-search-input" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
                 <div class="btn-group report-menu-option-container mr-0" (click)="openConfirmationPopup()">
                     <button appTooltip="clear all" class="p-0 report-menu-option">
                         <img alt="scan" src="../../../../../assets/images/shared/theme/bin.svg" />
@@ -25,9 +24,7 @@
 
             <div class="onboarding-step2__category-scroll" #categoryScroll>
                 <ng-container *ngIf="filteredIocs.length > 0; else noEntity">
-                    <div *ngFor="let category of filteredIocs" class="onboarding-step2__tab"
-                        [class.selected]="category.ioc_id === selectedCategoryId"
-                        (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+                    <div *ngFor="let category of filteredIocs" class="onboarding-step2__tab" [class.selected]="category.ioc_id === selectedCategoryId" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                         {{ category.name }}
                     </div>
                 </ng-container>
@@ -50,10 +47,8 @@
 
         <label class="onboarding-step2__label">Enter IOCs</label>
         <div class="onboarding-step2__input-wrapper">
-            <input type="text" class="onboarding-step2__input" placeholder="Type"
-                (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-            <button type="button" class="onboarding-step2__add-btn"
-                (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
+            <input type="text" class="onboarding-step2__input" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+            <button type="button" class="onboarding-step2__add-btn" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
         </div>
 
         <div class="onboarding-step2__divider2"></div>
@@ -67,8 +62,7 @@
                         <p class="onboarding-step2__heading">{{ ioc.name }}</p>
 
                         <div class="onboarding-step2__chips">
-                            <div class="onboarding-step2__chip" appTooltip="remove IOC" *ngFor="let value of ioc.values"
-                                (click)="removeIoc(ioc.ioc_id, value)">
+                            <div class="onboarding-step2__chip" appTooltip="remove IOC" *ngFor="let value of ioc.values" (click)="removeIoc(ioc.ioc_id, value)">
                                 <span>{{ value }}</span>
                                 <span class="onboarding-step2__chip-remove">
                                     ✕
