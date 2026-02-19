@@ -375,17 +375,6 @@ export class GraphReportExportService {
     return input.replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
-  private drawInfoPanel(doc: jsPDF, x: number, y: number, w: number, h: number, title: string): void {
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(x, y, w, h, 8, 8, 'F');
-    doc.setDrawColor(226, 232, 240);
-    doc.roundedRect(x, y, w, h, 8, 8, 'S');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(15, 23, 42);
-    doc.text(title, x + 12, y + 20);
-  }
-
   private buildDocPdfBytes(payload: GraphReportPayload): Uint8Array {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
     const meta = this.makeMeta(payload);

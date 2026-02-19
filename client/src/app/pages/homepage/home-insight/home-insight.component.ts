@@ -9,9 +9,6 @@ import {
 } from '../../../shared/model/homepage/stats_insight.model';
 import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
 import {ScrollService} from '../../../shared/services/scroll.service';
-import {CustomizeBarChartComponent} from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
-import {GraphModel} from '../../../shared/model/charts/charts.model';
-import {GraphInsightCallbackModel} from '../../../shared/model/homepage/graph.insight.model';
 import {LatestDocument, LatestDocumentCallbackModel} from '../../../shared/model/homepage/document_insight.model';
 import {AppService} from '../../../services/core/app/app.service';
 import {LicenseService} from '../../../services/licenses/licenses.service';
@@ -25,10 +22,8 @@ import {LicenseService} from '../../../services/licenses/licenses.service';
 export class HomeInsightComponent implements OnInit {
   insights!: InsightCallbackModel;
   latestDocuments!: LatestDocumentCallbackModel;
-  graphInsight!: GraphInsightCallbackModel;
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
   latestDocumentModelKeys: string[] = [];
-  GraphData!: GraphModel[];
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, public appService: AppService, protected licenseService: LicenseService) {
   }
@@ -37,7 +32,6 @@ export class HomeInsightComponent implements OnInit {
     const data = this.route.snapshot.data['insights'];
     this.insights = data.insights;
     this.latestDocuments = data.latestDocument;
-    this.graphInsight = data.graph_insight;
 
     this.latestDocumentModelKeys = (
       Object.keys(this.latestDocuments) as (keyof LatestDocumentCallbackModel)[]
@@ -47,34 +41,6 @@ export class HomeInsightComponent implements OnInit {
         this.latestDocuments[key] &&
         this.latestDocuments[key].length > 0
     );
-
-    const graphs = this.transformToGraphDataList(data.graph_insight);
-    this.GraphData = graphs.length
-      ? graphs
-      : Array.from({length: 4}, () => ({
-        type: 'bar',
-        title: '',
-        data: []
-      }));
-  }
-
-
-  transformToGraphDataList(insight: [true, any[]] | [false, null]): GraphModel[] {
-    if (!Array.isArray(insight) || !insight[0] || !Array.isArray(insight[1])) {
-      return [];
-    }
-
-    return insight[1].map((agg: any) => {
-      return {
-        type: 'bar',
-        title: agg.aggregation_name,
-        data: (agg.buckets || []).map((bucket: any) => ({
-          name: bucket.key,
-          value: bucket.count,
-          target: Math.floor(bucket.count * 0.8)
-        }))
-      };
-    });
   }
 
   getKeys(obj: GenericModel | LeakModel | DefacementModel): string[] {

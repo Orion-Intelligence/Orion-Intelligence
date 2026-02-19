@@ -3,7 +3,6 @@ import { Observable, throwError, timer } from 'rxjs';
 import { catchError, filter, map, retry, switchMap, take, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
 import { CustomEntity, PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
-import { mockAddEntity, mockFetchFollowers, mockFetchFollowing, mockFetchPlatformImages, mockFetchProfileInfo, mockFetchSocialPosts, mockPerformImageScan, mockPerformScan } from './social-scan.mock';
 
 type ApiEnvelope<T> = {
   status?: 'success' | 'error' | string;
@@ -15,8 +14,6 @@ type ApiEnvelope<T> = {
   providedIn: 'root'
 })
 export class SocialScanService {
-  private useMockData = false;
-
   constructor(private api: ApiService) {}
 
   private extractMetadata(platformName: string, data: any): Partial<PlatformResult>
@@ -86,10 +83,6 @@ export class SocialScanService {
 
   performScan(username: string): Observable<ScanEvent>
   {
-    if (this.useMockData) {
-      return mockPerformScan(username, this.extractMetadata.bind(this));
-    }
-
     return new Observable(subscriber => {
       subscriber.next({ type: 'progress', payload: { progress: 10, step: 'Submitting job to API...' } });
 
@@ -166,10 +159,6 @@ export class SocialScanService {
 
   performImageScan(base64Image: string): Observable<ScanEvent>
   {
-    if (this.useMockData) {
-      return mockPerformImageScan(this.extractMetadata.bind(this));
-    }
-
     return new Observable(subscriber => {
       subscriber.next({ type: 'progress', payload: { progress: 10, step: 'Submitting image to API...' } });
 
@@ -228,10 +217,6 @@ export class SocialScanService {
 
   fetchProfileInfo(platform: string, username: string): Observable<{ profile: ProfileDetails }>
   {
-    if (this.useMockData) {
-      return mockFetchProfileInfo(platform);
-    }
-
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<{ profile: ProfileDetails }>>('social/profile', { platform, username }),
       isReady: (res) => !!res && 'result' in res,
@@ -241,10 +226,6 @@ export class SocialScanService {
 
   fetchPlatformImages(platform: string, username: string): Observable<{ images: SocialImage[] }>
   {
-    if (this.useMockData) {
-      return mockFetchPlatformImages();
-    }
-
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<{ images: SocialImage[] }>>('social/online/images', { platform, username }),
       isReady: (res) => !!res && 'result' in res,
@@ -254,10 +235,6 @@ export class SocialScanService {
 
   fetchSocialPosts(platform: string, username: string): Observable<{ posts: SocialPost[] }>
   {
-    if (this.useMockData) {
-      return mockFetchSocialPosts();
-    }
-
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | { posts: SocialPost[] }>>('social/posts', { platform, username }),
       isReady: (res) => !!res && 'result' in res,
@@ -271,10 +248,6 @@ export class SocialScanService {
 
   fetchFollowers(platform: string, username: string): Observable<{ followers: string[] }>
   {
-    if (this.useMockData) {
-      return mockFetchFollowers();
-    }
-
     return this.pollForResult({
       request: () => this.api.post<any>('social/followers', { platform, username, max_followers: 1000 }),
       isReady: (res) => !!res && 'result' in res,
@@ -284,10 +257,6 @@ export class SocialScanService {
 
   fetchFollowing(platform: string, username: string): Observable<{ following: string[] }>
   {
-    if (this.useMockData) {
-      return mockFetchFollowing();
-    }
-
     return this.pollForResult({
       request: () => this.api.post<any>('social/following', { platform, username, max_following: 1000 }),
       isReady: (res) => !!res && 'result' in res,
@@ -297,6 +266,20 @@ export class SocialScanService {
 
   addEntity(entity: { type: 'wallet' | 'email' | 'domain'; value: string; label: string }): Observable<CustomEntity>
   {
-    return mockAddEntity(entity);
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<CustomEntity | { entity: CustomEntity }>>('social/entity', entity),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => {
+        const raw = (res.result as any)?.entity ?? res.result ?? {};
+        return {
+          id: raw.id ?? `entity-${entity.type}-${Date.now()}`,
+          type: raw.type ?? entity.type,
+          label: raw.label ?? entity.label,
+          value: raw.value ?? entity.value,
+          onGraph: raw.onGraph ?? true,
+          status: raw.status ?? 'added'
+        } as CustomEntity;
+      },
+    }).pipe(retry(3));
   }
 }

@@ -2,10 +2,6 @@
     'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
     'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen
   }">
-<!--  <div class="home_insight__container mt-lg-5">-->
-<!--    <app-customize-bar-chart *ngFor="let graph of GraphData" [graphModel]="graph"></app-customize-bar-chart>-->
-<!--  </div>-->
-<!--  <div class="home_insight__single">Top Data Leaks</div>-->
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
     <div [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen,
         'sidebar-closed': !appService.getConfig().localSettings.isSidebarOpen}">
