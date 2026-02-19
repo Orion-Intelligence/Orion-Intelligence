@@ -1,9 +1,8 @@
 import { signal } from '@angular/core';
 import { SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { loadMoreIncrementally } from './summary-view.util';
-import { PlatformFetchWithImagesActionsBase } from './platform-fetch-actions.base';
 
-export abstract class PlatformFeedViewBase extends PlatformFetchWithImagesActionsBase {
+export abstract class PlatformFeedViewBase {
     displayPosts = signal<SocialPost[]>([]);
     displayImages = signal<SocialImage[]>([]);
     displayFollowers = signal<string[]>([]);

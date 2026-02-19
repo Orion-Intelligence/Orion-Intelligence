@@ -6,7 +6,6 @@ import { FetchingStateService } from '../services/fetching-state.service';
 import { SummaryAllPlatformsViewComponent } from './summary-all-platforms-view/summary-all-platforms-view.component';
 import { SummaryPlatformViewComponent } from './summary-platform-view/summary-platform-view.component';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
-import { PlatformFetchWithImagesActionsBase } from '../utils/platform-fetch-actions.base';
 @Component({
     selector: 'app-profile-summary-popup',
     templateUrl: './profile-summary-popup.component.html',
@@ -14,12 +13,23 @@ import { PlatformFetchWithImagesActionsBase } from '../utils/platform-fetch-acti
     standalone: true,
     imports: [CommonModule, SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective],
 })
-export class ProfileSummaryPopupComponent extends PlatformFetchWithImagesActionsBase {
+export class ProfileSummaryPopupComponent {
     username = input.required<string>();
     platforms = input.required<PlatformResult[]>();
     email = input<string | undefined>();
+    isScanInProgress = input<boolean>(false);
     close = output<void>();
+    fetchProfile = output<PlatformResult>();
+    fetchPosts = output<PlatformResult>();
+    fetchFollowers = output<PlatformResult>();
+    fetchFollowing = output<PlatformResult>();
+    fetchPlatformImages = output<PlatformResult>();
     rescan = output<string>();
+    cancelFetchProfile = output<PlatformResult>();
+    cancelFetchPosts = output<PlatformResult>();
+    cancelFetchFollowers = output<PlatformResult>();
+    cancelFetchFollowing = output<PlatformResult>();
+    cancelFetchPlatformImages = output<PlatformResult>();
     cancelAllFetches = output<string>();
     platformSearchTerm = signal('');
     selectedPlatform = signal<PlatformResult | 'all' | null>('all');
@@ -32,7 +42,6 @@ export class ProfileSummaryPopupComponent extends PlatformFetchWithImagesActions
         return this.selectedPlatform() === 'all';
     });
     constructor(fetchingState: FetchingStateService) {
-        super();
         this.fetchingState = fetchingState;
         effect(() => {
             const platformList = this.filteredPlatforms();
