@@ -151,7 +151,6 @@ describe('Login & Sidebar Checks for Users', () => {
       {name: 'testing2', selector: 'div.sidebar__item-dropdown.active'},
       {name: 'General Intelligence', selector: 'div.sidebar__item-dropdown'},
       {name: 'Data Breach', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Discussion', selector: 'div.sidebar__item-dropdown'},
       {name: 'Defacement', selector: 'div.sidebar__item-dropdown'},
       {name: 'Social', selector: 'div.sidebar__item-dropdown'},
       {name: 'Exploit', selector: 'div.sidebar__item-dropdown'},
@@ -167,7 +166,6 @@ describe('Login & Sidebar Checks for Users', () => {
       {name: 'testing3', selector: 'div.sidebar__item-dropdown.active'},
       {name: 'General Intelligence', selector: 'div.sidebar__item-dropdown'},
       {name: 'Data Breach', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Discussion', selector: 'div.sidebar__item-dropdown'},
       {name: 'Defacement', selector: 'div.sidebar__item-dropdown'},
       {name: 'Social', selector: 'div.sidebar__item-dropdown'},
       {name: 'Exploit', selector: 'div.sidebar__item-dropdown'},
@@ -193,7 +191,6 @@ describe('Login & Sidebar Checks for Users', () => {
     const sidebarItems5 = [
       {name: 'General Intelligence', selector: 'div.sidebar__item-dropdown.active'},
       {name: 'Data Breach', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Discussion', selector: 'div.sidebar__item-dropdown'},
       {name: 'Defacement', selector: 'div.sidebar__item-dropdown'},
       {name: 'Social', selector: 'div.sidebar__item-dropdown'},
       {name: 'Exploit', selector: 'div.sidebar__item-dropdown'},

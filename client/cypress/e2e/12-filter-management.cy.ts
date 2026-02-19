@@ -244,72 +244,6 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
 
 
 
-describe('Discussion – Full Filters Flow', () => {
-
-  beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
-  });
-
-  it('Apply all filters in Discussion with auto-apply', () => {
-
-    cy.visit('/dashboard');
-
-    cy.contains('div.sidebar__item-dropdown', 'Discussion')
-      .scrollIntoView()
-      .click({ force: true });
-
-    cy.get('[data-cy="dashboard-general-input"]')
-      .should('be.visible');
-
-
-    const openFilters = () => {
-      cy.get('div.filter-button-wrapper label.filters-button')
-        .click({ force: true });
-      cy.get('form.sidebar_form')
-        .should('be.visible');
-    };
-    openFilters();
-
-
-    const selectMessageDate = () => {
-      cy.get('.sidebar_input_date-button').click({ force: true });
-
-      cy.contains('span.custom-day', '1').click({ force: true });
-
-      cy.contains('span.custom-day', '25').click({ force: true });
-
-      cy.contains('button', 'Apply').click({ force: true });
-
-
-      cy.get('.sidebar_input_date-button').click({ force: true });
-      cy.contains('button', 'Clear').click({ force: true });
-      openFilters();
-    };
-    selectMessageDate();
-
-
-    const contentTypes = [
-      'All','Breach','Credential','Ransomware'
-    ];
-
-    contentTypes.forEach(option => {
-      cy.get('#dropdowncontent').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
-      cy.contains('button', 'Apply').click({ force: true });
-
-      openFilters();
-    });
-
-
-    cy.get('button.default-input-button[type="submit"]').click({ force: true });
-
-  });
-
-});
-
-
 describe('Defacement – Full Filters Flow', () => {
 
   beforeEach(() => {
@@ -532,7 +466,6 @@ describe('Exploit – Full Filters Flow', () => {
   });
 
 });
-
 
 
 

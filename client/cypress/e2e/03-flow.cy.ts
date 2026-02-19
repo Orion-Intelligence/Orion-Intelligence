@@ -65,37 +65,6 @@ describe('Orion Intelligence – Full Stable Flow', () => {
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Discussion')
-      .click({ force: true });
-
-    const discussionSections = [
-      'All',
-      'Warfare',
-      'Cloud',
-      'DDoS',
-      'Exploit',
-      'Hack',
-      'Credentials Common',
-      'Text',
-      'Phishing',
-      'CVE',
-      'Credential',
-      'Ransomware',
-      'Data',
-      'Malware',
-      'XSS',
-      'C2',
-      'Leak',
-      'RCE',
-      'Fraud',
-      'Infostealer'
-    ];
-
-    discussionSections.forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
-        .click({ force: true });
-    });
-
     cy.contains('.sidebar__item-dropdown', 'Defacement')
       .click({ force: true });
 

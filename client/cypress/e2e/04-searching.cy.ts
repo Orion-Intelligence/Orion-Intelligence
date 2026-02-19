@@ -271,29 +271,6 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     jsom_relation_maping();
   });
 
-  it('Discussion: All → Search → Open Report → Click Tabs', () => {
-    cy.visit('/dashboard/profile/homepage');
-
-    cy.contains('.sidebar__item-dropdown', 'Discussion')
-      .scrollIntoView()
-      .click({force: true});
-
-    cy.contains('.sidebar__subitem-content', 'All').click({force: true});
-
-    cy.get('.dashboard__search-main-div')
-      .first()
-      .should('exist')
-      .and('be.visible')
-      .within(() => {
-        cy.get('[apptooltip="Open Report"]').should('be.visible').click({force: true});
-      });
-
-    cy.get('.search__result-detail').should('exist').and('be.visible');
-
-    clickReportTabs('discussion-all-report');
-    clickReportMenuButtons('discussion-all-report');
-  });
-
   it('Defacement: Hacked → Phishing → Databases', () => {
     cy.visit('/dashboard/profile/homepage');
 

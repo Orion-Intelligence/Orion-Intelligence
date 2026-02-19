@@ -124,64 +124,6 @@ describe('Data Breach – Tabs & Pagination', () => {
 });
 
 
-describe('Discussion – Tabs & Pagination', () => {
-
-  const TABS = [
-    'All'
-  ];
-
-  beforeEach(() => {
-
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
-
-    cy.visit('/dashboard');
-
-
-    cy.get('app-dashboard-sidebar-items').should('exist');
-  });
-
-  it('Discussion – tabs load & pagination', () => {
-
-    cy.contains('div.sidebar__item-dropdown', 'Discussion')
-      .click({ force: true });
-
-
-    TABS.forEach((tab) => {
-      cy.log(`TAB: ${tab}`);
-
-
-      cy.contains('.sidebar__subitem-content', tab)
-        .click({ force: true });
-
-
-      cy.get('.dashboard__search-main-div.ng-star-inserted')
-        .should('exist');
-
-
-      cy.get('.pagination_search-container').should('exist');
-
-
-      cy.get('button.pagination_navigation')
-        .not('.disabled')
-        .find('img[alt="nav-next"]')
-        .parents('button')
-        .then(($btn) => {
-          if ($btn.length) {
-            cy.wrap($btn).click({ force: true });
-
-
-            cy.get('.dashboard__search-main-div.ng-star-inserted')
-              .should('exist');
-          }
-        });
-    });
-  });
-});
-
-
-
 describe('Defacement – Tabs & Pagination', () => {
   const TABS = ['All', 'Hacked'];
 
@@ -421,4 +363,3 @@ describe('Feed – Tabs & Pagination', () => {
     });
   });
 });
-
