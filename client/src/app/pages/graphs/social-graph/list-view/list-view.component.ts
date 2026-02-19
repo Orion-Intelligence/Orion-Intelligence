@@ -4,6 +4,7 @@ import { NetworkData, PlatformResult, CustomEntity, NetworkNode } from '../../..
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
+import { getMetadataEntries } from '../utils/summary-view.util';
 
 @Component({
   selector: 'app-list-view',
@@ -168,11 +169,7 @@ export class ListViewComponent {
 
   getMetadataEntries(platformNodeId: string): { key: string, value: any }[] {
     const platformData = this.getPlatformData(platformNodeId);
-    const metadata = platformData?.allMetadata;
-    if (!metadata) {
-      return [];
-    }
-    return Object.entries(metadata).map(([key, value]) => ({ key, value }));
+    return getMetadataEntries(platformData?.allMetadata);
   }
 
   trackById(_index: number, item: { id: string | number }): string | number {

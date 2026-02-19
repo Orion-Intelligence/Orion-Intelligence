@@ -1,11 +1,13 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, effect, WritableSignal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PlatformResult, SocialImage, SocialPost } from '../../../../../shared/model/social/social-scan.models';
+import { PlatformResult } from '../../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey } from '../../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../../services/fetching-state.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
+import { getProfileDetailEntries } from '../../utils/summary-view.util';
+import { PlatformFeedViewBase } from '../../utils/platform-feed-view.base';
 
 @Component({
   selector: 'app-summary-platform-view',
@@ -14,7 +16,7 @@ import { buildSocialProfileUrl } from '../../utils/profile-url.util';
   templateUrl: './summary-platform-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SummaryPlatformViewComponent {
+export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   platform = input.required<PlatformResult | null>();
   isScanInProgress = input<boolean>(false);
 
@@ -29,36 +31,15 @@ export class SummaryPlatformViewComponent {
   cancelFetchFollowing = output<PlatformResult>();
   cancelFetchPlatformImages = output<PlatformResult>();
 
-  displayPosts = signal<SocialPost[]>([]);
-  displayImages = signal<SocialImage[]>([]);
-  displayFollowers = signal<string[]>([]);
-  displayFollowing = signal<string[]>([]);
-
-  isLoadingMorePosts = signal(false);
-  isLoadingMoreImages = signal(false);
-  isLoadingMoreFollowers = signal(false);
-  isLoadingMoreFollowing = signal(false);
-
-  private readonly initialPosts = 3;
-  private readonly initialImages = 8;
-  private readonly initialFollowers = 10;
-  private readonly initialFollowing = 10;
-  private readonly postsIncrement = 3;
-  private readonly imagesIncrement = 4;
-  private readonly followersIncrement = 10;
-  private readonly followingIncrement = 10;
-
   public fetchingState = inject(FetchingStateService);
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
 
   constructor() {
+    super();
     effect(() => {
       const p = this.platform();
-      this.displayPosts.set((p?.posts || []).slice(0, this.initialPosts));
-      this.displayImages.set((p?.images || []).slice(0, this.initialImages));
-      this.displayFollowers.set((p?.followers_list || []).slice(0, this.initialFollowers));
-      this.displayFollowing.set((p?.following_list || []).slice(0, this.initialFollowing));
+      this.resetFeedState(p?.posts, p?.images, p?.followers_list, p?.following_list);
     });
   }
 
@@ -66,54 +47,24 @@ export class SummaryPlatformViewComponent {
     return this.fetchingState.getPlatformUniqueKey(p);
   }
 
-  loadMorePosts() { this._loadMore(this.isLoadingMorePosts, this.displayPosts, this.platform()?.posts, this.postsIncrement); }
-  loadMoreImages() { this._loadMore(this.isLoadingMoreImages, this.displayImages, this.platform()?.images, this.imagesIncrement); }
-  loadMoreFollowers() { this._loadMore(this.isLoadingMoreFollowers, this.displayFollowers, this.platform()?.followers_list, this.followersIncrement); }
-  loadMoreFollowing() { this._loadMore(this.isLoadingMoreFollowing, this.displayFollowing, this.platform()?.following_list, this.followingIncrement); }
-
-  private addItemsIncrementally<T>(displaySignal: WritableSignal<T[]>, itemsToAdd: T[], onComplete: () => void) {
-    if (itemsToAdd.length === 0) {
-      onComplete();
-      return;
-    }
-
-    let i = 0;
-    const addItem = () => {
-      if (i < itemsToAdd.length) {
-        displaySignal.update(current => [...current, itemsToAdd[i]]);
-        i++;
-        setTimeout(addItem, 75);
-      } else {
-        onComplete();
-      }
-    };
-    addItem();
+  override loadMorePosts() {
+    super.loadMorePosts(this.platform()?.posts);
   }
 
-  private _loadMore<T>(isLoadingSignal: WritableSignal<boolean>, displaySignal: WritableSignal<T[]>, allItems: T[] | undefined | null, increment: number) {
-    if (isLoadingSignal()) {
-      return;
-    }
-    isLoadingSignal.set(true);
+  override loadMoreImages() {
+    super.loadMoreImages(this.platform()?.images);
+  }
 
-    const currentCount = displaySignal().length;
-    const items = allItems || [];
-    const nextItems = items.slice(currentCount, currentCount + increment);
+  override loadMoreFollowers() {
+    super.loadMoreFollowers(this.platform()?.followers_list);
+  }
 
-    this.addItemsIncrementally(displaySignal, nextItems, () => isLoadingSignal.set(false));
+  override loadMoreFollowing() {
+    super.loadMoreFollowing(this.platform()?.following_list);
   }
 
   getProfileDetailEntries(platform: PlatformResult | null): { key: string, value: any }[] {
-    if (!platform) {
-      return [];
-    }
-    const details = platform.profileDetails;
-    if (!details) {
-      return [];
-    }
-    return Object.entries(details)
-      .filter(([_, value]) => value !== null && value !== undefined && value !== '')
-      .map(([key, value]) => ({ key, value }));
+    return getProfileDetailEntries(platform);
   }
 
   getAccountUrl(platform: PlatformResult): string {

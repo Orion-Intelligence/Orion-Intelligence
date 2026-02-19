@@ -2333,3 +2333,53 @@ SEARCH_DOCS = {"defacement": {"description": (
         "  \"Page_Count\": 0.2\n"
         "}\n"
         "```"), }}
+
+from pathlib import Path
+import re
+
+
+_DOCS_DIR = Path(__file__).resolve().parent / "api_docs"
+
+
+def _read_md(rel_path: str) -> str:
+    path = _DOCS_DIR / rel_path
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return f"Documentation file not found: {path}"
+
+
+def _doc(rel_path: str) -> dict:
+    text = _read_md(rel_path.lstrip('/'))
+    match = re.search(r"^##\s*Response Description\s*\n(.*?)(?:\n##\s|\Z)", text, flags=re.MULTILINE | re.DOTALL)
+    response_description = "Success"
+    if match:
+        block = match.group(1).strip()
+        if block:
+            response_description = block.splitlines()[0].strip() or "Success"
+    return {"description": text, "response_description": response_description}
+
+
+SYSTEM_INFO_DOCS = {"directory": _doc("system-info/directory.md"), "dumps": _doc(
+    "system-info/dumps.md"), "insight": _doc("system-info/insight.md"), }
+
+REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("reports/breach.md"), "news": _doc(
+    "reports/news.md"), "exploit": _doc("reports/exploit.md"), "strategic": _doc("reports/strategic.md"), "chat": _doc(
+    "reports/chat.md"), "social_models": _doc("reports/social_models.md"), "breach_screenshot": _doc(
+    "reports/breach_screenshot.md"), "stix": _doc("reports/stix.md"), }
+
+DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dynamic_cracked": _doc(
+    "dynamic/dynamic_cracked.md"), "dynamic_software": _doc("dynamic/dynamic_software.md"), "dynamic_social": _doc(
+    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"), "ip_scan": _doc("dynamic/ip_scan.md"),
+    "ioc_extract": _doc("dynamic/ioc_extract.md"),"apk_scan": _doc("dynamic/apk_scan.md"),}
+
+CRYPTO_DOCS = {"crypto_scan": _doc("dynamic/crypto_scan.md"),}
+
+SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
+    "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
+    "search/consolidated_ranked.md"), "telegram": _doc("search/telegram.md"), "social_models": _doc(
+    "search/social_models.md"), "breach": _doc("search/breach.md"), "exploit": _doc("search/exploit.md"), "defacement": _doc(
+    "search/defacement.md"), }
+
+SUPPORT_METHOD_DOCS={"subdomain_scan": _doc("support/subdomain_scan.md"), "dns_scan": _doc(
+    "support/dns_scan.md"), "wayback_scan": _doc("support/wayback_scan.md")}

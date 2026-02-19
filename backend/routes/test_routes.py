@@ -32,6 +32,24 @@ def _mock_step(key: str):
 def _load_elastic_mock(filename: str):
     return json.loads((_ELASTIC_MOCKS_DIR / filename).read_text(encoding="utf-8"))
 
+def _load_api_mock(filename: str):
+    return json.loads((_MOCKS_DIR / filename).read_text(encoding="utf-8"))
+
+def _pending_or_api_mock(step_key: str, filename: str):
+    step = _mock_step(step_key)
+    if step:
+        return step
+    return _load_api_mock(filename)
+
+def _pending_or_dynamic_scan(scan_type: str):
+    step_key = f"urlscan_domain_{scan_type}"
+    step = _mock_step(step_key)
+    if step:
+        return step
+    filename = f"urlscan_domain_{scan_type}.json"
+    print(_MOCKS_DIR / filename)
+    return _load_api_mock(filename)
+
 
 test_routes = APIRouter(
     dependencies=[
@@ -71,10 +89,7 @@ async def test_search_dynamic_cracked(param: search_dynamic_crack_model = Body(.
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
-    step = _mock_step("dynamic_software")
-    if step:
-        return step
-    return json.loads((_MOCKS_DIR / "dynamic_software.json").read_text(encoding="utf-8"))
+    return _pending_or_api_mock("dynamic_software", "dynamic_software.json")
 
 @test_routes.post(
     "/api/urlscan/ip",
@@ -82,10 +97,7 @@ async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
-    step = _mock_step("dynamic_software")
-    if step:
-        return step
-    return json.loads((_MOCKS_DIR / "urlscan_domain_iplookup.json").read_text(encoding="utf-8"))
+    return _pending_or_api_mock("dynamic_software", "urlscan_domain_iplookup.json")
 
 @test_routes.post(
     "/api/dynamic/social",
@@ -105,11 +117,7 @@ async def test_search_dynamic_social(param: search_dynamic_social_model = Body(.
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
         Depends(license_required("scanning")), ], )
 async def test_parse_text(payload: DomainScanRequest):
-    step = _mock_step(f"urlscan_domain_{payload.scanType}")
-    if step:
-        return step
-    print((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json"))
-    return json.loads((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json").read_text(encoding="utf-8"))
+    return _pending_or_dynamic_scan(payload.scanType)
 
 @test_routes.post(
     "/api/urlscan/subdomains",
@@ -118,11 +126,7 @@ async def test_parse_text(payload: DomainScanRequest):
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
         Depends(license_required("scanning")), ], )
 async def test_parse_text(payload: DomainScanRequest):
-    step = _mock_step(f"urlscan_domain_{payload.scanType}")
-    if step:
-        return step
-    print((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json"))
-    return json.loads((_MOCKS_DIR / f"urlscan_domain_{payload.scanType}.json").read_text(encoding="utf-8"))
+    return _pending_or_dynamic_scan(payload.scanType)
 
 @test_routes.post(
     "/api/ioc/extract",

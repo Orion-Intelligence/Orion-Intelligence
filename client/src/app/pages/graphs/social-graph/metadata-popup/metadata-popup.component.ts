@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, WritableSignal, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PlatformResult, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
@@ -6,6 +6,8 @@ import { SocialIconComponent } from '../../../../shared/components/social-icon/s
 import { FetchingStateService } from '../services/fetching-state.service';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
+import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
+import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
 
 @Component({
   selector: 'app-metadata-popup',
@@ -14,7 +16,7 @@ import { buildSocialProfileUrl } from '../utils/profile-url.util';
   standalone: true,
   imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective],
 })
-export class MetadataPopupComponent {
+export class MetadataPopupComponent extends PlatformFeedViewBase {
   data = input.required<PlatformResult>();
   isScanInProgress = input<boolean>(false);
 
@@ -32,25 +34,6 @@ export class MetadataPopupComponent {
 
   fetchingState: FetchingStateService;
 
-  displayPosts = signal<SocialPost[]>([]);
-  displayImages = signal<SocialImage[]>([]);
-  displayFollowers = signal<string[]>([]);
-  displayFollowing = signal<string[]>([]);
-
-  isLoadingMorePosts = signal(false);
-  isLoadingMoreImages = signal(false);
-  isLoadingMoreFollowers = signal(false);
-  isLoadingMoreFollowing = signal(false);
-
-  private readonly initialPosts = 3;
-  private readonly initialImages = 8;
-  private readonly initialFollowers = 10;
-  private readonly initialFollowing = 10;
-  private readonly postsIncrement = 3;
-  private readonly imagesIncrement = 4;
-  private readonly followersIncrement = 10;
-  private readonly followingIncrement = 10;
-
   isFetching = computed(() => this.fetchingState.profile()[this.getPlatformUniqueKey()]);
   isFetchingPosts = computed(() => this.fetchingState.posts()[this.getPlatformUniqueKey()]);
   isFetchingImages = computed(() => this.fetchingState.platformImages()[this.getPlatformUniqueKey()]);
@@ -58,12 +41,10 @@ export class MetadataPopupComponent {
   isFetchingFollowing = computed(() => this.fetchingState.following()[this.getPlatformUniqueKey()]);
 
   constructor(fetchingState: FetchingStateService) {
+    super();
     this.fetchingState = fetchingState;
     effect(() => {
-      this.displayPosts.set((this.data().posts || []).slice(0, this.initialPosts));
-      this.displayImages.set((this.data().images || []).slice(0, this.initialImages));
-      this.displayFollowers.set((this.data().followers_list || []).slice(0, this.initialFollowers));
-      this.displayFollowing.set((this.data().following_list || []).slice(0, this.initialFollowing));
+      this.resetFeedState(this.data().posts, this.data().images, this.data().followers_list, this.data().following_list);
     });
   }
 
@@ -71,41 +52,20 @@ export class MetadataPopupComponent {
     return this.fetchingState.getPlatformUniqueKey(this.data());
   }
 
-  loadMorePosts() { this._loadMore(this.isLoadingMorePosts, this.displayPosts, this.data().posts, this.postsIncrement); }
-  loadMoreImages() { this._loadMore(this.isLoadingMoreImages, this.displayImages, this.data().images, this.imagesIncrement); }
-  loadMoreFollowers() { this._loadMore(this.isLoadingMoreFollowers, this.displayFollowers, this.data().followers_list, this.followersIncrement); }
-  loadMoreFollowing() { this._loadMore(this.isLoadingMoreFollowing, this.displayFollowing, this.data().following_list, this.followingIncrement); }
-
-  private addItemsIncrementally<T>(displaySignal: WritableSignal<T[]>, itemsToAdd: T[], onComplete: () => void) {
-    if (itemsToAdd.length === 0) {
-      onComplete();
-      return;
-    }
-
-    let i = 0;
-    const addItem = () => {
-      if (i < itemsToAdd.length) {
-        displaySignal.update(current => [...current, itemsToAdd[i]]);
-        i++;
-        setTimeout(addItem, 75);
-      } else {
-        onComplete();
-      }
-    };
-    addItem();
+  override loadMorePosts() {
+    super.loadMorePosts(this.data().posts);
   }
 
-  private _loadMore<T>(isLoadingSignal: WritableSignal<boolean>, displaySignal: WritableSignal<T[]>, allItems: T[] | undefined | null, increment: number) {
-    if (isLoadingSignal()) {
-      return;
-    }
-    isLoadingSignal.set(true);
+  override loadMoreImages() {
+    super.loadMoreImages(this.data().images);
+  }
 
-    const currentCount = displaySignal().length;
-    const items = allItems || [];
-    const nextItems = items.slice(currentCount, currentCount + increment);
+  override loadMoreFollowers() {
+    super.loadMoreFollowers(this.data().followers_list);
+  }
 
-    this.addItemsIncrementally(displaySignal, nextItems, () => isLoadingSignal.set(false));
+  override loadMoreFollowing() {
+    super.loadMoreFollowing(this.data().following_list);
   }
 
   public formatFollowers = formatFollowers;
@@ -118,21 +78,11 @@ export class MetadataPopupComponent {
   }
 
   getMetadataEntries(): { key: string, value: any }[] {
-    const metadata = this.data().allMetadata;
-    if (!metadata) {
-      return [];
-    }
-    return Object.entries(metadata).map(([key, value]) => ({ key, value }));
+    return getMetadataEntries(this.data().allMetadata);
   }
 
   getProfileDetailEntries(): { key: string, value: any }[] {
-    const details = this.data().profileDetails;
-    if (!details) {
-      return [];
-    }
-    return Object.entries(details)
-      .filter(([_, value]) => value !== null && value !== undefined && value !== '')
-      .map(([key, value]) => ({ key, value }));
+    return getProfileDetailEntries(this.data());
   }
 
   trackByKey(_index: number, item: { key: string }): string {

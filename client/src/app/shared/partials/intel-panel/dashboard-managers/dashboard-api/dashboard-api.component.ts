@@ -181,11 +181,8 @@ export class DashboardApiComponent implements OnInit {
       }))
       .subscribe({
         next: res => {
-          const pending = res?.status === 'pending' || res?.result?.status === 'busy' || res?.result?.status === 'pending';
-          const failedPending =
-            (res?.status === 'pending' || res?.result?.status === 'pending') &&
-            ((res?.result?.progress ?? res?.progress) === 0) &&
-            ((res?.result?.step ?? res?.step) === 'failed');
+          const pending = this.isPendingResponse(res);
+          const failedPending = this.isFailedPendingResponse(res);
 
           if (pending) {
             const p = res?.result?.progress ?? res?.progress;
@@ -238,25 +235,25 @@ export class DashboardApiComponent implements OnInit {
 
   private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
     return this.http.post<any>(apiEndpoint, paramModel).pipe(
-      expand(res => {
-        const isPending = (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
-        const isFailedPending =
-          (res?.status === 'pending' || res?.result?.status === 'pending') &&
-          ((res?.result?.progress ?? res?.progress) === 0) &&
-          ((res?.result?.step ?? res?.step) === 'failed');
-        return isPending && !isFailedPending
-          ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, paramModel)))
-          : EMPTY;
-      }),
-      takeWhile(res => {
-        const isPending = (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
-        const isFailedPending =
-          (res?.status === 'pending' || res?.result?.status === 'pending') &&
-          ((res?.result?.progress ?? res?.progress) === 0) &&
-          ((res?.result?.step ?? res?.step) === 'failed');
-        return isPending && !isFailedPending;
-      }, true),
+      expand(res => this.shouldContinuePolling(res)
+        ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, paramModel)))
+        : EMPTY),
+      takeWhile(res => this.shouldContinuePolling(res), true),
       catchError(_ => of(null))
     );
+  }
+
+  private isPendingResponse(res: any): boolean {
+    return (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
+  }
+
+  private isFailedPendingResponse(res: any): boolean {
+    return (res?.status === 'pending' || res?.result?.status === 'pending') &&
+      ((res?.result?.progress ?? res?.progress) === 0) &&
+      ((res?.result?.step ?? res?.step) === 'failed');
+  }
+
+  private shouldContinuePolling(res: any): boolean {
+    return this.isPendingResponse(res) && !this.isFailedPendingResponse(res);
   }
 }

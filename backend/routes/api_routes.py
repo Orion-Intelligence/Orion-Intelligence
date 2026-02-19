@@ -1,7 +1,5 @@
 import asyncio
 import base64
-import re
-from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
@@ -31,53 +29,7 @@ from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryMo
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
 from orion.services.stix_manager.stix_manager import stix_manager
-
-_DOCS_DIR = Path(__file__).resolve().parent / "docs" / "api_docs"
-
-
-def _read_md(rel_path: str) -> str:
-    p = _DOCS_DIR / rel_path
-    try:
-        return p.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        return f"Documentation file not found: {p}"
-
-
-def _doc(rel_path: str) -> dict:
-    text = _read_md(f"/app/docs/api_docs/{rel_path.lstrip('/')}")
-    m = re.search(
-        r"^##\s*Response Description\s*\n(.*?)(?:\n##\s|\Z)", text, flags=re.MULTILINE | re.DOTALL, )
-    resp = "Success"
-    if m:
-        block = m.group(1).strip()
-        if block:
-            resp = block.splitlines()[0].strip() or "Success"
-    return {"description": text, "response_description": resp}
-
-
-SYSTEM_INFO_DOCS = {"directory": _doc("system-info/directory.md"), "dumps": _doc(
-    "system-info/dumps.md"), "insight": _doc("system-info/insight.md"), }
-
-REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("reports/breach.md"), "news": _doc(
-    "reports/news.md"), "exploit": _doc("reports/exploit.md"), "strategic": _doc("reports/strategic.md"), "chat": _doc(
-    "reports/chat.md"), "social_models": _doc("reports/social_models.md"), "breach_screenshot": _doc(
-    "reports/breach_screenshot.md"), "stix": _doc("reports/stix.md"), }
-
-DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dynamic_cracked": _doc(
-    "dynamic/dynamic_cracked.md"), "dynamic_software": _doc("dynamic/dynamic_software.md"), "dynamic_social": _doc(
-    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"), "ip_scan": _doc("dynamic/ip_scan.md"), 
-    "ioc_extract": _doc("dynamic/ioc_extract.md"),"apk_scan": _doc("dynamic/apk_scan.md"),}
-
-CRYPTO_DOCS = {"crypto_scan": _doc("dynamic/crypto_scan.md"),}
-
-SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
-    "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
-    "search/consolidated_ranked.md"), "telegram": _doc("search/telegram.md"), "social_models": _doc(
-    "search/social_models.md"), "breach": _doc("search/breach.md"), "exploit": _doc("search/exploit.md"), "defacement": _doc(
-    "search/defacement.md"), }
-
-SUPPORT_METHOD_DOCS={"subdomain_scan": _doc("support/subdomain_scan.md"), "dns_scan": _doc(
-    "support/dns_scan.md"), "wayback_scan": _doc("support/wayback_scan.md")}
+from backend.routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS)
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -144,11 +96,11 @@ async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
     latestDocument_task = homepage_model.getInstance().insight_consolidated_result()
     graph_insight_task = homepage_model.getInstance().invoke_graphs()
-    countryInsightsTask=homepage_model.getInstance().get_country_specific_insights()
+    countryInsightsTask = homepage_model.getInstance().get_country_specific_insights()
 
-    insights, latestDocument, graph_insight,country_insight = await asyncio.gather(
-        insights_task, latestDocument_task, graph_insight_task,countryInsightsTask )
-    return {"insights": insights, "latestDocument": latestDocument, "graph_insight": graph_insight, "country_insight":country_insight}
+    insights, latestDocument, graph_insight, country_insight = await asyncio.gather(
+        insights_task, latestDocument_task, graph_insight_task, countryInsightsTask)
+    return {"insights": insights, "latestDocument": latestDocument, "graph_insight": graph_insight, "country_insight": country_insight}
 
 
 @api_routes.post(
@@ -590,6 +542,7 @@ async def search_dynamic_software(param: search_dynamic_crack_model = Body(...))
 async def parse_domain_scan(payload: DomainScanRequest):
     return await _scan_domain_with_type(payload)
 
+
 @api_routes.post(
     "/api/urlscan/subdomains",
     summary="Returns the list of associated subdomains",
@@ -601,6 +554,7 @@ async def parse_domain_scan(payload: DomainScanRequest):
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def parse_subdomain_scan(payload: DomainScanRequest):
     return await _scan_domain_with_type(payload, 'subdomains')
+
 
 @api_routes.post(
     "/api/urlscan/dns",
@@ -614,6 +568,7 @@ async def parse_subdomain_scan(payload: DomainScanRequest):
 async def parse_dns_scan(payload: DomainScanRequest):
     return await _scan_domain_with_type(payload, 'dns')
 
+
 @api_routes.post(
     "/api/urlscan/wayback",
     summary="Fetches archived snapshots and timestamps",
@@ -625,6 +580,7 @@ async def parse_dns_scan(payload: DomainScanRequest):
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def parse_wayback_scan(payload: DomainScanRequest):
     return await _scan_domain_with_type(payload, 'wayback')
+
 
 @api_routes.post(
     "/api/urlscan/ip",
@@ -832,23 +788,27 @@ async def scan_apk(file: UploadFile = File(...)):
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "crypto")
 
+
 @api_routes.post(
     "/api/social/recon",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialReconRequest = Body(...)):
     return await search_model.getInstance().social_search(param, "recon")
 
+
 @api_routes.post(
     "/api/social/profile",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
     return await search_model.getInstance().social_search(param, "profile")
 
+
 @api_routes.post(
     "/api/social/online/images",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialOnlineImages = Body(...)):
     return await search_model.getInstance().social_search(param, "online/images")
+
 
 @api_routes.post(
     "/api/social/recon/image",
@@ -868,35 +828,39 @@ async def search_dynamic_image(payload: dict = Body(...)):
         {"file_bytes": file_bytes, "filename": "upload.png"},
         "recon/image",
     )
+
+
 @api_routes.post(
     "/api/social/followers",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialFollowersRequest = Body(...)):
     return await graphs_model.getInstance().social_search(param, "followers")
 
+
 @api_routes.post(
     "/api/social/following",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialFollowingRequest = Body(...)):
     return await graphs_model.getInstance().social_search(param, "following")
 
+
 @api_routes.post(
     "/api/social/posts",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
     return await graphs_model.getInstance().social_search(param, "posts")
 
+
 @api_routes.post(
     "/api/social/entity",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialProfileRequest = Body(...)):
     return await graphs_model.getInstance().social_search(param, "entity")
 
 
-
 @api_routes.post(
     "/api/social/session/upsert",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def upsert_social_session(data: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     gt = (data or {}).get("graph_type") or graph_type or "social"
     return await graphs_model.getInstance().upsert_data(str(current_user.id), gt, data)
@@ -904,14 +868,14 @@ async def upsert_social_session(data: dict = Body(...), graph_type: str = Query(
 
 @api_routes.get(
     "/api/social/session/tabs",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def get_social_tabs(graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     return await graphs_model.getInstance().get_tabs_summary(str(current_user.id), graph_type)
 
 
 @api_routes.post(
     "/api/social/session/tab/add",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def add_social_tab(tab: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     gt = (tab or {}).get("graph_type") or graph_type or "social"
     return await graphs_model.getInstance().add_tab(str(current_user.id), gt, tab)
