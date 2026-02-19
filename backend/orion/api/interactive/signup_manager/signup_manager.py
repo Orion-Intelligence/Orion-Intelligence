@@ -55,16 +55,7 @@ class SignupManager:
             raise HTTPException(status_code=400, detail="This domain tenant already exists")
             
 
-        domain = email.split("@")[-1].lower()
-        PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
-        if PRODUCTION == "1":
-            non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me",
-                "protonmail.com", "mail.ru", "aol.com", "icloud.com", "msn.com", "live.com", "zoho.com", "gmx.com",
-                "gmx.net", "yandex.com", "yandex.ru", "fastmail.com", "pm.me", "me.com", "mail.com", "inbox.com"]
-
-            if domain in non_company_domains:
-                raise HTTPException(
-                    status_code=400, detail="Please enter your company email (Gmail, Yahoo, etc. not allowed).")
+        helper_controller.validate_company_email_domain(email)
 
         if password.startswith("$2b$") and len(password) >= 60:
             hashed_password = password
@@ -165,29 +156,17 @@ class SignupManager:
     
     @staticmethod
     async def send_support_mail(data: SupportRequest):
-        engine = mongo_controller.get_instance().get_engine()
         email=data.email or ""
         subject=data.subject or ""
         message=data.message or ""
             
 
-        domain = email.split("@")[-1].lower()
-        PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
-        if PRODUCTION == "1":
-            non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me",
-                "protonmail.com", "mail.ru", "aol.com", "icloud.com", "msn.com", "live.com", "zoho.com", "gmx.com",
-                "gmx.net", "yandex.com", "yandex.ru", "fastmail.com", "pm.me", "me.com", "mail.com", "inbox.com"]
-
-            if domain in non_company_domains:
-                raise HTTPException(
-                    status_code=400, detail="Please enter your company email (Gmail, Yahoo, etc. not allowed).")
+        helper_controller.validate_company_email_domain(email)
 
         company = email.split("@")[1].split(".")[0]
         if not company:
             raise HTTPException(status_code=422, detail="Invalid email")
-        APP_URL = env_handler.get_instance().env("APP_URL")
         html_content = constant.mail_template.render(
-            # username=user.username,
             email=email,
             subject=subject,
             lurlHeading=MailUrlHeading.SUPPORT.value,

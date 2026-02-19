@@ -4,6 +4,7 @@ import hashlib
 import locale
 import re
 
+from fastapi import HTTPException
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 from urllib.parse import urlparse, urlunparse
@@ -14,6 +15,7 @@ from stopwords import get_stopwords
 
 from orion.constants import constant
 from orion.constants.constant import allowed_keys
+from orion.helper_manager.env_handler import env_handler
 
 
 class helper_controller:
@@ -36,6 +38,7 @@ class helper_controller:
     @staticmethod
     def create_template_context(request: Request, response_data: dict) -> dict:
         return {"request": request, "vars": response_data}
+
 
     @staticmethod
     def extract_stealer_hash(log):
@@ -140,6 +143,40 @@ class helper_controller:
             (data.email or "").strip().lower(),
             data.password,
         )
+
+    @staticmethod
+    def validate_company_email_domain(email: str, detail: str = "Please enter your company email (Gmail, Yahoo, etc. not allowed)."):
+        NON_COMPANY_DOMAINS = {
+            "gmail.com",
+            "yahoo.com",
+            "hotmail.com",
+            "outlook.com",
+            "proton.me",
+            "protonmail.com",
+            "mail.ru",
+            "aol.com",
+            "icloud.com",
+            "msn.com",
+            "live.com",
+            "zoho.com",
+            "gmx.com",
+            "gmx.net",
+            "yandex.com",
+            "yandex.ru",
+            "fastmail.com",
+            "pm.me",
+            "me.com",
+            "mail.com",
+            "inbox.com",
+        }
+
+        production = str(env_handler.get_instance().env("PRODUCTION", 0))
+        if production != "1":
+            return
+
+        domain = (email or "").split("@")[-1].lower()
+        if domain in NON_COMPANY_DOMAINS:
+            raise HTTPException(status_code=400, detail=detail)
 
     @staticmethod
     def build_assets(build_dir):

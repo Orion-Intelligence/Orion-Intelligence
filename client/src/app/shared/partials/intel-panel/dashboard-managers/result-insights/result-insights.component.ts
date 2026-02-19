@@ -283,15 +283,9 @@ export class ResultInsightsComponent implements OnInit {
         if (!isGrouped && Array.isArray(rankedData)) {
             rankedData.forEach((item: any) => {
                 const fields = ['m_url', 'm_weblink', 'm_dumplink', 'm_clearnet_links', 'm_source_url', 'm_channel_url'];
-                for (const field of fields) {
-                    const value = item[field];
-                    const url = Array.isArray(value)
-                        ? value.find(v => typeof v === 'string' && v.startsWith('http'))
-                        : (typeof value === 'string' && value.startsWith('http') ? value : null);
-                    if (url) {
-                        urls.add(url);
-                        break;
-                    }
+                const url = this.getFirstHttpUrlFromFields(item, fields);
+                if (url) {
+                    urls.add(url);
                 }
             });
             return urls.size;
@@ -309,19 +303,25 @@ export class ResultInsightsComponent implements OnInit {
         Object.entries(fieldMap).forEach(([modelKey, fields]) => {
             const results = (consolidated as any)[modelKey]?.Result || [];
             results.forEach((item: any) => {
-                for (const field of fields) {
-                    const value = item[field];
-                    const url = Array.isArray(value)
-                        ? value.find(v => typeof v === 'string' && v.startsWith('http'))
-                        : (typeof value === 'string' && value.startsWith('http') ? value : null);
-                    if (url) {
-                        urls.add(url);
-                        break;
-                    }
+                const url = this.getFirstHttpUrlFromFields(item, fields);
+                if (url) {
+                    urls.add(url);
                 }
             });
         });
         return urls.size;
+    }
+    private getFirstHttpUrlFromFields(item: any, fields: string[]): string | null {
+        for (const field of fields) {
+            const value = item[field];
+            const url = Array.isArray(value)
+                ? value.find(v => typeof v === 'string' && v.startsWith('http'))
+                : (typeof value === 'string' && value.startsWith('http') ? value : null);
+            if (url) {
+                return url;
+            }
+        }
+        return null;
     }
     extractMultipleFieldsFromResults(groupData: any, rankData: any, isGrouped: boolean): Record<string, string[]> {
         const resultMap: Record<string, Set<string>> = {};

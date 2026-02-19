@@ -23,6 +23,14 @@ export class ScanHelperMethodsService {
     private isPendingOrBusy(status: string | undefined): boolean {
         return status === 'pending' || status === 'busy';
     }
+    private getPendingStatus<T extends { status?: string; result?: { status?: string } }>(res: T): string | undefined {
+        return res?.result?.status || res?.status;
+    }
+    private updateProgress(progress: number | null | undefined): void {
+        if (progress != null && typeof progress === 'number') {
+            this.progress.set(Math.min(99, progress));
+        }
+    }
     private poll<T>(call: () => Observable<T>, getStatus: (v: T) => string | undefined, onEach: (v: T) => void, cancel$: Subject<boolean>, delayMs: number): Observable<T> {
         const request$ = call().pipe(tap(onEach));
         return request$.pipe(expand((v: T) => {
@@ -64,12 +72,9 @@ export class ScanHelperMethodsService {
     }
     scanSubdomains(resolved: string, checkLive: boolean): Subscription {
         const call = () => this.api.post<SubdomainResponse>('urlscan/subdomains', { domain: resolved, scanType: 'subdomains', checkLive });
-        const getStatus = (res: SubdomainResponse) => (res?.result?.status || res?.status) as any;
+        const getStatus = (res: SubdomainResponse) => this.getPendingStatus(res);
         const enhanced = (res: SubdomainResponse) => {
-            const p = (res as any)?.progress;
-            if (p != null && typeof p === 'number') {
-                this.progress.set(Math.min(99, p));
-            }
+            this.updateProgress((res as any)?.progress);
         };
         const build = (cancel$: Subject<boolean>) => this.poll<SubdomainResponse>(call, getStatus, enhanced, cancel$, 4000);
         return this.runTask<SubdomainResponse>(build);
@@ -78,22 +83,16 @@ export class ScanHelperMethodsService {
         const call = () => this.api.post<DnsResponse>('urlscan/dns', { domain: ip, scanType: 'dns' });
         const getStatus = (res: DnsResponse) => res?.status;
         const enhanced = (res: DnsResponse) => {
-            const p = res?.progress;
-            if (p != null && typeof p === 'number') {
-                this.progress.set(Math.min(99, p));
-            }
+            this.updateProgress(res?.progress);
         };
         const build = (cancel$: Subject<boolean>) => this.poll<DnsResponse>(call, getStatus, enhanced, cancel$, 4000);
         return this.runTask<DnsResponse>(build);
     }
     scanWayback(resolved: string): Subscription {
         const call = () => this.api.post<WaybackResponse>('urlscan/wayback', { domain: resolved, scanType: 'wayback' });
-        const getStatus = (res: WaybackResponse) => (res?.result?.status || res?.status) as any;
+        const getStatus = (res: WaybackResponse) => this.getPendingStatus(res);
         const enhanced = (res: WaybackResponse) => {
-            const p = (res as any)?.progress;
-            if (p != null && typeof p === 'number') {
-                this.progress.set(Math.min(99, p));
-            }
+            this.updateProgress((res as any)?.progress);
         };
         const build = (cancel$: Subject<boolean>) => this.poll<WaybackResponse>(call, getStatus, enhanced, cancel$, 4000);
         return this.runTask<WaybackResponse>(build);
