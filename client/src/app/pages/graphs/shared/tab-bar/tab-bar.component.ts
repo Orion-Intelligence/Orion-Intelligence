@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TabManagerService } from '../../social-graph/services/tab-manager.service';
+import { TabManagerService } from '../services/tab-manager.service';
 import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
 import { ProfileComponent } from '../../../../shared/partials/profile/profile.component';
 import { ReportExportModalComponent } from '../report-export-modal/report-export-modal.component';

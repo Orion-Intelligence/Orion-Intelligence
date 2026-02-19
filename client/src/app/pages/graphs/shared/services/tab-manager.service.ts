@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, NetworkNode, GraphPlatformBatch } from '../../../../shared/model/social/social-scan.models';
 import { ApiService } from '../../../../shared/services/api.service';
-import { GraphReportExportService, GraphReportExportType, GraphReportPayload } from '../../shared/services/graph-report-export.service';
+import { GraphReportExportService, GraphReportExportType, GraphReportPayload } from './graph-report-export.service';
 
 @Injectable({
   providedIn: 'root',

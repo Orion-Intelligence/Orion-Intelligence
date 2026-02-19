@@ -251,13 +251,7 @@ export class FileScannerComponent {
       });
     }
 
-    return Array.from(categorized.entries())
-      .map(([_, meta]) => ({
-        name: IOC_LABELS[meta.key]?.label || this.formatIocType(meta.key),
-        total: meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value)).length,
-        items: meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value)),
-      }))
-      .filter(c => c.items.length > 0);
+    return this.buildGroupedIocs(categorized);
   }
 
   private processIocs(iocs: IocItem[]): void {
@@ -275,12 +269,19 @@ export class FileScannerComponent {
       });
     });
 
-    this.groupedIocs = Array.from(categorized.entries())
-      .map(([_, meta]) => ({
-        name: IOC_LABELS[meta.key]?.label || this.formatIocType(meta.key),
-        total: meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value)).length,
-        items: meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value)),
-      }))
+    this.groupedIocs = this.buildGroupedIocs(categorized);
+  }
+
+  private buildGroupedIocs(categorized: Map<string, { key: string; items: any[] }>): GroupedIoc[] {
+    return Array.from(categorized.entries())
+      .map(([_, meta]) => {
+        const uniqueItems = meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value));
+        return {
+          name: IOC_LABELS[meta.key]?.label || this.formatIocType(meta.key),
+          total: uniqueItems.length,
+          items: uniqueItems,
+        };
+      })
       .filter(c => c.items.length > 0);
   }
 

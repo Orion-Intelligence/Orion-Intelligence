@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+set -o pipefail
 
 PROJECT_NAME="trusted-search"
 ENV_FILE=".env"
@@ -27,11 +29,13 @@ create_parser_zip() {
 client_build() {
     cd client || exit
     npm install
+    rm -rf build
     if [ "$1" = "-t" ]; then
-        ng build --configuration instrumented
+        npx ng build --configuration instrumented
     else
-        ng build --configuration production
+        npx ng build --configuration production
     fi
+    test -d build
     cd ..
     rm -rf backend/build
     mkdir -p backend/build
@@ -148,4 +152,3 @@ fi
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
     wait_for_test_service
 fi
-

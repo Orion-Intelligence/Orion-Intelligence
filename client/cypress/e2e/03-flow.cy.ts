@@ -175,3 +175,127 @@ describe('Orion Intelligence – Full Stable Flow', () => {
     cy.logout();
   });
 });
+
+describe('Orion Intelligence - Heatmap Coverage', () => {
+  const getHeatmapComponent = () =>
+    cy.window().then((win) => {
+      const host = win.document.querySelector('app-world-heatmap') as any;
+      expect(host, 'app-world-heatmap host').to.exist;
+      const ngApi = (win as any).ng;
+      if (ngApi?.getComponent) {
+        return ngApi.getComponent(host) as any;
+      }
+      const ctx = host.__ngContext__ as any[] | undefined;
+      expect(ctx, 'Angular context fallback').to.exist;
+      const comp = (ctx || []).find((x: any) => x && x.constructor?.name === 'WorldHeatmapComponent');
+      expect(comp, 'WorldHeatmapComponent in ngContext').to.exist;
+      return comp as any;
+    });
+
+  const openHomepage = () => {
+    cy.visit('/dashboard/profile/homepage');
+    cy.get('app-world-heatmap', { timeout: 30000 }).should('be.visible');
+    cy.get('app-world-heatmap .map-container svg', { timeout: 30000 }).should('exist');
+    cy.get('app-world-heatmap .map-container path.country', { timeout: 30000 }).should('have.length.greaterThan', 0);
+  };
+
+  const openCountryReportFromMap = () => {
+    cy.get('app-world-heatmap .map-container path.country.has-data').then(($withData) => {
+      if ($withData.length) {
+        cy.wrap($withData[0]).click({ force: true });
+        return;
+      }
+      cy.get('app-world-heatmap .map-container path.country').first().click({ force: true });
+    });
+    cy.get('app-heatmap-report', { timeout: 15000 }).should('exist');
+  };
+
+  beforeEach(() => {
+    cy.session('admin-session', () => {
+      cy.loginAsAdmin();
+    });
+  });
+
+  it('covers world heatmap render, interactions and popup close paths', () => {
+    openHomepage();
+
+    cy.viewport(1280, 800);
+    cy.get('app-world-heatmap .map-container svg', { timeout: 15000 }).should('exist');
+    cy.viewport(1440, 900);
+    cy.get('app-world-heatmap .map-container svg', { timeout: 15000 }).should('exist');
+
+    cy.get('app-world-heatmap .map-container path.country').first().trigger('mousemove', {
+      clientX: 40,
+      clientY: 40,
+      force: true
+    });
+    cy.get('app-world-heatmap .map-container .heatmap-tooltip.heatmap-tooltip-visible', { timeout: 10000 }).should('be.visible');
+    cy.get('app-world-heatmap .map-container path.country').first().trigger('mouseleave', { force: true });
+    cy.get('app-world-heatmap .map-container .heatmap-tooltip').should('exist');
+
+    openCountryReportFromMap();
+    cy.contains('app-heatmap-report h3', 'Reports', { timeout: 10000 }).should('be.visible');
+    cy.get('app-heatmap-report .report-list').should('exist');
+
+    cy.get('app-heatmap-report button.close-btn').click({ force: true });
+    cy.get('app-heatmap-report', { timeout: 15000 }).should('not.exist');
+
+    openCountryReportFromMap();
+    cy.get('app-heatmap-report .overlay').click('topLeft', { force: true });
+    cy.get('app-heatmap-report', { timeout: 15000 }).should('not.exist');
+  });
+
+  it('covers branch paths by invoking heatmap component API', () => {
+    openHomepage();
+    cy.clock();
+
+    getHeatmapComponent().then((comp: any) => {
+      comp.ngOnChanges({
+        data: {
+          firstChange: false,
+          currentValue: [{ name: 'Mockland', value: 2 }],
+          previousValue: []
+        }
+      });
+
+      const appService = comp['appService'];
+      const originalWorld = appService.worldJson();
+      appService.worldJson.set(null);
+      comp['createChart']();
+      appService.worldJson.set(originalWorld);
+      comp['createChart']();
+
+      const originalAll = comp['allCategoryReports'];
+      comp['allCategoryReports'] = {};
+      comp['startCategoryRotation']();
+      comp['allCategoryReports'] = {
+        leak: [{ m_country: ['United States, Canada'] }, { m_country: ['Canada'] }],
+        generic: [{ m_country: ['France'] }],
+        exploit: [],
+        chat: [],
+        social: [],
+        defacement: []
+      };
+      comp['startCategoryRotation']();
+
+      const reports = comp.getReportsByCountry('Canada');
+      expect(reports.length).to.be.greaterThan(0);
+      comp['openCountryReport']('Canada');
+      expect(comp.isOpenCountryReport).to.equal(true);
+      expect(Array.isArray(comp.selectedCountryReports)).to.equal(true);
+      comp.closeCountryReport();
+      expect(comp.isOpenCountryReport).to.equal(false);
+
+      comp['onCountryClick']({});
+      comp['onCountryClick']({ properties: { name: 'Canada' } });
+      expect(comp.isOpenCountryReport).to.equal(true);
+      comp.closeCountryReport();
+
+      comp['allCategoryReports'] = originalAll;
+      comp.ngOnDestroy();
+    });
+
+    cy.tick(8100);
+    cy.get('app-world-heatmap .map-container svg', { timeout: 15000 }).should('exist');
+  });
+});

@@ -28,62 +28,35 @@ class SearchEngineMetaRequest(BaseModel):
     username: str = Field(..., min_length=1)
 
 
-class SocialProfileRequest(BaseModel):
+class PlatformUsernameRequest(BaseModel):
+    platform: str = Field(..., min_length=1)
+    username: str = Field(..., min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def lower_platform(cls, values):
+        if isinstance(values, dict) and "platform" in values:
+            values["platform"] = values["platform"].lower()
+        return values
+
+
+class SocialProfileRequest(PlatformUsernameRequest):
     platform: str = Field(..., min_length=1, examples=["tiktok"])
     username: str = Field(..., min_length=1, examples=["@msmannan00"])
 
-    @model_validator(mode="before")
-    @classmethod
-    def lower_platform(cls, values):
-        if isinstance(values, dict) and "platform" in values:
-            values["platform"] = values["platform"].lower()
-        return values
 
-
-class SocialPostRequest(BaseModel):
+class SocialPostRequest(PlatformUsernameRequest):
     platform: str = Field(..., min_length=1, examples=["tiktok"])
     username: str = Field(..., min_length=1, examples=["@msmannan00"])
 
-    @model_validator(mode="before")
-    @classmethod
-    def lower_platform(cls, values):
-        if isinstance(values, dict) and "platform" in values:
-            values["platform"] = values["platform"].lower()
-        return values
 
-
-class SocialFollowersRequest(BaseModel):
-    platform: str = Field(..., min_length=1)
-    username: str = Field(..., min_length=1)
+class SocialFollowersRequest(PlatformUsernameRequest):
     max_followers: int = Field(default=50, ge=1, le=5000)
 
-    @model_validator(mode="before")
-    @classmethod
-    def lower_platform(cls, values):
-        if isinstance(values, dict) and "platform" in values:
-            values["platform"] = values["platform"].lower()
-        return values
 
-class SocialOnlineImages(BaseModel):
-    platform: str = Field(..., min_length=1)
-    username: str = Field(..., min_length=1)
+class SocialOnlineImages(PlatformUsernameRequest):
     max_followers: int = Field(default=50, ge=1, le=5000)
 
-    @model_validator(mode="before")
-    @classmethod
-    def lower_platform(cls, values):
-        if isinstance(values, dict) and "platform" in values:
-            values["platform"] = values["platform"].lower()
-        return values
 
-class SocialFollowingRequest(BaseModel):
-    platform: str = Field(..., min_length=1)
-    username: str = Field(..., min_length=1)
+class SocialFollowingRequest(PlatformUsernameRequest):
     max_following: int = Field(default=50, ge=1, le=5000)
-
-    @model_validator(mode="before")
-    @classmethod
-    def lower_platform(cls, values):
-        if isinstance(values, dict) and "platform" in values:
-            values["platform"] = values["platform"].lower()
-        return values

@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, signal, inject } fro
 import { CommonModule } from '@angular/common';
 import { CustomEntity, TabState } from '../../../../shared/model/social/social-scan.models';
 import { GraphOrchestratorService } from '../services/graph-orchestrator.service';
-import { TabManagerService } from '../services/tab-manager.service';
+import { TabManagerService } from '../../shared/services/tab-manager.service';
 import { EntityMenuComponent } from '../entity-menu/entity-menu.component';
 import { AddEntityData } from './add-entity-modal/add-entity-modal.component';
 

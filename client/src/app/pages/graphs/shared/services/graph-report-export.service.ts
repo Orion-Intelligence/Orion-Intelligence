@@ -81,30 +81,30 @@ export class GraphReportExportService {
     ];
     kpis.forEach((kpi, idx) => this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value));
 
-    autoTable(doc, {
-      startY: 220,
+    const analysisDidDrawPage = (data: any) => { sectionsByPage[data.pageNumber] = 'Graph Analysis'; };
+    const analysisTableBase = {
       margin: { left: 40, right: 40, bottom: 58 },
       tableWidth: contentW,
+      styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak' as const, valign: 'top' as const },
+      alternateRowStyles: { fillColor: [248, 250, 252] as [number, number, number] },
+      didDrawPage: analysisDidDrawPage,
+      theme: 'grid' as const
+    };
+
+    autoTable(doc, {
+      startY: 220,
       head: [['Graph Summary', 'Value']],
       body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]) as RowInput[],
-      styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'top' },
       headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      didDrawPage: data => { sectionsByPage[data.pageNumber] = 'Graph Analysis'; },
-      theme: 'grid'
+      ...analysisTableBase
     });
 
     autoTable(doc, {
       startY: (doc as any).lastAutoTable.finalY + 12,
-      margin: { left: 40, right: 40, bottom: 58 },
-      tableWidth: contentW,
       head: [['Node Type', 'Count']],
       body: composition.map(x => [x.type, String(x.count)]) as RowInput[],
-      styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'top' },
       headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      didDrawPage: data => { sectionsByPage[data.pageNumber] = 'Graph Analysis'; },
-      theme: 'grid'
+      ...analysisTableBase
     });
 
     const socialPlatformCounts = this.extractSocialPlatformCounts(payload);
@@ -123,10 +123,7 @@ export class GraphReportExportService {
         styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'top' },
         headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
         alternateRowStyles: { fillColor: [248, 250, 252] },
-        didDrawPage: data => {
-          sectionsByPage[data.pageNumber] = 'Platform Inventory';
-          this.drawConnectionMatrixHeader(data.doc as jsPDF, 'Platform Inventory', 'Detected social platforms in current graph');
-        },
+        didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Platform Inventory', 'Detected social platforms in current graph'),
         theme: 'grid'
       });
     }
@@ -144,10 +141,7 @@ export class GraphReportExportService {
       styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'top' },
       headStyles: { fillColor: [51, 65, 85], textColor: [255, 255, 255], fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [248, 250, 252] },
-      didDrawPage: data => {
-        sectionsByPage[data.pageNumber] = 'Connection Matrix';
-        this.drawConnectionMatrixHeader(data.doc as jsPDF, 'Connection Matrix', 'Relationship listing from current graph state');
-      },
+      didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Connection Matrix', 'Relationship listing from current graph state'),
       theme: 'grid'
     });
 
@@ -323,19 +317,7 @@ export class GraphReportExportService {
   }
 
   private drawGraphChrome(doc: jsPDF, payload: GraphReportPayload, _meta: { generatedAt: string; kindLabel: string }, section: string): void {
-    const W = this.getPageW(doc);
-    doc.setFillColor(248, 250, 252);
-    doc.rect(0, 0, W, 56, 'F');
-    doc.setDrawColor(226, 232, 240);
-    doc.line(40, 56, W - 40, 56);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(15, 23, 42);
-    doc.text(payload.title || 'Graph Report', 40, 34);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(71, 85, 105);
-    doc.text(section, W - 40, 34, { align: 'right' });
+    this.drawStandardPageHeader(doc, payload.title || 'Graph Report', section, 56);
   }
 
   private drawGraphFooter(
@@ -479,19 +461,7 @@ export class GraphReportExportService {
 
   private makeHeaderFooterHooks(payload: GraphReportPayload, meta: { generatedAt: string; kindLabel: string }): { didDrawPage: (data: any) => void; drawHeader: (doc: jsPDF, section: string) => void; drawFooter: (doc: jsPDF, meta: any) => void } {
     const drawHeader = (doc: jsPDF, section: string) => {
-      const W = this.getPageW(doc);
-      doc.setFillColor(248, 250, 252);
-      doc.rect(0, 0, W, 54, 'F');
-      doc.setDrawColor(226, 232, 240);
-      doc.line(40, 54, W - 40, 54);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(15, 23, 42);
-      doc.text(payload.title || 'Network Report', 40, 34);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(71, 85, 105);
-      doc.text(section, W - 40, 34, { align: 'right' });
+      this.drawStandardPageHeader(doc, payload.title || 'Network Report', section, 54);
     };
 
     const drawFooter = (doc: jsPDF, meta2: any) => {
@@ -584,6 +554,33 @@ export class GraphReportExportService {
     return { x, y, w: maxW, h: maxH };
   }
 
+  private drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number): void {
+    const W = this.getPageW(doc);
+    doc.setFillColor(248, 250, 252);
+    doc.rect(0, 0, W, barBottom, 'F');
+    doc.setDrawColor(226, 232, 240);
+    doc.line(40, barBottom, W - 40, barBottom);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text(title, 40, 34);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    doc.text(section, W - 40, 34, { align: 'right' });
+  }
+
+  private makeSectionHeaderCallback(
+    sectionsByPage: Record<number, string>,
+    section: string,
+    subtitle: string
+  ): (data: any) => void {
+    return (data: any) => {
+      sectionsByPage[data.pageNumber] = section;
+      this.drawConnectionMatrixHeader(data.doc as jsPDF, section, subtitle);
+    };
+  }
+
   private getPageW(doc: jsPDF): number {
     return doc.internal.pageSize.getWidth();
   }
@@ -604,12 +601,15 @@ export class GraphReportExportService {
   }
 
   private downloadText(content: string, mimeType: string, filename: string): void {
-    const blob = new Blob([content], { type: mimeType });
-    this.downloadBlob(blob, filename);
+    this.downloadBlobFromParts([content], mimeType, filename);
   }
 
   private downloadBinary(content: Uint8Array, mimeType: string, filename: string): void {
-    const blob = new Blob([content], { type: mimeType });
+    this.downloadBlobFromParts([content], mimeType, filename);
+  }
+
+  private downloadBlobFromParts(content: BlobPart[], mimeType: string, filename: string): void {
+    const blob = new Blob(content, { type: mimeType });
     this.downloadBlob(blob, filename);
   }
 

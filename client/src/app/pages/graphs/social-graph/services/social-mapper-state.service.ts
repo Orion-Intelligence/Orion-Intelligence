@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { TabManagerService } from './tab-manager.service';
+import { TabManagerService } from '../../shared/services/tab-manager.service';
 import { FetchingStateService } from './fetching-state.service';
 import { PlatformResult, ManageProfilesModalData } from '../../../../shared/model/social/social-scan.models';
 import { ContextMenuData } from '../network-graph/context-menu/context-menu.component';

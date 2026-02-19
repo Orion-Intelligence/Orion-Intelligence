@@ -418,3 +418,180 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     closeManageProfilesModalIfOpen();
   });
 });
+
+describe('Orion Intelligence - Graph Coverage Boost', () => {
+  const getNgComponent = (selector: string, componentName: string) =>
+    cy.window().then((win) => {
+      const host = win.document.querySelector(selector) as any;
+      expect(host, `${selector} host`).to.exist;
+      const ngApi = (win as any).ng;
+      if (ngApi?.getComponent) return ngApi.getComponent(host) as any;
+      const ctx = host.__ngContext__ as any[] | undefined;
+      expect(ctx, `${componentName} ngContext`).to.exist;
+      const comp = (ctx || []).find((x: any) => x && x.constructor?.name === componentName);
+      expect(comp, `${componentName} instance`).to.exist;
+      return comp as any;
+    });
+
+  const samplePlatform = (overrides: Record<string, any> = {}) => ({
+    keyUsername: 'e2e-user',
+    platform: 'Twitter',
+    username: 'e2e_handle',
+    url: 'https://x.com/e2e_handle',
+    isSelected: true,
+    status: 'active',
+    allMetadata: { bio: 'E2E user', score: 10 },
+    profileDetails: { real_name: 'E2E User', bio: 'bio' },
+    posts: [
+      { post_url: 'https://x.com/e2e/status/1', datetime: '2026-01-01', caption: 'c1', likes: '1', comments: '0', shares: '0', views: '1', media_type: 'image', media_url: '' },
+      { post_url: 'https://x.com/e2e/status/2', datetime: '2026-01-02', caption: 'c2', likes: '2', comments: '0', shares: '0', views: '2', media_type: 'image', media_url: '' },
+      { post_url: 'https://x.com/e2e/status/3', datetime: '2026-01-03', caption: 'c3', likes: '3', comments: '0', shares: '0', views: '3', media_type: 'image', media_url: '' },
+      { post_url: 'https://x.com/e2e/status/4', datetime: '2026-01-04', caption: 'c4', likes: '4', comments: '0', shares: '0', views: '4', media_type: 'image', media_url: '' }
+    ],
+    images: [
+      { image_url: 'https://example.com/1.jpg', thumbnail: 'https://example.com/1_t.jpg', title: '1', source: 'e2e' },
+      { image_url: 'https://example.com/2.jpg', thumbnail: 'https://example.com/2_t.jpg', title: '2', source: 'e2e' },
+      { image_url: 'https://example.com/3.jpg', thumbnail: 'https://example.com/3_t.jpg', title: '3', source: 'e2e' },
+      { image_url: 'https://example.com/4.jpg', thumbnail: 'https://example.com/4_t.jpg', title: '4', source: 'e2e' },
+      { image_url: 'https://example.com/5.jpg', thumbnail: 'https://example.com/5_t.jpg', title: '5', source: 'e2e' },
+      { image_url: 'https://example.com/6.jpg', thumbnail: 'https://example.com/6_t.jpg', title: '6', source: 'e2e' },
+      { image_url: 'https://example.com/7.jpg', thumbnail: 'https://example.com/7_t.jpg', title: '7', source: 'e2e' },
+      { image_url: 'https://example.com/8.jpg', thumbnail: 'https://example.com/8_t.jpg', title: '8', source: 'e2e' },
+      { image_url: 'https://example.com/9.jpg', thumbnail: 'https://example.com/9_t.jpg', title: '9', source: 'e2e' }
+    ],
+    followers_list: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'],
+    following_list: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'u7', 'u8', 'u9', 'u10', 'u11'],
+    ...overrides
+  });
+
+  const visitSocialGraph = () => {
+    cy.viewport(1440, 900);
+    cy.intercept('GET', '**/api/social/session/tabs?graph_type=social*').as('socialTabs');
+    cy.visit('/dashboard/social-graph');
+    cy.wait('@socialTabs', { timeout: 30000 });
+    cy.get('app-social-graph', { timeout: 20000 }).should('be.visible');
+  };
+
+  beforeEach(() => {
+    cy.session('admin-session', () => {
+      cy.loginAsAdmin();
+    });
+  });
+
+  it('covers MetadataPopupComponent methods and load-more branches', () => {
+    visitSocialGraph();
+    getNgComponent('app-social-graph', 'SocialMapperComponent').then((mapper: any) => {
+      mapper.state.selectedPlatformData.set(samplePlatform());
+      mapper.state.isMetadataPopupVisible.set(true);
+    });
+    cy.get('app-metadata-popup', { timeout: 15000 }).should('exist');
+    cy.get('app-metadata-popup > div.fixed.inset-0', { timeout: 15000 }).should('be.visible');
+
+    getNgComponent('app-metadata-popup', 'MetadataPopupComponent').then((comp: any) => {
+      const key = comp.getPlatformUniqueKey();
+      expect(key).to.be.a('string').and.include('platform-');
+      expect(comp.getMetadataEntries()).to.be.an('array');
+      expect(comp.getProfileDetailEntries()).to.be.an('array');
+      expect(comp.trackByKey(0, { key: 'k' })).to.eq('k');
+      expect(comp.trackByUsername(0, 'u')).to.eq('u');
+      expect(comp.getAccountUrl()).to.match(/^https?:\/\/|^#/);
+
+      const closeSpy = cy.stub(comp.close, 'emit');
+      comp.onClose();
+      expect(closeSpy).to.have.been.called;
+
+      const postsBefore = comp.displayPosts().length;
+      comp.loadMorePosts();
+      comp.loadMoreImages();
+      comp.loadMoreFollowers();
+      comp.loadMoreFollowing();
+      const postsAfterFirstLoad = comp.displayPosts().length;
+      comp.isLoadingMorePosts.set(true);
+      comp.loadMorePosts();
+      expect(postsAfterFirstLoad).to.be.greaterThan(postsBefore);
+      expect(comp.displayPosts().length).to.eq(postsAfterFirstLoad);
+
+      const originalData = comp.data;
+      comp.data = () => ({
+        ...originalData(),
+        allMetadata: null,
+        profileDetails: null,
+        posts: null,
+        images: null,
+        followers_list: null,
+        following_list: null
+      });
+      expect(comp.getMetadataEntries()).to.deep.eq([]);
+      expect(comp.getProfileDetailEntries()).to.deep.eq([]);
+      comp.data = originalData;
+    });
+
+    cy.wait(1200);
+    cy.get('app-metadata-popup').then(($el) => {
+      if ($el.find('button:contains(\"Done\")').length) {
+        cy.contains('app-metadata-popup button', 'Done').click({ force: true });
+      }
+    });
+  });
+
+  it('covers SummaryPlatformViewComponent helper/load branches', () => {
+    visitSocialGraph();
+    getNgComponent('app-social-graph', 'SocialMapperComponent').then((mapper: any) => {
+      mapper.state.summaryPopupData.set({
+        username: 'e2e-user',
+        platforms: [
+          samplePlatform(),
+          samplePlatform({
+            platform: 'Github',
+            username: 'e2e-gh',
+            url: 'https://github.com/e2e-gh',
+            posts: [],
+            images: [],
+            followers_list: [],
+            following_list: []
+          })
+        ]
+      });
+    });
+    cy.get('app-profile-summary-popup', { timeout: 15000 }).should('exist');
+    cy.get('app-profile-summary-popup > div.fixed.inset-0', { timeout: 15000 }).should('be.visible');
+    cy.get('app-profile-summary-popup .group.flex.items-center.p-2.rounded-md.transition-colors.cursor-pointer').eq(1).click({ force: true });
+    cy.get('app-summary-platform-view', { timeout: 15000 }).should('exist');
+
+    getNgComponent('app-summary-platform-view', 'SummaryPlatformViewComponent').then((comp: any) => {
+      const p = comp.platform();
+      expect(p).to.exist;
+      expect(comp.getPlatformUniqueKey(p)).to.include('platform-');
+      expect(comp.getProfileDetailEntries(null)).to.deep.eq([]);
+      expect(comp.getProfileDetailEntries(p)).to.be.an('array');
+      expect(comp.getAccountUrl(p)).to.match(/^https?:\/\/|^#/);
+
+      comp.loadMorePosts();
+      comp.loadMoreImages();
+      comp.loadMoreFollowers();
+      comp.loadMoreFollowing();
+      comp.isLoadingMoreImages.set(true);
+      comp.loadMoreImages();
+      comp.isLoadingMoreImages.set(false);
+    });
+
+    cy.wait(1200);
+    cy.get('app-profile-summary-popup button').filter(':has(i.bi-x-lg)').first().click({ force: true });
+    cy.get('app-profile-summary-popup', { timeout: 10000 }).should('not.exist');
+  });
+
+  it('covers social context menu computed branches', () => {
+    visitSocialGraph();
+    getNgComponent('app-social-graph', 'SocialMapperComponent').then((mapper: any) => {
+      const mkEvt = (x: number, y: number) => new MouseEvent('contextmenu', { clientX: x, clientY: y }) as MouseEvent;
+      mapper.state.onNodeRightClicked({ nodeId: 'user-john', event: mkEvt(20, 20) }, false);
+      expect(mapper.state.contextMenuData()).to.deep.include({ nodeId: 'user-john', type: 'user' });
+      mapper.state.onNodeRightClicked({ nodeId: 'platform-john|github|octo', event: mkEvt(1200, 600) }, false);
+      expect(mapper.state.contextMenuData()).to.deep.include({ nodeId: 'platform-john|github|octo', type: 'platform' });
+      mapper.state.onNodeRightClicked({ nodeId: 'group-john-github', event: mkEvt(1200, 600) }, false);
+      expect(mapper.state.contextMenuData()).to.deep.include({ nodeId: 'group-john-github', type: 'group' });
+      mapper.state.closeContextMenu();
+      expect(mapper.state.contextMenuData()).to.eq(null);
+    });
+  });
+});
