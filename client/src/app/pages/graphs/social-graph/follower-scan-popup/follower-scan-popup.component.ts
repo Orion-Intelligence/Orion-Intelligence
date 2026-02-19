@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
+import { buildSocialProfileUrl } from '../utils/profile-url.util';
 @Component({
     selector: 'app-follower-scan-popup',
     templateUrl: './follower-scan-popup.component.html',
@@ -100,39 +101,8 @@ export class FollowerScanPopupComponent {
         return username;
     }
     getProfileUrl(username: string): string {
-        let normalizedUsername = username.trim();
-        const platform = this.platform().platform.toLowerCase();
-        if (normalizedUsername.startsWith('@')) {
-            normalizedUsername = normalizedUsername.substring(1);
-        }
-        if (platform === 'twitter' || platform === 'x') {
-            return `https://x.com/${normalizedUsername}`;
-        }
-        if (platform === 'instagram') {
-            return `https://www.instagram.com/${normalizedUsername}`;
-        }
-        if (platform === 'tiktok') {
-            return `https://www.tiktok.com/@${normalizedUsername}`;
-        }
-        if (platform === 'facebook') {
-            return `https://www.facebook.com/${normalizedUsername}`;
-        }
-        if (platform === 'youtube') {
-            return `https://www.youtube.com/@${normalizedUsername}`;
-        }
-        const baseUrl = this.platform().url?.trim();
-        if (!baseUrl) {
-            return '#';
-        }
-        try {
-            const parsedUrl = new URL(baseUrl);
-            const hasTrailingSlash = parsedUrl.pathname.endsWith('/');
-            parsedUrl.pathname = hasTrailingSlash ? `${parsedUrl.pathname}${normalizedUsername}` : `${parsedUrl.pathname}/${normalizedUsername}`;
-            return parsedUrl.toString();
-        }
-        catch {
-            return baseUrl;
-        }
+        const platform = this.platform();
+        return buildSocialProfileUrl(platform.platform, username, platform.url);
     }
     getCurrentAccountUrl(): string {
         return this.platform().url || '#';

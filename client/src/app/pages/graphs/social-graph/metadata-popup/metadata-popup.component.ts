@@ -17,18 +17,9 @@ import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
 })
 export class MetadataPopupComponent extends PlatformFeedViewBase {
     data = input.required<PlatformResult>();
-    isScanInProgress = input<boolean>(false);
     close = output<void>();
-    fetchProfile = output<PlatformResult>();
-    fetchPosts = output<PlatformResult>();
     fetchImages = output<PlatformResult>();
-    fetchFollowers = output<PlatformResult>();
-    fetchFollowing = output<PlatformResult>();
-    cancelFetchProfile = output<PlatformResult>();
-    cancelFetchPosts = output<PlatformResult>();
     cancelFetchImages = output<PlatformResult>();
-    cancelFetchFollowers = output<PlatformResult>();
-    cancelFetchFollowing = output<PlatformResult>();
     fetchingState: FetchingStateService;
     isFetching = computed(() => this.fetchingState.profile()[this.getPlatformUniqueKey()]);
     isFetchingPosts = computed(() => this.fetchingState.posts()[this.getPlatformUniqueKey()]);

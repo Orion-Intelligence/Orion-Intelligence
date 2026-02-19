@@ -5,6 +5,7 @@ import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../share
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
 import { getMetadataEntries } from '../utils/summary-view.util';
+import { buildSocialProfileUrl } from '../utils/profile-url.util';
 @Component({
     selector: 'app-list-view',
     templateUrl: './list-view.component.html',
@@ -61,39 +62,7 @@ export class ListViewComponent {
         return `${followingCount} following`;
     }
     getProfileUrl(platformData: PlatformResult, username: string): string {
-        let normalizedUsername = username.trim();
-        const platform = platformData.platform.toLowerCase();
-        if (normalizedUsername.startsWith('@')) {
-            normalizedUsername = normalizedUsername.substring(1);
-        }
-        if (platform === 'twitter' || platform === 'x') {
-            return `https://x.com/${normalizedUsername}`;
-        }
-        if (platform === 'instagram') {
-            return `https://www.instagram.com/${normalizedUsername}`;
-        }
-        if (platform === 'tiktok') {
-            return `https://www.tiktok.com/@${normalizedUsername}`;
-        }
-        if (platform === 'facebook') {
-            return `https://www.facebook.com/${normalizedUsername}`;
-        }
-        if (platform === 'youtube') {
-            return `https://www.youtube.com/@${normalizedUsername}`;
-        }
-        const baseUrl = platformData.url?.trim();
-        if (!baseUrl) {
-            return '#';
-        }
-        try {
-            const parsedUrl = new URL(baseUrl);
-            const hasTrailingSlash = parsedUrl.pathname.endsWith('/');
-            parsedUrl.pathname = hasTrailingSlash ? `${parsedUrl.pathname}${normalizedUsername}` : `${parsedUrl.pathname}/${normalizedUsername}`;
-            return parsedUrl.toString();
-        }
-        catch {
-            return baseUrl;
-        }
+        return buildSocialProfileUrl(platformData.platform, username, platformData.url);
     }
     getPlatformData(platformNodeId: string): PlatformResult | undefined {
         if (!platformNodeId.startsWith('platform-')) {

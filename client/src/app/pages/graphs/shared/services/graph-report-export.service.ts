@@ -28,6 +28,10 @@ export interface GraphReportPayload {
     graphImageDataUrl?: string;
 }
 export type GraphReportExportType = 'json' | 'graph_pdf' | 'doc_pdf';
+type GraphReportMeta = {
+    generatedAt: string;
+    kindLabel: string;
+};
 @Injectable({ providedIn: 'root' })
 export class GraphReportExportService {
     exportByType(payload: GraphReportPayload, type: GraphReportExportType): void {
@@ -155,13 +159,8 @@ export class GraphReportExportService {
         }
         return this.docToBytes(doc);
     }
-    private drawGraphCover(doc: jsPDF, payload: GraphReportPayload, meta: {
-        generatedAt: string;
-        kindLabel: string;
-    }): void {
-        const W = this.getPageW(doc);
-        doc.setFillColor(15, 23, 42);
-        doc.rect(0, 0, W, 170, 'F');
+    private drawGraphCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta): void {
+        const W = this.drawDarkTopBand(doc, 170);
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(24);
@@ -273,13 +272,8 @@ export class GraphReportExportService {
         doc.setTextColor(100, 116, 139);
         doc.text(`Nodes: ${payload.nodes.length}   Edges: ${payload.edges.length}`, 40, this.getPageH(doc) - 56);
     }
-    private drawGraphAnalysisHeader(doc: jsPDF, payload: GraphReportPayload, meta: {
-        generatedAt: string;
-        kindLabel: string;
-    }): void {
-        const W = this.getPageW(doc);
-        doc.setFillColor(15, 23, 42);
-        doc.roundedRect(40, 84, W - 80, 30, 8, 8, 'F');
+    private drawGraphAnalysisHeader(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta): void {
+        const W = this.drawDarkTopBand(doc, 30, true);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.setTextColor(255, 255, 255);
@@ -304,16 +298,10 @@ export class GraphReportExportService {
         doc.setTextColor(71, 85, 105);
         doc.text(subtitle, W - 56, 104, { align: 'right' });
     }
-    private drawGraphChrome(doc: jsPDF, payload: GraphReportPayload, _meta: {
-        generatedAt: string;
-        kindLabel: string;
-    }, section: string): void {
+    private drawGraphChrome(doc: jsPDF, payload: GraphReportPayload, _meta: GraphReportMeta, section: string): void {
         this.drawStandardPageHeader(doc, payload.title || 'Graph Report', section, 56);
     }
-    private drawGraphFooter(doc: jsPDF, payload: GraphReportPayload, meta: {
-        generatedAt: string;
-        kindLabel: string;
-    }, pageNo: number, totalPages: number): void {
+    private drawGraphFooter(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, pageNo: number, totalPages: number): void {
         const W = this.getPageW(doc);
         const H = this.getPageH(doc);
         doc.setDrawColor(226, 232, 240);
@@ -414,10 +402,7 @@ export class GraphReportExportService {
         });
         return this.docToBytes(doc);
     }
-    private drawCover(doc: jsPDF, payload: GraphReportPayload, meta: {
-        generatedAt: string;
-        kindLabel: string;
-    }, subtitle: string): void {
+    private drawCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, subtitle: string): void {
         const W = this.getPageW(doc);
         doc.setFillColor(15, 23, 42);
         doc.rect(0, 0, W, 110, 'F');
@@ -435,10 +420,7 @@ export class GraphReportExportService {
         doc.line(40, 130, W - 40, 130);
         doc.setTextColor(15, 23, 42);
     }
-    private makeHeaderFooterHooks(payload: GraphReportPayload, meta: {
-        generatedAt: string;
-        kindLabel: string;
-    }): {
+    private makeHeaderFooterHooks(payload: GraphReportPayload, meta: GraphReportMeta): {
         didDrawPage: (data: any) => void;
         drawHeader: (doc: jsPDF, section: string) => void;
         drawFooter: (doc: jsPDF, meta: any) => void;
@@ -520,13 +502,21 @@ export class GraphReportExportService {
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
     }
-    private makeMeta(payload: GraphReportPayload): {
-        generatedAt: string;
-        kindLabel: string;
-    } {
+    private makeMeta(payload: GraphReportPayload): GraphReportMeta {
         const generatedAt = new Date(payload.generatedAtIso).toLocaleString();
         const kindLabel = payload.graphKind === 'cti' ? 'CTI Network' : 'Social Network';
         return { generatedAt, kindLabel };
+    }
+    private drawDarkTopBand(doc: jsPDF, height: number, rounded: boolean = false): number {
+        const W = this.getPageW(doc);
+        doc.setFillColor(15, 23, 42);
+        if (rounded) {
+            doc.roundedRect(40, 84, W - 80, height, 8, 8, 'F');
+        }
+        else {
+            doc.rect(0, 0, W, height, 'F');
+        }
+        return W;
     }
     private isJpegDataUrl(dataUrl?: string): boolean {
         return typeof dataUrl === 'string' && /^data:image\/jpeg;base64,/.test(dataUrl);

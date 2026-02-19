@@ -129,21 +129,8 @@ class search_model:
             m_status, m_documents, search_leak_callback_model, leak_listing)
 
     @staticmethod
-    async def search_consolidated_ranked_result(param: search_consolidated_param_model,
-            base_index,
-            blocked_categories,
-            allowed_categories
-    ):
-        filter_dict = param.entity_filter if param.entity_filter else {}
-
-        indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
-            param, filter_dict, base_index, blocked_categories, allowed_categories)
-
-        response = await elastic_controller.get_instance().search_consolidated_ranked_query(
-            indices, query, indices_boost)
-
+    def _build_ranked_response(response, query, default_size: int):
         ranked_results = []
-
         if response and "hits" in response and "hits" in response["hits"]:
             for rank, hit in enumerate(response["hits"]["hits"]):
                 source = hit.get("_source", {})
@@ -158,10 +145,26 @@ class search_model:
             total_field = response["hits"].get("total", 0)
             total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
 
-        size = int(query.get("size", 10))
+        size = int(query.get("size", default_size))
         total_pages = (total + size - 1) // size if size > 0 else 0
 
         return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
+
+    @staticmethod
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model,
+            base_index,
+            blocked_categories,
+            allowed_categories
+    ):
+        filter_dict = param.entity_filter if param.entity_filter else {}
+
+        indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
+            param, filter_dict, base_index, blocked_categories, allowed_categories)
+
+        response = await elastic_controller.get_instance().search_consolidated_ranked_query(
+            indices, query, indices_boost)
+
+        return search_model._build_ranked_response(response, query, 10)
     
     @staticmethod
     async def search_consolidated_iocs(
@@ -183,29 +186,7 @@ class search_model:
             indices, query, indices_boost
         )
 
-        ranked_results = []
-        if response and "hits" in response and "hits" in response["hits"]:
-            for rank, hit in enumerate(response["hits"]["hits"]):
-                source = hit.get("_source", {})
-                source.pop("m_embedding", None)
-                source["rank_index"] = hit.get("_index")
-                source["_score"] = hit.get("_score", 0)
-                source["_rank"] = rank + 1
-                ranked_results.append(source)
-
-        total = 0
-        if response and "hits" in response:
-            total_field = response["hits"].get("total", 0)
-            total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
-
-        size = int(query.get("size", 15))
-        total_pages = (total + size - 1) // size if size > 0 else 0
-
-        return {
-            "Result": ranked_results,
-            "Page_Count": total_pages,
-            "Total_Hits": total,
-        }
+        return search_model._build_ranked_response(response, query, 15)
 
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):

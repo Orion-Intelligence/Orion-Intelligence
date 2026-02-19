@@ -5,6 +5,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { filter_mapping } from '../../../shared/constants/filters';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { Router } from '@angular/router';
+import { countFilterValues } from '../../../shared/utils/filter-values.util';
 @Component({
     selector: 'app-selected-filter-bar',
     imports: [NgIf, NgFor, CommonModule],
@@ -88,12 +89,7 @@ export class SelectedFilterBarComponent implements OnInit {
     }
     entityFiltersCount(): number {
         const categories = this.app_service.configData().localSettings.entityfilterCategories;
-        return Object.values(categories).reduce((count, val) => {
-            if (Array.isArray(val)) {
-                return count + val.length;
-            }
-            return count + 1;
-        }, 0);
+        return countFilterValues(categories);
     }
     getVisibleTags(): string[] {
         const allTags = Object.values(this.app_service.configData().localSettings.entityfilterCategories).flat();
@@ -101,12 +97,7 @@ export class SelectedFilterBarComponent implements OnInit {
     }
     getHiddenTagCount(): number {
         const categories = this.app_service.configData().localSettings.entityfilterCategories;
-        const totalTags = Object.values(categories).reduce((count, val) => {
-            if (Array.isArray(val)) {
-                return count + val.length;
-            }
-            return count + 1;
-        }, 0);
+        const totalTags = countFilterValues(categories);
         return Math.max(0, totalTags - this.maxVisibleTags);
     }
     protected readonly filter_mapping = filter_mapping;

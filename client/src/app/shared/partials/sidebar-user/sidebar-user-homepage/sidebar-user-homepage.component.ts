@@ -22,6 +22,7 @@ import { overlayAnimation } from '../../../animations/popup.animations';
 import { MessagePopupComponent } from "../../message-popup/message-popup.component";
 import { AlertExportComponentComponent } from "./alert-export-component/alert-export-component.component";
 import { NgxPrintModule } from 'ngx-print';
+import { countFilterValues } from '../../../utils/filter-values.util';
 @Component({
     selector: 'app-sidebar-user-homepage',
     imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
@@ -181,12 +182,7 @@ export class SidebarUserHomepageComponent implements OnInit {
     }
     entityFiltersCount(): number {
         const categories = this.appService.tenantData().iocs;
-        return Object.values(categories).reduce((count, val) => {
-            if (Array.isArray(val)) {
-                return count + val.length;
-            }
-            return count + 1;
-        }, 0);
+        return countFilterValues(categories);
     }
     editIocs() {
         this.router.navigate(['/dashboard/profile/ioc']).then();

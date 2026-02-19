@@ -9,6 +9,7 @@ import { userSessionData } from '../../../../model/company-profile/node.model';
 import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
 import { TenantModel } from '../../../../model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
+import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
 @Component({
     selector: 'app-tenant-settings',
     imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
@@ -36,28 +37,10 @@ export class TenantSettingsComponent implements OnInit {
         }
     }
     toggleEdit(event: Event) {
-        event.stopPropagation();
-        if (this.isEditing) {
-            this.updateUser();
-        }
-        this.isEditing = !this.isEditing;
+        this.isEditing = toggleEditState(event, this.isEditing, () => this.updateUser());
     }
     getLocationDisplay(): string {
-        const tenant = this.userSessionData.tenant;
-        if (!tenant) {
-            return '';
-        }
-        const { city, country } = tenant;
-        if (city && country) {
-            return `${city}, ${country}`;
-        }
-        if (city) {
-            return city;
-        }
-        if (country) {
-            return country;
-        }
-        return '';
+        return getTenantLocationDisplay(this.userSessionData.tenant);
     }
     updateUser() {
         let route = "update/tenants";

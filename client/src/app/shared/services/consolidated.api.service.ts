@@ -42,22 +42,21 @@ export class ConsolidatedApiService {
     private fetchLiveApiResults(input: ConsolidatedLiveApis): Observable<any> {
         const { apiEndpoint, payload } = this.getLiveApiDetails(input);
         return this.http.post<any>(apiEndpoint, payload).pipe(expand(res => {
-            const isPending = (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
-            const isFailedPending = (res?.status === 'pending' || res?.result?.status === 'pending') &&
-                ((res?.result?.progress ?? res?.progress) === 0) &&
-                ((res?.result?.step ?? res?.step) === 'failed');
-            return isPending && !isFailedPending
+            return this.shouldContinueLivePolling(res)
                 ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, payload)))
                 : EMPTY;
         }), takeWhile(res => {
-            const isPending = (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
-            const isFailedPending = (res?.status === 'pending' || res?.result?.status === 'pending') &&
-                ((res?.result?.progress ?? res?.progress) === 0) &&
-                ((res?.result?.step ?? res?.step) === 'failed');
-            return isPending && !isFailedPending;
+            return this.shouldContinueLivePolling(res);
         }, true), catchError(error => {
             return new Observable(observer => observer.error(error));
         }));
+    }
+    private shouldContinueLivePolling(res: any): boolean {
+        const isPending = (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
+        const isFailedPending = (res?.status === 'pending' || res?.result?.status === 'pending') &&
+            ((res?.result?.progress ?? res?.progress) === 0) &&
+            ((res?.result?.step ?? res?.step) === 'failed');
+        return isPending && !isFailedPending;
     }
     public runLiveApiSearch(inputs: ConsolidatedLiveApis[]): Observable<ConsolidatedLiveApiResults[]> {
         const searchObservables = inputs.map(input => this.fetchLiveApiResults(input).pipe(map(res => {

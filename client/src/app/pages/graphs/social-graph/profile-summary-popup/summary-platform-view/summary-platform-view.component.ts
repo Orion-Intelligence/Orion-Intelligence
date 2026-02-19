@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PlatformResult } from '../../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey } from '../../../../../shared/utils/formatters';
@@ -17,17 +17,6 @@ import { PlatformFeedViewBase } from '../../utils/platform-feed-view.base';
 })
 export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     platform = input.required<PlatformResult | null>();
-    isScanInProgress = input<boolean>(false);
-    fetchProfile = output<PlatformResult>();
-    fetchPosts = output<PlatformResult>();
-    fetchFollowers = output<PlatformResult>();
-    fetchFollowing = output<PlatformResult>();
-    fetchPlatformImages = output<PlatformResult>();
-    cancelFetchProfile = output<PlatformResult>();
-    cancelFetchPosts = output<PlatformResult>();
-    cancelFetchFollowers = output<PlatformResult>();
-    cancelFetchFollowing = output<PlatformResult>();
-    cancelFetchPlatformImages = output<PlatformResult>();
     public fetchingState = inject(FetchingStateService);
     public formatFollowers = formatFollowers;
     public formatKey = formatKey;

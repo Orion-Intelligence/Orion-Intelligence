@@ -320,25 +320,22 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         });
     }
     private initiateImageScan(base64Image: string, fileName: string) {
-        this.scanJobService.initiateImageScan(base64Image, fileName, {
-            updateState: this.updateState.bind(this),
-            state: this.state,
-            scanService: this.scanService,
-            destroyRef: this.destroyRef,
-            cancelScanSubjects: this.cancelScanSubjects
-        });
+        this.scanJobService.initiateImageScan(base64Image, fileName, this.buildScanJobOptions());
     }
     cancelScan(jobId: string) {
         this.scanJobService.cancelScan(jobId, this.updateState.bind(this), this.cancelScanSubjects);
     }
     private resumeIncompleteScans() {
-        this.scanJobService.resumeIncompleteScans(() => this.jobs(), {
+        this.scanJobService.resumeIncompleteScans(() => this.jobs(), this.buildScanJobOptions());
+    }
+    private buildScanJobOptions() {
+        return {
             updateState: this.updateState.bind(this),
             state: this.state,
             scanService: this.scanService,
             destroyRef: this.destroyRef,
             cancelScanSubjects: this.cancelScanSubjects
-        });
+        };
     }
     private removeUserScanData(username: string) {
         const normalizedUsername = username.toLowerCase();

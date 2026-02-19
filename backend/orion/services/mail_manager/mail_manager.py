@@ -57,17 +57,15 @@ class mail_manager:
     @staticmethod
     def _send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):
         recipients = [to, sender_email]
-        if env_handler.get_instance().env("PRODUCTION", "0") == "1":
-            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
-                server.login(sender_email, password)
-                server.sendmail(sender_email, recipients, msg.as_string())
-        else:
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.sendmail(sender_email, recipients, msg.as_string())
+        mail_manager._send_sync(sender_email, password, recipients, msg, smtp_server, smtp_port)
 
     @staticmethod
     def _send_sync_email_list(sender_email, password, to_list, msg, smtp_server, smtp_port):
         recipients = list(to_list) + [sender_email]
+        mail_manager._send_sync(sender_email, password, recipients, msg, smtp_server, smtp_port)
+
+    @staticmethod
+    def _send_sync(sender_email, password, recipients, msg, smtp_server, smtp_port):
         if env_handler.get_instance().env("PRODUCTION", "0") == "1":
             with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
                 server.login(sender_email, password)

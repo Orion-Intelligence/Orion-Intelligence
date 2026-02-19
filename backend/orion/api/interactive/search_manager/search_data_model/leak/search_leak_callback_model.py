@@ -3,12 +3,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 from pydantic.v1 import Extra
 
-
-class suggestion(BaseModel):
-    text: str
-    offset: int
-    length: int
-    options: List[dict]
+from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import suggestion
 
 
 class result_item(BaseModel):

@@ -11,6 +11,7 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { LicenseName } from '../../../model/licenses/license.rules';
+import { getTenantLocationDisplay, toggleEditState } from './sidebar-settings.util';
 @Component({
     selector: 'app-sidebar-profile-settings',
     imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
@@ -73,11 +74,7 @@ export class AccountSettingsComponent implements OnInit {
         }
     }
     toggleEdit(event: Event) {
-        event.stopPropagation();
-        if (this.isEditing) {
-            this.updateUser();
-        }
-        this.isEditing = !this.isEditing;
+        this.isEditing = toggleEditState(event, this.isEditing, () => this.updateUser());
     }
     toggleTheme() {
         const theme = this.isDarkMode ? 'dark-theme' : 'light-theme';
@@ -104,21 +101,7 @@ export class AccountSettingsComponent implements OnInit {
         this.updateUser();
     }
     getLocationDisplay(): string {
-        const tenant = this.userSessionData.tenant;
-        if (!tenant) {
-            return '';
-        }
-        const { city, country } = tenant;
-        if (city && country) {
-            return `${city}, ${country}`;
-        }
-        if (city) {
-            return city;
-        }
-        if (country) {
-            return country;
-        }
-        return '';
+        return getTenantLocationDisplay(this.userSessionData.tenant);
     }
     updateUser() {
         let route = "update/current/user";
