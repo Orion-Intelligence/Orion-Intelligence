@@ -152,8 +152,9 @@ export class ManageProfilesModalComponent {
             if (p.stableKey !== platformToToggle.stableKey) {
                 return p;
             }
-            if (isImageFlow && (!p.matches || !this.hasValidDraftUsername(p))) {
-                return { ...p, isSelected: false, matches: false };
+            const imageFlowBlocked = this.applyImageFlowSelectionGuard(p, isImageFlow);
+            if (imageFlowBlocked) {
+                return imageFlowBlocked;
             }
             return { ...p, isSelected: !p.isSelected };
         }));
@@ -248,27 +249,38 @@ export class ManageProfilesModalComponent {
         }
         this.toggleSelection(platformToToggle);
     }
-    selectAllVisible() {
-        const isImageFlow = this.isImageExtractedFlow();
-        const visibleKeys = new Set(this.filteredPlatforms().map(p => p.stableKey));
+    private visiblePlatformKeys(): Set<string> {
+        return new Set(this.filteredPlatforms().map(p => p.stableKey));
+    }
+    private updateVisiblePlatforms(updater: (platform: ManagedPlatformRow) => ManagedPlatformRow): void {
+        const visibleKeys = this.visiblePlatformKeys();
         this.platforms.update(current => current.map(p => {
             if (!visibleKeys.has(p.stableKey)) {
                 return p;
             }
-            if (isImageFlow && (!p.matches || !this.hasValidDraftUsername(p))) {
-                return { ...p, isSelected: false, matches: false };
-            }
-            return { ...p, isSelected: true };
+            return updater(p);
         }));
     }
-    deselectAllVisible() {
-        const visibleKeys = new Set(this.filteredPlatforms().map(p => p.stableKey));
-        this.platforms.update(current => current.map(p => {
-            if (!visibleKeys.has(p.stableKey)) {
-                return p;
+    private applyImageFlowSelectionGuard(platform: ManagedPlatformRow, isImageFlow: boolean): ManagedPlatformRow | null {
+        if (isImageFlow && (!platform.matches || !this.hasValidDraftUsername(platform))) {
+            return { ...platform, isSelected: false, matches: false };
+        }
+        return null;
+    }
+    selectAllVisible() {
+        const isImageFlow = this.isImageExtractedFlow();
+        this.updateVisiblePlatforms((p) => {
+            const imageFlowBlocked = this.applyImageFlowSelectionGuard(p, isImageFlow);
+            if (imageFlowBlocked) {
+                return imageFlowBlocked;
             }
+            return { ...p, isSelected: true };
+        });
+    }
+    deselectAllVisible() {
+        this.updateVisiblePlatforms((p) => {
             return { ...p, isSelected: false };
-        }));
+        });
     }
     usernameStatusLabel(platform: ManagedPlatformRow): string {
         if (!this.hasValidDraftUsername(platform)) {

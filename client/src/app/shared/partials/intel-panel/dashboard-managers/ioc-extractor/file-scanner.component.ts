@@ -224,15 +224,7 @@ export class FileScannerComponent {
         }
         if (apk.package) {
             const key = 'm_package';
-            if (!categorized.has(key)) {
-                categorized.set(key, { key, items: [] });
-            }
-            categorized.get(key)!.items.push({
-                type: key,
-                value: apk.package,
-                display: apk.package,
-                description: IOC_LABELS[key]?.description || 'Package name'
-            });
+            this.appendCategorizedItem(categorized, key, apk.package, 'Package name');
         }
         return this.buildGroupedIocs(categorized);
     }
@@ -243,18 +235,26 @@ export class FileScannerComponent {
         }>();
         iocs.forEach(ioc => {
             Object.entries(ioc).forEach(([key, value]) => {
-                if (!categorized.has(key)) {
-                    categorized.set(key, { key, items: [] });
-                }
-                categorized.get(key)!.items.push({
-                    type: key,
-                    value,
-                    display: value,
-                    description: IOC_LABELS[key]?.description || 'Detected indicator'
-                });
+                this.appendCategorizedItem(categorized, key, value, 'Detected indicator');
             });
         });
         this.groupedIocs = this.buildGroupedIocs(categorized);
+    }
+    private appendCategorizedItem(
+        categorized: Map<string, { key: string; items: any[] }>,
+        key: string,
+        value: any,
+        fallbackDescription: string
+    ): void {
+        if (!categorized.has(key)) {
+            categorized.set(key, { key, items: [] });
+        }
+        categorized.get(key)!.items.push({
+            type: key,
+            value,
+            display: value,
+            description: IOC_LABELS[key]?.description || fallbackDescription
+        });
     }
     private buildGroupedIocs(categorized: Map<string, {
         key: string;

@@ -90,12 +90,7 @@ export class SocialMapperStateService {
     }
     closeInfoModal() { this.infoModalData.set(null); }
     openPlatformNodePopup(nodeId: string) {
-        if (!nodeId.startsWith('platform-')) {
-            return;
-        }
-        const key = nodeId.substring('platform-'.length);
-        const [keyUsername, platformName, platformUsername] = key.split('|');
-        const platformData = this.scanResults().get(keyUsername)?.find(p => p.platform === platformName && p.username === platformUsername);
+        const platformData = this.findPlatformDataByNodeId(nodeId);
         if (platformData) {
             this.selectedPlatformData.set(platformData);
             this.isMetadataPopupVisible.set(true);
@@ -104,17 +99,25 @@ export class SocialMapperStateService {
     closeMetadataPopup() { this.isMetadataPopupVisible.set(false); this.selectedPlatformData.set(null); }
     closeSummaryPopup() { this.summaryPopupData.set(null); }
     openFollowerScanPopup(nodeId: string) {
-        if (!nodeId.startsWith('platform-')) {
-            return;
-        }
-        const key = nodeId.substring('platform-'.length);
-        const [keyUsername, platformName, platformUsername] = key.split('|');
-        const userResults = this.scanResults().get(keyUsername);
-        const pData = userResults?.find(p => p.username === platformUsername && p.platform === platformName);
+        const pData = this.findPlatformDataByNodeId(nodeId);
         if (pData) {
             this.followerScanPopupData.set({ platform: pData });
             this.isFollowerScanPopupVisible.set(true);
         }
+    }
+    private findPlatformDataByNodeId(nodeId: string): PlatformResult | null {
+        if (!nodeId.startsWith('platform-')) {
+            return null;
+        }
+        const key = nodeId.substring('platform-'.length);
+        const [keyUsername, platformName, platformUsername] = key.split('|');
+        const platformData = this.scanResults().get(keyUsername)?.find(
+            p => p.platform === platformName && p.username === platformUsername
+        );
+        if (!platformData) {
+            return null;
+        }
+        return platformData;
     }
     closeFollowerScanPopup() { this.followerScanPopupData.set(null); this.isFollowerScanPopupVisible.set(false); }
     openRelationshipPopup(data: RelationshipPopupData) {

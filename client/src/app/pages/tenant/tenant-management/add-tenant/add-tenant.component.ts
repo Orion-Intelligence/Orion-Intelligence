@@ -7,6 +7,7 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { buildUsernameSuggestions, buildUsernameSuggestionText } from '../../../../shared/utils/auth-form.util';
 @Component({
     selector: 'app-add-tenant',
     imports: [FormsModule, NgFor, NgIf],
@@ -75,31 +76,8 @@ export class AddTenantComponent implements OnInit {
         if (this.usernamePattern.test(this.model.username)) {
             return true;
         }
-        const suggestions: string[] = [];
-        const base = this.model.username || '';
-        let counter = 1;
-        while (suggestions.length < 4 && counter < 50) {
-            const suffix = counter.toString();
-            let s = base.toLowerCase();
-            if (!/^[A-Za-z]/.test(s)) {
-                s = 'u' + s;
-            }
-            s = s.replace(/[^A-Za-z0-9_-]/g, '');
-            if (s.length > 20 - suffix.length) {
-                s = s.slice(0, 20 - suffix.length);
-            }
-            if (s.length < 8 - suffix.length) {
-                s = s.padEnd(8 - suffix.length, '0');
-            }
-            const suggestion = s + suffix;
-            if (this.usernamePattern.test(suggestion) && !suggestions.includes(suggestion)) {
-                suggestions.push(suggestion);
-            }
-            counter++;
-        }
-        this.usernameSuggestion = suggestions.length
-            ? 'Username already taken. Suggested usernames: ' + suggestions.join(', ')
-            : 'Username already taken.';
+        const suggestions = buildUsernameSuggestions(this.model.username, this.usernamePattern);
+        this.usernameSuggestion = buildUsernameSuggestionText(suggestions);
         this.errorText = 'Invalid username';
         return false;
     }

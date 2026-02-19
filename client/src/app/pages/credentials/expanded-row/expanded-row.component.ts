@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgClass, NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
 type TelemetryGroup = {
     key: string;
     label: string;
@@ -24,10 +25,11 @@ export class ExpandedRowComponent implements OnChanges {
     @Input()
     searchQuery: string = '';
     activeTelemetryKey: string | null = null;
-    matchedTelemetryKeys: string[] = [];
     matchedValues: string[] = [];
     copiedKey: string | null = null;
     private copiedTimer: any = null;
+    constructor(private rowHelper: ResultRowHelperService) {
+    }
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['mode'] || changes['item'] || changes['result'] || changes['index']) {
             this.activeTelemetryKey = null;
@@ -78,7 +80,7 @@ export class ExpandedRowComponent implements OnChanges {
             this.result?.['m_channel'] ??
             this.result?.['source_channel'] ??
             this.result?.['m_source_channel'];
-        const arr = this.normalizeToArray(v);
+        const arr = this.rowHelper.normalizeToArray(v);
         return arr[0] || '-';
     }
     get yearValue(): string {
@@ -92,7 +94,7 @@ export class ExpandedRowComponent implements OnChanges {
             this.result?.['type'] ??
             this.result?.['file_type'] ??
             this.result?.['fileType'];
-        const arr = this.normalizeToArray(v);
+        const arr = this.rowHelper.normalizeToArray(v);
         return arr[0] || '-';
     }
     selectTelemetry(key: string, e?: MouseEvent) {
@@ -182,7 +184,7 @@ export class ExpandedRowComponent implements OnChanges {
         if (!value || value === '-') {
             return;
         }
-        const ok = await this.tryClipboard(value);
+        const ok = await this.rowHelper.copyToClipboard(value);
         if (!ok) {
             return;
         }
@@ -196,7 +198,7 @@ export class ExpandedRowComponent implements OnChanges {
         if (!payload.trim()) {
             return;
         }
-        const ok = await this.tryClipboard(payload);
+        const ok = await this.rowHelper.copyToClipboard(payload);
         if (!ok) {
             return;
         }
@@ -279,64 +281,14 @@ export class ExpandedRowComponent implements OnChanges {
         }
         return lines.join('\n');
     }
-    private async tryClipboard(value: string): Promise<boolean> {
-        try {
-            if (navigator?.clipboard?.writeText) {
-                await navigator.clipboard.writeText(value);
-                return true;
-            }
-        }
-        catch { }
-        try {
-            const ta = document.createElement('textarea');
-            ta.value = value;
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            ta.style.top = '0';
-            ta.setAttribute('readonly', '');
-            document.body.appendChild(ta);
-            ta.select();
-            const ok = document.execCommand('copy');
-            document.body.removeChild(ta);
-            return ok;
-        }
-        catch {
-            return false;
-        }
-    }
-    private normalizeToArray(v: any): string[] {
-        if (v == null) {
-            return [];
-        }
-        if (Array.isArray(v)) {
-            return v.map(x => String(x)).filter(Boolean);
-        }
-        return [String(v)].filter(Boolean);
-    }
-    private prettyLabel(key: string): string {
-        const cleaned = String(key)
-            .replace(/^m_/, '')
-            .replace(/[_\-]+/g, ' ')
-            .replace(/[^a-zA-Z0-9 ]/g, ' ')
-            .trim();
-        if (!cleaned) {
-            return String(key);
-        }
-        if (cleaned.length < 4) {
-            return cleaned.toUpperCase();
-        }
-        return cleaned
-            .toLowerCase()
-            .replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
-    }
     private buildStealerGroups(item: any): TelemetryGroup[] {
         if (!item) {
             return [];
         }
-        const emails = this.normalizeToArray(item?.['email']);
-        const domains = this.normalizeToArray(item?.['domain']);
-        const ips = this.normalizeToArray(item?.['ip']);
-        const passwords = this.normalizeToArray(item?.['password']);
+        const emails = this.rowHelper.normalizeToArray(item?.['email']);
+        const domains = this.rowHelper.normalizeToArray(item?.['domain']);
+        const ips = this.rowHelper.normalizeToArray(item?.['ip']);
+        const passwords = this.rowHelper.normalizeToArray(item?.['password']);
         const exclude = new Set<string>([
             '_id',
             'raw',
@@ -369,7 +321,7 @@ export class ExpandedRowComponent implements OnChanges {
         }
         const rest: TelemetryGroup[] = Object.keys(item)
             .filter(k => !exclude.has(k))
-            .map(k => ({ key: k, label: this.prettyLabel(k), values: this.normalizeToArray(item?.[k]) }))
+            .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(item?.[k]) }))
             .filter(g => g.values.length > 0)
             .sort((a, b) => a.label.localeCompare(b.label));
         return [...core, ...rest];
@@ -389,16 +341,16 @@ export class ExpandedRowComponent implements OnChanges {
         ]);
         const groups: TelemetryGroup[] = Object.keys(result)
             .filter(k => k.startsWith('m_') && Array.isArray(result[k]) && result[k].length > 0 && !exclude.has(k))
-            .map(k => ({ key: k, label: this.prettyLabel(k), values: this.normalizeToArray(result?.[k]) }))
+            .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(result?.[k]) }))
             .filter(g => g.values.length > 0);
         const emailK = 'm_email';
         const domainK = 'm_domain';
         const ipK = 'm_ip';
         const passK = 'm_password';
-        const emailV = this.normalizeToArray(result?.[emailK]);
-        const domainV = this.normalizeToArray(result?.[domainK]);
-        const ipV = this.normalizeToArray(result?.[ipK]);
-        const passV = this.normalizeToArray(result?.[passK]);
+        const emailV = this.rowHelper.normalizeToArray(result?.[emailK]);
+        const domainV = this.rowHelper.normalizeToArray(result?.[domainK]);
+        const ipV = this.rowHelper.normalizeToArray(result?.[ipK]);
+        const passV = this.rowHelper.normalizeToArray(result?.[passK]);
         const core: TelemetryGroup[] = [];
         if (emailV.length > 0) {
             core.push({ key: emailK, label: 'Email', values: emailV });
@@ -416,8 +368,5 @@ export class ExpandedRowComponent implements OnChanges {
             .filter(g => ![emailK, domainK, ipK, passK].includes(g.key))
             .sort((a, b) => a.label.localeCompare(b.label));
         return [...core, ...rest];
-    }
-    _console(value: string) {
-        console.log(value);
     }
 }

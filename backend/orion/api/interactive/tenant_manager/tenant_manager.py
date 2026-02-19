@@ -21,6 +21,9 @@ from orion.services.encryption_manager.key_manager import KeyManager
 class TenantManager:
     __instance = None
     __lock = threading.Lock()
+    SIGNUP_USERNAME_PATTERN = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
+    TENANT_USERNAME_PATTERN = r"^[A-Za-z0-9_-]{4,20}$"
+    EMAIL_PATTERN = r"^[\w\.-]+@[\w\.-]+\.\w+$"
 
     @staticmethod
     def get_instance():
@@ -43,6 +46,41 @@ class TenantManager:
     @staticmethod
     async def _dek(tenant_id: str) -> bytes:
         return await KeyManager.get_instance().get_or_create_dek(tenant_id)
+
+    @staticmethod
+    def get_email_domain(email: str) -> str:
+        return email.split("@")[1].lower()
+
+    @staticmethod
+    def get_company_from_email(email: str) -> str:
+        parts = email.split("@")
+        if len(parts) < 2:
+            return ""
+        return parts[1].split(".")[0]
+
+    @staticmethod
+    def validate_signup_username(username: str):
+        if not re.match(TenantManager.SIGNUP_USERNAME_PATTERN, username):
+            raise HTTPException(status_code=422, detail="Username already exist")
+
+    @staticmethod
+    def validate_tenant_username(username: str):
+        if not re.match(TenantManager.TENANT_USERNAME_PATTERN, username):
+            raise HTTPException(status_code=400, detail="Username already exist")
+
+    @staticmethod
+    def validate_signup_email(email: str):
+        if not re.match(TenantManager.EMAIL_PATTERN, email):
+            raise HTTPException(status_code=422, detail="Invalid email format")
+
+    @staticmethod
+    def validate_tenant_email(email: str, role: str):
+        if not re.match(TenantManager.EMAIL_PATTERN, email) and role not in ["demo"]:
+            raise HTTPException(status_code=400, detail="Invalid email format")
+
+    @staticmethod
+    def validate_company_email(email: str, detail: str = "Please enter your company email (Gmail, Yahoo, etc. not allowed)."):
+        helper_controller.validate_company_email_domain(email, detail=detail)
 
 
     @staticmethod
@@ -241,15 +279,9 @@ class TenantManager:
 
             username, email, password = helper_controller.extract_user_mail_fields(data)
 
-            username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
-            if not re.match(username_pattern, username):
-                raise HTTPException(status_code=400, detail="Username already exist")
-
-            email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
-            if not re.match(email_pattern, email) and not data.role in ["demo"]:
-                raise HTTPException(status_code=400, detail="Invalid email format")
-            
-            helper_controller.validate_company_email_domain(
+            TenantManager.validate_tenant_username(username)
+            TenantManager.validate_tenant_email(email, data.role)
+            TenantManager.validate_company_email(
                 email,
                 detail="Please enter user company email (Gmail, Yahoo, etc. not allowed)."
             )

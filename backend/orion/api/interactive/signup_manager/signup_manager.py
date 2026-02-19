@@ -1,4 +1,3 @@
-import re
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
@@ -26,13 +25,8 @@ class SignupManager:
         engine = mongo_controller.get_instance().get_engine()
         username, email, password = helper_controller.extract_user_mail_fields(data)
 
-        username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
-        if not re.match(username_pattern, username):
-            raise HTTPException(status_code=422, detail="Username already exist")
-
-        email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
-        if not re.match(email_pattern, email):
-            raise HTTPException(status_code=422, detail="Invalid email format")
+        TenantManager.validate_signup_username(username)
+        TenantManager.validate_signup_email(email)
 
         existing_user = await engine.find_one(
             db_user_account, (db_user_account.username == username))
@@ -44,18 +38,18 @@ class SignupManager:
         if existing_mail:
             raise HTTPException(status_code=400, detail="Username or email already exists")
         
-        new_email_domain = SignupManager.get_email_domain(email)
+        new_email_domain = TenantManager.get_email_domain(email)
         maintainers = await engine.find(
             db_user_account, db_user_account.licenses == LicenseName.MAINTAINER)
         domain_exists = any(
-            user.email and SignupManager.get_email_domain(user.email) == new_email_domain
+            user.email and TenantManager.get_email_domain(user.email) == new_email_domain
             for user in maintainers
         )
         if domain_exists:
             raise HTTPException(status_code=400, detail="This domain tenant already exists")
             
 
-        helper_controller.validate_company_email_domain(email)
+        TenantManager.validate_company_email(email)
 
         if password.startswith("$2b$") and len(password) >= 60:
             hashed_password = password
@@ -70,7 +64,7 @@ class SignupManager:
         _verification_token = session_manager.get_instance().generate_verification_token()
         _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
 
-        company = email.split("@")[1].split(".")[0]
+        company = TenantManager.get_company_from_email(email)
         if not company:
             raise HTTPException(status_code=422, detail="Invalid email")
 
@@ -151,19 +145,15 @@ class SignupManager:
             raise HTTPException(status_code=422, detail="Invalid data")
         
     @staticmethod
-    def get_email_domain(email: str) -> str:
-        return email.split("@")[1].lower()
-    
-    @staticmethod
     async def send_support_mail(data: SupportRequest):
         email=data.email or ""
         subject=data.subject or ""
         message=data.message or ""
             
 
-        helper_controller.validate_company_email_domain(email)
+        TenantManager.validate_company_email(email)
 
-        company = email.split("@")[1].split(".")[0]
+        company = TenantManager.get_company_from_email(email)
         if not company:
             raise HTTPException(status_code=422, detail="Invalid email")
         html_content = constant.mail_template.render(

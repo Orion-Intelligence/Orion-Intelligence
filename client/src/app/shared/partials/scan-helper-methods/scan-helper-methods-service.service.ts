@@ -70,31 +70,33 @@ export class ScanHelperMethodsService {
         });
         return sub;
     }
+    private runPollingScan<T>(
+        call: () => Observable<T>,
+        getStatus: (res: T) => string | undefined,
+        getProgress: (res: T) => number | null | undefined
+    ): Subscription {
+        const enhanced = (res: T) => {
+            this.updateProgress(getProgress(res));
+        };
+        const build = (cancel$: Subject<boolean>) => this.poll<T>(call, getStatus, enhanced, cancel$, 4000);
+        return this.runTask<T>(build);
+    }
     scanSubdomains(resolved: string, checkLive: boolean): Subscription {
         const call = () => this.api.post<SubdomainResponse>('urlscan/subdomains', { domain: resolved, scanType: 'subdomains', checkLive });
         const getStatus = (res: SubdomainResponse) => this.getPendingStatus(res);
-        const enhanced = (res: SubdomainResponse) => {
-            this.updateProgress((res as any)?.progress);
-        };
-        const build = (cancel$: Subject<boolean>) => this.poll<SubdomainResponse>(call, getStatus, enhanced, cancel$, 4000);
-        return this.runTask<SubdomainResponse>(build);
+        const getProgress = (res: SubdomainResponse) => (res as any)?.progress;
+        return this.runPollingScan<SubdomainResponse>(call, getStatus, getProgress);
     }
     scanDns(ip: string): Subscription {
         const call = () => this.api.post<DnsResponse>('urlscan/dns', { domain: ip, scanType: 'dns' });
         const getStatus = (res: DnsResponse) => res?.status;
-        const enhanced = (res: DnsResponse) => {
-            this.updateProgress(res?.progress);
-        };
-        const build = (cancel$: Subject<boolean>) => this.poll<DnsResponse>(call, getStatus, enhanced, cancel$, 4000);
-        return this.runTask<DnsResponse>(build);
+        const getProgress = (res: DnsResponse) => res?.progress;
+        return this.runPollingScan<DnsResponse>(call, getStatus, getProgress);
     }
     scanWayback(resolved: string): Subscription {
         const call = () => this.api.post<WaybackResponse>('urlscan/wayback', { domain: resolved, scanType: 'wayback' });
         const getStatus = (res: WaybackResponse) => this.getPendingStatus(res);
-        const enhanced = (res: WaybackResponse) => {
-            this.updateProgress((res as any)?.progress);
-        };
-        const build = (cancel$: Subject<boolean>) => this.poll<WaybackResponse>(call, getStatus, enhanced, cancel$, 4000);
-        return this.runTask<WaybackResponse>(build);
+        const getProgress = (res: WaybackResponse) => (res as any)?.progress;
+        return this.runPollingScan<WaybackResponse>(call, getStatus, getProgress);
     }
 }

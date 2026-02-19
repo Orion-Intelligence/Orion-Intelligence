@@ -5,10 +5,7 @@ import { TooltipDirective } from '../../../../../directive/tooltip-directive.dir
 import { HelperService } from '../../../../../services/helper.service';
 import { StealerLogCallbackModel } from '../../../../../model/results/credentials/credential.callback.model';
 import { DashboardService } from '../../../../../../services/dashboard/dashboard.service';
-type DefGroup = {
-    type: string;
-    items: DefacementResultItem[];
-};
+import { ResultRowHelperService } from '../../../../../services/result-row-helper.service';
 @Component({
     selector: 'app-defacement-results',
     imports: [CommonModule, TooltipDirective],
@@ -26,14 +23,12 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     threatTypeCounts: {
         [key: string]: number;
     } = {};
-    groupedDefacement: DefGroup[] = [];
     copiedKey: string | null = null;
     private copiedTimer: any = null;
-    constructor(protected helperService: HelperService, private dashboardService: DashboardService) { }
+    constructor(protected helperService: HelperService, private dashboardService: DashboardService, private rowHelper: ResultRowHelperService) { }
     ngOnInit(): void {
         if (this.results_defacement?.Result?.length) {
             this.updateThreatTypeCounts(this.results_defacement.Result);
-            this.buildGroupedDefacement();
         }
         if (this.results_stealerlog?.Result?.length) {
             this.showLimitStealer = 10;
@@ -43,7 +38,6 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
         if (changes['results_defacement'] && this.results_defacement?.Result?.length) {
             this.updateThreatTypeCounts(this.results_defacement.Result);
             this.showLimitDefacement = 10;
-            this.buildGroupedDefacement();
         }
         if (changes['results_stealerlog'] && this.results_stealerlog?.Result?.length) {
             this.showLimitStealer = 10;
@@ -61,21 +55,6 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
             const type = item.m_ioc_type?.[0] || 'Unknown';
             this.threatTypeCounts[type] = (this.threatTypeCounts[type] || 0) + 1;
         });
-    }
-    buildGroupedDefacement() {
-        const list = (this.results_defacement?.Result ?? []).slice(0, this.showLimitDefacement);
-        const map = new Map<string, DefacementResultItem[]>();
-        for (const item of list) {
-            const type = item.m_ioc_type?.[0] || 'Unknown';
-            const arr = map.get(type);
-            if (arr) {
-                arr.push(item);
-            }
-            else {
-                map.set(type, [item]);
-            }
-        }
-        this.groupedDefacement = Array.from(map.entries()).map(([type, items]) => ({ type, items }));
     }
     explore(route: string, q: string) {
         let query = this.helperService.extractDomain(q);
@@ -101,7 +80,6 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
         event.stopPropagation();
         if (category === 'defacement') {
             this.showLimitDefacement = Math.min(this.showLimitDefacement + 10, this.results_defacement?.Result?.length ?? this.showLimitDefacement);
-            this.buildGroupedDefacement();
         }
         else {
             this.showLimitStealer = Math.min(this.showLimitStealer + 10, this.results_stealerlog?.Result?.length ?? this.showLimitStealer);
@@ -143,7 +121,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
         if (!value || value === '-') {
             return;
         }
-        const ok = await this.tryClipboard(value);
+        const ok = await this.rowHelper.copyToClipboard(value);
         if (!ok) {
             return;
         }
@@ -156,110 +134,40 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
         }
         this.copiedTimer = setTimeout(() => (this.copiedKey = null), 1200);
     }
-    private async tryClipboard(value: string): Promise<boolean> {
-        try {
-            if (navigator?.clipboard?.writeText) {
-                await navigator.clipboard.writeText(value);
-                return true;
-            }
-        }
-        catch { }
-        try {
-            const ta = document.createElement('textarea');
-            ta.value = value;
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            ta.style.top = '0';
-            ta.setAttribute('readonly', '');
-            document.body.appendChild(ta);
-            ta.select();
-            const ok = document.execCommand('copy');
-            document.body.removeChild(ta);
-            return ok;
-        }
-        catch {
-            return false;
-        }
-    }
     webServerValue(item: any): string {
-        if (item?.m_web_server?.length) {
-            return item.m_web_server.join(', ');
-        }
-        return '-';
+        return this.rowHelper.arrayOrDash(item?.m_web_server);
     }
     attackerValue(item: any): string {
-        if (item?.m_attacker?.length) {
-            return item.m_attacker.join(', ');
-        }
-        return '-';
+        return this.rowHelper.arrayOrDash(item?.m_attacker);
     }
     teamValue(item: any): string {
-        const v = item?.m_team;
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.m_team);
     }
     ipValue(item: any): string {
-        if (item?.m_ip?.length) {
-            return item.m_ip.join(', ');
-        }
-        return '-';
+        return this.rowHelper.arrayOrDash(item?.m_ip);
     }
     urlValue(item: any): string {
-        const v = item?.m_url;
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.m_url);
     }
     dateValue(item: any): string {
-        const v = item?.m_leak_date;
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.m_leak_date);
     }
     usernameValue(item: any): string {
-        const v = item?.['username'];
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.['username']);
     }
     passwordValue(item: any): string {
-        const v = item?.['password'];
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.['password']);
     }
     domainValue(item: any): string {
-        const v = item?.['domain'];
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.['domain']);
     }
     hashValue(item: any): string {
-        const v = item?.['m_hash'];
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.['m_hash']);
     }
     stealerUrlValue(item: any): string {
-        const v = item?.['url'];
-        if (v == null || v === '') {
-            return '-';
-        }
-        return String(v);
+        return this.rowHelper.valueOrDash(item?.['url']);
     }
     truncate(v: any, n: number = 30): string {
-        const s = v == null ? '' : String(v);
-        if (!s) {
-            return '-';
-        }
-        return s.length > n ? s.slice(0, n) + '...' : s;
+        return this.rowHelper.truncate(v, n);
     }
 }

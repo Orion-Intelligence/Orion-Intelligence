@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { NgForm, FormsModule } from '@angular/forms';
 import { HeaderComponent } from "../header/login-header/header.component";
+import { PasswordChecks, PasswordStrength, areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput } from "../../utils/auth-form.util";
 @Component({
     selector: 'app-forgot-password',
     templateUrl: './reset-password.component.html',
@@ -17,53 +18,21 @@ export class ResetPasswordComponent implements OnInit {
     hasToken: boolean = false;
     token: string = '';
     confirmPassword: string = 'asdsadasd';
-    passwordStrength: 'weak' | 'medium' | 'strong' | null = null;
+    passwordStrength: PasswordStrength = null;
     showPasswordMeter = false;
-    passwordChecks = {
-        length: false,
-        lowercase: false,
-        uppercase: false,
-        number: false,
-        specialChar: false
-    };
+    passwordChecks: PasswordChecks = createEmptyPasswordChecks();
     currentUnmetCheck: string | null = null;
     constructor(private router: Router, private route: ActivatedRoute, public auth_service: AuthService) {
     }
     onPasswordInput(password: string) {
-        this.showPasswordMeter = password.length > 0;
-        this.passwordChecks = {
-            length: password.length >= 8,
-            lowercase: /[a-z]/.test(password),
-            uppercase: /[A-Z]/.test(password),
-            number: /[0-9]/.test(password),
-            specialChar: /[^A-Za-z0-9]/.test(password)
-        };
-        const checkOrder = [
-            { key: 'length', message: 'At least 8 characters' },
-            { key: 'lowercase', message: 'At least one lowercase letter' },
-            { key: 'uppercase', message: 'At least one uppercase letter' },
-            { key: 'number', message: 'At least one number' },
-            { key: 'specialChar', message: 'At least one special character' }
-        ] as const;
-        this.currentUnmetCheck =
-            checkOrder.find(c => !this.passwordChecks[c.key])?.message || null;
-        const allRequirementsMet = Object.values(this.passwordChecks).every(v => v);
-        if (!allRequirementsMet) {
-            this.passwordStrength = 'weak';
-            return;
-        }
-        if (password.length >= 12 && this.passwordChecks.specialChar && this.passwordChecks.number) {
-            this.passwordStrength = 'strong';
-        }
-        else if (password.length >= 10) {
-            this.passwordStrength = 'medium';
-        }
-        else {
-            this.passwordStrength = 'weak';
-        }
+        const evaluation = evaluatePasswordInput(password);
+        this.showPasswordMeter = evaluation.showPasswordMeter;
+        this.passwordChecks = evaluation.passwordChecks;
+        this.currentUnmetCheck = evaluation.currentUnmetCheck;
+        this.passwordStrength = evaluation.passwordStrength;
     }
     get allPasswordRequirementsMet(): boolean {
-        return Object.values(this.passwordChecks).every(v => v);
+        return areAllPasswordRequirementsMet(this.passwordChecks);
     }
     ngOnInit() {
         const token = this.route.snapshot.paramMap.get('token');
