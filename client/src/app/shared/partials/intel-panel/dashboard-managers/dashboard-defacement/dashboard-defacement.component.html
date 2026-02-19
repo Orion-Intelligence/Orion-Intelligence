@@ -1,7 +1,0 @@
-<app-result [discussion]="false" [isList]="isList" (onToggleSort)="onToggleSort($event)" [list_grid]="true" (onToggleSwitch)="list_switch($event)" [isLoading]="isResponseLoading()" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [filterModel]="defacement_filters" [result_count]="Math.ceil(result_count)" [searchQuery]="query" [showTabs]=true [type]="type"></app-result>
-
-<app-dashboard-result-general-list *ngIf="!isResponseLoading() || isList" [isLoading]="isResponseLoading()" [isList]="this.isList" [searchResults]="defacementCallbackModel.Result" ></app-dashboard-result-general-list>
-
-<div *ngIf="!isResponseLoading() && this.defacementCallbackModel.Result.length > 0" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.floor(this.dashboardService.consolidatedParamModel.page * this.defacementCallbackModel.Page_Count)"></app-pagination>
-</div>

@@ -1,0 +1,201 @@
+<div *ngIf="isList; else cardView" class="list__container-result" @fadeInDashboardItem>
+  <div class="list__container list-container">
+    <table class="table table-striped directory-list__table clear-paddings" *ngIf="isLoading || (!isLoading && searchResults.length>0)">
+      <thead>
+      <tr>
+        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="list__container-sort list__column-id-min" scope="col">#
+        </th>
+        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="list__container-sort" scope="col">Base URL
+        </th>
+        <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="list__container-sort" scope="col">IP
+          Addresses
+        </th>
+        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="list__container-sort" scope="col">Attacker
+        </th>
+        <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="list__container-sort" scope="col">
+          Team
+        </th>
+        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="list__container-sort" scope="col">Web Server
+        </th>
+        <th (click)="sortTable('m_leak_date')" [ngClass]="getSortClass('m_leak_date')" class="list__container-sort" scope="col">Leak Date
+        </th>
+        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="list__container-sort" scope="col">Web URL
+        </th>
+        <th class="list__column-id-min" scope="col"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngIf="isLoading">
+        <tr>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-100"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-100"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+        </tr>
+      </ng-container>
+
+      <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults : searchResults); let i = index">
+        <tr *ngIf="!isLoading" (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem>
+          <td class="list__cell-id">
+            <span>{{ i + 1 }}</span> <img class="list__cell-arrow" alt="click" width="15" height="15" src="../../../../../assets/images/shared/arrow-right-click.svg">
+          </td>
+          <td>{{ item.m_url || '-' }}</td>
+          <td>{{ (item.m_ip || []).length ? (item.m_ip || []).join(', ') : '-' }}</td>
+          <td>{{ (item.m_attacker || []).length ? (item.m_attacker || []).join(', ') : '-' }}</td>
+          <td>{{ item.m_team || '-' }}</td>
+          <td>{{ (item.m_web_server || []).length ? (item.m_web_server || []).join(', ') : '-' }}</td>
+          <td>{{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</td>
+          <td>
+            <a *ngIf="item.m_source_url?.length" [href]="item.m_source_url[0]" class="text-decoration-none text-reset">{{ item.m_source_url[0] }}</a> <span *ngIf="!item.m_source_url?.length">-</span>
+          </td>
+          <td class="list__column-id-min"><img alt="click" width="15" height="15" class="ml-4" src="../../../../../assets/images/shared/arrow-right-click.svg"></td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </table>
+    <div class="see-more-wrapper list__container-more" *ngIf="isExpandAble && searchResults.length > 2">
+      <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    </div>
+  </div>
+</div>
+
+<ng-template #cardView>
+  <div class="dashboard__search-container dashboard__search-container-chat">
+    <ng-container
+      *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0,2) : searchResults).slice(0,30)"
+      class="dashboard__search-card">
+      <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div">
+
+        <div class="dashboard__search-tags">
+          <ng-container *ngIf="item.m_ioc_type?.length; else unknownTag">
+            <span *ngFor="let tag of item.m_ioc_type" class="dashboard__tag">{{ tag }}</span>
+          </ng-container>
+          <ng-template #unknownTag>
+            <span class="dashboard__tag">unknown</span>
+          </ng-template>
+
+          <div class="dashboard__buttons" *ngIf="!isMobileMode()">
+            <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph" class="dashboard__search-button">
+              <div class="dashboard__search-button-inner">
+                <img height="20" src="/client/src/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
+              </div>
+            </div>
+
+            <div (click)="scrollService.saveSession(item.m_hash)" appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+              <div class="dashboard__search-button-inner">
+                <img height="20" src="/client/src/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="dashboard__search-title mb-0">{{ item.m_team || 'No Team' }}</h2>
+
+        <ng-container *ngIf="item.ioc?.length">
+          <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">IOC</h5>
+          <div class="dashboard__search-link">{{ item.ioc.join(', ') }}</div>
+        </ng-container>
+
+        <ng-container *ngIf="(item.m_content?.length || 0) > 5; else noContentBlock">
+          <p class="dashboard__search-description highlight mt-2">
+            {{ item.m_content.slice(0, 300) }}<span *ngIf="item.m_content.length > 300">...</span>
+          </p>
+        </ng-container>
+        <ng-template #noContentBlock>
+          <p class="dashboard__search-description highlight mt-2">Webpage is not available anymore</p>
+        </ng-template>
+
+        <ng-container *ngIf="item.m_source_url?.length">
+          <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Web URL</h5>
+          <div class="dashboard__search-link">
+            <div class="text-decoration-none text-reset">{{ item.m_url }}</div>
+          </div>
+        </ng-container>
+
+        <div class="dashboard__search-info dashboard__search-info-chat">
+          <div *ngIf="item.m_ip?.length" class="dashboard__search-info-item">
+            <span class="dashboard__info-label">IP Addresses:</span> <span class="dashboard__info-value">{{
+              item.m_ip.join(', ')
+            }}</span>
+          </div>
+          <div *ngIf="item.m_attacker?.length" class="dashboard__search-info-item">
+            <span class="dashboard__info-label">Attacker:</span> <span class="dashboard__info-value">{{
+              item.m_attacker.join(', ')
+            }}</span>
+          </div>
+          <div *ngIf="item.m_web_server?.length" class="dashboard__search-info-item">
+            <span class="dashboard__info-label">Web Server:</span> <span class="dashboard__info-value">{{
+              item.m_web_server.join(', ')
+            }}</span>
+          </div>
+          <div *ngIf="item.m_leak_date" class="dashboard__search-info-item">
+            <span class="dashboard__info-label">Leak Date:</span> <span class="dashboard__info-value">{{
+              item.m_leak_date | date: 'MMM d, y'
+            }}</span>
+          </div>
+          <div *ngIf="item.m_location" class="dashboard__search-info-item">
+            <span class="dashboard__info-label">Location:</span> <span class="dashboard__info-value">{{
+              item.m_location
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="see-more-wrapper" *ngIf="isExpandAble && searchResults.length > 2">
+      <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    </div>
+  </div>
+</ng-template>

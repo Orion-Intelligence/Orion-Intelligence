@@ -6,20 +6,16 @@ import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { HomepageComponent } from './pages/homepage/homepage.component';
 import { DirectoryComponent } from './pages/directory/directory.component';
-import { DashboardApiComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-api/dashboard-api.component';
-import { DashboardChatsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-chats/dashboard-chats.component';
-import { DashboardGeneralComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-general/dashboard-general.component';
+import { DashboardApiComponent } from './pages/intel-panel/dashboard-api/dashboard-api.component';
+import { DashboardResultContainer } from './pages/intel-panel/dashboard-result-container/dashboard-result-container.component';
 import { ReportComponent } from './shared/partials/report/report_general/report.component';
-import { DashboardDefacementComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-defacement/dashboard-defacement.component';
 import { ReportDefacementComponent } from './shared/partials/report/report-defacement/report-defacement.component';
 import { ReportChatComponent } from './shared/partials/report/report-chat/report-chat.component';
-import { DashboardExploitComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-exploit/dashboard-exploit.component';
 import { DumpComponent } from './pages/dump/dump.component';
 import { CredentialComponent } from './pages/credentials/credential.component';
 import { ErrorHandlerComponent } from './shared/partials/error-handler/error-handler.component';
-import { DashboardConsolidatedComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component';
+import { DashboardConsolidatedComponent } from './pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component';
 import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.resolver';
-import { DashboardSocialsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
 import { subscriptionGuard } from './shared/guards/subscription.guard';
 import { SecurityScanComponent } from './pages/security-scan/security-scan.component';
 import { SignupComponent } from './pages/signup/signup.component';
@@ -35,7 +31,6 @@ import { NotificationComponent } from './shared/partials/notification/notificati
 import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
 import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/account-settings.component';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
-import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
 import { SidebarUserHomepageComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component';
 import { CategoryAlertReportComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component';
 import { AddCustomAlertComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component';
@@ -45,7 +40,7 @@ import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
-import { FileScannerComponent } from './shared/partials/intel-panel/dashboard-managers/ioc-extractor/file-scanner.component';
+import { FileScannerComponent } from './pages/intel-panel/ioc-extractor/file-scanner.component';
 import { SocialMapperComponent } from './pages/graphs/social-graph/social-mapper.component';
 const HASH_CONSOLIDATED_ROUTE = {
     resolve: { reportdata: ReportConsolidatedResolver },
@@ -257,8 +252,8 @@ export const routes: Routes = [
                     },
                     {
                         path: 'all',
-                        component: DashboardDiscussionComponent,
-                        data: { type: 'all', animation: 'Discussion' },
+                        component: DashboardResultContainer,
+                        data: { type: 'Social', animation: 'Discussion' },
                         pathMatch: 'full'
                     },
                     {
@@ -280,8 +275,8 @@ export const routes: Routes = [
                     },
                     {
                         path: ':category',
-                        component: DashboardDiscussionComponent,
-                        data: { animation: 'Discussion' },
+                        component: DashboardResultContainer,
+                        data: { type: 'Social', animation: 'Discussion' },
                         pathMatch: 'full'
                     },
                     {
@@ -331,7 +326,7 @@ export const routes: Routes = [
                     },
                     {
                         path: ':category',
-                        component: DashboardGeneralComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'Breach', animation: 'DataBreach' }
                     },
                     {
@@ -353,7 +348,7 @@ export const routes: Routes = [
                     },
                     {
                         path: ':category',
-                        component: DashboardGeneralComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'strategic', animation: 'CategoryPage' }
                     },
                     {
@@ -375,12 +370,27 @@ export const routes: Routes = [
                     },
                     {
                         path: 'all',
-                        component: DashboardDefacementComponent,
-                        data: { type: 'exploit', animation: 'DataBreach' }
+                        component: DashboardResultContainer,
+                        data: { type: 'defacement', animation: 'DataBreach' }
+                    },
+                    {
+                        path: 'hacked',
+                        component: DashboardResultContainer,
+                        data: { type: 'defacement', animation: 'DataBreach' }
+                    },
+                    {
+                        path: 'phishing',
+                        component: DashboardResultContainer,
+                        data: { type: 'defacement', animation: 'DataBreach' }
+                    },
+                    {
+                        path: 'databases',
+                        component: DashboardResultContainer,
+                        data: { type: 'defacement', animation: 'DataBreach' }
                     },
                     {
                         path: ':category',
-                        component: DashboardDefacementComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'Defacement', animation: 'CategoryPage' }
                     },
                     {
@@ -398,51 +408,60 @@ export const routes: Routes = [
                     {
                         path: '',
                         redirectTo: 'all',
-                        pathMatch: 'full'
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'all',
-                        component: DashboardSocialsComponent,
-                        pathMatch: 'full'
+                        component: DashboardResultContainer,
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'chat',
                         redirectTo: '/dashboard/social/all',
-                        pathMatch: 'full'
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'telegram',
-                        component: DashboardChatsComponent,
-                        pathMatch: 'full'
+                        component: DashboardResultContainer,
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'twitter',
-                        component: DashboardSocialsComponent,
-                        pathMatch: 'full'
+                        component: DashboardResultContainer,
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'mastodon',
-                        component: DashboardSocialsComponent,
-                        pathMatch: 'full'
+                        component: DashboardResultContainer,
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'pastebin',
-                        component: DashboardSocialsComponent,
-                        pathMatch: 'full'
+                        component: DashboardResultContainer,
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'forum',
-                        component: DashboardSocialsComponent,
-                        pathMatch: 'full'
+                        component: DashboardResultContainer,
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: 'reddit',
-                        component: DashboardSocialsComponent,
-                        pathMatch: 'full'
+                        component: DashboardResultContainer,
+                        pathMatch: 'full',
+                        data: { type: 'social', animation: 'DataBreach' }
                     },
                     {
                         path: ':category',
-                        component: DashboardChatsComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'Social', animation: 'CategoryPage' }
                     },
                     {
@@ -470,7 +489,7 @@ export const routes: Routes = [
                     },
                     {
                         path: ':category',
-                        component: DashboardGeneralComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'Feed', animation: 'CategoryPage' }
                     },
                     {
@@ -492,22 +511,27 @@ export const routes: Routes = [
                     },
                     {
                         path: 'all',
-                        component: DashboardExploitComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'exploit', animation: 'DataBreach' }
                     },
                     {
                         path: 'tools',
-                        component: DashboardExploitComponent,
+                        component: DashboardResultContainer,
+                        data: { type: 'exploit', animation: 'DataBreach' }
+                    },
+                    {
+                        path: 'cve',
+                        component: DashboardResultContainer,
                         data: { type: 'exploit', animation: 'DataBreach' }
                     },
                     {
                         path: 'zeroday',
-                        component: DashboardExploitComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'exploit', animation: 'DataBreach' }
                     },
                     {
                         path: ':category',
-                        component: DashboardExploitComponent,
+                        component: DashboardResultContainer,
                         data: { type: 'Social', animation: 'CategoryPage' }
                     },
                     {

@@ -113,7 +113,7 @@ class _twitter(leak_extractor_interface, ABC):
                 m_message_sharable_link=tweet['url'],
                 m_weblink=tweet.get('weblink', []),
                 m_content=tweet['content'][:500],
-                m_content_type=["social_collector"],
+                m_content_type=["social"],
                 m_network="clearnet",
                 m_message_date=parsed_date,
                 m_message_id=tweet['id'],

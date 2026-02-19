@@ -1,0 +1,113 @@
+<div class="insight-card">
+  <div class="card_header" (click)="toggleSection('isKeywordExpanded')">
+    <span>Keyword insights</span>
+    <div [attr.aria-label]="isSectionExpanded('isKeywordExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ '_rotated': !isSectionExpanded('isKeywordExpanded') }" alt="toggle icon" src="/client/src/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    </div>
+  </div>
+
+  <div class="insight-card-body" *ngIf="isSectionExpanded('isKeywordExpanded')">
+    <ng-container *ngFor="let item of keywordData; let i = index">
+      <div class="stat-item">
+        <div class="stat-value">{{ item.value }}</div>
+        <div class="stat-label">{{ item.label }}</div>
+      </div>
+      <div class="divider" *ngIf="i < keywordData.length - 1"></div>
+    </ng-container>
+  </div>
+</div>
+
+<div class="insight-card">
+  <div class="card_header" (click)="toggleSection('isCoverageExpanded')">
+    <span>Results General Coverage</span>
+    <div [attr.aria-label]="isSectionExpanded('isCoverageExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ '_rotated': !isSectionExpanded('isCoverageExpanded') }" alt="toggle icon" src="/client/src/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    </div>
+  </div>
+
+  <div class="insight-card-body" *ngIf="isSectionExpanded('isCoverageExpanded')">
+    <ng-container *ngFor="let item of coverageData; let i = index">
+      <div class="stat-item">
+        <div class="stat-value">{{ item.value }}</div>
+        <div class="stat-label">
+          <span *ngIf="item.color" class="dot" [ngStyle]="{ backgroundColor: item.color }"></span>{{ item.label }}
+        </div>
+      </div>
+      <div class="divider" *ngIf="i < coverageData.length - 1"></div>
+    </ng-container>
+  </div>
+</div>
+
+<div class="insight-card"  *ngIf="result_count>0">
+  <div class="card_header" (click)="toggleSection('isThreatExpanded')">
+    <span>Search in Threat Actor</span>
+    <div [attr.aria-label]="isSectionExpanded('isThreatExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ '_rotated': !isSectionExpanded('isThreatExpanded') }" alt="toggle icon" src="/client/src/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    </div>
+  </div>
+
+  <div *ngIf="isSectionExpanded('isThreatExpanded')">
+    <div class="search-bar">
+      <div class="icon">
+        <img src="/client/src/assets/images/shared/theme/magnifyingglasswhite.svg" alt="magnifier">
+      </div>
+      <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" />
+    </div>
+
+    <div class="filter-toggles">
+      <label *ngFor="let option of filterOptions"> <input type="radio" name="filter" [checked]="selectedFilter === option" (change)="toggleFilter(option)" />{{ option }} </label>
+    </div>
+
+    <div class="scroll-fade-container">
+      <div class="scrollable" *ngIf="isSectionExpanded('isThreatExpanded')">
+        <div class="search-result" *ngFor="let item of threatResults() let isLast = last" [ngClass]="{ 'no-border': isLast }">
+          <span>{{ item }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-result" *ngIf="threatResults().length === 0">
+      No results found.
+    </div>
+  </div>
+</div>
+
+<div class="insight-card"  *ngIf="result_count>0">
+  <div class="card_header" (click)="toggleSection('isUrlsExpanded')">
+    <span>Unique URLs</span>
+    <div [attr.aria-label]="isSectionExpanded('isUrlsExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ '_rotated': !isSectionExpanded('isUrlsExpanded') }" alt="toggle icon" src="/client/src/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    </div>
+  </div>
+
+  <div class="scroll-fade-container">
+    <div class="scrollable" *ngIf="isSectionExpanded('isUrlsExpanded')">
+      <div class="url-item" *ngFor="let url of uniqueUrls let isLast = last" [ngClass]="{ 'no-border': isLast }">
+        <div class="url-title">
+          <span class="dot" [ngStyle]="{ backgroundColor: url.status ? '#1ec773' : '#e6534b' }"></span>{{
+          url.title.length > 50 ? (url.title | slice: 0:50) + '…' : url.title }}
+        </div>
+        <div class="url-link">{{ url.url.length > 130 ? (url.url | slice: 0:1130) + '…' : url.url }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngFor="let section of dataSections">
+  <div *ngIf="section.data?.length" class="insight-card">
+    <div class="card_header" (click)="toggleSection(section.key)">
+      <span>{{ section.title }}</span>
+      <div [attr.aria-label]="isSectionExpanded(section.key) ? 'Collapse' : 'Expand'" class="toggle-btn">
+        <img [ngClass]="{ '_rotated': !isSectionExpanded(section.key) }" alt="toggle icon" src="/client/src/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      </div>
+    </div>
+
+    <div class="scroll-fade-container">
+      <div class="scrollable" *ngIf="isSectionExpanded(section.key)">
+        <div class="url-item" *ngFor="let item of section.data; let isLast = last" [ngClass]="{ 'no-border': isLast }">
+          <span class="value">{{ item }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

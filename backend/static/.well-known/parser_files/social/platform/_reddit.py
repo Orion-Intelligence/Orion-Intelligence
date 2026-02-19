@@ -139,7 +139,7 @@ class _reddit(leak_extractor_interface, ABC):
                 m_message_sharable_link=post['url'],
                 m_weblink=post.get('weblinks', []),
                 m_content=full_content[:500],
-                m_content_type=["social_collector"],
+                m_content_type=["social"],
                 m_network="clearnet",
                 m_message_date=parsed_date,
                 m_message_id=post['id'],

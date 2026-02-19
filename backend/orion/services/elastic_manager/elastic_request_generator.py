@@ -2,8 +2,6 @@ import hashlib
 import re
 from datetime import timedelta, timezone
 from datetime import datetime
-import json
-
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
@@ -12,7 +10,7 @@ from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.bloom_manager.bloom_controller import bloom_controller
-from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC,ELASTIC_ENUMS
+from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
 from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
 
 
@@ -141,19 +139,7 @@ class elastic_request_generator:
         return must_filters
 
     @staticmethod
-    def _build_query_block(
-            p_query_model,
-            pfilter,
-            raw_query,
-            quoted_value,
-            exact_phrases,
-            loose_terms,
-            phrase_fields,
-            must_clauses,
-            must_not_clause,
-            m_page_number,
-            date_field
-    ):
+    def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_field):
         multi_fields = [f"{field}^{boost}" for field, boost in phrase_fields]
 
         if raw_query == "*":
@@ -331,7 +317,6 @@ class elastic_request_generator:
 
         return query_statement
 
-
     @staticmethod
     def on_bulk_domain_lookup(p_query_model, pFilter=None):
 
@@ -491,12 +476,7 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
-    def on_search_consolidated_ranked_data(self,
-            p_query_model: search_consolidated_param_model,
-            pfilter,
-            base_index,
-            blocked_categories,
-            allowed_categories):
+    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -621,19 +601,14 @@ class elastic_request_generator:
 
         return query
 
-    def on_search_consolidated_iocs(self,
-        p_query_model,
-        pfilter,
-        base_index,
-    ):
+    def on_search_consolidated_iocs(self, p_query_model, pfilter, base_index):
         must_clauses = []
         must_not_clause = []
 
         if p_query_model.ioc and p_query_model.ioc != "*":
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
-            logic_query = self.build_es_from_tagged(parsed,ELASTIC_ENUMS.mapping_consolidated_iocs)
+            logic_query = self.build_es_from_tagged(parsed, ELASTIC_ENUMS.mapping_consolidated_iocs)
             must_clauses.append(logic_query)
-
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")
@@ -655,7 +630,7 @@ class elastic_request_generator:
         unified_query = self._build_query_block(
             p_query_model=p_query_model,
             pfilter=pfilter,
-            raw_query="*", 
+            raw_query="*",
             quoted_value=False,
             exact_phrases=[],
             loose_terms=[],
@@ -681,7 +656,6 @@ class elastic_request_generator:
                 {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.4},
             ],
         )
-
 
     def on_search_consolidated_data(self, p_query_model, pFilter=None):
         queries = []
@@ -1066,19 +1040,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CHATS_INDEX, query
 
     @staticmethod
-    def on_search_credentials_data(p_query_model):
-        raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else ""
-        if raw_query:
-            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
-
-        query = {"query": {"bool": {"should": [
-            {"match": {"u": {"query": raw_query, "boost": 2.0}}}], "minimum_should_match": 1}}, "from": max(
-            0, (getattr(p_query_model, 'page', 1) - 1) * 1), "size": 1, "track_total_hits": True}
-
-        return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
-
-    @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model,pFilter, consolidated=False, alert=False):
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False, alert=False):
 
         extra_user_terms = []
         extra_domains = []
@@ -1249,43 +1211,6 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
 
-    @staticmethod
-    def on_search_persona(p_query_model):
-        q = (p_query_model.q or "").strip()
-        if not q: return None, None
-
-        query = {
-            "query": {
-                "term": {
-                    "email.keyword": q
-                }
-            },
-            "size": 0,
-            "track_total_hits": False,
-            "terminate_after": 1000,
-            "timeout": "200ms",
-            "aggs": {
-                "channels": {
-                    "terms": {
-                        "field": "channel.keyword",
-                        "size": 3,
-                        "order": {"_count": "desc"}
-                    }
-                },
-                "types": {
-                    "terms": {
-                        "field": "type.keyword",
-                        "size": 3,
-                        "order": {"_count": "desc"}
-                    }
-                }
-            },
-            "_source": False,
-            "stored_fields": []
-        }
-
-        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
-
     def on_search_general_data(self, p_query_model, pfilter=None):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
@@ -1418,29 +1343,6 @@ class elastic_request_generator:
             post["m_hash"] = helper_controller.generate_data_hash(m_hash)
             index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SOCIAL_INDEX, ELASTIC_KEYS.S_VALUE: post})
         return index_entries
-
-    @staticmethod
-    def index_query_credential(p_index_data):
-        now = datetime.now(timezone.utc).isoformat()
-        bulk_entries = []
-
-        for credential in p_index_data.get("m_credential_data", []):
-            if not credential.get("username") or not credential.get("file"):
-                continue
-
-            m_hash = helper_controller.generate_data_hash(
-                credential.get("username") + "_" + str(credential.get("file")))
-            doc = {"u": credential.get("username"), "l": credential.get("link"), "s": credential.get(
-                "source"), "g": credential.get("group"), "fn": credential.get("file"), "c": now}
-
-            doc = {k: [i for i in v if i not in (None, "", "null")] if isinstance(v, list) else v for k, v in
-                doc.items() if v not in (None, "", "null") and (
-                            not isinstance(v, list) or [i for i in v if i not in (None, "", "null")])}
-
-            bulk_entries.append({"create": {"_index": ELASTIC_INDEX.S_CREDENTIAL_INDEX, "_id": m_hash}})
-            bulk_entries.append(doc)
-
-        return bulk_entries
 
     @staticmethod
     def index_query_stealerlog(p_index_data):

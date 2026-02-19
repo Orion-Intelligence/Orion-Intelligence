@@ -1,12 +1,10 @@
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 import httpx
-import json
 from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
 from orion.api.interactive.search_manager.search_callback_model import search_callback
-from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model as SearchChatCallbackModel, search_chat_callback_model
-from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
+from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_callback_model import grouped_consolidated_search_callback_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import search_defacement_callback_model
@@ -21,20 +19,16 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_cal
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import search_social_callback_model
-from orion.api.interactive.graph_manager.graph_models.search_social_param_model import search_social_param_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
-from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import entity_filter_param_model
 
 
 class search_model:
-    # Private Variables
     __instance = None
     __search_callback = search_callback()
 
-    # Initializations
     @staticmethod
     def getInstance():
         if search_model.__instance is None:
@@ -151,13 +145,8 @@ class search_model:
         return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
 
     @staticmethod
-    async def search_consolidated_ranked_result(param: search_consolidated_param_model,
-            base_index,
-            blocked_categories,
-            allowed_categories
-    ):
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories):
         filter_dict = param.entity_filter if param.entity_filter else {}
-
         indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
             param, filter_dict, base_index, blocked_categories, allowed_categories)
 
@@ -167,12 +156,7 @@ class search_model:
         return search_model._build_ranked_response(response, query, 10)
     
     @staticmethod
-    async def search_consolidated_iocs(
-        param: search_consolidated_param_model,
-        base_index,
-        blocked_categories,
-        allowed_categories,
-    ):
+    async def search_consolidated_iocs(param: search_consolidated_param_model, base_index):
         filter_dict = {}
 
         indices, query, indices_boost = (
@@ -296,33 +280,6 @@ class search_model:
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_exploit_callback_model, exploit_listing)
 
-    async def search_telegram_result(self, param: search_chat_param_model):
-        document, data_filter = elastic_request_generator().on_search_telegram_data(param, param.entity_filter)
-        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-
-        return await self.__search_callback.search_handler(
-            m_status, m_documents, SearchChatCallbackModel, {})
-
-    async def search_social_result(self, param: search_social_param_model):
-        document, data_filter = elastic_request_generator().on_search_social_data(param, param.entity_filter)
-        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-
-        for hit in m_documents.get("hits", {}).get("hits", []):
-            hit.get("_source", {}).pop("m_embedding", None)
-
-        return await self.__search_callback.search_handler(
-            m_status, m_documents, search_social_callback_model, {})
-
-    async def search_credential_result(self,
-            param: search_credential_param_model,
-            search_credential_callback_model=None
-    ):
-        document, data_filter = elastic_request_generator().on_search_credentials_data(param)
-        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-
-        return await self.__search_callback.search_handler(
-            m_status, m_documents, search_credential_callback_model, {})
-
     async def search_stealerlogs_result(self, param: search_credential_param_model, alert=False):
 
         document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, param.entity_filter, alert=alert)
@@ -369,31 +326,6 @@ class search_model:
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents, search_defacement_callback_model, [])
-
-    @staticmethod
-    def _process_entity_filters_generic(filters: Optional[List[entity_filter_param_model]],
-            field_mapping: Dict[str, str]
-    ) -> List[Dict[str, Any]]:
-        es_clauses = []
-
-        if not filters:
-            return es_clauses
-
-        for filter_category in filters:
-            category_id = filter_category.categoryId
-            tags = filter_category.tags
-
-            if tags:
-                es_field_name = field_mapping.get(category_id)
-
-                if es_field_name:
-                    if len(tags) == 1:
-                        es_clauses.append({"term": {es_field_name: tags[0]}})
-                    else:
-                        es_clauses.append({"terms": {es_field_name: tags}})
-        return es_clauses
-
-
 
     async def extract_ioc_from_file(self, file_content: bytes, filename: str):
 

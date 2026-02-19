@@ -117,15 +117,6 @@ async def index_social_data(request: Request):
     body = await request.json()
     return await crawl_model.getInstance().invoke_social_index(social_data_model(**body))
 
-
-@crawl_routes.post(
-    "/api/index/credential",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def index_credential_data(request: Request):
-    body = await request.json()
-    return await crawl_model.getInstance().invoke_credential_index(credential_data_model(**body))
-
-
 @crawl_routes.post(
     "/api/index/entity",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])

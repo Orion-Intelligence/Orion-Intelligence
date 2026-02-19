@@ -1,7 +1,6 @@
 export enum Category {
     STRATEGIC = 'Strategic',
     BREACH = 'Breach',
-    DISCUSSION = 'Discussion',
     HOMEPAGE = 'Home',
     DIRECTORY = 'Directory',
     DUMP = 'Dump',

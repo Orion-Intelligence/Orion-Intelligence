@@ -20,18 +20,8 @@ class homepage_model:
         return homepage_model.__instance
 
     @staticmethod
-    async def invoke_graphs():
-        redis_instance = redis_controller.getInstance()
-        redis_key = f"{REDIS_KEYS.GRAPH_INSIGHT_STAT}"
-        result = await elastic_controller.get_instance().generate_graph()
-
-        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(result), 1])
-        return result
-
-    @staticmethod
     async def invoke_analytics():
-        results = await redis_controller.getInstance().invoke_trigger(
-            REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, InsightComparisonModel().model_dump_json(), None])
+        results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, InsightComparisonModel().model_dump_json(), None])
         if not results:
             log.g().ex("Error: No data retrieved from Redis")
             return None

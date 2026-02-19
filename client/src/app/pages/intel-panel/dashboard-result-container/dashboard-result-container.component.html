@@ -1,0 +1,54 @@
+<app-result
+  (onToggleSort)="onToggleSort($event)"
+  (reloadData)="fetchSearchResults()"
+  (reloadFilters)="reloadFilters($event)"
+  (updateQuery)="onUpdateQuery($event)"
+  [filterModel]="general_filters"
+  [isLoading]="isResponseLoading()"
+  [result_count]="Math.ceil(currentResultModel?.length ?? 0)"
+  [searchQuery]="currentParamModel.q"
+  [type]="type">
+</app-result>
+
+<div *ngIf="!isResponseLoading() && currentResultModel?.length > 0" @fadeInDashboardItem>
+  <app-dashboard-result-general-list
+    *ngIf="currentResultModel[0].rank_index === 'defacement_model'"
+    [isLoading]="isResponseLoading()"
+    [isExpandAble]="false"
+    [searchResults]="currentResultModel">
+  </app-dashboard-result-general-list>
+</div>
+
+<div *ngIf="!isResponseLoading()" @fadeInDashboardItem>
+  <div *ngFor="let item of currentResultModel">
+    <div class="dashboard__ranked-layout">
+      <app-dashboard-results-general-grid
+        *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'"
+        [query]="currentQuery"
+        [searchResults]="[item]"
+        [isExpandAble]="false"
+        [type]="item.rank_index === 'generic_model' ? 'Strategic' : 'leak'">
+      </app-dashboard-results-general-grid>
+
+      <app-dashboard-result-exploit
+        *ngIf="item.rank_index === 'exploit_model'"
+        [isExpandAble]="false"
+        [searchResults]="[item]">
+      </app-dashboard-result-exploit>
+
+      <app-dashboard-result-social
+        *ngIf="item.rank_index === 'social_model'"
+        [isExpandAble]="false"
+        [searchResults]="[item]">
+      </app-dashboard-result-social>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!isResponseLoading() && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
+  <app-pagination
+    (pageChange)="onPageChange($event)"
+    [currentPage]="currentParamModel.page"
+    [maxPages]="currentResultCount">
+  </app-pagination>
+</div>

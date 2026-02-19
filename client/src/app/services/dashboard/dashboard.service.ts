@@ -44,6 +44,7 @@ export class DashboardService {
     constructor(private router: Router, private route: ActivatedRoute, private helperService: HelperService, private apiService: ApiService, private app_service: AppService) {
         this.initializeSideFilters();
     }
+
     fetchSearchResults<T extends {
         Result?: any[];
         cards_data?: any[];

@@ -121,7 +121,7 @@ class _mastodon(leak_extractor_interface, ABC):
                     m_message_sharable_link=post.get("url", ""),
                     m_weblink=post.get("weblinks", []),
                     m_content=post.get("content", ""),
-                    m_content_type=["social_collector"],
+                    m_content_type=["social"],
                     m_network="clearnet",
                     m_message_date=parsed_date,
                     m_message_id=post.get("id"),

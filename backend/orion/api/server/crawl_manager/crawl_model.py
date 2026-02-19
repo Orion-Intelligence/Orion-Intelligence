@@ -183,13 +183,6 @@ class crawl_model:
             return {"error": str(ex)}
 
     @staticmethod
-    async def invoke_credential_index(credential_index: credential_data_model):
-        m_data = elastic_request_generator().index_query_credential(credential_index.model_dump())
-
-        await elastic_controller.get_instance().index_dump(m_data)
-        return {"parsed": "true"}
-
-    @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):
         m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
         if not m_data:

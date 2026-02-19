@@ -1,0 +1,133 @@
+<div class="live-api-results-container mt-2" *ngIf="showComponent" [class.is-loading]="isProcessing">
+
+  <div class="live-api_report-section-main" *ngIf="!isLoading" [ngClass]="{ 'scan_report-section-collapsed': !isExpanded, 'scan_report-section-loading': isProcessing, 'scan_report-section-loaded': !isProcessing && searchResults.length> 0
+            }">
+    <div class="scan_loading-header" *ngIf="!isLoading">
+
+      <div class="loading-circle" *ngIf="isProcessing"></div>
+
+      <h3 class="scan_section-title">
+        Live API Data: {{ query }}
+      </h3>
+
+      <button class="expand-collapse-btn" [ngClass]="{'is-disabled': isProcessing}" [disabled]="isProcessing" (click)="toggleCollapse()">
+        <img src="../../../../../assets/images/shared/theme/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
+      </button>
+    </div>
+
+    <ng-container *ngIf="isProcessing && !isLoading">
+      <p class="wait-message mt-2 mb-0">Getting data for {{ liveApiEntities.length }} items... Please wait.</p>
+    </ng-container>
+
+    <ng-container *ngIf="!isProcessing && isExpanded && !isLoading">
+
+      <div *ngIf="searchResults.length === 0" class="text-info mt-3 p-2">
+        No results found for query: {{ query }}
+      </div>
+
+      <div class="results-list">
+        <div *ngFor="let result of searchResults; let i = index" class="bulk-result-item dashboard-result-card mt-3 p-3">
+
+          <div class="report__defacement-detail-header-url dashboard-header-header">
+            Search {{ i + 1 }} ({{ result.input.type }}) - Input: {{ result.input.q1 }}
+            <span *ngIf="result.input.q2">/ {{ result.input.q2 }}</span>
+          </div>
+          <ng-container [ngSwitch]="result.status">
+            <div *ngSwitchCase="'pending'" class="text-warning">Status: Pending...</div>
+
+            <div *ngSwitchCase="'error'" class="text-info">
+              No results found for this query.
+            </div>
+
+            <ng-container *ngSwitchCase="'success'">
+              <div class="text-success mb-3">Status: Success</div>
+
+              <ng-container *ngIf="result.input.type === 'cracked'">
+                <div class="flex-col-gap-12">
+                  <div *ngFor="let item of result.resultData?.cards_data" class="cracked-card-detail">
+                    <div class="report__defacement-detail-header-url dashboard-header-header">
+                      {{ item?.m_app_name }}
+                    </div>
+
+                    <div class="mt-1">
+                      <a class="color-text1" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url
+                        }}</a>
+                    </div>
+
+                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                      Package ID
+                    </div>
+                    <div class="color-text1">{{ item?.m_package_id }}</div>
+
+                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                      Mod Features
+                    </div>
+                    <pre class="color-text1 pre-wrap-m0">{{ item?.m_mod_features }}</pre>
+
+                    <hr class="dashboard-header-divider" />
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="result.input.type === 'social'">
+                <div class="flex-col-gap-12">
+                  <div *ngFor="let item of result.resultData?.cards_data" class="social-card-detail">
+                    <div class="report__defacement-detail-header-url dashboard-header-header">
+                      {{ item?.m_title }}
+                    </div>
+                    <div class="mt-1">
+                      <a class="color-text1" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
+                    </div>
+
+                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                      Found On
+                    </div>
+                    <div class="color-text1">{{ item?.m_base_url }}</div>
+
+                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                      Links
+                    </div>
+                    <div class="flex-wrap-gap-8">
+                      <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a>
+                    </div>
+
+                    <hr class="dashboard-header-divider" />
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="result.input.type === 'user'">
+                <div *ngIf="result.resultData?.cards_data?.[0] as breachData">
+                  <div class="report__defacement-detail-header-url dashboard-header-header">
+                    {{ breachData?.m_url }}
+                  </div>
+                  <hr class="dashboard-header-divider" />
+                  <div class="report__defacement-detail-header-items mb-1 dashboard-header-label">
+                    Content Type:
+                  </div>
+                  <span class="color-text1">stolen</span>
+                  <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+                    Username:
+                  </div>
+                  <span class="color-text1">{{ result.input.q1 || 'not found' }}</span>
+                  <div *ngIf="result.input.q2" class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+                    Email Address:
+                  </div>
+                  <span *ngIf="result.input.q2" class="color-text1">{{ result.input.q2 || 'not found' }}</span>
+                  <div class="report__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">
+                    Breaches:
+                  </div>
+                  <div class="flex-wrap-gap-8">
+                    <span *ngFor="let item of breachData?.m_dumplink" class="badge-red">{{ item }}</span>
+                  </div>
+                </div>
+                <div *ngIf="!result.resultData?.cards_data?.length" class="text-info">No data found for this query.
+                </div>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

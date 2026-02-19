@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { AsyncPipe, NgClass, NgIf, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, GeneralSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory, DiscussionSubCategory } from '../../constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, GeneralSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory } from '../../constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -32,7 +32,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     newsCategories = Object.values(FeedSubCategory);
     generalCategories = Object.values(GeneralSubCategory);
     leakCategories = Object.values(BreachSubCategory);
-    discussionCategories = Object.values(DiscussionSubCategory);
     defacementCategories = Object.values(DefacementSubCategory);
     socialCategories = Object.values(SocialSubCategory);
     stealerlogsCategories = Object.values(StealerlogsSubCategory);
@@ -121,9 +120,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
                     break;
                 case Category.STEALERLOGS:
                     firstSubcategory = this.stealerlogsCategories[0];
-                    break;
-                case Category.DISCUSSION:
-                    firstSubcategory = this.scannerCategories[0];
                     break;
                 case Category.PROFILE:
                     firstSubcategory = this.profileCategories[0];

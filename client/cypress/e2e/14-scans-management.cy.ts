@@ -201,7 +201,7 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
   //
   //   cy.visit('/dashboard');
   //
-  //   cy.get('[data-cy="dashboard-general-input"]')
+  //   cy.get('[data-cy="dashboard-result-container-input"]')
   //     .should('exist')
   //     .should('be.visible')
   //     .clear()

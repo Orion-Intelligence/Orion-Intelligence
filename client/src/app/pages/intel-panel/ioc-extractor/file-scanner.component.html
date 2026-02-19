@@ -1,0 +1,159 @@
+<div class="file-scan-container">
+  <input type="file" #fileInput id="fileInput" class="ioc-extractor-file-input-hidden" [attr.accept]="accept" (change)="onFileSelected($event)" />
+  <div class="ioc-report-background" *ngIf="isFetched || isLoading"></div>
+
+  <div class="ioc-extractor-upload-center-container" *ngIf="!isFetched && !isLoading" @fadeInDashboardItem>
+    <div class="ioc-extractor-upload-card">
+      <div class="ioc-extractor-upload-icon-large">
+        <img src="../../../../assets/images/shared/theme/file-search.svg" alt="File Upload"/>
+      </div>
+      <h2 class="ioc-extractor-upload-title">{{ title }}</h2>
+      <p class="ioc-extractor-upload-description">{{ description }}</p>
+      <button type="button" class="sidebar_submit-button" (click)="triggerFileInput()">
+        <img ngSrc="../../../../assets/images/shared/theme/ai.svg" alt="Upload" width="24" height="24" style="margin-right: 10px;" /> Choose File
+      </button>
+      <div class="ioc-extractor-upload-info">
+        <div class="ioc-extractor-upload-info-item">
+          <strong>Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images (PNG, JPG, JPEG)' }}
+        </div>
+        <div class="ioc-extractor-upload-info-item">
+          <strong>Maximum file size:</strong> {{ type === 'apk' ? 'up to 30 MB' : 'up to 1 MB' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="isFetched || isLoading">
+    <div class="ioc-report-header">
+      <div class="ioc-report-header-left">
+        <h1 class="ioc-report-title">Analysis Report</h1>
+        <p class="ioc-report-subtitle">File Processing Results</p>
+      </div>
+      <div class="ioc-report-header-actions" *ngIf="!hasError && !isLoading && (extractionResult || apkResult || groupedIocs.length > 0)">
+        <div class="btn-group report-menu-option-container mr-0">
+          <button type="button" class="p-0 report-menu-option" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
+            <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="20" height="20" alt="scan" />
+          </button>
+          <div class="vr report-menu-divider"></div>
+          <button type="button" class="p-0 report-menu-option" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
+            <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="20" height="20" alt="download" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ioc-report-progress" *ngIf="!hasError && isLoading && progress() < 100">
+      <div class="ioc-report-progress-text">
+        {{ currentStep || 'Processing file...' }} ({{ progress() }}%)
+      </div>
+      <div class="ioc-report-progress-bar">
+        <div class="ioc-report-progress-fill" [style.width.%]="progress()"></div>
+      </div>
+    </div>
+
+    <div class="security-scan ioc-report-wrapper">
+      <div class="ioc-report-error" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
+        <div class="ioc-extractor-scan_alert">
+          <button class="ioc-extractor-scan_alert-close" (click)="closeError()" aria-label="Close error">
+            <img ngSrc="../../../../assets/images/shared/searchFilter_clossButton.svg" alt="Close" width="20" height="20" />
+          </button>
+          <div class="ioc-extractor-scan_alert-title">Processing Failed</div>
+          <div class="ioc-extractor-scan_alert-text">{{ errorMessage }}</div>
+          <ul class="ioc-extractor-scan_alert-reasons" *ngIf="isFileSizeError">
+            <li><strong>File size limit exceeded</strong></li>
+            <li>Please select a smaller file</li>
+          </ul>
+          <ul class="ioc-extractor-scan_alert-reasons" *ngIf="isUnsupportedFileError">
+            <li><strong>Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images' }}</li>
+          </ul>
+          <button class="ioc-extractor-scan_btn ioc-extractor-scan_btn-primary" (click)="triggerFileInput()">Try Again</button>
+        </div>
+      </div>
+
+      <section class="ioc-report-container" *ngIf="!hasError && (extractionResult || apkResult || groupedIocs.length > 0)">
+        <div class="ioc-report-hero" @fadeInDashboardItem>
+          <div class="ioc-report-hero-title">
+            Analysis Report for
+            <span class="ioc-report-hero-sep">〡</span>
+            <span class="ioc-report-hero-file">
+              {{ extractionResult?.original_filename || apkResult?.original_filename || fileName || 'file' }}
+            </span>
+          </div>
+          <div class="ioc-report-hero-sub">
+            <span class="ioc-report-pill" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'status-success' : 'status-failed'">
+              <i class="bi" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+              {{ extractionResult?.status || apkResult?.status || 'completed' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="ioc-report-summary-grid" *ngIf="!isLoading; else metaGridSkeleton" @fadeInDashboardItem>
+          <div class="ioc-report-stat" *ngFor="let s of getSummaryStats(); let idx = index" [ngClass]="'stat-' + idx">
+            <div class="ioc-report-stat-icon">
+              <i class="bi" [ngClass]="s.label === 'Filename' ? 'bi-file-earmark-text' : s.label === 'File Type' ? 'bi-code-slash' : s.label === 'Extracted Text' ? 'bi-body-text' : s.label === 'Total Findings' ? 'bi-shield-exclamation' : 'bi-check-circle'"></i>
+            </div>
+            <div class="ioc-report-stat-body">
+              <div class="ioc-report-stat-label">{{ s.label }}</div>
+              <div class="ioc-report-stat-value" [class.mono]="s.label === 'Filename'">{{ s.value }}</div>
+            </div>
+          </div>
+        </div>
+
+        <ng-container *ngIf="groupedIocs.length > 0; else emptyState">
+          <section class="ioc-report-findings">
+            <div class="ioc-report-category" *ngFor="let category of groupedIocs; trackBy: trackByCategory; let i = index" @fadeInDashboardItem>
+              <div class="ioc-report-category-header">
+                <div class="ioc-report-category-left">
+                  <div class="ioc-report-category-name">{{ category.name }}</div>
+                  <div class="ioc-report-category-count">{{ category.total }} Found</div>
+                </div>
+              </div>
+              <div class="ioc-report-findings-list">
+                <div class="ioc-report-finding" *ngFor="let item of category.items; trackBy: trackByItem" @fadeInDashboardItem>
+                  <div class="ioc-report-finding-main">
+                    <div class="ioc-report-finding-value">{{ item.value }}</div>
+                    <div class="ioc-report-finding-desc">{{ item.description }}</div>
+                  </div>
+                  <div class="ioc-report-finding-right">
+                    <span class="ioc-report-type-badge">{{ category.name }}</span>
+                    <button class="ioc-report-copy-btn" type="button" [class.copied]="copiedValue() === item.value" (click)="copyValue(item.value)">
+                      <i class="bi" [ngClass]="copiedValue() === item.value ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                      <span class="ioc-report-copy-text">{{ copiedValue() === item.value ? 'Copied!' : 'Copy' }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ng-container>
+
+        <ng-template #emptyState>
+          <div class="ioc-report-empty" @fadeInDashboardItem>
+            <div class="ioc-report-empty-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="ioc-report-empty-title">No Findings</div>
+            <div class="ioc-report-empty-text">No indicators or suspicious items were detected in the file.</div>
+            <button class="ioc-extractor-scan_btn" (click)="triggerFileInput()">Upload Another File</button>
+          </div>
+        </ng-template>
+      </section>
+
+      <ng-template #metaGridSkeleton>
+        <div class="ioc-report-summary-grid">
+          <div class="ioc-report-stat" *ngFor="let i of [1,2,3,4]">
+            <div class="ioc-extractor-skeleton ioc-extractor-skeleton-label ioc-extractor-shimmer"></div>
+            <div class="ioc-extractor-skeleton ioc-extractor-skeleton-text ioc-extractor-shimmer"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <div id="iocReport" class="d-none">
+      <div *ngIf="extractionResult || apkResult || groupedIocs.length > 0" style="padding: 20px;">
+        <h2>{{ title }} Report</h2>
+        <hr/>
+      </div>
+    </div>
+  </ng-container>
+</div>
