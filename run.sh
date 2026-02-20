@@ -28,7 +28,8 @@ create_parser_zip() {
 
 client_build() {
     cd client || exit
-    npm install
+        npm install
+    npm run lint
     rm -rf build
     if [ "$1" = "-t" ]; then
         npx ng build --configuration instrumented
@@ -99,8 +100,9 @@ set_testing_enabled "$FLAG"
 
 if [ "$COMMAND" = "build" ]; then
     docker pull python:3.11-slim
+    npm --prefix client run lint
 
-    case "$FLAG" in
+    case "" in
         -t)
             client_build "-t"
             cp nginx/nginx-dev.conf nginx/nginx.conf
