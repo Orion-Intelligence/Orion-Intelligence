@@ -14,6 +14,8 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   standalone: true
 })
 export class HomeInsightComponent implements OnInit {
+  protected readonly String = String;
+
   insights!: InsightCallbackModel;
   latestDocuments!: LatestDocumentCallbackModel;
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
@@ -71,5 +73,4 @@ export class HomeInsightComponent implements OnInit {
     const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
     return cleanUrl.length > maxLength ? cleanUrl.slice(0, maxLength) + '...' : cleanUrl;
   }
-  protected readonly String = String;
 }

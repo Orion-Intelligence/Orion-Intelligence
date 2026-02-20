@@ -12,6 +12,9 @@ import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent implements OnDestroy {
+  private fetchingState = inject(FetchingStateService);
+  private animationFrameId: number | null = null;
+
   isCollapsed = input.required<boolean>();
   activeTab = input.required<'history' | 'entities'>();
   searchTerm = input.required<string>();
@@ -28,26 +31,9 @@ export class HomeMenuComponent implements OnDestroy {
   cancelScan = output<string>();
   cancelAllFetches = output<string>();
   public state = inject(SocialMapperStateService);
-  private fetchingState = inject(FetchingStateService);
-  private animationFrameId: number | null = null;
   visibleJobsCount = signal(10);
   visibleEntitiesCount = signal(10);
   animatedProgressByJobId = signal<Record<string, number>>({});
-
-  constructor() {
-    effect(() => {
-      const jobs = this.jobs();
-      this.pruneAnimatedProgress(jobs);
-      this.startProgressAnimation();
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-  }
   jobsWithFilter = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.jobs().map(job => ({
@@ -68,6 +54,21 @@ export class HomeMenuComponent implements OnDestroy {
             entity.type.toLowerCase().includes(term));
   });
   displayEntities = computed(() => this.filteredEntities().slice(0, this.visibleEntitiesCount()));
+
+  constructor() {
+    effect(() => {
+      const jobs = this.jobs();
+      this.pruneAnimatedProgress(jobs);
+      this.startProgressAnimation();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+  }
 
   loadMoreJobs() {
     this.visibleJobsCount.update(c => c + 10);

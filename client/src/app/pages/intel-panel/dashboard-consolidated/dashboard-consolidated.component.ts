@@ -35,59 +35,57 @@ import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manage
   standalone: true,
   imports: [NgIf, ResultComponent, DashboardResultsGeneralComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, NgbAccordionModule, ConsolidatedIocComponent],
   templateUrl: './dashboard-consolidated.component.html',
-  styleUrl: './dashboard-consolidated.component.css',
+  styleUrls: ['./dashboard-consolidated.component.scss'],
   animations: [scanAnimation, fadeInDashboardItem],
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
-  @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
-
   protected readonly Math = Math;
-
   protected readonly fadeInDashboardItem = fadeInDashboardItem;
-
   protected readonly consolidated_filters = consolidated_filters;
 
+  @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
-
   public stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
-
   public groupedResults: { [index: string]: any[]; } = {};
-
   public response: any;
-
   public pageCounts: { [key: string]: number; } = {};
-
   isGrouped = true;
-
   isIOC = false;
-
   query: string = '';
-
   isLoading = signal(false);
-
   isStealerLogLoading = signal(false);
-
   firstTrigger = true;
-
   result_count = 0;
-
   apiCategories = Object.values(ApiSubCategory);
-
   dumpCategories = Object.values(DumpSubCategory);
-
   newsCategories = Object.values(FeedSubCategory);
-
   socialCategories = Object.values(SocialSubCategory);
-
   generalCategories = Object.values(GeneralSubCategory);
-
   leakCategories = Object.values(BreachSubCategory);
-
   defacementCategories = Object.values(DefacementSubCategory);
-
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
-
   rankedApiTime: any;
+  showScanCard = computed(() => {
+    const isLoading = this.isLoading();
+    const isStealerLogLoading = this.isStealerLogLoading();
+    const defacementData = this.consolidatedCallbackModel?.defacement_model?.Result ?? [];
+    const hasDefacementData = defacementData.length > 0;
+    const hasDefacementModel = !!this.consolidatedCallbackModel?.defacement_model;
+    const hasStealerLogModel = !!this.stealerlogCallbackModel;
+    if (isLoading && isStealerLogLoading) {
+      return true;
+    }
+    if (!isLoading && defacementData.length === 0 && isStealerLogLoading) {
+      return true;
+    }
+    if (isLoading && hasDefacementData && isStealerLogLoading) {
+      return true;
+    }
+    if (!isLoading && !isStealerLogLoading && !hasDefacementModel && !hasStealerLogModel) {
+      return false;
+    }
+    return false;
+  });
 
   constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected authService: AuthService) {
     this.pageCounts = {};
@@ -393,26 +391,4 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     return false;
   }
-
-  showScanCard = computed(() => {
-    const isLoading = this.isLoading();
-    const isStealerLogLoading = this.isStealerLogLoading();
-    const defacementData = this.consolidatedCallbackModel?.defacement_model?.Result ?? [];
-    const hasDefacementData = defacementData.length > 0;
-    const hasDefacementModel = !!this.consolidatedCallbackModel?.defacement_model;
-    const hasStealerLogModel = !!this.stealerlogCallbackModel;
-    if (isLoading && isStealerLogLoading) {
-      return true;
-    }
-    if (!isLoading && defacementData.length === 0 && isStealerLogLoading) {
-      return true;
-    }
-    if (isLoading && hasDefacementData && isStealerLogLoading) {
-      return true;
-    }
-    if (!isLoading && !isStealerLogLoading && !hasDefacementModel && !hasStealerLogModel) {
-      return false;
-    }
-    return false;
-  });
 }

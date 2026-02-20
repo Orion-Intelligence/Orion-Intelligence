@@ -11,22 +11,24 @@ import { sidebarItemTooltips } from '../../../constants/shared-enums';
   templateUrl: './dashboard-sidebar-collapsed.component.html',
 })
 export class SidebarSectionComponent {
-    @Input() title = '';
-    @Input() icon = '';
-    @Input() items: string[] = [];
-    @Input() category: any;
-    @Input() routePrefix = '';
-    @Input() selectionStore: any;
-    @Input() tooltip = '';
-    @Output() sectionSelected = new EventEmitter<any>();
-    @Output() optionSelected = new EventEmitter<string>();
+  protected readonly itemTooltips = sidebarItemTooltips;
 
-    selectSection() {
-      this.sectionSelected.emit(this.category);
-    }
+  @Input() title = '';
+  @Input() icon = '';
+  @Input() items: string[] = [];
+  @Input() category: any;
+  @Input() routePrefix = '';
+  @Input() selectionStore: any;
+  @Input() tooltip = '';
 
-    selectOption(item: string) {
-      this.optionSelected.emit(item);
-    }
-    protected readonly itemTooltips = sidebarItemTooltips;
+  @Output() sectionSelected = new EventEmitter<any>();
+  @Output() optionSelected = new EventEmitter<string>();
+
+  selectSection() {
+    this.sectionSelected.emit(this.category);
+  }
+
+  selectOption(item: string) {
+    this.optionSelected.emit(item);
+  }
 }

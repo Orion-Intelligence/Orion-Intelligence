@@ -28,7 +28,6 @@ import { ScannerService } from './scanner-service.service';
     EmptyQueryComponent,
   ],
   templateUrl: './security-scan.component.html',
-  styleUrl: './security-scan.component.css',
   animations: [fadeInDashboardItem],
 })
 export class SecurityScanComponent implements OnInit {
@@ -47,6 +46,8 @@ export class SecurityScanComponent implements OnInit {
   scanType: string = '';
   grade = '';
   gradeCounts: { high: number; medium: number; low: number; informational: number; } = { high: 0, medium: 0, low: 0, informational: 0, };
+  trackByCategory = ( _: number, c: { name: string; } ) => c.name;
+  trackByItem = (i: number) => i;
 
   constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService) { }
 
@@ -234,8 +235,6 @@ export class SecurityScanComponent implements OnInit {
   retry(): void {
     this.load();
   }
-  trackByCategory = ( _: number, c: { name: string; } ) => c.name;
-  trackByItem = (i: number) => i;
 
   onSearchSubmit(): void {
     const raw = (this.searchQuery ?? '').trim();

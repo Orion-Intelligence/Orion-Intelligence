@@ -4,7 +4,7 @@ import { AuditLogCallbackModel } from '../../shared/model/auditlog/auditlog.mode
 import { ApiService } from '../../shared/services/api.service';
 import { ListService } from '../../shared/directive/base.listing.directive';
 @Injectable({ providedIn: 'root' })
-export class AuditlogService implements ListService<AuditLogCallbackModel> {
+export class AuditlogService implements ListService {
   private auditDataSubject = new BehaviorSubject<AuditLogCallbackModel | null>(null);
   private currentPageSubject = new BehaviorSubject<number>(1);
 

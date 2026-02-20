@@ -28,7 +28,6 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   cancelFetchFollowers = output<PlatformResult>();
   cancelFetchFollowing = output<PlatformResult>();
   cancelFetchPlatformImages = output<PlatformResult>();
-
   public fetchingState = inject(FetchingStateService);
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;

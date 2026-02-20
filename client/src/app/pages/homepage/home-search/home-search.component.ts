@@ -18,20 +18,20 @@ import { WorldHeatmapComponent } from "../world-heatmap/world-heatmap.component"
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
-  @Input() isRoleAdmin: boolean = true;
+  private insightPointerId: number | null = null;
+  private insightStartY = 0;
+  private insightStartOffset = 0;
+  private insightMoved = false;
+
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
   searchQuery = '';
   selectedSearchBy = 'Match any term';
   homeInsightExpanded = false;
-
   public insightDragging = false;
   public insightDragY: number | null = null;
 
-  private insightPointerId: number | null = null;
-  private insightStartY = 0;
-  private insightStartOffset = 0;
-  private insightMoved = false;
+  @Input() isRoleAdmin: boolean = true;
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
   }

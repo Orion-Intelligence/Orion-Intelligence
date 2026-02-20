@@ -16,23 +16,19 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   standalone: true
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
-  @Input() query!: string;
-
-  @Input() type!: string;
-
-  @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
-
-  @Input() isExpandAble: boolean = false;
-
   private highlightCache = new Map<string, SafeHtml>();
 
+  protected readonly window = window;
+
   currentUrl = '';
-
   queryParams: any = {};
-
   isCollapsed = true;
-
   isFreeStrategic = false;
+
+  @Input() query!: string;
+  @Input() type!: string;
+  @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
+  @Input() isExpandAble: boolean = false;
 
   constructor(private authService: AuthService, private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
@@ -83,6 +79,4 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   isMobileMode(): boolean {
     return this.authService.getIsMobileDemo();
   }
-
-  protected readonly window = window;
 }

@@ -21,33 +21,6 @@ export class ManageProfilesModalComponent {
   platforms = signal<ManagedPlatformRow[]>([]);
   searchTerm = signal('');
   visibleCount = signal(20);
-
-  constructor() {
-    effect(() => {
-      const modalData = this.data();
-      if (modalData) {
-        const isImageFlow = this.isImageFlowUsername(modalData.username);
-        this.platforms.set(modalData.platforms.map((p, index) => ({
-          ...p,
-          stableKey: `${index}|${p.platform}|${p.url}`,
-          draftUsername: (p.username || '').trim(),
-          initialUsername: (p.username || '').trim(),
-          matches: isImageFlow ? false : true,
-          isSelected: isImageFlow ? false : p.isSelected,
-        })).sort((a, b) => {
-          if (a.status === 'active' && b.status !== 'active') {
-            return -1;
-          }
-          if (a.status !== 'active' && b.status === 'active') {
-            return 1;
-          }
-          return a.platform.localeCompare(b.platform);
-        }));
-        this.searchTerm.set('');
-        this.visibleCount.set(20);
-      }
-    });
-  }
   filteredPlatforms = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const filtered = !term
@@ -85,6 +58,34 @@ export class ManageProfilesModalComponent {
     }
     return filtered.every(p => !p.isSelected);
   });
+  allProfilesConfirmed = computed(() => this.platforms().every(p => p.matches && this.hasValidDraftUsername(p)));
+
+  constructor() {
+    effect(() => {
+      const modalData = this.data();
+      if (modalData) {
+        const isImageFlow = this.isImageFlowUsername(modalData.username);
+        this.platforms.set(modalData.platforms.map((p, index) => ({
+          ...p,
+          stableKey: `${index}|${p.platform}|${p.url}`,
+          draftUsername: (p.username || '').trim(),
+          initialUsername: (p.username || '').trim(),
+          matches: isImageFlow ? false : true,
+          isSelected: isImageFlow ? false : p.isSelected,
+        })).sort((a, b) => {
+          if (a.status === 'active' && b.status !== 'active') {
+            return -1;
+          }
+          if (a.status !== 'active' && b.status === 'active') {
+            return 1;
+          }
+          return a.platform.localeCompare(b.platform);
+        }));
+        this.searchTerm.set('');
+        this.visibleCount.set(20);
+      }
+    });
+  }
 
   onSearchChanged(event: Event) {
     this.searchTerm.set((event.target as HTMLInputElement).value);
@@ -109,7 +110,6 @@ export class ManageProfilesModalComponent {
   loadMore() {
     this.visibleCount.update(c => c + 20);
   }
-  allProfilesConfirmed = computed(() => this.platforms().every(p => p.matches && this.hasValidDraftUsername(p)));
 
   hasValidDraftUsername(platform: ManagedPlatformRow): boolean {
     return (platform.draftUsername || '').trim().length > 0;

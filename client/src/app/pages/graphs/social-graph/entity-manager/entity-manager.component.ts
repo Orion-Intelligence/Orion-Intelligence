@@ -13,14 +13,13 @@ import { AddEntityData } from './add-entity-modal/add-entity-modal.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EntityManagerComponent {
+  private graphOrchestrator = inject(GraphOrchestratorService);
+  private tabManager = inject(TabManagerService);
+
   isCollapsed = input.required<boolean>();
   isSmallScreen = input.required<boolean>();
   activeTabState = input.required<TabState>();
   toggle = output<void>();
-
-  private graphOrchestrator = inject(GraphOrchestratorService);
-  private tabManager = inject(TabManagerService);
-
   addEntityModalData = signal<AddEntityData | null>(null);
 
   openAddEntityModal(type: CustomEntity['type']) {

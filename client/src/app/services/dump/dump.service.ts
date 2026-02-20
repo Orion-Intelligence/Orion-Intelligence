@@ -4,13 +4,12 @@ import { ApiService } from '../../shared/services/api.service';
 import { DumpCallbackModel } from '../../shared/model/dump/dump.mode';
 import { ListService } from '../../shared/directive/base.listing.directive';
 @Injectable({ providedIn: 'root' })
-export class DumpService implements ListService<DumpCallbackModel> {
-  filterModel = { source: 'all', group: 'all', parsed_status: 'all' };
-
+export class DumpService implements ListService {
   private dumpDataSubject = new BehaviorSubject<DumpCallbackModel | null>(null);
   private currentPageSubject = new BehaviorSubject<number>(1);
   private filterOpenSubject = new BehaviorSubject<boolean>(false);
 
+  filterModel = { source: 'all', group: 'all', parsed_status: 'all' };
   dumpData$ = this.dumpDataSubject.asObservable();
   currentPage$ = this.currentPageSubject.asObservable();
   isFilterOpen$ = this.filterOpenSubject.asObservable();

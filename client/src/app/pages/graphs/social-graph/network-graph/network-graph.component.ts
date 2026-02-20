@@ -16,6 +16,15 @@ import { SocialMapperStateService } from '../services/social-mapper-state.servic
   }
 })
 export class NetworkGraphComponent implements OnInit, OnDestroy {
+  private fetchingState = inject(FetchingStateService);
+  private networkInstance = signal<Network | null>(null);
+  private visData = { nodes: new DataSet<any>(), edges: new DataSet<any>(), };
+  private hideButtonTimeout: any;
+  private animationFrameId: number | null = null;
+  private animationStartTime: number | null = null;
+  private readonly minZoomScale = 0.35;
+  private minZoomLockPosition: Position | null = null;
+
   data = input.required<NetworkData>();
   focusNodeId = input<string | null>(null);
   editMode = input(false);
@@ -40,31 +49,19 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   edgeDeleted = output<{
         edges: string[];
     }>();
-  private fetchingState = inject(FetchingStateService);
   public state = inject(SocialMapperStateService);
-  private networkInstance = signal<Network | null>(null);
-  private visData = { nodes: new DataSet<any>(), edges: new DataSet<any>(), };
   deleteButtonState = signal({
     visible: false,
     x: 0,
     y: 0,
     edgeId: null as string | null
   });
-  private hideButtonTimeout: any;
   isManipulating = signal(false);
-  private animationFrameId: number | null = null;
-  private animationStartTime: number | null = null;
   iconOverlayNodes = signal<{
         nodeId: string;
         x: number;
         y: number;
     }[]>([]);
-  private readonly minZoomScale = 0.35;
-  private minZoomLockPosition: Position | null = null;
-
-  private normalizeSearchValue(value: string): string {
-    return value.trim().toLowerCase().replace(/^@+/, '').replace(/[\s_-]+/g, '');
-  }
   loadingNodeIds = computed(() => {
     const loadingIds = new Set<string>();
     const statesToProcess = [
@@ -97,6 +94,10 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     }
     return loadingIds;
   });
+
+  private normalizeSearchValue(value: string): string {
+    return value.trim().toLowerCase().replace(/^@+/, '').replace(/[\s_-]+/g, '');
+  }
 
   constructor() {
     effect(() => {

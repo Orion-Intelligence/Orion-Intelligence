@@ -5,10 +5,11 @@ import { NgIf } from '@angular/common';
   templateUrl: './suggestion.component.html'
 })
 export class SuggestionComponent {
-    @Input() suggestion!: string;
-    @Output() update_query = new EventEmitter<string>();
+  @Input() suggestion!: string;
 
-    onUpdateQuery() {
-      this.update_query.emit(this.suggestion);
-    }
+  @Output() update_query = new EventEmitter<string>();
+
+  onUpdateQuery() {
+    this.update_query.emit(this.suggestion);
+  }
 }

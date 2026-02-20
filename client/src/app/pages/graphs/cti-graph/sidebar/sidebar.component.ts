@@ -11,131 +11,132 @@ import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.
   imports: [FormsModule, ReactiveFormsModule, NgForOf, NgIf, TitleCasePipe, SidebarShellComponent],
 })
 export class SidebarComponent implements OnInit {
-    @Output() filtersApplied = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
-    @Output() collapsedChange = new EventEmitter<boolean>();
-    isCollapsed = false;
-    isMobile = false;
-    selectedType = 'cluster';
-    singleInput = 'all';
-    propertyType = 'all';
-    propertyValue = '';
-    maxNodes = 25;
-    maxDepth = 1;
-    graphTypeOptions = Object.values(GraphType);
-    graphClusterOptions = Object.values(GraphClusterType);
-    graphAllowedProperties = Object.entries(search_filter_labels).map(([key, label]) => ({
-      label,
-      key
-    }));
+  isCollapsed = false;
+  isMobile = false;
+  selectedType = 'cluster';
+  singleInput = 'all';
+  propertyType = 'all';
+  propertyValue = '';
+  maxNodes = 25;
+  maxDepth = 1;
+  graphTypeOptions = Object.values(GraphType);
+  graphClusterOptions = Object.values(GraphClusterType);
+  graphAllowedProperties = Object.entries(search_filter_labels).map(([key, label]) => ({
+    label,
+    key
+  }));
 
-    constructor(private router: Router, private route: ActivatedRoute) {
-    }
+  @Output() filtersApplied = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
+  @Output() collapsedChange = new EventEmitter<boolean>();
 
-    private buildFilterPayload() {
-      return {
-        selectedType: this.selectedType,
-        singleInput: this.singleInput,
-        propertyType: this.propertyType,
-        propertyValue: this.propertyValue,
-        maxEdge: this.maxNodes,
-        maxDepth: this.maxDepth
-      };
-    }
+  constructor(private router: Router, private route: ActivatedRoute) {
+  }
 
-    private navigateWithFilters() {
-      this.router.navigate([], { queryParams: this.buildFilterPayload() }).then();
-    }
+  private buildFilterPayload() {
+    return {
+      selectedType: this.selectedType,
+      singleInput: this.singleInput,
+      propertyType: this.propertyType,
+      propertyValue: this.propertyValue,
+      maxEdge: this.maxNodes,
+      maxDepth: this.maxDepth
+    };
+  }
 
-    private emitFilters() {
-      this.filtersApplied.emit(this.buildFilterPayload());
-    }
+  private navigateWithFilters() {
+    this.router.navigate([], { queryParams: this.buildFilterPayload() }).then();
+  }
 
-    ngOnInit(): void {
-      this.updateViewportState();
-      this.route.queryParams.subscribe(params => {
-        this.selectedType = params['selectedType'] || 'cluster';
-        this.singleInput = params['singleInput'] || 'all';
-        this.propertyType = params['propertyType'] || 'all';
-        this.propertyValue = params['propertyValue'] || '';
-        this.maxNodes = (+params['maxEdge'] > 800 || +params['maxEdge'] < 0) ? '25' : (params['maxEdge'] || '25');
-        this.maxDepth = (+params['maxDepth'] > 5 || +params['maxDepth'] < 0) ? '1' : (params['maxDepth'] || '1');
-        this.emitFilters();
-      });
-    }
+  private emitFilters() {
+    this.filtersApplied.emit(this.buildFilterPayload());
+  }
 
-    private updateViewportState(): void {
-      if (typeof window === 'undefined') {
-        return;
-      }
-      const nextIsMobile = window.innerWidth < 768;
-      if (nextIsMobile !== this.isMobile) {
-        this.isMobile = nextIsMobile;
-        if (this.isMobile) {
-          this.isCollapsed = true;
-          this.collapsedChange.emit(this.isCollapsed);
-        }
-      }
-    }
-
-    @HostListener('window:resize')
-    onWindowResize(): void {
-      this.updateViewportState();
-    }
-
-    applyFilters() {
-      this.navigateWithFilters();
+  ngOnInit(): void {
+    this.updateViewportState();
+    this.route.queryParams.subscribe(params => {
+      this.selectedType = params['selectedType'] || 'cluster';
+      this.singleInput = params['singleInput'] || 'all';
+      this.propertyType = params['propertyType'] || 'all';
+      this.propertyValue = params['propertyValue'] || '';
+      this.maxNodes = (+params['maxEdge'] > 800 || +params['maxEdge'] < 0) ? '25' : (params['maxEdge'] || '25');
+      this.maxDepth = (+params['maxDepth'] > 5 || +params['maxDepth'] < 0) ? '1' : (params['maxDepth'] || '1');
       this.emitFilters();
-    }
+    });
+  }
 
-    toggleCollapsed() {
-      this.isCollapsed = !this.isCollapsed;
-      this.collapsedChange.emit(this.isCollapsed);
+  private updateViewportState(): void {
+    if (typeof window === 'undefined') {
+      return;
     }
-
-    onMobileBackdropClick(): void {
-      if (!this.isMobile) {
-        return;
+    const nextIsMobile = window.innerWidth < 768;
+    if (nextIsMobile !== this.isMobile) {
+      this.isMobile = nextIsMobile;
+      if (this.isMobile) {
+        this.isCollapsed = true;
+        this.collapsedChange.emit(this.isCollapsed);
       }
-      this.isCollapsed = true;
-      this.collapsedChange.emit(this.isCollapsed);
     }
+  }
 
-    resetFilters() {
-      this.selectedType = 'cluster';
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateViewportState();
+  }
+
+  applyFilters() {
+    this.navigateWithFilters();
+    this.emitFilters();
+  }
+
+  toggleCollapsed() {
+    this.isCollapsed = !this.isCollapsed;
+    this.collapsedChange.emit(this.isCollapsed);
+  }
+
+  onMobileBackdropClick(): void {
+    if (!this.isMobile) {
+      return;
+    }
+    this.isCollapsed = true;
+    this.collapsedChange.emit(this.isCollapsed);
+  }
+
+  resetFilters() {
+    this.selectedType = 'cluster';
+    this.singleInput = 'all';
+    this.propertyType = 'all';
+    this.propertyValue = '';
+    this.navigateWithFilters();
+    this.emitFilters();
+  }
+
+  onFormatPropertyType(type: string) {
+    return type.toLowerCase().replace("m_", "").replace("_", " ");
+  }
+
+  onTypeChange(type: string) {
+    this.selectedType = type;
+    if (type === 'cluster') {
       this.singleInput = 'all';
+    }
+    else if (type === 'document') {
+      this.singleInput = '';
+    }
+    else if (type === 'property') {
       this.propertyType = 'all';
       this.propertyValue = '';
-      this.navigateWithFilters();
-      this.emitFilters();
     }
+  }
 
-    onFormatPropertyType(type: string) {
-      return type.toLowerCase().replace("m_", "").replace("_", " ");
+  validateMaxNodes() {
+    if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 800) {
+      this.maxNodes = 25;
     }
+  }
 
-    onTypeChange(type: string) {
-      this.selectedType = type;
-      if (type === 'cluster') {
-        this.singleInput = 'all';
-      }
-      else if (type === 'document') {
-        this.singleInput = '';
-      }
-      else if (type === 'property') {
-        this.propertyType = 'all';
-        this.propertyValue = '';
-      }
+  validateMaxDepth() {
+    if (!this.maxDepth || this.maxDepth < 1 || this.maxDepth > 5) {
+      this.maxDepth = 2;
     }
-
-    validateMaxNodes() {
-      if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 800) {
-        this.maxNodes = 25;
-      }
-    }
-
-    validateMaxDepth() {
-      if (!this.maxDepth || this.maxDepth < 1 || this.maxDepth > 5) {
-        this.maxDepth = 2;
-      }
-    }
+  }
 }

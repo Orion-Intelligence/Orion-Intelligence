@@ -16,16 +16,18 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {
-  @Input() filterModel!: FilterModel;
-  @Input() isFilterOpen!: boolean | null;
-  @Output() filterChanged = new EventEmitter<Record<string, string | null>>();
-  @Output() filterReset = new EventEmitter<void>();
-  @Output() filterClose = new EventEmitter<void>();
+  protected readonly Object = Object;
+  protected readonly last = last;
+
   selectedFilters: Record<string, string | null> = {};
   initialModel!: FilterModel;
 
-  protected readonly Object = Object;
-  protected readonly last = last;
+  @Input() filterModel!: FilterModel;
+  @Input() isFilterOpen!: boolean | null;
+
+  @Output() filterChanged = new EventEmitter<Record<string, string | null>>();
+  @Output() filterReset = new EventEmitter<void>();
+  @Output() filterClose = new EventEmitter<void>();
 
   constructor(protected dashboard: DashboardService) {
     this.initialModel = structuredClone(this.filterModel);

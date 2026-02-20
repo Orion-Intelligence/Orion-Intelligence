@@ -3,15 +3,6 @@ import { SocialImage, SocialPost } from '../../../../shared/model/social/social-
 import { loadMoreIncrementally } from './summary-view.util';
 
 export abstract class PlatformFeedViewBase {
-  displayPosts = signal<SocialPost[]>([]);
-  displayImages = signal<SocialImage[]>([]);
-  displayFollowers = signal<string[]>([]);
-  displayFollowing = signal<string[]>([]);
-  isLoadingMorePosts = signal(false);
-  isLoadingMoreImages = signal(false);
-  isLoadingMoreFollowers = signal(false);
-  isLoadingMoreFollowing = signal(false);
-
   protected readonly initialPosts = 3;
   protected readonly initialImages = 8;
   protected readonly initialFollowers = 10;
@@ -20,6 +11,15 @@ export abstract class PlatformFeedViewBase {
   protected readonly imagesIncrement = 4;
   protected readonly followersIncrement = 10;
   protected readonly followingIncrement = 10;
+
+  displayPosts = signal<SocialPost[]>([]);
+  displayImages = signal<SocialImage[]>([]);
+  displayFollowers = signal<string[]>([]);
+  displayFollowing = signal<string[]>([]);
+  isLoadingMorePosts = signal(false);
+  isLoadingMoreImages = signal(false);
+  isLoadingMoreFollowers = signal(false);
+  isLoadingMoreFollowing = signal(false);
 
   protected resetFeedState(posts: SocialPost[] | undefined | null, images: SocialImage[] | undefined | null, followers: string[] | undefined | null, following: string[] | undefined | null): void {
     this.displayPosts.set((posts || []).slice(0, this.initialPosts));

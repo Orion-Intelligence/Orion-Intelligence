@@ -12,14 +12,14 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
   animations: [fadeInDashboardItem]
 })
 export class DirectoryListComponent implements AfterViewInit, OnDestroy {
+  private dataSub?: Subscription;
+  private observer?: IntersectionObserver;
+
   @ViewChild('infiniteAnchor', { static: false }) infiniteAnchor!: ElementRef<HTMLDivElement>;
   directoryData$: Observable<DirectoryCallbackModel | null>;
   visibleCount = 50;
   totalItems = 0;
   loadingMore = false;
-
-  private dataSub?: Subscription;
-  private observer?: IntersectionObserver;
 
   constructor(public directoryService: DirectoryService) {
     this.directoryData$ = this.directoryService.directoryData$;

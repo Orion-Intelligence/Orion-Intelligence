@@ -19,9 +19,6 @@ export class ScrollService {
     }
   }
 
-  saveSession(itemId: string): void {
-  }
-
   openCTI(event: MouseEvent, itemId: string): void {
     if (!this.licenseService.canUseCtiGraph()) {
       this.dashboardService.showSubscription.set(true);

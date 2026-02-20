@@ -159,8 +159,8 @@
                                     )
                                   " class="license-card license-btn"
                                     [class.license-selected]="(user.licenses || []).indexOf(license) > -1"
-                                    [class.license-disabled]="isLicenseDisabled(user, license)"
-                                    (click)="!isLicenseDisabled(user, license) && toggleUserLicense(user, license)">
+                                    [class.license-disabled]="isLicenseDisabled()"
+                                    (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
                                     <span class="license-label">{{ licenseService.getLicenseLabel(license) }}</span>
                                   </div>
                                 </ng-container>

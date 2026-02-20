@@ -25,6 +25,9 @@ import { CodeBlockComponent } from '../../code-block/code-block.component';
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
+  protected readonly last = last;
+  protected readonly Category = Category;
+
   resultItem: any = null;
   arrayKeys: string[] = [];
   listItems: any[] = [];
@@ -38,10 +41,6 @@ export class ReportComponent implements OnInit {
   imageSrc: string | null = null;
   isExpandedScreenshoot = true;
   isExpandedMetadata = true;
-
-  protected readonly last = last;
-  protected readonly Category = Category;
-
   username = signal<string>('');
   role = signal<string>('');
 

@@ -80,7 +80,7 @@ export class ConsolidatedApiService {
         resultData: data,
         errorMessage: null,
       } as ConsolidatedLiveApiResults;
-    }), catchError(error => of({
+    }), catchError(_ => of({
       input,
       status: 'error',
       resultData: null,

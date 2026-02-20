@@ -5,11 +5,11 @@ import { ApiService } from '../../services/api.service';
 import { DnsResponse, SubdomainResponse, WaybackResponse } from '../../model/scanners/scanner.models';
 @Injectable({ providedIn: 'root' })
 export class ScanHelperMethodsService {
+  private currentCancel$?: Subject<boolean> = undefined;
+
   progress = signal(0);
   onDone = signal<any>(null);
   onError = signal<any>(null);
-
-  private currentCancel$?: Subject<boolean> = undefined;
 
   constructor(private api: ApiService) { }
 

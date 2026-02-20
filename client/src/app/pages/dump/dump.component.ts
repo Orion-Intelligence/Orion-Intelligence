@@ -23,13 +23,12 @@ import { BaseListingComponent } from '../../shared/directive/base.listing.direct
   ],
 })
 export class DumpComponent extends BaseListingComponent<DumpCallbackModel> {
-  filterModel = dump_filters;
-
   private dumpService = inject(DumpService);
 
   protected data$ = this.dumpService.dumpData$;
   protected service = this.dumpService;
 
+  filterModel = dump_filters;
   isFilterOpen$ = this.dumpService.isFilterOpen$;
 
   openSidebar() {

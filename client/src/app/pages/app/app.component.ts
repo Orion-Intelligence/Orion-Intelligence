@@ -16,6 +16,8 @@ import { LoaderComponent } from '../../shared/partials/loader/loader.component';
   animations: [appAnimation],
 })
 export class AppComponent {
+  protected readonly JSON = JSON;
+
   currentRoute = signal('');
   error$: Observable<boolean>;
   isVisible = true;
@@ -35,5 +37,4 @@ export class AppComponent {
   shouldAnimate(): boolean {
     return !this.currentRoute().startsWith('/dashboard');
   }
-  protected readonly JSON = JSON;
 }

@@ -7,12 +7,13 @@ import { Category } from '../../constants/pages';
   imports: [],
 })
 export class EmptyResultComponent implements OnInit {
-    @Input() searchQuery!: string;
-    query = '';
+  protected readonly category = Category;
 
-    protected readonly category = Category;
+  query = '';
 
-    ngOnInit(): void {
-      this.query = this.searchQuery;
-    }
+  @Input() searchQuery!: string;
+
+  ngOnInit(): void {
+    this.query = this.searchQuery;
+  }
 }

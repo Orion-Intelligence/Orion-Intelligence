@@ -15,15 +15,13 @@ import { BaseListingComponent } from '../../../shared/directive/base.listing.dir
   templateUrl: './auditlog.component.html'
 })
 export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackModel> {
-  filterModel = audit_filters;
-
   private auditService = inject(AuditlogService);
+  private filterOpenSubject = new BehaviorSubject<boolean>(false);
 
   protected data$ = this.auditService.auditData$;
   protected service = this.auditService;
 
-  private filterOpenSubject = new BehaviorSubject<boolean>(false);
-
+  filterModel = audit_filters;
   isFilterOpen$ = this.filterOpenSubject.asObservable();
 
   openSidebar() {

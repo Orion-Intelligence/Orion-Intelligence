@@ -6,11 +6,12 @@ export class StealerLogResultItem {
   channel?: string;
   file?: string;
   timestamp?: string;
-    [key: string]: any;
 
-    constructor(init?: Partial<StealerLogResultItem>) {
-      Object.assign(this, init);
-    }
+  [key: string]: any;
+
+  constructor(init?: Partial<StealerLogResultItem>) {
+    Object.assign(this, init);
+  }
 }
 export class StealerLogCallbackModel {
   Result!: StealerLogResultItem[];

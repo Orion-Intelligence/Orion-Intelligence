@@ -11,8 +11,9 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
   animations: [fadeInDashboardItem],
 })
 export class AuditlogListComponent {
-  @Input() isLoading = true;
   auditData$: Observable<AuditLogCallbackModel | null>;
+
+  @Input() isLoading = true;
 
   constructor(public auditService: AuditlogService) {
     this.auditData$ = this.auditService.auditData$;

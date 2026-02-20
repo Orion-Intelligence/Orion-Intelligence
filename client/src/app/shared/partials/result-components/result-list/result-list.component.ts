@@ -9,16 +9,15 @@ import { fadeInDashboardItem } from '../../../animations/dashboard.item.animatio
   animations: [fadeInDashboardItem]
 })
 export class ResultListComponent {
+  filteredItems: string[] = [];
+  copiedIndex: number | null = null;
+
   @Input() activeTab = '';
 
   @Input()
   set listItems(items: string[]) {
     this.filteredItems = items.filter(item => item.length >= 2);
   }
-
-  filteredItems: string[] = [];
-
-  copiedIndex: number | null = null;
 
   copyText(text: string, index: number): void {
     navigator.clipboard.writeText(text).then(() => {

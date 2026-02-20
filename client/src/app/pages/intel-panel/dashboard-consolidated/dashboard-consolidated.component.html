@@ -1,4 +1,4 @@
-<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="true"
+<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
   (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
   [activeTab]="isIOC ? 'IOCs' : 'Group'" [isLoading]="isLoading()" [searchQuery]="query"
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"

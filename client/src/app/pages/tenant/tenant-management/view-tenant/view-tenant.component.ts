@@ -16,6 +16,8 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   templateUrl: './view-tenant.component.html',
 })
 export class ViewTenantComponent implements OnInit {
+  protected readonly JSON = JSON;
+
   tenants: any[] = [];
   licenseList = Object.values(LicenseName);
   isLoading = true;
@@ -44,7 +46,7 @@ export class ViewTenantComponent implements OnInit {
         }));
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (_) => {
         this.isLoading = false;
       },
     });
@@ -82,13 +84,13 @@ export class ViewTenantComponent implements OnInit {
       next: () => {
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (_) => {
         this.isLoading = false;
       },
     });
   }
 
-    @HostListener('document:click', ['$event'])
+  @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.action-menu')) {
@@ -96,27 +98,26 @@ export class ViewTenantComponent implements OnInit {
     }
   }
 
-    toggleTenantLicense(tenant: any, license: LicenseName): void {
-      if (!tenant.licenses) {
-        tenant.licenses = [];
-      }
-      const index = tenant.licenses.indexOf(license);
-      if (index > -1) {
-        tenant.licenses.splice(index, 1);
-      }
-      else {
-        tenant.licenses.push(license);
-      }
+  toggleTenantLicense(tenant: any, license: LicenseName): void {
+    if (!tenant.licenses) {
+      tenant.licenses = [];
     }
+    const index = tenant.licenses.indexOf(license);
+    if (index > -1) {
+      tenant.licenses.splice(index, 1);
+    }
+    else {
+      tenant.licenses.push(license);
+    }
+  }
 
-    getTenantLicensesLabel(tenant: any): string {
-      if (!tenant.licenses || tenant.licenses.length === 0) {
-        return 'None';
-      }
-      const names = tenant.licenses
-        .map((l: LicenseName) => this.licenseService.getLicenseLabel(l))
-        .join(', ');
-      return names.length <= 15 ? names : names.slice(0, 15) + '...';
+  getTenantLicensesLabel(tenant: any): string {
+    if (!tenant.licenses || tenant.licenses.length === 0) {
+      return 'None';
     }
-    protected readonly JSON = JSON;
+    const names = tenant.licenses
+      .map((l: LicenseName) => this.licenseService.getLicenseLabel(l))
+      .join(', ');
+    return names.length <= 15 ? names : names.slice(0, 15) + '...';
+  }
 }

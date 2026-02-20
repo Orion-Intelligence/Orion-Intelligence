@@ -31,6 +31,11 @@ export interface RelationshipPopupData {
 export class SocialMapperStateService {
   private tabManager = inject(TabManagerService);
   private fetchingState = inject(FetchingStateService);
+  private notificationTimeout: any;
+  private activeTabState = computed(() => this.tabManager.activeTab()?.state);
+  private jobs = computed(() => this.activeTabState()?.jobs() ?? []);
+  private scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map<string, PlatformResult[]>());
+  private networkData = computed(() => this.activeTabState()?.networkData() ?? { nodes: [], edges: [] });
 
   isMetadataPopupVisible = signal(false);
   selectedPlatformData = signal<PlatformResult | null>(null);
@@ -40,9 +45,6 @@ export class SocialMapperStateService {
         email?: string;
     } | null>(null);
   notification = signal<NotificationData | null>(null);
-
-  private notificationTimeout: any;
-
   nodeToFocus = signal<string | null>(null);
   contextMenuData = signal<ContextMenuData | null>(null);
   deleteConfirmationData = signal<DeleteConfirmationData | null>(null);
@@ -54,11 +56,6 @@ export class SocialMapperStateService {
         platform: PlatformResult;
     } | null>(null);
   relationshipPopupData = signal<RelationshipPopupData | null>(null);
-
-  private activeTabState = computed(() => this.tabManager.activeTab()?.state);
-  private jobs = computed(() => this.activeTabState()?.jobs() ?? []);
-  private scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map<string, PlatformResult[]>());
-  private networkData = computed(() => this.activeTabState()?.networkData() ?? { nodes: [], edges: [] });
 
   openManageProfilesModal(username: string) {
     const results = this.scanResults().get(username);

@@ -35,6 +35,10 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   isFetchingImages = computed(() => this.fetchingState.platformImages()[this.getPlatformUniqueKey()]);
   isFetchingFollowers = computed(() => this.fetchingState.followers()[this.getPlatformUniqueKey()]);
   isFetchingFollowing = computed(() => this.fetchingState.following()[this.getPlatformUniqueKey()]);
+  public formatFollowers = formatFollowers;
+  public formatKey = formatKey;
+  public isUrl = isUrl;
+  public isImageUrl = isImageUrl;
 
   constructor(fetchingState: FetchingStateService) {
     super();
@@ -63,10 +67,6 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   override loadMoreFollowing() {
     super.loadMoreFollowing(this.data().following_list);
   }
-  public formatFollowers = formatFollowers;
-  public formatKey = formatKey;
-  public isUrl = isUrl;
-  public isImageUrl = isImageUrl;
 
   onClose() {
     this.close.emit();

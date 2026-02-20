@@ -24,27 +24,22 @@ import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Output() openPopup = new EventEmitter<void>();
-
-  username = signal<string>('');
-
-  role = signal<string>('');
-
-  isNotificationOpen = signal<boolean>(false);
-
-  profile_image: string = "";
-
-  licences: string = '';
-
-  dropdownOpen = signal(false);
-
-  isDarkTheme = true;
-
   private scrollContainer: HTMLElement | null = null;
-
   private scrollHandler = () => {
     this.dropdownOpen.set(false);
   };
+
+  protected readonly Date = Date;
+
+  username = signal<string>('');
+  role = signal<string>('');
+  isNotificationOpen = signal<boolean>(false);
+  profile_image: string = "";
+  licences: string = '';
+  dropdownOpen = signal(false);
+  isDarkTheme = true;
+
+  @Output() openPopup = new EventEmitter<void>();
 
   constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, private appStorage: AppStorageService, protected licenseService: LicenseService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
@@ -170,6 +165,4 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   openSupportPopup() {
     this.openPopup.emit();
   }
-
-  protected readonly Date = Date;
 }

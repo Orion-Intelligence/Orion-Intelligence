@@ -12,10 +12,11 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
   ]
 })
 export class CodeBlockComponent {
-    @Input() code: string | undefined = '';
-    isExpanded = false;
+  isExpanded = false;
 
-    toggle(): void {
-      this.isExpanded = !this.isExpanded;
-    }
+  @Input() code: string | undefined = '';
+
+  toggle(): void {
+    this.isExpanded = !this.isExpanded;
+  }
 }

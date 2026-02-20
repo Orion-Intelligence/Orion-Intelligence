@@ -18,38 +18,39 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
-    @Input() searchResults: ChatResultItem[] = [];
-    @Input() isExpandAble: boolean = false;
-    currentUrl = '';
-    queryParams: any = {};
-    isCollapsed = true;
+  currentUrl = '';
+  queryParams: any = {};
+  isCollapsed = true;
 
-    constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
-    }
+  @Input() searchResults: ChatResultItem[] = [];
+  @Input() isExpandAble: boolean = false;
 
-    ngAfterViewInit() {
-      this.scrollService.scrollToSavedPosition();
-    }
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  }
 
-    ngOnInit() {
-      this.currentUrl = this.router.url.split('?')[0];
-      if (this.currentUrl.includes('consolidated')) {
-        this.currentUrl = this.currentUrl.replace("/all", "/chat");
-      }
-      if (this.currentUrl.includes('social')) {
-        this.currentUrl = this.currentUrl.replace("/all", "/chat");
-      }
-      else if (this.currentUrl.includes('discussion')) {
-        this.currentUrl = this.currentUrl + '/chat';
-      }
-      if (this.currentUrl.includes('social') && this.currentUrl.includes('chat') && !this.currentUrl.includes('all')) {
-        this.currentUrl = this.currentUrl + '/all';
-      }
-      this.route.queryParams.subscribe(params => {
-        this.queryParams = {
-          ...params,
-          ci: 'chat'
-        };
-      });
+  ngAfterViewInit() {
+    this.scrollService.scrollToSavedPosition();
+  }
+
+  ngOnInit() {
+    this.currentUrl = this.router.url.split('?')[0];
+    if (this.currentUrl.includes('consolidated')) {
+      this.currentUrl = this.currentUrl.replace("/all", "/chat");
     }
+    if (this.currentUrl.includes('social')) {
+      this.currentUrl = this.currentUrl.replace("/all", "/chat");
+    }
+    else if (this.currentUrl.includes('discussion')) {
+      this.currentUrl = this.currentUrl + '/chat';
+    }
+    if (this.currentUrl.includes('social') && this.currentUrl.includes('chat') && !this.currentUrl.includes('all')) {
+      this.currentUrl = this.currentUrl + '/all';
+    }
+    this.route.queryParams.subscribe(params => {
+      this.queryParams = {
+        ...params,
+        ci: 'chat'
+      };
+    });
+  }
 }

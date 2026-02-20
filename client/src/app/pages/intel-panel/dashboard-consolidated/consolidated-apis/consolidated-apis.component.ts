@@ -9,13 +9,14 @@ import { finalize } from 'rxjs';
   templateUrl: './consolidated-apis.component.html'
 })
 export class ConsolidatedApisComponent {
-  @Input() isLoading!: boolean;
   query: string = '';
   searchResults: ConsolidatedLiveApiResults[] = [];
   liveApiEntities: ConsolidatedLiveApis[] = [];
   isProcessing: boolean = false;
   showComponent: boolean = false;
   isExpanded: boolean = true;
+
+  @Input() isLoading!: boolean;
 
   constructor(private liveApiService: ConsolidatedApiService) { }
 
@@ -114,7 +115,7 @@ export class ConsolidatedApisComponent {
           this.searchResults = results;
           this.isExpanded = true;
         },
-        error: (err) => {
+        error: (_) => {
           this.isProcessing = false;
         }
       });

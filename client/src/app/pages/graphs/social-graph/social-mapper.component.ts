@@ -48,9 +48,7 @@ import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/u
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
-  public state = inject(SocialMapperStateService);
   private readonly twId = 'tw-social';
-  isTailwindReady = signal(false);
   private activeTabState = computed(() => this.tabManager.activeTab()?.state);
   private cancelScanSubjects = new Map<string, Subject<void>>();
   private cancelProfileFetchSubjects = new Map<string, Subject<void>>();
@@ -58,6 +56,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   private cancelPlatformImageFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowersFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
+  private mediaQueryList: MediaQueryList | null = null;
+  private tailwindLinkEl: HTMLLinkElement | null = null;
+  private ownsTailwindLink = false;
+  private readonly mediaQueryListener = (event: MediaQueryListEvent) => this.isSmallScreen.set(event.matches);
+
+  public state = inject(SocialMapperStateService);
+  isTailwindReady = signal(false);
   searchTerm = computed(() => this.activeTabState()?.searchTerm() ?? '');
   homeMenuSearchTerm = computed(() => this.activeTabState()?.homeMenuSearchTerm() ?? '');
   jobs = computed(() => this.activeTabState()?.jobs() ?? []);
@@ -116,10 +121,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
     return visibleNodeIdsWithFollows;
   });
-  private mediaQueryList: MediaQueryList | null = null;
-  private tailwindLinkEl: HTMLLinkElement | null = null;
-  private ownsTailwindLink = false;
-  private readonly mediaQueryListener = (event: MediaQueryListEvent) => this.isSmallScreen.set(event.matches);
+  isCustomEntityNode = (nodeId: string): boolean => this.customEntities().some(e => e.id === nodeId);
 
   constructor( private scanService: SocialScanService, private destroyRef: DestroyRef, public tabManager: TabManagerService, private fetchingState: FetchingStateService, private graphOrchestrator: GraphOrchestratorService, private scanJobService: SocialScanJobService, private platformFetchService: PlatformFetchService, private relationshipResolver: RelationshipResolverService, @Inject(PLATFORM_ID) private platformId: object ) {
     if (isPlatformBrowser(this.platformId)) {
@@ -620,7 +622,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.entityManager()?.deleteCustomEntity(nodeId);
     this.state.closeContextMenu();
   }
-  isCustomEntityNode = (nodeId: string): boolean => this.customEntities().some(e => e.id === nodeId);
 
   handleEdgeAdded( edge: { from: string; to: string; } ) {
     this.graphOrchestrator.addEdge(this.activeTabState()!, edge);

@@ -6,38 +6,40 @@ import { NgIf } from '@angular/common';
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent implements OnInit {
-    @Input() id!: string;
-    @Input() imageUrl!: string;
-    @Input() defaultImage: string = 'assets/images/tenant/logo_url_default.png';
-    @Input() wide = false;
-    @Output() onImageSelected = new EventEmitter<File>();
-    @Output() onClear = new EventEmitter<string>();
-    selectedFile?: File;
-    selectedImage?: string;
+  selectedFile?: File;
+  selectedImage?: string;
 
-    ngOnInit(): void {
-      this.selectedImage = this.imageUrl || this.defaultImage;
-    }
+  @Input() id!: string;
+  @Input() imageUrl!: string;
+  @Input() defaultImage: string = 'assets/images/tenant/logo_url_default.png';
+  @Input() wide = false;
 
-    onFileSelected(event: any) {
-      const file = event.target.files[0];
-      if (!file) {
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.selectedImage = e.target.result;
-      };
-      reader.readAsDataURL(file);
-      this.selectedFile = file;
-      this.onImageSelected.emit(file);
-    }
+  @Output() onImageSelected = new EventEmitter<File>();
+  @Output() onClear = new EventEmitter<string>();
 
-    deleteImage(event?: Event) {
-      event?.stopPropagation();
-      this.onClear.emit(this.id);
-      this.selectedFile = undefined;
-      this.selectedImage = this.defaultImage;
-      this.imageUrl = this.defaultImage;
+  ngOnInit(): void {
+    this.selectedImage = this.imageUrl || this.defaultImage;
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.selectedImage = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    this.selectedFile = file;
+    this.onImageSelected.emit(file);
+  }
+
+  deleteImage(event?: Event) {
+    event?.stopPropagation();
+    this.onClear.emit(this.id);
+    this.selectedFile = undefined;
+    this.selectedImage = this.defaultImage;
+    this.imageUrl = this.defaultImage;
+  }
 }

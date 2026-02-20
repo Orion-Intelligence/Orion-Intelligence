@@ -10,21 +10,22 @@ import { popupAnimation } from '../../animations/popup.animations';
   animations: [popupAnimation],
 })
 export class ConfirmationPopupComponent {
-    @Input() message = 'Are you sure you want to perform this action?';
-    @Output() confirmed = new EventEmitter<boolean>();
+  @Input() message = 'Are you sure you want to perform this action?';
 
-    @HostListener('click', ['$event'])
-    onBackdropClick(event: MouseEvent) {
-      if ((event.target as HTMLElement).classList.contains('confirmation-popup_backdrop')) {
-        this.confirmed.emit(false);
-      }
-    }
+  @Output() confirmed = new EventEmitter<boolean>();
 
-    onYes() {
-      this.confirmed.emit(true);
-    }
-
-    onNo() {
+  @HostListener('click', ['$event'])
+  onBackdropClick(event: MouseEvent) {
+    if ((event.target as HTMLElement).classList.contains('confirmation-popup_backdrop')) {
       this.confirmed.emit(false);
     }
+  }
+
+  onYes() {
+    this.confirmed.emit(true);
+  }
+
+  onNo() {
+    this.confirmed.emit(false);
+  }
 }

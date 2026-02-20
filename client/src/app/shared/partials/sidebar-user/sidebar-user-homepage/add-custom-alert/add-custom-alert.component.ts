@@ -13,23 +13,19 @@ import { MessageNotificationService } from '../../../../../services/message_noti
   templateUrl: './add-custom-alert.component.html'
 })
 export class AddCustomAlertComponent implements OnInit {
+  protected readonly decodeURIComponent = decodeURIComponent;
+
+  alert: AlertModel = { type: '', status: 'active', title: '', description: '', url: '', source: '', all_ioc: [], content_types: [], first_seen: new Date(), last_seen: new Date(), ioc_type: '', ioc_value: '' };
+  formError: string = '';
+  alertTypes = [ { key: 'general', label: 'General' }, { key: 'breach', label: 'Breach' }, { key: 'exploit', label: 'Exploit' }, { key: 'social', label: 'Social' }, { key: 'defacement', label: 'Defacement' } ];
+  allowedIocTypes = [ { title: 'Phone Numbers', key: 'm_phone_number' }, { title: 'Emails', key: 'm_email' }, { title: 'Domains', key: 'm_domain' }, { title: 'Country', key: 'm_country' }, { title: 'URLs', key: 'm_url' }, { title: 'CVE & CWE', key: 'm_cve' }, { title: 'IP Addresses', key: 'm_ip' }, { title: 'YARA Rules', key: 'm_yara_rule' }, { title: 'Encoded URLs', key: 'm_encoded_urls' }, { title: 'File Paths', key: 'm_file_paths' }, { title: 'Credit Cards', key: 'm_credit_card' }, { title: 'Organizations', key: 'm_org' }, { title: 'Company Names', key: 'm_company_name' }, { title: 'Persons', key: 'm_person' }, { title: 'Locations', key: 'm_location' }, { title: 'Languages', key: 'm_language' }, { title: 'User Agents', key: 'm_user_agents' }, { title: 'ASNs', key: 'm_asns' }, { title: 'Teams', key: 'm_team' }, { title: 'Hashtags', key: 'm_hashtag' }, { title: 'Mentions', key: 'm_mention' }, { title: 'Social Media Profiles', key: 'm_social_media_profiles' }, { title: 'Currencies', key: 'm_currencies' }, { title: 'Crypto Addresses', key: 'm_crypto_address' }, { title: 'XMPP Addresses', key: 'm_xmpp_addresses' }, { title: 'Enterprise ATT&CK Tactics', key: 'm_enterprise_attack_tactics' }, { title: 'Enterprise ATT&CK Techniques', key: 'm_enterprise_attack_techniques' }, { title: 'Document IDs', key: 'm_document_id' }, { title: 'Australian IDs', key: 'm_au_abn' }, { title: 'US IDs', key: 'm_us_passport' }, { title: 'US Bank Numbers', key: 'm_us_bank_number' }, { title: 'Platform', key: 'm_platform' }, { title: 'Author', key: 'm_author' }, { title: 'Industry', key: 'm_industry' }, { title: 'Scrap Script', key: 'm_scrap_file' } ];
+
   @Input() heading: string = '';
-
   @Input() description: string = '';
-
   @Input() edit: boolean = false;
-
   @Input() editAlertData!: AlertModel;
 
   @Output() cancle = new EventEmitter<boolean>();
-
-  alert: AlertModel = { type: '', status: 'active', title: '', description: '', url: '', source: '', all_ioc: [], content_types: [], first_seen: new Date(), last_seen: new Date(), ioc_type: '', ioc_value: '' };
-
-  formError: string = '';
-
-  alertTypes = [ { key: 'general', label: 'General' }, { key: 'breach', label: 'Breach' }, { key: 'exploit', label: 'Exploit' }, { key: 'social', label: 'Social' }, { key: 'defacement', label: 'Defacement' } ];
-
-  allowedIocTypes = [ { title: 'Phone Numbers', key: 'm_phone_number' }, { title: 'Emails', key: 'm_email' }, { title: 'Domains', key: 'm_domain' }, { title: 'Country', key: 'm_country' }, { title: 'URLs', key: 'm_url' }, { title: 'CVE & CWE', key: 'm_cve' }, { title: 'IP Addresses', key: 'm_ip' }, { title: 'YARA Rules', key: 'm_yara_rule' }, { title: 'Encoded URLs', key: 'm_encoded_urls' }, { title: 'File Paths', key: 'm_file_paths' }, { title: 'Credit Cards', key: 'm_credit_card' }, { title: 'Organizations', key: 'm_org' }, { title: 'Company Names', key: 'm_company_name' }, { title: 'Persons', key: 'm_person' }, { title: 'Locations', key: 'm_location' }, { title: 'Languages', key: 'm_language' }, { title: 'User Agents', key: 'm_user_agents' }, { title: 'ASNs', key: 'm_asns' }, { title: 'Teams', key: 'm_team' }, { title: 'Hashtags', key: 'm_hashtag' }, { title: 'Mentions', key: 'm_mention' }, { title: 'Social Media Profiles', key: 'm_social_media_profiles' }, { title: 'Currencies', key: 'm_currencies' }, { title: 'Crypto Addresses', key: 'm_crypto_address' }, { title: 'XMPP Addresses', key: 'm_xmpp_addresses' }, { title: 'Enterprise ATT&CK Tactics', key: 'm_enterprise_attack_tactics' }, { title: 'Enterprise ATT&CK Techniques', key: 'm_enterprise_attack_techniques' }, { title: 'Document IDs', key: 'm_document_id' }, { title: 'Australian IDs', key: 'm_au_abn' }, { title: 'US IDs', key: 'm_us_passport' }, { title: 'US Bank Numbers', key: 'm_us_bank_number' }, { title: 'Platform', key: 'm_platform' }, { title: 'Author', key: 'm_author' }, { title: 'Industry', key: 'm_industry' }, { title: 'Scrap Script', key: 'm_scrap_file' } ];
 
   constructor(public appService: AppService, public apiService: ApiService, public router: Router, public route: ActivatedRoute, private messageNotificationService: MessageNotificationService) { }
 
@@ -164,6 +160,4 @@ export class AddCustomAlertComponent implements OnInit {
     const item = this.allowedIocTypes.find(x => x.key === selectedKey);
     return item ? item.title : 'Select IOC Type';
   }
-
-  protected readonly decodeURIComponent = decodeURIComponent;
 }

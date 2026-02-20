@@ -13,8 +13,9 @@ import { ActivatedRoute, Router } from '@angular/router';
   imports: [NgForOf, AsyncPipe, DatePipe, NgIf]
 })
 export class DumpListComponent implements OnInit {
-  @Input() isLoading = true;
   dumpData$: Observable<DumpCallbackModel | null>;
+
+  @Input() isLoading = true;
 
   constructor(public dumpService: DumpService, private router: Router, private route: ActivatedRoute) {
     this.dumpData$ = this.dumpService.dumpData$;

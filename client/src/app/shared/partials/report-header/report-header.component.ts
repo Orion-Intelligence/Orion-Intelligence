@@ -19,97 +19,99 @@ import { Router } from '@angular/router';
   animations: [fadeInDashboardItem]
 })
 export class ReportHeaderComponent {
-    @Input() csv_object: string | object | null | undefined = null;
-    @Input() url: string | null | undefined = null;
-    @Input() lang: string = "";
-    @Input() content: string | null | undefined = null;
-    @Input() lang_detected: string = "";
-    @Output() languageUpdated = new EventEmitter<LeakResultItem | GeneralResultItem>();
-    aiSuggestStatus = false;
-    aiSuggestSummary = '';
+  aiSuggestStatus = false;
+  aiSuggestSummary = '';
 
-    constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router) {
+  @Input() csv_object: string | object | null | undefined = null;
+  @Input() url: string | null | undefined = null;
+  @Input() lang: string = "";
+  @Input() content: string | null | undefined = null;
+  @Input() lang_detected: string = "";
+
+  @Output() languageUpdated = new EventEmitter<LeakResultItem | GeneralResultItem>();
+
+  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router) {
+  }
+
+  downloadCSV() {
+    const tree = this.route.parseUrl(this.route.url);
+    const id = tree.root.children['primary'].segments.slice(-1)[0].path;
+    let ci = tree.queryParams['ci'];
+    if (ci === 'general') {
+      ci = 'strategic';
     }
+    if (ci === 'leak' || ci === "feed") {
+      ci = 'breach';
+    }
+    this.api.get<any>(`search/${ci}/stix/${id}`).subscribe((res) => {
+      this.helperService.downloadstixJson(res);
+    });
+  }
 
-    downloadCSV() {
-      const tree = this.route.parseUrl(this.route.url);
-      const id = tree.root.children['primary'].segments.slice(-1)[0].path;
-      let ci = tree.queryParams['ci'];
-      if (ci === 'general') {
-        ci = 'strategic';
+  printPage() {
+    this.helperService.printPage();
+  }
+
+  shareResult() {
+    this.helperService.shareResult(this.url || '');
+  }
+
+  redirectToUrl() {
+    if (this.url) {
+      let url = this.url.trim();
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
       }
-      if (ci === 'leak' || ci === "feed") {
-        ci = 'breach';
-      }
-      this.api.get<any>(`search/${ci}/stix/${id}`).subscribe((res) => {
-        this.helperService.downloadstixJson(res);
-      });
+      window.open(url, '_blank');
     }
+  }
 
-    printPage() {
-      this.helperService.printPage();
+  open_graph() {
+    const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+    const parts = window.location.pathname.split('/');
+    const singleInput = parts[parts.length - 1];
+    const params = new URLSearchParams({
+      selectedType: 'document',
+      singleInput
+    });
+    const fullUrl = `${baseUrl}?${params.toString()}`;
+    window.open(fullUrl, '_blank');
+  }
+
+  aiSuggest() {
+    if (!this.subscriptionService.accountExpirable()) {
+      this.dashboardService.showSubscription.set(true);
+      return;
     }
-
-    shareResult() {
-      this.helperService.shareResult(this.url || '');
-    }
-
-    redirectToUrl() {
-      if (this.url) {
-        let url = this.url.trim();
-        if (!/^https?:\/\//i.test(url)) {
-          url = 'https://' + url;
-        }
-        window.open(url, '_blank');
-      }
-    }
-
-    open_graph() {
-      const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
-      const parts = window.location.pathname.split('/');
-      const singleInput = parts[parts.length - 1];
-      const params = new URLSearchParams({
-        selectedType: 'document',
-        singleInput
-      });
-      const fullUrl = `${baseUrl}?${params.toString()}`;
-      window.open(fullUrl, '_blank');
-    }
-
-    aiSuggest() {
-      if (!this.subscriptionService.accountExpirable()) {
-        this.dashboardService.showSubscription.set(true);
-        return;
-      }
-      this.api.post<{
-            result: string;
-        }>('nlp/summarize/ai', {
-          data: [this.content]
-        }).subscribe({
-          next: (response) => {
-            this.aiSuggestStatus = true;
-            this.aiSuggestSummary = response.result || 'No summary available';
-            this.cdr.detectChanges();
-          },
-          error: (_err) => {
-          }
-        });
-    }
-
-    langUpdate() {
-      const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set('lang', this.lang);
-      const segments = currentUrl.pathname.split('/').filter(Boolean);
-      const type = segments[segments.length - 3];
-      const reportId = segments[segments.length - 1];
-      const apiUrl = `search/${type}/${reportId}`;
-      window.history.pushState({}, '', currentUrl.toString());
-      this.api.get<GeneralResultItem | LeakResultItem>(apiUrl, {
-        params: new HttpParams().set('lang', this.lang)
+    this.api.post<{
+          result: string;
+      }>('nlp/summarize/ai', {
+        data: [this.content]
       }).subscribe({
-        next: (result) => {
-          this.languageUpdated.emit(result);
+        next: (response) => {
+          this.aiSuggestStatus = true;
+          this.aiSuggestSummary = response.result || 'No summary available';
+          this.cdr.detectChanges();
+        },
+        error: (_err) => {
         }
       });
-    }
+  }
+
+  langUpdate() {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('lang', this.lang);
+    const segments = currentUrl.pathname.split('/').filter(Boolean);
+    const type = segments[segments.length - 3];
+    const reportId = segments[segments.length - 1];
+    const apiUrl = `search/${type}/${reportId}`;
+    window.history.pushState({}, '', currentUrl.toString());
+    this.api.get<GeneralResultItem | LeakResultItem>(apiUrl, {
+      params: new HttpParams().set('lang', this.lang)
+    }).subscribe({
+      next: (result) => {
+        this.languageUpdated.emit(result);
+      }
+    });
+  }
 }

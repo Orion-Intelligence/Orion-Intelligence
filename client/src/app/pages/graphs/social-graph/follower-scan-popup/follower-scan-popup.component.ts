@@ -12,6 +12,9 @@ import { buildSocialProfileUrl } from '../utils/profile-url.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowerScanPopupComponent {
+  private readonly initialLoadCount = 30;
+  private readonly increment = 30;
+
   platform = input.required<PlatformResult>();
   isFetchingFollowers = input<boolean>(false);
   isFetchingFollowing = input<boolean>(false);
@@ -26,9 +29,23 @@ export class FollowerScanPopupComponent {
   displayFollowing = signal<string[]>([]);
   isLoadingMoreFollowers = signal(false);
   isLoadingMoreFollowing = signal(false);
-  private readonly initialLoadCount = 30;
-  private readonly increment = 30;
   readonly MAX_SELECTION = 3;
+  followers = computed(() => this.platform().followers_list || []);
+  following = computed(() => this.platform().following_list || []);
+  filteredFollowers = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) {
+      return this.followers();
+    }
+    return this.followers().filter(u => u.toLowerCase().includes(term));
+  });
+  filteredFollowing = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) {
+      return this.following();
+    }
+    return this.following().filter(u => u.toLowerCase().includes(term));
+  });
 
   constructor() {
     effect(() => {
@@ -50,22 +67,6 @@ export class FollowerScanPopupComponent {
       }
     });
   }
-  followers = computed(() => this.platform().followers_list || []);
-  following = computed(() => this.platform().following_list || []);
-  filteredFollowers = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) {
-      return this.followers();
-    }
-    return this.followers().filter(u => u.toLowerCase().includes(term));
-  });
-  filteredFollowing = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) {
-      return this.following();
-    }
-    return this.following().filter(u => u.toLowerCase().includes(term));
-  });
 
   onSearchInput(event: Event) {
     this.searchTerm.set((event.target as HTMLInputElement).value);

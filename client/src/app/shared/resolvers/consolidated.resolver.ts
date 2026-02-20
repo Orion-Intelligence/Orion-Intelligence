@@ -47,7 +47,7 @@ export class ReportConsolidatedResolver implements Resolve<any> {
     if (lang) {
       apiUrl += `?lang=${lang}`;
     }
-    return this.apiService.get<any>(apiUrl).pipe(catchError((err) => {
+    return this.apiService.get<any>(apiUrl).pipe(catchError((_) => {
       this.router.navigate(['/']).then();
       return of(null);
     }));

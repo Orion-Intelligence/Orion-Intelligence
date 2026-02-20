@@ -87,7 +87,7 @@
       </ng-container>
 
       <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults : searchResults); let i = index">
-        <tr *ngIf="!isLoading" (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem>
+        <tr *ngIf="!isLoading" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem>
           <td class="list__cell-id">
             <span>{{ i + 1 }}</span> <img class="list__cell-arrow" alt="click" width="15" height="15" src="assets/images/shared/arrow-right-click.svg">
           </td>
@@ -133,7 +133,7 @@
               </div>
             </div>
 
-            <div (click)="scrollService.saveSession(item.m_hash)" appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+            <div appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
               <div class="dashboard__search-button-inner">
                 <img height="20" src="/client/src/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
               </div>

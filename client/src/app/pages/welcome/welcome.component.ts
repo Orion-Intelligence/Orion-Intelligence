@@ -8,7 +8,6 @@ import { AppService } from '../../services/core/app/app.service';
   selector: 'app-welcome',
   imports: [HeaderComponent],
   templateUrl: './welcome.component.html',
-  styleUrl: './welcome.component.css'
 })
 export class WelcomeComponent implements OnInit {
   hasToken: boolean = false;

@@ -6,10 +6,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './heatmap-report.component.html'
 })
 export class HeatmapReportComponent {
-    @Input() reports: any[] = [];
-    @Output() close = new EventEmitter<void>();
+  @Input() reports: any[] = [];
 
-    closePopup() {
-      this.close.emit();
-    }
+  @Output() close = new EventEmitter<void>();
+
+  closePopup() {
+    this.close.emit();
+  }
 }

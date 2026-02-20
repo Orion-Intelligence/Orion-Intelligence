@@ -20,6 +20,8 @@ import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stea
   providedIn: 'root'
 })
 export class DashboardService {
+  private cancelRequest$ = new Subject<void>();
+
   m_current_route = "";
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
   consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
@@ -34,8 +36,6 @@ export class DashboardService {
   showSubscription = signal<boolean>(false);
   selectedFilters = signal<Record<string, string | null>>({});
   passwordSchemeFilter: PasswordSchemaFilter = { minLength: null, maxLength: null, hasAlphabets: false, hasNumbers: false, hasSpecialChars: false };
-
-  private cancelRequest$ = new Subject<void>();
 
   constructor(private router: Router, private route: ActivatedRoute, private helperService: HelperService, private apiService: ApiService, private app_service: AppService) {
     this.initializeSideFilters();
@@ -83,7 +83,7 @@ export class DashboardService {
       success: true,
       isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
       data: response
-    })), catchError((error) => {
+    })), catchError((_) => {
       return of({ success: false, isEmpty: false, data: null });
     }));
   }

@@ -6,10 +6,10 @@ import { AppService } from '../core/app/app.service';
   providedIn: 'root'
 })
 export class AlertService {
-  isAlertScanLoading = signal<boolean>(true);
-
   private isCheckingStatus = false;
   private hasAutoCheckedOnce = false;
+
+  isAlertScanLoading = signal<boolean>(true);
 
   constructor(protected apiService: ApiService, private appService: AppService) {
   }
@@ -24,12 +24,12 @@ export class AlertService {
               this.getLatestAlerts();
             }
           },
-          error: (err) => {
+          error: (_) => {
             this.isAlertScanLoading.set(false);
           }
         });
       },
-      error: (err) => {
+      error: (_) => {
         this.isAlertScanLoading.set(false);
       },
     });
@@ -40,7 +40,7 @@ export class AlertService {
       next: (_) => {
         this.isAlertScanLoading.set(false);
       },
-      error: (_err) => {
+      error: (_) => {
       },
     });
   }

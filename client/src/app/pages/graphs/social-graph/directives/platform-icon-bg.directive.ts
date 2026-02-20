@@ -5,12 +5,12 @@ import { IconService } from '../../../../shared/services/icon.service';
   standalone: true,
 })
 export class PlatformIconBgDirective {
-  platformName = input.required<string>({ alias: 'socialMapperPlatformBg' });
-
   private el = inject(ElementRef<HTMLElement>);
   private renderer = inject(Renderer2);
   private iconService = inject(IconService);
   private activeColorClass = 'social-graph-platform-bg-slate';
+
+  platformName = input.required<string>({ alias: 'socialMapperPlatformBg' });
 
   constructor() {
     effect(() => {

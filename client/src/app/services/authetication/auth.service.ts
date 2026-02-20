@@ -69,7 +69,7 @@ export class AuthService {
     }));
   }
 
-  verifyTwofa(code: string, tempToken: string, username: string): Observable<any> {
+  verifyTwofa(code: string, tempToken: string, _: string): Observable<any> {
     if (!tempToken) {
       return new Observable((observer) => {
         observer.next(null);

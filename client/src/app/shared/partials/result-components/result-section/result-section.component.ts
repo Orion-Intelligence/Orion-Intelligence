@@ -6,13 +6,14 @@ import { CommonModule } from '@angular/common';
   templateUrl: './result-section.component.html'
 })
 export class ResultSectionComponent implements OnInit {
-    @Input() listItems: string[] = [];
-    filteredListItems: string[] = [];
+  filteredListItems: string[] = [];
 
-    ngOnInit() {
-      this.filteredListItems = this.listItems.filter(item => {
-        const cleaned = item?.trim();
-        return cleaned && cleaned.length > 1;
-      });
-    }
+  @Input() listItems: string[] = [];
+
+  ngOnInit() {
+    this.filteredListItems = this.listItems.filter(item => {
+      const cleaned = item?.trim();
+      return cleaned && cleaned.length > 1;
+    });
+  }
 }

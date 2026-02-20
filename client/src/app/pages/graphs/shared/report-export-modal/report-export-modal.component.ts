@@ -8,18 +8,19 @@ import { GraphReportExportType } from '../services/graph-report-export.service';
   templateUrl: './report-export-modal.component.html'
 })
 export class ReportExportModalComponent {
-    @Input() visible = false;
-    @Input() title = 'Export Report';
-    @Output() closed = new EventEmitter<void>();
-    @Output() exportSelected = new EventEmitter<GraphReportExportType>();
+  @Input() visible = false;
+  @Input() title = 'Export Report';
 
-    onOverlayClick(event: MouseEvent): void {
-      if ((event.target as HTMLElement).classList.contains('report-export-overlay')) {
-        this.closed.emit();
-      }
-    }
+  @Output() closed = new EventEmitter<void>();
+  @Output() exportSelected = new EventEmitter<GraphReportExportType>();
 
-    select(type: GraphReportExportType): void {
-      this.exportSelected.emit(type);
+  onOverlayClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('report-export-overlay')) {
+      this.closed.emit();
     }
+  }
+
+  select(type: GraphReportExportType): void {
+    this.exportSelected.emit(type);
+  }
 }

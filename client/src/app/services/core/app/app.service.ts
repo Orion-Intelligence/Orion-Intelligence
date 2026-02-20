@@ -14,11 +14,18 @@ import { firstValueFrom } from 'rxjs';
   providedIn: 'root'
 })
 export class AppService {
+  private entitiesCache: any[] | null = null;
+
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
   public entities = signal<any[]>([]);
   public worldJson = signal<any>(null);
-  private entitiesCache: any[] | null = null;
+  public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
+  public tenantData = signal<TenantModel>({
+    name: '',
+    iocs: []
+  });
+  public userImageUrl = signal<string | null>(null);
 
   private createEmptyUserSessionData(): userSessionData {
     return {
@@ -50,12 +57,6 @@ export class AppService {
       alerts: []
     };
   }
-  public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
-  public tenantData = signal<TenantModel>({
-    name: '',
-    iocs: []
-  });
-  public userImageUrl = signal<string | null>(null);
 
   constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
     this.loadEntities();

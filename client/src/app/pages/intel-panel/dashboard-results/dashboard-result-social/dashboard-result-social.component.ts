@@ -24,56 +24,57 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   animations: [fadeInDashboardItem]
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
-    @Input() searchResults: SocialResultItem[] = [];
-    @Input() isExpandAble: boolean = false;
-    currentUrl = '';
-    queryParams: any = {};
-    isCollapsed = true;
+  currentUrl = '';
+  queryParams: any = {};
+  isCollapsed = true;
 
-    constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
-    }
+  @Input() searchResults: SocialResultItem[] = [];
+  @Input() isExpandAble: boolean = false;
 
-    ngAfterViewInit() {
-      this.scrollService.scrollToSavedPosition();
-    }
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  }
 
-    getContentLines(item: any): string[] {
-      return item?.m_content
-        ? item.m_content
-          .split('\n')
-          .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
-        : [];
-    }
+  ngAfterViewInit() {
+    this.scrollService.scrollToSavedPosition();
+  }
 
-    hasCodeType(item: any): boolean {
-      return Array.isArray(item.m_content_type)
-        ? item.m_content_type.some((t: string) => t.includes('code'))
-        : (typeof item.m_content_type === 'string' && item.m_content_type.includes('code'));
-    }
-
-    getContentWithoutEmptyLines(content: string | undefined): string {
-      if (!content) {
-        return "";
-      }
-      return (content || '')
+  getContentLines(item: any): string[] {
+    return item?.m_content
+      ? item.m_content
         .split('\n')
-        .filter(line => line.trim().length > 0)
-        .join('\n');
-    }
+        .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
+      : [];
+  }
 
-    ngOnInit() {
-      this.currentUrl = this.router.url.split('?')[0];
-      if (this.currentUrl.includes('consolidated')) {
-        this.currentUrl = this.currentUrl.replace('/all', '/social');
-      }
-      else if (this.currentUrl.includes('discussion')) {
-        this.currentUrl = this.currentUrl + '/social';
-      }
-      this.route.queryParams.subscribe(params => {
-        this.queryParams = {
-          ...params,
-          ci: 'social'
-        };
-      });
+  hasCodeType(item: any): boolean {
+    return Array.isArray(item.m_content_type)
+      ? item.m_content_type.some((t: string) => t.includes('code'))
+      : (typeof item.m_content_type === 'string' && item.m_content_type.includes('code'));
+  }
+
+  getContentWithoutEmptyLines(content: string | undefined): string {
+    if (!content) {
+      return "";
     }
+    return (content || '')
+      .split('\n')
+      .filter(line => line.trim().length > 0)
+      .join('\n');
+  }
+
+  ngOnInit() {
+    this.currentUrl = this.router.url.split('?')[0];
+    if (this.currentUrl.includes('consolidated')) {
+      this.currentUrl = this.currentUrl.replace('/all', '/social');
+    }
+    else if (this.currentUrl.includes('discussion')) {
+      this.currentUrl = this.currentUrl + '/social';
+    }
+    this.route.queryParams.subscribe(params => {
+      this.queryParams = {
+        ...params,
+        ci: 'social'
+      };
+    });
+  }
 }

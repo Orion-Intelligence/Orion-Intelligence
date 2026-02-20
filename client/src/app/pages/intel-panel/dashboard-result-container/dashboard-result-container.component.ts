@@ -36,10 +36,10 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
   protected readonly Category = Category;
+  protected readonly alert = alert;
 
   public currentResultModel: any = null;
   public isResponseLoading = signal(false);
-
   type: Category = Category.STRATEGIC;
   apiEndpoint: string = '';
 
@@ -147,6 +147,4 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
       this.cdr.detectChanges();
     }
   }
-
-  protected readonly alert = alert;
 }

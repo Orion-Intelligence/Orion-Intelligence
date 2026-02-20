@@ -26,10 +26,8 @@ export class SummaryAllPlatformsViewComponent {
   visibleDetailsPlatformsCount = signal(5);
   visiblePostsPlatformsCount = signal(5);
   visibleImagesPlatformsCount = signal(5);
-
   public fetchingState = inject(FetchingStateService);
   public formatKey = formatKey;
-
   filteredPlatformsForDetails = computed(() => this.filterPlatforms(this.detailsSearchTerm(), p => p.profileDetails !== undefined));
   filteredPlatformsForPosts = computed(() => this.filterPlatforms(this.postsSearchTerm(), p => p.posts !== undefined));
   filteredPlatformsForImages = computed(() => this.filterPlatforms(this.imagesSearchTerm(), p => p.images !== undefined));

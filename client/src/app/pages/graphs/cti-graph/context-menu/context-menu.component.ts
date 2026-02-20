@@ -42,15 +42,16 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class GraphContextMenuComponent {
-    @Input() nodeId = '';
-    @Input() canExpand = false;
-    @Input() canCollapse = false;
-    @Input() showOpenCti = true;
-    @Input() showCopyLabel = true;
-    @Input() showOpenReport = true;
-    @Output() expand = new EventEmitter<void>();
-    @Output() collapse = new EventEmitter<void>();
-    @Output() openCti = new EventEmitter<void>();
-    @Output() copyLabel = new EventEmitter<MouseEvent>();
-    @Output() openReport = new EventEmitter<void>();
+  @Input() nodeId = '';
+  @Input() canExpand = false;
+  @Input() canCollapse = false;
+  @Input() showOpenCti = true;
+  @Input() showCopyLabel = true;
+  @Input() showOpenReport = true;
+
+  @Output() expand = new EventEmitter<void>();
+  @Output() collapse = new EventEmitter<void>();
+  @Output() openCti = new EventEmitter<void>();
+  @Output() copyLabel = new EventEmitter<MouseEvent>();
+  @Output() openReport = new EventEmitter<void>();
 }

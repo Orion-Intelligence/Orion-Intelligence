@@ -102,7 +102,7 @@ if [ "$COMMAND" = "build" ]; then
     docker pull python:3.11-slim
     npm --prefix client run lint
 
-    case "" in
+    case "$FLAG" in
         -t)
             client_build "-t"
             cp nginx/nginx-dev.conf nginx/nginx.conf

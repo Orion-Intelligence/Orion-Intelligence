@@ -22,13 +22,11 @@ export class ListViewComponent {
   nodeClicked = output<string>();
   platformNodeClicked = output<string>();
   deleteCustomEntity = output<string>();
-
   public state = inject(SocialMapperStateService);
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
   public isUrl = isUrl;
   public isImageUrl = isImageUrl;
-
   activeUserNodes = computed(() => this.networkData().nodes.filter(n => n.id.toString().startsWith('user-')));
   activeEntityNodesOnGraph = computed(() => this.networkData().nodes.filter(n => this.customEntities().some(e => e.id === n.id)));
 

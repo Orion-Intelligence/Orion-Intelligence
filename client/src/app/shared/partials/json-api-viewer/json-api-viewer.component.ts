@@ -9,10 +9,11 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
   templateUrl: './json-api-viewer.component.html',
 })
 export class JsonApiViewerComponent {
-    @Input() jsonData: any;
-    isExpanded = false;
+  isExpanded = false;
 
-    toggleContent(): void {
-      this.isExpanded = !this.isExpanded;
-    }
+  @Input() jsonData: any;
+
+  toggleContent(): void {
+    this.isExpanded = !this.isExpanded;
+  }
 }

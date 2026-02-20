@@ -38,7 +38,7 @@ export class SocialScanService {
           day: 'numeric'
         });
       }
-      catch (e) {
+      catch (_) {
       }
     }
     return result;

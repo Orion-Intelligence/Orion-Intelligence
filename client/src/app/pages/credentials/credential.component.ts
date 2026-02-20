@@ -37,8 +37,14 @@ import { ScanHelperMethods } from '../../shared/partials/scan-helper-methods/sca
   animations: [fadeInDashboardItem],
 })
 export class CredentialComponent implements OnInit, AfterViewInit {
+  private pendingRequests = 0;
+  private isSearchLoading = false;
+  private isRankedLoading = false;
+
   protected readonly Math = Math;
   protected readonly filters = stealer_filters;
+  protected readonly length = length;
+
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
@@ -52,9 +58,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   allSearchApiTime: any = 0;
   showPasswordscheme = false;
   showSubdomains = false;
-  private pendingRequests = 0;
-  private isSearchLoading = false;
-  private isRankedLoading = false;
+  subdomainList: string[] = [];
 
   private setLoading(delta: 1 | -1) {
     this.pendingRequests += delta;
@@ -268,7 +272,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   closeScheme() {
     this.showPasswordscheme = false;
   }
-  subdomainList: string[] = [];
 
   onPasswordSearch(filter: PasswordSchemaFilter) {
     const isEmpty = !filter.minLength &&
@@ -290,5 +293,4 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     const rankedPages = this.rankedResult.result.length || 0;
     return Math.max(stealerPages, rankedPages);
   }
-  protected readonly length = length;
 }

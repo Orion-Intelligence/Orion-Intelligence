@@ -13,30 +13,31 @@ import { SubscriptionService } from '../../../../services/dashboard/subscription
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {
-    @Input() title = '';
-    @Input() icon = '';
-    @Input() items: string[] = [];
-    @Input() category: any;
-    @Input() routePrefix = '';
-    @Input() tooltip = '';
-    @Output() sectionSelected = new EventEmitter<any>();
-    @Output() optionSelected = new EventEmitter<string>();
+  @Input() title = '';
+  @Input() icon = '';
+  @Input() items: string[] = [];
+  @Input() category: any;
+  @Input() routePrefix = '';
+  @Input() tooltip = '';
 
-    constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected subscriptionService: SubscriptionService) {
-    }
+  @Output() sectionSelected = new EventEmitter<any>();
+  @Output() optionSelected = new EventEmitter<string>();
 
-    selectSection() {
-      this.sectionSelected.emit(this.category);
-    }
+  constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected subscriptionService: SubscriptionService) {
+  }
 
-    selectOption(item: string) {
-      this.optionSelected.emit(item);
-    }
+  selectSection() {
+    this.sectionSelected.emit(this.category);
+  }
 
-    replaceDashWithSpace(value: string): string {
-      if (!value) {
-        return '';
-      }
-      return value.replace(/-/g, ' ');
+  selectOption(item: string) {
+    this.optionSelected.emit(item);
+  }
+
+  replaceDashWithSpace(value: string): string {
+    if (!value) {
+      return '';
     }
+    return value.replace(/-/g, ' ');
+  }
 }

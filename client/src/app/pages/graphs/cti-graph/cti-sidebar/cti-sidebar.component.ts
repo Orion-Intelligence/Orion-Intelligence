@@ -7,6 +7,6 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   template: `<graph-sidebar (filtersApplied)="filtersApplied.emit($event)" (collapsedChange)="collapsedChange.emit($event)"></graph-sidebar>`
 })
 export class CtiSidebarComponent {
-    @Output() filtersApplied = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
-    @Output() collapsedChange = new EventEmitter<boolean>();
+  @Output() filtersApplied = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
+  @Output() collapsedChange = new EventEmitter<boolean>();
 }

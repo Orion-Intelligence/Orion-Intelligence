@@ -83,7 +83,7 @@ export class GraphReportExportService {
     ];
     kpis.forEach((kpi, idx) => this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value));
     const analysisDidDrawPage = (data: any) => {
-      sectionsByPage[data.pageNumber] = 'Graph Analysis'; 
+      sectionsByPage[data.pageNumber] = 'Graph Analysis';
     };
     const analysisTableBase = {
       margin: { left: 40, right: 40, bottom: 58 },
@@ -165,7 +165,6 @@ export class GraphReportExportService {
   }
 
   private drawGraphCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta): void {
-    const W = this.drawDarkTopBand(doc, 170);
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(24);
@@ -243,7 +242,6 @@ export class GraphReportExportService {
   }
 
   private drawGraphSnapshot(doc: jsPDF, payload: GraphReportPayload): void {
-    const W = this.getPageW(doc);
     doc.setTextColor(15, 23, 42);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);

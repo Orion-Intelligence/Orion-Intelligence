@@ -12,10 +12,10 @@ import { IconService } from '../../services/icon.service';
   }
 })
 export class SocialIconComponent {
+  private iconService = inject(IconService);
+
   platformName = input.required<string>();
   iconDataUrl = signal<string>('');
-
-  private iconService = inject(IconService);
 
   constructor() {
     effect(() => {

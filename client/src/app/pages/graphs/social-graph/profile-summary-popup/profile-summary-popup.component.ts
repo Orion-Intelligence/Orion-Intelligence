@@ -14,6 +14,8 @@ import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directiv
   imports: [CommonModule, SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective],
 })
 export class ProfileSummaryPopupComponent {
+  private fetchingState: FetchingStateService;
+
   username = input.required<string>();
   platforms = input.required<PlatformResult[]>();
   email = input<string | undefined>();
@@ -33,13 +35,23 @@ export class ProfileSummaryPopupComponent {
   cancelAllFetches = output<string>();
   platformSearchTerm = signal('');
   selectedPlatform = signal<PlatformResult | 'all' | null>('all');
-  private fetchingState: FetchingStateService;
   selectedPlatformDetails = computed((): PlatformResult | null => {
     const selection = this.selectedPlatform();
     return (selection && selection !== 'all') ? selection : null;
   });
   isAllPlatformsSelected = computed((): boolean => {
     return this.selectedPlatform() === 'all';
+  });
+  filteredPlatforms = computed(() => {
+    const term = this.platformSearchTerm().toLowerCase();
+    const sortedPlatforms = [...this.platforms()].sort((a, b) => a.platform.localeCompare(b.platform));
+    if (!term) {
+      return sortedPlatforms;
+    }
+    return sortedPlatforms.filter(p => p.platform.toLowerCase().includes(term));
+  });
+  isAnythingFetching = computed(() => {
+    return this.isScanInProgress() || this.fetchingState.isUserBusy(this.username());
   });
 
   constructor(fetchingState: FetchingStateService) {
@@ -55,17 +67,6 @@ export class ProfileSummaryPopupComponent {
       }
     });
   }
-  filteredPlatforms = computed(() => {
-    const term = this.platformSearchTerm().toLowerCase();
-    const sortedPlatforms = [...this.platforms()].sort((a, b) => a.platform.localeCompare(b.platform));
-    if (!term) {
-      return sortedPlatforms;
-    }
-    return sortedPlatforms.filter(p => p.platform.toLowerCase().includes(term));
-  });
-  isAnythingFetching = computed(() => {
-    return this.isScanInProgress() || this.fetchingState.isUserBusy(this.username());
-  });
 
   onSearchTermChange(event: Event) {
     this.platformSearchTerm.set((event.target as HTMLInputElement).value); 

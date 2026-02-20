@@ -14,22 +14,19 @@ import { DashboardHeaderComponent } from '../../../shared/partials/header/dashbo
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
+  private authSubscription!: Subscription;
+  private tempToken: string | null = null;
+  private pendingUsername: string | null = null;
+
   user = { mail: '', password: '' };
   errorMessage: string | null = null;
   authenticated = true;
   copied = false;
-
-  private authSubscription!: Subscription;
-
   twofaRequired = false;
   otpCode = '';
   otpUri: string | null = null;
   otpDataUrl: string | null = null;
   otpSecret: string | null = null;
-
-  private tempToken: string | null = null;
-  private pendingUsername: string | null = null;
-
   isMobile = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }

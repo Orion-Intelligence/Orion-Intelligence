@@ -19,6 +19,8 @@ import { getTenantLocationDisplay, toggleEditState } from './sidebar-settings.ut
   templateUrl: './account-settings.component.html'
 })
 export class AccountSettingsComponent implements OnInit {
+  protected readonly JSON = JSON;
+
   isAccountSectionOpen = true;
   is2FAOpen = true;
   isThemeOpen = true;
@@ -154,5 +156,4 @@ export class AccountSettingsComponent implements OnInit {
     const names = user.license.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
     return names;
   }
-  protected readonly JSON = JSON;
 }

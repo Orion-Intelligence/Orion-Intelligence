@@ -9,29 +9,24 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
   selector: 'app-credentials-search-bar',
   imports: [NgFor, NgIf, KeyValuePipe, FormsModule, TooltipDirective, NgClass],
   templateUrl: './credentials-search-bar.component.html',
-  styleUrl: './credentials-search-bar.component.css',
   animations: [fadeInDashboardItem],
 })
 export class CredentialsSearchBarComponent {
-  @Output() searchTriggered = new EventEmitter<string>();
+  private VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^\d{13,19}$/ ];
+  private TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, [StealerlogsSearchFilters.CREDITCARD]: /^\d{13,19}$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
 
   SearchTag = StealerlogsSearchFilters;
-
   FILTER_LABELS = StealerlogsSearchFilterLabels;
-
   isAdvanced = false;
-
   basicSubmitted = false;
-
   basicTouched = false;
-
   selectedTag = StealerlogsSearchFilters.ALL;
-
   basicQuery = '';
+  advancedFilters: StealerlogsAdvancedFilter[] = [ { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' } ];
+
+  @Output() searchTriggered = new EventEmitter<string>();
 
   constructor(protected sidebarService: SidebarService) { }
-
-  advancedFilters: StealerlogsAdvancedFilter[] = [ { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' } ];
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;
@@ -150,8 +145,6 @@ export class CredentialsSearchBarComponent {
       .trim();
   }
 
-  private VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^\d{13,19}$/ ];
-
   validateValue(tag: StealerlogsSearchFilters, value: string): boolean {
     if (tag == StealerlogsSearchFilters.CHANNEL) {
       return true;
@@ -172,8 +165,6 @@ export class CredentialsSearchBarComponent {
     }
     return values.every(v => validator.test(v));
   }
-
-  private TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, [StealerlogsSearchFilters.CREDITCARD]: /^\d{13,19}$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
 
   private normalizeBasicQuery(tag: string, input: string): string {
     if (!input.trim()) {
