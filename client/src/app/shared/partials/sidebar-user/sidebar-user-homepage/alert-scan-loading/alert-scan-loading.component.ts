@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { AlertService } from '../../../../../services/alerts/alerts.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { NgIf } from '@angular/common';

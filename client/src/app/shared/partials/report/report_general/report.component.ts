@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
 import { CommonModule } from '@angular/common';
-import { last, Observable } from 'rxjs';
+import { last } from 'rxjs';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { HelperService } from '../../../services/helper.service';
 import { AppService } from '../../../../services/core/app/app.service';

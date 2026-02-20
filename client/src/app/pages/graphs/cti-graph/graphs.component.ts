@@ -1,6 +1,6 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { Color, Edge, Network, Node } from 'vis-network';
+import { Color, Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
 import { CtiSidebarComponent } from './cti-sidebar/cti-sidebar.component';

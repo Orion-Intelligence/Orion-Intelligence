@@ -1,4 +1,4 @@
-import { animate, animateChild, query, style, transition, trigger } from '@angular/animations';
+import { animate, style, transition, trigger } from '@angular/animations';
 export const scanAnimation = trigger('scanAnimation', [
   transition(':enter', [
     style({ opacity: 0, transform: 'translateY(10px) scale(0.985)' }),

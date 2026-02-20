@@ -1,5 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { RankedCallbackModel } from '../../../../shared/model/results/consolidated/ranked.callback.model';
+import { Component, OnInit } from '@angular/core';
 import { CredentialComponent } from "../../../credentials/credential.component";
 @Component({
   selector: 'app-consolidated-ioc',

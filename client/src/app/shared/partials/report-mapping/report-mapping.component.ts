@@ -5,7 +5,6 @@ import { ApiService } from '../../services/api.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { AuthService } from '../../../services/authetication/auth.service';
-import { Observable } from 'rxjs';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';

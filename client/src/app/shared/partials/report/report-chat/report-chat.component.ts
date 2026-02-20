@@ -7,7 +7,7 @@ import { ResultSectionComponent } from '../../result-components/result-section/r
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { last, Observable } from 'rxjs';
+import { last } from 'rxjs';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { SocialResultItem } from '../../../model/results/social/social.callback.model';
 import { ReportHeaderComponent } from '../../report-header/report-header.component';

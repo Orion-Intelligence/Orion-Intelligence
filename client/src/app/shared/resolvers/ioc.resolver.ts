@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
-import { Observable, forkJoin, of } from 'rxjs';
-import { catchError, shareReplay, tap, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, shareReplay, tap } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
 import { AppService } from '../../services/core/app/app.service';
 import { TenantModel } from '../model/tenant/tenant.model';

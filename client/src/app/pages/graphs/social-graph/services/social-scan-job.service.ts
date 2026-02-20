@@ -2,7 +2,7 @@ import { DestroyRef, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Job, PlatformResult, ScanEvent, TabState } from '../../../../shared/model/social/social-scan.models';
+import { Job, ScanEvent, TabState } from '../../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../../shared/services/social-scan.service';
 import { SocialMapperStateService } from './social-mapper-state.service';
 type UpdateStateFn = (updater: (state: TabState) => void, shouldScheduleSave?: boolean) => void;

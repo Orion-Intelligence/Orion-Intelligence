@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { SubscriptionService } from '../../services/dashboard/subscription.service';
-import { LicenseService } from '../../services/licenses/licenses.service';
-import { AuthService } from '../../services/authetication/auth.service';
 import { AppService } from '../../services/core/app/app.service';
 @Injectable({
   providedIn: 'root'

@@ -3,7 +3,6 @@ import { Component, OnInit, Input, ViewChild, ElementRef, AfterViewInit, OnDestr
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { AuthService } from '../../../services/authetication/auth.service';
 import { chatBotAnimation } from '../../animations/chat.bot.animation';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { AppService } from '../../../services/core/app/app.service';

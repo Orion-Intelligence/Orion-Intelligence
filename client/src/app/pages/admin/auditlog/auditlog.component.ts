@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
 import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
-import { BehaviorSubject, take } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { audit_filters } from '../../../shared/constants/filters';
 import { AuditlogListComponent } from './auditlog-list/auditlog-list.component';
 import { AuditLogCallbackModel } from '../../../shared/model/auditlog/auditlog.model';
