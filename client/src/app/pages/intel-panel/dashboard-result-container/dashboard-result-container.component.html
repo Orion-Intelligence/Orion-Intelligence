@@ -11,12 +11,13 @@
 </app-result>
 
 <div *ngIf="!isResponseLoading() && currentResultModel?.length > 0" @fadeInDashboardItem>
-  <app-dashboard-result-general-list
+  <app-dashboard-result-defacement
     *ngIf="currentResultModel[0].rank_index === 'defacement_model'"
     [isLoading]="isResponseLoading()"
     [isExpandAble]="false"
+    [isList]="true"
     [searchResults]="currentResultModel">
-  </app-dashboard-result-general-list>
+  </app-dashboard-result-defacement>
 </div>
 
 <div *ngIf="!isResponseLoading()" @fadeInDashboardItem>
