@@ -19,7 +19,7 @@
           <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
             <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
           </button>
-          <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
+          <input #searchInput class="search-trigger form-control default-input dashboard-general-input" data-cy="dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
           <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus(); onFormSubmit()" [disabled]="!searchQuery">
             <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14">
           </button>
@@ -96,7 +96,7 @@
                 <li><hr class="dropdown-divider mx-3"></li>
                 <li><a class="dropdown-item" (click)="onSetMatchType('or'); onFormSubmit()">Match any term (OR)</a></li>
                 <li><hr class="dropdown-divider mx-3"></li>
-                <li><a class="dropdown-item" (click)="onSetMatchType('and'); onFormSubmit()">Match individual terms (AND)</a></li>
+                <li><a class="dropdown-item" (click)="onSetMatchType('and'); onFormSubmit()">Match indivisual terms (AND)</a></li>
                 <li><hr class="dropdown-divider mx-3"></li>
                 <li><a class="dropdown-item" (click)="onSetMatchType('full'); onFormSubmit()">Match full query (AND)</a></li>
               </ul>

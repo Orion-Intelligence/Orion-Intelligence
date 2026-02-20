@@ -180,12 +180,14 @@ describe('Dashboard Sections Test', () => {
 
     cy.get('form.credential_search_wrapper').should('exist');
 
+
     cy.get('form.credential_search_wrapper input[name="searchQuery"]')
       .should('exist')
       .type('gmail.com || \n' +
         'floflick@gmx.de{enter}');
 
 
+    cy.wait(1000)
     cy.get('button.credentials-search_mode-toggle')
       .click({force: true});
 
@@ -396,6 +398,23 @@ describe('Dashboard Sections Test', () => {
       .should('be.visible')
       .clear({force: true})
       .type('1.1.1.1', {force: true});
+
+    cy.contains('button.subdomain-btn.search span', 'Lookup IP')
+      .click({force: true});
+
+    cy.get('button.subdomain-tab')
+      .contains(/^Wayback$/)
+      .should('be.visible')
+      .click({force: true});
+
+    cy.get('input.subdomain-input')
+      .should('be.visible')
+      .clear({force: true})
+      .type('example.com', {force: true});
+
+    cy.get('button.subdomain-btn.search')
+      .first()
+      .click({force: true});
 
   });
 
