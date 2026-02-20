@@ -348,98 +348,156 @@ const localRules = {
             meta: {
                 type: 'layout',
                 docs: {
-                    description: 'Require blank lines between class field access modifier groups and no blanks within groups.',
+                    description: 'Require class field grouping: private, protected, plain, @Input, @Output.',
                 },
                 schema: [],
                 messages: {
                     noBlankLine: 'Class fields must not have blank lines within a group.',
-                    group: 'Class field access modifier groups must be contiguous.',
+                    group: 'Class field groups must be contiguous.',
                     requireBlankLine: 'Expected a blank line between access modifier groups.',
                 },
                 fixable: 'whitespace',
             },
             create(context) {
                 const sourceCode = context.getSourceCode();
-                const accessOrder = ['private', 'protected', 'public', 'default'];
-                function getAccess(node) {
-                    return node.accessibility || 'default';
+                function getDecoratorName(dec) {
+                    const expr = dec && dec.expression;
+                    if (!expr) {
+                        return null;
+                    }
+                    if (expr.type === 'Identifier') {
+                        return expr.name;
+                    }
+                    if (expr.type === 'CallExpression' && expr.callee && expr.callee.type === 'Identifier') {
+                        return expr.callee.name;
+                    }
+                    return null;
+                }
+                function getGroupKey(node) {
+                    const decorators = Array.isArray(node.decorators) ? node.decorators : [];
+                    const hasInput = decorators.some(d => getDecoratorName(d) === 'Input');
+                    if (hasInput) {
+                        return 'input';
+                    }
+                    const hasOutput = decorators.some(d => getDecoratorName(d) === 'Output');
+                    if (hasOutput) {
+                        return 'output';
+                    }
+                    if (node.accessibility === 'private') {
+                        return 'private';
+                    }
+                    if (node.accessibility === 'protected') {
+                        return 'protected';
+                    }
+                    return 'plain';
+                }
+                function getGroupRank(node) {
+                    const group = getGroupKey(node);
+                    if (group === 'private') {
+                        return 0;
+                    }
+                    if (group === 'protected') {
+                        return 1;
+                    }
+                    if (group === 'plain') {
+                        return 2;
+                    }
+                    if (group === 'input') {
+                        return 3;
+                    }
+                    if (group === 'output') {
+                        return 4;
+                    }
+                    return 5;
+                }
+                function normalizeMemberText(text) {
+                    return text.replace(/^\s*\n/, '').replace(/\n\s*$/, '');
+                }
+                function normalizeMemberIndent(memberText, indent) {
+                    const lines = normalizeMemberText(memberText).split('\n');
+                    const nonEmpty = lines.filter(line => line.trim().length > 0);
+                    const minIndent = nonEmpty.length > 0
+                        ? Math.min(...nonEmpty.map(line => (line.match(/^\s*/) || [''])[0].length))
+                        : 0;
+                    return lines.map(line => {
+                        if (line.trim().length === 0) {
+                            return '';
+                        }
+                        return `${indent}${line.slice(minIndent)}`;
+                    }).join('\n');
+                }
+                function getMemberText(member) {
+                    if (!member.range) {
+                        return '';
+                    }
+                    const lineStart = sourceCode.text.lastIndexOf('\n', member.range[0] - 1) + 1;
+                    return sourceCode.text.slice(lineStart, member.range[1]);
                 }
                 return {
                     ClassBody(node) {
                         const body = node.body || [];
-                        const fields = body.filter(m => m.type === 'PropertyDefinition');
-                        let seenGroups = new Set();
-                        let seenOrder = [];
-                        let hasReport = false;
-                        let shouldFix = true;
-                        const fixes = [];
-                        for (let i = 0; i < fields.length - 1; i++) {
-                            const current = fields[i];
-                            const next = fields[i + 1];
-                            const currentIndex = body.indexOf(current);
-                            const nextIndex = body.indexOf(next);
-                            for (let j = currentIndex + 1; j < nextIndex; j++) {
-                                if (body[j].type !== 'PropertyDefinition') {
-                                    shouldFix = false;
-                                    break;
-                                }
-                            }
-                            if (!shouldFix) {
-                                break;
-                            }
+                        const members = body.filter(m => m.range);
+                        const fields = members.filter(m => m.type === 'PropertyDefinition');
+                        const nonFields = members.filter(m => m.type !== 'PropertyDefinition');
+                        if (fields.length < 2) {
+                            return;
                         }
-                        for (let i = 0; i < fields.length; i++) {
-                            const current = fields[i];
-                            const access = getAccess(current);
-                            const accessIndex = accessOrder.indexOf(access);
-                            if (accessIndex === -1) {
-                                continue;
+
+                        const orderedFields = [...fields].sort((a, b) => {
+                            const rankA = getGroupRank(a);
+                            const rankB = getGroupRank(b);
+                            if (rankA !== rankB) {
+                                return rankA - rankB;
                             }
-                            const lastSeen = seenOrder[seenOrder.length - 1];
-                            if (lastSeen && accessOrder.indexOf(lastSeen) > accessIndex) {
-                                hasReport = true;
-                            }
-                            if (!seenGroups.has(access)) {
-                                seenGroups.add(access);
-                                seenOrder.push(access);
+                            return members.indexOf(a) - members.indexOf(b);
+                        });
+
+                        const groupedFields = [];
+                        for (const field of orderedFields) {
+                            const key = getGroupKey(field);
+                            const last = groupedFields[groupedFields.length - 1];
+                            if (!last || last.key !== key) {
+                                groupedFields.push({ key, members: [field] });
                             }
                             else {
-                                const lastAccess = seenOrder[seenOrder.length - 1];
-                                if (access !== lastAccess) {
-                                    hasReport = true;
-                                }
-                            }
-                            if (i > 0) {
-                                const prev = fields[i - 1];
-                                if (!prev.range || !current.range) {
-                                    continue;
-                                }
-                                const between = sourceCode.text.slice(prev.range[1], current.range[0]);
-                                const lineStart = sourceCode.text.lastIndexOf('\n', current.range[0] - 1) + 1;
-                                const linePrefix = sourceCode.text.slice(lineStart, current.range[0]);
-                                const indentMatch = linePrefix.match(/^\s*/);
-                                const indent = indentMatch ? indentMatch[0] : '';
-                                const sameAccess = getAccess(prev) === access;
-                                const hasBlankLine = /\n\s*\n/.test(between);
-                                if (sameAccess && hasBlankLine) {
-                                    hasReport = true;
-                                    fixes.push(fixer => fixer.replaceTextRange([prev.range[1], current.range[0]], `\n${indent}`));
-                                }
-                                if (!sameAccess && !hasBlankLine) {
-                                    hasReport = true;
-                                    fixes.push(fixer => fixer.replaceTextRange([prev.range[1], current.range[0]], `\n\n${indent}`));
-                                }
+                                last.members.push(field);
                             }
                         }
-                        if (hasReport) {
+
+                        const classLineStart = sourceCode.text.lastIndexOf('\n', node.range[0] - 1) + 1;
+                        const classIndent = (sourceCode.text.slice(classLineStart, node.range[0]).match(/^\s*/) || [''])[0];
+                        const memberIndent = `${classIndent}  `;
+
+                        const fieldText = groupedFields
+                            .map(group => group.members
+                                .map(member => normalizeMemberIndent(getMemberText(member), memberIndent))
+                                .join('\n'))
+                            .join('\n\n');
+                        const nonFieldText = nonFields
+                            .map(member => normalizeMemberIndent(getMemberText(member), memberIndent))
+                            .join('\n\n');
+                        const desiredBodyText = fieldText && nonFieldText
+                            ? `${fieldText}\n\n${nonFieldText}`
+                            : (fieldText || nonFieldText);
+
+                        const bodyStart = node.range[0] + 1;
+                        const bodyEnd = node.range[1] - 1;
+                        const currentBodyText = sourceCode.text.slice(bodyStart, bodyEnd).replace(/^\n/, '').replace(/\n\s*$/, '');
+
+                        const isOrderCorrect = fields.every((field, idx) => field === orderedFields[idx]);
+                        const isAllFieldsAtTop = nonFields.length === 0
+                            || fields.every(field => members.indexOf(field) < members.indexOf(nonFields[0]));
+                        const needsSpacingFix = currentBodyText !== desiredBodyText;
+
+                        if (!isOrderCorrect || !isAllFieldsAtTop || needsSpacingFix) {
                             context.report({
                                 messageId: 'noBlankLine',
                                 node,
                                 fix(fixer) {
-                                    if (!shouldFix || fixes.length === 0) {
+                                    if (!desiredBodyText) {
                                         return null;
                                     }
-                                    return fixes.map(fn => fn(fixer));
+                                    return fixer.replaceTextRange([bodyStart, bodyEnd], `\n${desiredBodyText}\n${classIndent}`);
                                 },
                             });
                         }
@@ -919,15 +977,15 @@ module.exports = [
             '@typescript-eslint/no-unused-vars': [
                 'error',
                 {
-                    argsIgnorePattern: '^(?:_|err|error)',
+                    argsIgnorePattern: '^_',
                     varsIgnorePattern: '^_',
-                    caughtErrorsIgnorePattern: '^(?:_|err|error)'
+                    caughtErrorsIgnorePattern: '^_'
                 }
             ],
             'no-unused-private-class-members': 'error',
             'local/no-unused-imports': 'error',
             'local/decorator-single-line': 'error',
-            'local/decorator-first-in-class': 'error',
+            'local/decorator-first-in-class': 'off',
             'local/class-field-group-spacing': 'error',
             'local/method-blank-line': 'error',
             'local/class-field-single-line': 'error',
@@ -951,6 +1009,19 @@ module.exports = [
             'local/template-attr-single-line': 'error',
             'local/template-asset-src-root': 'error',
             'local/template-asset-src-no-parent': 'error',
+        },
+    },
+    {
+        files: ['src/app/**/*guard*.ts'],
+        rules: {
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    argsIgnorePattern: '^(?:_|route|state)$',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_'
+                }
+            ],
         },
     },
 ];
