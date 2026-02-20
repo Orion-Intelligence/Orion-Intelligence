@@ -27,11 +27,11 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 
 @Component({
-    selector: 'app-result',
-    standalone: true,
-    templateUrl: './result.component.html',
-    animations: [fadeInDashboardItem, searchFilterAnimation],
-    imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
+  selector: 'app-result',
+  standalone: true,
+  templateUrl: './result.component.html',
+  animations: [fadeInDashboardItem, searchFilterAnimation],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
     @Input() result_count!: number;
@@ -66,31 +66,41 @@ export class ResultComponent implements OnInit, OnChanges {
     showScans = false;
 
     constructor(protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
-        this.isFilterOpen$ = this.sidebarService.sidebarState$;
+      this.isFilterOpen$ = this.sidebarService.sidebarState$;
     }
 
     ngOnChanges(_: SimpleChanges): void {
-        this.init_domains();
+      this.init_domains();
     }
 
     onSetMatchType(type: string) {
-        this.homeSearchService.setMatchType(type);
+      this.homeSearchService.setMatchType(type);
     }
 
     matchTypeLabel = computed(() => {
-        const matchtype = this.dashboardService.selectedFilters()["matchtype"];
-        if (matchtype === "full") return "Match full query";
-        if (matchtype === "and") return "Match individual terms";
-        if (matchtype === "semantic") return "Match semantic query";
-        return "Match any term";
+      const matchtype = this.dashboardService.selectedFilters()["matchtype"];
+      if (matchtype === "full") {
+        return "Match full query";
+      }
+      if (matchtype === "and") {
+        return "Match individual terms";
+      }
+      if (matchtype === "semantic") {
+        return "Match semantic query";
+      }
+      return "Match any term";
     });
 
     onTabClick(event: Event): void {
       const target = event.target as HTMLElement;
-      if (!target.classList.contains('nav-link') || target.classList.contains('active')) return;
+      if (!target.classList.contains('nav-link') || target.classList.contains('active')) {
+        return;
+      }
 
       const parent = target.closest('.nav-tabs');
-      if (!parent) return;
+      if (!parent) {
+        return;
+      }
 
       parent.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
       target.classList.add('active');
@@ -104,109 +114,112 @@ export class ResultComponent implements OnInit, OnChanges {
     }
 
     ngOnInit(): void {
-        this.route.queryParams.subscribe(params => {
-            const newFilters: any = {};
-            if (this.filterModel) {
-                Object.keys(this.filterModel.filters).forEach(key => {
-                    const base = this.filterModel.filters[key];
-                    let value = params[key];
-                    if (key === 'mSearchParamSafeSearch') {
-                        value = value === 'true' ? 'yes' : value === 'false' ? 'no' : value;
-                    }
-                    if (value && base.options.includes(value)) {
-                        newFilters[key] = { ...base, selected: value };
-                    } else {
-                        newFilters[key] = { ...base };
-                    }
-                });
-                this.filterModel = { ...this.filterModel, filters: newFilters };
+      this.route.queryParams.subscribe(params => {
+        const newFilters: any = {};
+        if (this.filterModel) {
+          Object.keys(this.filterModel.filters).forEach(key => {
+            const base = this.filterModel.filters[key];
+            let value = params[key];
+            if (key === 'mSearchParamSafeSearch') {
+              value = value === 'true' ? 'yes' : value === 'false' ? 'no' : value;
             }
-        });
-        this.onFormSubmit();
+            if (value && base.options.includes(value)) {
+              newFilters[key] = { ...base, selected: value };
+            }
+            else {
+              newFilters[key] = { ...base };
+            }
+          });
+          this.filterModel = { ...this.filterModel, filters: newFilters };
+        }
+      });
+      this.onFormSubmit();
     }
 
     onFormSubmit() {
-        this.scrollService.resetOnReload();
-        this.dashboardService.consolidatedParamModel.page = 1;
-        this.dashboardService.consolidatedParamModel.tab = "";
-        const query = this.searchQuery.trim();
-        this.searchInputRef?.nativeElement.blur();
-        this.updateQuery.emit(query);
-        this.reloadData.emit();
-        this.init_domains();
+      this.scrollService.resetOnReload();
+      this.dashboardService.consolidatedParamModel.page = 1;
+      this.dashboardService.consolidatedParamModel.tab = "";
+      const query = this.searchQuery.trim();
+      this.searchInputRef?.nativeElement.blur();
+      this.updateQuery.emit(query);
+      this.reloadData.emit();
+      this.init_domains();
     }
 
     onToolToggle(event: Event): void {
-        this.homeSearchService.toggleAdvancedTools(event);
+      this.homeSearchService.toggleAdvancedTools(event);
     }
 
     sidebarFilterCount(): number {
-        return Object.keys(this.dashboardService.selectedFilters()).length;
+      return Object.keys(this.dashboardService.selectedFilters()).length;
     }
 
     entityFiltersCount(): number {
-        const categories = this.app_service.configData().localSettings.entityfilterCategories;
-        return Object.values(categories).reduce((count, val) => {
-            if (Array.isArray(val)) return count + val.length;
-            return count + 1;
-        }, 0);
+      const categories = this.app_service.configData().localSettings.entityfilterCategories;
+      return Object.values(categories).reduce((count, val) => {
+        if (Array.isArray(val)) {
+          return count + val.length;
+        }
+        return count + 1;
+      }, 0);
     }
 
     onAdvanceSettingToggle() {
-        this.homeSearchService.toggleAdvanceSettings();
+      this.homeSearchService.toggleAdvanceSettings();
     }
 
     onSortChange(type: SortType): void {
-        this.selectedSortBy = type;
-        this.onToggleSort.emit(type);
+      this.selectedSortBy = type;
+      this.onToggleSort.emit(type);
     }
 
     setFilterOverlay(newValue: boolean) {
-        if (!this.authService.getIsMobileDemo()) {
-            this.homeSearchService.showFiltersOverlay = newValue;
-        }
+      if (!this.authService.getIsMobileDemo()) {
+        this.homeSearchService.showFiltersOverlay = newValue;
+      }
     }
 
     reloadFilter() {
-        this.reloadFilters.emit();
+      this.reloadFilters.emit();
     }
 
     init_domains() {
-        const filters = this.app_service.configData().localSettings.entityfilterCategories;
-        const queryDomains = this.helperService.extractLinks(this.searchQuery) || [];
-        const filterDomains = Array.isArray(filters['m_domain'])
-            ? filters['m_domain'].map(domain => `https://${domain}`)
-            : [];
-        this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
+      const filters = this.app_service.configData().localSettings.entityfilterCategories;
+      const queryDomains = this.helperService.extractLinks(this.searchQuery) || [];
+      const filterDomains = Array.isArray(filters['m_domain'])
+        ? filters['m_domain'].map(domain => `https://${domain}`)
+        : [];
+      this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
     }
 
     toggleScan() {
-        this.showScans = !this.showScans;
+      this.showScans = !this.showScans;
     }
 
     onScanSelected(domain: string) {
-        const url = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan'], { queryParams: { domain } }));
-        window.open(url, '_blank');
+      const url = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan'], { queryParams: { domain } }));
+      window.open(url, '_blank');
     }
 
     checkMember(): boolean {
-        return this.app_service.userSessionData().user.role === 'member';
+      return this.app_service.userSessionData().user.role === 'member';
     }
 
     hasIOCs(): boolean {
-        const categories = this.app_service.configData().localSettings.entityfilterCategories;
-        return Object.values(categories).some((arr: any) => Array.isArray(arr) && arr.length > 0);
+      const categories = this.app_service.configData().localSettings.entityfilterCategories;
+      return Object.values(categories).some((arr: any) => Array.isArray(arr) && arr.length > 0);
     }
 
     onSearchInput(event: Event): void {
-        this.homeSearchService.handleSearchInput(event);
+      this.homeSearchService.handleSearchInput(event);
     }
 
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent) {
-        this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
+      this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
     }
 
-  protected readonly SortType = SortType;
-  protected readonly Category = Category;
+    protected readonly SortType = SortType;
+    protected readonly Category = Category;
 }

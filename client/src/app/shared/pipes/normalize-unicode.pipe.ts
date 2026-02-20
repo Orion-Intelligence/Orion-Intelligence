@@ -13,48 +13,48 @@ const sansBoldItalic = "𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉
 const mono = "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿";
 const fullwidth = "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９";
 const sets = [
-    bold,
-    italic,
-    boldItalic,
-    script,
-    boldScript,
-    fraktur,
-    doubleStruck,
-    sans,
-    sansBold,
-    sansItalic,
-    sansBoldItalic,
-    mono,
-    fullwidth
+  bold,
+  italic,
+  boldItalic,
+  script,
+  boldScript,
+  fraktur,
+  doubleStruck,
+  sans,
+  sansBold,
+  sansItalic,
+  sansBoldItalic,
+  mono,
+  fullwidth
 ];
 const map: Record<string, string> = {};
 for (const set of sets) {
-    let i = 0;
-    for (const ch of set) {
-        if (i >= base.length) {
-            break;
-        }
-        map[ch] = base[i];
-        i++;
+  let i = 0;
+  for (const ch of set) {
+    if (i >= base.length) {
+      break;
     }
+    map[ch] = base[i];
+    i++;
+  }
 }
 map["　"] = " ";
 export function normalizeUnicode(input: string): string {
-    if (!input) {
-        return "";
-    }
-    let out = "";
-    for (const c of input) {
-        out += map[c] ?? c;
-    }
-    return out;
+  if (!input) {
+    return "";
+  }
+  let out = "";
+  for (const c of input) {
+    out += map[c] ?? c;
+  }
+  return out;
 }
 import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
-    name: 'normalizeUnicode'
+  name: 'normalizeUnicode'
 })
 export class NormalizeUnicodePipe implements PipeTransform {
-    transform(value: unknown): unknown {
-        return typeof value === 'string' ? normalizeUnicode(value) : value;
-    }
+  transform(value: unknown): unknown {
+    return typeof value === 'string' ? normalizeUnicode(value) : value;
+  }
 }

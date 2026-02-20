@@ -9,29 +9,34 @@ import { DumpCallbackModel } from '../../shared/model/dump/dump.mode';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BaseListingComponent } from '../../shared/directive/base.listing.directive';
 @Component({
-    selector: 'app-dump',
-    standalone: true,
-    templateUrl: './dump.component.html',
-    imports: [
-        NgOptimizedImage,
-        PaginationComponent,
-        AsyncPipe,
-        FiltersComponent,
-        DumpListComponent,
-        FormsModule,
-        ReactiveFormsModule,
-    ],
+  selector: 'app-dump',
+  standalone: true,
+  templateUrl: './dump.component.html',
+  imports: [
+    NgOptimizedImage,
+    PaginationComponent,
+    AsyncPipe,
+    FiltersComponent,
+    DumpListComponent,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
 })
 export class DumpComponent extends BaseListingComponent<DumpCallbackModel> {
-    filterModel = dump_filters;
-    private dumpService = inject(DumpService);
-    protected data$ = this.dumpService.dumpData$;
-    protected service = this.dumpService;
-    isFilterOpen$ = this.dumpService.isFilterOpen$;
-    openSidebar() {
-        this.dumpService.toggleFilter(true);
-    }
-    closeSidebar() {
-        this.dumpService.toggleFilter(false);
-    }
+  filterModel = dump_filters;
+
+  private dumpService = inject(DumpService);
+
+  protected data$ = this.dumpService.dumpData$;
+  protected service = this.dumpService;
+
+  isFilterOpen$ = this.dumpService.isFilterOpen$;
+
+  openSidebar() {
+    this.dumpService.toggleFilter(true);
+  }
+
+  closeSidebar() {
+    this.dumpService.toggleFilter(false);
+  }
 }

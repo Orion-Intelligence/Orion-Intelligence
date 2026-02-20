@@ -124,6 +124,73 @@ const localRules = {
                 };
             },
         },
+        'template-asset-src-no-parent': {
+            meta: {
+                type: 'problem',
+                docs: {
+                    description: 'Disallow ../ in img src when referencing assets.',
+                },
+                schema: [],
+                messages: {
+                    assetsParent: 'Asset paths in img src must start with "assets/" and must not include "../".',
+                },
+                fixable: 'code',
+            },
+            create(context) {
+                const sourceCode = context.getSourceCode();
+                function normalizeAssetPath(value) {
+                    const assetsIndex = value.indexOf('assets/');
+                    if (assetsIndex === -1) {
+                        return null;
+                    }
+                    const normalized = value.slice(assetsIndex);
+                    if (normalized === value) {
+                        return null;
+                    }
+                    return normalized;
+                }
+                return {
+                    Program() {
+                        const text = sourceCode.text;
+                        const regex = /<img[^>]*\ssrc\s*=\s*(['"])([^'"]+)\1/gi;
+                        let match;
+                        while ((match = regex.exec(text)) !== null) {
+                            const matchedTag = match[0];
+                            const value = match[2];
+                            if (!value.includes('assets/')) {
+                                continue;
+                            }
+                            if (!value.includes('../')) {
+                                continue;
+                            }
+                            const start = match.index;
+                            const end = match.index + matchedTag.length;
+                            context.report({
+                                messageId: 'assetsParent',
+                                loc: {
+                                    start: sourceCode.getLocFromIndex(start),
+                                    end: sourceCode.getLocFromIndex(end),
+                                },
+                                fix(fixer) {
+                                    const srcAttrRegex = /\bsrc\s*=\s*(['"])([^'"]+)\1/i;
+                                    const attrMatch = matchedTag.match(srcAttrRegex);
+                                    if (!attrMatch) {
+                                        return null;
+                                    }
+                                    const normalized = normalizeAssetPath(attrMatch[2]);
+                                    if (!normalized) {
+                                        return null;
+                                    }
+                                    const quote = attrMatch[1] || '"';
+                                    const fixedTag = matchedTag.replace(srcAttrRegex, `src=${quote}${normalized}${quote}`);
+                                    return fixer.replaceTextRange([start, end], fixedTag);
+                                },
+                            });
+                        }
+                    },
+                };
+            },
+        },
         'decorator-single-line': {
             meta: {
                 type: 'layout',
@@ -236,14 +303,41 @@ const localRules = {
                             messageId: 'order',
                             node,
                             fix(fixer) {
-                                const members = [...decorated, ...nonDecorated];
-                                const first = members[0];
-                                const last = members[members.length - 1];
-                                if (!first || !last || first.range == null || last.range == null) {
+                                if (!node.range || !node.body || node.body.length === 0) {
                                     return null;
                                 }
-                                const replacement = members.map(m => sourceCode.getText(m)).join('\n\n');
-                                return fixer.replaceTextRange([first.range[0], last.range[1]], replacement);
+
+                                const reordered = [...decorated, ...nonDecorated];
+                                const innerStart = node.range[0] + 1;
+                                const innerEnd = node.range[1] - 1;
+                                const classLineStart = sourceCode.text.lastIndexOf('\n', node.range[0] - 1) + 1;
+                                const classIndent = (sourceCode.text.slice(classLineStart, node.range[0]).match(/^\s*/) || [''])[0];
+                                const memberIndent = `${classIndent}  `;
+
+                                const normalizeMemberIndent = (rawText) => {
+                                    const lines = rawText.replace(/\s+$/, '').split('\n');
+                                    const nonEmpty = lines.filter(line => line.trim().length > 0);
+                                    const minIndent = nonEmpty.length > 0
+                                        ? Math.min(...nonEmpty.map(line => (line.match(/^\s*/) || [''])[0].length))
+                                        : 0;
+                                    return lines.map(line => {
+                                        if (line.trim().length === 0) {
+                                            return '';
+                                        }
+                                        return `${memberIndent}${line.slice(minIndent)}`;
+                                    }).join('\n');
+                                };
+
+                                const reorderedText = reordered
+                                    .filter(member => member.range)
+                                    .map(member => normalizeMemberIndent(sourceCode.text.slice(member.range[0], member.range[1])))
+                                    .join('\n\n');
+
+                                if (!reorderedText) {
+                                    return null;
+                                }
+
+                                return fixer.replaceTextRange([innerStart, innerEnd], `\n${reorderedText}\n${classIndent}`);
                             },
                         });
                     },
@@ -276,9 +370,9 @@ const localRules = {
                         const fields = body.filter(m => m.type === 'PropertyDefinition');
                         let seenGroups = new Set();
                         let seenOrder = [];
-                        const fixes = [];
                         let hasReport = false;
                         let shouldFix = true;
+                        const fixes = [];
                         for (let i = 0; i < fields.length - 1; i++) {
                             const current = fields[i];
                             const next = fields[i + 1];
@@ -342,17 +436,10 @@ const localRules = {
                                 messageId: 'noBlankLine',
                                 node,
                                 fix(fixer) {
-                                    if (!shouldFix || fields.length === 0) {
-                                        return fixes.map(fn => fn(fixer));
+                                    if (!shouldFix || fixes.length === 0) {
+                                        return null;
                                     }
-                                    const groups = accessOrder.map(access => fields.filter(field => getAccess(field) === access)).filter(group => group.length > 0);
-                                    const first = fields[0];
-                                    const last = fields[fields.length - 1];
-                                    if (!first.range || !last.range) {
-                                        return fixes.map(fn => fn(fixer));
-                                    }
-                                    const replacement = groups.map(group => group.map(field => sourceCode.getText(field)).join('\n')).join('\n\n');
-                                    return fixer.replaceTextRange([first.range[0], last.range[1]], replacement);
+                                    return fixes.map(fn => fn(fixer));
                                 },
                             });
                         }
@@ -576,17 +663,45 @@ const localRules = {
             create(context) {
                 const sourceCode = context.getSourceCode();
                 function check(node) {
-                    const tokens = sourceCode.getTokens(node);
-                    const openIndex = tokens.findIndex(t => t.value === '(');
-                    if (openIndex === -1) {
+                    if (!node || !node.range) {
                         return;
                     }
-                    const closeIndex = tokens.findIndex((t, i) => i > openIndex && t.value === ')');
-                    if (closeIndex === -1) {
+                    let open;
+                    let close;
+
+                    if (node.type === 'ArrowFunctionExpression' && node.params.length === 1) {
+                        const beforeParam = sourceCode.text.slice(node.range[0], node.params[0].range[0]);
+                        if (!beforeParam.includes('(')) {
+                            return;
+                        }
+                    }
+
+                    if (node.params && node.params.length > 0) {
+                        const firstParam = node.params[0];
+                        const lastParam = node.params[node.params.length - 1];
+                        open = sourceCode.getTokenBefore(firstParam, token => token.value === '(');
+                        close = sourceCode.getTokenAfter(lastParam, token => token.value === ')');
+                    }
+                    else {
+                        const tokens = sourceCode.getTokens(node);
+                        const openIndex = tokens.findIndex(token => token.value === '(');
+                        if (openIndex === -1) {
+                            return;
+                        }
+                        const closeIndex = tokens.findIndex((token, i) => i > openIndex && token.value === ')');
+                        if (closeIndex === -1) {
+                            return;
+                        }
+                        open = tokens[openIndex];
+                        close = tokens[closeIndex];
+                    }
+
+                    if (!open || !close || !open.range || !close.range) {
                         return;
                     }
-                    const open = tokens[openIndex];
-                    const close = tokens[closeIndex];
+                    if (open.range[0] < node.range[0] || close.range[1] > node.range[1]) {
+                        return;
+                    }
                     if (open.loc.start.line !== close.loc.end.line) {
                         context.report({
                             messageId: 'singleLine',
@@ -608,7 +723,11 @@ const localRules = {
                     FunctionDeclaration: check,
                     FunctionExpression: check,
                     ArrowFunctionExpression: check,
-                    MethodDefinition: check,
+                    MethodDefinition(node) {
+                        if (node && node.value) {
+                            check(node.value);
+                        }
+                    },
                 };
             },
         },
@@ -642,6 +761,116 @@ const localRules = {
                             return;
                         }
                         context.report({ messageId: 'unused', node });
+                    },
+                };
+            },
+        },
+        'rxjs-empty-error-handler-param': {
+            meta: {
+                type: 'suggestion',
+                docs: {
+                    description: 'Require empty RxJS error handler callback params to be prefixed with underscore.',
+                },
+                schema: [],
+                messages: {
+                    underscoreParam: 'Empty error handlers should use an underscore-prefixed param (for auto-fix compatibility).',
+                },
+                fixable: 'code',
+            },
+            create(context) {
+                function isIdentifierNamed(node, name) {
+                    return node && node.type === 'Identifier' && node.name === name;
+                }
+                return {
+                    Property(node) {
+                        if (!node || node.type !== 'Property') {
+                            return;
+                        }
+                        if (!(isIdentifierNamed(node.key, 'error') || (node.key && node.key.type === 'Literal' && node.key.value === 'error'))) {
+                            return;
+                        }
+                        const value = node.value;
+                        if (!value || value.type !== 'ArrowFunctionExpression') {
+                            return;
+                        }
+                        if (!value.body || value.body.type !== 'BlockStatement' || value.body.body.length !== 0) {
+                            return;
+                        }
+                        if (!value.params || value.params.length !== 1) {
+                            return;
+                        }
+                        const param = value.params[0];
+                        if (!param || param.type !== 'Identifier') {
+                            return;
+                        }
+                        if (param.name.startsWith('_')) {
+                            return;
+                        }
+                        context.report({
+                            messageId: 'underscoreParam',
+                            node: param,
+                            fix(fixer) {
+                                return fixer.replaceText(param, `_${param.name}`);
+                            },
+                        });
+                    },
+                };
+            },
+        },
+        'assignment-single-line': {
+            meta: {
+                type: 'layout',
+                docs: {
+                    description: 'Require simple multiline assignment statements to be on a single line.',
+                },
+                schema: [],
+                messages: {
+                    singleLine: 'Simple assignment statements must be on a single line.',
+                },
+                fixable: 'whitespace',
+            },
+            create(context) {
+                const sourceCode = context.getSourceCode();
+                function normalizeSingleLine(text) {
+                    let fixed = text.replace(/\s+/g, ' ').trim();
+                    fixed = fixed.replace(/\s+\./g, '.');
+                    fixed = fixed.replace(/\s+\?\./g, '?.');
+                    fixed = fixed.replace(/\?\s+\./g, '?.');
+                    fixed = fixed.replace(/\s*\|\|\s*/g, ' || ');
+                    return fixed;
+                }
+                function isSimpleAssignable(node) {
+                    if (!node || node.type !== 'AssignmentExpression' || node.operator !== '=') {
+                        return false;
+                    }
+                    const right = node.right;
+                    return right
+                        && right.type === 'LogicalExpression'
+                        && right.operator === '||'
+                        && right.right
+                        && right.right.type === 'Literal'
+                        && right.right.value === null;
+                }
+                return {
+                    ExpressionStatement(node) {
+                        if (!node || !node.expression || !node.loc) {
+                            return;
+                        }
+                        if (node.loc.start.line === node.loc.end.line) {
+                            return;
+                        }
+                        if (!isSimpleAssignable(node.expression)) {
+                            return;
+                        }
+                        context.report({
+                            messageId: 'singleLine',
+                            node,
+                            fix(fixer) {
+                                const original = sourceCode.getText(node);
+                                const fixed = normalizeSingleLine(original);
+                                return fixer.replaceText(node, fixed);
+                            },
+                        });
                     },
                 };
             },
@@ -689,7 +918,11 @@ module.exports = [
             ],
             '@typescript-eslint/no-unused-vars': [
                 'error',
-                { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }
+                {
+                    argsIgnorePattern: '^(?:_|err|error)',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^(?:_|err|error)'
+                }
             ],
             'no-unused-private-class-members': 'error',
             'local/no-unused-imports': 'error',
@@ -701,6 +934,8 @@ module.exports = [
             'local/import-single-line': 'error',
             'local/function-params-single-line': 'error',
             'local/no-style-url-in-component': 'error',
+            'local/rxjs-empty-error-handler-param': 'error',
+            'local/assignment-single-line': 'error',
         },
     },
     {
@@ -715,6 +950,7 @@ module.exports = [
         rules: {
             'local/template-attr-single-line': 'error',
             'local/template-asset-src-root': 'error',
+            'local/template-asset-src-no-parent': 'error',
         },
     },
 ];

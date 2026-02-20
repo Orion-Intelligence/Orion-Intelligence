@@ -7,98 +7,108 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { Router } from '@angular/router';
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 @Component({
-    selector: 'app-selected-filter-bar',
-    imports: [NgIf, NgFor, CommonModule],
-    templateUrl: './selected-filter-bar.component.html',
-    animations: [fadeInDashboardItem],
+  selector: 'app-selected-filter-bar',
+  imports: [NgIf, NgFor, CommonModule],
+  templateUrl: './selected-filter-bar.component.html',
+  animations: [fadeInDashboardItem],
 })
 export class SelectedFilterBarComponent implements OnInit {
-    @Input()
-    showSorting!: boolean;
-    @Output()
-    clearAll = new EventEmitter<void>();
-    @Output()
-    searchFiltersChange = new EventEmitter<void>();
+    @Input() showSorting!: boolean;
+    @Output() clearAll = new EventEmitter<void>();
+    @Output() searchFiltersChange = new EventEmitter<void>();
     categories: Record<string, string[]> = {};
     isFilterBarExpanded: boolean = false;
     maxVisibleTags = 8;
     Object: any;
+
     get selectedFilters() {
-        return this.dashboardService.selectedFilters();
+      return this.dashboardService.selectedFilters();
     }
+
     constructor(protected app_service: AppService, protected dashboardService: DashboardService, private router: Router) {
     }
+
     isConsolidatedRoute(): boolean {
-        return true;
+      return true;
     }
+
     ngOnInit(): void {
-        this.categories = this.app_service.configData().localSettings.entityfilterCategories;
+      this.categories = this.app_service.configData().localSettings.entityfilterCategories;
     }
+
     clearMatchType(): void {
-        this.dashboardService.selectedFilters.update((filters) => {
-            const updated = { ...filters };
-            delete updated["matchtype"];
-            return updated;
-        });
-        this.app_service.set('matchType', "or");
-        this.clearAll.emit();
+      this.dashboardService.selectedFilters.update((filters) => {
+        const updated = { ...filters };
+        delete updated["matchtype"];
+        return updated;
+      });
+      this.app_service.set('matchType', "or");
+      this.clearAll.emit();
     }
+
     clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
-        if (scope === 'sidebar' || scope === 'all') {
-            this.dashboardService.selectedFilters.set({});
+      if (scope === 'sidebar' || scope === 'all') {
+        this.dashboardService.selectedFilters.set({});
+      }
+      if (scope === 'entity' || scope === 'all') {
+        if (this.isConsolidatedRoute()) {
+          this.app_service.set('entityfilterCategories', {});
         }
-        if (scope === 'entity' || scope === 'all') {
-            if (this.isConsolidatedRoute()) {
-                this.app_service.set('entityfilterCategories', {});
-            }
-        }
-        this.app_service.set('matchType', "or");
-        this.clearAll.emit();
+      }
+      this.app_service.set('matchType', "or");
+      this.clearAll.emit();
     }
+
     removeEntityTypeFilterTag(tagToRemoveId: string) {
-        const categories = { ...this.app_service.configData().localSettings.entityfilterCategories };
-        for (const key in categories) {
-            const value = categories[key];
-            if (Array.isArray(value)) {
-                categories[key] = value.filter(tag => tag !== tagToRemoveId);
-            }
-            else if (value === tagToRemoveId) {
-                delete categories[key];
-            }
+      const categories = { ...this.app_service.configData().localSettings.entityfilterCategories };
+      for (const key in categories) {
+        const value = categories[key];
+        if (Array.isArray(value)) {
+          categories[key] = value.filter(tag => tag !== tagToRemoveId);
         }
-        this.app_service.set('entityfilterCategories', categories);
-        this.searchFiltersChange.emit();
+        else if (value === tagToRemoveId) {
+          delete categories[key];
+        }
+      }
+      this.app_service.set('entityfilterCategories', categories);
+      this.searchFiltersChange.emit();
     }
+
     toggleFilterBarCollapse(): void {
-        this.isFilterBarExpanded = !this.isFilterBarExpanded;
+      this.isFilterBarExpanded = !this.isFilterBarExpanded;
     }
+
     sidebarFilters() {
-        return Object.keys(this.dashboardService.selectedFilters());
+      return Object.keys(this.dashboardService.selectedFilters());
     }
+
     sidebarFilterCount(all: boolean = false): number {
-        if (all) {
-            return Object.entries(this.dashboardService.selectedFilters())
-                .filter(([key, value]) => key !== 'matchtype' || value !== 'or')
-                .length;
-        }
-        else {
-            return Object.entries(this.dashboardService.selectedFilters())
-                .filter(([key, value]) => key !== 'matchtype' && value !== null)
-                .length;
-        }
+      if (all) {
+        return Object.entries(this.dashboardService.selectedFilters())
+          .filter(([key, value]) => key !== 'matchtype' || value !== 'or')
+          .length;
+      }
+      else {
+        return Object.entries(this.dashboardService.selectedFilters())
+          .filter(([key, value]) => key !== 'matchtype' && value !== null)
+          .length;
+      }
     }
+
     entityFiltersCount(): number {
-        const categories = this.app_service.configData().localSettings.entityfilterCategories;
-        return countFilterValues(categories);
+      const categories = this.app_service.configData().localSettings.entityfilterCategories;
+      return countFilterValues(categories);
     }
+
     getVisibleTags(): string[] {
-        const allTags = Object.values(this.app_service.configData().localSettings.entityfilterCategories).flat();
-        return allTags.slice(0, this.maxVisibleTags);
+      const allTags = Object.values(this.app_service.configData().localSettings.entityfilterCategories).flat();
+      return allTags.slice(0, this.maxVisibleTags);
     }
+
     getHiddenTagCount(): number {
-        const categories = this.app_service.configData().localSettings.entityfilterCategories;
-        const totalTags = countFilterValues(categories);
-        return Math.max(0, totalTags - this.maxVisibleTags);
+      const categories = this.app_service.configData().localSettings.entityfilterCategories;
+      const totalTags = countFilterValues(categories);
+      return Math.max(0, totalTags - this.maxVisibleTags);
     }
     protected readonly filter_mapping = filter_mapping;
 }

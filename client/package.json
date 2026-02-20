@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "build": "npm run prebuild && ng build --configuration=production && node post-build.js",
-    "production": "npm run prebuild && ng build --configuration=production && node post-build.js",
+    "build": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
+    "production": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
     "test": "npx cypress run --browser=chromium",
-    "lint": "ng lint",
-    "lint:fix": "npx eslint src/app --fix",
-    "serve": "npm run lint && ng serve"
+    "lint": "npx eslint src/app --ext .ts,.html --max-warnings=1000",
+    "lint:fix": "npx eslint src/app --ext .ts,.html --fix",
+    "lint:watch": "npx eslint src/app --ext .ts,.html --watch",
+    "serve": "node scripts/serve-watch-strict.js",
+    "serve:watch": "node scripts/serve-watch.js"
   },
   "private": true,
   "dependencies": {

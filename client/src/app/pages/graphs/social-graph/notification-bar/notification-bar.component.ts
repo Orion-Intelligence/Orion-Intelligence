@@ -8,12 +8,12 @@ export interface NotificationData {
     style: string;
 }
 @Component({
-    selector: 'app-notification-bar',
-    standalone: true,
-    imports: [CommonModule, NgClass],
-    templateUrl: './notification-bar.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-notification-bar',
+  standalone: true,
+  imports: [CommonModule, NgClass],
+  templateUrl: './notification-bar.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationBarComponent {
-    data = input<NotificationData | null>();
+  data = input<NotificationData | null>();
 }

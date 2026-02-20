@@ -43,714 +43,714 @@ import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { FileScannerComponent } from './pages/intel-panel/ioc-extractor/file-scanner.component';
 import { SocialMapperComponent } from './pages/graphs/social-graph/social-mapper.component';
 const HASH_CONSOLIDATED_ROUTE = {
-    resolve: { reportdata: ReportConsolidatedResolver },
-    data: { type: 'consolidated', animation: 'HashPage' }
+  resolve: { reportdata: ReportConsolidatedResolver },
+  data: { type: 'consolidated', animation: 'HashPage' }
 };
 const consolidatedChildren = [
-    {
-        path: 'all',
-        component: DashboardConsolidatedComponent,
-        data: { type: 'consolidated', animation: 'DataBreach' }
-    },
-    {
-        path: 'chat/:m_hash',
-        component: ReportChatComponent,
-        ...HASH_CONSOLIDATED_ROUTE
-    },
-    {
-        path: 'social/:m_hash',
-        component: ReportChatComponent,
-        ...HASH_CONSOLIDATED_ROUTE
-    },
-    {
-        path: 'general/:m_hash',
-        component: ReportComponent,
-        ...HASH_CONSOLIDATED_ROUTE
-    },
-    {
-        path: 'leak/:m_hash',
-        component: ReportComponent,
-        ...HASH_CONSOLIDATED_ROUTE
-    },
-    {
-        path: 'exploit/:m_hash',
-        component: ReportComponent,
-        ...HASH_CONSOLIDATED_ROUTE
-    },
-    {
-        path: 'defacement/:m_hash',
-        component: ReportDefacementComponent,
-        ...HASH_CONSOLIDATED_ROUTE
-    }
+  {
+    path: 'all',
+    component: DashboardConsolidatedComponent,
+    data: { type: 'consolidated', animation: 'DataBreach' }
+  },
+  {
+    path: 'chat/:m_hash',
+    component: ReportChatComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'social/:m_hash',
+    component: ReportChatComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'general/:m_hash',
+    component: ReportComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'leak/:m_hash',
+    component: ReportComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'exploit/:m_hash',
+    component: ReportComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'defacement/:m_hash',
+    component: ReportDefacementComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  }
 ];
 export const routes: Routes = [
-    {
+  {
+    path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full',
+    data: { animation: 'RootPage' }
+  },
+  {
+    path: 'signup',
+    component: SignupComponent,
+    data: { animation: 'SignupPage' }
+  },
+  {
+    path: 'login',
+    resolve: { config: ConfigResolver },
+    component: LoginComponent,
+    data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'onboarding',
+    resolve: { config: ConfigResolver },
+    component: TenantComponent,
+    canActivate: [TenantGuard],
+    data: { animation: 'TenantPage' }
+  },
+  {
+    path: 'welcome',
+    component: WelcomeComponent,
+    data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'welcome/:token',
+    component: WelcomeComponent,
+    data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'paymentGateway',
+    component: TrailNotificationComponent,
+    data: { animation: 'TrailNotificationPage' }
+  },
+  {
+    path: 'reset',
+    component: ResetPasswordComponent,
+    data: { animation: 'ForgotPasswordComponent' }
+  },
+  {
+    path: 'notification',
+    component: NotificationComponent,
+    data: { animation: 'PaymentGatewayComponent' }
+  },
+  {
+    path: 'reset/:token',
+    component: ResetPasswordComponent,
+    data: { animation: 'ForgotPasswordComponent' }
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [AuthGuard],
+    resolve: {
+      config: ConfigResolver,
+      session: DashboardResolver
+    },
+    data: { animation: 'DashboardPage' },
+    children: [
+      {
         path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-        data: { animation: 'RootPage' }
-    },
-    {
-        path: 'signup',
-        component: SignupComponent,
-        data: { animation: 'SignupPage' }
-    },
-    {
-        path: 'login',
-        resolve: { config: ConfigResolver },
-        component: LoginComponent,
-        data: { animation: 'LoginPage' }
-    },
-    {
-        path: 'onboarding',
-        resolve: { config: ConfigResolver },
-        component: TenantComponent,
-        canActivate: [TenantGuard],
-        data: { animation: 'TenantPage' }
-    },
-    {
-        path: 'welcome',
-        component: WelcomeComponent,
-        data: { animation: 'WelcomePage' }
-    },
-    {
-        path: 'welcome/:token',
-        component: WelcomeComponent,
-        data: { animation: 'WelcomePage' }
-    },
-    {
-        path: 'paymentGateway',
-        component: TrailNotificationComponent,
-        data: { animation: 'TrailNotificationPage' }
-    },
-    {
-        path: 'reset',
-        component: ResetPasswordComponent,
-        data: { animation: 'ForgotPasswordComponent' }
-    },
-    {
-        path: 'notification',
-        component: NotificationComponent,
-        data: { animation: 'PaymentGatewayComponent' }
-    },
-    {
-        path: 'reset/:token',
-        component: ResetPasswordComponent,
-        data: { animation: 'ForgotPasswordComponent' }
-    },
-    {
-        path: 'dashboard',
-        component: DashboardComponent,
-        canActivate: [AuthGuard],
-        resolve: {
-            config: ConfigResolver,
-            session: DashboardResolver
-        },
-        data: { animation: 'DashboardPage' },
+        redirectTo: 'profile',
+        pathMatch: 'full'
+      },
+      {
+        path: 'scan',
+        component: SecurityScanComponent,
+        data: { animation: 'HomePage' }
+      },
+      {
+        path: 'home',
+        component: HomepageComponent,
+        resolve: { insights: InsightResolver },
+        data: { animation: 'HomePage' }
+      },
+      {
+        path: 'ctigraph',
+        loadComponent: () => import('./pages/graphs/cti-graph/graphs.component').then(m => m.GraphComponent),
+        data: { animation: 'ctigraph' }
+      },
+      {
+        path: 'social-graph',
+        component: SocialMapperComponent,
+        data: { animation: 'SocialMapper' }
+      },
+      {
+        path: 'social-mapper',
+        component: SocialMapperComponent,
+        data: { animation: 'SocialMapper' }
+      },
+      {
+        path: 'directory',
+        component: DirectoryComponent,
+        data: { animation: 'DirectoryPage' }
+      },
+      {
+        path: 'api',
+        canActivate: [subscriptionGuard],
+        data: { animation: 'APIPage' },
         children: [
-            {
-                path: '',
-                redirectTo: 'profile',
-                pathMatch: 'full'
-            },
-            {
-                path: 'scan',
-                component: SecurityScanComponent,
-                data: { animation: 'HomePage' }
-            },
-            {
-                path: 'home',
-                component: HomepageComponent,
-                resolve: { insights: InsightResolver },
-                data: { animation: 'HomePage' }
-            },
-            {
-                path: 'ctigraph',
-                loadComponent: () => import('./pages/graphs/cti-graph/graphs.component').then(m => m.GraphComponent),
-                data: { animation: 'ctigraph' }
-            },
-            {
-                path: 'social-graph',
-                component: SocialMapperComponent,
-                data: { animation: 'SocialMapper' }
-            },
-            {
-                path: 'social-mapper',
-                component: SocialMapperComponent,
-                data: { animation: 'SocialMapper' }
-            },
-            {
-                path: 'directory',
-                component: DirectoryComponent,
-                data: { animation: 'DirectoryPage' }
-            },
-            {
-                path: 'api',
-                canActivate: [subscriptionGuard],
-                data: { animation: 'APIPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'email-breach',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'email-breach',
-                        component: DashboardApiComponent,
-                        data: { animation: 'EmailAPI', type: 'user' }
-                    },
-                    {
-                        path: 'social-scanner',
-                        component: DashboardApiComponent,
-                        data: { animation: 'SocialAPI', type: 'social' }
-                    },
-                    {
-                        path: 'playstore-scanner',
-                        component: DashboardApiComponent,
-                        data: { animation: 'CrackedAPI', type: 'cracked' }
-                    },
-                    {
-                        path: 'software-scanner',
-                        component: DashboardApiComponent,
-                        data: { animation: 'SoftwareAPI', type: 'software' }
-                    },
-                    {
-                        path: 'file-scanner',
-                        component: FileScannerComponent,
-                        data: {
-                            animation: 'FileAPI',
-                            type: 'filescan',
-                            title: 'File Analysis',
-                            description: 'Upload a file to extract Indicators of Compromise (IOCs)'
-                        }
-                    },
-                    {
-                        path: 'crypto-scanner',
-                        component: DashboardApiComponent,
-                        data: {
-                            animation: 'FileAPI',
-                            type: 'crypto',
-                            title: 'Crypto Analysis',
-                            description: 'provide a cryptocurrency address to extract related information and potential risks'
-                        }
-                    }
-                ]
-            },
-            {
-                path: 'discussion',
-                data: { animation: 'Discussion' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'all',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: ':category/social',
-                        redirectTo: '/dashboard/discussion/:category',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'all',
-                        component: DashboardResultContainer,
-                        data: { type: 'Social', animation: 'Discussion' },
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: ':category/chat',
-                        redirectTo: '/dashboard/discussion/:category',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: ':category/chat/:m_hash',
-                        component: ReportChatComponent,
-                        resolve: { reportdata: ReportConsolidatedResolver },
-                        data: { type: 'consolidated', animation: 'HashPage' }
-                    },
-                    {
-                        path: ':category/social/:m_hash',
-                        component: ReportChatComponent,
-                        resolve: { reportdata: ReportConsolidatedResolver },
-                        data: { type: 'consolidated', animation: 'HashPage' }
-                    },
-                    {
-                        path: ':category',
-                        component: DashboardResultContainer,
-                        data: { type: 'Social', animation: 'Discussion' },
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'social/:m_hash',
-                        component: ReportChatComponent,
-                        resolve: { reportdata: ReportConsolidatedResolver },
-                        data: { type: 'consolidated', animation: 'HashPage' }
-                    },
-                    {
-                        path: 'general/:m_hash',
-                        component: ReportComponent,
-                        resolve: { reportdata: ReportConsolidatedResolver },
-                        data: { type: 'consolidated', animation: 'HashPage' }
-                    },
-                    {
-                        path: 'leak/:m_hash',
-                        component: ReportComponent,
-                        resolve: { reportdata: ReportConsolidatedResolver },
-                        data: { type: 'consolidated', animation: 'HashPage' }
-                    },
-                    {
-                        path: 'exploit/:m_hash',
-                        component: ReportComponent,
-                        resolve: { reportdata: ReportConsolidatedResolver },
-                        data: { type: 'consolidated', animation: 'HashPage' }
-                    },
-                    {
-                        path: 'defacement/:m_hash',
-                        component: ReportDefacementComponent,
-                        resolve: { reportdata: ReportConsolidatedResolver },
-                        data: { type: 'consolidated', animation: 'HashPage' }
-                    },
-                    {
-                        path: '**',
-                        redirectTo: 'all'
-                    }
-                ]
-            },
-            {
-                path: 'breach',
-                data: { animation: 'DataBreach' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'all',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: ':category',
-                        component: DashboardResultContainer,
-                        data: { type: 'Breach', animation: 'DataBreach' }
-                    },
-                    {
-                        path: ':category/:m_hash',
-                        component: ReportComponent,
-                        resolve: { reportdata: ReportResolver },
-                        data: { type: 'Breach', animation: 'HashPage' }
-                    }
-                ]
-            },
-            {
-                path: 'strategic',
-                data: { animation: 'StrategicPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'all',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: ':category',
-                        component: DashboardResultContainer,
-                        data: { type: 'strategic', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: ':category/:m_hash',
-                        component: ReportComponent,
-                        resolve: { reportdata: ReportResolver },
-                        data: { type: 'strategic', animation: 'HashPage' }
-                    }
-                ]
-            },
-            {
-                path: 'defacement',
-                data: { animation: 'DefacementPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'all',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'all',
-                        component: DashboardResultContainer,
-                        data: { type: 'defacement', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'hacked',
-                        component: DashboardResultContainer,
-                        data: { type: 'defacement', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'phishing',
-                        component: DashboardResultContainer,
-                        data: { type: 'defacement', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'databases',
-                        component: DashboardResultContainer,
-                        data: { type: 'defacement', animation: 'DataBreach' }
-                    },
-                    {
-                        path: ':category',
-                        component: DashboardResultContainer,
-                        data: { type: 'Defacement', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: ':category/:m_hash',
-                        component: ReportDefacementComponent,
-                        resolve: { reportdata: ReportResolver },
-                        data: { type: 'Defacement', animation: 'HashPage' }
-                    }
-                ]
-            },
-            {
-                path: 'social',
-                data: { animation: 'SocialPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'all',
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'all',
-                        component: DashboardResultContainer,
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'chat',
-                        redirectTo: '/dashboard/social/all',
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'telegram',
-                        component: DashboardResultContainer,
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'twitter',
-                        component: DashboardResultContainer,
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'mastodon',
-                        component: DashboardResultContainer,
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'pastebin',
-                        component: DashboardResultContainer,
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'forum',
-                        component: DashboardResultContainer,
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'reddit',
-                        component: DashboardResultContainer,
-                        pathMatch: 'full',
-                        data: { type: 'social', animation: 'DataBreach' }
-                    },
-                    {
-                        path: ':category',
-                        component: DashboardResultContainer,
-                        data: { type: 'Social', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: ':category/:m_hash',
-                        component: ReportChatComponent,
-                        resolve: { reportdata: ReportResolver },
-                        data: { type: 'Social', animation: 'HashPage' }
-                    },
-                    {
-                        path: ':category/all/:m_hash',
-                        component: ReportChatComponent,
-                        resolve: { reportdata: ReportResolver },
-                        data: { type: 'Social', animation: 'HashPage' }
-                    }
-                ]
-            },
-            {
-                path: 'feed',
-                data: { animation: 'FeedPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'news',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: ':category',
-                        component: DashboardResultContainer,
-                        data: { type: 'Feed', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: ':category/:m_hash',
-                        component: ReportComponent,
-                        resolve: { reportdata: ReportResolver },
-                        data: { type: 'Feed', animation: 'HashPage' }
-                    }
-                ]
-            },
-            {
-                path: 'exploit',
-                data: { animation: 'ExploitPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'all',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'all',
-                        component: DashboardResultContainer,
-                        data: { type: 'exploit', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'tools',
-                        component: DashboardResultContainer,
-                        data: { type: 'exploit', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'cve',
-                        component: DashboardResultContainer,
-                        data: { type: 'exploit', animation: 'DataBreach' }
-                    },
-                    {
-                        path: 'zeroday',
-                        component: DashboardResultContainer,
-                        data: { type: 'exploit', animation: 'DataBreach' }
-                    },
-                    {
-                        path: ':category',
-                        component: DashboardResultContainer,
-                        data: { type: 'Social', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: ':category/:m_hash',
-                        component: ReportComponent,
-                        resolve: { reportdata: ReportResolver },
-                        data: { type: 'Exploit', animation: 'HashPage' }
-                    }
-                ]
-            },
-            {
-                canActivate: [subscriptionGuard],
-                path: 'consolidated',
-                data: { animation: 'ConsolidatedPage' },
-                children: consolidatedChildren
-            },
-            {
-                canActivate: [subscriptionGuard],
-                path: 'scanner',
-                data: { animation: 'ScannerPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'basic-scan',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'basic-scan',
-                        component: SecurityScanComponent,
-                        data: { type: 'basic', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'port-scan',
-                        component: SecurityScanComponent,
-                        data: { type: 'advanced', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'repository-scan',
-                        component: SecurityScanComponent,
-                        data: { type: 'repo', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'seo-scan',
-                        component: SecurityScanComponent,
-                        data: { type: 'seo', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'apk-scan',
-                        component: FileScannerComponent,
-                        data: {
-                            animation: 'CategoryPage',
-                            type: 'apk',
-                            title: 'APK Analysis',
-                            description: 'Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and behaviors'
-                        }
-                    }
-                ]
-            },
-            {
-                canActivate: [subscriptionGuard],
-                path: 'dump',
-                data: { animation: 'DumpPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'listing',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'listing',
-                        component: DumpComponent,
-                        data: { type: 'listing', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'credential',
-                        component: CredentialComponent,
-                        data: { type: 'credential', animation: 'CategoryPage' }
-                    }
-                ]
-            },
-            {
-                path: 'stealerlogs',
-                canActivate: [subscriptionGuard],
-                data: { animation: 'StealerlogsPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'iocs',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'iocs',
-                        component: CredentialComponent,
-                        data: { type: 'credential', animation: 'CategoryPage' }
-                    }
-                ]
-            },
-            {
-                path: 'tenant',
-                canActivate: [subscriptionGuard],
-                data: { animation: 'TenantPage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'view-profiles',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: 'view-profiles',
-                        component: ManageProfileComponent,
-                        data: { type: 'view', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'view-tenants',
-                        component: ViewTenantComponent,
-                        data: { type: 'view', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'auditlog',
-                        component: AuditlogComponent,
-                        data: { type: 'auditlog', animation: 'CategoryPage' }
-                    }
-                ]
-            },
-            {
-                path: 'profile',
-                canActivate: [subscriptionGuard, OnboardingGuard],
-                resolve: { ioc: IocResolver },
-                data: { animation: 'ProifilePage' },
-                children: [
-                    {
-                        path: '',
-                        redirectTo: 'homepage',
-                        pathMatch: 'full'
-                    },
-                    {
-                        canActivate: [subscriptionGuard],
-                        path: 'consolidated',
-                        data: { animation: 'ConsolidatedPage' },
-                        children: consolidatedChildren
-                    },
-                    {
-                        path: 'alerts/:type',
-                        component: CategoryAlertReportComponent,
-                        data: { type: 'alert', animation: 'AlertPage' },
-                    },
-                    {
-                        path: 'addcustomalert',
-                        component: AddCustomAlertComponent,
-                        data: { type: 'alert', animation: 'AlertPage' },
-                    },
-                    {
-                        path: 'homepage',
-                        component: SidebarUserHomepageComponent,
-                        resolve: { insights: InsightResolver },
-                        data: { type: 'homepage', animation: 'HomepagePage' },
-                    },
-                    {
-                        path: 'statistics',
-                        component: SidebarUserStatisticsComponent,
-                        resolve: { insights: InsightResolver },
-                        data: { type: 'settings', animation: 'ProfilePage' }
-                    },
-                    {
-                        path: 'ioc',
-                        component: SidebarUserIocComponent,
-                        data: { type: 'settings', animation: 'ProfilePage' }
-                    },
-                    {
-                        path: 'consolidated',
-                        data: { animation: 'ConsolidatedPage' },
-                        children: consolidatedChildren
-                    },
-                    {
-                        path: 'auditlog',
-                        component: AuditlogComponent,
-                        data: { type: 'auditlog', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'users',
-                        component: ManageProfileComponent,
-                        data: { type: 'profile', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'account',
-                        component: AccountSettingsComponent,
-                        data: { type: 'account', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'tenant-settings',
-                        component: TenantSettingsComponent,
-                        data: { type: 'settings', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'tenant',
-                        component: ViewTenantComponent,
-                        data: { type: 'view', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'system-settings',
-                        component: SidebarProfileSystemSettingsComponent,
-                        data: { type: 'srttings', animation: 'CategoryPage' }
-                    },
-                    {
-                        path: 'alerts',
-                        redirectTo: 'homepage',
-                        pathMatch: 'full'
-                    },
-                    {
-                        path: '**',
-                        redirectTo: 'consolidated/all'
-                    }
-                ]
+          {
+            path: '',
+            redirectTo: 'email-breach',
+            pathMatch: 'full'
+          },
+          {
+            path: 'email-breach',
+            component: DashboardApiComponent,
+            data: { animation: 'EmailAPI', type: 'user' }
+          },
+          {
+            path: 'social-scanner',
+            component: DashboardApiComponent,
+            data: { animation: 'SocialAPI', type: 'social' }
+          },
+          {
+            path: 'playstore-scanner',
+            component: DashboardApiComponent,
+            data: { animation: 'CrackedAPI', type: 'cracked' }
+          },
+          {
+            path: 'software-scanner',
+            component: DashboardApiComponent,
+            data: { animation: 'SoftwareAPI', type: 'software' }
+          },
+          {
+            path: 'file-scanner',
+            component: FileScannerComponent,
+            data: {
+              animation: 'FileAPI',
+              type: 'filescan',
+              title: 'File Analysis',
+              description: 'Upload a file to extract Indicators of Compromise (IOCs)'
             }
+          },
+          {
+            path: 'crypto-scanner',
+            component: DashboardApiComponent,
+            data: {
+              animation: 'FileAPI',
+              type: 'crypto',
+              title: 'Crypto Analysis',
+              description: 'provide a cryptocurrency address to extract related information and potential risks'
+            }
+          }
         ]
-    },
-    {
-        path: '**',
-        component: ErrorHandlerComponent,
-        data: { animation: 'ErrorPage' }
-    }
+      },
+      {
+        path: 'discussion',
+        data: { animation: 'Discussion' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category/social',
+            redirectTo: '/dashboard/discussion/:category',
+            pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            component: DashboardResultContainer,
+            data: { type: 'Social', animation: 'Discussion' },
+            pathMatch: 'full'
+          },
+          {
+            path: ':category/chat',
+            redirectTo: '/dashboard/discussion/:category',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category/chat/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: ':category/social/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: ':category',
+            component: DashboardResultContainer,
+            data: { type: 'Social', animation: 'Discussion' },
+            pathMatch: 'full'
+          },
+          {
+            path: 'social/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: 'general/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: 'leak/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: 'exploit/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: 'defacement/:m_hash',
+            component: ReportDefacementComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: '**',
+            redirectTo: 'all'
+          }
+        ]
+      },
+      {
+        path: 'breach',
+        data: { animation: 'DataBreach' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardResultContainer,
+            data: { type: 'Breach', animation: 'DataBreach' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Breach', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'strategic',
+        data: { animation: 'StrategicPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardResultContainer,
+            data: { type: 'strategic', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'strategic', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'defacement',
+        data: { animation: 'DefacementPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            component: DashboardResultContainer,
+            data: { type: 'defacement', animation: 'DataBreach' }
+          },
+          {
+            path: 'hacked',
+            component: DashboardResultContainer,
+            data: { type: 'defacement', animation: 'DataBreach' }
+          },
+          {
+            path: 'phishing',
+            component: DashboardResultContainer,
+            data: { type: 'defacement', animation: 'DataBreach' }
+          },
+          {
+            path: 'databases',
+            component: DashboardResultContainer,
+            data: { type: 'defacement', animation: 'DataBreach' }
+          },
+          {
+            path: ':category',
+            component: DashboardResultContainer,
+            data: { type: 'Defacement', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportDefacementComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Defacement', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'social',
+        data: { animation: 'SocialPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'all',
+            component: DashboardResultContainer,
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'chat',
+            redirectTo: '/dashboard/social/all',
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'telegram',
+            component: DashboardResultContainer,
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'twitter',
+            component: DashboardResultContainer,
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'mastodon',
+            component: DashboardResultContainer,
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'pastebin',
+            component: DashboardResultContainer,
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'forum',
+            component: DashboardResultContainer,
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: 'reddit',
+            component: DashboardResultContainer,
+            pathMatch: 'full',
+            data: { type: 'social', animation: 'DataBreach' }
+          },
+          {
+            path: ':category',
+            component: DashboardResultContainer,
+            data: { type: 'Social', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Social', animation: 'HashPage' }
+          },
+          {
+            path: ':category/all/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Social', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'feed',
+        data: { animation: 'FeedPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'news',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardResultContainer,
+            data: { type: 'Feed', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Feed', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'exploit',
+        data: { animation: 'ExploitPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            component: DashboardResultContainer,
+            data: { type: 'exploit', animation: 'DataBreach' }
+          },
+          {
+            path: 'tools',
+            component: DashboardResultContainer,
+            data: { type: 'exploit', animation: 'DataBreach' }
+          },
+          {
+            path: 'cve',
+            component: DashboardResultContainer,
+            data: { type: 'exploit', animation: 'DataBreach' }
+          },
+          {
+            path: 'zeroday',
+            component: DashboardResultContainer,
+            data: { type: 'exploit', animation: 'DataBreach' }
+          },
+          {
+            path: ':category',
+            component: DashboardResultContainer,
+            data: { type: 'Social', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Exploit', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        canActivate: [subscriptionGuard],
+        path: 'consolidated',
+        data: { animation: 'ConsolidatedPage' },
+        children: consolidatedChildren
+      },
+      {
+        canActivate: [subscriptionGuard],
+        path: 'scanner',
+        data: { animation: 'ScannerPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'basic-scan',
+            pathMatch: 'full'
+          },
+          {
+            path: 'basic-scan',
+            component: SecurityScanComponent,
+            data: { type: 'basic', animation: 'CategoryPage' }
+          },
+          {
+            path: 'port-scan',
+            component: SecurityScanComponent,
+            data: { type: 'advanced', animation: 'CategoryPage' }
+          },
+          {
+            path: 'repository-scan',
+            component: SecurityScanComponent,
+            data: { type: 'repo', animation: 'CategoryPage' }
+          },
+          {
+            path: 'seo-scan',
+            component: SecurityScanComponent,
+            data: { type: 'seo', animation: 'CategoryPage' }
+          },
+          {
+            path: 'apk-scan',
+            component: FileScannerComponent,
+            data: {
+              animation: 'CategoryPage',
+              type: 'apk',
+              title: 'APK Analysis',
+              description: 'Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and behaviors'
+            }
+          }
+        ]
+      },
+      {
+        canActivate: [subscriptionGuard],
+        path: 'dump',
+        data: { animation: 'DumpPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'listing',
+            pathMatch: 'full'
+          },
+          {
+            path: 'listing',
+            component: DumpComponent,
+            data: { type: 'listing', animation: 'CategoryPage' }
+          },
+          {
+            path: 'credential',
+            component: CredentialComponent,
+            data: { type: 'credential', animation: 'CategoryPage' }
+          }
+        ]
+      },
+      {
+        path: 'stealerlogs',
+        canActivate: [subscriptionGuard],
+        data: { animation: 'StealerlogsPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'iocs',
+            pathMatch: 'full'
+          },
+          {
+            path: 'iocs',
+            component: CredentialComponent,
+            data: { type: 'credential', animation: 'CategoryPage' }
+          }
+        ]
+      },
+      {
+        path: 'tenant',
+        canActivate: [subscriptionGuard],
+        data: { animation: 'TenantPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'view-profiles',
+            pathMatch: 'full'
+          },
+          {
+            path: 'view-profiles',
+            component: ManageProfileComponent,
+            data: { type: 'view', animation: 'CategoryPage' }
+          },
+          {
+            path: 'view-tenants',
+            component: ViewTenantComponent,
+            data: { type: 'view', animation: 'CategoryPage' }
+          },
+          {
+            path: 'auditlog',
+            component: AuditlogComponent,
+            data: { type: 'auditlog', animation: 'CategoryPage' }
+          }
+        ]
+      },
+      {
+        path: 'profile',
+        canActivate: [subscriptionGuard, OnboardingGuard],
+        resolve: { ioc: IocResolver },
+        data: { animation: 'ProifilePage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'homepage',
+            pathMatch: 'full'
+          },
+          {
+            canActivate: [subscriptionGuard],
+            path: 'consolidated',
+            data: { animation: 'ConsolidatedPage' },
+            children: consolidatedChildren
+          },
+          {
+            path: 'alerts/:type',
+            component: CategoryAlertReportComponent,
+            data: { type: 'alert', animation: 'AlertPage' },
+          },
+          {
+            path: 'addcustomalert',
+            component: AddCustomAlertComponent,
+            data: { type: 'alert', animation: 'AlertPage' },
+          },
+          {
+            path: 'homepage',
+            component: SidebarUserHomepageComponent,
+            resolve: { insights: InsightResolver },
+            data: { type: 'homepage', animation: 'HomepagePage' },
+          },
+          {
+            path: 'statistics',
+            component: SidebarUserStatisticsComponent,
+            resolve: { insights: InsightResolver },
+            data: { type: 'settings', animation: 'ProfilePage' }
+          },
+          {
+            path: 'ioc',
+            component: SidebarUserIocComponent,
+            data: { type: 'settings', animation: 'ProfilePage' }
+          },
+          {
+            path: 'consolidated',
+            data: { animation: 'ConsolidatedPage' },
+            children: consolidatedChildren
+          },
+          {
+            path: 'auditlog',
+            component: AuditlogComponent,
+            data: { type: 'auditlog', animation: 'CategoryPage' }
+          },
+          {
+            path: 'users',
+            component: ManageProfileComponent,
+            data: { type: 'profile', animation: 'CategoryPage' }
+          },
+          {
+            path: 'account',
+            component: AccountSettingsComponent,
+            data: { type: 'account', animation: 'CategoryPage' }
+          },
+          {
+            path: 'tenant-settings',
+            component: TenantSettingsComponent,
+            data: { type: 'settings', animation: 'CategoryPage' }
+          },
+          {
+            path: 'tenant',
+            component: ViewTenantComponent,
+            data: { type: 'view', animation: 'CategoryPage' }
+          },
+          {
+            path: 'system-settings',
+            component: SidebarProfileSystemSettingsComponent,
+            data: { type: 'srttings', animation: 'CategoryPage' }
+          },
+          {
+            path: 'alerts',
+            redirectTo: 'homepage',
+            pathMatch: 'full'
+          },
+          {
+            path: '**',
+            redirectTo: 'consolidated/all'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    path: '**',
+    component: ErrorHandlerComponent,
+    data: { animation: 'ErrorPage' }
+  }
 ];

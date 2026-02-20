@@ -6,50 +6,54 @@ import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ActivatedRoute, Router } from '@angular/router';
 @Component({
-    selector: 'dump-list',
-    standalone: true,
-    templateUrl: './dump-list.component.html',
-    animations: [fadeInDashboardItem],
-    imports: [NgForOf, AsyncPipe, DatePipe, NgIf]
+  selector: 'dump-list',
+  standalone: true,
+  templateUrl: './dump-list.component.html',
+  animations: [fadeInDashboardItem],
+  imports: [NgForOf, AsyncPipe, DatePipe, NgIf]
 })
 export class DumpListComponent implements OnInit {
-    dumpData$: Observable<DumpCallbackModel | null>;
-    @Input()
-    isLoading = true;
-    constructor(public dumpService: DumpService, private router: Router, private route: ActivatedRoute) {
-        this.dumpData$ = this.dumpService.dumpData$;
-    }
-    get currentPage$() {
-        return this.dumpService.currentPage$;
-    }
-    ngOnInit(): void {
-        this.isLoading = this.dumpService.getCurrentPage() > 0;
-        this.dumpData$ = this.dumpService.dumpData$.pipe(tap(data => {
-            this.isLoading = !data;
-        }), map(data => {
-            if (!data) {
-                return null;
-            }
-            return {
-                ...data,
-                mDumpCallbackLinks: data.mDumpCallbackLinks.filter(item => {
-                    const url = (item.leak_url || '').trim();
-                    return url !== '' && !/^\/+$/.test(url);
-                })
-            };
-        }));
-    }
-    onPageChange(currentPage: number) {
-        this.dumpService.setCurrentPage(currentPage);
-        this.router.navigate([], {
-            relativeTo: this.route.parent ?? this.route,
-            queryParams: { page: currentPage },
-            queryParamsHandling: 'merge'
-        }).then(() => {
-            this.dumpService.reloadDumpData({ page: currentPage });
-        });
-    }
-    copyRowData(item: any): void {
-        navigator.clipboard.writeText(item).then();
-    }
+  @Input() isLoading = true;
+  dumpData$: Observable<DumpCallbackModel | null>;
+
+  constructor(public dumpService: DumpService, private router: Router, private route: ActivatedRoute) {
+    this.dumpData$ = this.dumpService.dumpData$;
+  }
+
+  get currentPage$() {
+    return this.dumpService.currentPage$;
+  }
+
+  ngOnInit(): void {
+    this.isLoading = this.dumpService.getCurrentPage() > 0;
+    this.dumpData$ = this.dumpService.dumpData$.pipe(tap(data => {
+      this.isLoading = !data;
+    }), map(data => {
+      if (!data) {
+        return null;
+      }
+      return {
+        ...data,
+        mDumpCallbackLinks: data.mDumpCallbackLinks.filter(item => {
+          const url = (item.leak_url || '').trim();
+          return url !== '' && !/^\/+$/.test(url);
+        })
+      };
+    }));
+  }
+
+  onPageChange(currentPage: number) {
+    this.dumpService.setCurrentPage(currentPage);
+    this.router.navigate([], {
+      relativeTo: this.route.parent ?? this.route,
+      queryParams: { page: currentPage },
+      queryParamsHandling: 'merge'
+    }).then(() => {
+      this.dumpService.reloadDumpData({ page: currentPage });
+    });
+  }
+
+  copyRowData(item: any): void {
+    navigator.clipboard.writeText(item).then();
+  }
 }

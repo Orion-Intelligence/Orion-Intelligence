@@ -9,14 +9,14 @@ export enum StealerlogsSearchFilters {
     CREDITCARD = 'm_creditcard'
 }
 export const StealerlogsSearchFilterLabels: Record<StealerlogsSearchFilters, string> = {
-    [StealerlogsSearchFilters.ALL]: 'All',
-    [StealerlogsSearchFilters.DOMAIN]: 'Domain',
-    [StealerlogsSearchFilters.USERNAME]: 'Username',
-    [StealerlogsSearchFilters.IP]: 'IP Address',
-    [StealerlogsSearchFilters.CHANNEL]: 'Channel',
-    [StealerlogsSearchFilters.FILE]: 'File Name',
-    [StealerlogsSearchFilters.EMAIL]: 'Email',
-    [StealerlogsSearchFilters.CREDITCARD]: 'Credit Card'
+  [StealerlogsSearchFilters.ALL]: 'All',
+  [StealerlogsSearchFilters.DOMAIN]: 'Domain',
+  [StealerlogsSearchFilters.USERNAME]: 'Username',
+  [StealerlogsSearchFilters.IP]: 'IP Address',
+  [StealerlogsSearchFilters.CHANNEL]: 'Channel',
+  [StealerlogsSearchFilters.FILE]: 'File Name',
+  [StealerlogsSearchFilters.EMAIL]: 'Email',
+  [StealerlogsSearchFilters.CREDITCARD]: 'Credit Card'
 };
 export interface StealerlogsAdvancedFilter {
     id: string;

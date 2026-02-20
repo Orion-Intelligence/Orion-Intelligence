@@ -8,18 +8,18 @@
             Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
           </div>
           <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
-            Entity({{ entityFiltersCount() }}) <img src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
+            Entity({{ entityFiltersCount() }}) <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
           </div>
         </ng-container>
         <div class="selected-filter-bar__filter-type" *ngIf="sidebarFilterCount()>0">
-          Sidebar({{ sidebarFilterCount() }}) <img src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close"/>
+          Sidebar({{ sidebarFilterCount() }}) <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close"/>
         </div>
         <div class="selected-filter-bar__filter-type" *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
-          Search Type ({{ this.app_service.getConfig().localSettings.matchType }}) <img src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close"/>
+          Search Type ({{ this.app_service.getConfig().localSettings.matchType }}) <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close"/>
         </div>
         <button class="selected-filter-bar__clear-btn" (click)="clearFilters('all')">Clear Selection</button>
         <div class="selected-filter-bar__expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }" (click)="toggleFilterBarCollapse()">
-          <img src="../../../../assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon"/>
+          <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon"/>
         </div>
       </div>
     </div>

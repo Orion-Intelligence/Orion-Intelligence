@@ -1,74 +1,77 @@
 import { Directive, ElementRef, Renderer2, effect, inject, input } from '@angular/core';
 import { IconService } from '../../../../shared/services/icon.service';
 @Directive({
-    selector: '[socialMapperPlatformBg]',
-    standalone: true,
+  selector: '[socialMapperPlatformBg]',
+  standalone: true,
 })
 export class PlatformIconBgDirective {
-    platformName = input.required<string>({ alias: 'socialMapperPlatformBg' });
-    private el = inject(ElementRef<HTMLElement>);
-    private renderer = inject(Renderer2);
-    private iconService = inject(IconService);
-    private activeColorClass = 'social-graph-platform-bg-slate';
-    constructor() {
-        effect(() => {
-            const platformName = this.platformName();
-            const brandColor = this.iconService.getPlatformBrandColor(platformName);
-            const nextClass = this.getColorClassFromHex(brandColor);
-            this.renderer.removeClass(this.el.nativeElement, this.activeColorClass);
-            this.renderer.addClass(this.el.nativeElement, nextClass);
-            this.activeColorClass = nextClass;
-        });
+  platformName = input.required<string>({ alias: 'socialMapperPlatformBg' });
+
+  private el = inject(ElementRef<HTMLElement>);
+  private renderer = inject(Renderer2);
+  private iconService = inject(IconService);
+  private activeColorClass = 'social-graph-platform-bg-slate';
+
+  constructor() {
+    effect(() => {
+      const platformName = this.platformName();
+      const brandColor = this.iconService.getPlatformBrandColor(platformName);
+      const nextClass = this.getColorClassFromHex(brandColor);
+      this.renderer.removeClass(this.el.nativeElement, this.activeColorClass);
+      this.renderer.addClass(this.el.nativeElement, nextClass);
+      this.activeColorClass = nextClass;
+    });
+  }
+
+  private getColorClassFromHex(hex: string): string {
+    const normalizedHex = hex.replace('#', '');
+    if (!/^[0-9a-fA-F]{6}$/.test(normalizedHex)) {
+      return 'social-graph-platform-bg-slate';
     }
-    private getColorClassFromHex(hex: string): string {
-        const normalizedHex = hex.replace('#', '');
-        if (!/^[0-9a-fA-F]{6}$/.test(normalizedHex)) {
-            return 'social-graph-platform-bg-slate';
-        }
-        const r = parseInt(normalizedHex.substring(0, 2), 16) / 255;
-        const g = parseInt(normalizedHex.substring(2, 4), 16) / 255;
-        const b = parseInt(normalizedHex.substring(4, 6), 16) / 255;
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const delta = max - min;
-        if (delta === 0) {
-            return 'social-graph-platform-bg-slate';
-        }
-        let hue = 0;
-        if (max === r) {
-            hue = ((g - b) / delta) % 6;
-        }
-        else if (max === g) {
-            hue = (b - r) / delta + 2;
-        }
-        else {
-            hue = (r - g) / delta + 4;
-        }
-        hue = Math.round(hue * 60);
-        if (hue < 0) {
-            hue += 360;
-        }
-        if (hue < 20 || hue >= 340) {
-            return 'social-graph-platform-bg-red';
-        }
-        if (hue < 45) {
-            return 'social-graph-platform-bg-orange';
-        }
-        if (hue < 70) {
-            return 'social-graph-platform-bg-amber';
-        }
-        if (hue < 160) {
-            return 'social-graph-platform-bg-green';
-        }
-        if (hue < 200) {
-            return 'social-graph-platform-bg-cyan';
-        }
-        if (hue < 245) {
-            return 'social-graph-platform-bg-blue';
-        }
-        if (hue < 300) {
-            return 'social-graph-platform-bg-violet';
-        }
-        return 'social-graph-platform-bg-pink';
+    const r = parseInt(normalizedHex.substring(0, 2), 16) / 255;
+    const g = parseInt(normalizedHex.substring(2, 4), 16) / 255;
+    const b = parseInt(normalizedHex.substring(4, 6), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    if (delta === 0) {
+      return 'social-graph-platform-bg-slate';
     }
+    let hue = 0;
+    if (max === r) {
+      hue = ((g - b) / delta) % 6;
+    }
+    else if (max === g) {
+      hue = (b - r) / delta + 2;
+    }
+    else {
+      hue = (r - g) / delta + 4;
+    }
+    hue = Math.round(hue * 60);
+    if (hue < 0) {
+      hue += 360;
+    }
+    if (hue < 20 || hue >= 340) {
+      return 'social-graph-platform-bg-red';
+    }
+    if (hue < 45) {
+      return 'social-graph-platform-bg-orange';
+    }
+    if (hue < 70) {
+      return 'social-graph-platform-bg-amber';
+    }
+    if (hue < 160) {
+      return 'social-graph-platform-bg-green';
+    }
+    if (hue < 200) {
+      return 'social-graph-platform-bg-cyan';
+    }
+    if (hue < 245) {
+      return 'social-graph-platform-bg-blue';
+    }
+    if (hue < 300) {
+      return 'social-graph-platform-bg-violet';
+    }
+    return 'social-graph-platform-bg-pink';
+  }
 }

@@ -161,7 +161,7 @@
 
     <div *ngIf="isGraphView && maxEdge> 50 && showMaxEdgeNotice" class="absolute bottom-4 left-4 z-30 rounded-xl border border-slate-700/70 bg-slate-900/90 px-3 py-2 text-sm text-slate-200 shadow-2xl backdrop-blur-sm">
       <div class="flex items-start gap-2">
-        <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="../../../../assets/images/shared/hint.svg">
+        <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
         <span>You can see {{ maxEdge }} nodes at a time, avoid using extreme values for better performance</span>
         <button type="button" class="ml-1 text-slate-400 hover:text-white" (click)="showMaxEdgeNotice=false" title="Hide">
           <i class="bi bi-x-lg text-xs"></i>
@@ -222,8 +222,8 @@
   </span>
 
   <div *ngIf="this.isEmpty" @fadeInDashboardItem class="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-    <img *ngIf="loading" alt="No Data" class="h-40 w-auto" src="../../../../assets/images/shared/cti-empty.svg"/>
-    <img *ngIf="!loading" alt="No Data" class="h-40 w-auto animate-pulse" src="../../../../assets/images/shared/magnifying_search.svg"/>
+    <img *ngIf="loading" alt="No Data" class="h-40 w-auto" src="assets/images/shared/cti-empty.svg"/>
+    <img *ngIf="!loading" alt="No Data" class="h-40 w-auto animate-pulse" src="assets/images/shared/magnifying_search.svg"/>
   </div>
 
 </div>

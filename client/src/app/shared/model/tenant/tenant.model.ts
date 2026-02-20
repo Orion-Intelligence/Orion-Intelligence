@@ -5,9 +5,9 @@ export interface IocCategory {
 }
 export type TenantStatus = 'onboarding' | 'active' | 'disable';
 export const TenantStatusValues = {
-    ONBOARDING: 'onboarding' as TenantStatus,
-    ACTIVE: 'active' as TenantStatus,
-    DISABLE: 'disable' as TenantStatus,
+  ONBOARDING: 'onboarding' as TenantStatus,
+  ACTIVE: 'active' as TenantStatus,
+  DISABLE: 'disable' as TenantStatus,
 };
 export interface TenantModel {
     id?: string;

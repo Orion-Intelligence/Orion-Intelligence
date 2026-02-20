@@ -15,9 +15,7 @@ import { DashboardResultSocialComponent } from '../dashboard-results/dashboard-r
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
-import {
-  DashboardResultDefacementComponent
-} from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
+import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -98,10 +96,8 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
     this.isResponseLoading.set(true);
     this.currentResultModel = null;
 
-    this.dashboardService.fetchSearchResults<any>(
-      this.apiEndpoint,
-      this.dashboardService.consolidatedParamModel
-    ).pipe(switchMap((response) => timer(1000).pipe(map(() => response))))
+    this.dashboardService.fetchSearchResults<any>(this.apiEndpoint,
+      this.dashboardService.consolidatedParamModel).pipe(switchMap((response) => timer(1000).pipe(map(() => response))))
       .subscribe((response) => {
         if (response.success && response.data) {
           this.currentResultModel = response.data["Result"];
@@ -129,15 +125,18 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
 
     if (this.type === Category.BREACH) {
       key = 'm_leak_date';
-    } else {
+    }
+    else {
       key = 'm_update_date';
     }
 
     if (sort === SortType.NEWEST_FIRST) {
       order = 'desc';
-    } else if (sort === SortType.OLDEST_FIRST) {
+    }
+    else if (sort === SortType.OLDEST_FIRST) {
       order = 'asc';
-    } else if (sort === SortType.DEFAULT) {
+    }
+    else if (sort === SortType.DEFAULT) {
       this.fetchSearchResults();
       return;
     }

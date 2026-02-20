@@ -7,40 +7,36 @@ import { SelectionStoreService } from '../../../../services/dashboard/selection.
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 @Component({
-    selector: 'app-dashboard-sidebar-items',
-    standalone: true,
-    imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective, LowerPipe],
-    templateUrl: './dashboard-sidebar-items.component.html',
+  selector: 'app-dashboard-sidebar-items',
+  standalone: true,
+  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective, LowerPipe],
+  templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {
-    @Input()
-    title = '';
-    @Input()
-    icon = '';
-    @Input()
-    items: string[] = [];
-    @Input()
-    category: any;
-    @Input()
-    routePrefix = '';
-    @Input()
-    tooltip = '';
-    @Output()
-    sectionSelected = new EventEmitter<any>();
-    @Output()
-    optionSelected = new EventEmitter<string>();
+    @Input() title = '';
+    @Input() icon = '';
+    @Input() items: string[] = [];
+    @Input() category: any;
+    @Input() routePrefix = '';
+    @Input() tooltip = '';
+    @Output() sectionSelected = new EventEmitter<any>();
+    @Output() optionSelected = new EventEmitter<string>();
+
     constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected subscriptionService: SubscriptionService) {
     }
+
     selectSection() {
-        this.sectionSelected.emit(this.category);
+      this.sectionSelected.emit(this.category);
     }
+
     selectOption(item: string) {
-        this.optionSelected.emit(item);
+      this.optionSelected.emit(item);
     }
+
     replaceDashWithSpace(value: string): string {
-        if (!value) {
-            return '';
-        }
-        return value.replace(/-/g, ' ');
+      if (!value) {
+        return '';
+      }
+      return value.replace(/-/g, ' ');
     }
 }

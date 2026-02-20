@@ -7,11 +7,11 @@ import { AuthGuard } from './shared/guards/auth-guard.guard';
 import { httpInterceptor } from './services/core/http.interceptor';
 import { AppService } from './services/core/app/app.service';
 export const appConfig: ApplicationConfig = {
-    providers: [
-        AuthGuard,
-        provideHttpClient(withInterceptors([httpInterceptor])),
-        provideAppInitializer(() => inject(AppService).loadSession()),
-        provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'reload' })),
-        provideAnimations()
-    ],
+  providers: [
+    AuthGuard,
+    provideHttpClient(withInterceptors([httpInterceptor])),
+    provideAppInitializer(() => inject(AppService).loadSession()),
+    provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'reload' })),
+    provideAnimations()
+  ],
 };

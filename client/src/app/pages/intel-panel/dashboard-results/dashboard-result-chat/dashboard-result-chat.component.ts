@@ -7,20 +7,19 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
-    selector: 'app-dashboard-result-chat',
-    imports: [
-        NgForOf,
-        DatePipe,
-        NgIf,
-        SlicePipe,
-        TooltipDirective, CommonModule, NormalizeUnicodePipe, RouterLink
-    ],
-    templateUrl: './dashboard-result-chat.component.html'
+  selector: 'app-dashboard-result-chat',
+  imports: [
+    NgForOf,
+    DatePipe,
+    NgIf,
+    SlicePipe,
+    TooltipDirective, CommonModule, NormalizeUnicodePipe, RouterLink
+  ],
+  templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
     @Input() searchResults: ChatResultItem[] = [];
     @Input() isExpandAble: boolean = false;
-
     currentUrl = '';
     queryParams: any = {};
     isCollapsed = true;
@@ -29,27 +28,28 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.scrollService.scrollToSavedPosition();
+      this.scrollService.scrollToSavedPosition();
     }
+
     ngOnInit() {
-        this.currentUrl = this.router.url.split('?')[0];
-        if (this.currentUrl.includes('consolidated')) {
-            this.currentUrl = this.currentUrl.replace("/all", "/chat");
-        }
-        if (this.currentUrl.includes('social')) {
-            this.currentUrl = this.currentUrl.replace("/all", "/chat");
-        }
-        else if (this.currentUrl.includes('discussion')) {
-            this.currentUrl = this.currentUrl + '/chat';
-        }
-        if (this.currentUrl.includes('social') && this.currentUrl.includes('chat') && !this.currentUrl.includes('all')) {
-            this.currentUrl = this.currentUrl + '/all';
-        }
-        this.route.queryParams.subscribe(params => {
-            this.queryParams = {
-                ...params,
-                ci: 'chat'
-            };
-        });
+      this.currentUrl = this.router.url.split('?')[0];
+      if (this.currentUrl.includes('consolidated')) {
+        this.currentUrl = this.currentUrl.replace("/all", "/chat");
+      }
+      if (this.currentUrl.includes('social')) {
+        this.currentUrl = this.currentUrl.replace("/all", "/chat");
+      }
+      else if (this.currentUrl.includes('discussion')) {
+        this.currentUrl = this.currentUrl + '/chat';
+      }
+      if (this.currentUrl.includes('social') && this.currentUrl.includes('chat') && !this.currentUrl.includes('all')) {
+        this.currentUrl = this.currentUrl + '/all';
+      }
+      this.route.queryParams.subscribe(params => {
+        this.queryParams = {
+          ...params,
+          ci: 'chat'
+        };
+      });
     }
 }

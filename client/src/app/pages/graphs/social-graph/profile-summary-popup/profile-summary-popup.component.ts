@@ -7,83 +7,95 @@ import { SummaryAllPlatformsViewComponent } from './summary-all-platforms-view/s
 import { SummaryPlatformViewComponent } from './summary-platform-view/summary-platform-view.component';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
 @Component({
-    selector: 'app-profile-summary-popup',
-    templateUrl: './profile-summary-popup.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [CommonModule, SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective],
+  selector: 'app-profile-summary-popup',
+  templateUrl: './profile-summary-popup.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective],
 })
 export class ProfileSummaryPopupComponent {
-    username = input.required<string>();
-    platforms = input.required<PlatformResult[]>();
-    email = input<string | undefined>();
-    isScanInProgress = input<boolean>(false);
-    close = output<void>();
-    fetchProfile = output<PlatformResult>();
-    fetchPosts = output<PlatformResult>();
-    fetchFollowers = output<PlatformResult>();
-    fetchFollowing = output<PlatformResult>();
-    fetchPlatformImages = output<PlatformResult>();
-    rescan = output<string>();
-    cancelFetchProfile = output<PlatformResult>();
-    cancelFetchPosts = output<PlatformResult>();
-    cancelFetchFollowers = output<PlatformResult>();
-    cancelFetchFollowing = output<PlatformResult>();
-    cancelFetchPlatformImages = output<PlatformResult>();
-    cancelAllFetches = output<string>();
-    platformSearchTerm = signal('');
-    selectedPlatform = signal<PlatformResult | 'all' | null>('all');
-    private fetchingState: FetchingStateService;
-    selectedPlatformDetails = computed((): PlatformResult | null => {
-        const selection = this.selectedPlatform();
-        return (selection && selection !== 'all') ? selection : null;
-    });
-    isAllPlatformsSelected = computed((): boolean => {
-        return this.selectedPlatform() === 'all';
-    });
-    constructor(fetchingState: FetchingStateService) {
-        this.fetchingState = fetchingState;
-        effect(() => {
-            const platformList = this.filteredPlatforms();
-            const currentSelection = this.selectedPlatform();
-            if (currentSelection !== 'all' && currentSelection !== null) {
-                const isSelectedPlatformVisible = platformList.some(p => p.platform === currentSelection.platform);
-                if (!isSelectedPlatformVisible) {
-                    this.selectedPlatform.set('all');
-                }
-            }
-        });
-    }
-    filteredPlatforms = computed(() => {
-        const term = this.platformSearchTerm().toLowerCase();
-        const sortedPlatforms = [...this.platforms()].sort((a, b) => a.platform.localeCompare(b.platform));
-        if (!term) {
-            return sortedPlatforms;
+  username = input.required<string>();
+  platforms = input.required<PlatformResult[]>();
+  email = input<string | undefined>();
+  isScanInProgress = input<boolean>(false);
+  close = output<void>();
+  fetchProfile = output<PlatformResult>();
+  fetchPosts = output<PlatformResult>();
+  fetchFollowers = output<PlatformResult>();
+  fetchFollowing = output<PlatformResult>();
+  fetchPlatformImages = output<PlatformResult>();
+  rescan = output<string>();
+  cancelFetchProfile = output<PlatformResult>();
+  cancelFetchPosts = output<PlatformResult>();
+  cancelFetchFollowers = output<PlatformResult>();
+  cancelFetchFollowing = output<PlatformResult>();
+  cancelFetchPlatformImages = output<PlatformResult>();
+  cancelAllFetches = output<string>();
+  platformSearchTerm = signal('');
+  selectedPlatform = signal<PlatformResult | 'all' | null>('all');
+  private fetchingState: FetchingStateService;
+  selectedPlatformDetails = computed((): PlatformResult | null => {
+    const selection = this.selectedPlatform();
+    return (selection && selection !== 'all') ? selection : null;
+  });
+  isAllPlatformsSelected = computed((): boolean => {
+    return this.selectedPlatform() === 'all';
+  });
+
+  constructor(fetchingState: FetchingStateService) {
+    this.fetchingState = fetchingState;
+    effect(() => {
+      const platformList = this.filteredPlatforms();
+      const currentSelection = this.selectedPlatform();
+      if (currentSelection !== 'all' && currentSelection !== null) {
+        const isSelectedPlatformVisible = platformList.some(p => p.platform === currentSelection.platform);
+        if (!isSelectedPlatformVisible) {
+          this.selectedPlatform.set('all');
         }
-        return sortedPlatforms.filter(p => p.platform.toLowerCase().includes(term));
+      }
     });
-    isAnythingFetching = computed(() => {
-        return this.isScanInProgress() || this.fetchingState.isUserBusy(this.username());
-    });
-    onSearchTermChange(event: Event) { this.platformSearchTerm.set((event.target as HTMLInputElement).value); }
-    clearSearch() { this.platformSearchTerm.set(''); }
-    onClose() {
-        this.close.emit();
+  }
+  filteredPlatforms = computed(() => {
+    const term = this.platformSearchTerm().toLowerCase();
+    const sortedPlatforms = [...this.platforms()].sort((a, b) => a.platform.localeCompare(b.platform));
+    if (!term) {
+      return sortedPlatforms;
     }
-    onAllPlatformsClick(): void {
-        this.selectedPlatform.set('all');
+    return sortedPlatforms.filter(p => p.platform.toLowerCase().includes(term));
+  });
+  isAnythingFetching = computed(() => {
+    return this.isScanInProgress() || this.fetchingState.isUserBusy(this.username());
+  });
+
+  onSearchTermChange(event: Event) {
+    this.platformSearchTerm.set((event.target as HTMLInputElement).value); 
+  }
+
+  clearSearch() {
+    this.platformSearchTerm.set(''); 
+  }
+
+  onClose() {
+    this.close.emit();
+  }
+
+  onAllPlatformsClick(): void {
+    this.selectedPlatform.set('all');
+  }
+
+  onPlatformClick(platform: PlatformResult) {
+    this.selectedPlatform.set(platform);
+  }
+
+  isSelected(platform: PlatformResult): boolean {
+    const selection = this.selectedPlatform();
+    if (selection === 'all' || selection === null) {
+      return false;
     }
-    onPlatformClick(platform: PlatformResult) {
-        this.selectedPlatform.set(platform);
-    }
-    isSelected(platform: PlatformResult): boolean {
-        const selection = this.selectedPlatform();
-        if (selection === 'all' || selection === null) {
-            return false;
-        }
-        return selection.platform === platform.platform && selection.username === platform.username;
-    }
-    trackByUrl(_index: number, item: PlatformResult): string {
-        return item.url;
-    }
+    return selection.platform === platform.platform && selection.username === platform.username;
+  }
+
+  trackByUrl(_index: number, item: PlatformResult): string {
+    return item.url;
+  }
 }

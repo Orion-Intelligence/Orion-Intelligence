@@ -12,150 +12,164 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { WorldHeatmapComponent } from "../world-heatmap/world-heatmap.component";
 @Component({
-    selector: 'app-home-search',
-    standalone: true,
-    imports: [FormsModule, NgOptimizedImage, CommonModule, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent],
-    templateUrl: './home-search.component.html',
+  selector: 'app-home-search',
+  standalone: true,
+  imports: [FormsModule, NgOptimizedImage, CommonModule, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent],
+  templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
-    @Input()
-    isRoleAdmin: boolean = true;
-    searchQuery = '';
-    selectedSearchBy = 'Match any term';
-    @ViewChild('filtersWrapper', { static: false })
-    filtersWrapperRef!: ElementRef;
-    @ViewChild('searchInput', { static: false })
-    searchInputRef!: ElementRef;
-    homeInsightExpanded = false;
-    public insightDragging = false;
-    public insightDragY: number | null = null;
-    private insightPointerId: number | null = null;
-    private insightStartY = 0;
-    private insightStartOffset = 0;
-    private insightMoved = false;
-    constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
+  @Input() isRoleAdmin: boolean = true;
+  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  searchQuery = '';
+  selectedSearchBy = 'Match any term';
+  homeInsightExpanded = false;
+
+  public insightDragging = false;
+  public insightDragY: number | null = null;
+
+  private insightPointerId: number | null = null;
+  private insightStartY = 0;
+  private insightStartOffset = 0;
+  private insightMoved = false;
+
+  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
+  }
+
+  ngOnInit(): void {
+    const cfg = this.app_service.configData();
+    const matchtype = cfg.localSettings.matchType;
+    this.onSetMatchType(matchtype);
+  }
+
+  onSetMatchType(type: string) {
+    this.homeSearchService.setMatchType(type);
+  }
+
+  onSearchSubmit(): void {
+    this.searchInputRef?.nativeElement.blur();
+    this.dashboardService.consolidatedCallbackModel = new ConsolidatedCallbackModel();
+    const queryParams = {
+      ...this.route.snapshot.queryParams,
+      q: this.searchQuery || null
+    };
+    this.router.navigate(['/dashboard/profile/consolidated/all'], {
+      queryParams,
+      queryParamsHandling: 'merge'
+    }).then();
+  }
+
+  getMatchType() {
+    const matchtype = this.dashboardService.selectedFilters()["matchtype"];
+    if (matchtype === "full") {
+      return "Match full query";
     }
-    ngOnInit(): void {
-        const cfg = this.app_service.configData();
-        const matchtype = cfg.localSettings.matchType;
-        this.onSetMatchType(matchtype);
+    else if (matchtype === "or") {
+      return "Match any term";
     }
-    onSetMatchType(type: string) {
-        this.homeSearchService.setMatchType(type);
+    else if (matchtype === "semantic") {
+      return "Match semantic query";
     }
-    onSearchSubmit(): void {
-        this.searchInputRef?.nativeElement.blur();
-        this.dashboardService.consolidatedCallbackModel = new ConsolidatedCallbackModel();
-        const queryParams = {
-            ...this.route.snapshot.queryParams,
-            q: this.searchQuery || null
-        };
-        this.router.navigate(['/dashboard/profile/consolidated/all'], {
-            queryParams,
-            queryParamsHandling: 'merge'
-        }).then();
+    else {
+      return "Match individual terms";
     }
-    getMatchType() {
-        const matchtype = this.dashboardService.selectedFilters()["matchtype"];
-        if (matchtype === "full") {
-            return "Match full query";
-        }
-        else if (matchtype === "or") {
-            return "Match any term";
-        }
-        else if (matchtype === "semantic") {
-            return "Match semantic query";
-        }
-        else {
-            return "Match individual terms";
-        }
+  }
+
+  setFilterOverlay(newValue: boolean) {
+    this.homeSearchService.showFiltersOverlay = newValue;
+  }
+
+  onAdvanceSettingToggle() {
+    this.homeSearchService.toggleAdvanceSettings();
+  }
+
+  onToolToggle(event: Event) {
+    this.homeSearchService.toggleAdvancedTools(event);
+  }
+
+  onSearchInput(event: Event) {
+    this.homeSearchService.handleSearchInput(event);
+  }
+
+  onInsightToggleClick(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.insightMoved) {
+      this.insightMoved = false;
+      return;
     }
-    setFilterOverlay(newValue: boolean) {
-        this.homeSearchService.showFiltersOverlay = newValue;
+    this.homeInsightExpanded = !this.homeInsightExpanded;
+  }
+
+  onInsightPointerDown(event: PointerEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const el = event.currentTarget as HTMLElement;
+    el.setPointerCapture(event.pointerId);
+    this.insightDragging = true;
+    this.insightMoved = false;
+    this.insightPointerId = event.pointerId;
+    this.insightStartY = event.clientY;
+    const max = Math.round(window.innerHeight * 0.30);
+    this.insightStartOffset = this.homeInsightExpanded ? -max : 0;
+    this.insightDragY = this.insightStartOffset;
+  }
+
+  onInsightPointerMove(event: PointerEvent): void {
+    if (!this.insightDragging || this.insightPointerId !== event.pointerId) {
+      return;
     }
-    onAdvanceSettingToggle() {
-        this.homeSearchService.toggleAdvanceSettings();
+    event.preventDefault();
+    event.stopPropagation();
+    const max = Math.round(window.innerHeight * 0.30);
+    const dy = event.clientY - this.insightStartY;
+    if (Math.abs(dy) > 3) {
+      this.insightMoved = true;
     }
-    onToolToggle(event: Event) {
-        this.homeSearchService.toggleAdvancedTools(event);
+    const next = this.insightStartOffset + dy;
+    this.insightDragY = Math.max(-max, Math.min(0, next));
+  }
+
+  onInsightPointerUp(event: PointerEvent): void {
+    if (this.insightPointerId !== event.pointerId) {
+      return;
     }
-    onSearchInput(event: Event) {
-        this.homeSearchService.handleSearchInput(event);
+    event.preventDefault();
+    event.stopPropagation();
+    const el = event.currentTarget as HTMLElement;
+    try {
+      el.releasePointerCapture(event.pointerId);
     }
-    onInsightToggleClick(event: MouseEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
-        if (this.insightMoved) {
-            this.insightMoved = false;
-            return;
-        }
-        this.homeInsightExpanded = !this.homeInsightExpanded;
+    catch {
     }
-    onInsightPointerDown(event: PointerEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
-        const el = event.currentTarget as HTMLElement;
-        el.setPointerCapture(event.pointerId);
-        this.insightDragging = true;
-        this.insightMoved = false;
-        this.insightPointerId = event.pointerId;
-        this.insightStartY = event.clientY;
-        const max = Math.round(window.innerHeight * 0.30);
-        this.insightStartOffset = this.homeInsightExpanded ? -max : 0;
-        this.insightDragY = this.insightStartOffset;
+    const max = Math.round(window.innerHeight * 0.30);
+    const mid = -max / 2;
+    const y = this.insightDragY ?? (this.homeInsightExpanded ? -max : 0);
+    this.homeInsightExpanded = y <= mid;
+    this.insightPointerId = null;
+    this.insightDragging = false;
+    this.insightDragY = null;
+  }
+
+  onInsightPointerCancel(event: PointerEvent): void {
+    if (this.insightPointerId !== event.pointerId) {
+      return;
     }
-    onInsightPointerMove(event: PointerEvent): void {
-        if (!this.insightDragging || this.insightPointerId !== event.pointerId) {
-            return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        const max = Math.round(window.innerHeight * 0.30);
-        const dy = event.clientY - this.insightStartY;
-        if (Math.abs(dy) > 3) {
-            this.insightMoved = true;
-        }
-        const next = this.insightStartOffset + dy;
-        this.insightDragY = Math.max(-max, Math.min(0, next));
+    event.preventDefault();
+    event.stopPropagation();
+    const el = event.currentTarget as HTMLElement;
+    try {
+      el.releasePointerCapture(event.pointerId);
     }
-    onInsightPointerUp(event: PointerEvent): void {
-        if (this.insightPointerId !== event.pointerId) {
-            return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        const el = event.currentTarget as HTMLElement;
-        try {
-            el.releasePointerCapture(event.pointerId);
-        }
-        catch {
-        }
-        const max = Math.round(window.innerHeight * 0.30);
-        const mid = -max / 2;
-        const y = this.insightDragY ?? (this.homeInsightExpanded ? -max : 0);
-        this.homeInsightExpanded = y <= mid;
-        this.insightPointerId = null;
-        this.insightDragging = false;
-        this.insightDragY = null;
+    catch {
     }
-    onInsightPointerCancel(event: PointerEvent): void {
-        if (this.insightPointerId !== event.pointerId) {
-            return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        const el = event.currentTarget as HTMLElement;
-        try {
-            el.releasePointerCapture(event.pointerId);
-        }
-        catch {
-        }
-        this.insightPointerId = null;
-        this.insightDragging = false;
-        this.insightDragY = null;
-    }
-    @HostListener('document:click', ['$event'])
-    onDocumentClick(event: MouseEvent) {
-        this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
-    }
+    this.insightPointerId = null;
+    this.insightDragging = false;
+    this.insightDragY = null;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
+  }
 }
