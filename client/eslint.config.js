@@ -266,6 +266,7 @@ const localRules = {
             },
             create(context) {
                 const sourceCode = context.getSourceCode();
+                const accessOrder = ['private', 'protected', 'public', 'default'];
                 function getAccess(node) {
                     return node.accessibility || 'default';
                 }
@@ -273,18 +274,26 @@ const localRules = {
                     ClassBody(node) {
                         const fields = (node.body || []).filter(m => m.type === 'PropertyDefinition');
                         let seenGroups = new Set();
-                        let order = [];
+                        let seenOrder = [];
                         const fixes = [];
                         let hasReport = false;
                         for (let i = 0; i < fields.length; i++) {
                             const current = fields[i];
                             const access = getAccess(current);
+                            const accessIndex = accessOrder.indexOf(access);
+                            if (accessIndex === -1) {
+                                continue;
+                            }
+                            const lastSeen = seenOrder[seenOrder.length - 1];
+                            if (lastSeen && accessOrder.indexOf(lastSeen) > accessIndex) {
+                                context.report({ messageId: 'group', node: current });
+                            }
                             if (!seenGroups.has(access)) {
                                 seenGroups.add(access);
-                                order.push(access);
+                                seenOrder.push(access);
                             }
                             else {
-                                const lastAccess = order[order.length - 1];
+                                const lastAccess = seenOrder[seenOrder.length - 1];
                                 if (access !== lastAccess) {
                                     context.report({ messageId: 'group', node: current });
                                 }
