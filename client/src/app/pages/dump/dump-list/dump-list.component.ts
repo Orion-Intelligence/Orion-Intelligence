@@ -25,7 +25,7 @@ export class DumpListComponent implements OnInit {
     ngOnInit(): void {
         this.isLoading = this.dumpService.getCurrentPage() > 0;
         this.dumpData$ = this.dumpService.dumpData$.pipe(tap(data => {
-            this.isLoading = data ? false : true;
+            this.isLoading = !data;
         }), map(data => {
             if (!data) {
                 return null;

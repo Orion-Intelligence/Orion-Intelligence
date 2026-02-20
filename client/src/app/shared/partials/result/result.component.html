@@ -1,9 +1,9 @@
 <ng-container *ngIf="consolidated">
-  <ul class="nav nav-tabs default-input-container-tab">
-    <li class="nav-item" *ngIf="!list_grid">
+  <ul class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
+    <li class="nav-item">
       <a class="nav-link cursor-pointer" [class.active]="activeTab === 'Group'">Group</a>
     </li>
-    <li class="nav-item" *ngIf="!list_grid">
+    <li class="nav-item">
       <a class="nav-link cursor-pointer" [class.active]="activeTab === 'IOCs'">IOCs</a>
     </li>
   </ul>
@@ -52,7 +52,7 @@
                   <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found
                 </small>
               </div>
-              <img src="../../../../assets/images/shared/security-scan-arrow.svg" alt="arrow" class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans" />
+              <img src="assets/images/shared/security-scan-arrow.svg" alt="arrow" class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans" />
               <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
                 <ng-container *ngFor="let domain of scandomains; let last = last">
                   <li @fadeInDashboardItem>
@@ -114,7 +114,7 @@
       <div class="filter-scan_flex">
         <div *ngIf="!shrinkmenu && filterModel" class="filter-button-wrapper side-menu-container d-flex align-items-start justify-content-start gap-3">
           <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="filters-button d-flex align-items-center">
-            <img alt="Filter Icon" height="24" ngSrc="../../../../assets/images/shared/theme/filter_icon.svg" priority width="24">
+            <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24">
             <span class="ms-2">Filter</span>
           </label>
         </div>
@@ -137,11 +137,7 @@
   </form>
 </ng-container>
 
-<ng-container *ngIf="suggestion && suggestion.options.length > 0">
-  <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
-</ng-container>
-
-<ng-container *ngIf="result_count_enabled">
+<ng-container *ngIf="!consolidated">
   <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs()); else noResults" @fadeInDashboardItem>
     <div class="right-text label-text">
       <span>{{ result_count }} Results Found</span>
@@ -158,7 +154,7 @@
   <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 
-<div *ngIf="isLoading && !isList" @fadeInDashboardItem>
+<div *ngIf="isLoading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
 
@@ -166,7 +162,7 @@
   <app-empty-query></app-empty-query>
 </div>
 
-<div *ngIf="!(checkMember() && !hasIOCs()) && showNoResult && !isLoading && result_count === 0" @fadeInDashboardItem>
+<div *ngIf="showNoResult && !isLoading && result_count === 0" @fadeInDashboardItem>
   <app-empty-result [searchQuery]="searchQuery"></app-empty-result>
 </div>
 

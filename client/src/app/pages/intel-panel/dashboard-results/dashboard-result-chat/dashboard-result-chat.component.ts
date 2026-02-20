@@ -18,15 +18,16 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
     templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
-    @Input()
-    searchResults: ChatResultItem[] = [];
-    @Input()
-    isExpandAble: boolean = false;
+    @Input() searchResults: ChatResultItem[] = [];
+    @Input() isExpandAble: boolean = false;
+
     currentUrl = '';
     queryParams: any = {};
     isCollapsed = true;
+
     constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
     }
+
     ngAfterViewInit() {
         this.scrollService.scrollToSavedPosition();
     }

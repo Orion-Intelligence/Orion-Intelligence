@@ -6,7 +6,7 @@ import { combineLatest, map, switchMap, take, timer } from 'rxjs';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { DashboardResultsGeneralGridComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import { DashboardResultsGeneralComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { DashboardResultExploitComponent } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
@@ -33,7 +33,7 @@ import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manage
 @Component({
     selector: 'app-dashboard-consolidated',
     standalone: true,
-    imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, NgbAccordionModule, ConsolidatedIocComponent],
+    imports: [NgIf, ResultComponent, DashboardResultsGeneralComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, NgbAccordionModule, ConsolidatedIocComponent],
     templateUrl: './dashboard-consolidated.component.html',
     styleUrl: './dashboard-consolidated.component.css',
     animations: [scanAnimation, fadeInDashboardItem],
@@ -111,7 +111,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
             this.domainScanComponent.clearResults();
         }
         if (!this.isGrouped) {
-          alert("dsadsa")
             this.fetchRanked();
             return;
         }

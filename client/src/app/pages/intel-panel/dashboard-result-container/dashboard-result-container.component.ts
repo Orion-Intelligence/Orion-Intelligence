@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgForOf, NgIf } from '@angular/common';
-import { DashboardResultsGeneralGridComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import { DashboardResultsGeneralComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
 import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
@@ -16,20 +16,20 @@ import { ConsolidatedParamModel } from '../../../shared/model/results/consolidat
 import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
 import {
-  DashboardResultGeneralListComponent
-} from '../dashboard-results/dashboard-result-general-list/dashboard-result-general-list.component';
+  DashboardResultDefacementComponent
+} from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 
 @Component({
   selector: 'app-dashboard-result-container',
   imports: [
     NgIf,
     PaginationComponent,
-    DashboardResultsGeneralGridComponent,
+    DashboardResultsGeneralComponent,
     ResultComponent,
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     NgForOf,
-    DashboardResultGeneralListComponent
+    DashboardResultDefacementComponent
   ],
   templateUrl: './dashboard-result-container.component.html',
   animations: [fadeInDashboardItem],
@@ -52,14 +52,6 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
 
   get currentParamModel(): ConsolidatedParamModel {
     return this.dashboardService.consolidatedParamModel;
-  }
-
-  get currentResultCount(): number {
-    return Math.ceil(this.currentResultModel?.Page_Count ?? 0);
-  }
-
-  get currentSearchResults(): any[] {
-    return this.currentResultModel?.Result ?? [];
   }
 
   get currentQuery(): string {

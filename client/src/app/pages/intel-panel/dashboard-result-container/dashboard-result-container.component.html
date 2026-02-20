@@ -45,10 +45,10 @@
   </div>
 </div>
 
-<div *ngIf="!isResponseLoading() && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
+<div *ngIf="currentResultModel?.length>0" @fadeInDashboardItem class="pagination-margin">
   <app-pagination
     (pageChange)="onPageChange($event)"
     [currentPage]="currentParamModel.page"
-    [maxPages]="currentResultCount">
+    [maxPages]="Math.ceil(currentResultModel?.length ?? 0)">
   </app-pagination>
 </div>

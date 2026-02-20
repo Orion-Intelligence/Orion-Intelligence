@@ -8,12 +8,12 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
-    selector: 'app-dashboard-result-general-list',
+    selector: 'app-dashboard-result-defacement',
     standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
-    templateUrl: './dashboard-result-general-list.component.html',
+    templateUrl: './dashboard-result-defacement.component.html',
     animations: [fadeInDashboardItem],
 })
-export class DashboardResultGeneralListComponent implements OnInit, AfterViewInit {
+export class DashboardResultDefacementComponent implements OnInit, AfterViewInit {
     @Input()
     searchResults: DefacementResultItem[] = [];
     @Input()

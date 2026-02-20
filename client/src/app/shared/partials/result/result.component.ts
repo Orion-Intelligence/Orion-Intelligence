@@ -7,9 +7,8 @@ import { LoadingFormComponent } from '../loading-form/loading-form.component';
 import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { SidebarService } from '../../services/sidebar.service';
 import { FiltersComponent } from '../filters/filters.component';
-import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
+import { FilterModel } from '../../model/filter/filter.model';
 import { SortType } from '../../constants/shared-enums';
-import { SuggestionComponent } from '../suggestion/suggestion.component';
 import { EmptyQueryComponent } from '../empty-query/empty-query.component';
 import { Suggestion } from '../../model/results/shared/common-result';
 import { Category } from "../../constants/pages";
@@ -32,53 +31,41 @@ import { HomeSearchService } from '../../../services/home_search/home.search.ser
     standalone: true,
     templateUrl: './result.component.html',
     animations: [fadeInDashboardItem, searchFilterAnimation],
-    imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
+    imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
-    @Input() result_count_enabled: boolean = true;
     @Input() result_count!: number;
     @Input() isLoading!: boolean;
     @Input() showNoResult: boolean = true;
     @Input() showEmptyQuery = false;
-    @Input() isList!: boolean;
     @Input() suggestion!: Suggestion | undefined;
     @Input() searchQuery = '';
-    @Input() list_grid = false;
     @Input() shrinkmenu = false;
     @Input() disableScroll = false;
     @Input() type!: Category;
     @Input() consolidated = false;
+
     @Input() domain = false;
     @Input() filterModel!: FilterModel;
     @Input() showSorting: boolean = true;
     @Input() showSelectedFilters: boolean = true;
     @Input() activeTab: string = 'Group';
 
+    @Output() onToggleSwitch = new EventEmitter<string>();
     @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
     @Output() reloadData = new EventEmitter<void>();
     @Output() updateQuery = new EventEmitter<string>();
     @Output() onToggleSort = new EventEmitter<SortType>();
+
+    @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
+    @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
     isFilterOpen$: Observable<boolean>;
     selectedSortBy: SortType = SortType.DEFAULT;
     scandomains: string[] = [];
     showScans = false;
 
-    @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
-    @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
-
-    constructor(
-        protected scrollService: ScrollService,
-        private router: Router,
-        public helperService: HelperService,
-        public app_service: AppService,
-        protected dashboardService: DashboardService,
-        public sidebarService: SidebarService,
-        private route: ActivatedRoute,
-        public authService: AuthService,
-        protected licenseService: LicenseService,
-        protected homeSearchService: HomeSearchService
-    ) {
+    constructor(protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
         this.isFilterOpen$ = this.sidebarService.sidebarState$;
     }
 
@@ -97,6 +84,24 @@ export class ResultComponent implements OnInit, OnChanges {
         if (matchtype === "semantic") return "Match semantic query";
         return "Match any term";
     });
+
+    onTabClick(event: Event): void {
+      const target = event.target as HTMLElement;
+      if (!target.classList.contains('nav-link') || target.classList.contains('active')) return;
+
+      const parent = target.closest('.nav-tabs');
+      if (!parent) return;
+
+      parent.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+      target.classList.add('active');
+
+      this.onToggleMenu(target.textContent?.trim() || '');
+    }
+
+    onToggleMenu(_tab: string) {
+      this.activeTab = _tab;
+      this.onToggleSwitch.emit(_tab);
+    }
 
     ngOnInit(): void {
         this.route.queryParams.subscribe(params => {
@@ -129,21 +134,6 @@ export class ResultComponent implements OnInit, OnChanges {
         this.updateQuery.emit(query);
         this.reloadData.emit();
         this.init_domains();
-    }
-
-    onGetSuggestion() {
-        if (this.searchQuery && this.suggestion && this.suggestion.options.length > 0 && this.suggestion.options.length < 15) {
-            return this.searchQuery.replace(this.suggestion.text, this.suggestion.options[0].text);
-        }
-        return "";
-    }
-
-    onUpdateSuggestion(suggestion: string) {
-        if (this.suggestion && this.suggestion.options.length) {
-            this.searchQuery = suggestion;
-            this.updateQuery.emit(suggestion);
-            this.reloadData.emit();
-        }
     }
 
     onToolToggle(event: Event): void {

@@ -1,7 +1,7 @@
-<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
-  (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
+<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="true"
+  (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
   [activeTab]="isIOC ? 'IOCs' : 'Group'" [isLoading]="isLoading()" [searchQuery]="query"
-  [result_count_enabled]="false" [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
+  [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
   (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
 
 <br>

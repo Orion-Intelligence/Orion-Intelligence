@@ -11,11 +11,11 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
     selector: 'app-dashboard-results-general-grid',
-    templateUrl: './dashboard-results-general-grid.component.html',
+    templateUrl: './dashboard-results-general.component.html',
     imports: [NgForOf, RouterLink, DatePipe, NgIf, TooltipDirective, CommonModule],
     standalone: true
 })
-export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnInit {
+export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     private highlightCache = new Map<string, SafeHtml>();
     @Input()
     query!: string;

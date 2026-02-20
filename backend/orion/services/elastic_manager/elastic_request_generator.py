@@ -550,17 +550,19 @@ class elastic_request_generator:
         if m_safe_search and m_safe_search == True:
             must_not_clause.append({"term": {"m_content_type": "adult"}})
 
-        if hasattr(p_query_model, "platform") and p_query_model.platform:
-            must_clauses.append({"term": {"m_platform": p_query_model.platform}})
-        if hasattr(p_query_model, "attacker") and p_query_model.attacker:
-            must_clauses.append({"terms": {"m_attacker": [p_query_model.attacker]}})
-        if hasattr(p_query_model, "team") and p_query_model.team:
-            must_clauses.append({"terms": {"m_team": [p_query_model.team]}})
+        if m_content_type == "phishing":
+            must_clauses.append({"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["phishing"]}}]}})
+        elif m_content_type == "hacked":
+            must_clauses.append({"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["hacked"]}}]}})
+        elif m_content_type == "databases":
+            must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
         if m_content_type and m_content_type.lower() not in ("", "all"):
             must_clauses.append(
-                {"bool": {"filter": [{"exists": {"field": "content_type"}},
-                    {"term": {"content_type": m_content_type.lower()}}]}})
+                {"bool": {"should": [
+                    {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
+                    {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
+                ], "minimum_should_match": 1}})
 
         phrases = re.findall(r'"([^"]+)"', p_query_model.q or "")
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (

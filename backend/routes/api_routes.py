@@ -247,6 +247,7 @@ async def search_consolidated_iocs( param: search_consolidated_param_model = Bod
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
 async def get_defacement_document(doc_id: str):
+
     return await search_model.getInstance().request_defacement_doc(doc_id)
 
 
