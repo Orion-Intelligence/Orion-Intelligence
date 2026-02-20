@@ -7,7 +7,8 @@
     "production": "npm run prebuild && ng build --configuration=production && node post-build.js",
     "test": "npx cypress run --browser=chromium",
     "lint": "ng lint",
-    "lint:fix": "npx eslint src/app --fix"
+    "lint:fix": "npx eslint src/app --fix",
+    "serve": "npm run lint && ng serve"
   },
   "private": true,
   "dependencies": {

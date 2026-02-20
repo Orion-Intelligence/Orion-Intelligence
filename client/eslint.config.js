@@ -272,11 +272,28 @@ const localRules = {
                 }
                 return {
                     ClassBody(node) {
-                        const fields = (node.body || []).filter(m => m.type === 'PropertyDefinition');
+                        const body = node.body || [];
+                        const fields = body.filter(m => m.type === 'PropertyDefinition');
                         let seenGroups = new Set();
                         let seenOrder = [];
                         const fixes = [];
                         let hasReport = false;
+                        let shouldFix = true;
+                        for (let i = 0; i < fields.length - 1; i++) {
+                            const current = fields[i];
+                            const next = fields[i + 1];
+                            const currentIndex = body.indexOf(current);
+                            const nextIndex = body.indexOf(next);
+                            for (let j = currentIndex + 1; j < nextIndex; j++) {
+                                if (body[j].type !== 'PropertyDefinition') {
+                                    shouldFix = false;
+                                    break;
+                                }
+                            }
+                            if (!shouldFix) {
+                                break;
+                            }
+                        }
                         for (let i = 0; i < fields.length; i++) {
                             const current = fields[i];
                             const access = getAccess(current);
@@ -286,7 +303,7 @@ const localRules = {
                             }
                             const lastSeen = seenOrder[seenOrder.length - 1];
                             if (lastSeen && accessOrder.indexOf(lastSeen) > accessIndex) {
-                                context.report({ messageId: 'group', node: current });
+                                hasReport = true;
                             }
                             if (!seenGroups.has(access)) {
                                 seenGroups.add(access);
@@ -295,7 +312,7 @@ const localRules = {
                             else {
                                 const lastAccess = seenOrder[seenOrder.length - 1];
                                 if (access !== lastAccess) {
-                                    context.report({ messageId: 'group', node: current });
+                                    hasReport = true;
                                 }
                             }
                             if (i > 0) {
@@ -325,7 +342,17 @@ const localRules = {
                                 messageId: 'noBlankLine',
                                 node,
                                 fix(fixer) {
-                                    return fixes.map(fn => fn(fixer));
+                                    if (!shouldFix || fields.length === 0) {
+                                        return fixes.map(fn => fn(fixer));
+                                    }
+                                    const groups = accessOrder.map(access => fields.filter(field => getAccess(field) === access)).filter(group => group.length > 0);
+                                    const first = fields[0];
+                                    const last = fields[fields.length - 1];
+                                    if (!first.range || !last.range) {
+                                        return fixes.map(fn => fn(fixer));
+                                    }
+                                    const replacement = groups.map(group => group.map(field => sourceCode.getText(field)).join('\n')).join('\n\n');
+                                    return fixer.replaceTextRange([first.range[0], last.range[1]], replacement);
                                 },
                             });
                         }
@@ -595,48 +622,14 @@ const localRules = {
                 messages: {
                     unused: 'Unused import.',
                 },
-                fixable: 'code',
             },
             create(context) {
-                const sourceCode = context.getSourceCode();
-                function getQuote(node) {
-                    const raw = sourceCode.getText(node.source);
-                    const match = raw.match(/^(['"])/);
-                    return match ? match[1] : "'";
-                }
-                function buildImportText(node, usedSpecifiers) {
-                    if (usedSpecifiers.length === 0) {
-                        return null;
-                    }
-                    const defaultSpec = usedSpecifiers.find(spec => spec.type === 'ImportDefaultSpecifier');
-                    const namespaceSpec = usedSpecifiers.find(spec => spec.type === 'ImportNamespaceSpecifier');
-                    const namedSpecs = usedSpecifiers.filter(spec => spec.type === 'ImportSpecifier');
-                    const parts = [];
-                    if (defaultSpec) {
-                        parts.push(defaultSpec.local.name);
-                    }
-                    if (namespaceSpec) {
-                        parts.push(`* as ${namespaceSpec.local.name}`);
-                    }
-                    if (namedSpecs.length > 0) {
-                        const names = namedSpecs.map(spec => {
-                            const importedName = spec.imported.name || spec.imported.value;
-                            if (importedName === spec.local.name) {
-                                return importedName;
-                            }
-                            return `${importedName} as ${spec.local.name}`;
-                        });
-                        parts.push(`{ ${names.join(', ')} }`);
-                    }
-                    const quote = getQuote(node);
-                    const importKind = node.importKind === 'type' ? 'import type' : 'import';
-                    return `${importKind} ${parts.join(', ')} from ${quote}${node.source.value}${quote};`;
-                }
                 return {
                     ImportDeclaration(node) {
                         if (!node.specifiers || node.specifiers.length === 0) {
                             return;
                         }
+                        const sourceCode = context.getSourceCode();
                         const variables = sourceCode.getDeclaredVariables(node);
                         const usedNames = new Set();
                         for (const variable of variables) {
@@ -648,23 +641,7 @@ const localRules = {
                         if (usedSpecifiers.length === node.specifiers.length) {
                             return;
                         }
-                        context.report({
-                            messageId: 'unused',
-                            node,
-                            fix(fixer) {
-                                const replacement = buildImportText(node, usedSpecifiers);
-                                if (!replacement) {
-                                    const start = node.range[0];
-                                    let end = node.range[1];
-                                    const nextToken = sourceCode.getTokenAfter(node);
-                                    if (nextToken && nextToken.loc.start.line === node.loc.end.line + 1) {
-                                        end = nextToken.range[0];
-                                    }
-                                    return fixer.removeRange([start, end]);
-                                }
-                                return fixer.replaceText(node, replacement);
-                            },
-                        });
+                        context.report({ messageId: 'unused', node });
                     },
                 };
             },
@@ -714,6 +691,7 @@ module.exports = [
                 'error',
                 { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }
             ],
+            'no-unused-private-class-members': 'error',
             'local/no-unused-imports': 'error',
             'local/decorator-single-line': 'error',
             'local/decorator-first-in-class': 'error',
