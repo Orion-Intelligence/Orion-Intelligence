@@ -21,7 +21,7 @@
 </div>
 
 <div *ngIf="!isResponseLoading()" @fadeInDashboardItem>
-  <div class="mx-[20px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]">
+  <div class="mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]">
     <div *ngFor="let item of currentResultModel" class="space-y-6">
       <app-dashboard-results-general-grid
         *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'"
@@ -46,9 +46,10 @@
   </div>
 </div>
 
-<div *ngIf="currentResultModel?.length>0" @fadeInDashboardItem class="mt-4">
+<div *ngIf="currentResultModel?.length>0" @fadeInDashboardItem class="mt-4 mx-[32px] w-[calc(100%-64px)] max-w-[910px] max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]">
   <app-pagination
     (pageChange)="onPageChange($event)"
+    [align]="'left'"
     [currentPage]="currentParamModel.page"
     [maxPages]="Math.ceil(currentResultModel?.length ?? 0)">
   </app-pagination>

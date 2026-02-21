@@ -10,6 +10,7 @@ export class PaginationComponent implements OnInit {
 
   @Input() maxPages = 1;
   @Input() currentPage = 1;
+  @Input() align: 'left' | 'center' = 'center';
 
   @Output() pageChange = new EventEmitter<number>();
 
