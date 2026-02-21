@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Output, Input } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { FocusDirective } from '../../directive/focus.directive';
 import { popupAnimation } from '../../animations/popup.animations';
 @Component({

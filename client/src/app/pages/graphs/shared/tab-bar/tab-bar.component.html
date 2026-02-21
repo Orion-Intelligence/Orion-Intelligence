@@ -1,12 +1,12 @@
 <div (click)="closeMenus()">
-  <header class="flex-shrink-0 h-12 bg-slate-800/50 border-b border-slate-700">
-    <div class="h-full flex items-end justify-between pl-2">
-      <nav class="h-full flex items-end gap-1">
-        <div *ngFor="let tab of tabManager.tabs(); trackBy: trackById" (click)="tabManager.editingTabId() !== tab.id && tabManager.selectTab(tab.id)" [class]="'group relative flex items-center cursor-pointer pr-2 pl-3 text-sm font-medium border-b-2 ' + (tabManager.activeTabId() === tab.id ? 'border-indigo-400 bg-slate-800 text-white pt-2 pb-1.5 rounded-t-md' : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 pt-2 pb-1.5 rounded-t-md')">
+  <header class="h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
+    <div class="h-full flex items-end justify-between pl-4">
+      <nav class="flex h-full items-end gap-1.5">
+        <div *ngFor="let tab of tabManager.tabs(); trackBy: trackById" (click)="tabManager.editingTabId() !== tab.id && tabManager.selectTab(tab.id)" [class]="'group relative flex items-center cursor-pointer pr-2 pl-3 text-sm font-medium border border-b-2 pt-2 pb-1.5 rounded-t-md transition-colors ' + (tabManager.activeTabId() === tab.id ? 'border-[var(--color-border)] border-b-indigo-400 bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-[0_1px_0_0_var(--color-blue-700)]' : 'border-transparent border-b-transparent bg-transparent text-[var(--color-text4)] hover:border-[var(--color-border)] hover:border-b-[var(--color-border)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
 
           <div *ngIf="tabManager.editingTabId() === tab.id; else tabNameBlock">
             <div>
-              <input #renameInput appAutofocus type="text" [value]="tab.name" [attr.data-tab-id]="tab.id" (blur)="handleRename(tab.id, renameInput)" (keydown.enter)="handleRename(tab.id, renameInput)" (keydown.escape)="cancelRename()" (click)="$event.stopPropagation()" class="bg-slate-700 text-white p-1 rounded-md outline-none ring-2 ring-indigo-500 w-32" />
+              <input #renameInput appAutofocus type="text" [value]="tab.name" [attr.data-tab-id]="tab.id" (blur)="handleRename(tab.id, renameInput)" (keydown.enter)="handleRename(tab.id, renameInput)" (keydown.escape)="cancelRename()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500" />
             </div>
           </div>
           <ng-template #tabNameBlock>
@@ -15,7 +15,7 @@
           
           <button *ngIf="tabManager.tabs().length > 1"
             (click)="$event.stopPropagation(); tabManager.closeTab(tab.id)"
-            [class]="'ml-1 p-1 rounded-full text-slate-500 hover:bg-slate-600 hover:text-white transition-colors ' + 
+            [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + 
                      (tabManager.activeTabId() === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
             <i class="bi bi-x-lg text-xs"></i>
           </button>
@@ -23,20 +23,20 @@
 
         <div class="pl-1">
           <div class="relative">
-            <input type="file" class="hidden" id="fileInput" (change)="onFileSelected($event)" accept=".json">
-            <button (click)="toggleAddMenu($event)" [disabled]="tabManager.tabs().length>= 4"
-              class="flex items-center justify-center h-8 w-8 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            <input data-cy="graph-tab-file-input" type="file" class="hidden" id="fileInput" (change)="onFileSelected($event)" accept=".json">
+            <button data-cy="graph-tab-add-menu" (click)="toggleAddMenu($event)" [disabled]="tabManager.tabs().length>= 4"
+              class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               title="New Session">
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
 
-            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 origin-top-left rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
-                <button (click)="createNewTab()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
-                    <i class="bi bi-plus-square w-5 h-5 text-slate-400 group-hover:text-white"></i>
+            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 origin-top-left rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
+                <button (click)="createNewTab()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                    <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>New Session</span>
                 </button>
-                <label for="fileInput" (click)="closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group cursor-pointer">
-                    <i class="bi bi-upload w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                <label for="fileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                    <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>Import Session</span>
                 </label>
             </div>
@@ -45,25 +45,25 @@
       </nav>
       <div class="self-center flex items-center gap-1 pr-2">
         <div class="relative">
-            <button (click)="toggleHeaderMenu($event)" class="flex items-center justify-center h-8 w-8 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors" title="Session Menu">
+            <button data-cy="graph-tab-session-menu" (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
                 <i class="bi bi-three-dots-vertical text-lg"></i>
             </button>
-            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 origin-top-right rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
-                <button (click)="tabManager.exportActiveTab(); closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
-                    <i class="bi bi-download w-5 h-5 text-slate-400 group-hover:text-white"></i>
+            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 origin-top-right rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
+                <button (click)="tabManager.exportActiveTab(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                    <i class="bi bi-download h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>Export Current Session</span>
                 </button>
-                <button (click)="openReportExportModal(); closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
-                    <i class="bi bi-file-earmark-arrow-down w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                <button (click)="openReportExportModal(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                    <i class="bi bi-file-earmark-arrow-down h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>Export Report</span>
                 </button>
-                <label for="fileInput" (click)="closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group cursor-pointer">
-                    <i class="bi bi-upload w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                <label for="fileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                    <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>Import Session</span>
                 </label>
-                <div class="my-1 h-px bg-slate-600"></div>
-                <button (click)="createNewTab()" [disabled]="tabManager.tabs().length >= 4" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-slate-200 disabled:cursor-not-allowed">
-                    <i class="bi bi-plus-square w-5 h-5 text-slate-400 group-hover:text-white"></i>
+                <div class="my-1 h-px bg-[var(--color-blue-710)]"></div>
+                <button (click)="createNewTab()" [disabled]="tabManager.tabs().length >= 4" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[var(--color-text2)]">
+                    <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>New Session</span>
                 </button>
             </div>

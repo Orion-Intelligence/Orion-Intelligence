@@ -1,5 +1,5 @@
 <div *ngIf="isList; else cardView" class="mt-4" @fadeInDashboardItem>
-  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-sm">
     <table class="w-full text-left text-sm" *ngIf="isLoading || (!isLoading && searchResults.length>0)">
       <thead class="text-[var(--color-text3)]">
       <tr>
@@ -59,7 +59,7 @@
 <ng-template #cardView>
   <div class="space-y-4">
     <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0,2) : searchResults).slice(0,30)">
-      <div [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm">
+      <div [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap gap-2">
             <ng-container *ngIf="item.m_ioc_type?.length; else unknownTag">

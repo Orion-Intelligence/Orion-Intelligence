@@ -1,18 +1,22 @@
-<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" enctype="multipart/form-data" method="GET" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px]">
+<div class="mx-auto w-full max-w-[2400px] px-5 pb-4 lg:px-8">
+<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">
   <div
-    class="flex w-full flex-wrap items-start gap-[12px] rounded-[10px] bg-[#4EA2F170] pr-[46px] pt-[8px] max-[1100px]:pr-[20px]"
-    [ngClass]="{ 'pr-[60px] w-[550px]': (apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'), 'pr-[60px]': apiType === 'user' || apiType === 'crypto' }">
-
-    <div class="w-full xl:w-9/12" [ngClass]="(apiType === 'social' || apiType === 'cracked'|| apiType === 'software' || apiType === 'crypto') ? 'xl:w-9/12' : 'xl:w-5/12'">
-      <div class="flex h-[42px] w-full">
-        <div class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white">
-          <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20">
+    class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3"
+    [ngClass]="{
+      'xl:max-w-[620px]': (apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'),
+      'xl:max-w-[980px]': !(apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto')
+    }">
+    <div class="flex w-full items-center gap-3">
+      <div class="min-w-0 flex-1">
+      <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+        <div class="flex w-[45px] items-center justify-center bg-white">
+          <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20" class="brightness-0 opacity-80">
         </div>
         <input
           [(ngModel)]="q1"
           autocapitalize="none"
           autocomplete="off"
-          class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
+          class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]"
           [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'cracked' || apiType === 'crypto' }"
           maxlength="150"
           [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))"
@@ -20,20 +24,25 @@
           [type]="apiType === 'cracked' ? 'url' : 'text'"
           [required]="apiType === 'crypto' ? true : ((apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim())))">
         <input type="hidden" value="1">
-        <span class="w-[1px] border-y border-r border-[var(--color-border)]"></span>
+        <button
+          *ngIf="apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'"
+          [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)"
+          class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
+          Search
+        </button>
       </div>
     </div>
 
-    <div class="w-full xl:w-5/12 mt-[8px] xl:mt-0" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software' && apiType !== 'crypto'">
-      <div class="flex h-[42px] w-full">
-        <div class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white">
-          <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20">
+    <div class="min-w-0 flex-1" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software' && apiType !== 'crypto'">
+      <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+        <div class="flex w-[45px] items-center justify-center bg-white">
+          <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20" class="brightness-0 opacity-80">
         </div>
         <input
           [(ngModel)]="q2"
           autocapitalize="none"
           autocomplete="off"
-          class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
+          class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]"
           email
           maxlength="150"
           name="q2"
@@ -41,66 +50,74 @@
           type="email"
           [required]="apiType === 'email' ? true : !(q1 && q1.trim())">
         <input type="hidden" value="1">
-        <span class="w-[1px] border-y border-r border-[var(--color-border)]"></span>
+        <button
+          [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)"
+          class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
+          Search
+        </button>
       </div>
     </div>
-
-    <div class="w-full xl:w-2/12 mt-[8px] xl:mt-0">
-      <button
-        [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)"
-        class="h-[41px] w-full rounded-[8px] bg-[linear-gradient(92.32deg,#4EA2F1_2.58%,#2C7AC5_66.77%,#1E6CB7_130.97%)] text-[14px] font-normal text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40 hover:opacity-100">
-        Search
-      </button>
     </div>
   </div>
 </form>
 
-<ng-container *ngIf="query_triggered && loading">
-  <div class="mt-[12px] ml-[32px] max-w-[720px]" *ngIf="progress < 100">
-    <div class="mb-[6px] text-[12px] text-[var(--color-text1)]">{{ currentStep || 'Scanning...' }} ({{ progress }}%)</div>
-    <div class="h-[8px] w-full rounded-full bg-[var(--color-progress)]">
-      <div class="h-[8px] rounded-full bg-[var(--color-blue-640)]" [style.width.%]="progress"></div>
-    </div>
-  </div>
-</ng-container>
-
-<div class="ml-[30px] mt-[10px]">
-  <div class="w-[calc(100%-60px)] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[20px] py-[12px] text-[13px] text-[var(--color-text1)]">
+<div class="ml-0 mt-3">
+  <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)]">
     <span>
-      <img alt="Info Icon" class="mr-[8px] inline-block" src="/client/src/assets/images/shared/hint.svg"/>
+      <img alt="Info Icon" class="mr-[8px] inline-block" src="/assets/images/shared/hint.svg"/>
       <span>{{ apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '' }}</span>
     </span>
   </div>
 </div>
 
-<div class="mt-[15px] mx-[32px]" *ngIf="query_triggered && !loading && hasResults" @fadeInDashboardItem>
-  <section class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[15px] shadow-[0_4px_8px_rgba(0,0,0,0.1)]">
+<app-empty-query *ngIf="!query_triggered && !loading"></app-empty-query>
+
+<ng-container *ngIf="query_triggered && loading">
+  <div class="mt-[12px] ml-0 max-w-[720px]" *ngIf="progress < 100">
+    <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ currentStep || 'Scanning...' }} ({{ progressValue }}%)</div>
+    <div class="h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+      <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [style.width.%]="progressValue"></div>
+    </div>
+  </div>
+  <div class="mt-[14px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]">
+    <div class="space-y-[12px]">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let i of [1,2,3]">
+        <div class="ui-shimmer h-[14px] w-[220px] rounded-[5px] bg-[#ffffff14]"></div>
+        <div class="ui-shimmer mt-[10px] h-[12px] w-full rounded-[5px] bg-[#ffffff14]"></div>
+        <div class="ui-shimmer mt-[8px] h-[12px] w-[75%] rounded-[5px] bg-[#ffffff14]"></div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<div class="mt-[15px] mx-0" *ngIf="query_triggered && !loading && hasResults" @fadeInDashboardItem>
+  <section class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] p-[15px]">
     <div class="flex items-center justify-between" @fadeInDashboardItem>
       <div class="text-[16px] font-semibold text-[var(--color-text1)]">Search Results for <span class="mx-[6px]">〡</span><span class="font-mono">{{ (apiType === 'user' ? (displayQ1 || q1) : (q1 || displayQ1)) || 'query' }}</span></div>
       <div class="flex items-center gap-[8px]">
-        <span class="inline-flex items-center gap-[6px] rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(46,204,113,0.12)] px-[10px] py-[2px] text-[12px] text-[var(--color-text1)]">
+        <span class="inline-flex items-center gap-[6px] rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize bg-emerald-500/10 text-emerald-300">
           <i class="bi bi-check-circle-fill"></i> success
         </span>
-        <button type="button" class="inline-flex items-center gap-[6px] rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] px-[10px] py-[2px] text-[12px] text-[var(--color-text1)]" *ngIf="apiType === 'crypto' && txDrilldown" (click)="backFromTx()">
+        <button type="button" class="inline-flex items-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-730)] px-[10px] py-[2px] text-[12px] text-[var(--color-text1)]" *ngIf="apiType === 'crypto' && txDrilldown" (click)="backFromTx()">
           <i class="bi bi-arrow-left"></i> back
         </button>
       </div>
     </div>
 
     <div class="mt-[12px] grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4" @fadeInDashboardItem>
-      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
         <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-diagram-3"></i> API Type</div>
         <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ apiType }}</div>
       </div>
-      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
         <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-shield-exclamation"></i> Total Results</div>
         <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? ((cryptoResult?.recent_transactions?.length || 0) || 1) : cardsData.length }}</div>
       </div>
-      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
         <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-person-badge"></i> Query 1</div>
         <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ1 || q1) || 'not found' }}</div>
       </div>
-      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
         <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-envelope"></i> Query 2</div>
         <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ2 || q2) || 'not found' }}</div>
       </div>
@@ -110,7 +127,7 @@
       <ng-container *ngIf="apiType === 'crypto'; else nonCryptoSwitch">
         <ng-container *ngIf="cryptoResult as r">
           <ng-container *ngIf="(r?.query_type === 'transaction_id' || r?.txid); else cryptoWalletView">
-            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" @fadeInDashboardItem>
+            <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" @fadeInDashboardItem>
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ r?.detected_network || r?.network || 'crypto' }}</div>
@@ -119,80 +136,80 @@
               </div>
 
               <div class="mt-[12px] space-y-[10px]">
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">TXID</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.txid || (displayQ2 || q2) || 'not found' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">TX</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">TX</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Network</div>
                     <div class="text-[13px] text-[var(--color-text1)]">{{ r?.network || r?.detected_network || 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Network</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Network</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Confirmed</div>
                     <div class="text-[13px] text-[var(--color-text1)]">{{ r?.status_info?.confirmed === true ? 'true' : (r?.status_info?.confirmed === false ? 'false' : 'not available') }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Status</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Status</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Block Height</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.status_info?.block_height ?? 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Block</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Block</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Confirmations</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.status_info?.confirmations ?? 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Block</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Block</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Total Input (BTC)</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.amounts?.total_input_btc ?? 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Amounts</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Amounts</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Total Output (BTC)</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.amounts?.total_output_btc ?? 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Amounts</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Amounts</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Fee (BTC)</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.amounts?.fee_btc ?? 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Fee</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Fee</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Size</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.transaction_details?.size ?? 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Details</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Details</span>
                 </div>
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Weight</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.transaction_details?.weight ?? 'not available' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Details</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Details</span>
                 </div>
               </div>
             </div>
 
-            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngIf="r?.inputs && r?.inputs.length > 0" @fadeInDashboardItem>
+            <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" *ngIf="r?.inputs && r?.inputs.length > 0" @fadeInDashboardItem>
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-[14px] font-semibold text-[var(--color-text1)]">Inputs</div>
@@ -201,17 +218,17 @@
               </div>
 
               <div class="mt-[12px] space-y-[10px]">
-                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let i of r?.inputs" @fadeInDashboardItem (click)="openAddr(i?.address)">
+                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]" *ngFor="let i of r?.inputs" @fadeInDashboardItem (click)="openAddr(i?.address)">
                   <div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ i?.address }}</div>
                     <div class="text-[12px] text-[var(--color-text4)]">Address ({{ i?.value_btc ?? 'not available' }} BTC)</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">IN</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">IN</span>
                 </div>
               </div>
             </div>
 
-            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngIf="r?.outputs && r?.outputs.length > 0" @fadeInDashboardItem>
+            <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" *ngIf="r?.outputs && r?.outputs.length > 0" @fadeInDashboardItem>
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-[14px] font-semibold text-[var(--color-text1)]">Outputs</div>
@@ -220,17 +237,17 @@
               </div>
 
               <div class="mt-[12px] space-y-[10px]">
-                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let o of r?.outputs" @fadeInDashboardItem (click)="openAddr(o?.address)">
+                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]" *ngFor="let o of r?.outputs" @fadeInDashboardItem (click)="openAddr(o?.address)">
                   <div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ o?.address }}</div>
                     <div class="text-[12px] text-[var(--color-text4)]">Address ({{ o?.value_btc ?? 'not available' }} BTC)</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">OUT</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">OUT</span>
                 </div>
               </div>
             </div>
 
-            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngIf="r?.recent_transactions && r?.recent_transactions.length > 0" @fadeInDashboardItem>
+            <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" *ngIf="r?.recent_transactions && r?.recent_transactions.length > 0" @fadeInDashboardItem>
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-[14px] font-semibold text-[var(--color-text1)]">Recent Transactions</div>
@@ -239,19 +256,19 @@
               </div>
 
               <div class="mt-[12px] space-y-[10px]">
-                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let tx of r?.recent_transactions" @fadeInDashboardItem (click)="openTx(tx?.txid)">
+                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]" *ngFor="let tx of r?.recent_transactions" @fadeInDashboardItem (click)="openTx(tx?.txid)">
                   <div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ tx?.txid }}</div>
                     <div class="text-[12px] text-[var(--color-text4)]">TXID</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">TX</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">TX</span>
                 </div>
               </div>
             </div>
           </ng-container>
 
           <ng-template #cryptoWalletView>
-            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" @fadeInDashboardItem>
+            <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" @fadeInDashboardItem>
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-[14px] font-semibold text-[var(--color-text1)]">Wallet</div>
@@ -260,12 +277,12 @@
               </div>
 
               <div class="mt-[12px] space-y-[10px]">
-                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
                   <div>
                     <div class="text-[12px] text-[var(--color-text4)]">Address</div>
                     <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.address || (displayQ1 || q1) || 'not found' }}</div>
                   </div>
-                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Wallet</span>
+                  <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Wallet</span>
                 </div>
               </div>
             </div>
@@ -274,215 +291,52 @@
       </ng-container>
 
       <ng-template #nonCryptoSwitch>
-        <ng-container *ngIf="apiType === 'cracked'; else nonCrackedSwitch">
-          <ng-container *ngIf="cardsData && cardsData.length > 0; else emptyResult">
-            <div class="space-y-[16px]" *ngFor="let item of cardsData" @fadeInDashboardItem>
-              <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_app_name }}</div>
-                    <div class="text-[12px] text-[var(--color-text4)]">{{ (item?.m_download_link?.length || 0) }} Links</div>
-                  </div>
+        <ng-container *ngIf="genericItems.length > 0; else emptyResult">
+          <div class="space-y-[16px]">
+            <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" *ngFor="let item of genericItems; let idx = index; trackBy: trackByIndex" @fadeInDashboardItem>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_title || item?.m_app_name || item?.title || ('Result ' + (idx + 1)) }}</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ getObjectEntries(item).length }} Fields</div>
                 </div>
+              </div>
 
-                <div class="mt-[12px] space-y-[10px]">
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Application URL</div>
-                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_app_url }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ apiType }}</span>
+              <div class="mt-[12px] space-y-[10px]">
+                <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]" *ngFor="let entry of getObjectEntries(item)">
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ displayFieldLabel(entry.key) }}</div>
+
+                  <div class="mt-[4px] text-[13px] text-[var(--color-text1)]" *ngIf="!isArrayValue(entry.value) && !isObjectValue(entry.value)">
+                    <a *ngIf="isUrlValue(entry.value); else plainValue" class="inline-flex max-w-full items-center gap-[8px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[10px] py-[6px] text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" [href]="entry.value" target="_blank" rel="noopener noreferrer">
+                      <span aria-hidden="true">🔗</span>
+                      <span class="truncate max-w-[760px]">{{ entry.value }}</span>
+                    </a>
+                    <ng-template #plainValue>{{ stringifyPrimitive(entry.value) }}</ng-template>
                   </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Package ID</div>
-                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_package_id }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Package</span>
+
+                  <div class="mt-[4px] flex flex-wrap gap-[6px]" *ngIf="isArrayValue(entry.value)">
+                    <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]" *ngFor="let v of entry.value; trackBy: trackByIndex">{{ stringifyPrimitive(v) }}</span>
+                    <span class="text-[13px] text-[var(--color-text4)]" *ngIf="entry.value.length === 0">[]</span>
                   </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Network</div>
-                      <div class="text-[13px] text-[var(--color-text1)]">{{ item?.m_network }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Network</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Version</div>
-                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_version }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Version</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let ct of item?.m_content_type">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Content Type</div>
-                      <div class="text-[13px] text-[var(--color-text1)]">{{ ct }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Type</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let d of item?.m_download_link">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Download Link</div>
-                      <div class="text-[13px] text-[var(--color-text1)]">
-                        <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="d" target="_blank" rel="noopener noreferrer" title="{{ d }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ d }}</span></a>
-                      </div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Download</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Download Links</div>
-                      <div class="text-[13px] text-[var(--color-text1)]">not available</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Download</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">APK Size</div>
-                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Size</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Latest Date</div>
-                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_latest_date }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Date</span>
-                  </div>
-                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngIf="item?.m_mod_features && (item?.m_mod_features + '').trim().length > 0">
-                    <div>
-                      <div class="text-[12px] text-[var(--color-text4)]">Mod Features</div>
-                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_mod_features }}</div>
-                    </div>
-                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Mod</span>
-                  </div>
+
+                  <pre class="mt-[6px] overflow-x-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[8px] text-[12px] text-[var(--color-text1)]" *ngIf="isObjectValue(entry.value)">{{ stringifyJson(entry.value) }}</pre>
                 </div>
               </div>
             </div>
-          </ng-container>
+          </div>
         </ng-container>
-
-        <ng-template #nonCrackedSwitch>
-          <ng-container *ngIf="apiType === 'social'; else nonSocialSwitch">
-            <ng-container *ngIf="cardsData && cardsData.length > 0; else emptyResult">
-              <div class="space-y-[16px]" *ngFor="let item of cardsData; let last = last" @fadeInDashboardItem>
-                <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_title }}</div>
-                      <div class="text-[12px] text-[var(--color-text4)]">{{ ((item?.m_weblink?.length || 0) + (item?.m_dumplink?.length || 0)) }} Links</div>
-                    </div>
-                  </div>
-
-                  <div class="mt-[12px] space-y-[10px]">
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Profile URL</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">
-                          <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="item?.m_url" target="_blank" rel="noopener" title="{{ item?.m_url }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ item?.m_url }}</span></a>
-                        </div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Profile</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Found On</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">{{ item?.m_base_url }}</div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Source</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let w of item?.m_weblink">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Web Link</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">
-                          <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="w" target="_blank" rel="noopener" title="{{ w }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ w }}</span></a>
-                        </div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Web</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let d of item?.m_dumplink">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Dump Link</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">
-                          <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="d" target="_blank" rel="noopener" title="{{ d }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ d }}</span></a>
-                        </div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Dump</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ng-container>
-          </ng-container>
-
-          <ng-template #nonSocialSwitch>
-            <ng-container *ngIf="apiType === 'breach'; else nonBreachSwitch">
-              <ng-container *ngIf="breachData; else emptyResult">
-                <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" @fadeInDashboardItem>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ breachData?.m_url }}</div>
-                      <div class="text-[12px] text-[var(--color-text4)]">{{ breachData?.m_dumplink?.length || 0 }} Breaches</div>
-                    </div>
-                  </div>
-
-                  <div class="mt-[12px] space-y-[10px]">
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Content Type</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">stolen</div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Status</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">{{ $any(apiType) === 'user' ? 'Username' : 'Query 1' }}</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ displayQ1 && displayQ1.trim() !== '' ? displayQ1 : 'not found' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Query</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngIf="$any(apiType) !== 'social' && $any(apiType) !== 'cracked' && $any(apiType) !== 'software'">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">{{ $any(apiType) === 'user' ? 'Email Address' : 'Query 2' }}</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Query</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let item of breachData?.m_dumplink">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Breach</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item }}</div>
-                      </div>
-                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Breach</span>
-                    </div>
-                  </div>
-                </div>
-              </ng-container>
-            </ng-container>
-          </ng-template>
-        </ng-template>
       </ng-template>
     </section>
   </section>
 </div>
 
-<ng-template #nonBreachSwitch>
-  <ng-container *ngIf="cardsData && cardsData.length > 0; else emptyResult">
-    <div class="mt-[15px] mx-[32px] space-y-[16px]" @fadeInDashboardItem>
-      <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngFor="let item of cardsData">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_title }}</div>
-            <div class="text-[12px] text-[var(--color-text4)]">{{ (item?.m_links?.length || 0) }} Links</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-</ng-template>
+<div class="mt-[15px] mx-0" *ngIf="query_triggered && !loading && !hasResults" @fadeInDashboardItem>
+  <section class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[20px] text-center">
+    <div class="text-[16px] font-semibold text-[var(--color-text1)]">No result found</div>
+    <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">Try a different query and run the scan again.</div>
+  </section>
+</div>
 
 <ng-template #emptyResult>
   <app-empty-result></app-empty-result>
 </ng-template>
+</div>

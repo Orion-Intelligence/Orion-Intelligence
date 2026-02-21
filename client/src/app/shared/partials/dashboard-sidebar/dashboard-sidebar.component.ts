@@ -13,11 +13,23 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { animate, style, transition, trigger } from '@angular/animations';
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
   imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent],
   templateUrl: './dashboard-sidebar.component.html',
+  animations: [
+    trigger('sidebarMode', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-10px) scale(0.99)' }),
+        animate('220ms cubic-bezier(0.22,1,0.36,1)', style({ opacity: 1, transform: 'translateX(0) scale(1)' })),
+      ]),
+      transition(':leave', [
+        animate('170ms ease-out', style({ opacity: 0, transform: 'translateX(-8px) scale(0.99)' })),
+      ]),
+    ]),
+  ],
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
   sidebar_default = true;

@@ -6,10 +6,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, EMPTY, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
 import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
+import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgForOf, NgOptimizedImage, NgIf, EmptyResultComponent, NgClass],
+  imports: [FormsModule, NgForOf, NgOptimizedImage, NgIf, EmptyResultComponent, EmptyQueryComponent, NgClass],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
@@ -32,6 +33,7 @@ export class DashboardApiComponent implements OnInit {
   prevDisplayQ1 = '';
   prevDisplayQ2 = '';
   prevBreachData: any | null = null;
+  trackByIndex = (index: number) => index;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
@@ -76,7 +78,76 @@ export class DashboardApiComponent implements OnInit {
     if (this.apiType === 'crypto') {
       return !!this.cryptoResult;
     }
-    return this.cardsData.length > 0;
+    return this.genericItems.length > 0;
+  }
+
+  get progressValue(): number {
+    const p = Number(this.progress);
+    if (!Number.isFinite(p)) {
+      return 0;
+    }
+    return Math.max(0, Math.min(100, Math.round(p)));
+  }
+
+  get genericItems(): any[] {
+    if (this.apiType === 'crypto') {
+      return [];
+    }
+    if (this.cardsData.length > 0) {
+      return this.cardsData;
+    }
+    if (this.responseData && typeof this.responseData === 'object') {
+      return [this.responseData];
+    }
+    return [];
+  }
+
+  getObjectEntries(item: any): Array<{ key: string; value: any }> {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      return [];
+    }
+    return Object.entries(item).map(([key, value]) => ({ key, value }));
+  }
+
+  displayFieldLabel(key: string): string {
+    return key
+      .replace(/^m_/, '')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  isArrayValue(value: any): boolean {
+    return Array.isArray(value);
+  }
+
+  isObjectValue(value: any): boolean {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
+  }
+
+  isUrlValue(value: any): boolean {
+    if (typeof value !== 'string') {
+      return false;
+    }
+    return /^https?:\/\//i.test(value.trim());
+  }
+
+  stringifyPrimitive(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'not available';
+    }
+    if (typeof value === 'boolean') {
+      return value ? 'true' : 'false';
+    }
+    return String(value);
+  }
+
+  stringifyJson(value: any): string {
+    try {
+      return JSON.stringify(value, null, 2);
+    }
+    catch {
+      return String(value);
+    }
   }
 
   ngOnInit(): void {
@@ -287,7 +358,10 @@ export class DashboardApiComponent implements OnInit {
   }
 
   private isPendingResponse(res: any): boolean {
-    return (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
+    const topStatus = (res?.status || '').toLowerCase();
+    const nestedStatus = (res?.result?.status || '').toLowerCase();
+    return ['pending', 'processing', 'running', 'busy'].includes(topStatus) ||
+      ['pending', 'processing', 'running', 'busy'].includes(nestedStatus);
   }
 
   private isFailedPendingResponse(res: any): boolean {

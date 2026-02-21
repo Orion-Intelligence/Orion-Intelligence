@@ -1,6 +1,6 @@
 <div class="space-y-4">
   <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))">
-    <div [id]="'item-' + item.m_message_id" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm">
+    <div [id]="'item-' + item.m_message_id" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">

@@ -13,8 +13,8 @@
       <div class="flex-grow p-3 flex flex-col overflow-y-auto">
         <div class="border-b border-slate-700 shrink-0">
           <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-            <button (click)="tabSelected.emit('history')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Scan History</button>
-            <button *ngIf="!isSmallScreen()" (click)="tabSelected.emit('entities')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Entities</button>
+            <button data-cy="home-menu-tab-history" (click)="tabSelected.emit('history')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Scan History</button>
+            <button data-cy="home-menu-tab-entities" *ngIf="!isSmallScreen()" (click)="tabSelected.emit('entities')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Entities</button>
           </nav>
         </div>
 
@@ -131,10 +131,10 @@
 
     <div sidebar-collapsed class="h-full flex flex-col items-center">
       <div class="py-4 flex flex-col items-center gap-4">
-        <button (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-xl transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
+        <button data-cy="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-xl transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
           <i class="bi bi-clock-history text-lg leading-none"></i>
         </button>
-        <button *ngIf="!isSmallScreen()" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-xl transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
+        <button data-cy="home-menu-tab-entities-collapsed" *ngIf="!isSmallScreen()" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-xl transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
           <i class="bi bi-diagram-3 text-lg leading-none"></i>
         </button>
       </div>

@@ -1,16 +1,16 @@
-<div class="flex h-screen w-screen flex-col overflow-hidden bg-slate-900">
+<div class="flex h-screen w-screen flex-col overflow-hidden bg-[var(--color-blue-850)]">
   <ng-container *ngIf="isTailwindReady(); else tailwindLoading">
     <app-tab-bar></app-tab-bar>
 
     <ng-container *ngIf="tabManager.activeTab() as activeTab; else loading">
       <main class="flex-grow min-h-0 relative">
         <input type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
-        <div class="h-full w-full min-h-0 flex flex-col overflow-hidden text-slate-200" (click)="state.closeContextMenu()">
+        <div class="h-full w-full min-h-0 flex flex-col overflow-hidden text-[var(--color-text2)]" (click)="state.closeContextMenu()">
 
         <div class="flex-grow min-h-0 flex flex-col lg:flex-row relative">
 
           <app-home-menu
-            class="border-b lg:border-r border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
+            class="hidden flex-shrink-0 flex-col overflow-hidden border-b border-[var(--color-border)] bg-[#172235] backdrop-blur-md lg:flex lg:border-r"
             [isCollapsed]="isHomeMenuCollapsed()"
             [activeTab]="activeHomeMenuTab()"
             [searchTerm]="homeMenuSearchTerm()"
@@ -28,7 +28,7 @@
             (cancelAllFetches)="cancelAllFetchesForUser($event)">
           </app-home-menu>
 
-          <main class="relative flex min-h-0 flex-grow flex-col bg-[radial-gradient(circle,rgba(100,116,139,0.15)_1px,transparent_1px)] bg-[length:2rem_2rem]">
+          <main class="relative flex min-h-0 flex-grow flex-col bg-[var(--color-blue-850)] bg-[radial-gradient(circle,rgba(100,116,139,0.15)_1px,transparent_1px)] bg-[length:2rem_2rem]">
 
             <app-graph-toolbar
               [searchTerm]="searchTerm()"
@@ -56,13 +56,13 @@
                     <app-graph-search-trigger [isExpanded]="isGraphSearchExpanded()" (triggered)="expandGraphSearch()"></app-graph-search-trigger>
                     <div class="absolute top-0 left-0 w-[22rem] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-out origin-top-left" [class.opacity-100]="isGraphSearchExpanded()" [class.opacity-0]="!isGraphSearchExpanded()" [class.scale-100]="isGraphSearchExpanded()" [class.scale-95]="!isGraphSearchExpanded()" [class.pointer-events-auto]="isGraphSearchExpanded()" [class.pointer-events-none]="!isGraphSearchExpanded()">
                       <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
-                        <i class="bi bi-search w-5 h-5 text-slate-400 leading-none"></i>
+                        <i class="bi bi-search w-5 h-5 text-[var(--color-text4)] leading-none"></i>
                       </div>
-                      <input type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border-0 bg-slate-800/85 py-2.5 pl-11 pr-10 text-slate-200 shadow-lg ring-1 ring-inset ring-slate-700/60 backdrop-blur-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
-                      <button *ngIf="graphSearchTerm()" (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors">
+                      <input type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+                      <button *ngIf="graphSearchTerm()" (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
                         <i class="bi bi-x-circle-fill"></i>
                       </button>
-                      <button *ngIf="!graphSearchTerm()" (click)="toggleGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors">
+                      <button *ngIf="!graphSearchTerm()" (click)="toggleGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
                         <i class="bi bi-x-lg text-sm"></i>
                       </button>
                     </div>
@@ -86,55 +86,55 @@
                   (edgeDeleted)="handleEdgeDeleted($event)">
                 </app-network-graph>
 
-                <div *ngIf="networkData().nodes.length === 0" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-600 select-none">
+                <div *ngIf="networkData().nodes.length === 0" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-center text-[var(--color-text4)]">
                   <div class="text-center">
-                    <i class="bi bi-share text-5xl text-slate-800 mx-auto"></i>
-                    <p class="text-2xl font-semibold mt-3 text-slate-700">Graph is Waiting for Data</p>
-                    <p class="text-slate-700/80">Complete a scan or add an entity to begin visualization.</p>
+                    <i class="bi bi-share mx-auto text-5xl text-[var(--color-text4)]"></i>
+                    <p class="mt-3 text-2xl font-semibold text-[var(--color-text2)]">Graph is Waiting for Data</p>
+                    <p class="text-[var(--color-text4)]">Complete a scan or add an entity to begin visualization.</p>
                   </div>
                 </div>
 
-                <div *ngIf="networkData().nodes.length > 0" class="absolute bottom-4 left-4 select-none rounded-lg border border-slate-700 bg-slate-800/70 p-3 shadow-lg backdrop-blur-sm animate-[social-mapper-fade-in_0.4s_ease-in-out]">
-                  <h3 class="font-semibold text-slate-300 text-sm mb-2 border-b border-slate-700 pb-1">Legend</h3>
+                <div *ngIf="networkData().nodes.length > 0" class="absolute bottom-4 left-4 animate-[social-mapper-fade-in_0.4s_ease-in-out] select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
+                  <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">Legend</h3>
                   <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-2">
                       <div class="w-4 h-4 rounded-full border-2 border-indigo-400 bg-indigo-800 flex-shrink-0"></div>
-                      <span class="text-xs text-slate-400">User Profile</span>
+                      <span class="text-xs text-[var(--color-text4)]">User Profile</span>
                     </div>
                     <div class="flex items-center gap-2">
-                      <div class="w-4 h-4 rounded-full border-2 border-teal-500 bg-slate-700 flex-shrink-0 flex items-center justify-center">
+                      <div class="w-4 h-4 rounded-full border-2 border-teal-500 bg-[var(--color-blue-720)] flex-shrink-0 flex items-center justify-center">
                         <i class="bi bi-at text-white text-[10px]"></i>
                       </div>
-                      <span class="text-xs text-slate-400">Social Platform</span>
+                      <span class="text-xs text-[var(--color-text4)]">Social Platform</span>
                     </div>
                      <div class="flex items-center gap-2">
                       <div class="w-4 h-4 flex items-center justify-center text-sky-400">
                         <i class="bi bi-stack"></i>
                       </div>
-                      <span class="text-xs text-slate-400">Platform Group</span>
+                      <span class="text-xs text-[var(--color-text4)]">Platform Group</span>
                     </div>
                     <div class="flex items-center gap-2">
                       <div class="w-4 h-4 rounded-md border-2 border-green-400 bg-green-800 flex-shrink-0"></div>
-                      <span class="text-xs text-slate-400">Custom Entity</span>
+                      <span class="text-xs text-[var(--color-text4)]">Custom Entity</span>
                     </div>
-                    <div class="my-1 h-px bg-slate-700"></div>
+                    <div class="my-1 h-px bg-[var(--color-border)]"></div>
                     <div class="flex items-center gap-2">
-                      <div class="w-4 h-4 rounded-full border-2 border-sky-500 bg-slate-700 flex-shrink-0 flex items-center justify-center p-0.5">
+                      <div class="w-4 h-4 rounded-full border-2 border-sky-500 bg-[var(--color-blue-720)] flex-shrink-0 flex items-center justify-center p-0.5">
                          <i class="bi bi-twitter-x text-[8px] text-white"></i>
                       </div>
-                      <span class="text-xs text-slate-400">Platform Connection</span>
+                      <span class="text-xs text-[var(--color-text4)]">Platform Connection</span>
                     </div>
                     <div class="flex items-center gap-2">
-                      <div class="w-4 flex items-center text-slate-500">
+                      <div class="flex w-4 items-center text-[var(--color-text4)]">
                         &rarr;
                       </div>
-                      <span class="text-xs text-slate-400">Connection Direction</span>
+                      <span class="text-xs text-[var(--color-text4)]">Connection Direction</span>
                     </div>
                     <div class="flex items-center gap-2">
                       <div class="w-4 flex items-center">
                         <div class="h-px w-full border-t-2 border-dashed border-[#a78bfa]"></div>
                       </div>
-                      <span class="text-xs text-slate-400">Entity Connection</span>
+                      <span class="text-xs text-[var(--color-text4)]">Entity Connection</span>
                     </div>
                   </div>
                 </div>
@@ -155,7 +155,7 @@
           </main>
 
           <app-entity-manager
-            class="border-t lg:border-l border-slate-800 flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-visible transition-all duration-300"
+            class="flex flex-shrink-0 flex-col overflow-visible border-t border-[var(--color-border)] bg-[var(--color-blue-820-light)] backdrop-blur-md transition-all duration-300 lg:border-l"
             [isCollapsed]="isEntityMenuCollapsed()"
             [isSmallScreen]="isSmallScreen()"
             [activeTabState]="activeTab.state"
@@ -167,21 +167,21 @@
 
         <app-context-menu *ngIf="state.contextMenuData()" [data]="state.contextMenuData()" (action)="handleContextMenuAction($event)"></app-context-menu>
 
-        <div *ngIf="platformAliasModalData() as aliasData" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm" (click)="closePlatformAliasModal()">
-          <div class="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 shadow-2xl p-4" (click)="$event.stopPropagation()">
+        <div *ngIf="platformAliasModalData() as aliasData" class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-blue-850)]/70 backdrop-blur-sm" (click)="closePlatformAliasModal()">
+          <div class="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] shadow-2xl p-4" (click)="$event.stopPropagation()">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="text-base font-semibold text-slate-100 mb-1">Set Graph Alias</h3>
-                <p class="text-xs text-slate-400 truncate mb-0">Profile: &#64;{{ aliasData.username }}</p>
+                <h3 class="text-base font-semibold text-[var(--color-text1)] mb-1">Set Graph Alias</h3>
+                <p class="text-xs text-[var(--color-text4)] truncate mb-0">Profile: &#64;{{ aliasData.username }}</p>
               </div>
-              <button type="button" (click)="closePlatformAliasModal()" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"><i class="bi bi-x-lg text-sm"></i></button>
+              <button type="button" (click)="closePlatformAliasModal()" class="h-8 w-8 flex items-center justify-center rounded-full text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-white transition-colors"><i class="bi bi-x-lg text-sm"></i></button>
             </div>
             <div class="mt-4">
-              <label class="block text-xs font-medium text-slate-400 mb-1">Alias (graph label only)</label>
-              <input type="text" [value]="platformAliasInput()" (input)="onPlatformAliasInputChanged($event)" placeholder="Leave empty to reset" class="block w-full rounded-md border-0 bg-slate-800 py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none sm:text-sm sm:leading-6" />
+              <label class="block text-xs font-medium text-[var(--color-text4)] mb-1">Alias (graph label only)</label>
+              <input type="text" [value]="platformAliasInput()" (input)="onPlatformAliasInputChanged($event)" placeholder="Leave empty to reset" class="block w-full rounded-md border-0 bg-[var(--color-blue-800)] py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6" />
             </div>
             <div class="mt-4 flex items-center justify-end gap-2">
-              <button type="button" (click)="closePlatformAliasModal()" class="px-3 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">Cancel</button>
+              <button type="button" (click)="closePlatformAliasModal()" class="px-3 py-2 text-sm font-medium text-[var(--color-text2)] bg-[var(--color-blue-720)] rounded-md hover:bg-[var(--color-blue-710)] transition-colors">Cancel</button>
               <button type="button" (click)="savePlatformAlias()" class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 transition-colors">Save</button>
             </div>
           </div>
@@ -191,7 +191,7 @@
       </main>
     </ng-container>
     <ng-template #loading>
-      <div class="flex-grow flex items-center justify-center text-slate-500">
+      <div class="flex-grow flex items-center justify-center text-[var(--color-text4)]">
         <p>Loading session...</p>
       </div>
     </ng-template>
@@ -269,7 +269,7 @@
   </ng-container>
 
   <ng-template #tailwindLoading>
-    <div class="flex-grow flex items-center justify-center text-slate-500">
+    <div class="flex-grow flex items-center justify-center text-[var(--color-text4)]">
       <p>Loading social mapper styles...</p>
     </div>
   </ng-template>

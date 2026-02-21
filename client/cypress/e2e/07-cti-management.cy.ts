@@ -26,17 +26,13 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     cy.get('app-cti-sidebar input[name="maxDepth"]').clear().type('2');
     applyFilters();
 
-    cy.get('input[placeholder="Search nodes to highlight..."]').clear().type('leak');
-    cy.contains('button', 'Search').click({ force: true });
+    cy.get('[data-cy="graph-toolbar-search-input"]').first().clear().type('leak');
+    cy.get('[data-cy="graph-toolbar-search-button"]').first().click({ force: true });
     cy.contains('node(s) highlighted', { timeout: 20000 }).should('exist');
-    cy.get('button[title="Clear search"]').click({ force: true });
+    cy.get('[data-cy="graph-toolbar-clear-search"]').first().click({ force: true });
 
-    cy.get('button[title="Disable Physics Simulation"], button[title="Enable Physics Simulation"]')
-      .first()
-      .click({ force: true });
-    cy.get('button[title="Expand Groups"], button[title="Collapse Groups"]')
-      .first()
-      .click({ force: true });
+    cy.get('[data-cy="graph-toolbar-physics-toggle"]').first().click({ force: true });
+    cy.get('[data-cy="cti-expand-groups-toggle"]').first().click({ force: true });
 
     cy.get('app-cti-sidebar select[name="selectedType"]').select('Property', { force: true });
     cy.get('app-cti-sidebar select[name="propertyType"]').select('All', { force: true });
@@ -50,9 +46,9 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     cy.contains('button', 'Reset').click({ force: true });
     applyFilters();
 
-    cy.get('button[title="List View"]').click({ force: true });
+    cy.get('[data-cy="graph-toolbar-view-list"]').first().click({ force: true });
     cy.contains('Document').should('be.visible');
-    cy.get('button[title="Graph View"]').click({ force: true });
+    cy.get('[data-cy="graph-toolbar-view-graph"]').first().click({ force: true });
 
     openSessionMenu();
     cy.contains('button', 'Export Current Session').click({ force: true });
@@ -72,7 +68,7 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
   });
 
   const openSessionMenu = () => {
-    cy.get('button[title="Session Menu"]', { timeout: 15000 }).first().click({ force: true });
+    cy.get('[data-cy="cti-tab-session-menu"], [data-cy="graph-tab-session-menu"]', { timeout: 15000 }).first().click({ force: true });
   };
 
   const openAndAssertReportModal = (title: string) => {
@@ -107,13 +103,12 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
         return;
       }
 
-      cy.get('app-graph-toolbar').within(() => {
-        cy.get('input[placeholder="Enter username to scan..."]').clear().type(username);
-        cy.contains('button', 'Scan')
-          .should('be.visible')
-          .and('not.be.disabled')
-          .click({ force: true });
-      });
+      cy.get('[data-cy="graph-toolbar-search-input"]').first().clear().type(username);
+      cy.get('[data-cy="graph-toolbar-search-button"]')
+        .first()
+        .should('be.visible')
+        .and('not.be.disabled')
+        .click({ force: true });
       cy.wait('@socialRecon', { timeout: 90000 });
       cy.wait(1000);
     });
@@ -159,7 +154,7 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
   };
 
   const ensureListHasProfiles = () => {
-    cy.get('button[title="List View"]').click({ force: true });
+    cy.get('[data-cy="graph-toolbar-view-list"]').first().click({ force: true });
     cy.get('app-list-view, app-home-menu').should('exist');
 
     cy.get('body').then(($body) => {
@@ -174,11 +169,11 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     cy.contains('app-list-view h3', username, { timeout: 20000 }).should('exist');
   };
 
-  const addEntity = (buttonLabel: string, value: string, label: string) => {
-    cy.contains('button:visible', buttonLabel, { timeout: 15000 }).click({ force: true });
-    cy.get('app-add-entity-modal input#entityValue', { timeout: 15000 }).should('be.visible').clear().type(value);
-    cy.get('app-add-entity-modal input#entityLabel', { timeout: 10000 }).should('be.visible').clear().type(label);
-    cy.contains('app-add-entity-modal button', 'Add Entity', { timeout: 10000 })
+  const addEntity = (entityType: 'wallet' | 'email' | 'domain', value: string, label: string) => {
+    cy.get(`[data-cy="entity-add-${entityType}"]`, { timeout: 15000 }).first().click({ force: true });
+    cy.get('[data-cy="add-entity-value-input"]', { timeout: 15000 }).should('be.visible').clear().type(value);
+    cy.get('[data-cy="add-entity-label-input"]', { timeout: 10000 }).should('be.visible').clear().type(label);
+    cy.get('[data-cy="add-entity-submit"]', { timeout: 10000 })
       .should('be.visible')
       .and('not.be.disabled')
       .click({ force: true });
@@ -275,7 +270,7 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     cy.contains('app-manage-profiles-modal button', 'Cancel', { timeout: 20000 }).should('exist').click({ force: true });
     cy.get('app-manage-profiles-modal').should('not.exist');
 
-    cy.get('app-list-view button[title="Followers and Following"]').first().click({ force: true });
+    cy.get('[data-cy="list-view-followers-following"]').first().click({ force: true });
     cy.get('app-follower-scan-popup', { timeout: 20000 }).should('exist');
     cy.get('app-follower-scan-popup').within(() => {
       cy.get('input[placeholder="Filter profiles..."]').first().clear().type('follow');
@@ -286,8 +281,8 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
           cy.contains('button', 'Fetch Following').click({ force: true });
           cy.wait('@socialPlatformFetch', { timeout: 30000 });
         }
-        if ($popup.find('button[title="Scan this username"]').length > 0) {
-          cy.get('button[title="Scan this username"]').first().click({ force: true });
+        if ($popup.find('[data-cy="follower-scan-single"]').length > 0) {
+          cy.get('[data-cy="follower-scan-single"]').first().click({ force: true });
           cy.wait('@socialRecon', { timeout: 90000 });
         }
         if ($popup.find('a[title="Open account in new tab"]').length > 0) {
@@ -304,10 +299,10 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     triggerScanIfNeeded();
     ensureProfileAddedToGraph();
 
-    cy.get('button[title="Graph View"]').click({ force: true });
+    cy.get('[data-cy="graph-toolbar-view-graph"]').first().click({ force: true });
     cy.get('.vis-network canvas', { timeout: 30000 }).should('exist');
 
-    cy.get('button[title="New Session"]').first().click({ force: true });
+    cy.get('[data-cy="graph-tab-add-menu"]').first().click({ force: true });
     cy.contains('button', 'New Session').click({ force: true });
     cy.wait('@socialSessionTabAdd', { timeout: 30000 });
     cy.get('app-tab-bar header nav > div.group').its('length').should('be.greaterThan', 1);
@@ -338,15 +333,15 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     triggerScanIfNeeded();
     ensureProfileAddedToGraph();
 
-    cy.get('button[title="Graph View"]').click({ force: true });
+    cy.get('[data-cy="graph-toolbar-view-graph"]').first().click({ force: true });
     cy.get('.vis-network canvas', { timeout: 30000 }).should('exist');
 
-    cy.get('button[title="Disable Physics Simulation"], button[title="Enable Physics Simulation"]')
+    cy.get('[data-cy="graph-toolbar-physics-toggle"]')
       .first()
       .invoke('attr', 'title')
       .then((prevTitle) => {
-        cy.get('button[title="Disable Physics Simulation"], button[title="Enable Physics Simulation"]').first().click({ force: true });
-        cy.get('button[title="Disable Physics Simulation"], button[title="Enable Physics Simulation"]')
+        cy.get('[data-cy="graph-toolbar-physics-toggle"]').first().click({ force: true });
+        cy.get('[data-cy="graph-toolbar-physics-toggle"]')
           .first()
           .invoke('attr', 'title')
           .should('not.eq', prevTitle);
@@ -360,9 +355,9 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
       }
     });
 
-    addEntity('Add Wallet', '0x1234567890abcdef1234567890abcdef12345678', 'Coverage Wallet');
-    addEntity('Add Email', 'coverage@example.com', 'Coverage Email');
-    addEntity('Add Domain', 'coverage-example.com', 'Coverage Domain');
+    addEntity('wallet', '0x1234567890abcdef1234567890abcdef12345678', 'Coverage Wallet');
+    addEntity('email', 'coverage@example.com', 'Coverage Email');
+    addEntity('domain', 'coverage-example.com', 'Coverage Domain');
 
     cy.contains('Coverage Wallet', { timeout: 15000 }).should('exist');
     cy.contains('Coverage Email', { timeout: 15000 }).should('exist');
@@ -370,8 +365,8 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
 
     cy.get('input[placeholder="Filter items..."]', { timeout: 15000 }).clear().type('zzz-no-match');
     cy.contains('No Results Found').should('exist');
-    cy.get('button[title="Entities"]').click({ force: true });
-    cy.get('button[title="Scan History"]').click({ force: true });
+    cy.get('[data-cy="home-menu-tab-entities"], [data-cy="home-menu-tab-entities-collapsed"]').first().click({ force: true });
+    cy.get('[data-cy="home-menu-tab-history"], [data-cy="home-menu-tab-history-collapsed"]').first().click({ force: true });
 
     cy.get('.vis-network canvas').trigger('contextmenu', {
       button: 2,
@@ -387,16 +382,14 @@ describe('Orion Intelligence - Social Mapper Deep Coverage', () => {
     });
 
     cy.get('body').then(($body) => {
-      if ($body.find('button[title="Search on graph"]').length) {
-        cy.get('button[title="Search on graph"]').first().click({ force: true });
+      if ($body.find('[data-cy="social-graph-search-trigger"]').length) {
+        cy.get('[data-cy="social-graph-search-trigger"]').first().click({ force: true });
         cy.get('input[placeholder="Search on graph..."]', { timeout: 10000 }).should('be.visible').clear().type('bitbucket');
         cy.get('input[placeholder="Search on graph..."]').should('have.value', 'bitbucket');
       }
     });
 
-    cy.get('app-graph-toolbar').within(() => {
-      cy.get('button[title="Search by image"]').first().click({ force: true });
-    });
+    cy.get('[data-cy="graph-toolbar-image-search"]').first().click({ force: true });
     cy.get('input[type="file"][accept*="image"], input#imageInput', { timeout: 10000 })
       .first()
       .selectFile('cypress/fixtures/avatar.png', { force: true });

@@ -1,24 +1,24 @@
-<div class="mt-[16px] overflow-x-auto rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)]">
+<div class="ui-table-shell">
   <ng-container *ngIf="(directoryData$ | async) as data; else loadingTpl">
-    <table class="w-full border-collapse text-left text-[13px] text-[var(--color-text1)]">
-      <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0" class="bg-[var(--color-blue-820-light)]">
+    <table class="ui-table">
+      <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
         <tr>
-          <th class="px-[12px] py-[10px] font-semibold">ID</th>
-          <th class="px-[12px] py-[10px] font-semibold">Service URL</th>
-          <th class="px-[12px] py-[10px] font-semibold">Category</th>
-          <th class="px-[12px] py-[10px] font-semibold">General</th>
-          <th class="px-[12px] py-[10px] font-semibold">Leak</th>
-          <th class="px-[12px] py-[10px] font-semibold">Network</th>
-          <th class="px-[12px] py-[10px] font-semibold">Last Updated</th>
+          <th>ID</th>
+          <th>Service URL</th>
+          <th>Category</th>
+          <th>General</th>
+          <th>Leak</th>
+          <th>Network</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
       <tbody *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0" @fadeInDashboardItem>
         <ng-container *ngFor="let item of data.mDirectoryCallbackLinks | slice:0:visibleCount; let i = index">
-          <tr *ngIf="item.url?.trim()" class="border-t border-[var(--color-border)]">
-            <td class="px-[12px] py-[10px]" data-label="ID">
+          <tr *ngIf="item.url?.trim()">
+            <td data-label="ID">
               {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
             </td>
-            <td class="px-[12px] py-[10px]" data-label="Service URL">
+            <td class="max-w-[460px] truncate" data-label="Service URL">
               <ng-container *ngIf="item.network_type === 'telegram'; else nonTg">
                 <span class="text-[var(--color-text1)]">{{ item.name?.toLowerCase() }}</span>
               </ng-container>
@@ -26,37 +26,37 @@
                 <span class="text-[var(--color-text1)]">{{ item.url }}</span>
               </ng-template>
             </td>
-            <td class="px-[12px] py-[10px]" data-label="Category">
+            <td data-label="Category">
               <div class="flex flex-wrap gap-[6px]">
                 <ng-container *ngIf="item.content_type?.length; else noCategory">
-                  <div *ngFor="let category of item.content_type | slice:0:2" class="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[8px] py-[4px] text-[12px]">
+                  <div *ngFor="let category of item.content_type | slice:0:2" class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text2)]">
                     {{ category | titlecase }}
                   </div>
                 </ng-container>
                 <ng-template #noCategory>
-                  <div class="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[8px] py-[4px] text-[12px]">No categories available</div>
+                  <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text4)]">No categories</div>
                 </ng-template>
               </div>
             </td>
-            <td class="px-[12px] py-[10px]" data-label="General Model Status">
+            <td data-label="General Model Status">
               <span class="mr-[6px] inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
               {{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
             </td>
-            <td class="px-[12px] py-[10px]" data-label="Leak Model Status">
+            <td data-label="Leak Model Status">
               <span class="mr-[6px] inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
               {{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
             </td>
-            <td class="px-[12px] py-[10px]" data-label="Network Type">
+            <td class="capitalize" data-label="Network Type">
               {{ item.network_type ? item.network_type : 'Unknown' }}
             </td>
-            <td class="px-[12px] py-[10px]" data-label="Last Updated">
+            <td data-label="Last Updated">
               {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}
             </td>
           </tr>
         </ng-container>
 
-        <tr *ngIf="loadingMore" class="border-t border-[var(--color-border)]">
-          <td colspan="7" class="px-[12px] py-[16px] text-center">
+        <tr *ngIf="loadingMore">
+          <td colspan="7" class="py-[16px] text-center">
             <div class="mx-auto h-[20px] w-[20px] animate-spin rounded-full border-2 border-[var(--color-border)] border-t-transparent"></div>
           </td>
         </tr>
@@ -70,36 +70,36 @@
     </div>
   </ng-container>
   <ng-template #loadingTpl>
-    <table class="w-full border-collapse text-left text-[13px] text-[var(--color-text1)]">
-      <thead class="bg-[var(--color-blue-820-light)]">
+    <table class="ui-table">
+      <thead>
         <tr>
-          <th class="px-[12px] py-[10px] font-semibold">ID</th>
-          <th class="px-[12px] py-[10px] font-semibold">Service URL</th>
-          <th class="px-[12px] py-[10px] font-semibold">Category</th>
-          <th class="px-[12px] py-[10px] font-semibold">General</th>
-          <th class="px-[12px] py-[10px] font-semibold">Leak</th>
-          <th class="px-[12px] py-[10px] font-semibold">Network</th>
-          <th class="px-[12px] py-[10px] font-semibold">Last Updated</th>
+          <th>ID</th>
+          <th>Service URL</th>
+          <th>Category</th>
+          <th>General</th>
+          <th>Leak</th>
+          <th>Network</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
       <tbody @fadeInDashboardItem>
-        <tr class="border-t border-[var(--color-border)]">
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <tr>
+          <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
         </tr>
-        <tr class="border-t border-[var(--color-border)]">
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <tr>
+          <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
         </tr>
       </tbody>
     </table>

@@ -1,10 +1,10 @@
-<nav *ngIf="this.sidebar_default" class="w-full">
+<nav *ngIf="this.sidebar_default" @sidebarMode class="w-full">
   <div class="flex w-full items-start justify-between px-[20px] py-[10px] mt-[10px] text-[24px] font-medium">
     <a href="">
       <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
     </a>
     <button (click)="onToggleSidebar(false)" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
-      <img alt="Menu" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
+      <img alt="Menu" height="28" src="/assets/images/sidebar/nav_menu.svg" width="24" />
     </button>
   </div>
 
@@ -152,7 +152,7 @@
           class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
           href="/dashboard/ctigraph"
           target="_blank">
-          <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="assets/images/sidebar/graph.svg" width="20">
+          <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
           CTI Graph
         </a>
       </div>
@@ -164,7 +164,7 @@
           class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
           href="/dashboard/social-mapper"
           target="_blank">
-          <img alt="Social Mapper" class="mr-[8px] opacity-60" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
+          <img alt="Social Mapper" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
           Social Mapper
         </a>
       </div>
@@ -176,7 +176,7 @@
           class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
           href="https://orionleaks.com/#/"
           target="_blank">
-          <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="assets/images/sidebar/whistle.svg" width="20">
+          <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
           Whistle Blowing
         </a>
       </div>
@@ -188,7 +188,7 @@
     <a class="select-none" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
       <div class="mt-[6px] rounded-[8px] select-none">
         <div class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="mr-[8px] opacity-60 mb-[4px]" height="20" ngSrc="assets/images/sidebar/tor.svg" width="20">Onion Link
+          <img alt="Documentation" class="mr-[8px] opacity-60 mb-[4px]" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
         </div>
       </div>
     </a>
@@ -200,7 +200,7 @@
         [routerLink]="'directory'"
         class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
         queryParamsHandling="merge">
-        <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="../../../../assets/images/sidebar/directory.svg" width="20">
+        <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
         Links
       </div>
     </div>
@@ -208,24 +208,27 @@
     <a class="select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="mt-[6px] rounded-[8px] select-none">
         <div class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="mr-[8px] opacity-60" height="20" ngSrc="../../../../assets/images/sidebar/documentation.svg" width="20">Documentation
+          <img alt="Documentation" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
         </div>
       </div>
     </a>
   </ul>
 </nav>
 
-<nav *ngIf="!this.sidebar_default" class="w-[100px] ml-[-13px] mt-[-10px]">
-  <button (click)="onToggleSidebar(true)" class="cursor-pointer bg-transparent border-0 p-0 ml-[25px]">
-    <img alt="Menu" height="20" ngSrc="../../../../assets/images/sidebar/menu-mini.svg" width="20" />
+<nav *ngIf="!this.sidebar_default" @sidebarMode class="w-full px-2 pt-0">
+  <button
+    (click)="onToggleSidebar(true)"
+    aria-label="Expand sidebar"
+    class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+    <img alt="Menu" height="20" ngSrc="/assets/images/sidebar/menu-mini.svg" width="20" />
   </button>
-  <div class="flex w-full items-start justify-between px-[20px] py-[10px] mt-[10px] text-[24px] font-medium ml-[7px]">
+  <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">
     <a href="">
-      <img alt="Logo" height="30" ngSrc="../../../../assets/images/shared/logo-min.svg" priority width="30" />
+      <img alt="Logo" height="30" ngSrc="/assets/images/shared/logo-min.svg" priority width="30" />
     </a>
   </div>
 
-  <ul class="list-none overflow-y-auto h-screen pb-[200px] p-[20px] w-[400px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+  <ul class="flex w-full list-none flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
     <app-dashboard-sidebar-collapsed
       (optionSelected)="onOptionSelected($event)"
       (sectionSelected)="onSectionSelected($event)"
@@ -378,7 +381,7 @@
           class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
           href="/dashboard/ctigraph"
           target="_blank">
-          <img alt="Links" class="mr-[4px] opacity-60 mt-[2px]" height="20" ngSrc="assets/images/sidebar/graph.svg" width="20">
+          <img alt="Links" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
         </a>
       </div>
     </ng-container>
@@ -389,7 +392,7 @@
           class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
           href="/dashboard/social-mapper"
           target="_blank">
-          <img alt="Social Mapper" class="mr-[4px] opacity-60 mt-[2px]" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
+          <img alt="Social Mapper" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
         </a>
       </div>
     </ng-container>
@@ -400,7 +403,7 @@
           class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
           href="https://orionleaks.com/#/"
           target="_blank">
-          <img alt="Links" class="mr-[4px] opacity-60 mt-[2px]" height="20" ngSrc="assets/images/sidebar/whistle.svg" width="20">
+          <img alt="Links" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
         </a>
       </div>
     </ng-container>
@@ -411,7 +414,7 @@
     <a href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank" class="select-none">
       <div class="mt-[6px] rounded-[8px] select-none">
         <div class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="mr-[4px] opacity-60 mb-[4px]" height="20" ngSrc="assets/images/sidebar/tor.svg" width="20">
+          <img alt="Documentation" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
         </div>
       </div>
     </a>
@@ -423,14 +426,14 @@
         [routerLink]="'directory'"
         class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white"
         queryParamsHandling="merge">
-        <img alt="Links" class="mr-[4px] opacity-60 mt-[2px]" height="20" ngSrc="../../../../assets/images/sidebar/directory.svg" width="20">
+        <img alt="Links" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
       </div>
     </div>
 
     <a class="select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="mt-[6px] rounded-[8px] select-none">
         <div class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="mr-[4px] opacity-60" height="20" ngSrc="../../../../assets/images/sidebar/documentation.svg" width="20">
+          <img alt="Documentation" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
         </div>
       </div>
     </a>

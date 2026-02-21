@@ -3,7 +3,7 @@
     <a [href]="homeHref()" [title]="logoAlt()" class="hidden lg:flex items-center overflow-hidden transition-all duration-300" [class.flex-grow]="!isCollapsed()" [class.w-0]="isCollapsed()" [class.opacity-0]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
       <img [src]="logoSrc()" [alt]="logoAlt()" class="h-8 object-contain">
     </a>
-    <button (click)="toggleClicked.emit()" [class]="isCollapsed() ? 'graph-sidebar-shell-toggle w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'graph-sidebar-shell-toggle w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
+    <button (click)="toggleClicked.emit()" [class]="isCollapsed() ? 'graph-sidebar-shell-toggle w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'graph-sidebar-shell-toggle w-10 h-10 flex items-center justify-center rounded-xl text-[var(--color-text4)] hover:text-[var(--color-text1)] transition-colors active:bg-transparent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
       <i class="bi bi-list text-xl leading-none"></i>
     </button>
   </div>

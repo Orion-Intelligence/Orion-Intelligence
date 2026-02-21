@@ -30,9 +30,9 @@
   <div class="mt-3 space-y-3 md:hidden" @fadeInDashboardItem>
     <div
       *ngFor="let item of dumpData.items; let i = index"
-      class="overflow-hidden rounded-xl border border-white/15 bg-[var(--color-blue-830)]"
+      class="overflow-hidden rounded-xl border border-[var(--tenant-line)] bg-[var(--color-blue-830)]"
     >
-      <div class="flex items-center justify-between border-b border-white/15 bg-[var(--color-blue-820-light)] px-3 py-2">
+      <div class="flex items-center justify-between border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-2">
         <div class="text-xs font-semibold tracking-wide text-[var(--color-text4)]">#{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</div>
         <div class="text-[11px] font-medium text-[var(--color-text4)]">{{ item.ts | date:'dd MMM yyyy, HH:mm:ss' }}</div>
       </div>
@@ -55,7 +55,7 @@
 
     <div
       *ngIf="dumpData.items?.length === 0"
-      class="rounded-xl border border-white/15 bg-[var(--color-blue-830)] px-3 py-8 text-center text-sm text-[var(--color-text4)]"
+      class="rounded-xl border border-[var(--tenant-line)] bg-[var(--color-blue-830)] px-3 py-8 text-center text-sm text-[var(--color-text4)]"
     >
       No audit logs found for the selected filters.
     </div>
@@ -88,8 +88,8 @@
   </div>
 
   <div class="mt-3 space-y-3 md:hidden" @fadeInDashboardItem>
-    <div *ngFor="let _ of [1,2,3]" class="overflow-hidden rounded-xl border border-white/15 bg-[var(--color-blue-830)]">
-      <div class="border-b border-white/15 bg-[var(--color-blue-820-light)] px-3 py-2">
+    <div *ngFor="let _ of [1,2,3]" class="overflow-hidden rounded-xl border border-[var(--tenant-line)] bg-[var(--color-blue-830)]">
+      <div class="border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-2">
         <div class="h-3 w-1/2 animate-pulse rounded bg-[var(--color-placeholder)]"></div>
       </div>
       <div class="space-y-2 p-3">

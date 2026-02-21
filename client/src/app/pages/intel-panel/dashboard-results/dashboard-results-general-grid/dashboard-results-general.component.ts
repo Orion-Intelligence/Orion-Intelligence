@@ -12,6 +12,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
+  styleUrls: ['./dashboard-results-general.component.css'],
   imports: [NgForOf, RouterLink, DatePipe, NgIf, TooltipDirective, CommonModule, NgClass],
   standalone: true
 })

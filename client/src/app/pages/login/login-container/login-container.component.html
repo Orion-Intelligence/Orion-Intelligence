@@ -44,7 +44,7 @@
 
             <div *ngIf="errorMessage == 'verification pending'" class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm">
               <span class="text-left"><b>{{ errorMessage }}</b></span>
-              <button (click)="resendMail()" class="ml-3 bg-white text-[#172235] text-[12px] font-medium px-3 py-1 rounded">
+              <button (click)="resendMail()" class="ml-3 bg-[var(--color-blue-700)] text-[var(--color-text1)] text-[12px] font-medium px-3 py-1 rounded">
                 Resend mail
               </button>
             </div>
@@ -55,7 +55,7 @@
             </div>
 
             <div>
-              <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-cy="login-button" type="submit" value="Sign In" />
+              <input class="w-full h-[44px] bg-[var(--color-blue-640)] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-cy="login-button" type="submit" value="Sign In" />
             </div>
           </form>
 
@@ -94,7 +94,7 @@
     </div>
 
     <p *ngIf="otpSecret" class="text-white mt-3 text-center"><b>Backup key (tap to copy)</b></p>
-    <div *ngIf="otpSecret" class="cursor-pointer bg-[#ffc107] text-[#172235] px-4 py-3 rounded-md" role="alert" (click)="copyToClipboard(otpSecret)">
+    <div *ngIf="otpSecret" class="cursor-pointer bg-[#ffc107] text-[var(--color-text1)] px-4 py-3 rounded-md" role="alert" (click)="copyToClipboard(otpSecret)">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
           <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="18" height="18">

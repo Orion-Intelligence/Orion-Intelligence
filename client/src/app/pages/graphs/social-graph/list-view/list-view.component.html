@@ -47,7 +47,7 @@
                                     <a [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-7 h-7 rounded-full flex items-center justify-center text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Open account in new tab">
                                       <i class="bi bi-link-45deg text-sm leading-none"></i>
                                     </a>
-                                    <button (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Followers and Following">
+                                    <button data-cy="list-view-followers-following" (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Followers and Following">
                                       <i class="bi bi-people-fill text-[11px] leading-none"></i>
                                     </button>
                                   </div>

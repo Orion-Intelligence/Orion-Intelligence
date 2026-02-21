@@ -172,10 +172,8 @@ export class HelperService {
       }
       result += text.slice(lastIndex);
       highlighted = result
-        .replace(
-          /<em>/g,
-          '<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">'
-        )
+        .replace(/<em>/g,
+          '<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">')
         .replace(/<\/em>/g, '</span>');
     }
     else {

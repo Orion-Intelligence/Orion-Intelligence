@@ -12,7 +12,7 @@ import { SortType } from '../../constants/shared-enums';
 import { EmptyQueryComponent } from '../empty-query/empty-query.component';
 import { Suggestion } from '../../model/results/shared/common-result';
 import { Category } from "../../constants/pages";
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { AppService } from '../../../services/core/app/app.service';
@@ -20,10 +20,8 @@ import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/s
 import { searchFilterAnimation } from '../../animations/search.filter.animation';
 import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { HelperService } from '../../services/helper.service';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
-import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 
 @Component({
@@ -41,8 +39,6 @@ export class ResultComponent implements OnInit, OnChanges {
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
   isFilterOpen$: Observable<boolean>;
   selectedSortBy: SortType = SortType.DEFAULT;
-  scandomains: string[] = [];
-  showScans = false;
   matchTypeLabel = computed(() => {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
     if (matchtype === "full") {
@@ -79,13 +75,11 @@ export class ResultComponent implements OnInit, OnChanges {
   @Output() updateQuery = new EventEmitter<string>();
   @Output() onToggleSort = new EventEmitter<SortType>();
 
-  constructor(protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
+  constructor(protected scrollService: ScrollService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected homeSearchService: HomeSearchService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
-  ngOnChanges(_: SimpleChanges): void {
-    this.init_domains();
-  }
+  ngOnChanges(_: SimpleChanges): void {}
 
   onSetMatchType(type: string) {
     this.homeSearchService.setMatchType(type);
@@ -140,7 +134,6 @@ export class ResultComponent implements OnInit, OnChanges {
     this.searchInputRef?.nativeElement.blur();
     this.updateQuery.emit(query);
     this.reloadData.emit();
-    this.init_domains();
   }
 
   onToolToggle(event: Event): void {
@@ -178,24 +171,6 @@ export class ResultComponent implements OnInit, OnChanges {
 
   reloadFilter() {
     this.reloadFilters.emit();
-  }
-
-  init_domains() {
-    const filters = this.app_service.configData().localSettings.entityfilterCategories;
-    const queryDomains = this.helperService.extractLinks(this.searchQuery) || [];
-    const filterDomains = Array.isArray(filters['m_domain'])
-      ? filters['m_domain'].map(domain => `https://${domain}`)
-      : [];
-    this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
-  }
-
-  toggleScan() {
-    this.showScans = !this.showScans;
-  }
-
-  onScanSelected(domain: string) {
-    const url = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan'], { queryParams: { domain } }));
-    window.open(url, '_blank');
   }
 
   checkMember(): boolean {

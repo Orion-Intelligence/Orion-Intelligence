@@ -1,5 +1,5 @@
 <div class="space-y-4">
-  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm" [@fadeInDashboardItem]>
+  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]" [@fadeInDashboardItem]>
     <div [id]="'item-' + item.m_message_id">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2">

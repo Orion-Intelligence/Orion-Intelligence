@@ -7,13 +7,13 @@
     role="button"
     aria-label="Upload image"
     [ngClass]="{
-      'h-20 w-20 rounded-full border border-[#1D2939] bg-[#1D2939]': !wide,
-      'h-16 w-full rounded-[10px] border border-[#ffffff14] bg-[#0f2133] p-2': wide
+      'h-20 w-20 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)]': !wide,
+      'h-16 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-2': wide
     }"
     class="group relative cursor-pointer overflow-hidden transition duration-200 hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]">
     <img
       [src]="selectedImage || imageUrl || defaultImage"
-      class="h-full w-full object-contain"
+      [ngClass]="wide ? 'h-full w-full object-contain' : 'h-full w-full rounded-full object-cover'"
       alt="" />
     <div class="absolute inset-0 flex items-center justify-center gap-2 bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus:opacity-100">
       <img src="assets/images/shared/image_pick_icon.svg" alt="Upload Icon" class="h-5 w-5" />
@@ -22,7 +22,7 @@
     <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" hidden />
   </div>
   <button
-    class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-[rgb(15,15,15,0.82)] text-[13px] font-medium text-white shadow-[0_2px_6px_rgba(0,0,0,0.28)] transition-all duration-150 hover:scale-110 hover:bg-[rgb(255,65,65,0.92)] active:scale-95"
+    class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_2px_6px_rgba(0,0,0,0.18)] transition-all duration-150 hover:scale-110 hover:bg-[rgb(255,65,65,0.92)] hover:text-white active:scale-95"
     *ngIf="hasCustomImage()"
     (click)="deleteImage($event)">
     ✕

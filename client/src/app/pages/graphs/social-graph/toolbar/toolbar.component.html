@@ -14,8 +14,8 @@
      </div>
    </div>
    <div class="w-full lg:w-full lg:max-w-md flex items-center justify-start gap-2">
-     <div class="hidden lg:flex relative items-center bg-slate-800/80 rounded-full p-1 shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm">
-        <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 shadow-md transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
+     <div class="hidden lg:flex relative items-center bg-white rounded-full p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm">
+        <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
 
         <button (click)="viewModeChanged.emit(viewMode() === 'graph' ? 'list' : 'graph')" [class]="'relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-slate-300 hover:text-white')" title="Graph View">
           <i class="bi bi-share-fill"></i> Graph
@@ -25,11 +25,11 @@
         </button>
      </div>
      <ng-container *ngIf="viewMode() === 'graph'">
-       <button (click)="physicsToggled.emit()" [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')" [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
+       <button (click)="physicsToggled.emit()" [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')" [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
            <i [class]="'bi ' + (isPhysicsEnabled() ? 'bi-pause-fill' : 'bi-play-fill')"></i>
            <span>Physics</span>
        </button>
-       <button *ngIf="canEditConnections()" (click)="editModeToggled.emit()" [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full shadow-lg ring-1 ring-inset ring-slate-700/50 backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-800/80 text-slate-200 hover:bg-slate-700')">
+       <button *ngIf="canEditConnections()" (click)="editModeToggled.emit()" [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')">
            <i [class]="'bi ' + (isEditMode() ? 'bi-check-circle-fill' : 'bi-pencil-fill')"></i>
            <span>{{ isEditMode() ? 'Done Editing' : 'Edit Connections' }}</span>
        </button>

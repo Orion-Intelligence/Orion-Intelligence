@@ -8,7 +8,7 @@
           'cursor-pointer': !(breadcrumb.length <= 2 && breadcrumb[0].label !== 'ctigraph')
         }"
         alt="Back"
-        class="mt-[-1px] mr-[10px] ml-[5px] h-[50px] w-[50px] p-[10px]"
+        class="ui-breadcrumb-chevron mt-[-1px] mr-[10px] ml-[5px] h-[50px] w-[50px] p-[10px]"
         height="30"
         ngSrc="assets/images/shared/theme/arrow.svg"
         width="30" />
@@ -20,7 +20,7 @@
           [ngClass]="{ 'cursor-default opacity-50 pointer-events-none': breadcrumb.length <= 2 }"
           class="inline-flex items-center cursor-pointer font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-header)] hover:text-[#fcfcfc]">
           {{ crumb.label.replace('-', ' ') | titlecase }}
-          <img alt="breadcrumb" class="ml-[5px] mr-[5px] inline-block" height="20" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
+          <img alt="breadcrumb" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
         </span>
 
         <span *ngIf="last" class="font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">

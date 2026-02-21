@@ -22,7 +22,7 @@
 
       <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
 
-      <div class="m-0 overflow-hidden rounded-none border-0 bg-[var(--color-blue-830)] shadow-none md:rounded-[8px] md:border md:!border-white/10 md:shadow-[0_8px_24px_-18px_rgba(0,0,0,0.55)]">
+      <div class="m-0 overflow-hidden rounded-none border-0 bg-[var(--color-blue-830)] shadow-none md:rounded-[8px] md:border md:!border-[var(--tenant-line)] md:shadow-[0_8px_24px_-18px_rgba(0,0,0,0.55)]">
         <ng-container *ngIf="!isLoading; else loadingTpl">
           <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
             <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
@@ -42,7 +42,7 @@
               <tbody *ngIf="(users?.length || 0) > 0" class="text-[15px] font-normal text-[var(--color-text3)]" @fadeInDashboardItem>
                 <ng-container *ngFor="let user of users; let i = index">
                   <tr
-                    class="border-t !border-white/10 bg-[#131E30] transition-colors hover:!border-white/10 hover:bg-[#131E30] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-white/10"
+                    class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]"
                     [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''"
                   >
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
@@ -58,7 +58,7 @@
                       <span class="inline-block max-w-full truncate">{{ user.email || '-' }}</span>
                     </td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">
-                      <span class="inline-flex rounded-full bg-white/[0.04] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">
+                      <span class="inline-flex rounded-full bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">
                         {{ user.role }}
                       </span>
                     </td>
@@ -80,7 +80,7 @@
                     </td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
                       <span
-                        class="mr-0 block max-w-[290px] truncate rounded-full border border-[#f5f5f51a] bg-white/[0.04] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]"
+                        class="mr-0 block max-w-[290px] truncate rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]"
                         [attr.title]="getUserLicensesLabel(user)"
                       >
                         {{ getUserLicensesLabel(user) }}
@@ -90,7 +90,7 @@
                       <button
                         *ngIf="!canEditUser(user); else editAction"
                         type="button"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#f5f5f51a] bg-white/[0.04] text-[var(--color-text2)] transition hover:bg-white/[0.08]"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]"
                         aria-label="View user"
                         (click)="toggleExpandedUser(i)"
                       >
@@ -98,29 +98,29 @@
                           src="assets/images/shared/view.svg"
                           width="18"
                           alt="view"
-                          class="cursor-pointer"
+                          class="tenant-action-icon cursor-pointer"
                         />
                       </button>
                       <ng-template #editAction>
                         <button
                           id="edit-profile"
                           type="button"
-                          class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#f5f5f51a] bg-white/[0.04] p-0 text-[var(--color-text2)] transition hover:bg-white/[0.08]"
+                          class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]"
                           [attr.aria-label]="'Edit user'"
                           (click)="toggleExpandedUser(i)"
                         >
-                          <img src="assets/images/shared/edit.svg" width="18" alt="edit" />
+                          <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
                         </button>
                       </ng-template>
                     </td>
                   </tr>
 
-                  <tr *ngIf="expandedUserIndex === i" class="!border-t-0 bg-[#131E30]">
+                  <tr *ngIf="expandedUserIndex === i" class="!border-t-0 bg-[var(--tenant-row-bg)]">
                     <td colspan="8" class="overflow-clip align-middle px-4 py-4">
                       <div class="space-y-4">
-                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-4">
+                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
                           <div class="text-[19px] font-bold text-[var(--color-text1)]">User Information</div>
-                          <div class="mt-2 divide-y !divide-[#f5f5f51a]">
+                          <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                             <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
                               <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Name</div>
                               <div class="text-sm font-medium text-[var(--color-text1)]">{{ user.username || '-' }}</div>
@@ -154,7 +154,7 @@
                               <div *ngIf="user.licenses?.length; else noUserLicenses" class="flex flex-wrap gap-1.5">
                                 <span
                                   *ngFor="let license of user.licenses"
-                                  class="rounded-md border border-[#f5f5f51a] bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]"
+                                  class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]"
                                 >
                                   {{ licenseService.getLicenseLabel(license) }}
                                 </span>
@@ -166,7 +166,7 @@
                           </div>
                         </div>
 
-                        <div *ngIf="canEditUser(user)" class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-4">
+                        <div *ngIf="canEditUser(user)" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
                           <div class="text-[19px] font-bold text-[var(--color-text1)]">Edit User</div>
                           <div class="mt-2 space-y-3 pt-1">
                             <div>
@@ -192,7 +192,7 @@
                                     [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1"
                                     [ngClass]="{
                                       'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1,
-                                      'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[#f5f5f533] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1,
+                                      'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1,
                                       'cursor-not-allowed opacity-60': isLicenseDisabled()
                                     }"
                                     (click)="!isLicenseDisabled() && toggleUserLicense(user, license)"
@@ -233,7 +233,7 @@
               </tbody>
 
               <tbody *ngIf="(users?.length || 0) === 0">
-                <tr class="border-t !border-white/10 bg-[var(--color-blue-820-light)]">
+                <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
                   <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">No users available.</td>
                 </tr>
               </tbody>
@@ -242,7 +242,7 @@
 
           <div class="space-y-3 p-0 md:hidden" @fadeInDashboardItem>
             <ng-container *ngIf="(users?.length || 0) > 0; else noUsersMobile">
-              <div *ngFor="let user of users; let i = index" class="overflow-hidden rounded-[10px] bg-[#131E30]">
+              <div *ngFor="let user of users; let i = index" class="overflow-hidden rounded-[10px] bg-[var(--tenant-row-bg)]">
                 <div class="flex items-center justify-between px-3 py-2.5">
                   <div class="min-w-0">
                     <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ user.username || '-' }}</div>
@@ -250,15 +250,15 @@
                   </div>
                   <button
                     type="button"
-                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#f5f5f51a] bg-white/[0.04]"
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]"
                     [attr.aria-label]="canEditUser(user) ? 'Edit user' : 'View user'"
                     (click)="toggleExpandedUser(i)"
                   >
-                    <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" [alt]="canEditUser(user) ? 'edit' : 'view'" />
+                    <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" [alt]="canEditUser(user) ? 'edit' : 'view'" class="tenant-action-icon" />
                   </button>
                 </div>
 
-                <div class="divide-y divide-[#f5f5f51a] px-3 py-2.5 text-sm text-[var(--color-text2)]">
+                <div class="divide-y divide-[var(--tenant-line)] px-3 py-2.5 text-sm text-[var(--color-text2)]">
                   <div class="flex items-center justify-between gap-3 py-2">
                     <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</span>
                     <span class="truncate text-right">{{ user.email || '-' }}</span>
@@ -273,15 +273,15 @@
                   </div>
                   <div class="py-2">
                     <div class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                    <div class="rounded-md border border-[#f5f5f51a] bg-white/[0.04] px-2.5 py-1.5 text-xs">{{ getUserLicensesLabel(user) }}</div>
+                    <div class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1.5 text-xs">{{ getUserLicensesLabel(user) }}</div>
                   </div>
                 </div>
 
-                <div *ngIf="expandedUserIndex === i" class="bg-[#131E30] px-3 py-3">
+                <div *ngIf="expandedUserIndex === i" class="bg-[var(--tenant-row-bg)] px-3 py-3">
                   <div class="space-y-3">
-                    <div class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-3">
+                    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
                       <div class="text-base font-bold text-[var(--color-text1)]">User Information</div>
-                      <div class="mt-2 divide-y !divide-[#f5f5f51a]">
+                      <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                         <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
                           <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Name</div>
                           <div class="text-sm text-[var(--color-text1)]">{{ user.username || '-' }}</div>
@@ -297,7 +297,7 @@
                       </div>
                     </div>
 
-                    <div *ngIf="canEditUser(user)" class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-3">
+                    <div *ngIf="canEditUser(user)" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
                       <div class="text-base font-bold text-[var(--color-text1)]">Edit User</div>
                       <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
                       <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="user.status">
@@ -314,7 +314,7 @@
                             [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1"
                             [ngClass]="{
                               'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1,
-                              'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[#f5f5f533] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1
+                              'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1
                             }"
                             (click)="toggleUserLicense(user, license)"
                           >
@@ -356,7 +356,7 @@
                 </tr>
               </thead>
               <tbody @fadeInDashboardItem>
-                <tr class="border-t !border-white/10 bg-[#172235]">
+                <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)]">
                   <td class="px-4 py-3"><div class="h-3 w-12 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
                   <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
                   <td class="px-4 py-3"><div class="h-3 w-32 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
@@ -370,7 +370,7 @@
             </table>
           </div>
           <div class="space-y-3 p-0 md:hidden">
-            <div *ngFor="let _ of [1,2,3]" class="rounded-[10px] bg-[#131E30] p-3">
+            <div *ngFor="let _ of [1,2,3]" class="rounded-[10px] bg-[var(--tenant-row-bg)] p-3">
               <div class="h-4 w-1/2 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
               <div class="mt-3 space-y-2">
                 <div class="h-3 w-full animate-pulse rounded bg-[var(--color-blue-760)]"></div>

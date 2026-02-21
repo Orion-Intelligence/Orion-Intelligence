@@ -1,51 +1,51 @@
-<div *ngIf="!isSmallScreen()" class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-56]="!isCollapsed()" [class.w-14]="isCollapsed()">
-  <div class="p-2 border-b border-slate-800 flex items-center shrink-0" [class.gap-3]="!isCollapsed()" [class.justify-between]="!isCollapsed()" [class.justify-center]="isCollapsed()">
+<div *ngIf="!isSmallScreen()" class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-72]="!isCollapsed()" [class.w-14]="isCollapsed()">
+  <div class="flex shrink-0 items-center border-b border-[var(--color-border)] p-3" [class.gap-3]="!isCollapsed()" [class.justify-between]="!isCollapsed()" [class.justify-center]="isCollapsed()">
     <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isCollapsed()" [class.w-0]="isCollapsed()" [class.opacity-0]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
-      <h2 class="text-md font-semibold text-slate-300 whitespace-nowrap">Add Entity</h2>
+      <h2 class="text-md whitespace-nowrap font-semibold text-[var(--color-text2)]">Add Entity</h2>
     </div>
-    <button (click)="toggle.emit()" [class]="isCollapsed() ? 'w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
+    <button (click)="toggle.emit()" [class]="isCollapsed() ? 'flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
       <i class="bi bi-list text-xl leading-none"></i>
     </button>
   </div>
 
   <div class="flex-grow overflow-hidden">
-    <div *ngIf="!isCollapsed()" class="h-full w-56 p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-300 ease-out">
-      <button (click)="addEntityClicked.emit('wallet')" class="w-full flex items-center gap-3 p-2 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+    <div *ngIf="!isCollapsed()" class="h-full w-72 p-3 flex flex-col gap-2 overflow-y-auto transition-all duration-300 ease-out">
+      <button data-cy="entity-add-wallet" (click)="addEntityClicked.emit('wallet')" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
         <i class="bi bi-wallet2 w-4 h-4 text-green-400"></i>
         <span>Add Wallet</span>
       </button>
-      <button (click)="addEntityClicked.emit('email')" class="w-full flex items-center gap-3 p-2 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+      <button data-cy="entity-add-email" (click)="addEntityClicked.emit('email')" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
         <i class="bi bi-envelope-at w-4 h-4 text-yellow-400"></i>
         <span>Add Email</span>
       </button>
-      <button (click)="addEntityClicked.emit('domain')" class="w-full flex items-center gap-3 p-2 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+      <button data-cy="entity-add-domain" (click)="addEntityClicked.emit('domain')" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
         <i class="bi bi-globe w-4 h-4 text-sky-400"></i>
         <span>Add Domain</span>
       </button>
 
-      <div class="my-2 h-px bg-slate-700"></div>
-      <div class="text-xs uppercase tracking-wider text-slate-500 px-1">Saved Entities</div>
-      <div *ngIf="customEntities().length === 0" class="text-xs text-slate-500 px-1 py-1">No entities added yet.</div>
-      <div *ngFor="let entity of customEntities()" class="w-full rounded-lg border border-slate-700 bg-slate-800/40 p-2">
+      <div class="my-2 h-px bg-[var(--color-border)]"></div>
+      <div class="px-1 text-xs uppercase tracking-wider text-[var(--color-text4)]">Saved Entities</div>
+      <div *ngIf="customEntities().length === 0" class="px-1 py-1 text-xs text-[var(--color-text4)]">No entities added yet.</div>
+      <div *ngFor="let entity of customEntities()" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/75 p-2">
         <div class="flex items-center justify-between gap-2">
-          <button (click)="entityClicked.emit(entity.id)" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-slate-300 hover:text-white transition-colors">
+          <button (click)="entityClicked.emit(entity.id)" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-[var(--color-text2)] transition-colors hover:text-[var(--color-text1)]">
             <i [class]="getIconForEntityType(entity.type)"></i>
             <span class="truncate">{{ entity.label }}</span>
           </button>
-          <button (click)="deleteEntityClicked.emit(entity.id)" title="Delete Entity" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+          <button (click)="deleteEntityClicked.emit(entity.id)" title="Delete Entity" class="flex h-7 w-7 items-center justify-center rounded-full text-[var(--color-text4)] transition-colors hover:bg-red-500/20 hover:text-red-400">
             <i class="bi bi-trash3 leading-none block"></i>
           </button>
         </div>
       </div>
     </div>
     <div *ngIf="isCollapsed()" class="h-full w-14 flex flex-col items-center py-4 gap-4 transition-all duration-300 ease-in opacity-100">
-      <button (click)="addEntityClicked.emit('wallet')" class="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white" title="Add Wallet">
+      <button (click)="addEntityClicked.emit('wallet')" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" title="Add Wallet">
         <i class="bi bi-wallet2 text-xl text-green-400"></i>
       </button>
-      <button (click)="addEntityClicked.emit('email')" class="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white" title="Add Email">
+      <button (click)="addEntityClicked.emit('email')" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" title="Add Email">
         <i class="bi bi-envelope-at text-xl text-yellow-400"></i>
       </button>
-      <button (click)="addEntityClicked.emit('domain')" class="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white" title="Add Domain">
+      <button (click)="addEntityClicked.emit('domain')" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" title="Add Domain">
         <i class="bi bi-globe text-xl text-sky-400"></i>
       </button>
     </div>
@@ -53,39 +53,39 @@
 </div>
 
 <div *ngIf="isSmallScreen()">
-  <div *ngIf="mobilePanelOpen()" (click)="closeMobilePanel()" class="fixed inset-0 z-30 bg-slate-900/60 animate-[social-mapper-fade-in_0.4s_ease-in-out]"></div>
+  <div *ngIf="mobilePanelOpen()" (click)="closeMobilePanel()" class="fixed inset-0 z-30 bg-[var(--color-blue-850)]/60 animate-[social-mapper-fade-in_0.4s_ease-in-out]"></div>
 
-  <aside class="fixed inset-y-0 right-0 z-40 w-72 bg-slate-900 border-l border-slate-700 shadow-xl transition-transform duration-300 ease-in-out flex flex-col" [class.translate-x-0]="mobilePanelOpen()" [class.translate-x-full]="!mobilePanelOpen()" (click)="$event.stopPropagation()">
-    <div class="p-3 border-b border-slate-800 flex items-center justify-between shrink-0">
-      <h2 class="text-md font-semibold text-slate-300 whitespace-nowrap">Add Entity</h2>
-      <button (click)="closeMobilePanel()" class="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors active:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+  <aside class="fixed inset-y-0 right-0 z-40 flex w-[28rem] flex-col border-l border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-transform duration-300 ease-in-out" [class.translate-x-0]="mobilePanelOpen()" [class.translate-x-full]="!mobilePanelOpen()" (click)="$event.stopPropagation()">
+    <div class="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] p-3">
+      <h2 class="text-md whitespace-nowrap font-semibold text-[var(--color-text2)]">Add Entity</h2>
+      <button (click)="closeMobilePanel()" class="flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] active:bg-[var(--color-blue-710)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
         <i class="bi bi-x-lg text-xl"></i>
       </button>
     </div>
     <div class="p-3 flex flex-col gap-2 overflow-y-auto">
-      <button (click)="addEntityClicked.emit('wallet'); closeMobilePanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+      <button (click)="addEntityClicked.emit('wallet'); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
         <i class="bi bi-wallet2 w-5 h-5 text-green-400"></i>
         <span>Add Wallet</span>
       </button>
-      <button (click)="addEntityClicked.emit('email'); closeMobilePanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+      <button (click)="addEntityClicked.emit('email'); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
         <i class="bi bi-envelope-at w-5 h-5 text-yellow-400"></i>
         <span>Add Email</span>
       </button>
-      <button (click)="addEntityClicked.emit('domain'); closeMobilePanel();" class="w-full flex items-center gap-3 p-3 text-sm text-left font-medium text-slate-300 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors">
+      <button (click)="addEntityClicked.emit('domain'); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
         <i class="bi bi-globe w-5 h-5 text-sky-400"></i>
         <span>Add Domain</span>
       </button>
 
-      <div class="my-1 h-px bg-slate-700"></div>
-      <div class="text-xs uppercase tracking-wider text-slate-500 px-1">Saved Entities</div>
-      <div *ngIf="customEntities().length === 0" class="text-xs text-slate-500 px-1 py-1">No entities added yet.</div>
-      <div *ngFor="let entity of customEntities()" class="w-full rounded-lg border border-slate-700 bg-slate-800/40 p-2">
+      <div class="my-1 h-px bg-[var(--color-border)]"></div>
+      <div class="px-1 text-xs uppercase tracking-wider text-[var(--color-text4)]">Saved Entities</div>
+      <div *ngIf="customEntities().length === 0" class="px-1 py-1 text-xs text-[var(--color-text4)]">No entities added yet.</div>
+      <div *ngFor="let entity of customEntities()" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/75 p-2">
         <div class="flex items-center justify-between gap-2">
-          <button (click)="entityClicked.emit(entity.id); closeMobilePanel();" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-slate-300 hover:text-white transition-colors">
+          <button (click)="entityClicked.emit(entity.id); closeMobilePanel();" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-[var(--color-text2)] transition-colors hover:text-[var(--color-text1)]">
             <i [class]="getIconForEntityType(entity.type)"></i>
             <span class="truncate">{{ entity.label }}</span>
           </button>
-          <button (click)="deleteEntityClicked.emit(entity.id)" title="Delete Entity" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+          <button (click)="deleteEntityClicked.emit(entity.id)" title="Delete Entity" class="flex h-7 w-7 items-center justify-center rounded-full text-[var(--color-text4)] transition-colors hover:bg-red-500/20 hover:text-red-400">
             <i class="bi bi-trash3 leading-none block"></i>
           </button>
         </div>
@@ -93,7 +93,7 @@
     </div>
   </aside>
 
-  <button (click)="toggleMobilePanel($event)" class="fixed bottom-6 right-6 z-20 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-500 transition-transform active:scale-95 duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-indigo-500">
+  <button (click)="toggleMobilePanel($event)" class="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition-transform duration-200 ease-in-out hover:bg-indigo-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-[var(--color-blue-850)]">
     <i class="bi bi-diagram-3-fill text-2xl"></i>
   </button>
 </div>

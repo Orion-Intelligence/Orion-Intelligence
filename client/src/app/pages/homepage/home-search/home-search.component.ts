@@ -4,13 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
-import { SearchFiltersComponent } from "../search-filters/search-filters.component";
+import { SearchFiltersComponent } from '../search-filters/search-filters.component';
 import { AppService } from '../../../services/core/app/app.service';
-import { HomeInsightComponent } from "../home-insight/home-insight.component";
+import { HomeInsightComponent } from '../home-insight/home-insight.component';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
-import { WorldHeatmapComponent } from "../world-heatmap/world-heatmap.component";
+import { WorldHeatmapComponent } from '../world-heatmap/world-heatmap.component';
+
 @Component({
   selector: 'app-home-search',
   standalone: true,
@@ -22,6 +23,9 @@ export class HomeSearchComponent implements OnInit {
   private insightStartY = 0;
   private insightStartOffset = 0;
   private insightMoved = false;
+  private suppressInsightClick = false;
+  private insightMax = 0;
+  private removeWindowListeners: (() => void) | null = null;
 
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
@@ -33,13 +37,33 @@ export class HomeSearchComponent implements OnInit {
 
   @Input() isRoleAdmin: boolean = true;
 
-  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService) {
-  }
+  constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
 
   ngOnInit(): void {
     const cfg = this.app_service.configData();
     const matchtype = cfg.localSettings.matchType;
     this.onSetMatchType(matchtype);
+    this.computeInsightMax();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.computeInsightMax();
+  }
+
+  private computeInsightMax() {
+    this.insightMax = Math.round(window.innerHeight * 0.30);
+    if (!this.insightDragging && this.insightDragY == null) {
+      // keep state consistent on resize
+    }
+  }
+
+  getInsightTransform(): string {
+    const max = this.insightMax || Math.round(window.innerHeight * 0.30);
+    const y = this.insightDragging
+      ? (this.insightDragY ?? (this.homeInsightExpanded ? -max : 0))
+      : (this.homeInsightExpanded ? -max : 0);
+    return `translate3d(0, ${y}px, 0)`;
   }
 
   onSetMatchType(type: string) {
@@ -60,19 +84,17 @@ export class HomeSearchComponent implements OnInit {
   }
 
   getMatchType() {
-    const matchtype = this.dashboardService.selectedFilters()["matchtype"];
-    if (matchtype === "full") {
-      return "Match full query";
+    const matchtype = this.dashboardService.selectedFilters()['matchtype'];
+    if (matchtype === 'full') {
+      return 'Match full query';
     }
-    else if (matchtype === "or") {
-      return "Match any term";
+    if (matchtype === 'or') {
+      return 'Match any term';
     }
-    else if (matchtype === "semantic") {
-      return "Match semantic query";
+    if (matchtype === 'semantic') {
+      return 'Match semantic query';
     }
-    else {
-      return "Match individual terms";
-    }
+    return 'Match individual terms';
   }
 
   setFilterOverlay(newValue: boolean) {
@@ -94,7 +116,11 @@ export class HomeSearchComponent implements OnInit {
   onInsightToggleClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    if (this.insightMoved) {
+    if (this.suppressInsightClick) {
+      this.suppressInsightClick = false;
+      return;
+    }
+    if (this.insightDragging || this.insightMoved) {
       this.insightMoved = false;
       return;
     }
@@ -104,28 +130,68 @@ export class HomeSearchComponent implements OnInit {
   onInsightPointerDown(event: PointerEvent): void {
     event.preventDefault();
     event.stopPropagation();
+
+    this.computeInsightMax();
+    const max = this.insightMax;
+
     const el = event.currentTarget as HTMLElement;
-    el.setPointerCapture(event.pointerId);
+    try {
+      el.setPointerCapture(event.pointerId);
+    }
+    catch {}
+
     this.insightDragging = true;
     this.insightMoved = false;
+    this.suppressInsightClick = false;
     this.insightPointerId = event.pointerId;
+
     this.insightStartY = event.clientY;
-    const max = Math.round(window.innerHeight * 0.30);
     this.insightStartOffset = this.homeInsightExpanded ? -max : 0;
     this.insightDragY = this.insightStartOffset;
+
+    this.attachWindowPointerListeners();
+  }
+
+  private attachWindowPointerListeners() {
+    this.detachWindowPointerListeners();
+
+    const move = (e: PointerEvent) => this.onInsightPointerMove(e);
+    const up = (e: PointerEvent) => this.onInsightPointerUp(e);
+    const cancel = (e: PointerEvent) => this.onInsightPointerCancel(e);
+
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', up, { passive: false });
+    window.addEventListener('pointercancel', cancel, { passive: false });
+
+    this.removeWindowListeners = () => {
+      window.removeEventListener('pointermove', move as any);
+      window.removeEventListener('pointerup', up as any);
+      window.removeEventListener('pointercancel', cancel as any);
+      this.removeWindowListeners = null;
+    };
+  }
+
+  private detachWindowPointerListeners() {
+    if (this.removeWindowListeners) {
+      this.removeWindowListeners();
+    }
   }
 
   onInsightPointerMove(event: PointerEvent): void {
     if (!this.insightDragging || this.insightPointerId !== event.pointerId) {
       return;
     }
+
     event.preventDefault();
     event.stopPropagation();
-    const max = Math.round(window.innerHeight * 0.30);
+
+    const max = this.insightMax || Math.round(window.innerHeight * 0.30);
     const dy = event.clientY - this.insightStartY;
+
     if (Math.abs(dy) > 3) {
       this.insightMoved = true;
     }
+
     const next = this.insightStartOffset + dy;
     this.insightDragY = Math.max(-max, Math.min(0, next));
   }
@@ -134,38 +200,45 @@ export class HomeSearchComponent implements OnInit {
     if (this.insightPointerId !== event.pointerId) {
       return;
     }
+
     event.preventDefault();
     event.stopPropagation();
-    const el = event.currentTarget as HTMLElement;
-    try {
-      el.releasePointerCapture(event.pointerId);
-    }
-    catch {
-    }
-    const max = Math.round(window.innerHeight * 0.30);
+
+    const max = this.insightMax || Math.round(window.innerHeight * 0.30);
     const mid = -max / 2;
     const y = this.insightDragY ?? (this.homeInsightExpanded ? -max : 0);
-    this.homeInsightExpanded = y <= mid;
+
+    if (this.insightMoved) {
+      this.homeInsightExpanded = y <= mid;
+    }
+    else {
+      this.homeInsightExpanded = !this.homeInsightExpanded;
+    }
+
+    this.suppressInsightClick = true;
+    this.insightMoved = false;
     this.insightPointerId = null;
     this.insightDragging = false;
     this.insightDragY = null;
+
+    this.detachWindowPointerListeners();
   }
 
   onInsightPointerCancel(event: PointerEvent): void {
     if (this.insightPointerId !== event.pointerId) {
       return;
     }
+
     event.preventDefault();
     event.stopPropagation();
-    const el = event.currentTarget as HTMLElement;
-    try {
-      el.releasePointerCapture(event.pointerId);
-    }
-    catch {
-    }
+
     this.insightPointerId = null;
     this.insightDragging = false;
     this.insightDragY = null;
+    this.suppressInsightClick = true;
+    this.insightMoved = false;
+
+    this.detachWindowPointerListeners();
   }
 
   @HostListener('document:click', ['$event'])

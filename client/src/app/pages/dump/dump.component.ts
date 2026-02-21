@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
+import { AsyncPipe, NgClass, NgIf, NgOptimizedImage } from '@angular/common';
 import { PaginationComponent } from '../../shared/partials/pagination/pagination.component';
 import { FiltersComponent } from '../../shared/partials/filters/filters.component';
 import { DumpService } from '../../services/dump/dump.service';
@@ -17,6 +17,7 @@ import { BaseListingComponent } from '../../shared/directive/base.listing.direct
     PaginationComponent,
     AsyncPipe,
     NgClass,
+    NgIf,
     FiltersComponent,
     DumpListComponent,
     FormsModule,

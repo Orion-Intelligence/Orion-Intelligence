@@ -1,34 +1,31 @@
-<ng-container>
+<div class="w-full p-3 md:p-4">
   <span id="top"></span>
-  <div class="mt-[30px]">
-    <div class="px-[20px]">
-      <div class="flex flex-wrap items-center justify-between gap-[12px]">
-        <div>
-          <p class="text-[16px] font-medium text-[var(--color-text1)]">Live Onion Services</p>
-        </div>
 
-        <div class="flex items-center gap-[12px]">
-          <label (click)="openSidebar()" class="flex cursor-pointer items-center gap-[8px] text-[var(--color-text1)]">
-            <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24">Filter
-          </label>
-
-          <div
-            class="fixed top-0 h-[96vh] w-[300px] rounded-tl-[15px] bg-[#2A5784] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full"
-            [ngClass]="{
-              'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async),
-              'right-0': (isFilterOpen$ | async)
-            }">
-            <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
-              (filterReset)="resetFilters()" [filterModel]="filterModel"
-              [isFilterOpen]="isFilterOpen$ | async"></app-filters>
-          </div>
-        </div>
+  <div class="ui-page-container w-full max-w-[2400px]">
+    <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h1 class="ui-page-title">Directory</h1>
+        <p class="ui-page-description">Live onion services and monitoring status.</p>
       </div>
 
-      <app-directory-list></app-directory-list>
+      <button type="button" (click)="openSidebar()" class="ui-btn ui-btn-secondary gap-2">
+        <img alt="Filter Icon" height="16" ngSrc="/assets/images/shared/theme/filter_icon.svg" width="16" class="ui-filter-icon">
+        Filter
+      </button>
+
+      <div *ngIf="isFilterOpen$ | async" class="fixed inset-0 z-50 bg-[#0b1220]/55 backdrop-blur-[1px]" (click)="closeSidebar()"></div>
+      <div
+        class="ui-filter-drawer fixed right-0 top-0 z-[60] h-screen w-[320px] max-w-[92vw] bg-[#2A5784] shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-transform duration-200 max-[450px]:w-screen"
+        [ngClass]="(isFilterOpen$ | async) ? 'translate-x-0' : 'translate-x-full'">
+        <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
+          (filterReset)="resetFilters()" [filterModel]="filterModel"
+          [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+      </div>
     </div>
-    <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
+
+    <app-directory-list></app-directory-list>
   </div>
 
+  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
   <span id="bottom"></span>
-</ng-container>
+</div>

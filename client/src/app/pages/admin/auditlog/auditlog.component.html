@@ -13,16 +13,16 @@
             Export
           </button>
           <button type="button" (click)="openSidebar()" class="inline-flex h-10 items-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-680)] px-3 text-[15px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-750)]">
-            <img alt="Filter Icon" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16">
+            <img alt="Filter Icon" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16" class="ui-filter-icon">
             <span class="ml-2">Filter</span>
           </button>
           <div
             *ngIf="isFilterOpen$ | async"
-            class="fixed inset-0 z-50 bg-black/30"
+            class="fixed inset-0 z-50 bg-[#0b1220]/55 backdrop-blur-[1px]"
             (click)="closeSidebar()"
           ></div>
           <div
-            class="fixed right-0 top-0 z-[60] h-[96vh] w-[300px] rounded-tl-[15px] bg-[#2A5784] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-transform duration-200 max-[450px]:w-screen"
+            class="ui-filter-drawer fixed right-0 top-0 z-[60] h-screen w-[320px] max-w-[92vw] bg-[#2A5784] shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-transform duration-200 max-[450px]:w-screen"
             [ngClass]="(isFilterOpen$ | async) ? 'translate-x-0' : 'translate-x-full'"
           >
             <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"

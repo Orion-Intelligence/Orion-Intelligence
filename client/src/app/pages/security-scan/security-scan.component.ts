@@ -108,7 +108,7 @@ export class SecurityScanComponent implements OnInit {
           if (res?.result?.status === 'busy' || res?.result?.status === 'pending' || res?.status === 'pending') {
             const p = res?.result?.progress ?? res?.progress;
             if (typeof p === 'number' && !Number.isNaN(p)) {
-              this.progress.set(p);
+              this.progress.set(0);
             }
             const st = res?.result?.step ?? res?.step;
             if (typeof st === 'string' && st) {
@@ -231,6 +231,18 @@ export class SecurityScanComponent implements OnInit {
 
   get hasSSL(): boolean {
     return !!this.meta?.Port && /ssl/i.test(this.meta.Port);
+  }
+
+  get loadingStepLabel(): string {
+    const raw = (this.currentStep || '').trim();
+    if (!raw) {
+      return 'Scanning in progress...';
+    }
+    const normalized = raw.toLowerCase();
+    if (normalized === 'queued' || normalized.includes('queue')) {
+      return 'Queued: waiting for scanner availability...';
+    }
+    return raw;
   }
 
   retry(): void {

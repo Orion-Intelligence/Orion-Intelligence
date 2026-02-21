@@ -17,7 +17,7 @@
         type="text"
         placeholder="Enter username"
         name="username"
-        class="w-full rounded-lg border border-[#2C3A4A] bg-white px-3.5 py-3 text-sm text-[#172235] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300"
         [(ngModel)]="model.username"
       />
 
@@ -31,7 +31,7 @@
         type="email"
         placeholder="Enter email"
         name="email"
-        class="w-full rounded-lg border border-[#2C3A4A] bg-white px-3.5 py-3 text-sm text-[#172235] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300"
         [(ngModel)]="model.email"
       />
 
@@ -40,7 +40,7 @@
         type="password"
         placeholder="Enter password"
         name="password"
-        class="w-full rounded-lg border border-[#2C3A4A] bg-white px-3.5 py-3 text-sm text-[#172235] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300"
         [(ngModel)]="model.password"
       />
 
@@ -49,7 +49,7 @@
           <label class="mb-1 block text-sm text-[var(--color-text2)]">Role</label>
           <select
             name="role"
-            class="w-full rounded-lg border border-[#2C3A4A] bg-white px-3.5 py-3 text-sm text-[#172235] outline-none focus:ring-2 focus:ring-sky-300"
+            class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none focus:ring-2 focus:ring-sky-300"
             [(ngModel)]="model.role"
           >
             <ng-container *ngIf="isAdmin; else nonAdminRoles">
@@ -68,7 +68,7 @@
           <label class="mb-1 block text-sm text-[var(--color-text2)]">Status</label>
           <select
             name="status"
-            class="w-full rounded-lg border border-[#2C3A4A] bg-white px-3.5 py-3 text-sm text-[#172235] outline-none focus:ring-2 focus:ring-sky-300"
+            class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none focus:ring-2 focus:ring-sky-300"
             [(ngModel)]="model.status"
           >
             <option [ngValue]="'active'">Active</option>

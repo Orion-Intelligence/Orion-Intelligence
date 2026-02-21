@@ -220,7 +220,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .attr('font-size', 14)
       .attr('font-weight', 700)
       .attr('letter-spacing', 0.8)
-      .attr('fill', '#ffe4e6')
+      .attr('fill', 'var(--color-text1)')
       .text(d => `HEATMAP: ${(d ?? '').toUpperCase()}`);
   }
 

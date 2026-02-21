@@ -1,18 +1,18 @@
 <ng-container *ngIf="isTailwindReady; else tailwindLoading">
 <div class="fixed inset-0" (click)="closeMenus()">
-  <header class="absolute left-0 right-0 top-0 z-50 flex-shrink-0 h-12 border-b border-slate-700 bg-slate-800/50">
-    <div class="h-full flex items-end justify-between pl-2">
-      <nav class="h-full flex items-end gap-1">
-        <div *ngFor="let tab of tabs" (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center border-b-2 pl-3 pr-2 text-sm font-medium ' + (activeTabId === tab.id ? 'border-indigo-400 bg-slate-800 text-white pt-2 pb-1.5 rounded-t-md' : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 pt-2 pb-1.5 rounded-t-md')">
+  <header class="absolute left-0 right-0 top-0 z-50 h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
+    <div class="h-full flex items-end justify-between pl-4">
+      <nav class="flex h-full items-end gap-1.5">
+        <div *ngFor="let tab of tabs" (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center border border-b-2 pl-3 pr-2 pt-2 pb-1.5 text-sm font-medium rounded-t-md transition-colors ' + (activeTabId === tab.id ? 'border-[var(--color-border)] border-b-indigo-400 bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-[0_1px_0_0_var(--color-blue-700)]' : 'border-transparent border-b-transparent text-[var(--color-text4)] hover:border-[var(--color-border)] hover:border-b-[var(--color-border)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
           <div *ngIf="editingTabId === tab.id; else graphTabName">
-            <input #renameInput type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-slate-700 p-1 text-white outline-none ring-2 ring-indigo-500">
+            <input #renameInput type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500">
           </div>
           <ng-template #graphTabName>
             <span (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1">{{ tab.name }}</span>
           </ng-template>
           <button *ngIf="tabs.length> 1"
             (click)="$event.stopPropagation(); closeSession(tab.id)"
-            [class]="'ml-1 rounded-full p-1 text-slate-500 transition-colors hover:bg-slate-600 hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+            [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
             <i class="bi bi-x-lg text-xs"></i>
           </button>
         </div>
@@ -20,16 +20,16 @@
         <div class="pl-1">
           <div class="relative">
             <input type="file" class="hidden" id="graphSessionFileInput" (change)="importSessionFile($event)" accept=".json">
-            <button (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-700 hover:text-white" title="New Session">
+            <button data-cy="cti-tab-add-menu" (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="New Session">
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
-            <div *ngIf="isAddMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg">
-              <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
-                <i class="bi bi-plus-square h-5 w-5 text-slate-400 group-hover:text-white"></i>
+            <div *ngIf="isAddMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
+              <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                 <span>New Session</span>
               </button>
-              <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
-                <i class="bi bi-upload h-5 w-5 text-slate-400 group-hover:text-white"></i>
+              <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                 <span>Import Session</span>
               </label>
             </div>
@@ -38,25 +38,25 @@
       </nav>
       <div class="self-center flex items-center gap-1 pr-2">
         <div class="relative">
-          <button (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-700 hover:text-white" title="Session Menu">
+          <button data-cy="cti-tab-session-menu" (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
             <i class="bi bi-three-dots-vertical text-lg"></i>
           </button>
-          <div *ngIf="isHeaderMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg">
-            <button (click)="exportActiveSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
-              <i class="bi bi-download h-5 w-5 text-slate-400 group-hover:text-white"></i>
+          <div *ngIf="isHeaderMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
+            <button (click)="exportActiveSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+              <i class="bi bi-download h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>Export Current Session</span>
             </button>
-            <button (click)="openReportExportModal(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
-              <i class="bi bi-file-earmark-arrow-down h-5 w-5 text-slate-400 group-hover:text-white"></i>
+            <button (click)="openReportExportModal(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+              <i class="bi bi-file-earmark-arrow-down h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>Export Report</span>
             </button>
-            <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
-              <i class="bi bi-upload h-5 w-5 text-slate-400 group-hover:text-white"></i>
+            <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+              <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>Import Session</span>
             </label>
-            <div class="my-1 h-px bg-slate-600"></div>
-            <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-indigo-500 hover:text-white">
-              <i class="bi bi-plus-square h-5 w-5 text-slate-400 group-hover:text-white"></i>
+            <div class="my-1 h-px bg-[var(--color-blue-710)]"></div>
+            <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+              <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>New Session</span>
             </button>
           </div>
@@ -68,7 +68,7 @@
 
   <div class="absolute inset-x-0 bottom-0 top-12 flex">
     <app-cti-sidebar
-      class="border-b lg:border-r border-slate-800 hidden lg:flex flex-col flex-shrink-0 bg-slate-900/70 backdrop-blur-md overflow-hidden"
+      class="hidden flex-shrink-0 flex-col overflow-hidden border-b border-[var(--color-border)] bg-[#172235] backdrop-blur-md lg:flex lg:border-r"
       (filtersApplied)="onSidebarApply($event)"
       (collapsedChange)="onSidebarCollapsedChange($event)">
     </app-cti-sidebar>
@@ -93,7 +93,7 @@
             (physicsToggled)="togglePhysics()">
           </app-graph-toolbar>
         </div>
-        <div *ngIf="nodeSearchText.trim().length> 0" class="mt-2 text-xs text-slate-300">
+        <div *ngIf="nodeSearchText.trim().length> 0" class="mt-2 text-xs text-[var(--color-text2)]">
           {{ searchMatchedCount }} node(s) highlighted
         </div>
       </div>
@@ -104,99 +104,99 @@
       </div>
     </div>
 
-    <div #networkContainer class="h-full w-full bg-slate-900 [background-image:radial-gradient(circle,_rgb(100_116_139_/_15%)_1px,_transparent_1px)] [background-size:2rem_2rem] transition-all duration-300" [ngClass]="{ 'lg:pr-[20rem]': isGraphView && !isListingsCollapsed, 'lg:pr-16': isGraphView && isListingsCollapsed, 'lg:pr-0': !isGraphView }" [class.opacity-100]="isGraphView" [class.translate-y-0]="isGraphView" [class.pointer-events-auto]="isGraphView" [class.opacity-0]="!isGraphView" [class.-translate-y-2]="!isGraphView" [class.pointer-events-none]="!isGraphView">
+    <div #networkContainer class="h-full w-full bg-[var(--color-blue-850)] [background-image:radial-gradient(circle,_rgb(100_116_139_/_15%)_1px,_transparent_1px)] [background-size:2rem_2rem] transition-all duration-300" [ngClass]="{ 'lg:pr-[20rem]': isGraphView && !isListingsCollapsed, 'lg:pr-16': isGraphView && isListingsCollapsed, 'lg:pr-0': !isGraphView }" [class.opacity-100]="isGraphView" [class.translate-y-0]="isGraphView" [class.pointer-events-auto]="isGraphView" [class.opacity-0]="!isGraphView" [class.-translate-y-2]="!isGraphView" [class.pointer-events-none]="!isGraphView">
     </div>
 
-    <aside *ngIf="isGraphView" class="absolute inset-y-0 right-0 z-40 hidden overflow-hidden border-l border-slate-700/80 bg-slate-900/95 shadow-2xl backdrop-blur-sm transition-all duration-300 lg:block" [class.w-[20rem]]="!isListingsCollapsed" [class.w-16]="isListingsCollapsed">
+    <aside *ngIf="isGraphView" class="absolute inset-y-0 right-0 z-40 hidden overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-820-light)] backdrop-blur-sm transition-all duration-300 lg:block" [class.w-[22rem]]="!isListingsCollapsed" [class.w-16]="isListingsCollapsed">
       <div class="flex h-full flex-col">
-        <div class="flex shrink-0 items-center border-b border-slate-800 p-2" [class.gap-3]="!isListingsCollapsed" [class.justify-between]="!isListingsCollapsed" [class.justify-center]="isListingsCollapsed">
+        <div class="flex shrink-0 items-center border-b border-[var(--color-border)] p-3" [class.gap-3]="!isListingsCollapsed" [class.justify-between]="!isListingsCollapsed" [class.justify-center]="isListingsCollapsed">
           <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isListingsCollapsed" [class.w-0]="isListingsCollapsed" [class.opacity-0]="isListingsCollapsed">
-            <h2 class="whitespace-nowrap text-md font-semibold text-slate-300">Listings</h2>
+            <h2 class="whitespace-nowrap text-md font-semibold text-[var(--color-text2)]">Listings</h2>
           </div>
-          <button type="button" (click)="toggleListingsCollapsed()" class="active:bg-slate-600 flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="isListingsCollapsed ? 'Expand listings' : 'Collapse listings'">
+          <button data-cy="cti-listings-toggle" type="button" (click)="toggleListingsCollapsed()" class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="isListingsCollapsed ? 'Expand listings' : 'Collapse listings'">
             <i class="bi bi-list text-xl leading-none"></i>
           </button>
         </div>
-        <div *ngIf="!isListingsCollapsed" class="border-b border-slate-700/60 px-4 py-2 text-xs text-slate-400">{{ listRows.length }} documents</div>
+        <div *ngIf="!isListingsCollapsed" class="border-b border-[var(--color-border)] px-5 py-2 text-xs text-[var(--color-text4)]">{{ listRows.length }} documents</div>
 
         <div *ngIf="isListingsCollapsed" class="flex flex-1 items-start justify-center pt-3">
-          <div class="flex h-10 min-w-10 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-slate-300 ring-1 ring-inset ring-slate-700/80">
+          <div class="flex h-10 min-w-10 items-center justify-center rounded-full bg-[var(--color-blue-800)] text-xs font-semibold text-[var(--color-text2)] ring-1 ring-inset ring-[var(--color-border)]">
             {{ listRows.length }}
           </div>
         </div>
 
         <div *ngIf="!isListingsCollapsed" class="flex-1 overflow-y-auto">
-          <div class="grid grid-cols-[1.6fr_1fr] border-b border-slate-700 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">
             <span>Document</span>
             <span>Type</span>
           </div>
-          <div *ngFor="let row of listRows" class="grid grid-cols-[1.6fr_1fr] border-b border-slate-800 px-4 py-3 text-sm text-slate-200 last:border-b-0">
+          <div *ngFor="let row of listRows" class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-5 py-3 text-sm text-[var(--color-text2)] last:border-b-0">
             <span class="truncate">{{ row.label || row.id }}</span>
-            <span class="text-slate-400">{{ row.cluster }}</span>
+            <span class="text-[var(--color-text4)]">{{ row.cluster }}</span>
           </div>
-          <div *ngIf="listRows.length === 0" class="px-4 py-6 text-sm text-slate-400">
+          <div *ngIf="listRows.length === 0" class="px-5 py-6 text-sm text-[var(--color-text4)]">
             No listings available for current filters.
           </div>
         </div>
       </div>
     </aside>
 
-    <div *ngIf="!isGraphView" class="absolute inset-0 overflow-y-auto bg-slate-900/95">
+    <div *ngIf="!isGraphView" class="absolute inset-0 overflow-y-auto bg-[var(--color-blue-850)]/95">
       <div class="mx-auto max-w-6xl px-4 pt-24 pb-10">
-        <div class="rounded-xl border border-slate-700 bg-slate-800/70 shadow-lg backdrop-blur-sm">
-          <div class="grid grid-cols-[1.6fr_1fr] border-b border-slate-700 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 shadow-lg backdrop-blur-sm">
+          <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">
             <span>Document</span>
             <span>Type</span>
           </div>
-          <div *ngFor="let row of listRows" class="grid grid-cols-[1.6fr_1fr] border-b border-slate-800 px-4 py-3 text-sm text-slate-200 last:border-b-0">
+          <div *ngFor="let row of listRows" class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-text2)] last:border-b-0">
             <span class="truncate">{{ row.label || row.id }}</span>
-            <span class="text-slate-400">{{ row.cluster }}</span>
+            <span class="text-[var(--color-text4)]">{{ row.cluster }}</span>
           </div>
-          <div *ngIf="listRows.length === 0" class="px-4 py-6 text-sm text-slate-400">
+          <div *ngIf="listRows.length === 0" class="px-4 py-6 text-sm text-[var(--color-text4)]">
             No listings available for current filters.
           </div>
         </div>
       </div>
     </div>
 
-    <div *ngIf="isGraphView && maxEdge> 50 && showMaxEdgeNotice" class="absolute bottom-4 left-4 z-30 rounded-xl border border-slate-700/70 bg-slate-900/90 px-3 py-2 text-sm text-slate-200 shadow-2xl backdrop-blur-sm">
+    <div *ngIf="isGraphView && maxEdge> 50 && showMaxEdgeNotice" class="absolute bottom-4 left-4 z-30 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-850)]/90 px-3 py-2 text-sm text-[var(--color-text1)] shadow-2xl backdrop-blur-sm">
       <div class="flex items-start gap-2">
         <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
         <span>You can see {{ maxEdge }} nodes at a time, avoid using extreme values for better performance</span>
-        <button type="button" class="ml-1 text-slate-400 hover:text-white" (click)="showMaxEdgeNotice=false" title="Hide">
+        <button type="button" class="ml-1 text-[var(--color-text4)] hover:text-white" (click)="showMaxEdgeNotice=false" title="Hide">
           <i class="bi bi-x-lg text-xs"></i>
         </button>
       </div>
     </div>
 
     <div *ngIf="rawNodes.length> 0 && isGraphView"
-      class="pointer-events-none absolute bottom-4 left-4 z-20 rounded-lg border border-slate-700 bg-slate-800/70 p-3 shadow-lg backdrop-blur-sm select-none">
-      <h3 class="mb-2 border-b border-slate-700 pb-1 text-sm font-semibold text-slate-300">Legend</h3>
+      class="pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
+      <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">Legend</h3>
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
-          <div class="h-4 w-4 rounded-full border-2 border-[#f59e0b] bg-slate-700"></div>
-          <span class="text-xs text-slate-400">Cluster</span>
+          <div class="h-4 w-4 rounded-full border-2 border-[#f59e0b] bg-[var(--color-blue-720)]"></div>
+          <span class="text-xs text-[var(--color-text4)]">Cluster</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="h-4 w-4 rounded-full border-2 border-[#f97316] bg-slate-700"></div>
-          <span class="text-xs text-slate-400">Document</span>
+          <div class="h-4 w-4 rounded-full border-2 border-[#f97316] bg-[var(--color-blue-720)]"></div>
+          <span class="text-xs text-[var(--color-text4)]">Document</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="h-4 w-4 rounded-full border-2 border-[#38bdf8] bg-slate-700"></div>
-          <span class="text-xs text-slate-400">Property</span>
+          <div class="h-4 w-4 rounded-full border-2 border-[#38bdf8] bg-[var(--color-blue-720)]"></div>
+          <span class="text-xs text-[var(--color-text4)]">Property</span>
         </div>
         <div class="flex items-center gap-2">
           <div class="h-4 w-4 rounded-full border-2 border-[#7dd3fc] bg-transparent"></div>
-          <span class="text-xs text-slate-400">Group Node</span>
+          <span class="text-xs text-[var(--color-text4)]">Group Node</span>
         </div>
-        <div class="my-1 h-px bg-slate-700"></div>
+        <div class="my-1 h-px bg-[var(--color-border)]"></div>
         <div class="flex items-center gap-2">
-          <div class="h-px w-4 bg-slate-500"></div>
-          <span class="text-xs text-slate-400">Connection</span>
+          <div class="h-px w-4 bg-[var(--color-text4)]"></div>
+          <span class="text-xs text-[var(--color-text4)]">Connection</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="w-4 text-slate-500">&rarr;</div>
-          <span class="text-xs text-slate-400">Connection Direction</span>
+          <div class="w-4 text-[var(--color-text4)]">&rarr;</div>
+          <span class="text-xs text-[var(--color-text4)]">Connection Direction</span>
         </div>
       </div>
     </div>
@@ -237,7 +237,7 @@
 </app-report-export-modal>
 
 <ng-template #tailwindLoading>
-  <div class="fixed inset-0 flex items-center justify-center bg-slate-900 text-slate-400">
+  <div class="fixed inset-0 flex items-center justify-center bg-[var(--color-blue-850)] text-[var(--color-text4)]">
     <p>Loading graph styles...</p>
   </div>
 </ng-template>

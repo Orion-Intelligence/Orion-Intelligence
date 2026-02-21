@@ -15,21 +15,20 @@ interface CalendarCell {
   templateUrl: './date-picker.component.html',
 })
 export class DatePickerComponent implements OnChanges {
-  @Input() key = '';
-  @Input() filterModel: any;
-  @Input() mSelectedFilters: any;
-  @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
-  @Output() dateSelected = new EventEmitter<{ key: string; value: string }>();
-
+  readonly weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   isOpen = false;
   viewYear = 0;
-  viewMonth = 0; // 0-11
+  viewMonth = 0;
   cells: CalendarCell[] = [];
-
   fromDate: Date | null = null;
   toDate: Date | null = null;
 
-  readonly weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  @Input() key = '';
+  @Input() filterModel: any;
+  @Input() mSelectedFilters: any;
+
+  @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
+  @Output() dateSelected = new EventEmitter<{ key: string; value: string }>();
 
   get displayValue(): string {
     if (this.fromDate && this.toDate) {
@@ -82,7 +81,8 @@ export class DatePickerComponent implements OnChanges {
     if (this.viewMonth === 0) {
       this.viewMonth = 11;
       this.viewYear -= 1;
-    } else {
+    }
+    else {
       this.viewMonth -= 1;
     }
     this.buildCalendar();
@@ -92,7 +92,8 @@ export class DatePickerComponent implements OnChanges {
     if (this.viewMonth === 11) {
       this.viewMonth = 0;
       this.viewYear += 1;
-    } else {
+    }
+    else {
       this.viewMonth += 1;
     }
     this.buildCalendar();

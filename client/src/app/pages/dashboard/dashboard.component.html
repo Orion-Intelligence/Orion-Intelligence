@@ -23,9 +23,9 @@
       *ngIf="!authService.getIsMobileDemo()"
       [ngClass]="{
         'w-[300px] p-0 overflow-y-auto': isMenuOpen,
-        'w-[70px] px-[7px] py-[24px] overflow-hidden': !isMenuOpen
+        'w-[70px] px-[7px] py-[8px] overflow-hidden': !isMenuOpen
       }"
-      class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] [scrollbar-color:var(--color-blue-880)_transparent]"
+      class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]"
       data-cy="dashboard-sidebar">
 
       <app-dashboard-sidebar

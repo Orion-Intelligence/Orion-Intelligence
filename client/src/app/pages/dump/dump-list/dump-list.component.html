@@ -1,46 +1,46 @@
-<div class="mt-[16px] overflow-x-auto rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)]">
-  <table class="w-full border-collapse text-left text-[13px] text-[var(--color-text1)]">
-    <thead class="bg-[var(--color-blue-820-light)]">
+<div class="ui-table-shell">
+  <table class="ui-table">
+    <thead>
       <tr>
-        <th class="px-[12px] py-[10px] font-semibold">ID</th>
-        <th class="px-[12px] py-[10px] font-semibold">Leak URL</th>
-        <th class="px-[12px] py-[10px] font-semibold">Source</th>
-        <th class="px-[12px] py-[10px] font-semibold">Group</th>
-        <th class="px-[12px] py-[10px] font-semibold">Parsed</th>
-        <th class="px-[12px] py-[10px] font-semibold">Created</th>
+        <th>ID</th>
+        <th>Leak URL</th>
+        <th>Source</th>
+        <th>Group</th>
+        <th>Parsed</th>
+        <th>Created</th>
       </tr>
     </thead>
     <tbody *ngIf="!isLoading && (dumpData$ | async) as dumpData" @fadeInDashboardItem>
-      <tr *ngFor="let item of dumpData.mDumpCallbackLinks; let i = index" [hidden]="(item.leak_url.length || 0) <= 5" class="border-t border-[var(--color-border)]">
-        <td class="px-[12px] py-[10px]">{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
-        <td (click)="copyRowData(item.leak_url)" class="px-[12px] py-[10px] cursor-pointer text-[var(--color-text1)] hover:underline">{{ item.leak_url }}</td>
-        <td class="px-[12px] py-[10px]">{{ item.source }}</td>
-        <td class="px-[12px] py-[10px]">{{ item.group }}</td>
-        <td class="px-[12px] py-[10px]">
+      <tr *ngFor="let item of dumpData.mDumpCallbackLinks; let i = index" [hidden]="(item.leak_url.length || 0) <= 5">
+        <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
+        <td (click)="copyRowData(item.leak_url)" class="max-w-[480px] cursor-pointer truncate text-[var(--color-text1)] hover:underline">{{ item.leak_url }}</td>
+        <td>{{ item.source }}</td>
+        <td>{{ item.group }}</td>
+        <td>
           <span class="mr-[6px] inline-block h-[8px] w-[8px] rounded-full" [ngClass]="item.parsed_status ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"> </span>
           {{ item.parsed_status ? 'parsed' : 'unparsed' }}
         </td>
-        <td class="px-[12px] py-[10px]">{{ item.created_at | date: 'MMM yyyy' }}</td>
+        <td>{{ item.created_at | date: 'MMM yyyy' }}</td>
       </tr>
 
-      <tr *ngIf="dumpData.mDumpCallbackLinks?.length === 0" class="border-t border-[var(--color-border)]">
-        <td class="px-[12px] py-[10px]">-</td>
-        <td class="px-[12px] py-[10px]">-</td>
-        <td class="px-[12px] py-[10px]">-</td>
-        <td class="px-[12px] py-[10px]">-</td>
-        <td class="px-[12px] py-[10px]">-</td>
-        <td class="px-[12px] py-[10px]">-</td>
+      <tr *ngIf="dumpData.mDumpCallbackLinks?.length === 0">
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
       </tr>
     </tbody>
 
     <tbody *ngIf="isLoading" @fadeInDashboardItem>
-      <tr *ngFor="let _ of [1,2,3,4,5]" class="border-t border-[var(--color-border)]">
-        <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-        <td class="px-[12px] py-[10px]"><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-        <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-        <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-        <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
-        <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+      <tr *ngFor="let _ of [1,2,3,4,5]">
+        <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <td><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
       </tr>
     </tbody>
   </table>

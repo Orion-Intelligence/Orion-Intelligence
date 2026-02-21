@@ -2,7 +2,7 @@
   <div class="ui-page-container w-full max-w-[2400px]" @fadeInDashboardItem>
     <div class="mb-4 flex items-start justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="h-[88px] w-[88px] rounded-full border border-[#1D2939] bg-[#1D2939] p-1">
+        <div class="h-[88px] w-[88px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[0.2rem]">
           <app-user-image-picker
             [imageUrl]="this.appService.getConfig().appSettings.logo_url || '/api/s/static/system/logo_url_default.png'"
             [defaultImage]="'/api/s/static/system/default'"
@@ -59,7 +59,7 @@
             <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Wide Logo (Light)</div>
             <div class="mt-0.5 text-xs text-[var(--color-text4)]">Used on light surfaces and reports.</div>
             <app-user-image-picker
-              class="mt-1 block h-20 w-full max-w-[250px] rounded-xl border border-[#1D2939] bg-[#1D2939] p-2"
+              class="mt-1 block h-20 w-full max-w-[250px] rounded-xl p-2 pl-0"
               [wide]="true"
               [imageUrl]="this.appService.getConfig().appSettings.logo_wide_light || '/api/s/static/system/logo_wide_light_default.png'"
               [defaultImage]="'/api/s/static/system/logo_wide_light_default.png'"
@@ -72,7 +72,7 @@
             <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Wide Logo (Dark)</div>
             <div class="mt-0.5 text-xs text-[var(--color-text4)]">Used on dark navigation and headers.</div>
             <app-user-image-picker
-              class="mt-1 block h-20 w-full max-w-[250px] rounded-xl border border-[#1D2939] bg-[#1D2939] p-2"
+              class="mt-1 block h-20 w-full max-w-[250px] rounded-xl p-2 pl-0"
               [wide]="true"
               [imageUrl]="this.appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'"
               [defaultImage]="'/api/s/static/system/logo_wide_dark_default.png'"
