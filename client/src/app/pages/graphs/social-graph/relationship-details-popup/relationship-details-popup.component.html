@@ -8,7 +8,7 @@
       <button type="button" class="w-8 h-8 rounded-full text-slate-300 hover:text-white hover:bg-slate-700 transition-colors flex items-center justify-center" (click)="close.emit()"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <div class="flex-grow overflow-y-auto p-4 space-y-3 social-mapper-custom-scrollbar">
+    <div class="flex-grow overflow-y-auto p-4 space-y-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
       <div *ngIf="data().connections.length === 0" class="text-slate-400 text-sm p-4 rounded-lg bg-slate-900/50 border border-slate-700">No account-level matches available for this relationship.</div>
 
       <div *ngFor="let item of data().connections; trackBy: trackByConnection" class="rounded-lg border border-slate-700 bg-slate-900/50 p-3">

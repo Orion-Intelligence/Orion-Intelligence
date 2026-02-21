@@ -1,5 +1,5 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in p-[30px]" (click)="close.emit()">
-    <div class="flex flex-col bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-2xl h-full animate-fade-in-scale overflow-hidden" (click)="$event.stopPropagation()">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-[30px] backdrop-blur-sm animate-[social-mapper-fade-in_0.4s_ease-in-out]" (click)="close.emit()">
+    <div class="flex h-full w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-2xl animate-[social-mapper-slide-in-up_0.4s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]" (click)="$event.stopPropagation()">
       <div class="p-3 flex items-start justify-between gap-3 border-b border-slate-700 bg-slate-900 flex-shrink-0 rounded-t-lg">
         <div class="flex items-center gap-3 min-w-0">
           <div class="h-12 w-12 rounded-full ring-2 ring-slate-600 flex-shrink-0 flex items-center justify-center bg-slate-700">
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <div class="flex-grow p-3 overflow-y-auto min-h-[20rem] social-mapper-custom-scrollbar">
+      <div class="flex-grow min-h-[20rem] overflow-y-auto p-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
         <ng-container *ngIf="hasMatches(); else noMatches">
           <div class="flex flex-col gap-2">
             <ng-container *ngFor="let platform of displayPlatforms(); trackBy: trackByPlatformKey; let i = index">
@@ -52,7 +52,7 @@
               <div class="rounded-lg">
                 <div (click)="toggleSelection(platform)" class="flex flex-col gap-3 p-3 rounded-lg cursor-pointer border transition-colors" [class.bg-slate-700]="platform.isSelected" [class.border-slate-500]="platform.isSelected" [class.border-slate-700]="!platform.isSelected">
                   <div class="flex items-center">
-                  <div [socialMapperPlatformBg]="platform.platform" class="social-mapper-platform-icon flex-shrink-0 rounded-full mr-4 flex items-center justify-center text-lg font-bold text-white h-10 w-10 p-2">
+                  <div [socialMapperPlatformBg]="platform.platform" class="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-[#64748b] bg-[#475569] p-2 text-lg font-bold text-white shadow-[inset_0_0_0_1px_#64748b]">
                     <app-social-icon [platformName]="platform.platform"></app-social-icon>
                   </div>
                   <div class="flex-grow min-w-0">

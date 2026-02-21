@@ -1,116 +1,120 @@
-<span class="login-header">
+<span>
   <app-dashboard-header data-cy="dashboard-header" *ngIf="twofaRequired"></app-dashboard-header >
 </span>
 
-<div class="" id="content" *ngIf="!twofaRequired">
-  <div class="login-page-container">
-    <div class="login-form-side">
-      <div class="header-links">
-        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank" class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank" class="header-link">About Us</a>
+<div id="content" *ngIf="!twofaRequired">
+  <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-cy="login-page-container">
+    <div class="min-w-[500px] bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:flex-[0_0_100vw] max-[943px]:min-w-[350px]">
+      <div class="w-full flex justify-center gap-6">
+        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Privacy Policy</a>
+        <a href="https://orionintelligence.org/service/" target="_blank" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Our Services</a>
+        <a href="https://orionintelligence.org" target="_blank" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">About Us</a>
       </div>
-      <div class="center-content-wrapper">
-        <div class="login-content">
+      <div class="flex flex-col mt-[100px] items-center flex-grow">
+        <div class="w-full max-w-[500px] flex flex-col items-center">
           <div *ngIf="!twofaRequired">
-            <img [src]="appService.getConfig().appSettings.logo_wide_light" width="80px" height="54px" alt="logo" class="orion-logo" />
+            <img [src]="appService.getConfig().appSettings.logo_wide_light" width="80px" height="54px" alt="logo" class="mb-[14px] w-[300px]" />
           </div>
 
-          <div class="login-heading">Login to get started!</div>
+          <div class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[16px] text-center mb-8">Login to get started!</div>
 
           <ng-container *ngIf="isMobile">
-            <div class="d-flex align-items-center gap-2 demo-note" (click)="demoLogin()">
-              <span><img src="/assets/images/shared/theme/info.svg" class="info-icon info-icon-demo" alt=""> &nbsp; Want
-                to explore first? <strong>Try Demo</strong></span>
+            <div class="flex items-center gap-2 cursor-pointer text-[#373637] text-[14px]" (click)="demoLogin()">
+              <span class="flex items-center gap-2">
+                <img src="/assets/images/shared/theme/info.svg" class="mt-[-2px]" alt="">
+                Want to explore first? <strong class="font-semibold">Try Demo</strong>
+              </span>
             </div>
           </ng-container>
 
-          <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="login-form">
-            <label for="username" class="input-label">Email</label>
-            <div class="input-with-icon">
-              <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="input-icon" />
-              <input [(ngModel)]="user.mail" placeholder="Enter email" class="login-input" name="username" required type="text" />
+          <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="w-full flex flex-col gap-2">
+            <label for="username" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">Email</label>
+            <div class="relative w-full">
+              <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+              <input [(ngModel)]="user.mail" placeholder="Enter email" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" required type="text" />
             </div>
 
-            <label for=" word" class="input-label mt-2">Password</label>
-            <div class="input-with-icon">
-              <img src="/assets/images/shared/lock.svg" alt="profile icon" class="input-icon" />
-              <input [(ngModel)]="user.password" placeholder="Enter password" class="login-input" name="password" required type="password" />
+            <label for=" word" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">Password</label>
+            <div class="relative w-full">
+              <img src="/assets/images/shared/lock.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+              <input [(ngModel)]="user.password" placeholder="Enter password" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" required type="password" />
             </div>
 
-            <span (click)="goToForgot()" class="reset-password">Reset password?</span>
+            <span (click)="goToForgot()" class="text-[#a0b8d1] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-cy="reset-password">Reset password?</span>
 
-            <div *ngIf="errorMessage == 'verification pending'" class="d-flex align-items-center justify-content-between mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
-              <span class="text-start"><b>{{ errorMessage }}</b></span>
-              <button (click)="resendMail()" class="btn btn-light btn-sm ms-3">
+            <div *ngIf="errorMessage == 'verification pending'" class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm">
+              <span class="text-left"><b>{{ errorMessage }}</b></span>
+              <button (click)="resendMail()" class="ml-3 bg-white text-[#172235] text-[12px] font-medium px-3 py-1 rounded">
                 Resend mail
               </button>
             </div>
 
-            <div *ngIf="errorMessage && errorMessage != 'verification pending'" class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm text-center">
-              <i class="bi bi-exclamation-diamond-fill me-2"></i>
+            <div *ngIf="errorMessage && errorMessage != 'verification pending'" class="inline-block mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center">
+              <span class="mr-2">!</span>
               {{ errorMessage }}
             </div>
 
             <div>
-              <input [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid" type="submit" value="Sign In" />
+              <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-cy="login-button" type="submit" value="Sign In" />
             </div>
           </form>
 
-          <p class="signup-text">
-            Don't have an account? <span (click)="goToSignUp()" class="signup-link cursor-pointer">Sign Up</span>
+          <p class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[14px] mt-[-16px]">
+            Don't have an account? <span (click)="goToSignUp()" class="text-[#373637] font-bold no-underline cursor-pointer">Sign Up</span>
           </p>
         </div>
       </div>
 
-      <div class="footer-copyright">
-        <p>Copyright &copy; 2025. Powered by</p>
-        <p>{{ this.appService.getConfig().appSettings.app_name }}</p>
+      <div class="text-center mt-auto">
+        <p class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">Copyright &copy; 2025. Powered by</p>
+        <p class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">{{ this.appService.getConfig().appSettings.app_name }}</p>
       </div>
     </div>
 
-    <div class="dashboard-preview-side">
-      <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="dashboard-visual" />
+    <div class="flex-1 relative overflow-hidden bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
+      <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="absolute right-0 h-screen" />
     </div>
   </div>
 </div>
 
-<div *ngIf="twofaRequired" class="login_container" [class.twofaextend]="otpSecret" id="content">
-  <div class="login_box">
-    <div class="login_header">
-      <a class="home_chip" href="/">
-        <img alt="back" src="assets/images/shared/theme/arrow.svg">
+<div *ngIf="twofaRequired" class="w-full min-h-[70vh] bg-[var(--color-blue-830)] relative text-white overflow-hidden flex justify-center items-center min-w-[300px]" [class.twofaextend]="otpSecret" id="content">
+  <div class="bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.04)_0,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_24px),radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.06)_0%,transparent_40%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.04)_0%,transparent_45%),linear-gradient(90deg,rgba(21,52,84,0.55)_0%,rgba(22,56,88,0.55)_100%)] p-[42px] px-[32px] rounded-[16px] border border-[rgba(255,255,255,0.12)]" [ngClass]="otpSecret ? 'w-[700px] mt-0' : 'w-auto'">
+    <div class="flex items-center">
+      <a class="inline-flex items-center gap-2 px-[14px] py-[6px] rounded-[20px] bg-[rgba(255,255,255,0.2)] border border-[rgba(255,255,255,0.35)] text-[14px] font-bold no-underline text-white transition-colors hover:bg-[rgba(255,255,255,0.3)] hover:border-[rgba(255,255,255,0.6)]" href="/">
+        <img alt="back" src="assets/images/shared/theme/arrow.svg" class="w-[18px] h-[18px]">
         <span>Homepage</span>
       </a>
     </div>
 
-    <p *ngIf="errorMessage" class="text-warning text-start"><b>{{ errorMessage }}</b></p>
+    <p *ngIf="errorMessage" class="text-[#ffc107] text-left"><b>{{ errorMessage }}</b></p>
 
-    <div *ngIf="otpDataUrl" class="login_form-group twofa-center">
+    <div *ngIf="otpDataUrl" class="grid text-center mb-4" data-cy="twofa-center">
       <img [src]="otpDataUrl" alt="2FA QR" width="200" height="200">
-      <div class="twofa_note">Scan QR in your authenticator app</div>
+      <div class="mt-[10px] text-center text-[13px] font-semibold text-white/70">Scan QR in your authenticator app</div>
     </div>
 
     <p *ngIf="otpSecret" class="text-white mt-3 text-center"><b>Backup key (tap to copy)</b></p>
-    <div *ngIf="otpSecret" class="alert alert-warning cursor-pointer" role="alert" (click)="copyToClipboard(otpSecret)">
-      <div class="d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center">
-          <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="18" height="18" class="copy-icon">
-          <strong class="ms-2">{{ otpSecret }}</strong>
+    <div *ngIf="otpSecret" class="cursor-pointer bg-[#ffc107] text-[#172235] px-4 py-3 rounded-md" role="alert" (click)="copyToClipboard(otpSecret)">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="18" height="18">
+          <strong class="ml-2">{{ otpSecret }}</strong>
         </div>
-        <span *ngIf="copied" class="fw-bold">Copied!</span>
+        <span *ngIf="copied" class="font-bold">Copied!</span>
       </div>
     </div>
 
-    <div class="twofa_title">Enter 2FA code</div>
-    <div class="twofa_subtitle">Type the 6-digit code from your authenticator app</div>
+    <div class="text-center text-[16px] font-extrabold text-white" data-cy="twofa_title">Enter 2FA code</div>
+    <div class="mt-[6px] mb-[14px] text-center text-[13px] font-medium text-white/70">Type the 6-digit code from your authenticator app</div>
 
     <form (ngSubmit)="submitOtp()">
-      <div class="login_form-group">
-        <label class="login_hidden-label" for="id_otp">2FA Code</label>
-        <input [(ngModel)]="otpCode" name="otpCode" class="login_input twofa_code-input" id="id_otp" placeholder="••••••" required minlength="6" maxlength="6" inputmode="numeric" autocomplete="one-time-code" type="text">
+      <div class="grid">
+        <label class="hidden" for="id_otp">2FA Code</label>
+        <input [(ngModel)]="otpCode" name="otpCode" class="h-[44px] rounded-[8px] px-[14px] text-center text-[18px] font-bold tracking-[8px] bg-[linear-gradient(180deg,#fff_0%,#f2f4f6_100%)] border border-[rgba(0,0,0,0.15)] focus:outline-none focus:ring-[3px] focus:ring-[rgba(78,162,241,0.35)] placeholder:tracking-[0]" id="id_otp" placeholder="••••••" required minlength="6" maxlength="6" inputmode="numeric" autocomplete="one-time-code" type="text">
       </div>
 
-      <div class="login-button-container">
-        <button type="submit" class="mt-4" [disabled]="!otpCode || otpCode.length < 6" [class.login_btn-submit]="otpCode && otpCode.length === 6" [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
+      <div>
+        <button type="submit" class="mt-4 w-full text-white bg-[linear-gradient(92.32deg,#4EA2F1_2.58%,#2C7AC5_66.77%,#1E6CB7_130.97%)] border-none py-3 rounded-[8px] text-[14px] font-medium transition-all duration-300 ease-in-out hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="!otpCode || otpCode.length < 6">
           Verify 2FA
         </button>
       </div>

@@ -1,100 +1,103 @@
-<div class="user-settings_section" @fadeInDashboardItem>
-  <div class="user-settings_section-header" (click)="toggleSection('profile')">
-    <span class="user-settings_section-title">
-      {{ isAdmin() ? 'Admin Profile' : 'User Profile' }}
-    </span>
-    <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
-  </div>
+<div class="w-full p-3 md:p-4">
+  <form class="ui-page-container w-full max-w-[2400px]" (ngSubmit)="updateUser()" @fadeInDashboardItem>
+    <div class="mb-4 flex items-start gap-3">
+      <div class="h-[88px] w-[88px] shrink-0 rounded-full border border-[#1D2939] bg-[#1D2939] p-1">
+        <app-user-image-picker
+          class="block h-full w-full"
+          [imageUrl]="userSessionData.user.image || ''"
+          (onImageSelected)="updateUserResource($event)"
+          [defaultImage]="'/api/s/static/user/logo_url_default.png'"
+          (onClear)="deleteUserResource()">
+        </app-user-image-picker>
+      </div>
+      <div class="pt-1">
+        <h1 class="ui-page-title">{{ isAdmin() ? 'Admin Profile Form' : 'User Profile Form' }}</h1>
+        <p class="ui-page-description">Account details and preferences.</p>
+        <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
+          Version <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
+        </p>
+      </div>
+    </div>
 
-  <span class="user-settings_section-description">
-    {{
-    isAdmin()
-    ? 'Manage profile information.'
-    : 'Manage and edit your company details, including phone, address, and profile information.'
-    }}
-  </span>
+    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+      <div class="ui-section-title">Profile</div>
+      <div class="ui-section-description">Manage profile identity and assigned access.</div>
 
-  <div *ngIf="isAccountSectionOpen">
-    <div class="user-settings_card">
-      <div class="user-settings_info">
-        <div class="user-avatar">
-          <div class="avatar-wrapper">
-            <app-user-image-picker [imageUrl]="userSessionData.user.image || ''"
-              (onImageSelected)="updateUserResource($event)" [defaultImage]="'/api/s/static/user/logo_url_default.png'"
-              (onClear)="deleteUserResource()">
-            </app-user-image-picker>
+      <div class="mt-3 grid gap-3 sm:grid-cols-2">
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Username</label>
+        <input
+          type="text"
+          [(ngModel)]="editableUsername"
+          name="username"
+          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Role</label>
+        <input
+          type="text"
+          [value]="(appService.userSessionData().user.role | titlecase)"
+          disabled
+          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Tenant / Location</label>
+        <input
+          type="text"
+          [value]="getLocationDisplay() || appService.userSessionData().user.username"
+          disabled
+          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Licenses</label>
+        <input
+          type="text"
+          [value]="getUserLicensesLabel(userSessionData.user) || 'No licenses assigned'"
+          disabled
+          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+      </div>
+      </div>
+    </div>
+
+    <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+      <div class="ui-section-title">Preferences</div>
+      <div class="ui-section-description">Security and appearance settings.</div>
+      <div class="mt-3 space-y-3">
+      <div
+        class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35"
+        (click)="twoFactorEnabled = !twoFactorEnabled; toggleTwoFa()"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <label class="block text-sm font-semibold text-[var(--color-text1)]">2 Factor Authentication</label>
+            <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.user.twofa_enabled ? 'Enabled' : 'Disabled' }}</p>
           </div>
-        </div>
-
-        <div>
-          <ng-container
-            *ngIf="isAdmin() || licenseService.getLicenses().includes('free'); then adminProfileBlock; else companyProfileBlock">
-          </ng-container>
-
-          <ng-template #adminProfileBlock>
-            <div class="user-settings_company-name">
-              {{ getLocationDisplay() || this.appService.userSessionData().user.username }}
-            </div>
-            <div class="user-settings_company-location">
-              {{ getLocationDisplay() || this.appService.userSessionData().user.username }}
-            </div>
-          </ng-template>
-
-          <ng-template #companyProfileBlock>
-            <div class="user-settings_company-name">
-              <input type="text" [(ngModel)]="userSessionData.user.username" class="user-settings_input" disabled placeholder="Enter company name" />
-            </div>
-
-            <div class="user-settings_company-location">
-              Licenses〡{{ getUserLicensesLabel(userSessionData.user) || 'No licenses assigned' }}
-            </div>
-          </ng-template>
+          <label class="pointer-events-none relative h-6 w-11 shrink-0">
+            <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="twoFactorEnabled" />
+            <span class="absolute inset-0 rounded-[20px] bg-[#58a9ff] transition-[background-color] duration-300 peer-checked:bg-[#1b60a5] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+          </label>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<div class="user-settings_section" @fadeInDashboardItem>
-  <div class="user-settings_section-header" (click)="toggleSection('twoFA')">
-    <span class="user-settings_section-title">2 Factor Authentication</span>
-    <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt="" />
-  </div>
-
-  <span class="user-settings_section-description">
-    Enhance your account security by enabling or managing two-factor authentication settings.
-  </span>
-
-  <div *ngIf="is2FAOpen">
-    <div class="user-settings_toggle-row">
-      <div class="user-settings_toggle-label">
-        {{ userSessionData.user.twofa_enabled ? 'Enabled' : 'Disabled' }}
+      <div
+        class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35"
+        (click)="isDarkMode = !isDarkMode; toggleTheme()"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <label class="block text-sm font-semibold text-[var(--color-text1)]">Theme</label>
+            <p class="mt-1 text-xs text-[var(--color-text4)]">{{ isDarkMode ? 'Dark Mode' : 'Light Mode' }}</p>
+          </div>
+          <label class="pointer-events-none relative h-6 w-11 shrink-0">
+            <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="isDarkMode" />
+            <span class="absolute inset-0 rounded-[20px] bg-[#58a9ff] transition-[background-color] duration-300 peer-checked:bg-[#1b60a5] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+          </label>
+        </div>
       </div>
-      <label class="user-settings_switch">
-        <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()" />
-        <span class="user-settings_slider"></span>
-      </label>
+      </div>
     </div>
-  </div>
-</div>
-
-<div class="user-settings_section" @fadeInDashboardItem>
-  <div class="user-settings_section-header" (click)="toggleSection('theme')">
-    <span class="user-settings_section-title">Theme</span>
-    <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt="" />
-  </div>
-
-  <span class="user-settings_section-description">
-    Customize the look and feel of your dashboard by choosing between available themes.
-  </span>
-
-  <div *ngIf="isThemeOpen">
-    <div class="user-settings_toggle-row">
-      <div class="user-settings_toggle-label">Dark Mode</div>
-      <label class="user-settings_switch">
-        <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()" />
-        <span class="user-settings_slider"></span>
-      </label>
-    </div>
-  </div>
+  </form>
 </div>

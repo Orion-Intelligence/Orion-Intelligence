@@ -1,106 +1,149 @@
 <ng-container *ngIf="consolidated">
-  <ul class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
-    <li class="nav-item">
-      <a class="nav-link cursor-pointer" [class.active]="activeTab === 'Group'">Group</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link cursor-pointer" [class.active]="activeTab === 'IOCs'">IOCs</a>
-    </li>
-  </ul>
+  <div class="flex border-b border-[var(--color-border)] mt-[32px] mx-[32px] max-[1000px]:mx-[17px]" (click)="onTabClick($event)">
+    <button
+      type="button"
+      data-tab="Group"
+      class="cursor-pointer px-[24px] py-[10px] font-[Inter] text-[14px] text-[#A0B8D1]"
+      [ngClass]="{
+        'bg-[var(--color-blur-920)] border border-[var(--color-border)] border-b-2 border-b-[var(--color-text1)] rounded-t-[8px] text-[var(--color-text1)] font-medium': activeTab === 'Group',
+        'hover:bg-[var(--color-blue-810)] hover:border hover:border-[#ffffff08] hover:border-b-2 hover:border-b-[var(--color-divider-dark)] hover:rounded-t-[8px] hover:text-[var(--color-text1)]': activeTab !== 'Group'
+      }">Group</button>
+    <button
+      type="button"
+      data-tab="IOCs"
+      class="cursor-pointer px-[24px] py-[10px] font-[Inter] text-[14px] text-[#A0B8D1]"
+      [ngClass]="{
+        'bg-[var(--color-blur-920)] border border-[var(--color-border)] border-b-2 border-b-[var(--color-text1)] rounded-t-[8px] text-[var(--color-text1)] font-medium': activeTab === 'IOCs',
+        'hover:bg-[var(--color-blue-810)] hover:border hover:border-[#ffffff08] hover:border-b-2 hover:border-b-[var(--color-divider-dark)] hover:rounded-t-[8px] hover:text-[var(--color-text1)]': activeTab !== 'IOCs'
+      }">IOCs</button>
+  </div>
   <br *ngIf="activeTab !== 'IOCs'">
 </ng-container>
 
 <ng-container *ngIf="activeTab !== 'IOCs'">
-  <form (submit)="onFormSubmit()" @fadeInDashboardItem class="default-input-container default-input-sub-container-padded w-90" [ngClass]="{ 'mt-0': consolidated }" *ngIf="!domain">
-    <div class="search-filter-d-flex search-filter-row">
-      <div class="search-bar-wrapper default-input-container-mobile">
-        <div class="mobile-backdrop" *ngIf="homeSearchService.showFiltersOverlay"></div>
-        <div class="input-group default-input-sub-container" [ngClass]="{ 'mobile-overlay-active': homeSearchService.showFiltersOverlay, 'mobile-overlay-inactive': !homeSearchService.showFiltersOverlay }">
-          <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
-            <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
-          </button>
-          <input #searchInput class="search-trigger form-control default-input dashboard-general-input" data-cy="dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
-          <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus(); onFormSubmit()" [disabled]="!searchQuery">
-            <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14">
-          </button>
+  <form
+    (submit)="onFormSubmit()"
+    @fadeInDashboardItem
+    class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[550px]:grid"
+    [ngClass]="{ 'mt-0': consolidated }"
+    *ngIf="!domain">
+    <div class="flex w-full flex-wrap items-start justify-between">
+      <div class="w-full">
+        <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
 
-          <span class="input-group-text border-start-0 gc-clear-selection homebar-advance" [style.cursor]="consolidated ? 'pointer' : 'default'">
-            <ng-container>
-              <hr class="vertical-divider" />
-              <span>Advance&nbsp;&nbsp;</span>
-              <label class="small-switch">
-                <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
-                <span class="small-slider round"></span>
-              </label>
-            </ng-container>
-            <ng-container>
-              <hr class="vertical-divider ml-3" />
-              <span class="cursor-pointer" (click)="onToolToggle($event)">
-                Tools
-                <div class="expand-icon">
-                  <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform" />
-                </div>
-              </span>
-            </ng-container>
-          </span>
+        <div class="relative">
+          <div
+            class="flex w-[calc(100vw-840px)] flex-nowrap mb-[8px] h-[42px] max-[1000px]:w-full"
+            [ngClass]="{
+              'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay,
+              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-auto max-[550px]:px-0 max-[550px]:mr-[100px]': !homeSearchService.showFiltersOverlay
+            }">
 
-          <ng-container *ngIf="licenseService.canUseScanning() && scandomains.length > 0">
-            <div class="gc-clear-selection d-flex align-items-center scan-shrink dashboard-general-scan dropdown" (click)="toggleScan()">
-              <div class="dashboard-general-scan-text">
-                <span class="dashboard-general-scan-header">Run Scan</span>
-                <small class="dashboard-general-scan-desc text-muted">
-                  <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found
-                </small>
-              </div>
-              <img src="assets/images/shared/security-scan-arrow.svg" alt="arrow" class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans" />
-              <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
-                <ng-container *ngFor="let domain of scandomains; let last = last">
-                  <li @fadeInDashboardItem>
-                    <span class="bullet"></span>
-                    <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</span>
-                  </li>
-                  <hr *ngIf="!last" class="dropdown-divider mx-3">
-                </ng-container>
-              </ul>
+            <button class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" type="submit">
+              <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
+            </button>
+
+            <input
+              #searchInput
+              class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
+              data-cy="dashboard-general-input"
+              [(ngModel)]="searchQuery"
+              autocapitalize="none"
+              autocomplete="off"
+              maxlength="350"
+              name="q"
+              placeholder="Search..."
+              type="search"
+              (focus)="setFilterOverlay(true)"
+              (input)="onSearchInput($event)" />
+
+            <button
+              type="button"
+              class="flex items-center justify-center border-y border-r border-[var(--color-border)] bg-white px-[10px]"
+              aria-label="Clear"
+              (click)="searchQuery=''; searchInput.focus(); onFormSubmit()"
+              [disabled]="!searchQuery">
+              <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
+            </button>
+
+            <div class="flex shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[15px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden">
+              <ng-container>
+                <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
+                <span>Advance&nbsp;&nbsp;</span>
+                <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
+                  <input type="checkbox" class="sr-only peer" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
+                  <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-white transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
+                    <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition peer-checked:translate-x-[10px]"></span>
+                  </span>
+                </label>
+              </ng-container>
+              <ng-container>
+                <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
+                <button type="button" class="inline-flex items-center cursor-pointer" (click)="onToolToggle($event)">
+                  Tools
+                  <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="mt-[-1px] px-[10px] transition-transform duration-300" />
+                </button>
+              </ng-container>
             </div>
-          </ng-container>
-        </div>
 
-        <div class="col-md-12 col-sm-12 col-xs-12">
-          <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+            <ng-container *ngIf="licenseService.canUseScanning() && scandomains.length > 0">
+              <div class="relative ml-[8px] flex cursor-pointer items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[8px]" (click)="toggleScan()">
+                <div class="flex flex-col">
+                  <span class="text-[12px] font-semibold text-[var(--color-text1)]">Run Scan</span>
+                  <small class="text-[11px] text-[var(--color-text4)]">
+                    <span class="inline-block h-[8px] w-[8px] mr-[4px] rounded-full bg-[var(--color-blue-640)]"></span>{{ scandomains.length }} Resources Found
+                  </small>
+                </div>
+                <img src="assets/images/shared/security-scan-arrow.svg" alt="arrow" class="ml-[10px] h-[12px] w-[12px] transition-transform duration-200" [ngClass]="{ 'rotate-180': showScans }" />
+                <ul class="absolute right-0 top-[calc(100%+8px)] z-[10] w-[210px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]" [ngClass]="{ 'block': showScans, 'hidden': !showScans }" @fadeInDashboardItem>
+                  <ng-container *ngFor="let domain of scandomains; let last = last">
+                    <li class="flex items-center gap-[8px] py-[4px]" @fadeInDashboardItem>
+                      <span class="h-[6px] w-[6px] rounded-full bg-[var(--color-blue-640)]"></span>
+                      <span class="cursor-pointer text-[13px] text-[var(--color-text1)]" (click)="onScanSelected(domain)">{{ domain }}</span>
+                    </li>
+                    <hr *ngIf="!last" class="my-[6px] border-0 h-px bg-[#ffffff12]">
+                  </ng-container>
+                </ul>
+              </div>
+            </ng-container>
+          </div>
+
+          <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
+
+          <div #filtersWrapper class="absolute z-[1] w-full max-w-[910px]" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
             <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools" (checkDomain)="init_domains()"></app-search-filters>
           </div>
         </div>
 
         <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools">
-          <div class="mt-2 d-flex gap-3 dropdown-menu-container" @fadeInDashboardItem>
-            <div class="dropdown me-3" *ngIf="showSorting">
-              <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown">
+          <div class="mt-[8px] flex gap-[12px]" @fadeInDashboardItem>
+            <details class="relative" *ngIf="showSorting">
+              <summary class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)] list-none [&::-webkit-details-marker]:hidden">
                 sort by <b>({{ selectedSortBy }})</b>
                 <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-              </span>
-              <ul class="dropdown-menu mt-3 rounded-4 fade" aria-labelledby="dropdownMenu1">
-                <li><a class="dropdown-item" (click)="onSortChange(SortType.NEWEST_FIRST)">Newest first</a></li>
-                <li><hr class="dropdown-divider mx-3"></li>
-                <li><a class="dropdown-item" (click)="onSortChange(SortType.OLDEST_FIRST)">Oldest first</a></li>
-              </ul>
-            </div>
+              </summary>
+              <div class="absolute z-[10] mt-[12px] w-[220px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onSortChange(SortType.NEWEST_FIRST)">Newest first</button>
+                <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
+                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onSortChange(SortType.OLDEST_FIRST)">Oldest first</button>
+              </div>
+            </details>
 
-            <div class="dropdown">
-              <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown">
+            <details class="relative">
+              <summary class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)] list-none [&::-webkit-details-marker]:hidden">
                 search by <b>({{ matchTypeLabel() }})</b>
                 <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-              </span>
-              <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
-                <li><a class="dropdown-item" (click)="onSetMatchType('or'); onFormSubmit()">Match Semantic</a></li>
-                <li><hr class="dropdown-divider mx-3"></li>
-                <li><a class="dropdown-item" (click)="onSetMatchType('or'); onFormSubmit()">Match any term (OR)</a></li>
-                <li><hr class="dropdown-divider mx-3"></li>
-                <li><a class="dropdown-item" (click)="onSetMatchType('and'); onFormSubmit()">Match indivisual terms (AND)</a></li>
-                <li><hr class="dropdown-divider mx-3"></li>
-                <li><a class="dropdown-item" (click)="onSetMatchType('full'); onFormSubmit()">Match full query (AND)</a></li>
-              </ul>
-            </div>
+              </summary>
+              <div class="absolute z-[10] mt-[12px] w-[240px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onSetMatchType('or'); onFormSubmit()">Match Semantic</button>
+                <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
+                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onSetMatchType('or'); onFormSubmit()">Match any term (OR)</button>
+                <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
+                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onSetMatchType('and'); onFormSubmit()">Match indivisual terms (AND)</button>
+                <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
+                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onSetMatchType('full'); onFormSubmit()">Match full query (AND)</button>
+              </div>
+            </details>
           </div>
         </ng-container>
 
@@ -111,23 +154,23 @@
         </app-selected-filter-bar>
       </div>
 
-      <div class="filter-scan_flex">
-        <div *ngIf="!shrinkmenu && filterModel" class="filter-button-wrapper side-menu-container d-flex align-items-start justify-content-start gap-3">
-          <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="filters-button d-flex align-items-center">
+      <div class="mt-[8px] flex gap-[12px]">
+        <div *ngIf="!shrinkmenu && filterModel" class="flex items-start gap-[12px]">
+          <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="flex cursor-pointer items-center gap-[8px] text-[var(--color-text1)]">
             <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24">
-            <span class="ms-2">Filter</span>
+            <span>Filter</span>
           </label>
         </div>
-        <div *ngIf="!shrinkmenu && licenseService.canUseScanning() && scandomains.length > 0" class="side-menu-container tools-shrink d-flex flex-column align-items-start justify-content-start mt-2 gap-3">
-          <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown" (click)="toggleScan()">
-            <span class="dashboard-general-scan-header">Run Scan</span>
-            <small class="dashboard-general-scan-desc text-muted">
-              <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>
+        <div *ngIf="!shrinkmenu && licenseService.canUseScanning() && scandomains.length > 0" class="flex flex-col items-start gap-[12px] mt-[8px]">
+          <div class="relative flex cursor-pointer flex-col items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[8px]" (click)="toggleScan()">
+            <span class="text-[12px] font-semibold text-[var(--color-text1)]">Run Scan</span>
+            <small class="text-[11px] text-[var(--color-text4)]">
+              <span class="inline-block h-[8px] w-[8px] mr-[4px] rounded-full bg-[var(--color-blue-640)]"></span>
               {{ scandomains.length }} Resources Found
             </small>
-            <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
-              <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
-                <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</span>
+            <ul class="absolute top-[calc(100%+8px)] z-[10] w-[210px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]" [ngClass]="{ 'block': showScans, 'hidden': !showScans }" @fadeInDashboardItem>
+              <li *ngFor="let domain of scandomains" @fadeInDashboardItem class="py-[4px]">
+                <span class="cursor-pointer text-[13px] text-[var(--color-text1)]" (click)="onScanSelected(domain)">{{ domain }}</span>
               </li>
             </ul>
           </div>
@@ -139,18 +182,24 @@
 
 <ng-container *ngIf="!consolidated">
   <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs()); else noResults" @fadeInDashboardItem>
-    <div class="right-text label-text">
+    <div class="mt-[30px] mb-[10px] ml-[35px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)] max-[1000px]:ml-[15px]">
       <span>{{ result_count }} Results Found</span>
     </div>
   </div>
   <ng-template #noResults>
-    <div *ngIf="(!checkMember() || hasIOCs()) && isLoading" class="right-text label-text">
+    <div *ngIf="(!checkMember() || hasIOCs()) && isLoading" class="mt-[30px] mb-[10px] ml-[35px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)] max-[1000px]:ml-[15px]">
       <span>Searching for results ...</span><br><br>
     </div>
   </ng-template>
 </ng-container>
 
-<div *ngIf="filterModel && !shrinkmenu" [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
+<div
+  *ngIf="filterModel && !shrinkmenu"
+  class="fixed top-0 h-[96vh] w-[300px] rounded-tl-[15px] bg-[#2A5784] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full"
+  [ngClass]="{
+    'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async),
+    'right-0': (isFilterOpen$ | async)
+  }">
   <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 
@@ -167,11 +216,11 @@
 </div>
 
 <ng-container *ngIf="result_count && !isLoading && result_count > 0 && type === Category.STRATEGIC">
-  <div class="default-notification-banner">
+  <div class="mt-[30px] mb-[10px] ml-[35px] w-[calc(100%-70px)] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[20px] py-[12px] text-[13px] text-[var(--color-text1)] max-[1000px]:ml-[15px] max-[1000px]:w-[calc(100%-30px)]">
     <span>
-      <img alt="Info Icon" width="18px" height="18px" class="default-notification-banner-icon" src="assets/images/shared/hint.svg">
+      <img alt="Info Icon" width="18" height="18" class="mr-[8px] inline-block" src="assets/images/shared/hint.svg">
       Current results are general and may lack accuracy. For precise insights, open the
-      <u><b><a appTooltip="Go to Breach Details" class="cursor-pointer text-reset text-decoration-none" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">Data Breaches</a></b></u>
+      <u><b><a appTooltip="Go to Breach Details" class="cursor-pointer text-[inherit] no-underline" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">Data Breaches</a></b></u>
       section in sidebar.
     </span>
   </div>

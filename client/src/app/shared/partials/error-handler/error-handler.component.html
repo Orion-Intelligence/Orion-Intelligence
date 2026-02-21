@@ -1,28 +1,26 @@
-<div class="notice_container">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-6">
-        <div class="notice">
-          <h2>
-            Oops! Server Error 404</h2><br>
-          <hr class="notice_header-divider">
-          <br>
-          <h1>
-            Something went wrong!</h1>
-          <div>
-            <p>The requested URL was not found on this server</p>
-          </div>
-          <br>
-          <div class="notice_actions">
-            <a class="btn btn-info btn-lg notice_action-button" href="https://github.com/msmannan00/Orion-Search"> <span class="glyphicon glyphicon-home"></span> Explore Project </a>
-          </div>
-          <div class="notice_actions">
-            <a class="btn btn-info btn-lg notice_action-button" href="/"> <span class="glyphicon glyphicon-home"></span> Homepage </a>
-          </div>
+<div class="min-h-screen bg-[var(--color-blue-700)] px-6 py-12">
+  <div class="mx-auto w-full max-w-[1000px]">
+    <div class="grid items-center gap-10 lg:grid-cols-2">
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text4)]">Oops! Server Error 404</h2>
+        <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
+        <h1 class="mt-4 text-3xl font-semibold text-[var(--color-text1)]">Something went wrong!</h1>
+        <p class="mt-2 text-sm text-[var(--color-text3)]">The requested URL was not found on this server</p>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="inline-flex items-center gap-2 rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-blue-630)]" href="https://github.com/msmannan00/Orion-Search">
+            <i class="bi bi-house"></i>
+            Explore Project
+          </a>
+          <a class="inline-flex items-center gap-2 rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text3)]" href="/">
+            <i class="bi bi-house"></i>
+            Homepage
+          </a>
         </div>
       </div>
-      <div class="col-md-6">
-        <img alt="Brand Logo" fill="true" ngSrc="/assets/images/shared/server-icon.svg" priority>
+
+      <div class="flex items-center justify-center">
+        <img alt="Brand Logo" class="max-w-[360px]" ngSrc="/assets/images/shared/server-icon.svg" priority>
       </div>
     </div>
   </div>

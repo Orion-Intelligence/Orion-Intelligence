@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
-import { NgFor, NgIf, CommonModule } from '@angular/common';
+import { NgFor, NgIf, CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryAlerts } from '../../../../model/alert-notification/alert.notification.model';
@@ -23,7 +23,7 @@ import { AlertExportComponentComponent } from "../alert-export-component/alert-e
 import { EmptyResultComponent } from '../../../empty-result/empty-result.component';
 @Component({
   selector: 'app-category-alert-report',
-  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, NgxPrintModule, AlertExportComponentComponent, EmptyResultComponent],
+  imports: [NgFor, NgIf, NgClass, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, NgxPrintModule, AlertExportComponentComponent, EmptyResultComponent],
   templateUrl: './category-alert-report.component.html'
 })
 export class CategoryAlertReportComponent implements OnInit {

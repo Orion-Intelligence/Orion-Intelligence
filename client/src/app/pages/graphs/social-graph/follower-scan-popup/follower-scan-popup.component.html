@@ -1,8 +1,8 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-in p-[30px]" (click)="close.emit()">
-  <div class="flex flex-col bg-slate-800 rounded-lg border border-slate-700 shadow-2xl w-full max-w-lg h-[80vh] animate-fade-in-scale overflow-hidden" (click)="$event.stopPropagation()">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-[30px] backdrop-blur-sm animate-[social-mapper-fade-in_0.4s_ease-in-out]" (click)="close.emit()">
+  <div class="flex h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-2xl animate-[social-mapper-slide-in-up_0.4s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]" (click)="$event.stopPropagation()">
     <div class="p-3 flex items-start justify-between gap-3 border-b border-slate-700 bg-slate-900 flex-shrink-0 rounded-t-lg">
       <div class="flex items-center gap-3 min-w-0">
-        <div [socialMapperPlatformBg]="platform().platform" class="social-mapper-platform-icon rounded-lg flex-shrink-0 flex items-center justify-center text-3xl font-bold text-white w-12 h-12 p-2">
+        <div [socialMapperPlatformBg]="platform().platform" class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-[#64748b] bg-[#475569] p-2 text-3xl font-bold text-white shadow-[inset_0_0_0_1px_#64748b]">
           <app-social-icon [platformName]="platform().platform"></app-social-icon>
         </div>
         <div class="min-w-0">
@@ -38,7 +38,7 @@
       <div class="flex-grow mt-3 min-h-0 relative overflow-hidden">
         <div class="absolute inset-0 transition-all duration-300 ease-out" [class.opacity-100]="activeTab() === 'followers'" [class.opacity-0]="activeTab() !== 'followers'" [class.translate-x-0]="activeTab() === 'followers'" [class.-translate-x-4]="activeTab() !== 'followers'" [class.pointer-events-auto]="activeTab() === 'followers'" [class.pointer-events-none]="activeTab() !== 'followers'">
           <div *ngIf="followers().length > 0; else fetchFollowersState" class="h-full flex flex-col">
-            <div class="flex-grow overflow-y-auto social-mapper-custom-scrollbar pr-1 space-y-1.5">
+            <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
               <div *ngFor="let username of displayFollowers(); trackBy: trackByUsername" class="bg-slate-700/40 border border-slate-700 rounded-md transition-colors hover:bg-slate-700">
                 <div class="flex items-center gap-2 px-2 py-1.5">
                   <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-slate-200'">
@@ -56,7 +56,7 @@
 
         <div class="absolute inset-0 transition-all duration-300 ease-out" [class.opacity-100]="activeTab() === 'following'" [class.opacity-0]="activeTab() !== 'following'" [class.translate-x-0]="activeTab() === 'following'" [class.translate-x-4]="activeTab() !== 'following'" [class.pointer-events-auto]="activeTab() === 'following'" [class.pointer-events-none]="activeTab() !== 'following'">
           <div *ngIf="following().length > 0; else fetchFollowingState" class="h-full flex flex-col">
-            <div class="flex-grow overflow-y-auto social-mapper-custom-scrollbar pr-1 space-y-1.5">
+            <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
               <div *ngFor="let username of displayFollowing(); trackBy: trackByUsername" class="bg-slate-700/40 border border-slate-700 rounded-md transition-colors hover:bg-slate-700">
                 <div class="flex items-center gap-2 px-2 py-1.5">
                   <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-slate-200'">

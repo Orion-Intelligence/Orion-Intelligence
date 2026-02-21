@@ -1,153 +1,150 @@
-<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_channel_url"
-  [content]="resultItem?.m_content"></app-report-header>
+<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_channel_url" [content]="resultItem?.m_content"></app-report-header>
 
 <div *ngIf="resultItem">
-  <div class="search__result-detail">
-    <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_name">
-      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_name.length ||
-      'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
+  <div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
+    <p class="text-lg font-semibold text-[var(--color-text1)]" *ngIf="resultItem.m_channel_name">
+      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_name.length || 'Untitled Channel'.length) > 550 ? '...' : '' }}
+    </p>
 
-    <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_url">
-      {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_url.length ||
-      'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
+    <p class="text-sm text-[var(--color-text3)]" *ngIf="resultItem.m_channel_url">
+      {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_url.length || 'Untitled Channel'.length) > 550 ? '...' : '' }}
+    </p>
 
     <ng-container *ngIf="hasCodeType(resultItem); else showSections">
-      <div class="result-list_section-content">
-        <p>Code snippet - content not available</p>
-        <div class="content collapsible-container p-3">
+      <div class="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3 text-sm text-[var(--color-text3)]">
+        <p class="font-semibold">Code snippet - content not available</p>
+        <div class="mt-2 rounded-md bg-[var(--color-blue-810)] p-3 font-mono text-xs text-[var(--color-text1)]">
           <code [innerText]="getContentWithoutEmptyLines(resultItem.m_content)"></code>
         </div>
       </div>
     </ng-container>
     <ng-template #showSections>
       <ng-container *ngIf="getContentLines(resultItem).length > 0; else noContent">
-        <div class="result-list_section-content">
+        <div class="mt-4 space-y-4">
           <ng-container *ngFor="let section of getContentLines(resultItem).slice(0, 12); let i = index">
-            <h3 class="mt-0 pt-0">Section {{ i + 1 }}</h3>
-            <p>{{ section.length > 550 ? (section | slice:0:550) + '...' : section }}</p>
+            <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3">
+              <h3 class="text-sm font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
+              <p class="mt-2 text-sm text-[var(--color-text3)]">{{ section.length > 550 ? (section | slice:0:550) + '...' : section }}</p>
+            </div>
           </ng-container>
         </div>
       </ng-container>
     </ng-template>
 
     <ng-template #noContent>
-      <p class="search__result-detail-description">No content available</p>
+      <p class="mt-3 text-sm text-[var(--color-text4)]">No content available</p>
     </ng-template>
 
-    <ng-container>
-      <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Report Sharable Link</h5>
-    </ng-container>
+    <h5 class="mt-6 text-sm font-semibold uppercase tracking-wide text-[var(--color-text4)]">Report Sharable Link</h5>
 
-    <p *ngIf="resultItem.m_message_sharable_link" class="search__result-detail-url-p text-truncate">
-      <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank"> {{
-        resultItem.m_message_sharable_link }} </a>
+    <p *ngIf="resultItem.m_message_sharable_link" class="mt-2 truncate text-sm">
+      <a [href]="resultItem.m_message_sharable_link" class="text-[var(--color-blue-640)] hover:underline" target="_blank">
+        {{ resultItem.m_message_sharable_link }}
+      </a>
     </p>
 
-    <div class="search__result-detail-meta report_chat">
-      <div class="search__result-detail-meta-divs">
-        <p>Message Date:</p>
-        <span>{{ resultItem.m_message_date }}</span>
+    <div class="mt-6 grid gap-3 text-sm text-[var(--color-text3)] md:grid-cols-2">
+      <div>
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Message Date</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_message_date }}</span>
       </div>
-      <div *ngIf="resultItem.m_views" class="search__result-detail-meta-divs">
-        <p>Views:</p>
-        <span>{{ resultItem.m_views }}</span>
+      <div *ngIf="resultItem.m_views">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Views</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_views }}</span>
       </div>
-      <div *ngIf="resultItem.m_sender_username" class="search__result-detail-meta-divs">
-        <p>Sender Username:</p>
-        <span>{{ resultItem.m_sender_username }}</span>
+      <div *ngIf="resultItem.m_sender_username">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Sender Username</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_sender_username }}</span>
       </div>
-      <div *ngIf="resultItem.m_sender_name" class="search__result-detail-meta-divs">
-        <p>Sender:</p>
-        <span>{{ resultItem.m_sender_name }}</span>
+      <div *ngIf="resultItem.m_sender_name">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Sender</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_sender_name }}</span>
       </div>
-      <div *ngIf="resultItem.m_message_id" class="search__result-detail-meta-divs">
-        <p>Message ID:</p>
-        <span>{{ resultItem.m_message_id }}</span>
+      <div *ngIf="resultItem.m_message_id">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Message ID</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_message_id }}</span>
       </div>
-      <div *ngIf="resultItem.m_platform" class="search__result-detail-meta-divs">
-        <p>Platform:</p>
-        <span>{{ resultItem.m_platform }}</span>
+      <div *ngIf="resultItem.m_platform">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Platform</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_platform }}</span>
       </div>
-      <div *ngIf="resultItem.m_network" class="search__result-detail-meta-divs">
-        <p>Network:</p>
-        <span>{{ resultItem.m_network }}</span>
+      <div *ngIf="resultItem.m_network">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Network</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_network }}</span>
       </div>
-      <div *ngIf="resultItem.m_post_likes" class="search__result-detail-meta-divs">
-        <p>Post Likes:</p>
-        <span>{{ resultItem.m_post_likes }}</span>
+      <div *ngIf="resultItem.m_post_likes">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Post Likes</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_post_likes }}</span>
       </div>
-      <div *ngIf="resultItem.m_post_shares" class="search__result-detail-meta-divs">
-        <p>Post Shares:</p>
-        <span>{{ resultItem.m_post_shares }}</span>
+      <div *ngIf="resultItem.m_post_shares">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Post Shares</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_post_shares }}</span>
       </div>
-      <div *ngIf="resultItem.m_post_comments_count" class="search__result-detail-meta-divs">
-        <p>Post Comments:</p>
-        <span>{{ resultItem.m_post_comments_count }}</span>
+      <div *ngIf="resultItem.m_post_comments_count">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Post Comments</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_post_comments_count }}</span>
       </div>
-      <div *ngIf="resultItem.m_post_tags?.length" class="search__result-detail-meta-divs">
-        <p>Post Tags:</p>
-        <span>{{ resultItem.m_post_tags.join(', ') }}</span>
+      <div *ngIf="resultItem.m_post_tags?.length">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Post Tags</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_post_tags.join(', ') }}</span>
       </div>
-      <div *ngIf="resultItem.m_post_views" class="search__result-detail-meta-divs">
-        <p>Post Views:</p>
-        <span>{{ resultItem.m_post_views }}</span>
+      <div *ngIf="resultItem.m_post_views">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Post Views</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_post_views }}</span>
       </div>
-      <div *ngIf="resultItem.m_post_expiry" class="search__result-detail-meta-divs">
-        <p>Post Expiry:</p>
-        <span>{{ resultItem.m_post_expiry }}</span>
+      <div *ngIf="resultItem.m_post_expiry">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Post Expiry</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_post_expiry }}</span>
       </div>
-      <div *ngIf="resultItem.m_comment_count" class="search__result-detail-meta-divs">
-        <p>Comment Count:</p>
-        <span>{{ resultItem.m_comment_count }}</span>
+      <div *ngIf="resultItem.m_comment_count">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Comment Count</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_comment_count }}</span>
       </div>
-      <div *ngIf="resultItem.m_likes" class="search__result-detail-meta-divs">
-        <p>Likes:</p>
-        <span>{{ resultItem.m_likes }}</span>
+      <div *ngIf="resultItem.m_likes">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Likes</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_likes }}</span>
       </div>
-      <div *ngIf="resultItem.m_retweets" class="search__result-detail-meta-divs">
-        <p>Retweets:</p>
-        <span>{{ resultItem.m_retweets }}</span>
+      <div *ngIf="resultItem.m_retweets">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Retweets</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_retweets }}</span>
       </div>
-      <div *ngIf="resultItem.m_commenters?.length" class="search__result-detail-meta-divs">
-        <p>Commenters:</p>
-        <span>{{ resultItem.m_commenters.join(', ') }}</span>
+      <div *ngIf="resultItem.m_commenters?.length">
+        <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Commenters</p>
+        <span class="text-[var(--color-text1)]">{{ resultItem.m_commenters.join(', ') }}</span>
       </div>
     </div>
   </div>
 
-  <div *ngIf="arrayKeys.length">
-    <div class="search__result-detail">
-      <div (click)="metaadataToggleContent()" class="search__result__section__heading">
-        <div class="left-content">
-          Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Metadata">
-        </div>
-        <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
-        </div>
+  <div *ngIf="arrayKeys.length" class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
+    <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-center justify-between">
+      <div class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text1)]">
+        Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Metadata">
       </div>
-      <ng-container *ngIf="isExpandedMetadata">
-        <div class="tabs d-flex align-items-center search__result-detail-container">
-          <ng-container *ngFor="let key of arrayKeys; let last = last">
-            <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
-              {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
-            </button>
-            <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
-          </ng-container>
-        </div>
-
-        <div class="search__result-tabs-line"></div>
-        <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem
-          [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
-        <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
-          Names of people, organizations, and entities are handled separately, but may overlap in the results.
-        </div>
-        <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem
-          [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
-      </ng-container>
+      <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+        <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      </div>
     </div>
+    <ng-container *ngIf="isExpandedMetadata">
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <ng-container *ngFor="let key of arrayKeys; let last = last">
+          <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full px-4 py-1.5 text-xs font-semibold transition">
+            {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
+          </button>
+          <div *ngIf="!last" class="h-5 w-px bg-[var(--color-divider)]"></div>
+        </ng-container>
+      </div>
+
+      <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
+      <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem
+        [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
+      <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3 text-xs text-[var(--color-text4)]">
+        Names of people, organizations, and entities are handled separately, but may overlap in the results.
+      </div>
+      <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem
+        [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+    </ng-container>
   </div>
 
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 </div>
-<app-chat-widget [reportText]="resultItem?.m_content"
-  *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>
+<app-chat-widget [reportText]="resultItem?.m_content" *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>

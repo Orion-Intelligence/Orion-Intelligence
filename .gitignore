@@ -9,6 +9,7 @@ backend/backend_cov_app/*
 *.tmp
 */.dll
 */.pyc
+backend/static/test/mocks/api/**/*.state
 __pycache__/
 **/_pycache_/
 

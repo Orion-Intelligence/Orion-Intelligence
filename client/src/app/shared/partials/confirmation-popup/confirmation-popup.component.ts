@@ -14,9 +14,9 @@ export class ConfirmationPopupComponent {
 
   @Output() confirmed = new EventEmitter<boolean>();
 
-  @HostListener('click', ['$event'])
-  onBackdropClick(event: MouseEvent) {
-    if ((event.target as HTMLElement).classList.contains('confirmation-popup_backdrop')) {
+  onBackdrop(event: MouseEvent) {
+    const target = event.target as HTMLElement | null;
+    if (target?.dataset?.['role'] === 'backdrop') {
       this.confirmed.emit(false);
     }
   }

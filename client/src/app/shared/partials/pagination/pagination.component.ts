@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { max } from 'rxjs';
 @Component({
-  selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgOptimizedImage]
+  selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgClass, NgOptimizedImage]
 })
 export class PaginationComponent implements OnInit {
   protected readonly max = max;

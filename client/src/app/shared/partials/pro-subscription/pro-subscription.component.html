@@ -1,80 +1,95 @@
-<div class="pro-subscription_overlay">
-  <div class="pro-subscription_container" (click)="$event.stopPropagation()">
-    <div class="pro-subscription_left-section">
-      <div class="pro-subscription_feature-item">
-        <h3>Dark Web Scanning</h3>
-        <p>Continuously monitor the dark web for leaked data tied to your identity, accounts, and sensitive assets.</p>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  <div class="w-full max-w-[1000px] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]" (click)="$event.stopPropagation()">
+    <div class="grid gap-0 lg:grid-cols-2">
+      <div class="space-y-6 border-b border-[var(--color-border)] bg-[var(--color-blue-720)] p-6 lg:border-b-0 lg:border-r">
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--color-text1)]">Dark Web Scanning</h3>
+          <p class="mt-1 text-sm text-[var(--color-text4)]">Continuously monitor the dark web for leaked data tied to your identity, accounts, and sensitive assets.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--color-text1)]">Identity Theft Alerts</h3>
+          <p class="mt-1 text-sm text-[var(--color-text4)]">Receive real-time alerts when your personal or business information is found on underground marketplaces.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--color-text1)]">Credential Monitoring</h3>
+          <p class="mt-1 text-sm text-[var(--color-text4)]">Track exposure of usernames, passwords, and other credentials before they're used maliciously.</p>
+        </div>
+        <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
+          <h3 class="text-sm font-semibold text-[var(--color-text1)]">Total Due</h3>
+          <p class="mt-2 text-2xl font-semibold text-[var(--color-text1)]">$1200 <span class="text-sm text-[var(--color-text4)]">/year</span></p>
+        </div>
       </div>
 
-      <div class="pro-subscription_feature-item">
-        <h3>Identity Theft Alerts</h3>
-        <p>Receive real-time alerts when your personal or business information is found on underground marketplaces.</p>
-      </div>
+      <div class="p-6">
+        <h2 class="text-xl font-semibold text-[var(--color-text1)]">Upgrade to Dark Web Shield Pro</h2>
+        <p class="mt-2 text-sm text-[var(--color-text4)]">Gain continuous protection by monitoring the dark web for your compromised information and security breaches.</p>
 
-      <div class="pro-subscription_feature-item">
-        <h3>Credential Monitoring</h3>
-        <p>Track exposure of usernames, passwords, and other credentials before they're used maliciously.</p>
-      </div>
+        <div class="mt-4 space-y-3">
+          <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3 text-sm text-[var(--color-text3)]">
+            <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription" class="h-4 w-4 accent-[var(--color-blue-640)]"/>
+            <div>
+              <div class="font-semibold text-[var(--color-text1)]">($100/month)</div>
+              <div class="text-xs text-[var(--color-text4)]">Billed monthly at $1200</div>
+            </div>
+          </label>
 
-      <div class="pro-subscription_total-due">
-        <h3>Total Due</h3>
-        <p>$1200 <span class="per-year">/year</span></p>
-      </div>
-    </div>
+          <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3 text-sm text-[var(--color-text3)]">
+            <input type="radio" name="subscription" value="annual" [(ngModel)]="selectedSubscription" checked class="h-4 w-4 accent-[var(--color-blue-640)]"/>
+            <div>
+              <div class="font-semibold text-[var(--color-text1)]">($83.33/month)</div>
+              <div class="text-xs text-[var(--color-text4)]">Billed annually at $1000</div>
+            </div>
+          </label>
+        </div>
 
-    <div class="pro-subscription_right-section">
-      <h2>Upgrade to Dark Web Shield Pro</h2>
-      <p>Gain continuous protection by monitoring the dark web for your compromised information and security breaches.</p>
+        <form class="mt-6 space-y-4" (ngSubmit)="submitForm()" #formRef="ngForm" novalidate>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="name" class="text-xs font-semibold text-[var(--color-text4)]">Your Name</label>
+              <input type="text" id="name" name="userName" [(ngModel)]="userName" required minlength="2" #userNameCtrl="ngModel"
+                [ngClass]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'"
+                [attr.aria-invalid]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)"
+                [placeholder]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'Required' : ''"
+                class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
+              <span class="mt-1 block text-xs text-[var(--color-text4)]" *ngIf="userNameCtrl.errors && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)">
+                {{ userNameCtrl.errors['required'] ? 'Required' : (userNameCtrl.errors['minlength'] ? 'Too short' : '') }}
+              </span>
+            </div>
 
-      <div class="pro-subscription_subscription-options">
-        <label class="pro-subscription_subscription-option"> <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription"/>
-          <div class="pro-subscription_option-content">
-            <div class="radio-label">
-              <h4>($100/month)</h4>
-              <p>Billed monthly at $1200</p>
+            <div>
+              <label for="phone" class="text-xs font-semibold text-[var(--color-text4)]">Phone</label>
+              <input type="tel" id="phone" name="userPhone" [(ngModel)]="userPhone" required pattern="^[0-9()+\-\s]{7,15}$" #userPhoneCtrl="ngModel"
+                [ngClass]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'"
+                [attr.aria-invalid]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)"
+                [placeholder]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'Required' : ''"
+                class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
+              <span class="mt-1 block text-xs text-[var(--color-text4)]" *ngIf="userPhoneCtrl.errors && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)">
+                {{ userPhoneCtrl.errors['required'] ? 'Required' : 'Invalid' }}
+              </span>
             </div>
           </div>
-        </label>
 
-        <label class="pro-subscription_subscription-option"> <input type="radio" name="subscription" value="annual" [(ngModel)]="selectedSubscription" checked/>
-          <div class="pro-subscription_option-content">
-            <div class="radio-label">
-              <h4>($83.33/month)</h4>
-              <p>Billed annually at $1000</p>
-            </div>
-          </div>
-        </label>
-      </div>
-
-      <form class="pro-subscription_payment-form" (ngSubmit)="submitForm()" #formRef="ngForm" novalidate>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="name">Your Name</label> <input type="text" id="name" name="userName" [(ngModel)]="userName" required minlength="2" #userNameCtrl="ngModel" [class.input-error]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)" [attr.aria-invalid]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)" [placeholder]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'Required' : ''"/> <span class="field-error" *ngIf="userNameCtrl.errors && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)">
-              {{ userNameCtrl.errors['required'] ? 'Required' : (userNameCtrl.errors['minlength'] ? 'Too short' : '') }}
+          <div>
+            <label for="email" class="text-xs font-semibold text-[var(--color-text4)]">Email Address</label>
+            <input type="email" id="email" name="userEmail" [(ngModel)]="userEmail" required email #userEmailCtrl="ngModel"
+              [ngClass]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'"
+              [attr.aria-invalid]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)"
+              [placeholder]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'Required' : ''"
+              class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
+            <span class="mt-1 block text-xs text-[var(--color-text4)]" *ngIf="userEmailCtrl.errors && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)">
+              {{ userEmailCtrl.errors['required'] ? 'Required' : 'Invalid' }}
             </span>
           </div>
 
-          <div class="form-group">
-            <label for="phone">Phone</label> <input type="tel" id="phone" name="userPhone" [(ngModel)]="userPhone" required pattern="^[0-9()+\\-\\s]{7,15}$" #userPhoneCtrl="ngModel" [class.input-error]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)" [attr.aria-invalid]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)" [placeholder]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'Required' : ''"/> <span class="field-error" *ngIf="userPhoneCtrl.errors && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)">
-              {{ userPhoneCtrl.errors['required'] ? 'Required' : 'Invalid' }}
-            </span>
-          </div>
-        </div>
+          <button type="submit" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-60" [disabled]="formRef.invalid">
+            Proceed to Payment
+          </button>
 
-        <div class="form-group full-width">
-          <label for="email">Email Address</label> <input type="email" id="email" name="userEmail" [(ngModel)]="userEmail" required email #userEmailCtrl="ngModel" [class.input-error]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)" [attr.aria-invalid]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)" [placeholder]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'Required' : ''"/> <span class="field-error" *ngIf="userEmailCtrl.errors && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)">
-            {{ userEmailCtrl.errors['required'] ? 'Required' : 'Invalid' }}
-          </span>
-        </div>
-
-        <button type="submit" class="pro-subscription_btn-proceed" [disabled]="formRef.invalid">
-          Proceed to Payment
-        </button>
-
-        <button type="button" class="pro-subscription_btn-close" *ngIf="!permanent" (click)="closePopup()">
-          Close
-        </button>
-      </form>
+          <button type="button" class="w-full rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text3)]" *ngIf="!permanent" (click)="closePopup()">
+            Close
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </div>

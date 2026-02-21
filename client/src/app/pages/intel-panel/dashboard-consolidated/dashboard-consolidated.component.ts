@@ -23,7 +23,6 @@ import { RankedCallbackModel } from '../../../shared/model/results/consolidated/
 import { HttpClient } from '@angular/common/http';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
-import { NgbAccordionModule } from "@ng-bootstrap/ng-bootstrap";
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
@@ -33,7 +32,7 @@ import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manage
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, NgbAccordionModule, ConsolidatedIocComponent],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrls: ['./dashboard-consolidated.component.scss'],
   animations: [scanAnimation, fadeInDashboardItem],

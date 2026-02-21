@@ -1,67 +1,69 @@
-<div class="chat-support" [class.chat-support--open]="chatOpen">
-  <button *ngIf="!chatOpen" class="chat-support__toggle chat-support__push" (click)="openChat()" type="button">
-    <span><img src="assets/images/shared/theme/chat.svg" alt="chat" /></span>
+<div class="fixed bottom-6 right-6 z-40">
+  <button *ngIf="!chatOpen" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button">
+    <span><img src="assets/images/shared/theme/chat.svg" alt="chat" class="h-5 w-5" /></span>
   </button>
+</div>
 
-  <div *ngIf="chatOpen" class="chat-support__overlay">
-    <div class="chat-support__window" @chatBotAnimation>
-      <div class="chat-support__header">
-        <div class="chat-support__main-avatar">
-          <img alt="chat" src="assets/images/shared/chat-icon.svg" />
-          <span class="chat-support__status-indicator"></span>
+<div *ngIf="chatOpen" class="fixed inset-0 z-50 flex items-end justify-end bg-black/40 p-4">
+  <div class="flex h-[640px] w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]" @chatBotAnimation>
+    <div class="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
+      <div class="flex items-center gap-3">
+        <div class="relative h-9 w-9 rounded-full bg-[var(--color-blue-720)] p-1">
+          <img alt="chat" src="assets/images/shared/chat-icon.svg" class="h-full w-full" />
+          <span class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-[var(--color-blue-700)]"></span>
         </div>
-        <div class="chat-support__header-text">Orion Analyst</div>
-        <div class="chat-support__close-btn" (click)="closeChat()">
-          <img src="assets/images/shared/cross.svg" alt="close">
-        </div>
+        <div class="text-sm font-semibold text-[var(--color-text1)]">Orion Analyst</div>
       </div>
-
-      <div #messagesContainer class="chat-support__messages chat-support__messages--scroll" (scroll)="onMessagesScroll()">
-        <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
-          <ng-container [ngSwitch]="msg.sender">
-            <div *ngSwitchCase="'user'" class="chat-support__message-container">
-              <div class="chat-support__chat-avatar">
-                <img alt="profile icon" src="assets/images/shared/user-icon.svg" />
-              </div>
-              <div class="chat-support__msg chat-support__msg--user">
-                <p>{{ msg.text }}</p>
-              </div>
-            </div>
-            <div *ngSwitchCase="'bot'" class="chat-support__message-container">
-              <div class="chat-support__chat-avatar">
-                <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" />
-              </div>
-              <div class="chat-support__msg chat-support__msg--bot">
-                <p>{{ msg.text }}</p>
-              </div>
-            </div>
-            <div *ngSwitchCase="'error'">
-              <div class="chat-support__error-box">
-                <p>{{ msg.text }}</p>
-                <button *ngIf="msg.retryPayload" class="chat-support__retry-btn" (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
-                  <img src="assets/images/shared/chat-support-retry.svg" alt="Retry" />
-                </button>
-              </div>
-            </div>
-          </ng-container>
-        </div>
-
-        <div *ngIf="isBotTyping" class="chat-support__msg chat-support__msg--bot chat-support__typing">
-          <span class="chat-support__typing-dot"></span>
-          <span class="chat-support__typing-dot"></span>
-          <span class="chat-support__typing-dot"></span>
-        </div>
-
-        <div #bottomSentinel class="chat-support__bottom-sentinel"></div>
-      </div>
-
-      <form class="chat-support__input" (submit)="sendMessage($event)">
-        <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="chat-support__input-field" [disabled]="isBotTyping" required />
-
-        <button #submitBtn type="submit" class="chat-support__send-btn chat-support__push" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
-          <img src="assets/images/shared/chat_small.svg" alt="chat">
-        </button>
-      </form>
+      <button class="h-8 w-8 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]" (click)="closeChat()">
+        <img src="assets/images/shared/cross.svg" alt="close" class="h-4 w-4" />
+      </button>
     </div>
+
+    <div #messagesContainer class="flex-1 space-y-3 overflow-y-auto px-4 py-4" (scroll)="onMessagesScroll()">
+      <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
+        <ng-container [ngSwitch]="msg.sender">
+          <div *ngSwitchCase="'user'" class="flex items-start gap-3">
+            <div class="h-8 w-8 rounded-full bg-[var(--color-blue-720)] p-1">
+              <img alt="profile icon" src="assets/images/shared/user-icon.svg" class="h-full w-full" />
+            </div>
+            <div class="rounded-2xl bg-[var(--color-blue-640)] px-3 py-2 text-sm text-white">
+              <p>{{ msg.text }}</p>
+            </div>
+          </div>
+          <div *ngSwitchCase="'bot'" class="flex items-start gap-3">
+            <div class="h-8 w-8 rounded-full bg-[var(--color-blue-720)] p-1">
+              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="h-full w-full" />
+            </div>
+            <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)]">
+              <p>{{ msg.text }}</p>
+            </div>
+          </div>
+          <div *ngSwitchCase="'error'" class="rounded-xl border border-[var(--color-border-red)] bg-[var(--color-red-200)] px-3 py-2 text-sm text-[var(--color-text1)]">
+            <p>{{ msg.text }}</p>
+            <button *ngIf="msg.retryPayload" class="mt-2 inline-flex items-center gap-2 rounded-md border border-[var(--color-border)] bg-white/10 px-3 py-1 text-xs" (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
+              <img src="assets/images/shared/chat-support-retry.svg" alt="Retry" class="h-4 w-4" />
+              Retry
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <div *ngIf="isBotTyping" class="flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)]">
+        <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)]"></span>
+        <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:120ms]"></span>
+        <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:240ms]"></span>
+      </div>
+
+      <div #bottomSentinel></div>
+    </div>
+
+    <form class="border-t border-[var(--color-border)] p-3" (submit)="sendMessage($event)">
+      <div class="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
+        <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" [disabled]="isBotTyping" required />
+        <button #submitBtn type="submit" class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-blue-640)]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
+          <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4" />
+        </button>
+      </div>
+    </form>
   </div>
 </div>

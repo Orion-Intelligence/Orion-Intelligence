@@ -1,88 +1,103 @@
-<form (submit)="onSearchSubmit()" class="home__form default-input-container w-90">
-  <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
-
-    <div class="col-md-12 col-sm-12 col-xs-12 default-input-container-mobile">
-      <div class="mobile-backdrop" *ngIf="homeSearchService.showFiltersOverlay"></div>
+<form (submit)="onSearchSubmit()" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px] max-[550px]:grid">
+  <div class="flex w-full flex-wrap items-start justify-between">
+    <div class="w-full">
+      <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
 
       <ng-container *ngIf="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise') ||
         app_service.userSessionData().user.role === 'analyst'">
-        <div class="input-group default-input-sub-container" [ngClass]="{'mobile-overlay-active': homeSearchService.showFiltersOverlay,'mobile-overlay-inactive': !homeSearchService.showFiltersOverlay }">
+        <div class="relative">
+          <div
+            class="flex w-[calc(100vw-840px)] flex-nowrap mb-[8px] h-[42px] max-[1000px]:w-full"
+            [ngClass]="{
+              'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay,
+              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-auto max-[550px]:px-0 max-[550px]:mr-[100px]': !homeSearchService.showFiltersOverlay
+            }">
 
-          <button class="btn btn-primary default-input-button" (click)="onSearchSubmit()" type="submit">
-            <img alt="Search" height="16" class="search-icon" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
-          </button>
+            <button class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" (click)="onSearchSubmit()" type="submit">
+              <img alt="Search" height="16" class="ml-[6px] mb-[1px] opacity-80" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
+            </button>
 
-          <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input dashboard-general-input" data-cy="dashboard-general-input" maxlength="350" name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)">
-          <input type="hidden" value="1">
+            <input
+              #searchInput
+              [(ngModel)]="searchQuery"
+              autocapitalize="none"
+              autocomplete="off"
+              class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
+              data-cy="dashboard-general-input"
+              maxlength="350"
+              name="q"
+              placeholder="Search ..."
+              type="search"
+              (focus)="setFilterOverlay(true)"
+              (input)="onSearchInput($event)">
+            <input type="hidden" value="1">
 
-          <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()" [disabled]="!searchQuery">
-            <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14">
-          </button>
+            <button
+              type="button"
+              class="flex items-center justify-center border-y border-r border-[var(--color-border)] bg-white px-[10px]"
+              aria-label="Clear"
+              (click)="searchQuery=''; searchInput.focus()"
+              [disabled]="!searchQuery">
+              <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
+            </button>
 
-          <span class="input-group-text border-start-0 gc-clear-selection cursor-pointer">
-            <ng-container>
-              <hr class="vertical-divider">
-              Advance &nbsp;&nbsp;
-              <label class="small-switch">
-                <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()">
-                <span class="small-slider round"></span>
-              </label>
-
+            <div class="flex shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[15px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden">
               <ng-container>
-                <hr class="vertical-divider ml-3">
-                <span (click)="onToolToggle($event)">
-                  Tools
-                  <div class="expand-icon">
-                    <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform">
-                  </div>
-                </span>
+                <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]">
+                <span class="inline-flex items-center">Advance&nbsp;&nbsp;</span>
+                <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
+                  <input type="checkbox" class="sr-only peer" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()">
+                  <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-white transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
+                    <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition peer-checked:translate-x-[10px]"></span>
+                  </span>
+                </label>
+
+                <ng-container>
+                  <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]">
+                  <button type="button" (click)="onToolToggle($event)" class="inline-flex items-center cursor-pointer">
+                    Tools
+                    <img
+                      src="assets/images/shared/theme/cheveron-right.svg"
+                      width="27"
+                      height="27"
+                      alt="Toggle Icon"
+                      [ngClass]="{ 'rotate-90': app_service.configData().localSettings.enable_advanced_tools }"
+                      class="mt-[-1px] px-[10px] transition-transform duration-300">
+                  </button>
+                </ng-container>
               </ng-container>
-            </ng-container>
-          </span>
-        </div>
+            </div>
+          </div>
 
-        <div class="overlay-placeholder"></div>
+          <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
 
-        <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
-          <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
-            [homePage]="true"></app-search-filters>
+          <div
+            #filtersWrapper
+            class="absolute z-[1] w-full max-w-[910px]"
+            *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+            <app-search-filters
+              [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
+              [homePage]="true"></app-search-filters>
+          </div>
         </div>
 
         <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools;">
-          <div class="dropdown mt-2">
-            <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
+          <details class="relative mt-[8px] w-fit">
+            <summary class="flex items-center gap-[6px] cursor-pointer list-none text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" [ngClass]="{ '[&::-webkit-details-marker]:hidden': true }">
               search by <b>({{ getMatchType() }})</b>
               <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-            </span>
+            </summary>
 
-            <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
-              <li>
-                <a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();">Match any term
-                  (OR)</a>
-              </li>
-              <li>
-                <hr class="dropdown-divider mx-3">
-              </li>
-              <li>
-                <a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();">Match
-                  indivisual terms (AND)</a>
-              </li>
-              <li>
-                <hr class="dropdown-divider mx-3">
-              </li>
-              <li>
-                <a class="dropdown-item" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();">Match full
-                  query (AND)</a>
-              </li>
-              <li>
-                <hr class="dropdown-divider mx-3">
-              </li>
-              <li>
-                <a class="dropdown-item" (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();">Match
-                  semantic query (semantic)</a>
-              </li>
-            </ul>
-          </div>
+            <div class="absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();">Match any term (OR)</button>
+              <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
+              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();">Match indivisual terms (AND)</button>
+              <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
+              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();">Match full query (AND)</button>
+              <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
+              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();">Match semantic query (semantic)</button>
+            </div>
+          </details>
         </ng-container>
       </ng-container>
 
@@ -91,8 +106,18 @@
           <app-world-heatmap></app-world-heatmap>
         </div>
 
-        <div class="home-insight-wrapper" [class.expanded]="homeInsightExpanded" [class.dragging]="insightDragging" [style.transform]="insightDragging ? 'translateY(' + insightDragY + 'px)' : null">
-          <div class="home-insight-toggle" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)" (pointermove)="onInsightPointerMove($event)" (pointerup)="onInsightPointerUp($event)" (pointercancel)="onInsightPointerCancel($event)"></div>
+        <div
+          class="relative translate-y-0 transition-transform duration-300 ease-out"
+          [ngClass]="{ '-translate-y-[30vh]': homeInsightExpanded, 'transition-none': insightDragging }"
+          [style.transform]="insightDragging ? 'translateY(' + insightDragY + 'px)' : null">
+          <div
+            class="absolute left-1/2 top-[-50px] z-[20] flex min-h-[22px] min-w-[84px] -translate-x-1/2 items-center justify-center rounded-full border border-[rgba(148,163,184,0.42)] bg-[linear-gradient(90deg,rgba(56,189,248,0.3),rgba(99,102,241,0.34))] text-[0] font-semibold shadow-[0_8px_18px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[background,border-color,box-shadow] duration-200 before:content-[''] before:h-[6px] before:w-[26px] before:rounded-full before:bg-[radial-gradient(circle,rgba(226,232,240,0.92)_2px,transparent_2.5px)] before:bg-[length:8px_6px] before:bg-[position:0_50%] before:bg-repeat-x hover:bg-[linear-gradient(90deg,rgba(56,189,248,0.4),rgba(99,102,241,0.44))] hover:border-[rgba(148,163,184,0.58)] hover:shadow-[0_10px_22px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.12)] after:content-[''] after:absolute after:inset-[-20px]"
+            (click)="onInsightToggleClick($event)"
+            (pointerdown)="onInsightPointerDown($event)"
+            (pointermove)="onInsightPointerMove($event)"
+            (pointerup)="onInsightPointerUp($event)"
+            (pointercancel)="onInsightPointerCancel($event)">
+          </div>
           <app-home-insight></app-home-insight>
         </div>
       </ng-container>

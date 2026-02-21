@@ -67,7 +67,6 @@
               }
             ],
             "scripts": [
-              "src/assets/libs/bootstrap.min.js"
             ]
           },
           "configurations": {
@@ -116,7 +115,6 @@
                 }
               ],
               "scripts": [
-                "src/assets/libs/bootstrap.min.js"
               ]
             },
             "development": {
@@ -191,7 +189,6 @@
               }
             ],
             "scripts": [
-              "src/assets/libs/bootstrap.min.js"
             ]
           }
         }

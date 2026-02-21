@@ -1,280 +1,385 @@
 <ng-container>
   <span id="top"></span>
-  <div class="dropdown-short directory-listing view-tenant-container">
-    <div class="directory-listing_container">
-      <div class="directory-listing_main-container">
-        <div class="directory-listing_upper-heading">
-          <div class="directory-listing_pagination-heading">
-            <p class="directory-listing_header">Tenant Users</p>
-            <span class="d-inline-block" [appTooltip]="appService.userSessionData().tenant.quotaExceeded ? 'Access blocked' : ''">
-              <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center" [class.expand-btn]="!appService.userSessionData().tenant.quotaExceeded" [disabled]="appService.userSessionData().tenant.quotaExceeded" [class.opacity-50]="appService.userSessionData().tenant.quotaExceeded" [class.pe-none]="appService.userSessionData().tenant.quotaExceeded" (click)="addtenant()">
-                <span class="flex-grow-1 text-center">Add User</span>
-              </button>
-            </span>
-          </div>
+  <div class="w-full max-w-[2400px] rounded-[12px] p-5">
+    <div class="ui-page-container p-5">
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="ui-page-title">Tenant Users</h1>
+          <p class="ui-page-description">Manage user access, status, and licenses.</p>
         </div>
+        <span [appTooltip]="appService.userSessionData().tenant.quotaExceeded ? 'Access blocked' : ''">
+          <button
+            type="button"
+            class="ui-btn"
+            [ngClass]="appService.userSessionData().tenant.quotaExceeded ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'"
+            [disabled]="appService.userSessionData().tenant.quotaExceeded"
+            (click)="addtenant()"
+          >
+            Add User
+          </button>
+        </span>
+      </div>
 
-        <div class="list__container">
-          <ng-container *ngIf="!isLoading; else loadingTpl">
-            <div class="table-responsive">
-              <table class="table table-striped directory-list__table clear-paddings">
-                <thead *ngIf="(users?.length || 0) > 0">
-                  <tr>
-                    <th class="list__column-id-min col-sr">Sr #</th>
-                    <th class="list__column-service-url col-company">User Name</th>
-                    <th class="list__column-category col-country">Email</th>
-                    <th class="list__column-url-status col-verified">Role</th>
-                    <th class="list__column-leak-status col-status">Status</th>
-                    <th class="list__column-network-type col-quota">Subscription</th>
-                    <th class="list__column-license col-licenses">Licenses</th>
-                    <th class="list__column-license col-action text-center">Action</th>
-                  </tr>
-                </thead>
+      <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
 
-                <tbody *ngIf="(users?.length || 0) > 0" @fadeInDashboardItem>
-                  <ng-container *ngFor="let user of users; let i = index">
-                    <tr>
-                      <td>{{ i + 1 }}</td>
+      <div class="m-0 overflow-hidden rounded-none border-0 bg-[var(--color-blue-830)] shadow-none md:rounded-[8px] md:border md:!border-white/10 md:shadow-[0_8px_24px_-18px_rgba(0,0,0,0.55)]">
+        <ng-container *ngIf="!isLoading; else loadingTpl">
+          <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
+            <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+              <thead *ngIf="(users?.length || 0) > 0" class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+                <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+                  <th class="w-[70px] overflow-clip align-middle px-4 py-3.5">Sr #</th>
+                  <th class="w-[190px] overflow-clip align-middle px-4 py-3.5">User Name</th>
+                  <th class="w-[250px] overflow-clip align-middle px-4 py-3.5">Email</th>
+                  <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">Role</th>
+                  <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">Status</th>
+                  <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Subscription</th>
+                  <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">Licenses</th>
+                  <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
+                </tr>
+              </thead>
 
-                      <td>
-                        <a class="list__table-url text-decoration-none text-reset">
-                          {{ user.username }}
-                        </a>
-                      </td>
-
-                      <td>{{ user.email || '-' }}</td>
-
-                      <td>{{ user.role }}</td>
-
-                      <td>
-                        <span class="label-text-dropdown no-chevron">
-                          {{ user.status }}
+              <tbody *ngIf="(users?.length || 0) > 0" class="text-[15px] font-normal text-[var(--color-text3)]" @fadeInDashboardItem>
+                <ng-container *ngFor="let user of users; let i = index">
+                  <tr
+                    class="border-t !border-white/10 bg-[#131E30] transition-colors hover:!border-white/10 hover:bg-[#131E30] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-white/10"
+                    [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''"
+                  >
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <div class="flex items-center gap-2">
+                        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/20 bg-[var(--color-blue-820-light)] text-[11px] font-semibold uppercase text-[var(--color-text2)]">
+                          {{ (user.username || '?').slice(0, 1) }}
                         </span>
-                      </td>
-
-                      <td>
-                        <span class="label-text-dropdown no-chevron">
-                          {{ user.subscription ? 'Paid' : 'Free' }}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span class="label-text-dropdown no-chevron">
-                          {{ getUserLicensesLabel(user) }}
-
-                        </span>
-                      </td>
-                      <td class="text-center col-action">
-                        <img (click)="toggleExpandedUser(i)" class="cursor-pointer" *ngIf="(user.role === 'admin' || user.licenses?.includes('maintainer'))" src="assets/images/shared/view.svg" width="20" alt="view" />
-
-                        <button id="edit-profile" type="button" class="cursor-pointer bg-transparent border-0 p-0" (click)="toggleExpandedUser(i)" *ngIf="!(user.role === 'admin' || user.licenses?.includes('maintainer'))">
-                          <img src="assets/images/shared/edit.svg" width="20" alt="edit" />
+                        <a class="inline-block max-w-full truncate font-medium text-[var(--color-text1)] no-underline">{{ user.username }}</a>
+                      </div>
+                    </td>
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <span class="inline-block max-w-full truncate">{{ user.email || '-' }}</span>
+                    </td>
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">
+                      <span class="inline-flex rounded-full bg-white/[0.04] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">
+                        {{ user.role }}
+                      </span>
+                    </td>
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <span
+                        class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize"
+                        [ngClass]="getStatusBadgeClass(user.status)"
+                      >
+                        {{ user.status }}
+                      </span>
+                    </td>
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <span
+                        class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold"
+                        [ngClass]="getSubscriptionBadgeClass(user.subscription)"
+                      >
+                        {{ user.subscription ? 'Paid' : 'Free' }}
+                      </span>
+                    </td>
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <span
+                        class="mr-0 block max-w-[290px] truncate rounded-full border border-[#f5f5f51a] bg-white/[0.04] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]"
+                        [attr.title]="getUserLicensesLabel(user)"
+                      >
+                        {{ getUserLicensesLabel(user) }}
+                      </span>
+                    </td>
+                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                      <button
+                        *ngIf="!canEditUser(user); else editAction"
+                        type="button"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#f5f5f51a] bg-white/[0.04] text-[var(--color-text2)] transition hover:bg-white/[0.08]"
+                        aria-label="View user"
+                        (click)="toggleExpandedUser(i)"
+                      >
+                        <img
+                          src="assets/images/shared/view.svg"
+                          width="18"
+                          alt="view"
+                          class="cursor-pointer"
+                        />
+                      </button>
+                      <ng-template #editAction>
+                        <button
+                          id="edit-profile"
+                          type="button"
+                          class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#f5f5f51a] bg-white/[0.04] p-0 text-[var(--color-text2)] transition hover:bg-white/[0.08]"
+                          [attr.aria-label]="'Edit user'"
+                          (click)="toggleExpandedUser(i)"
+                        >
+                          <img src="assets/images/shared/edit.svg" width="18" alt="edit" />
                         </button>
-                      </td>
-                    </tr>
+                      </ng-template>
+                    </td>
+                  </tr>
 
-                    <tr *ngIf="expandedUserIndex === i" class="table-active no-hover-row">
-                      <td colspan="8"><br>
-
-                        <div class="vstack gap-4 tenant-panel">
-
-                          <div class="tenant-edit-section mb-3">
-                            <div class="section-heading">User information</div>
-                            <div class="section-desc">Read-only user details.</div>
-
-                            <div class="tenant-block">
-                              <div class="tenant-title">User Name</div>
-                              <div class="tenant-value">{{ user.username || '-' }}</div>
-                              <hr class="tenant-divider">
+                  <tr *ngIf="expandedUserIndex === i" class="!border-t-0 bg-[#131E30]">
+                    <td colspan="8" class="overflow-clip align-middle px-4 py-4">
+                      <div class="space-y-4">
+                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-4">
+                          <div class="text-[19px] font-bold text-[var(--color-text1)]">User Information</div>
+                          <div class="mt-2 divide-y !divide-[#f5f5f51a]">
+                            <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Name</div>
+                              <div class="text-sm font-medium text-[var(--color-text1)]">{{ user.username || '-' }}</div>
                             </div>
-
-                            <div class="tenant-block">
-                              <div class="tenant-title">Email</div>
-                              <div class="tenant-value">{{ user.email || '-' }}</div>
-                              <hr class="tenant-divider">
+                            <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</div>
+                              <div class="break-all text-sm text-[var(--color-text1)]">{{ user.email || '-' }}</div>
                             </div>
-
-                            <div class="tenant-block">
-                              <div class="tenant-title">Role</div>
-                              <div class="tenant-value">{{ user.role }}</div>
-                              <hr class="tenant-divider">
+                            <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
+                              <div class="text-sm capitalize text-[var(--color-text1)]">{{ user.role }}</div>
                             </div>
-
-                            <div class="tenant-block">
-                              <div class="tenant-title">Status</div>
-                              <div class="tenant-value">{{ user.status }}</div>
-                              <hr class="tenant-divider">
+                            <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</div>
+                              <div>
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
+                                  {{ user.status }}
+                                </span>
+                              </div>
                             </div>
-
-                            <div class="tenant-block">
-                              <div class="tenant-title">Subscription</div>
-                              <div class="tenant-value">{{ user.subscription ? 'Paid' : 'Free' }}</div>
-                              <hr class="tenant-divider">
+                            <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</div>
+                              <div>
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
+                                  {{ user.subscription ? 'Paid' : 'Free' }}
+                                </span>
+                              </div>
                             </div>
-
-                            <div class="tenant-block">
-                              <div class="tenant-title">Licenses</div>
-                              <div *ngIf="user.licenses?.length; else noUserLicenses">
-                                <ng-container *ngFor="let license of user.licenses">
-                                  <span class="badge-license">{{ licenseService.getLicenseLabel(license) }}</span>
-                                </ng-container>
+                            <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                              <div *ngIf="user.licenses?.length; else noUserLicenses" class="flex flex-wrap gap-1.5">
+                                <span
+                                  *ngFor="let license of user.licenses"
+                                  class="rounded-md border border-[#f5f5f51a] bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]"
+                                >
+                                  {{ licenseService.getLicenseLabel(license) }}
+                                </span>
                               </div>
                               <ng-template #noUserLicenses>
-                                <div class="no-licenses">No licenses assigned.</div>
+                                <div class="text-xs text-[var(--color-text4)]">No licenses assigned.</div>
                               </ng-template>
                             </div>
                           </div>
+                        </div>
 
-                          <div class="tenant-edit-section mt-4 mb-4" *ngIf="user.role !== 'admin' && !user.licenses?.includes('maintainer')">
-                            <div class="section-heading">Edit user</div>
-                            <div class="section-desc">Update User Data.</div>
-
-                            <label class="sidebar_label mt-1">Status</label>
-                            <div class="dropdown mb-3" [class.dropdown-disabled]="appService.userSessionData().tenant.quotaExceeded">
-
-                              <button aria-expanded="false" class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdownStatus" type="button">
-                                {{ user.status | titlecase }}
-                              </button>
-
-                              <ul aria-labelledby="dropdownStatus" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow rounded-3">
-
-                                <li class="p-0">
-                                  <button class="dropdown-item py-0 align-items-center" (click)="setStatus(user,'active')">Active</button>
-                                </li>
-                                <li class="dropdown-divider m-0 mx-3"></li>
-
-                                <li class="p-0">
-                                  <button class="dropdown-item py-0 align-items-center" (click)="setStatus(user,'disable')">Disable</button>
-                                </li>
-                              </ul>
-
-                              <hr class="tenant-divider">
+                        <div *ngIf="canEditUser(user)" class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-4">
+                          <div class="text-[19px] font-bold text-[var(--color-text1)]">Edit User</div>
+                          <div class="mt-2 space-y-3 pt-1">
+                            <div>
+                              <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
+                              <select
+                                class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/40"
+                                [disabled]="appService.userSessionData().tenant.quotaExceeded"
+                                [(ngModel)]="user.status"
+                              >
+                                <option [ngValue]="'active'">Active</option>
+                                <option [ngValue]="'disable'">Disable</option>
+                              </select>
                             </div>
 
-                            <div class="tenant-block">
-                              <div class="tenant-title">Licenses</div>
-                              <div class="license-grid">
+                            <div>
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                              <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <div *ngIf=" license !== 'maintainer' && ( this.appService.userSessionData().user.role === 'admin' || (this.appService.userSessionData().tenant.licenses || []).indexOf(license)> -1
-                                    )
-                                  " class="license-card license-btn"
-                                    [class.license-selected]="(user.licenses || []).indexOf(license) > -1"
-                                    [class.license-disabled]="isLicenseDisabled()"
-                                    (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
-                                    <span class="license-label">{{ licenseService.getLicenseLabel(license) }}</span>
-                                  </div>
+                                  <button
+                                    type="button"
+                                    *ngIf="canAssignLicense(license)"
+                                  class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0"
+                                    [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1"
+                                    [ngClass]="{
+                                      'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1,
+                                      'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[#f5f5f533] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1,
+                                      'cursor-not-allowed opacity-60': isLicenseDisabled()
+                                    }"
+                                    (click)="!isLicenseDisabled() && toggleUserLicense(user, license)"
+                                  >
+                                    <span class="truncate">{{ licenseService.getLicenseLabel(license) }}</span>
+                                    <input
+                                      type="checkbox"
+                                      class="ml-2 h-4 w-4 shrink-0 pointer-events-none accent-sky-500"
+                                      [checked]="(user.licenses || []).indexOf(license) > -1"
+                                    />
+                                  </button>
                                 </ng-container>
                               </div>
-                              <hr class="tenant-divider">
-                            </div>
-
-                            <div class="d-flex justify-content-end mt-3 gap-2">
-                              <button type="button" class="btn btn-sm btn-danger expand-btn mr-2 p-2 pl-2 pr-2" (click)="deleteUser(user)">
-                                Delete User
-                              </button>
-
-                              <button type="button" class="btn btn-sm btn-primary expand-btn p-2" (click)="updateUser(user)">
-                                Save changes
-                              </button>
                             </div>
                           </div>
 
+                          <div class="mt-3 flex flex-wrap justify-end gap-2">
+                            <button
+                              type="button"
+                              class="ui-btn ui-btn-danger"
+                              (click)="deleteUser(user)"
+                            >
+                              Delete User
+                            </button>
+                            <button
+                              type="button"
+                              class="ui-btn ui-btn-primary"
+                              (click)="updateUser(user)"
+                            >
+                              Save changes
+                            </button>
+                          </div>
                         </div>
-                      </td>
-                    </tr>
-                  </ng-container>
-                </tbody>
-
-                <tbody *ngIf="(users?.length || 0) === 0">
-                  <tr>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
+                      </div>
+                    </td>
                   </tr>
-                </tbody>
+                </ng-container>
+              </tbody>
 
-              </table>
+              <tbody *ngIf="(users?.length || 0) === 0">
+                <tr class="border-t !border-white/10 bg-[var(--color-blue-820-light)]">
+                  <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">No users available.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="space-y-3 p-0 md:hidden" @fadeInDashboardItem>
+            <ng-container *ngIf="(users?.length || 0) > 0; else noUsersMobile">
+              <div *ngFor="let user of users; let i = index" class="overflow-hidden rounded-[10px] bg-[#131E30]">
+                <div class="flex items-center justify-between px-3 py-2.5">
+                  <div class="min-w-0">
+                    <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ user.username || '-' }}</div>
+                    <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ user.role }}</div>
+                  </div>
+                  <button
+                    type="button"
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#f5f5f51a] bg-white/[0.04]"
+                    [attr.aria-label]="canEditUser(user) ? 'Edit user' : 'View user'"
+                    (click)="toggleExpandedUser(i)"
+                  >
+                    <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" [alt]="canEditUser(user) ? 'edit' : 'view'" />
+                  </button>
+                </div>
+
+                <div class="divide-y divide-[#f5f5f51a] px-3 py-2.5 text-sm text-[var(--color-text2)]">
+                  <div class="flex items-center justify-between gap-3 py-2">
+                    <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</span>
+                    <span class="truncate text-right">{{ user.email || '-' }}</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 py-2">
+                    <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</span>
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">{{ user.status }}</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 py-2">
+                    <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</span>
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">{{ user.subscription ? 'Paid' : 'Free' }}</span>
+                  </div>
+                  <div class="py-2">
+                    <div class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                    <div class="rounded-md border border-[#f5f5f51a] bg-white/[0.04] px-2.5 py-1.5 text-xs">{{ getUserLicensesLabel(user) }}</div>
+                  </div>
+                </div>
+
+                <div *ngIf="expandedUserIndex === i" class="bg-[#131E30] px-3 py-3">
+                  <div class="space-y-3">
+                    <div class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-3">
+                      <div class="text-base font-bold text-[var(--color-text1)]">User Information</div>
+                      <div class="mt-2 divide-y !divide-[#f5f5f51a]">
+                        <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Name</div>
+                          <div class="text-sm text-[var(--color-text1)]">{{ user.username || '-' }}</div>
+                        </div>
+                        <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</div>
+                          <div class="break-all text-sm text-[var(--color-text1)]">{{ user.email || '-' }}</div>
+                        </div>
+                        <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
+                          <div class="text-sm text-[var(--color-text1)]">{{ user.role }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div *ngIf="canEditUser(user)" class="rounded-[10px] border border-[var(--color-border)] bg-[#172235] p-3">
+                      <div class="text-base font-bold text-[var(--color-text1)]">Edit User</div>
+                      <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
+                      <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="user.status">
+                        <option [ngValue]="'active'">Active</option>
+                        <option [ngValue]="'disable'">Disable</option>
+                      </select>
+                      <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                      <div class="mt-2 grid grid-cols-1 gap-2">
+                        <ng-container *ngFor="let license of licenseList">
+                          <button
+                            type="button"
+                            *ngIf="canAssignLicense(license)"
+                            class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0"
+                            [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1"
+                            [ngClass]="{
+                              'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1,
+                              'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[#f5f5f533] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1
+                            }"
+                            (click)="toggleUserLicense(user, license)"
+                          >
+                            <span class="truncate">{{ licenseService.getLicenseLabel(license) }}</span>
+                            <input type="checkbox" class="ml-2 h-4 w-4 shrink-0 pointer-events-none accent-sky-500" [checked]="(user.licenses || []).indexOf(license) > -1" />
+                          </button>
+                        </ng-container>
+                      </div>
+                      <div class="mt-3 flex flex-wrap justify-end gap-2">
+                        <button type="button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">Delete User</button>
+                        <button type="button" class="ui-btn ui-btn-primary" (click)="updateUser(user)">Save changes</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #noUsersMobile>
+              <div class="rounded-[10px] bg-[var(--color-blue-820-light)] px-4 py-10 text-center text-sm text-[var(--color-text4)]">
+                No users available.
+              </div>
+            </ng-template>
+          </div>
+        </ng-container>
+
+        <ng-template #loadingTpl>
+          <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
+            <table class="w-full min-w-[1120px] text-left text-sm">
+              <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+                <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+                  <th class="overflow-clip align-middle px-4 py-3.5">Sr #</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">User Name</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">Email</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">Role</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">Status</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">Subscription</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">Licenses</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">Action</th>
+                </tr>
+              </thead>
+              <tbody @fadeInDashboardItem>
+                <tr class="border-t !border-white/10 bg-[#172235]">
+                  <td class="px-4 py-3"><div class="h-3 w-12 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="h-3 w-32 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="h-3 w-10 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="space-y-3 p-0 md:hidden">
+            <div *ngFor="let _ of [1,2,3]" class="rounded-[10px] bg-[#131E30] p-3">
+              <div class="h-4 w-1/2 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+              <div class="mt-3 space-y-2">
+                <div class="h-3 w-full animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+                <div class="h-3 w-4/5 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+                <div class="h-3 w-3/5 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+              </div>
             </div>
-          </ng-container>
-
-          <ng-template #loadingTpl>
-            <div class="table-responsive">
-              <table class="table table-striped directory-list__table clear-paddings">
-                <thead>
-                  <tr>
-                    <th class="col-sr">Sr #</th>
-                    <th class="col-company">User Name</th>
-                    <th class="col-country">Email</th>
-                    <th class="col-verified">Role</th>
-                    <th class="col-status">Status</th>
-                    <th class="col-quota">Subscription</th>
-                    <th class="col-licenses">Licenses</th>
-                    <th class="col-action">Action</th>
-                  </tr>
-                </thead>
-                <tbody @fadeInDashboardItem>
-                  <tr>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-75"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-100"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-75"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-75"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-50"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-50"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-50"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-25"></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-75"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-100"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-75"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-75"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-50"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-50"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-50"></div>
-                    </td>
-                    <td>
-                      <div class="skeleton_shimmer shimmer-line w-25"></div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </ng-template>
-        </div>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>

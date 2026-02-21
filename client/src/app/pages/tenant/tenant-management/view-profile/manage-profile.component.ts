@@ -77,6 +77,16 @@ export class ManageProfileComponent implements OnInit {
     return false;
   }
 
+  canAssignLicense(license: LicenseName): boolean {
+    if (license === LicenseName.MAINTAINER) {
+      return false;
+    }
+    if (this.appService.userSessionData().user.role === 'admin') {
+      return true;
+    }
+    return (this.appService.userSessionData().tenant.licenses || []).includes(license);
+  }
+
   toggleUserLicense(user: any, license: LicenseName) {
     if (!user.licenses) {
       user.licenses = [];
@@ -121,8 +131,31 @@ export class ManageProfileComponent implements OnInit {
     if (!user.licenses || user.licenses.length === 0) {
       return 'None';
     }
-    const names = user.licenses.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
-    return (names.length <= 15) ? names : names.slice(0, 15) + ('...');
+    return user.licenses.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
+  }
+
+  canEditUser(user: User): boolean {
+    return !(user.role === 'admin' || user.licenses?.includes('maintainer'));
+  }
+
+  getStatusBadgeClass(status: string): string {
+    return status === 'active'
+      ? 'bg-emerald-500/10 text-emerald-300'
+      : 'bg-rose-500/10 text-rose-300';
+  }
+
+  getSubscriptionBadgeClass(subscription?: boolean): string {
+    return subscription
+      ? 'bg-sky-500/10 text-sky-300'
+      : 'bg-slate-500/10 text-slate-300';
+  }
+
+  get activeUsersCount(): number {
+    return this.users.filter(user => user.status === 'active').length;
+  }
+
+  get editableUsersCount(): number {
+    return this.users.filter(user => this.canEditUser(user)).length;
   }
 
   addtenant() {

@@ -1,26 +1,39 @@
 <ng-container>
   <span id="top"></span>
-  <div class="directory-listing">
-    <div class="directory-listing_container">
-      <div class="directory-listing_main-container">
-        <div class="directory-listing_upper-heading">
-          <div class="directory-listing_pagination-heading">
-            <p class="directory-listing_header">Audit Logs</p>
-          </div>
-          <div class="directory-listing_pagination col-7"></div>
-          <div class="side-menu-container">
-            <label (click)="openSidebar()" class="filters-button"> <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24"> Filter </label>
-            <div [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
-              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
-                (filterReset)="resetFilters()" [filterModel]="filterModel"
-                [isFilterOpen]="isFilterOpen$ | async"></app-filters>
-            </div>
+  <div class="w-full p-3 md:p-4">
+    <div class="ui-page-container w-full max-w-[2400px]">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="ui-page-title">Audit Logs</h1>
+          <p class="ui-page-description">Track user and tenant activity across the platform.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="ui-btn ui-btn-primary" (click)="exportAuditLogs()">
+            <i class="bi bi-download me-2"></i>
+            Export
+          </button>
+          <button type="button" (click)="openSidebar()" class="inline-flex h-10 items-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-680)] px-3 text-[15px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-750)]">
+            <img alt="Filter Icon" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16">
+            <span class="ml-2">Filter</span>
+          </button>
+          <div
+            *ngIf="isFilterOpen$ | async"
+            class="fixed inset-0 z-50 bg-black/30"
+            (click)="closeSidebar()"
+          ></div>
+          <div
+            class="fixed right-0 top-0 z-[60] h-[96vh] w-[300px] rounded-tl-[15px] bg-[#2A5784] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-transform duration-200 max-[450px]:w-screen"
+            [ngClass]="(isFilterOpen$ | async) ? 'translate-x-0' : 'translate-x-full'"
+          >
+            <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
+                         (filterReset)="resetFilters()" [filterModel]="filterModel"
+                         [isFilterOpen]="isFilterOpen$ | async"></app-filters>
           </div>
         </div>
-        <app-auditlog-list [isLoading]="isLoading()"></app-auditlog-list>
       </div>
-      <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
+      <app-auditlog-list [isLoading]="isLoading()"></app-auditlog-list>
     </div>
+    <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
   </div>
   <span id="bottom"></span>
 </ng-container>

@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
 import { DirectoryCallbackModel } from '../../../shared/model/directory/directory.model';
 import { DirectoryService } from '../../../services/directory/directory.service';
@@ -8,7 +8,7 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
   selector: 'app-directory-list',
   templateUrl: './directory-list.component.html',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgClass],
   animations: [fadeInDashboardItem]
 })
 export class DirectoryListComponent implements AfterViewInit, OnDestroy {

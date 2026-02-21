@@ -1,38 +1,47 @@
-<div [ngClass]="{ 'selected-filter-bar__top-space': showSorting }" @fadeInDashboardItem>
-  <div class="selected-filter-bar selected-filter-bar__left-space" *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
-    <div class="selected-filter-bar__top-row">
-      <div class="selected-filter-bar__title">Filters</div>
-      <div class="selected-filter-bar__actions">
+<div [ngClass]="{ 'mt-[10px]': showSorting }" @fadeInDashboardItem>
+  <div
+    class="ml-[31px] mt-[15px] min-w-[450px] max-w-[912px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-890)] px-[24px] py-[8px] pl-[17px] font-[Inter] text-[var(--color-text1)] shadow-[0_2px_10px_rgba(0,0,0,0.2)]"
+    *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
+
+    <div class="flex items-center justify-between">
+      <div class="flex text-[18px] font-medium text-[var(--color-text1)]">Filters</div>
+      <div class="flex items-center gap-[20px] mr-[-10px]">
         <ng-container *ngIf="isConsolidatedRoute()">
-          <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
+          <div class="flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="entityFiltersCount()>0">
             Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
           </div>
-          <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
-            Entity({{ entityFiltersCount() }}) <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
+          <div class="flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="entityFiltersCount()>0">
+            Entity({{ entityFiltersCount() }})
+            <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="ml-[8px] h-[9px] w-[9px] cursor-pointer" (click)="clearFilters('entity')" alt="close"/>
           </div>
         </ng-container>
-        <div class="selected-filter-bar__filter-type" *ngIf="sidebarFilterCount()>0">
-          Sidebar({{ sidebarFilterCount() }}) <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close"/>
+
+        <div class="flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="sidebarFilterCount()>0">
+          Sidebar({{ sidebarFilterCount() }})
+          <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="ml-[8px] h-[9px] w-[9px] cursor-pointer" (click)="clearFilters('sidebar')" alt="close"/>
         </div>
-        <div class="selected-filter-bar__filter-type" *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
-          Search Type ({{ this.app_service.getConfig().localSettings.matchType }}) <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close"/>
+
+        <div class="flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
+          Search Type ({{ this.app_service.getConfig().localSettings.matchType }})
+          <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="ml-[8px] h-[9px] w-[9px] cursor-pointer" (click)="clearMatchType()" alt="close"/>
         </div>
-        <button class="selected-filter-bar__clear-btn" (click)="clearFilters('all')">Clear Selection</button>
-        <div class="selected-filter-bar__expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }" (click)="toggleFilterBarCollapse()">
-          <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon"/>
+
+        <button class="h-[32px] w-[110px] rounded-[6px] border border-[#57A5EB] bg-transparent text-[13px] font-medium text-[#57A5EB]" (click)="clearFilters('all')">Clear Selection</button>
+        <div class="relative inline-block cursor-pointer" (click)="toggleFilterBarCollapse()">
+          <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="px-[10px] py-[5px] transition-transform duration-300" [ngClass]="{ 'rotate-90': isFilterBarExpanded }" />
         </div>
       </div>
     </div>
 
     <div *ngIf="isFilterBarExpanded">
-      <div class="selected-filter-bar__primary-filters-wrap">
+      <div class="mt-[20px] flex flex-wrap gap-y-[12px] gap-x-[24px] pr-[8px] text-[14px]">
         <ng-container *ngIf="sidebarFilterCount() > 0; else noSidebarFilters">
           <ng-container *ngFor="let key of sidebarFilters()">
-            <div class="selected-filter-bar__filter-item">
-              <div class="selected-filter-bar__filter-label-edit">
+            <div class="flex flex-col pb-[8px]">
+              <div class="mb-[10px] flex items-center text-[14px] font-medium text-[#A0B8D1]">
                 {{ filter_mapping[key] || key }}
               </div>
-              <span class="selected-filter-bar__filter-tag">
+              <span class="flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[var(--color-text1)]">
                 {{ selectedFilters[key] }}
               </span>
             </div>
@@ -40,24 +49,24 @@
         </ng-container>
 
         <ng-template #noSidebarFilters>
-          <div class="selected-filter-bar__no-filters-text">
+          <div class="mt-[6px] mb-[10px] text-[12px] text-[#A0B8D1]">
             Sidebar filters are empty. Click the filter icon (top right) to select filters.
           </div>
         </ng-template>
       </div>
 
-
-      <div class="selected-filter-bar__divider"></div>
+      <div class="my-[12px] h-px bg-[var(--color-border)]"></div>
 
       <ng-container *ngIf="entityFiltersCount(); else noSearchFilters">
-        <div class="selected-filter-bar__filter-item">
-          <div class="selected-filter-bar__filter-label-edit">Entity Type</div>
-          <div class="selected-filter-bar__entity-filter-wrap">
+        <div class="flex flex-col pb-[8px]">
+          <div class="mb-[10px] flex items-center text-[14px] font-medium text-[#A0B8D1]">Entity Type</div>
+          <div class="flex flex-1 gap-[16px] overflow-x-auto overflow-y-hidden">
             <ng-container *ngIf="getVisibleTags().length > 0">
-              <div class="selected-filter-bar__filter-tag" *ngFor="let tag of getVisibleTags()">
-                {{ tag }}<img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="removeEntityTypeFilterTag(tag)" alt="search"/>
+              <div class="flex h-[30px] items-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[var(--color-text1)]" *ngFor="let tag of getVisibleTags()">
+                {{ tag }}
+                <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" class="ml-[8px] h-[9px] w-[9px] cursor-pointer" (click)="removeEntityTypeFilterTag(tag)" alt="search"/>
               </div>
-              <div class="selected-filter-bar__filter-tag selected-filter-bar__more-tag" *ngIf="getHiddenTagCount()> 0">
+              <div class="mt-[4px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#A0B8D1] text-[11px] font-normal text-[#0E1626]" *ngIf="getHiddenTagCount()> 0">
                 +{{ getHiddenTagCount() }}
               </div>
             </ng-container>
@@ -66,11 +75,10 @@
       </ng-container>
 
       <ng-template #noSearchFilters>
-        <div class="selected-filter-bar__no-filters-text">
+        <div class="mt-[6px] mb-[10px] text-[12px] text-[#A0B8D1]">
           Entity filters are empty. Click the search bar to select filters.
         </div>
       </ng-template>
     </div>
-
   </div>
 </div>

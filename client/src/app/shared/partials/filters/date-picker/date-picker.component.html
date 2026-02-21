@@ -1,18 +1,47 @@
-<form class="row filter__date">
-  <div class="col-12">
-    <div class="d-flex align-items-center">
-      <input #datepicker="ngbDatepicker" (click)="datepicker.toggle()" (dateSelect)="onDateSelection($event)" [autoClose]="'outside'" [dayTemplate]="t" [displayMonths]="1" [placeholder]="filterModel?.filters?.[key]?.placeholder || 'Select date range'" [startDate]="fromDate!" [value]="mSelectedFilters[key] || ''" class="sidebar_input sidebar_input_date text-start justify-content-between align-items-center filter__date-hidden" ngbDatepicker outsideDays="hidden" readonly tabindex="-1" />
-      <input #datepicker="ngbDatepicker" (click)="datepicker.toggle()" (dateSelect)="onDateSelection($event)" [autoClose]="'outside'" [dayTemplate]="t" [displayMonths]="1" [placeholder]="filterModel?.filters?.[key]?.placeholder || 'Select date range'" [startDate]="fromDate!" [value]="mSelectedFilters[key] || ''" class="sidebar_input sidebar_input_date text-start justify-content-between align-items-center" ngbDatepicker outsideDays="hidden" readonly tabindex="-1" />
+<form class="relative w-full overflow-visible">
+  <button
+    type="button"
+    (click)="togglePicker()"
+    class="flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition hover:brightness-[0.98] outline-none focus:outline-none focus:ring-0"
+  >
+    <span class="truncate">{{ displayValue || (filterModel?.filters?.[key]?.placeholder || 'Select date range') }}</span>
+    <img alt="Calendar" class="h-4 w-4 shrink-0 opacity-70" src="assets/images/shared/theme/calendar.png" />
+  </button>
 
-      <button (click)="datepicker.toggle()" class="btn date_picker_button_bg ms-2 sidebar_input_date-button" type="button">
-        <img alt="Calendar" class="date_picker_button_image" src="assets/images/shared/theme/calendar.png" />
+  <div *ngIf="isOpen" class="fixed inset-0 z-40" (click)="closePicker()"></div>
+
+  <div *ngIf="isOpen" class="fixed inset-0 z-50 overflow-y-auto p-4 sm:absolute sm:right-0 sm:top-[46px] sm:mt-1 sm:w-full sm:overflow-visible sm:p-0">
+    <div class="w-full rounded-xl border border-slate-200 bg-white p-3 shadow-xl sm:w-auto">
+    <div class="mb-2 flex items-center justify-between">
+      <button type="button" (click)="prevMonth()" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-base text-slate-600 transition hover:bg-slate-100 outline-none focus:outline-none focus:ring-0">
+        ‹
+      </button>
+      <div class="text-sm font-semibold text-slate-800">{{ monthLabel }}</div>
+      <button type="button" (click)="nextMonth()" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-base text-slate-600 transition hover:bg-slate-100 outline-none focus:outline-none focus:ring-0">
+        ›
       </button>
     </div>
 
-    <ng-template #t let-date let-focused="focused">
-      <span (mouseenter)="hoveredDate = date" (mouseleave)="hoveredDate = null" [class.faded]="isHovered(date) || isInside(date)" [class.focused]="!!focused" [class.range]="isRange(date)" class="custom-day">
-        {{ date.day }}
-      </span>
-    </ng-template>
+    <div class="mb-1 grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+      <div *ngFor="let day of weekdays">{{ day }}</div>
+    </div>
+
+    <div class="grid grid-cols-7 gap-1">
+      <button
+        type="button"
+        *ngFor="let cell of cells"
+        (click)="onSelect(cell)"
+        class="h-8 rounded-md text-xs transition-colors outline-none focus:outline-none focus:ring-0"
+        [ngClass]="{
+          'text-slate-400': !cell.inCurrentMonth,
+          'text-slate-700 hover:bg-slate-100': cell.inCurrentMonth && !isInRange(cell) && !isStart(cell) && !isEnd(cell),
+          'bg-sky-100 text-sky-900': isInRange(cell),
+          'bg-sky-500 text-white font-semibold': isStart(cell) || isEnd(cell)
+        }"
+      >
+        {{ cell.date.getDate() }}
+      </button>
+    </div>
+    </div>
   </div>
 </form>

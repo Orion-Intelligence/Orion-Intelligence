@@ -1,5 +1,5 @@
 import { Component, signal, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
@@ -15,6 +15,7 @@ import { ALLOWED_FILE_TYPES, APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, IOC_LABELS
   standalone: true,
   imports: [
     CommonModule,
+    NgClass,
     NgxPrintModule,
     NgOptimizedImage,
     TooltipDirective,

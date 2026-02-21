@@ -9,8 +9,9 @@
 </div>
 
 <div class="space-y-3">
-  <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-    <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
       <span>Profile Details</span>
     </summary>
     <div class="p-3 border-t border-slate-700 space-y-4">
@@ -21,11 +22,11 @@
       </div>
 
       <div class="space-y-2">
-        <div *ngFor="let platform of displayPlatformsForDetails(); let i = index" class="animate-list-item-in">
+        <div *ngFor="let platform of displayPlatformsForDetails(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
           <ng-container *ngIf="platform.profileDetails !== undefined; else detailFetchBlock">
             <div class="bg-slate-800/50 rounded-lg p-3">
               <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                <div [socialMapperPlatformBg]="platform.platform" class="social-mapper-platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
                 <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
                 <div *ngIf="fetchingState.profile()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
               </div>
@@ -43,7 +44,7 @@
           <ng-template #detailFetchBlock>
             <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
               <div class="flex items-center gap-2 min-w-0">
-                <div [socialMapperPlatformBg]="platform.platform" class="social-mapper-platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
                 <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
               </div>
               <div *ngIf="fetchingState.profile()[getPlatformUniqueKey(platform)]; else detailFetchBtn" class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
@@ -65,8 +66,9 @@
     </div>
   </details>
 
-  <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-    <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
       <span>Recent Posts</span>
     </summary>
     <div class="p-3 border-t border-slate-700 space-y-4">
@@ -77,11 +79,11 @@
       </div>
 
       <div class="space-y-2">
-        <div *ngFor="let platform of displayPlatformsForPosts(); let i = index" class="animate-list-item-in">
+        <div *ngFor="let platform of displayPlatformsForPosts(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
           <ng-container *ngIf="platform.posts !== undefined; else postFetchBlock">
             <div class="bg-slate-800/50 rounded-lg p-3">
               <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                <div [socialMapperPlatformBg]="platform.platform" class="social-mapper-platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
                 <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
                 <div *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
               </div>
@@ -103,7 +105,7 @@
           <ng-template #postFetchBlock>
             <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
               <div class="flex items-center gap-2 min-w-0">
-                <div [socialMapperPlatformBg]="platform.platform" class="social-mapper-platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
                 <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
               </div>
               <div *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]; else postFetchBtn" class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
@@ -125,8 +127,9 @@
     </div>
   </details>
 
-  <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-    <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
       <span>Associated Images</span>
     </summary>
     <div class="p-3 border-t border-slate-700 space-y-4">
@@ -137,11 +140,11 @@
       </div>
 
       <div class="space-y-2">
-        <div *ngFor="let platform of displayPlatformsForImages(); let i = index" class="animate-list-item-in">
+        <div *ngFor="let platform of displayPlatformsForImages(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
           <ng-container *ngIf="platform.images !== undefined; else imagesFetchBlock">
             <div class="bg-slate-800/50 rounded-lg p-3">
               <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                <div [socialMapperPlatformBg]="platform.platform" class="social-mapper-platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
                 <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
                 <div *ngIf="fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
               </div>
@@ -156,7 +159,7 @@
           <ng-template #imagesFetchBlock>
             <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
               <div class="flex items-center gap-2 min-w-0">
-                <div [socialMapperPlatformBg]="platform.platform" class="social-mapper-platform-icon flex-shrink-0 rounded-md flex items-center justify-center text-sm font-bold text-white h-6 w-6 p-1"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
                 <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
               </div>
               <div *ngIf="fetchingState.platformImages()[getPlatformUniqueKey(platform)]; else imagesFetchBtn" class="flex items-center gap-2 text-slate-400 text-xs shrink-0">

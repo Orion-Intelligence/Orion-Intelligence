@@ -7,11 +7,26 @@
 <div *ngIf="!isCtiGraph()" data-cy="dashboard-main-container">
   <div id="top" data-cy="top"></div>
 
-  <div class="row dashboard_sidebar-main" id="dashboard__sidebar-main" data-cy="dashboard-sidebar-main">
+  <div
+    class="flex h-screen min-h-[800px] overflow-x-hidden overflow-y-visible bg-[var(--color-blue-900)]"
+    id="dashboard__sidebar-main"
+    data-cy="dashboard-sidebar-main">
 
-    <input class="dashboard_menu-toggle" id="dashboard__menu-toggle" name="menu-input" type="radio" data-cy="menu-toggle">
+    <input
+      class="hidden"
+      id="dashboard__menu-toggle"
+      name="menu-input"
+      type="radio"
+      data-cy="menu-toggle">
 
-    <div [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }" class="dashboard_sidebar" *ngIf="!authService.getIsMobileDemo()" data-cy="dashboard-sidebar">
+    <div
+      *ngIf="!authService.getIsMobileDemo()"
+      [ngClass]="{
+        'w-[300px] p-0 overflow-y-auto': isMenuOpen,
+        'w-[70px] px-[7px] py-[24px] overflow-hidden': !isMenuOpen
+      }"
+      class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] [scrollbar-color:var(--color-blue-880)_transparent]"
+      data-cy="dashboard-sidebar">
 
       <app-dashboard-sidebar
         (menuToggle)="toggleNavigation()"
@@ -19,12 +34,18 @@
       </app-dashboard-sidebar>
     </div>
 
-    <div class="dashboard_container" data-cy="dashboard-container">
-      <div class="dashboard_sub-container dashboard_content-scroll" id="dashboard-container" data-cy="dashboard-sub-container">
+    <div class="m-0 h-auto max-h-full flex-1 overflow-hidden bg-[var(--color-blue-850)] z-[1]" data-cy="dashboard-container">
+      <div
+        class="h-[1vh] min-h-full overflow-y-auto bg-[var(--color-blue-830)] pb-[100px]"
+        id="dashboard-container"
+        data-cy="dashboard-sub-container">
 
         <app-dashboard-header data-cy="dashboard-header"></app-dashboard-header>
 
-        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard_body" data-cy="dashboard-body">
+        <span
+          [@dashboard-global-animation]="prepareRoute(routerOutlet)"
+          class="m-0"
+          data-cy="dashboard-body">
 
           <router-outlet #routerOutlet="outlet" data-cy="router-outlet"></router-outlet>
         </span>

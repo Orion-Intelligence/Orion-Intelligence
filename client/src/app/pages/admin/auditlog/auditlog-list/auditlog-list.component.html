@@ -1,40 +1,102 @@
-<div class="list__container">
-  <table class="table table-striped directory-list__table clear-paddings">
-    <thead>
-    <tr>
-      <th class="list__column-id-min">ID</th>
-      <th class="list__column-service-url">Timestamp</th>
-      <th class="list__column-category">Actor</th>
-      <th class="list__column-category">Tenant</th>
-      <th class="list__column-service-url">Event</th>
-    </tr>
-    </thead>
+<ng-container *ngIf="!isLoading && (auditData$ | async) as dumpData">
+  <div class="ui-table-shell hidden md:block">
+    <table class="ui-table">
+      <thead>
+        <tr>
+          <th class="font-semibold">ID</th>
+          <th class="font-semibold">Timestamp</th>
+          <th class="font-semibold">Actor</th>
+          <th class="font-semibold">Tenant</th>
+          <th class="font-semibold">Event</th>
+        </tr>
+      </thead>
 
-    <tbody *ngIf="!isLoading && (auditData$ | async) as dumpData" @fadeInDashboardItem>
-      <tr *ngFor="let item of dumpData.items; let i = index">
-        <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
-        <td>{{ item.ts | date:'dd MMM yyyy, HH:mm:ss' }}</td>
-        <td>{{ item.actor_id }}</td>
-        <td>{{ item.tenant_id }}</td>
-        <td>{{ item.event }}</td>
-      </tr>
+      <tbody @fadeInDashboardItem>
+        <tr *ngFor="let item of dumpData.items; let i = index">
+          <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
+          <td>{{ item.ts | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+          <td class="max-w-[260px] truncate">{{ item.actor_id }}</td>
+          <td class="max-w-[220px] truncate">{{ item.tenant_id }}</td>
+          <td class="max-w-[420px] truncate">{{ item.event }}</td>
+        </tr>
 
-      <tr *ngIf="dumpData.items?.length === 0">
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
-      </tr>
-    </tbody>
+        <tr *ngIf="dumpData.items?.length === 0">
+          <td class="py-10 text-center text-sm text-[var(--color-text4)]" colspan="5">No audit logs found for the selected filters.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-    <tbody *ngIf="isLoading" @fadeInDashboardItem>
-      <tr *ngFor="let _ of [1,2,3,4,5]">
-        <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+  <div class="mt-3 space-y-3 md:hidden" @fadeInDashboardItem>
+    <div
+      *ngFor="let item of dumpData.items; let i = index"
+      class="overflow-hidden rounded-xl border border-white/15 bg-[var(--color-blue-830)]"
+    >
+      <div class="flex items-center justify-between border-b border-white/15 bg-[var(--color-blue-820-light)] px-3 py-2">
+        <div class="text-xs font-semibold tracking-wide text-[var(--color-text4)]">#{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</div>
+        <div class="text-[11px] font-medium text-[var(--color-text4)]">{{ item.ts | date:'dd MMM yyyy, HH:mm:ss' }}</div>
+      </div>
+
+      <div class="divide-y divide-white/10">
+        <div class="px-3 py-2">
+          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Actor</div>
+          <div class="mt-0.5 break-all text-sm font-medium text-[var(--color-text3)]">{{ item.actor_id }}</div>
+        </div>
+        <div class="px-3 py-2">
+          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Tenant</div>
+          <div class="mt-0.5 break-all text-sm font-medium text-[var(--color-text3)]">{{ item.tenant_id }}</div>
+        </div>
+        <div class="px-3 py-2">
+          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Event</div>
+          <div class="mt-0.5 text-sm font-medium leading-5 text-[var(--color-text3)]">{{ item.event }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      *ngIf="dumpData.items?.length === 0"
+      class="rounded-xl border border-white/15 bg-[var(--color-blue-830)] px-3 py-8 text-center text-sm text-[var(--color-text4)]"
+    >
+      No audit logs found for the selected filters.
+    </div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="isLoading">
+  <div class="ui-table-shell hidden md:block">
+    <table class="ui-table">
+      <thead>
+        <tr>
+          <th class="font-semibold">ID</th>
+          <th class="font-semibold">Timestamp</th>
+          <th class="font-semibold">Actor</th>
+          <th class="font-semibold">Tenant</th>
+          <th class="font-semibold">Event</th>
+        </tr>
+      </thead>
+
+      <tbody @fadeInDashboardItem>
+        <tr *ngFor="let _ of [1,2,3,4,5]">
+          <td><div class="h-3 w-[75%] animate-pulse rounded bg-[var(--color-placeholder)]"></div></td>
+          <td><div class="h-3 w-full animate-pulse rounded bg-[var(--color-placeholder)]"></div></td>
+          <td><div class="h-3 w-[75%] animate-pulse rounded bg-[var(--color-placeholder)]"></div></td>
+          <td><div class="h-3 w-[75%] animate-pulse rounded bg-[var(--color-placeholder)]"></div></td>
+          <td><div class="h-3 w-[50%] animate-pulse rounded bg-[var(--color-placeholder)]"></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-3 space-y-3 md:hidden" @fadeInDashboardItem>
+    <div *ngFor="let _ of [1,2,3]" class="overflow-hidden rounded-xl border border-white/15 bg-[var(--color-blue-830)]">
+      <div class="border-b border-white/15 bg-[var(--color-blue-820-light)] px-3 py-2">
+        <div class="h-3 w-1/2 animate-pulse rounded bg-[var(--color-placeholder)]"></div>
+      </div>
+      <div class="space-y-2 p-3">
+        <div class="h-3 w-[70%] animate-pulse rounded bg-[var(--color-placeholder)]"></div>
+        <div class="h-3 w-[80%] animate-pulse rounded bg-[var(--color-placeholder)]"></div>
+        <div class="h-3 w-[55%] animate-pulse rounded bg-[var(--color-placeholder)]"></div>
+      </div>
+    </div>
+  </div>
+</ng-container>

@@ -1,27 +1,25 @@
-<ul class="json-tree json-tree--depth-{{ level }}">
+<ul class="space-y-2" [style.paddingLeft.px]="level * 12">
   <ng-container *ngFor="let key of keys(json); let last = last">
-    <li [class.json-tree__node--last]="last" class="json-tree_node">
-      <div (click)="isCollapsible(json[key]) && toggle(pathKey(parentPath, key))" class="json-tree_line">
-        <span *ngIf="isCollapsible(json[key])" class="json-tree_toggle">
-          <img *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedIcon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Expanded" width="20" height="20" />
+    <li class="rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
+      <div (click)="isCollapsible(json[key]) && toggle(pathKey(parentPath, key))" class="flex cursor-pointer items-center gap-2 text-xs text-[var(--color-text3)]">
+        <span *ngIf="isCollapsible(json[key])" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-730)]">
+          <img *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedIcon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Expanded" class="h-3 w-3" />
           <ng-template #collapsedIcon>
-            <img [ngClass]="{ 'rotated': !isExpanded(pathKey(parentPath, key)) }" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Collapsed" width="20" height="20" />
+            <img [ngClass]="{ 'rotate-180': !isExpanded(pathKey(parentPath, key)) }" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Collapsed" class="h-3 w-3 transition" />
           </ng-template>
-        </span> <span class="json-tree_key json-tree_key-faded ms-1">{{ key }}</span>
+        </span>
+        <span class="font-semibold text-[var(--color-text4)]">{{ key }}</span>
       </div>
 
-      <div *ngIf="isExpanded(pathKey(parentPath, key))" class="json-tree_children">
+      <div *ngIf="isExpanded(pathKey(parentPath, key))" class="mt-2">
         <ng-container *ngIf="isObject(json[key]); else jsonLeaf">
-          <app-json-viewer [json]="json[key]" [level]="level + 1"
-            [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
+          <app-json-viewer [json]="json[key]" [level]="level + 1" [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
         </ng-container>
 
         <ng-template #jsonLeaf>
-          <ul class="json-tree json-tree--depth-{{ level + 1 }}">
-            <li class="json-tree_node json-tree__node--last">
-              <div class="json-tree_line json-tree_line-leaf">
-                <strong class="json-tree_value">{{ json[key] }}</strong>
-              </div>
+          <ul class="mt-2" [style.paddingLeft.px]="(level + 1) * 12">
+            <li class="rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-xs text-[var(--color-text1)]">
+              <strong>{{ json[key] }}</strong>
             </li>
           </ul>
         </ng-template>

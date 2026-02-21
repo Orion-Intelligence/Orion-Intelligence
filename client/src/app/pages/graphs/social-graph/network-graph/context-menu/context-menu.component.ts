@@ -55,14 +55,16 @@ export class ContextMenuComponent {
     }
     return 'Custom entity';
   });
-  menuPositionClass = computed(() => {
+  menuPosition = computed(() => {
     const data = this.data();
-    const fallbackClass = 'social-graph-context-menu-x-50 social-graph-context-menu-y-50 social-graph-context-menu-anchor-left-top';
-    if (!data) {
-      return fallbackClass;
-    }
-    if (typeof window === 'undefined') {
-      return fallbackClass;
+    const fallback = {
+      left: '50%',
+      top: '50%',
+      transform: 'translate(14px, 14px)',
+      originClass: 'origin-top-left'
+    };
+    if (!data || typeof window === 'undefined') {
+      return fallback;
     }
     const xPercentRaw = (data.x / window.innerWidth) * 100;
     const yPercentRaw = (data.y / window.innerHeight) * 100;
@@ -70,6 +72,13 @@ export class ContextMenuComponent {
     const yPercent = Math.max(2, Math.min(98, Math.round(yPercentRaw)));
     const horizontalAnchor = data.x < window.innerWidth / 2 ? 'left' : 'right';
     const verticalAnchor = data.y < window.innerHeight / 2 ? 'top' : 'bottom';
-    return `social-mapper-context-menu-x-${xPercent} social-mapper-context-menu-y-${yPercent} social-mapper-context-menu-anchor-${horizontalAnchor}-${verticalAnchor}`;
+    const transform = `${horizontalAnchor === 'left' ? 'translate(14px' : 'translate(calc(-100% - 14px)'}${verticalAnchor === 'top' ? ', 14px)' : ', calc(-100% - 14px))'}`;
+    const originClass = `origin-${verticalAnchor}-${horizontalAnchor}`;
+    return {
+      left: `${xPercent}%`,
+      top: `${yPercent}%`,
+      transform,
+      originClass
+    };
   });
 }

@@ -254,10 +254,11 @@ export class ConsolidatedScanComponent {
 
   gradeBadgeClass(grade?: string): string {
     const g = (grade || '').toUpperCase();
+    const baseClass = 'inline-flex items-center justify-center rounded-[999px] border border-[var(--color-border)] px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] text-[var(--color-text1)] whitespace-nowrap';
     if (g === 'C' || g === 'D' || g === 'F') {
-      return 'consolidated-scans-badge consolidated-scans-badge-warning';
+      return `${baseClass} bg-[var(--color-banner)] text-[var(--color-text5)]`;
     }
-    return 'consolidated-scans-badge';
+    return baseClass;
   }
 
   gradeText(grade?: string): string {

@@ -92,20 +92,16 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onTabClick(event: Event): void {
-    const target = event.target as HTMLElement;
-    if (!target.classList.contains('nav-link') || target.classList.contains('active')) {
+    const target = event.target as HTMLElement | null;
+    const tabEl = target?.closest('[data-tab]') as HTMLElement | null;
+    if (!tabEl) {
       return;
     }
-
-    const parent = target.closest('.nav-tabs');
-    if (!parent) {
+    const tab = tabEl.getAttribute('data-tab') || '';
+    if (!tab || tab === this.activeTab) {
       return;
     }
-
-    parent.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-    target.classList.add('active');
-
-    this.onToggleMenu(target.textContent?.trim() || '');
+    this.onToggleMenu(tab);
   }
 
   onToggleMenu(_tab: string) {

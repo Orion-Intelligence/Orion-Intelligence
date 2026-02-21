@@ -6,12 +6,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, EMPTY, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
 import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
-import { LoadingFormComponent } from '../../../shared/partials/loading-form/loading-form.component';
-import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgForOf, NgOptimizedImage, NgIf, EmptyResultComponent, LoadingFormComponent, EmptyQueryComponent, NgClass],
+  imports: [FormsModule, NgForOf, NgOptimizedImage, NgIf, EmptyResultComponent, NgClass],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })

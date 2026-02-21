@@ -1,5 +1,7 @@
-<div class="heatmap-shell">
-  <div #mapContainer class="map-container"></div>
+<div class="w-full">
+  <div
+    #mapContainer
+    class="relative w-[calc(100%+60px)] -mx-[30px] min-h-[340px] max-h-[80vh] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)]"></div>
 
   <app-heatmap-report *ngIf="isOpenCountryReport" [reports]="selectedCountryReports"
     (close)="closeCountryReport()"></app-heatmap-report>

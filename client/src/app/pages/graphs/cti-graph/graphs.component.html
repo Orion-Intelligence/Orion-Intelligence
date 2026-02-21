@@ -61,7 +61,7 @@
             </button>
           </div>
         </div>
-        <app-profile class="topbar-profile-compact"></app-profile>
+        <app-profile></app-profile>
       </div>
     </div>
   </header>
@@ -98,7 +98,7 @@
         </div>
       </div>
 
-    <div class="absolute top-[80px] left-2 sm:top-[96px] sm:left-4 z-40 pointer-events-auto animate-fade-in" [class.hidden]="!isGraphView">
+    <div class="absolute top-[80px] left-2 z-40 pointer-events-auto animate-[social-mapper-fade-in_0.4s_ease-in-out] sm:top-[96px] sm:left-4" [class.hidden]="!isGraphView">
       <div class="relative h-10 w-10">
         <app-expand-toggle-button [isExpanded]="expandEnabled" (toggled)="toggleExpandCollapseAll()"></app-expand-toggle-button>
       </div>

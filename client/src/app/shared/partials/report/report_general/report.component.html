@@ -1,136 +1,144 @@
 <app-report-header [csv_object]="resultItem" [lang_detected]="lang_detected" [url]="resultItem?.m_url"
   [content]="resultItem?.m_content" [lang]="lang" (languageUpdated)="langUpdate($event)"></app-report-header>
 
-<div class="search__result-detail">
+<div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
   <ng-container *ngIf="resultItem?.m_title as title; else noTitle">
     <ng-container *ngIf="title.trim().length > 1; else noTitle">
-      <p class="search__result-detail-heading mt-2">
-        {{ title.length > 150 ? (title.slice(0, 150) + '...') : title }} </p>
+      <p class="text-lg font-semibold text-[var(--color-text1)]">
+        {{ title.length > 150 ? (title.slice(0, 150) + '...') : title }}
+      </p>
     </ng-container>
   </ng-container>
   <ng-template #noTitle>
-    <p class="search__result-detail-heading">Title not available</p>
+    <p class="text-lg font-semibold text-[var(--color-text1)]">Title not available</p>
   </ng-template>
 
-  <span class="search__result-detail-description-span">Description</span>
+  <span class="mt-4 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</span>
   <ng-container *ngIf="resultItem?.m_important_content as content; else noDescription">
     <ng-container *ngIf="content.length > 1; else noDescription">
-      <p class="search__result-detail-description">
-        {{ content.length > 650 ? (content | slice:0:650) + ' ...' : content }} </p>
+      <p class="mt-2 text-sm text-[var(--color-text3)]">
+        {{ content.length > 650 ? (content | slice:0:650) + ' ...' : content }}
+      </p>
     </ng-container>
   </ng-container>
   <ng-template #noDescription></ng-template>
 
-  <span *ngIf="resultItem?.m_ref_html?.length" class="search__result-detail-description-span">Web Reference</span>
-  <p class="search__result-detail-description" *ngIf="resultItem?.m_ref_html?.length">
+  <span *ngIf="resultItem?.m_ref_html?.length" class="mt-4 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Web Reference</span>
+  <p class="mt-2 text-sm text-[var(--color-text3)]" *ngIf="resultItem?.m_ref_html?.length">
     {{
-    ((resultItem?.m_ref_html ?? '').length > 650)
-    ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
-    : resultItem?.m_ref_html
-    }} </p>
+      ((resultItem?.m_ref_html ?? '').length > 650)
+        ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
+        : resultItem?.m_ref_html
+    }}
+  </p>
 
-  <span class="search__result-detail-description-span">URL</span>
+  <span class="mt-4 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">URL</span>
   <ng-container *ngIf="resultItem?.m_url as url; else noUrl">
     <ng-container *ngIf="url.trim().length > 1; else noUrl">
-      <p class="search__result-detail-url-p text-truncate">
-        <a [href]="url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width" target="_blank"> {{ url }} </a>
+      <p class="mt-2 truncate text-sm">
+        <a [href]="url" class="text-[var(--color-blue-640)] hover:underline" target="_blank">{{ url }}</a>
       </p>
     </ng-container>
   </ng-container>
   <ng-template #noUrl>
-    <p class="gc-clear-selection search__result-detail-url d-inline-block text-truncate">URL not available</p>
+    <p class="mt-2 text-sm text-[var(--color-text4)]">URL not available</p>
   </ng-template>
-  <div class="search__result-detail-meta">
-    <div class="search__result-detail-meta-divs">
-      <p>Published on:</p>
-      <span>{{ resultItem?.m_leak_date ? (resultItem?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
+
+  <div class="mt-6 grid gap-4 text-sm text-[var(--color-text3)] md:grid-cols-2">
+    <div>
+      <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Published on</p>
+      <span class="text-[var(--color-text1)]">{{ resultItem?.m_leak_date ? (resultItem?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
     </div>
-    <div class="search__result-detail-meta-divs">
-      <p>Network:</p>
-      <span>{{ resultItem?.m_network }}</span>
+    <div>
+      <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Network</p>
+      <span class="text-[var(--color-text1)]">{{ resultItem?.m_network }}</span>
     </div>
-    <div class="search__result-detail-meta-divs">
-      <p>Last checked on:</p>
-      <span>{{ resultItem?.m_creation_date | date: 'mediumDate' }}</span>
+    <div>
+      <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Last checked on</p>
+      <span class="text-[var(--color-text1)]">{{ resultItem?.m_creation_date | date: 'mediumDate' }}</span>
     </div>
-    <div class="search__result-detail-meta-divs">
-      <p class="tags">Tags:</p>
-      <div>
-        <span *ngFor="let tag of resultItem?.m_content_type">
-          <span class="tag-item">
-            {{ tag }}
-          </span>
+    <div>
+      <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Tags</p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <span *ngFor="let tag of resultItem?.m_content_type" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">
+          {{ tag }}
         </span>
       </div>
     </div>
-    <div class="search__result-detail-meta-divs">
-      <p class="status">Status:</p>
-      <div class="search__result-detail-meta-divs d-flex align-items-center">
-        <span [ngClass]="{ 'bg-success': isWithinDays(resultItem!.m_creation_date, 5), 'bg-warning': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5), 'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}" class="rounded-circle d-inline-block me-2 search__result-detail-status-circle">
-        </span>
-        <p class="status mb-0">{{ getStatusText(resultItem?.m_creation_date) }} </p>
+    <div>
+      <p class="text-xs font-semibold uppercase text-[var(--color-text4)]">Status</p>
+      <div class="mt-2 flex items-center gap-2">
+        <span
+          class="h-2.5 w-2.5 rounded-full"
+          [ngClass]="{
+            'bg-green-500': isWithinDays(resultItem!.m_creation_date, 5),
+            'bg-yellow-500': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5),
+            'bg-red-500': !isWithinDays(resultItem!.m_creation_date, 10)
+          }"
+        ></span>
+        <p class="text-sm text-[var(--color-text1)]">{{ getStatusText(resultItem?.m_creation_date) }}</p>
       </div>
     </div>
   </div>
 </div>
-<div class="search__result-detail">
-  <div (click)="metaadataToggleContent()" class="search__result__section__heading">
-    <div class="left-content">
-      Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
+
+<div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
+  <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-center justify-between">
+    <div class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text1)]">
+      Metadata
+      <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
     </div>
-    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-      <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+      <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 
-  <div *ngIf="isExpandedMetadata">
-    <div class="tabs d-flex align-items-center search__result-detail-container">
+  <div *ngIf="isExpandedMetadata" class="mt-4">
+    <div class="flex flex-wrap items-center gap-2">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
+        <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full px-4 py-1.5 text-xs font-semibold transition">
           {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
         </button>
-        <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
+        <div *ngIf="!last" class="h-5 w-px bg-[var(--color-divider)]"></div>
       </ng-container>
     </div>
-    <div class="search__result-tabs-line"></div>
-    <app-result-section *ngIf="activeTab === 'm_content'" @fadeInDashboardItem
-      [listItems]="[content]"></app-result-section>
-    <app-result-section *ngIf="activeTab === 'm_section'" @fadeInDashboardItem
-      [listItems]="listItems"></app-result-section>
-    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
+    <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
+
+    <app-result-section *ngIf="activeTab === 'm_content'" @fadeInDashboardItem [listItems]="[content]"></app-result-section>
+    <app-result-section *ngIf="activeTab === 'm_section'" @fadeInDashboardItem [listItems]="listItems"></app-result-section>
+
+    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3 text-xs text-[var(--color-text4)]">
       Names of people, organizations, and entities are handled separately, but may overlap in the results.
     </div>
-    <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" @fadeInDashboardItem
-      [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+
+    <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" @fadeInDashboardItem [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
   </div>
 </div>
 
 <app-code-block [code]="resultItem?.m_code_snippet" *ngIf="resultItem?.m_code_snippet?.length"></app-code-block>
 
-<div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!=''" class="search__result-detail">
-  <div (click)="screenshootToggleContent()" class="search__result__section__heading">
-    <div class="left-content">Leak Screenshot <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Leak Screenshot">
+<div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!=''" class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
+  <div (click)="screenshootToggleContent()" class="flex cursor-pointer items-center justify-between">
+    <div class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text1)]">Leak Screenshot
+      <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Leak Screenshot">
     </div>
-    <div [attr.aria-label]="isExpandedScreenshoot ? 'Collapse' : 'Expand'" class="toggle-btn">
-      <img [ngClass]="{ 'rotated': !isExpandedScreenshoot }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    <div [attr.aria-label]="isExpandedScreenshoot ? 'Collapse' : 'Expand'" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+      <img [ngClass]="{ 'rotate-180': !isExpandedScreenshoot }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
-  <div *ngIf="isExpandedScreenshoot">
-    <br>
-    <div *ngIf="!isImageLoaded && !isImageError" class="text-left text-muted">
-      <p class="report-mapping-empty-header">Loading resources, please wait...</p>
-      <div class="skeleton_shimmer shimmer-line 100"></div>
+  <div *ngIf="isExpandedScreenshoot" class="mt-4">
+    <div *ngIf="!isImageLoaded && !isImageError" class="text-sm text-[var(--color-text4)]">
+      <p class="font-semibold">Loading resources, please wait...</p>
+      <div class="mt-2 h-3 w-40 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
     </div>
-    <div *ngIf="isImageError" class="text-left text-muted">
-      <div class="report-mapping-empty-header">Resource not found!</div>
-      <div class="report-mapping-empty-body">No screenshot is currently available. New breach or tracking data will
-        appear here once detected.</div>
+    <div *ngIf="isImageError" class="text-sm text-[var(--color-text4)]">
+      <div class="font-semibold">Resource not found!</div>
+      <div>No screenshot is currently available. New breach or tracking data will appear here once detected.</div>
     </div>
-    <img (error)="onImageError()" (load)="onImageLoad()" *ngIf="imageSrc && !isImageError" [src]="imageSrc" alt="Screenshot Preview" class="search__result-preview" />
+    <img (error)="onImageError()" (load)="onImageLoad()" *ngIf="imageSrc && !isImageError" [src]="imageSrc" alt="Screenshot Preview" class="mt-3 w-full rounded-lg border border-[var(--color-border)]" />
   </div>
 </div>
 
 <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 <app-report-mapping></app-report-mapping>
-<app-chat-widget [reportText]="resultItem?.m_content"
-  *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>
+<app-chat-widget [reportText]="resultItem?.m_content" *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>

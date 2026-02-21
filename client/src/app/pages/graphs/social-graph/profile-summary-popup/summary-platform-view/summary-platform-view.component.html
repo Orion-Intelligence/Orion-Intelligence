@@ -1,6 +1,6 @@
 <ng-container *ngIf="platform() as p">
   <div class="flex items-start gap-4 mb-4">
-    <div [socialMapperPlatformBg]="p.platform" class="social-mapper-platform-icon rounded-lg flex-shrink-0 flex items-center justify-center text-4xl font-bold text-white w-16 h-16 p-3">
+    <div [socialMapperPlatformBg]="p.platform" class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg border border-[#64748b] bg-[#475569] p-3 text-4xl font-bold text-white shadow-[inset_0_0_0_1px_#64748b]">
       <app-social-icon [platformName]="p.platform"></app-social-icon>
     </div>
     <div class="flex-grow">
@@ -30,8 +30,9 @@
   <p *ngIf="p.description" class="text-slate-400 text-sm mb-4">{{ p.description }}</p>
 
   <div class="space-y-3">
-    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-      <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+    <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+      <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+        <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
         <span>Profile Details</span>
         <button *ngIf="p.profileDetails !== undefined" (click)="$event.preventDefault(); fetchProfile.emit(p)" [disabled]="isScanInProgress() || fetchingState.profile()[getPlatformUniqueKey(p)]" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 bg-slate-700/60 border border-slate-600/80 hover:bg-slate-600/80 hover:border-slate-500 hover:text-slate-100 transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh profile details">
           <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="fetchingState.profile()[getPlatformUniqueKey(p)]"></i>
@@ -66,8 +67,9 @@
       </div>
     </details>
 
-    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-      <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+    <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+      <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+        <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
         <span>Recent Posts</span>
         <button *ngIf="p.posts !== undefined" (click)="$event.preventDefault(); fetchPosts.emit(p)" [disabled]="isScanInProgress() || fetchingState.posts()[getPlatformUniqueKey(p)]" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 bg-slate-700/60 border border-slate-600/80 hover:bg-slate-600/80 hover:border-slate-500 hover:text-slate-100 transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh posts">
           <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="fetchingState.posts()[getPlatformUniqueKey(p)]"></i>
@@ -93,7 +95,7 @@
             <p class="mt-1 text-sm">No posts found for this account.</p>
           </div>
           <div *ngIf="p.posts && p.posts.length > 0" class="space-y-3">
-            <div *ngFor="let post of displayPosts()" class="bg-slate-700/50 p-3 rounded-lg text-sm animate-list-item-in">
+            <div *ngFor="let post of displayPosts()" class="rounded-lg bg-slate-700/50 p-3 text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
               <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
               <div class="flex items-center justify-between text-slate-400">
                 <div class="flex items-center gap-4">
@@ -111,8 +113,9 @@
       </div>
     </details>
 
-    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-      <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+    <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+      <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+        <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
         <span>Followers</span>
         <button *ngIf="p.followers_list !== undefined" (click)="$event.preventDefault(); fetchFollowers.emit(p)" [disabled]="isScanInProgress() || fetchingState.followers()[getPlatformUniqueKey(p)]" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 bg-slate-700/60 border border-slate-600/80 hover:bg-slate-600/80 hover:border-slate-500 hover:text-slate-100 transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Followers">
           <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="fetchingState.followers()[getPlatformUniqueKey(p)]"></i>
@@ -138,8 +141,8 @@
             <p class="mt-1 text-sm">No followers found or data is private.</p>
           </div>
           <ng-template #followersList>
-            <div class="max-h-60 overflow-y-auto social-mapper-custom-scrollbar pr-2 space-y-1">
-              <div *ngFor="let follower of displayFollowers()" class="bg-slate-700/50 px-3 py-1.5 rounded-md text-sm text-slate-300 font-mono animate-list-item-in">{{ follower }}</div>
+            <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
+              <div *ngFor="let follower of displayFollowers()" class="rounded-md bg-slate-700/50 px-3 py-1.5 text-sm font-mono text-slate-300 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">{{ follower }}</div>
             </div>
             <button *ngIf="displayFollowers().length < (p.followers_list || []).length" (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-wait">
               {{ isLoadingMoreFollowers() ? 'Loading...' : 'Load More' }}
@@ -149,8 +152,9 @@
       </div>
     </details>
 
-    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-      <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+    <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+      <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+        <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
         <span>Following</span>
         <button *ngIf="p.following_list !== undefined" (click)="$event.preventDefault(); fetchFollowing.emit(p)" [disabled]="isScanInProgress() || fetchingState.following()[getPlatformUniqueKey(p)]" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 bg-slate-700/60 border border-slate-600/80 hover:bg-slate-600/80 hover:border-slate-500 hover:text-slate-100 transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Following">
           <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="fetchingState.following()[getPlatformUniqueKey(p)]"></i>
@@ -176,8 +180,8 @@
             <p class="mt-1 text-sm">Not following anyone or data is private.</p>
           </div>
           <ng-template #followingList>
-            <div class="max-h-60 overflow-y-auto social-mapper-custom-scrollbar pr-2 space-y-1">
-              <div *ngFor="let user of displayFollowing()" class="bg-slate-700/50 px-3 py-1.5 rounded-md text-sm text-slate-300 font-mono animate-list-item-in">{{ user }}</div>
+            <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
+              <div *ngFor="let user of displayFollowing()" class="rounded-md bg-slate-700/50 px-3 py-1.5 text-sm font-mono text-slate-300 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">{{ user }}</div>
             </div>
             <button *ngIf="displayFollowing().length < (p.following_list || []).length" (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-wait">
               {{ isLoadingMoreFollowing() ? 'Loading...' : 'Load More' }}
@@ -187,8 +191,9 @@
       </div>
     </details>
 
-    <details class="bg-slate-900/30 rounded-lg border border-slate-700" open>
-      <summary class="flex justify-between items-center p-3 text-sm font-semibold text-slate-300 cursor-pointer social-mapper-list-item-custom">
+    <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+      <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+        <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
         <span>Associated Images</span>
         <button *ngIf="p.images !== undefined" (click)="$event.preventDefault(); fetchPlatformImages.emit(p)" [disabled]="isScanInProgress() || fetchingState.platformImages()[getPlatformUniqueKey(p)]" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 bg-slate-700/60 border border-slate-600/80 hover:bg-slate-600/80 hover:border-slate-500 hover:text-slate-100 transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Images">
           <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="fetchingState.platformImages()[getPlatformUniqueKey(p)]"></i>
@@ -215,9 +220,9 @@
           </div>
 
           <ng-container *ngIf="p.images as imageList">
-            <div *ngIf="imageList.length > 0" class="max-h-80 overflow-y-auto social-mapper-custom-scrollbar pr-1">
+            <div *ngIf="imageList.length > 0" class="max-h-80 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                <div *ngFor="let image of displayImages()" class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors animate-list-item-in">
+                <div *ngFor="let image of displayImages()" class="group relative overflow-hidden rounded-md border border-slate-700 transition-colors hover:border-indigo-500 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                   <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
                     <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
                   </a>

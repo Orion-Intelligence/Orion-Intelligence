@@ -1,22 +1,19 @@
-<div *ngIf="maxPages>1" class="pagination disable-highlight">
-  <div class="pagination_search-container">
-
-    <button (click)="currentPage !== 1 && onPageChange(1)" [class.disabled]="currentPage === 1" class="pagination_navigation">
+<div *ngIf="maxPages>1" class="mt-4">
+  <div class="flex items-center justify-center gap-2">
+    <button (click)="currentPage !== 1 && onPageChange(1)" [disabled]="currentPage === 1" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition disabled:cursor-not-allowed disabled:opacity-50">
       <img alt="nav-first" height="16" ngSrc="../../../../assets/images/shared/theme/nav-first.svg" width="16">
     </button>
 
-    <button (click)="currentPage !== 1 && onPageChange(currentPage - 1)" [class.disabled]="currentPage === 1" class="pagination_navigation gc-clear-selection">
+    <button (click)="currentPage !== 1 && onPageChange(currentPage - 1)" [disabled]="currentPage === 1" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition disabled:cursor-not-allowed disabled:opacity-50">
       <img alt="nav-prev" height="16" ngSrc="../../../../assets/images/shared/theme/nav-prev.svg" width="16">
     </button>
 
-    <button (click)="onPageChange(page)" *ngFor="let page of getPageRange()" [class.search__navigation--focus]="page === currentPage" [class.active]="page === currentPage" class="pagination_search-navigation gc-clear-selection">
+    <button (click)="onPageChange(page)" *ngFor="let page of getPageRange()" [ngClass]="page === currentPage ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)]'" class="h-9 min-w-[36px] rounded-md border border-[var(--color-border)] px-3 text-sm font-semibold transition">
       {{ page }}
     </button>
 
-    <button (click)="currentPage < maxPages && onPageChange(currentPage + 1)" [class.disabled]="currentPage >= maxPages"
-      class="pagination_navigation gc-clear-selection">
+    <button (click)="currentPage < maxPages && onPageChange(currentPage + 1)" [disabled]="currentPage >= maxPages" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition disabled:cursor-not-allowed disabled:opacity-50">
       <img alt="nav-next" height="16" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="16">
     </button>
-
   </div>
 </div>

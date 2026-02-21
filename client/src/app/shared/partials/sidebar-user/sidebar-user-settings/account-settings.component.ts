@@ -1,36 +1,30 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
 import { ApiService } from '../../../services/api.service';
 import { userMetaData, userSessionData } from '../../../model/company-profile/node.model';
 import { UserImagePickerComponent } from "./user-image-picker/user-image-picker.component";
 import { AppStorageService } from '../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../services/core/app/app.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { LicenseName } from '../../../model/licenses/license.rules';
-import { getTenantLocationDisplay, toggleEditState } from './sidebar-settings.util';
+import { getTenantLocationDisplay } from './sidebar-settings.util';
+
 @Component({
   selector: 'app-sidebar-profile-settings',
-  imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './account-settings.component.html'
 })
 export class AccountSettingsComponent implements OnInit {
-  protected readonly JSON = JSON;
-
-  isAccountSectionOpen = true;
-  is2FAOpen = true;
-  isThemeOpen = true;
-  isEditing = false;
   userSessionData: userSessionData;
   twoFactorEnabled = true;
   isDarkMode = true;
-  userId: string = '';
+  editableUsername = '';
 
-  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
@@ -38,6 +32,7 @@ export class AccountSettingsComponent implements OnInit {
     if (this.userSessionData) {
       this.setItemsFromPreferences();
       this.twoFactorEnabled = this.userSessionData.user.twofa_enabled;
+      this.editableUsername = this.userSessionData.user.username || '';
     }
   }
 
@@ -54,37 +49,16 @@ export class AccountSettingsComponent implements OnInit {
         this.isDarkMode = false;
       }
     }
-    this.userId = this.userSessionData?.user.preferences?.["userId"];
   }
 
   isAdmin(): boolean {
     return this.appService.userSessionData().user.role === 'admin';
   }
 
-  isMember(): boolean {
-    return this.appService.userSessionData().user.role == 'member';
-  }
-
   applyTheme() {
     const body = document.body;
     body.classList.remove('light-theme', 'dark-theme');
     body.classList.add(this.isDarkMode ? 'dark-theme' : 'light-theme');
-  }
-
-  toggleSection(section: string) {
-    if (section === 'profile') {
-      this.isAccountSectionOpen = !this.isAccountSectionOpen;
-    }
-    if (section === 'twoFA') {
-      this.is2FAOpen = !this.is2FAOpen;
-    }
-    if (section === 'theme') {
-      this.isThemeOpen = !this.isThemeOpen;
-    }
-  }
-
-  toggleEdit(event: Event) {
-    this.isEditing = toggleEditState(event, this.isEditing, () => this.updateUser());
   }
 
   toggleTheme() {
@@ -109,7 +83,7 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   toggleTwoFa() {
-    this.userSessionData.user.twofa_enabled = !this.userSessionData.user.twofa_enabled;
+    this.userSessionData.user.twofa_enabled = this.twoFactorEnabled;
     this.updateUser();
   }
 
@@ -118,9 +92,10 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   updateUser() {
-    let route = "update/current/user";
+    const route = "update/current/user";
+    this.userSessionData.user.username = this.editableUsername.trim() || this.userSessionData.user.username;
     const userMeta: userMetaData = {
-      username: this.appService.userSessionData().user.username,
+      username: this.userSessionData.user.username,
       twofa_enabled: this.userSessionData.user.twofa_enabled,
       preferences: this.userSessionData.user.preferences,
     };
@@ -135,10 +110,15 @@ export class AccountSettingsComponent implements OnInit {
   updateUserResource(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.apiService.put<any>('user/image', formData).subscribe(res => {
-      if (res?.image) {
-        this.appService.userSessionData().user.image =
-                    `/api/s/static/user/${res.image}`;
+    return this.apiService.put<any>('user/image', formData).subscribe({
+      next: (res) => {
+        if (res?.image) {
+          this.appService.userSessionData().user.image = `/api/s/static/user/${res.image}`;
+        }
+      },
+      error: (err) => {
+        const message = err?.error?.detail || 'Failed to upload image';
+        this.messageNotificationService.show(message);
       }
     });
   }
@@ -153,7 +133,11 @@ export class AccountSettingsComponent implements OnInit {
     if (!user?.license?.length) {
       return '';
     }
-    const names = user.license.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
-    return names;
+    return user.license.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
+  }
+
+  get displayVersion(): string {
+    const version = this.appService.getConfig()?.appSettings?.version || '';
+    return version.replaceAll('_', '.');
   }
 }

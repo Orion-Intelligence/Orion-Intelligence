@@ -1,66 +1,64 @@
-<div class="add-alert-wrapper add-tenant_wrapper" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
-  <div class="add-alert-container add-tenant_container" @popupAnimation>
-    <div class="add-alert-header add-tenant_header">
-      <div class="add-alert-heading add-tenant_heading">{{ heading }}</div>
-      <button class="add-alert-close add-tenant_close-btn" (click)="cancleAlert(false)">×</button>
+<div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
+  <div class="relative w-full max-w-[1000px] max-h-[800px] overflow-y-auto rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[35px] font-[Inter] text-[var(--color-text1)] shadow-[0_0_30px_rgba(0,0,0,0.3)]" @popupAnimation>
+    <div>
+      <div class="text-[24px] font-semibold">{{ heading }}</div>
+      <button class="absolute right-[20px] top-[20px] text-[28px] text-[#ccc] hover:text-white" (click)="cancleAlert(false)">×</button>
     </div>
 
-    <form class="add-alert-form add-tenant_form">
-      <div class="add-alert-description">{{ description }}</div>
+    <form>
+      <div class="text-[12px] font-normal text-[var(--color-text2)]">{{ description }}</div>
 
-      <label class="add-alert-field-title add-tenant_label">Selected Type</label>
-      <div class="dropdown">
-        <button class="btn add-alert-input add-tenant_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" type="button" disabled>
-                {{ decodeURIComponent(router.url.split('/').pop() || '') }}
-        </button>
-      </div>
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Selected Type</label>
+      <button class="flex w-full items-center justify-between rounded-[8px] border border-[#2C3A4A] bg-white px-[14px] py-[12px] text-left text-[14px] text-[#172235] opacity-80" type="button" disabled>
+        {{ decodeURIComponent(router.url.split('/').pop() || '') }}
+      </button>
 
-      <label class="add-alert-field-title add-tenant_label">Title</label>
-      <input [(ngModel)]="alert.title" class="add-alert-input add-tenant_input" type="text" placeholder="Enter title" name="title" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Title</label>
+      <input [(ngModel)]="alert.title" class="w-full rounded-[8px] border border-[#2C3A4A] bg-white px-[14px] py-[12px] text-[14px] text-[#172235] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter title" name="title" />
 
-      <label class="add-alert-field-title add-tenant_label">Description</label>
-      <textarea [(ngModel)]="alert.description" class="add-alert-input add-tenant_input add-alert-textarea" placeholder="Enter description" name="alert_description" rows="4"></textarea>
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Description</label>
+      <textarea [(ngModel)]="alert.description" class="min-h-[110px] w-full resize-y rounded-[8px] border border-[#2C3A4A] bg-white px-[14px] py-[12px] text-[14px] text-[#172235] outline-none placeholder:text-[#57718D]" placeholder="Enter description" name="alert_description" rows="4"></textarea>
 
-      <label class="add-alert-field-title add-tenant_label">Select IOC Type</label>
-      <div class="dropdown">
-        <button aria-expanded="false" class="btn dropdown-toggle add-alert-input add-tenant_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="iocTypeDropdown" type="button">
-          {{ getIOCTypeLabel(alert.ioc_type!) }}
-        </button>
-
-        <ul [attr.aria-labelledby]="'iocTypeDropdown'" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3 dropdown-scroll">
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Select IOC Type</label>
+      <details class="relative">
+        <summary class="flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[#2C3A4A] bg-white px-[14px] py-[12px] text-[14px] text-[#172235] [&::-webkit-details-marker]:hidden">
+          <span>{{ getIOCTypeLabel(alert.ioc_type!) }}</span>
+          <i class="bi bi-chevron-down text-[12px] text-[#57718D]"></i>
+        </summary>
+        <ul class="absolute left-0 right-0 z-10 mt-2 max-h-[250px] overflow-y-auto rounded-[12px] border border-[var(--color-border)] bg-white p-1 shadow-[0_6px_16px_rgba(0,0,0,0.15)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#888] [&::-webkit-scrollbar-thumb:hover]:bg-[#555]">
           <ng-container *ngFor="let item of allowedIocTypes; let last = last">
-            <li class="p-0">
-              <button type="button" class="dropdown-item py-0 d-flex align-items-center justify-content-between pt-2 pb-2" (click)="onIOCTypeChange(item.key)" [class.active]="alert.ioc_type === item.key">
+            <li>
+              <button type="button" class="flex w-full items-center justify-between rounded-[6px] px-[10px] py-[8px] text-[14px] text-[#172235] hover:bg-[#f2f4f7]" (click)="onIOCTypeChange(item.key)" [class]="alert.ioc_type === item.key ? 'bg-[var(--color-blue-820)] text-[var(--color-text1)]' : ''">
                 <span>{{ item.title }}</span>
                 <span *ngIf="alert.ioc_type === item.key">✓</span>
               </button>
             </li>
             <ng-container *ngIf="!last">
-              <li class="dropdown-divider m-0 mx-3"></li>
+              <li><div class="mx-3 h-px bg-[var(--color-border)]"></div></li>
             </ng-container>
           </ng-container>
         </ul>
-      </div>
+      </details>
 
-      <label class="add-alert-field-title add-tenant_label">Source</label>
-      <input [(ngModel)]="alert.source" class="add-alert-input add-tenant_input" type="text" placeholder="Enter source" name="source" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Source</label>
+      <input [(ngModel)]="alert.source" class="w-full rounded-[8px] border border-[#2C3A4A] bg-white px-[14px] py-[12px] text-[14px] text-[#172235] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter source" name="source" />
 
-      <label class="add-alert-field-title add-tenant_label">URL</label>
-      <input [(ngModel)]="alert.url" class="add-alert-input add-tenant_input" type="text" placeholder="Enter url" name="url" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">URL</label>
+      <input [(ngModel)]="alert.url" class="w-full rounded-[8px] border border-[#2C3A4A] bg-white px-[14px] py-[12px] text-[14px] text-[#172235] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter url" name="url" />
 
-      <label class="add-alert-field-title add-tenant_label">IOC Value</label>
-      <input [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="add-alert-input add-tenant_input" type="text" placeholder="Enter IOC value" name="ioc_value" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">IOC Value</label>
+      <input [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="w-full rounded-[8px] border border-[#2C3A4A] bg-white px-[14px] py-[12px] text-[14px] text-[#172235] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter IOC value" name="ioc_value" />
     </form>
-    <div *ngIf="formError" class="add-alert-form-error w-100">
-        <div class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm text-center w-100">
-          <i class="bi bi-exclamation-diamond-fill me-2"></i>
-          {{ formError }}
-        </div>
+    <div *ngIf="formError" class="mt-[8px] text-center">
+      <div class="inline-block w-full rounded-lg bg-[#dc3545] bg-opacity-75 px-3 py-2 text-center text-white shadow-sm">
+        <i class="bi bi-exclamation-diamond-fill mr-2"></i>
+        {{ formError }}
+      </div>
     </div>
 
-    <div class="add-alert-footer add-tenant_footer">
-      <button class="add-alert-btn cancel add-tenant_btn-outline" (click)="cancleAlert(false)">Cancel</button>
-      <button class="add-alert-btn add add-tenant_btn-primary" (click)="saveAlert()">
+    <div class="mt-[30px] flex items-center justify-between gap-[15px]">
+      <button class="rounded-[8px] border border-[#A0B8D1] bg-transparent px-[24px] py-[10px] text-[14px] text-[var(--color-text1)]" (click)="cancleAlert(false)">Cancel</button>
+      <button class="rounded-[8px] bg-[#57A5EB] px-[24px] py-[10px] text-[14px] text-[#373637]" (click)="saveAlert()">
         {{ edit ? 'Save Alert' : 'Add Alert' }}
       </button>
     </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
 import { ReportMappingComponent } from '../../report-mapping/report-mapping.component';
@@ -20,6 +20,7 @@ import { TooltipDirective } from '../../../directive/tooltip-directive.directive
     ReportHeaderComponent,
     ResultSectionComponent,
     ResultListComponent,
+    NgClass,
     TooltipDirective
   ]
 })

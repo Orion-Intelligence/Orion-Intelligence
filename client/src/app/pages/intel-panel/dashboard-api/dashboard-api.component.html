@@ -1,354 +1,271 @@
-<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" class="default-input-container default-input-container-api" enctype="multipart/form-data" method="GET">
-  <div class="row dashboard__api-search-input-div dashboard__api-search-input-div-extended" [ngClass]="{ 'email-search': apiType === 'user' || apiType === 'crypto', 'dashboard__api-search-input-div-extended': (apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto') }">
-    <div [ngClass]="(apiType === 'social' || apiType === 'cracked'|| apiType === 'software' || apiType === 'crypto') ? 'col-xl-9 input-api-padding-right col-12 input-container' : 'col-xl-5 col-12 input-container'">
-      <div class="input-group default-input-sub-container">
-        <div class="btn btn-primary default-input-button default-input-button-light">
+<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" enctype="multipart/form-data" method="GET" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px]">
+  <div
+    class="flex w-full flex-wrap items-start gap-[12px] rounded-[10px] bg-[#4EA2F170] pr-[46px] pt-[8px] max-[1100px]:pr-[20px]"
+    [ngClass]="{ 'pr-[60px] w-[550px]': (apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'), 'pr-[60px]': apiType === 'user' || apiType === 'crypto' }">
+
+    <div class="w-full xl:w-9/12" [ngClass]="(apiType === 'social' || apiType === 'cracked'|| apiType === 'software' || apiType === 'crypto') ? 'xl:w-9/12' : 'xl:w-5/12'">
+      <div class="flex h-[42px] w-full">
+        <div class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white">
           <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20">
         </div>
-        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input" [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked' || apiType === 'crypto'}" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))" [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="apiType === 'crypto' ? true : ((apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim())))">
-        <input type="hidden" value="1"> <span class="input-group-text"></span>
+        <input
+          [(ngModel)]="q1"
+          autocapitalize="none"
+          autocomplete="off"
+          class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
+          [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'cracked' || apiType === 'crypto' }"
+          maxlength="150"
+          [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))"
+          [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))"
+          [type]="apiType === 'cracked' ? 'url' : 'text'"
+          [required]="apiType === 'crypto' ? true : ((apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim())))">
+        <input type="hidden" value="1">
+        <span class="w-[1px] border-y border-r border-[var(--color-border)]"></span>
       </div>
     </div>
 
-    <div class="col-xl-5 col-12 mt-lg-0 mt-2 input-container" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software' && apiType !== 'crypto'">
-      <div class="input-group default-input-sub-container">
-        <div class="btn btn-primary default-input-button default-input-button-light">
+    <div class="w-full xl:w-5/12 mt-[8px] xl:mt-0" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software' && apiType !== 'crypto'">
+      <div class="flex h-[42px] w-full">
+        <div class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white">
           <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20">
         </div>
-        <input [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="form-control default-input" email maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email" [required]="apiType === 'email' ? true : !(q1 && q1.trim())"> <input type="hidden" value="1"> <span class="input-group-text"></span>
+        <input
+          [(ngModel)]="q2"
+          autocapitalize="none"
+          autocomplete="off"
+          class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
+          email
+          maxlength="150"
+          name="q2"
+          [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'"
+          type="email"
+          [required]="apiType === 'email' ? true : !(q1 && q1.trim())">
+        <input type="hidden" value="1">
+        <span class="w-[1px] border-y border-r border-[var(--color-border)]"></span>
       </div>
     </div>
 
-    <div class="col-2 mt-lg-0 mt-2 dash-search-button-container">
-      <button [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="dash-search-button">Search</button>
+    <div class="w-full xl:w-2/12 mt-[8px] xl:mt-0">
+      <button
+        [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)"
+        class="h-[41px] w-full rounded-[8px] bg-[linear-gradient(92.32deg,#4EA2F1_2.58%,#2C7AC5_66.77%,#1E6CB7_130.97%)] text-[14px] font-normal text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40 hover:opacity-100">
+        Search
+      </button>
     </div>
   </div>
 </form>
 
 <ng-container *ngIf="query_triggered && loading">
-  <div class="scan_progress-top" *ngIf="progress < 100">
-    <div class="scan_progress-text">{{ currentStep || 'Scanning...' }} ({{ progress }}%)</div>
-    <div class="scan_progress-bar">
-      <div class="scan_progress-fill" [style.width.%]="progress"></div>
+  <div class="mt-[12px] ml-[32px] max-w-[720px]" *ngIf="progress < 100">
+    <div class="mb-[6px] text-[12px] text-[var(--color-text1)]">{{ currentStep || 'Scanning...' }} ({{ progress }}%)</div>
+    <div class="h-[8px] w-full rounded-full bg-[var(--color-progress)]">
+      <div class="h-[8px] rounded-full bg-[var(--color-blue-640)]" [style.width.%]="progress"></div>
     </div>
   </div>
 </ng-container>
 
-<div class="ml-lg-4 dash-api_hint">
-  <div class="default-notification-banner default-notification-banner-stealer">
-    <span><img alt="Info Icon" class="default-notification-banner-icon" src="/client/src/assets/images/shared/hint.svg"/><span>{{ apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '' }}</span></span>
+<div class="ml-[30px] mt-[10px]">
+  <div class="w-[calc(100%-60px)] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[20px] py-[12px] text-[13px] text-[var(--color-text1)]">
+    <span>
+      <img alt="Info Icon" class="mr-[8px] inline-block" src="/client/src/assets/images/shared/hint.svg"/>
+      <span>{{ apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '' }}</span>
+    </span>
   </div>
 </div>
 
-<div class="file-scan-container" *ngIf="query_triggered && !loading && hasResults" @fadeInDashboardItem>
-  <section class="search__result-detail-ioc search__result-detail-extended ioc-report-container">
-    <div class="ioc-report-hero" @fadeInDashboardItem>
-      <div class="ioc-report-hero-title">Search Results for <span class="ioc-report-hero-sep">〡</span><span class="ioc-report-hero-file">{{ (apiType === 'user' ? (displayQ1 || q1) : (q1 || displayQ1)) || 'query' }}</span></div>
-      <div class="ioc-report-hero-sub">
-        <span class="ioc-report-pill status-success"><i class="bi bi-check-circle-fill"></i> success </span>
-        <button type="button" class="ioc-report-pill" *ngIf="apiType === 'crypto' && txDrilldown" (click)="backFromTx()"><i class="bi bi-arrow-left"></i> back</button>
+<div class="mt-[15px] mx-[32px]" *ngIf="query_triggered && !loading && hasResults" @fadeInDashboardItem>
+  <section class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[15px] shadow-[0_4px_8px_rgba(0,0,0,0.1)]">
+    <div class="flex items-center justify-between" @fadeInDashboardItem>
+      <div class="text-[16px] font-semibold text-[var(--color-text1)]">Search Results for <span class="mx-[6px]">〡</span><span class="font-mono">{{ (apiType === 'user' ? (displayQ1 || q1) : (q1 || displayQ1)) || 'query' }}</span></div>
+      <div class="flex items-center gap-[8px]">
+        <span class="inline-flex items-center gap-[6px] rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(46,204,113,0.12)] px-[10px] py-[2px] text-[12px] text-[var(--color-text1)]">
+          <i class="bi bi-check-circle-fill"></i> success
+        </span>
+        <button type="button" class="inline-flex items-center gap-[6px] rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] px-[10px] py-[2px] text-[12px] text-[var(--color-text1)]" *ngIf="apiType === 'crypto' && txDrilldown" (click)="backFromTx()">
+          <i class="bi bi-arrow-left"></i> back
+        </button>
       </div>
     </div>
 
-    <div class="ioc-report-summary-grid" @fadeInDashboardItem>
-      <div class="ioc-report-stat stat-0">
-        <div class="ioc-report-stat-icon"><i class="bi bi-diagram-3"></i></div>
-        <div class="ioc-report-stat-body">
-          <div class="ioc-report-stat-label">API Type</div>
-          <div class="ioc-report-stat-value">{{ apiType }}</div>
-        </div>
+    <div class="mt-[12px] grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4" @fadeInDashboardItem>
+      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]">
+        <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-diagram-3"></i> API Type</div>
+        <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ apiType }}</div>
       </div>
-
-      <div class="ioc-report-stat stat-1">
-        <div class="ioc-report-stat-icon"><i class="bi bi-shield-exclamation"></i></div>
-        <div class="ioc-report-stat-body">
-          <div class="ioc-report-stat-label">Total Results</div>
-          <div class="ioc-report-stat-value">{{ apiType === 'crypto' ? ((cryptoResult?.recent_transactions?.length || 0) || 1) : cardsData.length }}</div>
-        </div>
+      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]">
+        <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-shield-exclamation"></i> Total Results</div>
+        <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? ((cryptoResult?.recent_transactions?.length || 0) || 1) : cardsData.length }}</div>
       </div>
-
-      <div class="ioc-report-stat stat-2">
-        <div class="ioc-report-stat-icon"><i class="bi bi-person-badge"></i></div>
-        <div class="ioc-report-stat-body">
-          <div class="ioc-report-stat-label">Query 1</div>
-          <div class="ioc-report-stat-value mono">{{ (displayQ1 || q1) || 'not found' }}</div>
-        </div>
+      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]">
+        <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-person-badge"></i> Query 1</div>
+        <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ1 || q1) || 'not found' }}</div>
       </div>
-
-      <div class="ioc-report-stat stat-3" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
-        <div class="ioc-report-stat-icon"><i class="bi bi-envelope"></i></div>
-        <div class="ioc-report-stat-body">
-          <div class="ioc-report-stat-label">Query 2</div>
-          <div class="ioc-report-stat-value mono">{{ (displayQ2 || q2) || 'not found' }}</div>
-        </div>
+      <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
+        <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-envelope"></i> Query 2</div>
+        <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ2 || q2) || 'not found' }}</div>
       </div>
     </div>
 
-    <section class="ioc-report-findings">
+    <section class="mt-[16px] space-y-[16px]">
       <ng-container *ngIf="apiType === 'crypto'; else nonCryptoSwitch">
         <ng-container *ngIf="cryptoResult as r">
           <ng-container *ngIf="(r?.query_type === 'transaction_id' || r?.txid); else cryptoWalletView">
-            <div class="ioc-report-category" @fadeInDashboardItem>
-              <div class="ioc-report-category-header">
-                <div class="ioc-report-category-left">
-                  <div class="ioc-report-category-name">{{ r?.detected_network || r?.network || 'crypto' }}</div>
-                  <div class="ioc-report-category-count">{{ r?.txid ? '1 Transaction' : 'not available' }}</div>
+            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" @fadeInDashboardItem>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ r?.detected_network || r?.network || 'crypto' }}</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ r?.txid ? '1 Transaction' : 'not available' }}</div>
                 </div>
               </div>
 
-              <div class="ioc-report-findings-list">
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.txid || (displayQ2 || q2) || 'not found' }}</div>
-                    <div class="ioc-report-finding-desc">TXID</div>
+              <div class="mt-[12px] space-y-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">TXID</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.txid || (displayQ2 || q2) || 'not found' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">TX</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">TX</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value">{{ r?.network || r?.detected_network || 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Network</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Network</div>
+                    <div class="text-[13px] text-[var(--color-text1)]">{{ r?.network || r?.detected_network || 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Network</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Network</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value">{{ r?.status_info?.confirmed === true ? 'true' : (r?.status_info?.confirmed === false ? 'false' : 'not available') }}</div>
-                    <div class="ioc-report-finding-desc">Confirmed</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Confirmed</div>
+                    <div class="text-[13px] text-[var(--color-text1)]">{{ r?.status_info?.confirmed === true ? 'true' : (r?.status_info?.confirmed === false ? 'false' : 'not available') }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Status</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Status</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.status_info?.block_height ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Block Height</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Block Height</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.status_info?.block_height ?? 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Block</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Block</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.status_info?.confirmations ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Confirmations</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Confirmations</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.status_info?.confirmations ?? 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Block</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Block</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.amounts?.total_input_btc ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Total Input (BTC)</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Total Input (BTC)</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.amounts?.total_input_btc ?? 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Amounts</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Amounts</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.amounts?.total_output_btc ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Total Output (BTC)</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Total Output (BTC)</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.amounts?.total_output_btc ?? 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Amounts</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Amounts</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.amounts?.fee_btc ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Fee (BTC)</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Fee (BTC)</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.amounts?.fee_btc ?? 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Fee</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Fee</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.transaction_details?.size ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Size</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Size</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.transaction_details?.size ?? 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Details</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Details</span>
                 </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.transaction_details?.weight ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Weight</div>
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Weight</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.transaction_details?.weight ?? 'not available' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Details</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Details</span>
                 </div>
               </div>
             </div>
 
-            <div class="ioc-report-category" *ngIf="r?.inputs && r?.inputs.length > 0" @fadeInDashboardItem>
-              <div class="ioc-report-category-header">
-                <div class="ioc-report-category-left">
-                  <div class="ioc-report-category-name">Inputs</div>
-                  <div class="ioc-report-category-count">{{ r?.inputs.length }} Inputs</div>
+            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngIf="r?.inputs && r?.inputs.length > 0" @fadeInDashboardItem>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-[var(--color-text1)]">Inputs</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ r?.inputs.length }} Inputs</div>
                 </div>
               </div>
 
-              <div class="ioc-report-findings-list">
-                <div class="ioc-report-finding" *ngFor="let i of r?.inputs" @fadeInDashboardItem (click)="openAddr(i?.address)" style="cursor:pointer">
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ i?.address }}</div>
-                    <div class="ioc-report-finding-desc">Address ({{ i?.value_btc ?? 'not available' }} BTC)</div>
+              <div class="mt-[12px] space-y-[10px]">
+                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let i of r?.inputs" @fadeInDashboardItem (click)="openAddr(i?.address)">
+                  <div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ i?.address }}</div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Address ({{ i?.value_btc ?? 'not available' }} BTC)</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">IN</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">IN</span>
                 </div>
               </div>
             </div>
 
-            <div class="ioc-report-category" *ngIf="r?.outputs && r?.outputs.length > 0" @fadeInDashboardItem>
-              <div class="ioc-report-category-header">
-                <div class="ioc-report-category-left">
-                  <div class="ioc-report-category-name">Outputs</div>
-                  <div class="ioc-report-category-count">{{ r?.outputs.length }} Outputs</div>
+            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngIf="r?.outputs && r?.outputs.length > 0" @fadeInDashboardItem>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-[var(--color-text1)]">Outputs</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ r?.outputs.length }} Outputs</div>
                 </div>
               </div>
 
-              <div class="ioc-report-findings-list">
-                <div class="ioc-report-finding" *ngFor="let o of r?.outputs" @fadeInDashboardItem (click)="openAddr(o?.address)" style="cursor:pointer">
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ o?.address }}</div>
-                    <div class="ioc-report-finding-desc">Address ({{ o?.value_btc ?? 'not available' }} BTC)</div>
+              <div class="mt-[12px] space-y-[10px]">
+                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let o of r?.outputs" @fadeInDashboardItem (click)="openAddr(o?.address)">
+                  <div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ o?.address }}</div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Address ({{ o?.value_btc ?? 'not available' }} BTC)</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">OUT</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">OUT</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngIf="r?.recent_transactions && r?.recent_transactions.length > 0" @fadeInDashboardItem>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-[var(--color-text1)]">Recent Transactions</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ r?.recent_transactions.length }} TX</div>
+                </div>
+              </div>
+
+              <div class="mt-[12px] space-y-[10px]">
+                <div class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let tx of r?.recent_transactions" @fadeInDashboardItem (click)="openTx(tx?.txid)">
+                  <div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ tx?.txid }}</div>
+                    <div class="text-[12px] text-[var(--color-text4)]">TXID</div>
+                  </div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">TX</span>
                 </div>
               </div>
             </div>
           </ng-container>
 
           <ng-template #cryptoWalletView>
-            <div class="ioc-report-category" @fadeInDashboardItem>
-              <div class="ioc-report-category-header">
-                <div class="ioc-report-category-left">
-                  <div class="ioc-report-category-name">{{ r?.network || 'crypto' }}</div>
-                  <div class="ioc-report-category-count">{{ (r?.recent_transactions?.length || 0) }} Transactions</div>
+            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" @fadeInDashboardItem>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-[var(--color-text1)]">Wallet</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ r?.network || r?.detected_network || 'crypto' }}</div>
                 </div>
               </div>
 
-              <div class="ioc-report-findings-list">
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.address || (displayQ1 || q1) || 'not found' }}</div>
-                    <div class="ioc-report-finding-desc">Wallet Address</div>
+              <div class="mt-[12px] space-y-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                  <div>
+                    <div class="text-[12px] text-[var(--color-text4)]">Address</div>
+                    <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.address || (displayQ1 || q1) || 'not found' }}</div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Wallet</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value">{{ r?.network || 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Network</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Network</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.balance?.confirmed ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Confirmed Balance</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Balance</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.balance?.unconfirmed ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Unconfirmed Balance</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Balance</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.transaction_count?.total ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Total Transactions</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">TX</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.transaction_count?.received ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Received</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">TX</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.transaction_count?.sent ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Sent</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">TX</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.total_received ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Total Received</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Stats</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.total_sent ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Total Sent</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Stats</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.statistics?.first_seen ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">First Seen</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Stats</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.statistics?.last_seen ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Last Seen</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Stats</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ r?.statistics?.avg_transaction_value ?? 'not available' }}</div>
-                    <div class="ioc-report-finding-desc">Avg Transaction Value</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Stats</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value">{{ r?.statistics?.is_active === true ? 'true' : (r?.statistics?.is_active === false ? 'false' : 'not available') }}</div>
-                    <div class="ioc-report-finding-desc">Is Active</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Status</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="ioc-report-category" *ngIf="r?.recent_transactions && r?.recent_transactions.length > 0" @fadeInDashboardItem>
-              <div class="ioc-report-category-header">
-                <div class="ioc-report-category-left">
-                  <div class="ioc-report-category-name">Recent Transactions</div>
-                  <div class="ioc-report-category-count">{{ r?.recent_transactions.length }} TX</div>
-                </div>
-              </div>
-
-              <div class="ioc-report-findings-list">
-                <div class="ioc-report-finding" *ngFor="let tx of r?.recent_transactions" @fadeInDashboardItem (click)="openTx(tx?.txid)" style="cursor:pointer">
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ tx?.txid }}</div>
-                    <div class="ioc-report-finding-desc">TXID</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">TX</span></div>
+                  <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Wallet</span>
                 </div>
               </div>
             </div>
@@ -357,199 +274,215 @@
       </ng-container>
 
       <ng-template #nonCryptoSwitch>
-        <ng-container *ngIf="apiType === 'cracked' || apiType === 'software'; else nonCrackedSwitch">
-          <div class="ioc-report-category" *ngFor="let item of cardsData" @fadeInDashboardItem>
-            <div class="ioc-report-category-header">
-              <div class="ioc-report-category-left">
-                <div class="ioc-report-category-name">{{ item?.m_app_name }}</div>
-                <div class="ioc-report-category-count">{{ (item?.m_download_link?.length || 0) }} Links</div>
+        <ng-container *ngIf="apiType === 'cracked'; else nonCrackedSwitch">
+          <ng-container *ngIf="cardsData && cardsData.length > 0; else emptyResult">
+            <div class="space-y-[16px]" *ngFor="let item of cardsData" @fadeInDashboardItem>
+              <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_app_name }}</div>
+                    <div class="text-[12px] text-[var(--color-text4)]">{{ (item?.m_download_link?.length || 0) }} Links</div>
+                  </div>
+                </div>
+
+                <div class="mt-[12px] space-y-[10px]">
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Application URL</div>
+                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_app_url }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ apiType }}</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Package ID</div>
+                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_package_id }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Package</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Network</div>
+                      <div class="text-[13px] text-[var(--color-text1)]">{{ item?.m_network }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Network</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Version</div>
+                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_version }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Version</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let ct of item?.m_content_type">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Content Type</div>
+                      <div class="text-[13px] text-[var(--color-text1)]">{{ ct }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Type</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let d of item?.m_download_link">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Download Link</div>
+                      <div class="text-[13px] text-[var(--color-text1)]">
+                        <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="d" target="_blank" rel="noopener noreferrer" title="{{ d }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ d }}</span></a>
+                      </div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Download</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Download Links</div>
+                      <div class="text-[13px] text-[var(--color-text1)]">not available</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Download</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">APK Size</div>
+                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Size</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Latest Date</div>
+                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_latest_date }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Date</span>
+                  </div>
+                  <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngIf="item?.m_mod_features && (item?.m_mod_features + '').trim().length > 0">
+                    <div>
+                      <div class="text-[12px] text-[var(--color-text4)]">Mod Features</div>
+                      <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item?.m_mod_features }}</div>
+                    </div>
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Mod</span>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div class="ioc-report-findings-list">
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ item?.m_app_url }}</div>
-                  <div class="ioc-report-finding-desc">Application URL</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">{{ apiType }}</span></div>
-              </div>
-
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ item?.m_package_id }}</div>
-                  <div class="ioc-report-finding-desc">Package ID</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Package</span></div>
-              </div>
-
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value">{{ item?.m_network }}</div>
-                  <div class="ioc-report-finding-desc">Network</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Network</span></div>
-              </div>
-
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ item?.m_version }}</div>
-                  <div class="ioc-report-finding-desc">Version</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Version</span></div>
-              </div>
-
-              <div class="ioc-report-finding" *ngFor="let ct of item?.m_content_type" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value">{{ ct }}</div>
-                  <div class="ioc-report-finding-desc">Content Type</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Type</span></div>
-              </div>
-
-              <div class="ioc-report-finding" *ngFor="let d of item?.m_download_link" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value"><a class="card-link" [href]="d" target="_blank" rel="noopener noreferrer" title="{{ d }}"><span class="link-ico" aria-hidden="true">🔗</span><span class="link-text">{{ d }}</span></a></div>
-                  <div class="ioc-report-finding-desc">Download Link</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Download</span></div>
-              </div>
-
-              <div class="ioc-report-finding" *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value">not available</div>
-                  <div class="ioc-report-finding-desc">Download Links</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Download</span></div>
-              </div>
-
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}</div>
-                  <div class="ioc-report-finding-desc">APK Size</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Size</span></div>
-              </div>
-
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ item?.m_latest_date }}</div>
-                  <div class="ioc-report-finding-desc">Latest Date</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Date</span></div>
-              </div>
-
-              <div class="ioc-report-finding" *ngIf="item?.m_mod_features && (item?.m_mod_features + '').trim().length > 0" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ item?.m_mod_features }}</div>
-                  <div class="ioc-report-finding-desc">Mod Features</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Mod</span></div>
-              </div>
-            </div>
-          </div>
+          </ng-container>
         </ng-container>
 
         <ng-template #nonCrackedSwitch>
-          <ng-container *ngIf="apiType === 'social'; else nonSocialView">
-            <div class="ioc-report-category" *ngFor="let item of cardsData; let last = last" @fadeInDashboardItem>
-              <div class="ioc-report-category-header">
-                <div class="ioc-report-category-left">
-                  <div class="ioc-report-category-name">{{ item?.m_title }}</div>
-                  <div class="ioc-report-category-count">{{ ((item?.m_weblink?.length || 0) + (item?.m_dumplink?.length || 0)) }} Links</div>
+          <ng-container *ngIf="apiType === 'social'; else nonSocialSwitch">
+            <ng-container *ngIf="cardsData && cardsData.length > 0; else emptyResult">
+              <div class="space-y-[16px]" *ngFor="let item of cardsData; let last = last" @fadeInDashboardItem>
+                <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_title }}</div>
+                      <div class="text-[12px] text-[var(--color-text4)]">{{ ((item?.m_weblink?.length || 0) + (item?.m_dumplink?.length || 0)) }} Links</div>
+                    </div>
+                  </div>
+
+                  <div class="mt-[12px] space-y-[10px]">
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Profile URL</div>
+                        <div class="text-[13px] text-[var(--color-text1)]">
+                          <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="item?.m_url" target="_blank" rel="noopener" title="{{ item?.m_url }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ item?.m_url }}</span></a>
+                        </div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Profile</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Found On</div>
+                        <div class="text-[13px] text-[var(--color-text1)]">{{ item?.m_base_url }}</div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Source</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let w of item?.m_weblink">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Web Link</div>
+                        <div class="text-[13px] text-[var(--color-text1)]">
+                          <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="w" target="_blank" rel="noopener" title="{{ w }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ w }}</span></a>
+                        </div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Web</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let d of item?.m_dumplink">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Dump Link</div>
+                        <div class="text-[13px] text-[var(--color-text1)]">
+                          <a class="inline-flex items-center gap-[8px] rounded-[10px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[6px] text-[13px] text-white hover:bg-[rgba(255,255,255,0.05)]" [href]="d" target="_blank" rel="noopener" title="{{ d }}"><span aria-hidden="true">🔗</span><span class="truncate max-w-[760px]">{{ d }}</span></a>
+                        </div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Dump</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div class="ioc-report-findings-list">
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value"><a class="card-link" [href]="item?.m_url" target="_blank" rel="noopener" title="{{ item?.m_url }}"><span class="link-ico" aria-hidden="true">🔗</span><span class="link-text">{{ item?.m_url }}</span></a></div>
-                    <div class="ioc-report-finding-desc">Profile URL</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Profile</span></div>
-                </div>
-
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value">{{ item?.m_base_url }}</div>
-                    <div class="ioc-report-finding-desc">Found On</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Source</span></div>
-                </div>
-
-                <div class="ioc-report-finding" *ngFor="let w of item?.m_weblink" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value"><a class="card-link" [href]="w" target="_blank" rel="noopener" title="{{ w }}"><span class="link-ico" aria-hidden="true">🔗</span><span class="link-text">{{ w }}</span></a></div>
-                    <div class="ioc-report-finding-desc">Web Link</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Web</span></div>
-                </div>
-
-                <div class="ioc-report-finding" *ngFor="let d of item?.m_dumplink" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value"><a class="card-link" [href]="d" target="_blank" rel="noopener" title="{{ d }}"><span class="link-ico" aria-hidden="true">🔗</span><span class="link-text">{{ d }}</span></a></div>
-                    <div class="ioc-report-finding-desc">Dump Link</div>
-                  </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Dump</span></div>
-                </div>
-              </div>
-
-              <hr class="dashboard-header-divider card-divider" *ngIf="!last">
-            </div>
+            </ng-container>
           </ng-container>
-        </ng-template>
 
-        <ng-template #nonSocialView>
-          <div class="ioc-report-category" @fadeInDashboardItem>
-            <div class="ioc-report-category-header">
-              <div class="ioc-report-category-left">
-                <div class="ioc-report-category-name">{{ breachData?.m_url }}</div>
-                <div class="ioc-report-category-count">{{ breachData?.m_dumplink?.length || 0 }} Breaches</div>
-              </div>
-            </div>
-
-            <div class="ioc-report-findings-list">
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value">stolen</div>
-                  <div class="ioc-report-finding-desc">Content Type</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Status</span></div>
-              </div>
-
-              <div class="ioc-report-finding" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ displayQ1 && displayQ1.trim() !== '' ? displayQ1 : 'not found' }}</div>
-                  <div class="ioc-report-finding-desc">{{ apiType === 'user' ? 'Username' : 'Query 1' }}</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Query</span></div>
-              </div>
-
-              <ng-container *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
-                <div class="ioc-report-finding" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value mono">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</div>
-                    <div class="ioc-report-finding-desc">{{ apiType === 'user' ? 'Email Address' : 'Query 2' }}</div>
+          <ng-template #nonSocialSwitch>
+            <ng-container *ngIf="apiType === 'breach'; else nonBreachSwitch">
+              <ng-container *ngIf="breachData; else emptyResult">
+                <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" @fadeInDashboardItem>
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ breachData?.m_url }}</div>
+                      <div class="text-[12px] text-[var(--color-text4)]">{{ breachData?.m_dumplink?.length || 0 }} Breaches</div>
+                    </div>
                   </div>
-                  <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Query</span></div>
+
+                  <div class="mt-[12px] space-y-[10px]">
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Content Type</div>
+                        <div class="text-[13px] text-[var(--color-text1)]">stolen</div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Status</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">{{ $any(apiType) === 'user' ? 'Username' : 'Query 1' }}</div>
+                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ displayQ1 && displayQ1.trim() !== '' ? displayQ1 : 'not found' }}</div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Query</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngIf="$any(apiType) !== 'social' && $any(apiType) !== 'cracked' && $any(apiType) !== 'software'">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">{{ $any(apiType) === 'user' ? 'Email Address' : 'Query 2' }}</div>
+                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Query</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let item of breachData?.m_dumplink">
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Breach</div>
+                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ item }}</div>
+                      </div>
+                      <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Breach</span>
+                    </div>
+                  </div>
                 </div>
               </ng-container>
-
-              <div class="ioc-report-finding" *ngFor="let item of breachData?.m_dumplink" @fadeInDashboardItem>
-                <div class="ioc-report-finding-main">
-                  <div class="ioc-report-finding-value mono">{{ item }}</div>
-                  <div class="ioc-report-finding-desc">Breach</div>
-                </div>
-                <div class="ioc-report-finding-right"><span class="ioc-report-type-badge">Breach</span></div>
-              </div>
-            </div>
-          </div>
+            </ng-container>
+          </ng-template>
         </ng-template>
       </ng-template>
     </section>
   </section>
 </div>
 
-<div *ngIf="loading" @fadeInDashboardItem><app-loading-form></app-loading-form></div>
-<div *ngIf="query_triggered && !loading && !hasResults" @fadeInDashboardItem><app-empty-result></app-empty-result></div>
-<div *ngIf="!query_triggered && !loading && !hasResults" @fadeInDashboardItem><app-empty-query></app-empty-query></div>
+<ng-template #nonBreachSwitch>
+  <ng-container *ngIf="cardsData && cardsData.length > 0; else emptyResult">
+    <div class="mt-[15px] mx-[32px] space-y-[16px]" @fadeInDashboardItem>
+      <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngFor="let item of cardsData">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_title }}</div>
+            <div class="text-[12px] text-[var(--color-text4)]">{{ (item?.m_links?.length || 0) }} Links</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
+
+<ng-template #emptyResult>
+  <app-empty-result></app-empty-result>
+</ng-template>

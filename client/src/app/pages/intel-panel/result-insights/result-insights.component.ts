@@ -1,12 +1,12 @@
 import { FormsModule } from '@angular/forms';
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { UniqueLinkItem } from '../../../shared/model/homepage/consolidation_insights';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 @Component({
   selector: 'app-result-insights',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgClass],
   templateUrl: './result-insights.component.html'
 })
 export class ResultInsightsComponent implements OnInit {

@@ -1,127 +1,126 @@
-<div class="live-api-results-container mt-2" *ngIf="showComponent" [class.is-loading]="isProcessing">
+<div class="mt-[8px]" *ngIf="showComponent">
 
-  <div class="live-api_report-section-main" *ngIf="!isLoading" [ngClass]="{ 'scan_report-section-collapsed': !isExpanded, 'scan_report-section-loading': isProcessing, 'scan_report-section-loaded': !isProcessing && searchResults.length> 0
-            }">
-    <div class="scan_loading-header" *ngIf="!isLoading">
+  <div class="max-h-[500px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] p-[20px] ml-[35px] mr-[50px] transition-[opacity,height] duration-300" *ngIf="!isLoading">
+    <div class="flex items-center gap-[10px]" *ngIf="!isLoading">
 
-      <div class="loading-circle" *ngIf="isProcessing"></div>
+      <div class="h-[16px] w-[16px] animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-t-transparent" *ngIf="isProcessing"></div>
 
-      <h3 class="scan_section-title">
+      <h3 class="font-[Roboto] text-[18px] font-medium text-[var(--color-blue-640)]">
         Live API Data: {{ query }}
       </h3>
 
-      <button class="expand-collapse-btn" [ngClass]="{'is-disabled': isProcessing}" [disabled]="isProcessing" (click)="toggleCollapse()">
-        <img src="assets/images/shared/theme/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
+      <button class="ml-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-transparent text-[var(--color-text1)] transition-opacity disabled:cursor-not-allowed disabled:opacity-40" [disabled]="isProcessing" (click)="toggleCollapse()">
+        <img src="assets/images/shared/theme/cheveron-right.svg" [ngClass]="{ 'rotate-90': isExpanded }" alt="Toggle" class="h-[16px] w-[16px] transition-transform duration-200">
       </button>
     </div>
 
     <ng-container *ngIf="isProcessing && !isLoading">
-      <p class="wait-message mt-2 mb-0">Getting data for {{ liveApiEntities.length }} items... Please wait.</p>
+      <p class="mt-[8px] text-[13px] text-[var(--color-text4)]">Getting data for {{ liveApiEntities.length }} items... Please wait.</p>
     </ng-container>
 
     <ng-container *ngIf="!isProcessing && isExpanded && !isLoading">
 
-      <div *ngIf="searchResults.length === 0" class="text-info mt-3 p-2">
+      <div *ngIf="searchResults.length === 0" class="mt-[12px] rounded-[6px] bg-[var(--color-blue-820)] p-[8px] text-[13px] text-[#17a2b8]">
         No results found for query: {{ query }}
       </div>
 
-      <div class="results-list">
-        <div *ngFor="let result of searchResults; let i = index" class="bulk-result-item dashboard-result-card mt-3 p-3">
+      <div class="flex flex-col">
+        <div *ngFor="let result of searchResults; let i = index" class="mt-[12px] overflow-hidden rounded-[14px] border border-[rgb(255_255_255_/_10%)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] p-[12px] shadow-[0_10px_22px_rgba(0,0,0,0.32)] transition-[transform,box-shadow,border-color,background] duration-150 hover:translate-y-[-1px] hover:border-[rgb(255_255_255_/_16%)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] hover:shadow-[0_14px_28px_rgba(0,0,0,0.4)]">
 
-          <div class="report__defacement-detail-header-url dashboard-header-header">
+          <div class="pr-[20px] text-[17px] font-medium text-[var(--color-text1)] whitespace-nowrap overflow-hidden text-ellipsis">
             Search {{ i + 1 }} ({{ result.input.type }}) - Input: {{ result.input.q1 }}
             <span *ngIf="result.input.q2">/ {{ result.input.q2 }}</span>
           </div>
           <ng-container [ngSwitch]="result.status">
-            <div *ngSwitchCase="'pending'" class="text-warning">Status: Pending...</div>
+            <div *ngSwitchCase="'pending'" class="text-[#ffc107]">Status: Pending...</div>
 
-            <div *ngSwitchCase="'error'" class="text-info">
+            <div *ngSwitchCase="'error'" class="text-[#17a2b8]">
               No results found for this query.
             </div>
 
             <ng-container *ngSwitchCase="'success'">
-              <div class="text-success mb-3">Status: Success</div>
+              <div class="mb-[12px] text-[#28a745]">Status: Success</div>
 
               <ng-container *ngIf="result.input.type === 'cracked'">
-                <div class="flex-col-gap-12">
-                  <div *ngFor="let item of result.resultData?.cards_data" class="cracked-card-detail">
-                    <div class="report__defacement-detail-header-url dashboard-header-header">
+                <div class="flex flex-col gap-[14px]">
+                  <div *ngFor="let item of result.resultData?.cards_data">
+                    <div class="pr-[20px] text-[17px] font-medium text-[var(--color-text1)] whitespace-nowrap overflow-hidden text-ellipsis">
                       {{ item?.m_app_name }}
                     </div>
 
                     <div class="mt-1">
-                      <a class="color-text1" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url
+                      <a class="text-[var(--color-text1)] underline" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url
                         }}</a>
                     </div>
 
-                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                    <div class="mt-[12px] mb-[4px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                       Package ID
                     </div>
-                    <div class="color-text1">{{ item?.m_package_id }}</div>
+                    <div class="text-[var(--color-text1)]">{{ item?.m_package_id }}</div>
 
-                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                    <div class="mt-[12px] mb-[4px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                       Mod Features
                     </div>
-                    <pre class="color-text1 pre-wrap-m0">{{ item?.m_mod_features }}</pre>
+                    <pre class="m-0 whitespace-pre-wrap text-[var(--color-text1)]">{{ item?.m_mod_features }}</pre>
 
-                    <hr class="dashboard-header-divider" />
+                    <hr class="h-px border-0 bg-[var(--color-divider)]" />
                   </div>
                 </div>
               </ng-container>
 
               <ng-container *ngIf="result.input.type === 'social'">
-                <div class="flex-col-gap-12">
-                  <div *ngFor="let item of result.resultData?.cards_data" class="social-card-detail">
-                    <div class="report__defacement-detail-header-url dashboard-header-header">
+                <div class="flex flex-col gap-[14px]">
+                  <div *ngFor="let item of result.resultData?.cards_data">
+                    <div class="pr-[20px] text-[17px] font-medium text-[var(--color-text1)] whitespace-nowrap overflow-hidden text-ellipsis">
                       {{ item?.m_title }}
                     </div>
                     <div class="mt-1">
-                      <a class="color-text1" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
+                      <a class="text-[var(--color-text1)] underline" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
                     </div>
 
-                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                    <div class="mt-[12px] mb-[4px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                       Found On
                     </div>
-                    <div class="color-text1">{{ item?.m_base_url }}</div>
+                    <div class="text-[var(--color-text1)]">{{ item?.m_base_url }}</div>
 
-                    <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
+                    <div class="mt-[12px] mb-[4px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                       Links
                     </div>
-                    <div class="flex-wrap-gap-8">
-                      <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a>
+                    <div class="flex flex-wrap gap-[8px]">
+                      <a *ngFor="let w of item?.m_weblink" class="inline-flex items-center gap-[6px] rounded-[999px] border border-[rgb(255_255_255_/_10%)] bg-[var(--color-tags)] px-[10px] py-[6px] text-[12px] leading-none text-[var(--color-text1)] transition-[transform,filter,border-color] duration-150 hover:translate-y-[-1px] hover:brightness-[1.05] hover:border-[rgb(255_255_255_/_18%)]" [href]="w" target="_blank" rel="noopener">{{ w }}</a>
                     </div>
 
-                    <hr class="dashboard-header-divider" />
+                    <hr class="h-px border-0 bg-[var(--color-divider)]" />
                   </div>
                 </div>
               </ng-container>
 
               <ng-container *ngIf="result.input.type === 'user'">
                 <div *ngIf="result.resultData?.cards_data?.[0] as breachData">
-                  <div class="report__defacement-detail-header-url dashboard-header-header">
+                  <div class="pr-[20px] text-[17px] font-medium text-[var(--color-text1)] whitespace-nowrap overflow-hidden text-ellipsis">
                     {{ breachData?.m_url }}
                   </div>
-                  <hr class="dashboard-header-divider" />
-                  <div class="report__defacement-detail-header-items mb-1 dashboard-header-label">
+                  <hr class="h-px border-0 bg-[var(--color-divider)]" />
+                  <div class="mb-[4px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                     Content Type:
                   </div>
-                  <span class="color-text1">stolen</span>
-                  <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+                  <span class="text-[var(--color-text1)]">stolen</span>
+                  <div class="mt-[16px] mb-[4px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                     Username:
                   </div>
-                  <span class="color-text1">{{ result.input.q1 || 'not found' }}</span>
-                  <div *ngIf="result.input.q2" class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+                  <span class="text-[var(--color-text1)]">{{ result.input.q1 || 'not found' }}</span>
+                  <div *ngIf="result.input.q2" class="mt-[16px] mb-[4px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                     Email Address:
                   </div>
-                  <span *ngIf="result.input.q2" class="color-text1">{{ result.input.q2 || 'not found' }}</span>
-                  <div class="report__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">
+                  <span *ngIf="result.input.q2" class="text-[var(--color-text1)]">{{ result.input.q2 || 'not found' }}</span>
+                  <div class="mt-[16px] mb-[8px] grid max-w-[300px] text-[16px] font-medium text-[var(--color-blue-640)]">
                     Breaches:
                   </div>
-                  <div class="flex-wrap-gap-8">
-                    <span *ngFor="let item of breachData?.m_dumplink" class="badge-red">{{ item }}</span>
+                  <div class="flex flex-wrap gap-[8px]">
+                    <span *ngFor="let item of breachData?.m_dumplink" class="inline-flex items-center gap-[6px] rounded-[999px] border border-[rgb(255_255_255_/_10%)] bg-[var(--color-tags)] px-[10px] py-[6px] text-[12px] leading-none text-[var(--color-text1)]">{{ item }}</span>
                   </div>
                 </div>
-                <div *ngIf="!result.resultData?.cards_data?.length" class="text-info">No data found for this query.
+                <div *ngIf="!result.resultData?.cards_data?.length" class="text-[#17a2b8]">No data found for this query.
                 </div>
               </ng-container>
             </ng-container>

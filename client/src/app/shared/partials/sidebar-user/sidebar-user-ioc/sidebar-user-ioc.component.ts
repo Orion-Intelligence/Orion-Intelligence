@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { TenantModel } from '../../../model/tenant/tenant.model';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../constants/shared-enums';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -11,7 +11,7 @@ import { TooltipDirective } from '../../../directive/tooltip-directive.directive
 import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
 @Component({
   selector: 'app-sidebar-user-ioc',
-  imports: [NgIf, NgFor, CommonModule, FormsModule, TooltipDirective, ConfirmationPopupComponent],
+  imports: [NgIf, NgFor, NgClass, CommonModule, FormsModule, TooltipDirective, ConfirmationPopupComponent],
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {

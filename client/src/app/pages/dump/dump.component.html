@@ -1,44 +1,48 @@
-<form (submit)="onSearchSubmit()" action="" class="default-input-container directory-listing-search" enctype="multipart/form-data" method="GET">
-  <div class="row dashboard__api-search-input-div">
-    <div class="col-xl-9 col-12 input-container">
-      <div class="input-group default-input-sub-container">
-        <div class="btn btn-primary default-input-button default-input-button-light">
+<form (submit)="onSearchSubmit()" action="" enctype="multipart/form-data" method="GET" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px]">
+  <div class="flex w-full flex-wrap items-start gap-[12px]">
+    <div class="w-full xl:w-9/12">
+      <div class="flex h-[42px] w-full">
+        <div class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-[#9ebfe030]">
           <img alt="Search" height="20" ngSrc="assets/images/shared/domain.svg" priority width="20">
         </div>
-        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input" maxlength="150" name="username" placeholder="Leak URL" type="text">
+        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" maxlength="150" name="username" placeholder="Leak URL" type="text">
         <input type="hidden" value="1">
-        <span class="input-group-text"></span>
+        <span class="w-[1px] border-y border-r border-[var(--color-border)]"></span>
       </div>
     </div>
-    <div class="col-2 mt-lg-0 mt-2">
-      <button class="dash-search-button">Search</button>
+    <div class="w-full xl:w-2/12 mt-[8px] xl:mt-0">
+      <button class="h-[42px] w-full rounded-[8px] bg-[var(--color-blue-640)] text-[14px] font-medium text-[var(--color-text1)]">Search</button>
     </div>
   </div>
 </form>
 
 <ng-container>
   <span id="top"></span>
-  <div class="directory-listing">
-    <div class="directory-listing_container">
-      <div class="directory-listing_main-container">
-        <div class="directory-listing_upper-heading">
-          <div class="directory-listing_pagination-heading">
-            <p class="directory-listing_header">Leak Dump Records</p>
-          </div>
-          <div class="directory-listing_pagination col-7"></div>
-          <div class="side-menu-container">
-            <label (click)="openSidebar()" class="filters-button"> <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24"> Filter </label>
-            <div [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
-              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
-                (filterReset)="resetFilters()" [filterModel]="filterModel"
-                [isFilterOpen]="isFilterOpen$ | async"></app-filters>
-            </div>
+  <div class="mt-[30px]">
+    <div class="px-[20px]">
+      <div class="flex flex-wrap items-center justify-between gap-[12px]">
+        <div>
+          <p class="text-[16px] font-medium text-[var(--color-text1)]">Leak Dump Records</p>
+        </div>
+        <div class="flex items-center gap-[12px]">
+          <label (click)="openSidebar()" class="flex cursor-pointer items-center gap-[8px] text-[var(--color-text1)]">
+            <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24"> Filter
+          </label>
+          <div
+            class="fixed top-0 h-[96vh] w-[300px] rounded-tl-[15px] bg-[#2A5784] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full"
+            [ngClass]="{
+              'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async),
+              'right-0': (isFilterOpen$ | async)
+            }">
+            <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
+              (filterReset)="resetFilters()" [filterModel]="filterModel"
+              [isFilterOpen]="isFilterOpen$ | async"></app-filters>
           </div>
         </div>
-        <dump-list [isLoading]="isLoading()"></dump-list>
       </div>
-      <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
+      <dump-list [isLoading]="isLoading()"></dump-list>
     </div>
+    <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
   </div>
   <span id="bottom"></span>
 </ng-container>

@@ -10,14 +10,13 @@ import { LeakCallbackModel } from '../../model/results/leak/leak.callback.model'
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { AppService } from '../../../services/core/app/app.service';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective],
+  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent],
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {

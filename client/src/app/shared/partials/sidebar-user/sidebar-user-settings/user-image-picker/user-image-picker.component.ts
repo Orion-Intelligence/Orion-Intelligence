@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { NgClass, NgIf } from '@angular/common';
 @Component({
   selector: 'app-user-image-picker',
-  imports: [NgIf],
+  imports: [NgIf, NgClass],
   templateUrl: './user-image-picker.component.html'
 })
-export class UserImagePickerComponent implements OnInit {
+export class UserImagePickerComponent implements OnInit, OnChanges {
   selectedFile?: File;
   selectedImage?: string;
 
@@ -21,16 +21,17 @@ export class UserImagePickerComponent implements OnInit {
     this.selectedImage = this.imageUrl || this.defaultImage;
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['imageUrl'] || changes['defaultImage']) {
+      this.selectedImage = this.imageUrl || this.defaultImage;
+    }
+  }
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (!file) {
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.selectedImage = e.target.result;
-    };
-    reader.readAsDataURL(file);
     this.selectedFile = file;
     this.onImageSelected.emit(file);
   }
@@ -41,5 +42,20 @@ export class UserImagePickerComponent implements OnInit {
     this.selectedFile = undefined;
     this.selectedImage = this.defaultImage;
     this.imageUrl = this.defaultImage;
+  }
+
+  hasCustomImage(): boolean {
+    const image = this.selectedImage || this.imageUrl || '';
+    if (!image) {
+      return false;
+    }
+    const defaults = [
+      'default.png',
+      '/default',
+      'logo_url_default.png',
+      'logo_wide_light_default.png',
+      'logo_wide_dark_default.png'
+    ];
+    return !defaults.some(token => image.endsWith(token));
   }
 }

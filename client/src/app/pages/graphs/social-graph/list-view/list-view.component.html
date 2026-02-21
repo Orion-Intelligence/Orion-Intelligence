@@ -15,7 +15,7 @@
           <h2 class="text-xl font-bold text-slate-300 border-b-2 border-slate-700 pb-2 mb-4">Active Profiles</h2>
           <div *ngIf="activeUserNodes().length > 0; else noUserProfiles">
             <div class="space-y-4">
-              <div *ngFor="let userNode of activeUserNodes(); trackBy: trackById; let i = index" class="bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden animate-fade-in-up">
+              <div *ngFor="let userNode of activeUserNodes(); trackBy: trackById; let i = index" class="overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50 animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
                   <div class="p-4 flex items-start gap-4 bg-slate-800/70">
                       <div class="w-16 h-16 rounded-full ring-2 ring-slate-600 flex-shrink-0 flex items-center justify-center bg-slate-700">
                         <i class="bi bi-person-fill text-4xl text-slate-400"></i>
@@ -36,7 +36,7 @@
                         <ng-container *ngIf="getPlatformData(platformNode.id.toString()) as platformData">
                           <div class="bg-slate-700/50 rounded-lg overflow-hidden transition-all duration-300">
                               <div (click)="platformNodeClicked.emit(platformNode.id.toString())" class="p-3 flex items-center gap-3 cursor-pointer hover:bg-slate-700 transition-colors">
-                                  <div class="social-mapper-platform-icon w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-white p-1">
+                                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]">
                                     <app-social-icon [platformName]="platformNode.label"></app-social-icon>
                                   </div>
                                   <div class="flex-grow min-w-0">
@@ -142,7 +142,7 @@
           <h2 class="text-xl font-bold text-slate-300 border-b-2 border-slate-700 pb-2 mb-4">Active Entities</h2>
           <div *ngIf="activeEntityNodesOnGraph().length > 0; else noEntities">
             <div class="space-y-4">
-              <div *ngFor="let entityNode of activeEntityNodesOnGraph(); trackBy: trackById; let i = index" class="bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden animate-fade-in-up">
+              <div *ngFor="let entityNode of activeEntityNodesOnGraph(); trackBy: trackById; let i = index" class="overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50 animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
                 <ng-container *ngIf="getEntityData(entityNode.id.toString()) as entity">
                   <div class="p-4 flex items-start gap-4">
                     <i [class]="getIconForEntityType(entity.type) + ' text-3xl mt-1'"></i>

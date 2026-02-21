@@ -25,7 +25,6 @@
     "@angular/platform-browser-dynamic": "19.2.18",
     "@angular/router": "19.2.18",
     "@cypress/code-coverage": "^3.14.7",
-    "@ng-bootstrap/ng-bootstrap": "^18.0.0",
     "@popperjs/core": "^2.11.8",
     "bootstrap-icons": "^1.13.1",
     "cypress-axe": "1.7.0",

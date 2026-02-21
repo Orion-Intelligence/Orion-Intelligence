@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LoadingService } from '../../services/loading.service';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 @Component({
   selector: 'app-loader',
   standalone: true,
   templateUrl: './loader.component.html',
   imports: [
-    AsyncPipe
+    AsyncPipe,
+    NgClass
   ],
 })
 export class LoaderComponent {

@@ -1,9 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 @Component({
   selector: 'app-json-viewer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgClass],
   templateUrl: './json-viewer.component.html'
 })
 export class JsonViewerComponent implements OnInit {

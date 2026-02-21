@@ -1,72 +1,72 @@
-<section class="consolidated-scans-container" *ngIf="showUi && !isLoading">
-  <header class="consolidated-scans-header">
-    <div class="consolidated-scans-header-content">
-      <div>
-        <h1 class="consolidated-scans-title">Threats Scans Report: {{ targetLabel }}</h1>
+<section class="mb-[20px] flex flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] p-[16px] ml-[35px] mr-[50px] max-[768px]:ml-[10px] max-[768px]:mr-[10px]" *ngIf="showUi && !isLoading">
+  <header class="w-full">
+    <div class="flex w-full items-center justify-between gap-[12px]">
+      <div class="min-w-0">
+        <h1 class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">Threats Scans Report: {{ targetLabel }}</h1>
 
-        <div class="consolidated-scans-status-text consolidated-scans-mt-6" *ngIf="isProcessing || runningTypes.length">
+        <div class="mt-[6px] font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap" *ngIf="isProcessing || runningTypes.length">
           Collecting intelligence… {{ completedCount }}/{{ totalCount }} scans completed
         </div>
 
-        <div class="consolidated-scans-completed-row consolidated-scans-mt-6" *ngIf="!isProcessing && !runningTypes.length">
-          <span class="consolidated-scans-badge consolidated-scans-badge-inline">
-            <span class="consolidated-scans-badge-dot"></span>
+        <div class="mt-[6px] flex flex-wrap items-center gap-[10px]" *ngIf="!isProcessing && !runningTypes.length">
+          <span class="inline-flex items-center gap-[6px] rounded-[999px] border border-[var(--color-border)] px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] text-[var(--color-text1)] whitespace-nowrap">
+            <span class="h-[8px] w-[8px] rounded-full bg-current opacity-85"></span>
             Completed
           </span>
 
-          <span class="consolidated-scans-status-text consolidated-scans-status-muted">
+          <span class="font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] opacity-90 whitespace-nowrap">
             {{ domainResults.length }} web scans
           </span>
 
-          <span class="consolidated-scans-status-text consolidated-scans-status-muted">
+          <span class="font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] opacity-90 whitespace-nowrap">
             {{ liveApiRows.length }} live findings
           </span>
         </div>
       </div>
 
-      <button type="button" (click)="toggleCollapse()" class="consolidated-scans-chevron-btn text-toggle" [attr.aria-expanded]="!isCollapsed">
-        <span class="toggle-label">
+      <button type="button" (click)="toggleCollapse()" class="inline-flex items-center gap-[6px] border-0 bg-transparent p-0 font-[Inter] text-[12px] font-medium text-[var(--color-text4)] transition-colors duration-150 hover:text-[var(--color-text5)] active:opacity-85 focus-visible:underline" [attr.aria-expanded]="!isCollapsed">
+        <span class="whitespace-nowrap leading-none">
           {{ isCollapsed ? 'Show details' : 'Hide details' }}
         </span>
 
-        <svg class="consolidated-scans-chevron-icon"
+        <svg class="h-[24px] w-[24px] shrink-0 text-[var(--color-text5)] transition-transform duration-150"
              width="16" height="16" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round"
-             [class.is-expanded]="!isCollapsed">
+             [ngClass]="{ 'rotate-180': !isCollapsed }">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
     </div>
 
     <div *ngIf="isCollapsed">
-      <div class="consolidated-scans-progress-bar consolidated-scans-mt-12">
-        <div class="consolidated-scans-progress-fill" [style.width.%]="(isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100"></div>
+      <div class="mt-[12px] h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--color-divider)]">
+        <div class="h-full bg-[#26B961] transition-[width] duration-300" [style.width.%]="(isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100"></div>
       </div>
     </div>
   </header>
 
-  <div class="consolidated-scans-cards-grid" *ngIf="!isCollapsed">
-    <div class="consolidated-scans-card" *ngIf="domainResults.length" @scanAnimation>
-      <div class="consolidated-scans-card-content">
-        <h2 class="consolidated-scans-card-title">Open Web Presence Scan</h2>
+  <div class="flex w-full items-stretch gap-[24px] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1200px]:flex-col" *ngIf="!isCollapsed">
+    <div class="flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-890)]" *ngIf="domainResults.length" @scanAnimation>
+      <div class="flex flex-col gap-[9px] p-[12px]">
+        <h2 class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Open Web Presence Scan</h2>
 
-        <div class="consolidated-scans-table-wrapper">
-          <div class="consolidated-scans-table-header">
-            <div class="consolidated-scans-col-scan">Scan</div>
-            <div class="consolidated-scans-col-date">Scanned on</div>
-            <div class="consolidated-scans-col-risk">Risk</div>
-            <div class="consolidated-scans-col-action">Action</div>
+        <div class="flex w-full flex-col gap-[8px]">
+          <div class="flex w-full items-start justify-between rounded-[8px]">
+            <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Scan</div>
+            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Scanned on</div>
+            <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Risk</div>
+            <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
           </div>
 
-          <div class="consolidated-scans-table-row" *ngFor="let r of domainResults">
-            <div class="consolidated-scans-col-scan">{{ r.scanType | titlecase }} Scan</div>
-            <div class="consolidated-scans-col-date">{{ today | date:'MMMM dd, yyyy' }}</div>
-            <div class="consolidated-scans-col-risk">
+          <div class="flex w-full items-center justify-between border-t border-[var(--color-divider)] pt-[6px]" *ngFor="let r of domainResults">
+            <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)]">{{ r.scanType | titlecase }} Scan</div>
+            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)]">{{ today | date:'MMMM dd, yyyy' }}</div>
+            <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2]">
               <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
             </div>
-            <div class="consolidated-scans-col-action">
-              <a class="consolidated-scans-link" [routerLink]="{ seo: '/dashboard/scanner/seo-scan', basic: '/dashboard/scanner/basic-scan', repo: '/dashboard/scanner/repository-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: '', page: 1, matchtype: 'or', domain: r.domain, scanType: r.scanType }" target="_blank" rel="noopener">
+            <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)]">
+              <a class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/seo-scan', basic: '/dashboard/scanner/basic-scan', repo: '/dashboard/scanner/repository-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: '', page: 1, matchtype: 'or', domain: r.domain, scanType: r.scanType }" target="_blank" rel="noopener">
                 Details
               </a>
             </div>
@@ -75,24 +75,24 @@
       </div>
     </div>
 
-    <div class="consolidated-scans-card" *ngIf="liveApiRows.length" @scanAnimation>
-      <div class="consolidated-scans-card-content">
-        <h2 class="consolidated-scans-card-title">Active Threat Discovery/Live Api</h2>
+    <div class="flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-890)]" *ngIf="liveApiRows.length" @scanAnimation>
+      <div class="flex flex-col gap-[9px] p-[12px]">
+        <h2 class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Active Threat Discovery/Live Api</h2>
 
-        <div class="consolidated-scans-table-wrapper">
-          <div class="consolidated-scans-table-header">
-            <div class="consolidated-scans-col-platform consolidated-scans-col-platform-extended">Platform</div>
-            <div class="consolidated-scans-col-profile">Profile</div>
-            <div class="consolidated-scans-col-url">Action</div>
+        <div class="flex w-full flex-col gap-[8px]">
+          <div class="flex w-full items-start justify-between rounded-[8px]">
+            <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Platform</div>
+            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Profile</div>
+            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
           </div>
 
-          <div class="consolidated-scans-table-row" *ngFor="let row of liveApiRows.slice(0,3)">
-            <div class="consolidated-scans-col-platform consolidated-scans-col-platform-extended">
+          <div class="flex w-full items-center justify-between border-t border-[var(--color-divider)] pt-[6px]" *ngFor="let row of liveApiRows.slice(0,3)">
+            <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)]">
               {{ (row.url || 'Details').replace('https://', '').replace('http://', '').replace('www.', '') }}
             </div>
-            <div class="consolidated-scans-col-profile">{{ row.profile }}</div>
-            <div class="consolidated-scans-col-url">
-              <a class="consolidated-scans-link" [href]="row.url || '#'" target="_blank">
+            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)]">{{ row.profile }}</div>
+            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)]">
+              <a class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [href]="row.url || '#'" target="_blank">
                 Detail
               </a>
             </div>
@@ -102,29 +102,29 @@
     </div>
 
     <ng-container *ngIf="isProcessing || runningTypes.length">
-      <div class="consolidated-scans-card consolidated-scans-card-progress" @scanAnimation>
-        <div class="consolidated-scans-card-content consolidated-scans-card-content-progress">
-          <div class="consolidated-scans-progress-header">
-            <h2 class="consolidated-scans-progress-title">Threats scans</h2>
-            <div class="consolidated-scans-status-indicator">
-              <div class="consolidated-scans-status-dot"></div>
-              <div class="consolidated-scans-status-text">Collecting intelligence…</div>
+      <div class="flex-none min-w-[350px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-890)] max-[1200px]:min-w-0" @scanAnimation>
+        <div class="flex flex-col gap-[16px] p-[20px_24px]">
+          <div class="flex w-full items-center justify-between">
+            <h2 class="font-[Inter] text-[16px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap">Threats scans</h2>
+            <div class="inline-flex items-center gap-[6px]">
+              <div class="h-[8px] w-[8px] rounded-full bg-[var(--color-text5)]"></div>
+              <div class="font-[Inter] text-[13px] font-normal leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap">Collecting intelligence…</div>
             </div>
           </div>
 
-          <div class="consolidated-scans-running-list consolidated-scans-mt-10 h-scroll">
-        <span class="consolidated-scans-running-pill" *ngFor="let t of runningTypes">
+          <div class="mt-[10px] flex flex-wrap gap-[8px]">
+        <span class="inline-flex items-center justify-center rounded-[999px] border border-[var(--color-border)] px-[10px] py-[4px] font-[Inter] text-[12px] font-medium leading-[12px] text-[var(--color-text4)]" *ngFor="let t of runningTypes">
           {{ t | uppercase }}
         </span>
           </div>
 
-          <div class="consolidated-scans-progress-section">
-            <div class="consolidated-scans-progress-bar-wrapper">
-              <div class="consolidated-scans-progress-bar">
-                <div class="consolidated-scans-progress-fill" [style.width.%]="mergedProgress || 6"></div>
+          <div class="inline-flex items-center gap-[50px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-[12px]">
+            <div class="w-[226px] max-[768px]:w-full">
+              <div class="h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--color-divider)]">
+                <div class="h-full bg-[#26B961] transition-[width] duration-300" [style.width.%]="mergedProgress || 6"></div>
               </div>
             </div>
-            <div class="consolidated-scans-progress-label">{{ completedCount }}/{{ totalCount }} scans completed</div>
+            <div class="font-[Inter] text-[14px] font-normal leading-[18.2px] text-[var(--color-text4)] whitespace-nowrap">{{ completedCount }}/{{ totalCount }} scans completed</div>
           </div>
         </div>
       </div>

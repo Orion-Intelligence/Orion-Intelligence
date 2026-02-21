@@ -2,10 +2,9 @@ import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@
 import { AlertService } from '../../../../../services/alerts/alerts.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { NgIf } from '@angular/common';
-import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 @Component({
   selector: 'app-alert-scan-loading',
-  imports: [NgIf, NgbCarouselModule],
+  imports: [NgIf],
   templateUrl: './alert-scan-loading.component.html'
 })
 export class AlertScanLoadingComponent implements AfterViewInit {

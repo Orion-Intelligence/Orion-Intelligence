@@ -115,9 +115,26 @@ export class ViewTenantComponent implements OnInit {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       return 'None';
     }
-    const names = tenant.licenses
+    return tenant.licenses
       .map((l: LicenseName) => this.licenseService.getLicenseLabel(l))
       .join(', ');
-    return names.length <= 15 ? names : names.slice(0, 15) + '...';
+  }
+
+  getTenantStatusBadgeClass(status: TenantStatus): string {
+    return status === TenantStatusValues.ACTIVE
+      ? 'bg-emerald-500/10 text-emerald-300'
+      : 'bg-rose-500/10 text-rose-300';
+  }
+
+  getSubscriptionBadgeClass(subscription?: boolean): string {
+    return subscription
+      ? 'bg-sky-500/10 text-sky-300'
+      : 'bg-slate-500/10 text-slate-300';
+  }
+
+  getVerifiedBadgeClass(verified?: boolean): string {
+    return verified
+      ? 'bg-sky-500/10 text-sky-300'
+      : 'bg-rose-500/10 text-rose-300';
   }
 }

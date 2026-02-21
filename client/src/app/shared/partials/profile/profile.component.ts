@@ -9,7 +9,6 @@ import { ConfigSettings } from '../../model/app/config';
 import { AppStorageService } from '../../../services/core/app/app-storage.service';
 import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -19,7 +18,6 @@ import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
     TooltipDirective,
     NgClass,
     AlertNotificationComponent,
-    NgbCarouselModule
   ],
   templateUrl: './profile.component.html'
 })

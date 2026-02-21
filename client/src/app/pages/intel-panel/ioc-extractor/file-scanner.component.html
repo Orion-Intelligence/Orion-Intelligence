@@ -1,124 +1,121 @@
-<div class="file-scan-container">
-  <input type="file" #fileInput id="fileInput" class="ioc-extractor-file-input-hidden" [attr.accept]="accept" (change)="onFileSelected($event)" />
-  <div class="ioc-report-background" *ngIf="isFetched || isLoading"></div>
+<div class="relative">
+  <input type="file" #fileInput id="fileInput" class="hidden" [attr.accept]="accept" (change)="onFileSelected($event)" />
+  <div class="fixed inset-0 z-[0] bg-[rgba(0,0,0,0.3)]" *ngIf="isFetched || isLoading"></div>
 
-  <div class="ioc-extractor-upload-center-container" *ngIf="!isFetched && !isLoading" @fadeInDashboardItem>
-    <div class="ioc-extractor-upload-card">
-      <div class="ioc-extractor-upload-icon-large">
-        <img src="assets/images/shared/theme/file-search.svg" alt="File Upload"/>
+  <div class="flex min-h-[60vh] items-center justify-center" *ngIf="!isFetched && !isLoading" @fadeInDashboardItem>
+    <div class="w-full max-w-[520px] rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[24px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+      <div class="mx-auto mb-[12px] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[var(--color-blue-820-light)]">
+        <img src="assets/images/shared/theme/file-search.svg" alt="File Upload" class="h-[32px] w-[32px]"/>
       </div>
-      <h2 class="ioc-extractor-upload-title">{{ title }}</h2>
-      <p class="ioc-extractor-upload-description">{{ description }}</p>
-      <button type="button" class="sidebar_submit-button" (click)="triggerFileInput()">
-        <img ngSrc="../../../../assets/images/shared/theme/ai.svg" alt="Upload" width="24" height="24" style="margin-right: 10px;" /> Choose File
+      <h2 class="text-[20px] font-semibold text-[var(--color-text1)]">{{ title }}</h2>
+      <p class="mt-[6px] text-[14px] text-[var(--color-text4)]">{{ description }}</p>
+      <button type="button" class="mt-[16px] inline-flex items-center justify-center rounded-[8px] bg-[var(--color-blue-640)] px-[16px] py-[10px] text-[14px] font-medium text-white" (click)="triggerFileInput()">
+        <img ngSrc="../../../../assets/images/shared/theme/ai.svg" alt="Upload" width="24" height="24" class="mr-[10px]" />
+        Choose File
       </button>
-      <div class="ioc-extractor-upload-info">
-        <div class="ioc-extractor-upload-info-item">
-          <strong>Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images (PNG, JPG, JPEG)' }}
-        </div>
-        <div class="ioc-extractor-upload-info-item">
-          <strong>Maximum file size:</strong> {{ type === 'apk' ? 'up to 30 MB' : 'up to 1 MB' }}
-        </div>
+      <div class="mt-[16px] text-left text-[12px] text-[var(--color-text4)]">
+        <div><strong>Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images (PNG, JPG, JPEG)' }}</div>
+        <div class="mt-[4px]"><strong>Maximum file size:</strong> {{ type === 'apk' ? 'up to 30 MB' : 'up to 1 MB' }}</div>
       </div>
     </div>
   </div>
 
   <ng-container *ngIf="isFetched || isLoading">
-    <div class="ioc-report-header">
-      <div class="ioc-report-header-left">
-        <h1 class="ioc-report-title">Analysis Report</h1>
-        <p class="ioc-report-subtitle">File Processing Results</p>
+    <div class="relative z-[1] mx-[32px] mt-[16px] flex items-center justify-between">
+      <div>
+        <h1 class="text-[20px] font-semibold text-[var(--color-text1)]">Analysis Report</h1>
+        <p class="text-[13px] text-[var(--color-text4)]">File Processing Results</p>
       </div>
-      <div class="ioc-report-header-actions" *ngIf="!hasError && !isLoading && (extractionResult || apkResult || groupedIocs.length > 0)">
-        <div class="btn-group report-menu-option-container mr-0">
-          <button type="button" class="p-0 report-menu-option" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
+      <div *ngIf="!hasError && !isLoading && (extractionResult || apkResult || groupedIocs.length > 0)">
+        <div class="inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
+          <button type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
             <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="20" height="20" alt="scan" />
           </button>
-          <div class="vr report-menu-divider"></div>
-          <button type="button" class="p-0 report-menu-option" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
+          <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
+          <button type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
             <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="20" height="20" alt="download" />
           </button>
         </div>
       </div>
     </div>
 
-    <div class="ioc-report-progress" *ngIf="!hasError && isLoading && progress() < 100">
-      <div class="ioc-report-progress-text">
+    <div class="relative z-[1] mx-[32px] mt-[12px] max-w-[720px]" *ngIf="!hasError && isLoading && progress() < 100">
+      <div class="mb-[6px] text-[12px] text-[var(--color-text1)]">
         {{ currentStep || 'Processing file...' }} ({{ progress() }}%)
       </div>
-      <div class="ioc-report-progress-bar">
-        <div class="ioc-report-progress-fill" [style.width.%]="progress()"></div>
+      <div class="h-[8px] w-full rounded-full bg-[var(--color-progress)]">
+        <div class="h-[8px] rounded-full bg-[var(--color-blue-640)]" [style.width.%]="progress()"></div>
       </div>
     </div>
 
-    <div class="security-scan ioc-report-wrapper">
-      <div class="ioc-report-error" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
-        <div class="ioc-extractor-scan_alert">
-          <button class="ioc-extractor-scan_alert-close" (click)="closeError()" aria-label="Close error">
+    <div class="relative z-[1] mx-[20px] mt-[16px] rounded-[10px] bg-[#0f172a] p-[20px] text-[#e2e8f0]">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[20px]" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
+        <div class="flex justify-end">
+          <button class="h-[32px] w-[32px] rounded-full hover:bg-[rgba(255,255,255,0.08)]" (click)="closeError()" aria-label="Close error">
             <img ngSrc="../../../../assets/images/shared/searchFilter_clossButton.svg" alt="Close" width="20" height="20" />
           </button>
-          <div class="ioc-extractor-scan_alert-title">Processing Failed</div>
-          <div class="ioc-extractor-scan_alert-text">{{ errorMessage }}</div>
-          <ul class="ioc-extractor-scan_alert-reasons" *ngIf="isFileSizeError">
-            <li><strong>File size limit exceeded</strong></li>
-            <li>Please select a smaller file</li>
-          </ul>
-          <ul class="ioc-extractor-scan_alert-reasons" *ngIf="isUnsupportedFileError">
-            <li><strong>Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images' }}</li>
-          </ul>
-          <button class="ioc-extractor-scan_btn ioc-extractor-scan_btn-primary" (click)="triggerFileInput()">Try Again</button>
         </div>
+        <div class="text-[18px] font-semibold text-[#f8d7da]">Processing Failed</div>
+        <div class="mt-[6px] text-[14px] text-[#f8d7da]">{{ errorMessage }}</div>
+        <ul class="mt-[10px] list-disc pl-[18px] text-[13px] text-[#f8d7da]" *ngIf="isFileSizeError">
+          <li><strong>File size limit exceeded</strong></li>
+          <li>Please select a smaller file</li>
+        </ul>
+        <ul class="mt-[10px] list-disc pl-[18px] text-[13px] text-[#f8d7da]" *ngIf="isUnsupportedFileError">
+          <li><strong>Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images' }}</li>
+        </ul>
+        <button class="mt-[12px] rounded-[8px] border border-[#a83232] bg-[#7a1c1c] px-[14px] py-[8px] text-[14px] text-white" (click)="triggerFileInput()">Try Again</button>
       </div>
 
-      <section class="ioc-report-container" *ngIf="!hasError && (extractionResult || apkResult || groupedIocs.length > 0)">
-        <div class="ioc-report-hero" @fadeInDashboardItem>
-          <div class="ioc-report-hero-title">
+      <section class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[15px] shadow-[0_4px_8px_rgba(0,0,0,0.1)]" *ngIf="!hasError && (extractionResult || apkResult || groupedIocs.length > 0)">
+        <div class="flex items-center justify-between" @fadeInDashboardItem>
+          <div class="text-[16px] font-semibold text-[var(--color-text1)]">
             Analysis Report for
-            <span class="ioc-report-hero-sep">〡</span>
-            <span class="ioc-report-hero-file">
-              {{ extractionResult?.original_filename || apkResult?.original_filename || fileName || 'file' }}
-            </span>
+            <span class="mx-[6px]">〡</span>
+            <span class="font-mono">{{ extractionResult?.original_filename || apkResult?.original_filename || fileName || 'file' }}</span>
           </div>
-          <div class="ioc-report-hero-sub">
-            <span class="ioc-report-pill" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'status-success' : 'status-failed'">
+          <div>
+            <span class="inline-flex items-center gap-[6px] rounded-full border border-[rgba(255,255,255,0.12)] px-[10px] py-[2px] text-[12px]"
+              [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bg-[rgba(46,204,113,0.12)] text-[var(--color-text1)]' : 'bg-[rgba(239,68,68,0.12)] text-[var(--color-text1)]'">
               <i class="bi" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
               {{ extractionResult?.status || apkResult?.status || 'completed' }}
             </span>
           </div>
         </div>
 
-        <div class="ioc-report-summary-grid" *ngIf="!isLoading; else metaGridSkeleton" @fadeInDashboardItem>
-          <div class="ioc-report-stat" *ngFor="let s of getSummaryStats(); let idx = index" [ngClass]="'stat-' + idx">
-            <div class="ioc-report-stat-icon">
+        <div class="mt-[12px] grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4" *ngIf="!isLoading; else metaGridSkeleton" @fadeInDashboardItem>
+          <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]" *ngFor="let s of getSummaryStats(); let idx = index">
+            <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]">
               <i class="bi" [ngClass]="s.label === 'Filename' ? 'bi-file-earmark-text' : s.label === 'File Type' ? 'bi-code-slash' : s.label === 'Extracted Text' ? 'bi-body-text' : s.label === 'Total Findings' ? 'bi-shield-exclamation' : 'bi-check-circle'"></i>
+              {{ s.label }}
             </div>
-            <div class="ioc-report-stat-body">
-              <div class="ioc-report-stat-label">{{ s.label }}</div>
-              <div class="ioc-report-stat-value" [class.mono]="s.label === 'Filename'">{{ s.value }}</div>
-            </div>
+            <div class="text-[14px]" [ngClass]="{ 'font-mono': s.label === 'Filename', 'text-[var(--color-text1)]': true }">{{ s.value }}</div>
           </div>
         </div>
 
         <ng-container *ngIf="groupedIocs.length > 0; else emptyState">
-          <section class="ioc-report-findings">
-            <div class="ioc-report-category" *ngFor="let category of groupedIocs; trackBy: trackByCategory; let i = index" @fadeInDashboardItem>
-              <div class="ioc-report-category-header">
-                <div class="ioc-report-category-left">
-                  <div class="ioc-report-category-name">{{ category.name }}</div>
-                  <div class="ioc-report-category-count">{{ category.total }} Found</div>
+          <section class="mt-[16px] space-y-[16px]">
+            <div class="rounded-[12px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[14px]" *ngFor="let category of groupedIocs; trackBy: trackByCategory; let i = index" @fadeInDashboardItem>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ category.name }}</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ category.total }} Found</div>
                 </div>
               </div>
-              <div class="ioc-report-findings-list">
-                <div class="ioc-report-finding" *ngFor="let item of category.items; trackBy: trackByItem" @fadeInDashboardItem>
-                  <div class="ioc-report-finding-main">
-                    <div class="ioc-report-finding-value">{{ item.value }}</div>
-                    <div class="ioc-report-finding-desc">{{ item.description }}</div>
+              <div class="mt-[12px] space-y-[10px]">
+                <div class="flex items-center justify-between rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-[10px]" *ngFor="let item of category.items; trackBy: trackByItem" @fadeInDashboardItem>
+                  <div>
+                    <div class="text-[13px] text-[var(--color-text1)]">{{ item.value }}</div>
+                    <div class="text-[12px] text-[var(--color-text4)]">{{ item.description }}</div>
                   </div>
-                  <div class="ioc-report-finding-right">
-                    <span class="ioc-report-type-badge">{{ category.name }}</span>
-                    <button class="ioc-report-copy-btn" type="button" [class.copied]="copiedValue() === item.value" (click)="copyValue(item.value)">
+                  <div class="flex items-center gap-[8px]">
+                    <span class="rounded-full border border-[rgba(255,255,255,0.12)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ category.name }}</span>
+                    <button class="inline-flex items-center gap-[6px] rounded-full border border-[rgba(255,255,255,0.12)] px-[10px] py-[2px] text-[11px]"
+                      type="button"
+                      [ngClass]="{ 'bg-[rgba(46,204,113,0.12)] text-[var(--color-text1)]': copiedValue() === item.value, 'bg-[rgba(255,255,255,0.06)] text-[var(--color-text1)]': copiedValue() !== item.value }"
+                      (click)="copyValue(item.value)">
                       <i class="bi" [ngClass]="copiedValue() === item.value ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                      <span class="ioc-report-copy-text">{{ copiedValue() === item.value ? 'Copied!' : 'Copy' }}</span>
+                      <span>{{ copiedValue() === item.value ? 'Copied!' : 'Copy' }}</span>
                     </button>
                   </div>
                 </div>
@@ -128,28 +125,26 @@
         </ng-container>
 
         <ng-template #emptyState>
-          <div class="ioc-report-empty" @fadeInDashboardItem>
-            <div class="ioc-report-empty-icon">
-              <i class="bi bi-shield-check"></i>
-            </div>
-            <div class="ioc-report-empty-title">No Findings</div>
-            <div class="ioc-report-empty-text">No indicators or suspicious items were detected in the file.</div>
-            <button class="ioc-extractor-scan_btn" (click)="triggerFileInput()">Upload Another File</button>
+          <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[20px] text-center" @fadeInDashboardItem>
+            <div class="text-[30px] text-[var(--color-text1)]"><i class="bi bi-shield-check"></i></div>
+            <div class="mt-[6px] text-[16px] font-semibold text-[var(--color-text1)]">No Findings</div>
+            <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">No indicators or suspicious items were detected in the file.</div>
+            <button class="mt-[12px] rounded-[8px] border border-[#ffffff07] bg-transparent px-[12px] py-[6px] text-[14px] text-[#94a3b8] hover:bg-[#334155] hover:text-white" (click)="triggerFileInput()">Upload Another File</button>
           </div>
         </ng-template>
       </section>
 
       <ng-template #metaGridSkeleton>
-        <div class="ioc-report-summary-grid">
-          <div class="ioc-report-stat" *ngFor="let i of [1,2,3,4]">
-            <div class="ioc-extractor-skeleton ioc-extractor-skeleton-label ioc-extractor-shimmer"></div>
-            <div class="ioc-extractor-skeleton ioc-extractor-skeleton-text ioc-extractor-shimmer"></div>
+        <div class="mt-[12px] grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] p-[12px]" *ngFor="let i of [1,2,3,4]">
+            <div class="h-[12px] w-[120px] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div>
+            <div class="mt-[8px] h-[16px] w-[160px] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div>
           </div>
         </div>
       </ng-template>
     </div>
 
-    <div id="iocReport" class="d-none">
+    <div id="iocReport" class="hidden">
       <div *ngIf="extractionResult || apkResult || groupedIocs.length > 0" style="padding: 20px;">
         <h2>{{ title }} Report</h2>
         <hr/>

@@ -1,4 +1,4 @@
-import { CommonModule, UpperCasePipe } from '@angular/common';
+import { CommonModule, UpperCasePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnChanges } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { AlertModel } from '../../../../model/company-profile/node.model';
@@ -6,7 +6,7 @@ type AlertStatusClass = 'alert-active' | 'alert-ignore' | 'alert-info';
 type AlertRiskClass = 'risk-critical' | 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-unknown';
 @Component({
   selector: 'app-alert-export-component',
-  imports: [NgIf, NgFor, CommonModule, UpperCasePipe],
+  imports: [NgIf, NgFor, CommonModule, UpperCasePipe, NgClass],
   templateUrl: './alert-export-component.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

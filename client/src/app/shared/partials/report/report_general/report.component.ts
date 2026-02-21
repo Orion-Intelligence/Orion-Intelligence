@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { last } from 'rxjs';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { HelperService } from '../../../services/helper.service';
@@ -10,7 +10,6 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { Category } from '../../../constants/pages';
 import { ApiService } from '../../../services/api.service';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
 import { ReportMappingComponent } from "../../report-mapping/report-mapping.component";
 import { AuthService } from '../../../../services/authetication/auth.service';
@@ -21,7 +20,7 @@ import { CodeBlockComponent } from '../../code-block/code-block.component';
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent],
+  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {

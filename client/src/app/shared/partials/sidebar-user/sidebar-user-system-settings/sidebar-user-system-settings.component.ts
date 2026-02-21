@@ -110,4 +110,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       error: (err) => console.log(err)
     });
   }
+
+  get displayVersion(): string {
+    return (this.systemData.version || '').replaceAll('_', '.');
+  }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -11,7 +11,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-report-mapping',
   templateUrl: './report-mapping.component.html',
-  imports: [CommonModule, TooltipDirective],
+  imports: [CommonModule, NgClass, TooltipDirective],
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingComponent implements OnInit {

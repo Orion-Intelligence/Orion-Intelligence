@@ -1,17 +1,17 @@
-<form #searchForm="ngForm" (submit)="onSearchSubmit()" action="" class="default-input-container directory-listing-search security-scan-container" enctype="multipart/form-data" method="GET">
-  <div class="row dashboard__api-search-input-div">
-    <div class="col-xl-9 col-12 input-container">
-      <div class="input-group default-input-sub-container">
-        <div class="btn btn-primary default-input-button default-input-button-light">
+<form #searchForm="ngForm" (submit)="onSearchSubmit()" action="" enctype="multipart/form-data" method="GET" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px]">
+  <div class="flex w-full flex-wrap items-start gap-[12px] rounded-[10px] bg-[#4EA2F170] pr-[46px] pt-[8px] max-[1100px]:pr-[20px]">
+    <div class="w-full xl:w-9/12">
+      <div class="flex h-[42px] w-full">
+        <div class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white">
           <img alt="Search" height="20" ngSrc="../../../assets/images/shared/domain.svg" priority width="20">
         </div>
-        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
+        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
         <input type="hidden" value="1">
-        <span class="input-group-text"></span>
+        <span class="w-[1px] border-y border-r border-[var(--color-border)]"></span>
       </div>
     </div>
-    <div class="col-2 mt-lg-0 mt-2">
-      <button class="dash-search-button" [disabled]="!searchForm.valid">Search</button>
+    <div class="w-full xl:w-2/12 mt-[8px] xl:mt-0">
+      <button class="h-[41px] w-full rounded-[8px] bg-[linear-gradient(92.32deg,#4EA2F1_2.58%,#2C7AC5_66.77%,#1E6CB7_130.97%)] text-[14px] font-normal text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40 hover:opacity-100" [disabled]="!searchForm.valid">Search</button>
     </div>
   </div>
 </form>
@@ -19,74 +19,81 @@
 <app-empty-query *ngIf="!isFetched && !isLoading"></app-empty-query>
 
 <ng-container *ngIf="isFetched || isLoading">
-  <div class="scan_progress-top" *ngIf="!hasError && isLoading && progress() < 100">
-    <div class="scan_progress-text">{{ currentStep || 'Scanning...' }} ({{ progress() }}%)</div>
-    <div class="scan_progress-bar">
-      <div class="scan_progress-fill" [style.width.%]="progress()"></div>
+  <div class="mt-[12px] ml-[32px] max-w-[720px]" *ngIf="!hasError && isLoading && progress() < 100">
+    <div class="mb-[6px] text-[12px] text-[var(--color-text1)]">{{ currentStep || 'Scanning...' }} ({{ progress() }}%)</div>
+    <div class="h-[8px] w-full rounded-full bg-[var(--color-progress)]">
+      <div class="h-[8px] rounded-full bg-[var(--color-blue-640)]" [style.width.%]="progress()"></div>
     </div>
   </div>
 
-  <div class="d-flex justify-content-end" *ngIf="!hasError && !isLoading">
-    <div class="btn-group report-menu-option-container mr-2">
-      <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
+  <div class="flex justify-end mt-[12px] mr-[32px]" *ngIf="!hasError && !isLoading">
+    <div class="inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
+      <button (click)="exportReport()" appTooltip="Download" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Download" height="25" ngSrc="../../../assets/images/shared/theme/download.svg" width="25" />
       </button>
-      <div class="vr report-menu-divider"></div>
+      <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-      <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="p-0 report-menu-option">
+      <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Print" height="25" ngSrc="../../../assets/images/shared/theme/print.svg" width="25" />
       </button>
     </div>
   </div>
-  <div class="security-scan scan_container">
-    <div class="scan_report-section" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
-      <div class="scan_alert">
-        <div class="scan_alert-title">Scan Failed</div>
-        <div class="scan_alert-text">{{ errorMessage }}</div>
-        <ul class="scan_alert-reasons">
-          <li>The server may be temporarily unavailable</li>
-          <li>The target website may not be reachable</li>
-          <li>An unexpected error occurred during scanning</li>
-        </ul>
-        <br>
-        <button class="scan_btn scan_btn-primary" (click)="retry()">Scan Again</button>
+
+  <div class="mx-[20px] mt-[12px] rounded-[10px] bg-[#0f172a] p-[20px] text-[#e2e8f0]">
+    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[20px]" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
+      <div class="text-[18px] font-semibold text-[#f8d7da]">Scan Failed</div>
+      <div class="mt-[6px] text-[14px] text-[#f8d7da]">{{ errorMessage }}</div>
+      <ul class="mt-[10px] list-disc pl-[18px] text-[13px] text-[#f8d7da]">
+        <li>The server may be temporarily unavailable</li>
+        <li>The target website may not be reachable</li>
+        <li>An unexpected error occurred during scanning</li>
+      </ul>
+      <div class="mt-[16px]">
+        <button class="rounded-[8px] border border-[#a83232] bg-[#7a1c1c] px-[14px] py-[8px] text-[14px] text-white" (click)="retry()">Scan Again</button>
       </div>
     </div>
 
-    <div class="scan_report-section" [ngClass]="{ 'scan_report-section-danger': grade === 'D' || grade === 'F', 'scan_report-section-warning': grade === 'C' }" *ngIf="!hasError">
-      <h3 class="scan_section-title">
-        <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton" class="text-white">
-          Security Scan Report for 〡 <a [href]="meta.URL">{{ displayHost }}</a>
+    <div
+      class="rounded-[10px] border border-[var(--color-border)] p-[20px]"
+      [ngClass]="{
+        'border-[var(--color-border-red)] bg-[var(--color-red-100)] text-[#f8d7da]': grade === 'D' || grade === 'F',
+        'border-[var(--color-border-orange)] bg-[var(--color-orange-100)] text-[#8C4B16]': grade === 'C',
+        'bg-[var(--color-blue-830)] text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C')
+      }"
+      *ngIf="!hasError">
+      <h3 class="text-[18px] font-medium text-[var(--color-blue-640)]">
+        <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton">
+          Security Scan Report for 〡 <a class="underline" [href]="meta.URL">{{ displayHost }}</a>
         </ng-container>
       </h3>
-      <div class="scan_divider"></div>
+      <div class="my-[15px] h-px bg-[#ffffff12]"></div>
 
       <ng-container *ngIf="!isLoading && meta; else metaGridSkeleton">
-        <div class="scan_scan-meta-grid" @fadeInDashboardItem>
-          <div class="scan_meta-card">
-            <p class="scan_meta-value scan_meta-value-large">{{ grade || '—' }} Grade</p>
+        <div class="grid grid-cols-1 gap-[15px] sm:grid-cols-2 lg:grid-cols-3" @fadeInDashboardItem>
+          <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]">
+            <p class="text-[14px] font-semibold">{{ grade || '—' }} Grade</p>
           </div>
-          <div class="scan_meta-card">
-            <p class="scan_meta-label">URL</p>
-            <p class="scan_meta-value">{{ meta.URL }}</p>
+          <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]">
+            <p class="mb-[6px] text-[13px] font-bold text-[var(--color-text3)]">URL</p>
+            <p class="text-[14px] text-[var(--color-text4)]">{{ meta.URL }}</p>
           </div>
-          <div class="scan_meta-card">
-            <p class="scan_meta-label">Host</p>
-            <p class="scan_meta-value">{{ displayHost }}</p>
+          <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]">
+            <p class="mb-[6px] text-[13px] font-bold text-[var(--color-text3)]">Host</p>
+            <p class="text-[14px] text-[var(--color-text4)]">{{ displayHost }}</p>
           </div>
-          <div class="scan_meta-card">
-            <p class="scan_meta-label">Port</p>
-            <p class="scan_meta-value">
-              {{ displayPort }} <span *ngIf="hasSSL" class="scan_ssl-tag">SSL</span>
+          <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]">
+            <p class="mb-[6px] text-[13px] font-bold text-[var(--color-text3)]">Port</p>
+            <p class="text-[14px] text-[var(--color-text4)]">
+              {{ displayPort }} <span *ngIf="hasSSL" class="ml-[6px] rounded-[4px] bg-[#4caf50] px-[6px] py-[2px] text-[12px] text-white">SSL</span>
             </p>
           </div>
-          <div class="scan_meta-card">
-            <p class="scan_meta-label">Scanned on (date)</p>
-            <p class="scan_meta-value">{{ meta.Scanned_on_date }}</p>
+          <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]">
+            <p class="mb-[6px] text-[13px] font-bold text-[var(--color-text3)]">Scanned on (date)</p>
+            <p class="text-[14px] text-[var(--color-text4)]">{{ meta.Scanned_on_date }}</p>
           </div>
-          <div class="scan_meta-card">
-            <p class="scan_meta-label">Scanned by</p>
-            <p class="scan_meta-value">{{ meta.Scanned_by}}</p>
+          <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]">
+            <p class="mb-[6px] text-[13px] font-bold text-[var(--color-text3)]">Scanned by</p>
+            <p class="text-[14px] text-[var(--color-text4)]">{{ meta.Scanned_by}}</p>
           </div>
         </div>
       </ng-container>
@@ -94,82 +101,74 @@
 
     <ng-container *ngIf="!isLoading && !hasError; else categoriesSkeleton">
       <ng-container *ngIf="categories.length">
-        <div class="scan_report-section" *ngFor="let cat of categories; trackBy: trackByCategory" @fadeInDashboardItem>
-          <h3 class="scan_section-title">{{ cat.name }} Findings ({{ cat.total }})</h3>
-          <div class="scan_divider"></div>
-          <div class="scan_findings-list">
-            <div class="scan_finding-card" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
-              <div class="scan_finding-header">
-                <h4 class="scan_finding-title">
-                  <span class="scan_status-dot" [ngClass]="{ 'scan_high': item.risk.toLowerCase() === 'high', 'scan_medium': item.risk.toLowerCase() === 'medium', 'scan_low': item.risk.toLowerCase() === 'low', 'scan_info': item.risk.toLowerCase() === 'informational' }"></span>{{ item.header }}
-                </h4>
+        <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[20px]" *ngFor="let cat of categories; trackBy: trackByCategory" @fadeInDashboardItem>
+          <h3 class="text-[18px] font-medium text-[var(--color-blue-640)]">{{ cat.name }} Findings ({{ cat.total }})</h3>
+          <div class="my-[15px] h-px bg-[#ffffff12]"></div>
+          <div class="flex flex-col gap-[15px]">
+            <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[14px]" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
+              <div class="flex items-center gap-[8px]">
+                <span class="h-[10px] w-[10px] rounded-full"
+                  [ngClass]="{
+                    'bg-[#dc3545]': item.risk.toLowerCase() === 'high',
+                    'bg-[#ffc107]': item.risk.toLowerCase() === 'medium',
+                    'bg-[#4caf50]': item.risk.toLowerCase() === 'low',
+                    'bg-[#17a2b8]': item.risk.toLowerCase() === 'informational'
+                  }"></span>
+                <h4 class="text-[16px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
               </div>
 
-              <p class="scan_finding-description">{{ item.description }}</p>
-              <div class="scan_finding-meta">
-                <span class="scan_severity-badge" [ngClass]="{ 'scan_high': item.risk.toLowerCase() === 'high', 'scan_medium': item.risk.toLowerCase() === 'medium', 'scan_low': item.risk.toLowerCase() === 'low', 'scan_info': item.risk.toLowerCase() === 'informational' }">
+              <p class="mt-[10px] text-[14px] text-[var(--color-text4)]">{{ item.description }}</p>
+              <div class="mt-[10px]">
+                <span class="inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium"
+                  [ngClass]="{
+                    'text-[#dc3545]': item.risk.toLowerCase() === 'high',
+                    'text-[#ffc107]': item.risk.toLowerCase() === 'medium',
+                    'text-[#4caf50]': item.risk.toLowerCase() === 'low',
+                    'text-[#17a2b8]': item.risk.toLowerCase() === 'informational'
+                  }">
                   {{ item.risk }} Risk ({{ item.confidence }} Confidence)
                 </span>
               </div>
               <app-code-block [code]="item.proof" *ngIf="item.proof"></app-code-block>
-              <div class="scan_divider-light"></div>
+              <div class="my-[15px] h-px bg-[#ffffff12]"></div>
             </div>
           </div>
         </div>
       </ng-container>
 
-      <div class="scan_report-section" *ngIf="!categories.length && meta" @fadeInDashboardItem>
-        <div class="scan_empty">
-          <div class="scan_empty-title">No Findings</div>
-          <div class="scan_empty-text">No issues were detected for this target.</div>
-          <button class="scan_btn" (click)="retry()">Rescan</button>
-        </div>
+      <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[20px]" *ngIf="!categories.length && meta" @fadeInDashboardItem>
+        <div class="text-[16px] font-semibold text-[var(--color-text1)]">No Findings</div>
+        <div class="mt-[6px] text-[14px] text-[var(--color-text4)]">No issues were detected for this target.</div>
+        <button class="mt-[12px] rounded-[8px] border border-[#ffffff07] bg-transparent px-[12px] py-[6px] text-[14px] text-[#94a3b8] hover:bg-[#334155] hover:text-white" (click)="retry()">Rescan</button>
       </div>
     </ng-container>
 
     <ng-template #metaTitleSkeleton>
-      <div class="skeleton skeleton-title shimmer"></div>
+      <div class="h-[22px] w-[240px] rounded-[6px] bg-[var(--color-placeholder)] animate-pulse"></div>
     </ng-template>
 
     <ng-template #metaGridSkeleton>
-      <div class="scan_scan-meta-grid" *ngIf="isLoading">
-        <div class="scan_meta-card">
-          <div class="skeleton skeleton-label shimmer"></div>
-          <div class="skeleton skeleton-text shimmer"></div>
+      <div class="grid grid-cols-1 gap-[15px] sm:grid-cols-2 lg:grid-cols-3" *ngIf="isLoading">
+        <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]">
+          <div class="h-[12px] w-[120px] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div>
+          <div class="mt-[8px] h-[16px] w-[200px] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div>
         </div>
-        <div class="scan_meta-card">
-          <div class="skeleton skeleton-label shimmer"></div>
-          <div class="skeleton skeleton-text shimmer"></div>
-        </div>
-        <div class="scan_meta-card">
-          <div class="skeleton skeleton-label shimmer"></div>
-          <div class="skeleton skeleton-text shimmer"></div>
-        </div>
-        <div class="scan_meta-card">
-          <div class="skeleton skeleton-label shimmer"></div>
-          <div class="skeleton skeleton-text shimmer"></div>
-        </div>
-        <div class="scan_meta-card">
-          <div class="skeleton skeleton-label shimmer"></div>
-          <div class="skeleton skeleton-text shimmer"></div>
-        </div>
+        <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]"></div>
+        <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[12px]"></div>
       </div>
     </ng-template>
 
     <ng-template #categoriesSkeleton>
       <ng-container *ngIf="isLoading">
-        <div class="scan_report-section" *ngFor="let i of skeletonCards; index as idx" @fadeInDashboardItem>
-          <div class="skeleton skeleton-section-title shimmer"></div>
-          <div class="scan_divider"></div>
-          <div class="scan_findings-list">
-            <div class="scan_finding-card" *ngFor="let j of skeletonCards; index as jdx">
-              <div class="scan_finding-header">
-                <div class="skeleton skeleton-dot shimmer"></div>
-                <div class="skeleton skeleton-subtitle shimmer"></div>
-              </div>
-              <div class="skeleton skeleton-paragraph shimmer"></div>
-              <div class="skeleton skeleton-badge shimmer"></div>
-              <div class="scan_divider-light"></div>
+        <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[20px]" *ngFor="let i of skeletonCards; index as idx" @fadeInDashboardItem>
+          <div class="h-[18px] w-[200px] rounded-[6px] bg-[var(--color-placeholder)] animate-pulse"></div>
+          <div class="my-[15px] h-px bg-[#ffffff12]"></div>
+          <div class="flex flex-col gap-[12px]">
+            <div class="rounded-[8px] border border-[#ffffff07] bg-[var(--color-blue-890)] p-[14px]" *ngFor="let j of skeletonCards; index as jdx">
+              <div class="h-[12px] w-[140px] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div>
+              <div class="mt-[8px] h-[12px] w-[240px] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div>
+              <div class="mt-[10px] h-[20px] w-[120px] rounded-full bg-[var(--color-placeholder)] animate-pulse"></div>
+              <div class="my-[15px] h-px bg-[#ffffff12]"></div>
             </div>
           </div>
         </div>
@@ -177,8 +176,7 @@
     </ng-template>
   </div>
 
-  <div id="scanReport" class="d-none">
-    <app-security-scan-export-component *ngIf="meta" [meta]="meta"
-      [categories]="categories"></app-security-scan-export-component>
+  <div id="scanReport" class="hidden">
+    <app-security-scan-export-component *ngIf="meta" [meta]="meta" [categories]="categories"></app-security-scan-export-component>
   </div>
 </ng-container>

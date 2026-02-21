@@ -14,7 +14,6 @@ import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmatio
 import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
 import { AlertService } from '../../../../services/alerts/alerts.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
 import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
 import { LicenseService } from '../../../../services/licenses/licenses.service';
@@ -25,7 +24,7 @@ import { NgxPrintModule } from 'ngx-print';
 import { countFilterValues } from '../../../utils/filter-values.util';
 @Component({
   selector: 'app-sidebar-user-homepage',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
   templateUrl: './sidebar-user-homepage.component.html',
   animations: [overlayAnimation],
 })

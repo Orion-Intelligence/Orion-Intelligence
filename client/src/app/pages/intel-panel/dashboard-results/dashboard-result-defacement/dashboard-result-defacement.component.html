@@ -1,201 +1,119 @@
-<div *ngIf="isList; else cardView" class="list__container-result" @fadeInDashboardItem>
-  <div class="list__container list-container">
-    <table class="table table-striped directory-list__table clear-paddings" *ngIf="isLoading || (!isLoading && searchResults.length>0)">
-      <thead>
+<div *ngIf="isList; else cardView" class="mt-4" @fadeInDashboardItem>
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+    <table class="w-full text-left text-sm" *ngIf="isLoading || (!isLoading && searchResults.length>0)">
+      <thead class="text-[var(--color-text3)]">
       <tr>
-        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="list__container-sort list__column-id-min" scope="col">#
-        </th>
-        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="list__container-sort" scope="col">Base URL
-        </th>
-        <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="list__container-sort" scope="col">IP
-          Addresses
-        </th>
-        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="list__container-sort" scope="col">Attacker
-        </th>
-        <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="list__container-sort" scope="col">
-          Team
-        </th>
-        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="list__container-sort" scope="col">Web Server
-        </th>
-        <th (click)="sortTable('m_leak_date')" [ngClass]="getSortClass('m_leak_date')" class="list__container-sort" scope="col">Leak Date
-        </th>
-        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="list__container-sort" scope="col">Web URL
-        </th>
-        <th class="list__column-id-min" scope="col"></th>
+        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="px-4 py-3 font-semibold" scope="col">#</th>
+        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="px-4 py-3 font-semibold" scope="col">Base URL</th>
+        <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="px-4 py-3 font-semibold" scope="col">IP Addresses</th>
+        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="px-4 py-3 font-semibold" scope="col">Attacker</th>
+        <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="px-4 py-3 font-semibold" scope="col">Team</th>
+        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="px-4 py-3 font-semibold" scope="col">Web Server</th>
+        <th (click)="sortTable('m_leak_date')" [ngClass]="getSortClass('m_leak_date')" class="px-4 py-3 font-semibold" scope="col">Leak Date</th>
+        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="px-4 py-3 font-semibold" scope="col">Web URL</th>
+        <th class="px-4 py-3" scope="col"></th>
       </tr>
       </thead>
       <tbody>
       <ng-container *ngIf="isLoading">
-        <tr>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-100"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-100"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
+        <tr class="border-t border-[var(--color-divider)]">
+          <td class="px-4 py-3"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-32 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+          <td class="px-4 py-3"><div class="h-3 w-10 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
         </tr>
       </ng-container>
 
       <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults : searchResults); let i = index">
-        <tr *ngIf="!isLoading" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem>
-          <td class="list__cell-id">
-            <span>{{ i + 1 }}</span> <img class="list__cell-arrow" alt="click" width="15" height="15" src="assets/images/shared/arrow-right-click.svg">
+        <tr *ngIf="!isLoading" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem class="border-t border-[var(--color-divider)] hover:bg-[var(--color-blue-720)]">
+          <td class="px-4 py-3 text-[var(--color-text1)]">
+            <span>{{ i + 1 }}</span>
+            <img class="ml-2 inline-block" alt="click" width="15" height="15" src="assets/images/shared/arrow-right-click.svg">
           </td>
-          <td>{{ item.m_url || '-' }}</td>
-          <td>{{ (item.m_ip || []).length ? (item.m_ip || []).join(', ') : '-' }}</td>
-          <td>{{ (item.m_attacker || []).length ? (item.m_attacker || []).join(', ') : '-' }}</td>
-          <td>{{ item.m_team || '-' }}</td>
-          <td>{{ (item.m_web_server || []).length ? (item.m_web_server || []).join(', ') : '-' }}</td>
-          <td>{{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</td>
-          <td>
-            <a *ngIf="item.m_source_url?.length" [href]="item.m_source_url[0]" class="text-decoration-none text-reset">{{ item.m_source_url[0] }}</a> <span *ngIf="!item.m_source_url?.length">-</span>
+          <td class="px-4 py-3 text-[var(--color-text1)]">{{ item.m_url || '-' }}</td>
+          <td class="px-4 py-3 text-[var(--color-text1)]">{{ (item.m_ip || []).length ? (item.m_ip || []).join(', ') : '-' }}</td>
+          <td class="px-4 py-3 text-[var(--color-text1)]">{{ (item.m_attacker || []).length ? (item.m_attacker || []).join(', ') : '-' }}</td>
+          <td class="px-4 py-3 text-[var(--color-text1)]">{{ item.m_team || '-' }}</td>
+          <td class="px-4 py-3 text-[var(--color-text1)]">{{ (item.m_web_server || []).length ? (item.m_web_server || []).join(', ') : '-' }}</td>
+          <td class="px-4 py-3 text-[var(--color-text1)]">{{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</td>
+          <td class="px-4 py-3 text-[var(--color-text1)]">
+            <a *ngIf="item.m_source_url?.length" [href]="item.m_source_url[0]" class="text-[var(--color-blue-640)] hover:underline">{{ item.m_source_url[0] }}</a>
+            <span *ngIf="!item.m_source_url?.length">-</span>
           </td>
-          <td class="list__column-id-min"><img alt="click" width="15" height="15" class="ml-4" src="assets/images/shared/arrow-right-click.svg"></td>
+          <td class="px-4 py-3"><img alt="click" width="15" height="15" class="ml-4 inline-block" src="assets/images/shared/arrow-right-click.svg"></td>
         </tr>
       </ng-container>
       </tbody>
     </table>
-    <div class="see-more-wrapper list__container-more" *ngIf="isExpandAble && searchResults.length > 2">
-      <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    <div class="flex justify-center py-3" *ngIf="isExpandAble && searchResults.length > 2">
+      <span class="cursor-pointer text-sm font-semibold text-[var(--color-blue-640)] hover:underline" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
     </div>
   </div>
 </div>
 
 <ng-template #cardView>
-  <div class="dashboard__search-container dashboard__search-container-chat">
-    <ng-container
-      *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0,2) : searchResults).slice(0,30)"
-      class="dashboard__search-card">
-      <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div">
+  <div class="space-y-4">
+    <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0,2) : searchResults).slice(0,30)">
+      <div [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-2">
+            <ng-container *ngIf="item.m_ioc_type?.length; else unknownTag">
+              <span *ngFor="let tag of item.m_ioc_type" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">{{ tag }}</span>
+            </ng-container>
+            <ng-template #unknownTag>
+              <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">unknown</span>
+            </ng-template>
+          </div>
 
-        <div class="dashboard__search-tags">
-          <ng-container *ngIf="item.m_ioc_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_ioc_type" class="dashboard__tag">{{ tag }}</span>
-          </ng-container>
-          <ng-template #unknownTag>
-            <span class="dashboard__tag">unknown</span>
-          </ng-template>
-
-          <div class="dashboard__buttons" *ngIf="!isMobileMode()">
-            <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph" class="dashboard__search-button">
-              <div class="dashboard__search-button-inner">
-                <img height="20" src="/client/src/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
-              </div>
+          <div class="flex items-center gap-2" *ngIf="!isMobileMode()">
+            <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
+              <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" />
             </div>
 
-            <div appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
-              <div class="dashboard__search-button-inner">
-                <img height="20" src="/client/src/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
-              </div>
+            <div appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
+              <img height="18" src="/assets/images/shared/theme/redirect.svg" width="18" alt="redirect" />
             </div>
           </div>
         </div>
 
-        <h2 class="dashboard__search-title mb-0">{{ item.m_team || 'No Team' }}</h2>
+        <h2 class="mt-3 text-lg font-semibold text-[var(--color-text1)]">{{ item.m_team || 'No Team' }}</h2>
 
         <ng-container *ngIf="item.ioc?.length">
-          <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">IOC</h5>
-          <div class="dashboard__search-link">{{ item.ioc.join(', ') }}</div>
+          <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">IOC</h5>
+          <div class="mt-2 text-sm text-[var(--color-text3)]">{{ item.ioc.join(', ') }}</div>
         </ng-container>
 
         <ng-container *ngIf="(item.m_content?.length || 0) > 5; else noContentBlock">
-          <p class="dashboard__search-description highlight mt-2">
+          <p class="mt-2 text-sm text-[var(--color-text3)]">
             {{ item.m_content.slice(0, 300) }}<span *ngIf="item.m_content.length > 300">...</span>
           </p>
         </ng-container>
         <ng-template #noContentBlock>
-          <p class="dashboard__search-description highlight mt-2">Webpage is not available anymore</p>
+          <p class="mt-2 text-sm text-[var(--color-text4)]">Webpage is not available anymore</p>
         </ng-template>
 
         <ng-container *ngIf="item.m_source_url?.length">
-          <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Web URL</h5>
-          <div class="dashboard__search-link">
-            <div class="text-decoration-none text-reset">{{ item.m_url }}</div>
-          </div>
+          <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Web URL</h5>
+          <div class="mt-2 text-sm text-[var(--color-text3)]">{{ item.m_url }}</div>
         </ng-container>
 
-        <div class="dashboard__search-info dashboard__search-info-chat">
-          <div *ngIf="item.m_ip?.length" class="dashboard__search-info-item">
-            <span class="dashboard__info-label">IP Addresses:</span> <span class="dashboard__info-value">{{
-              item.m_ip.join(', ')
-            }}</span>
-          </div>
-          <div *ngIf="item.m_attacker?.length" class="dashboard__search-info-item">
-            <span class="dashboard__info-label">Attacker:</span> <span class="dashboard__info-value">{{
-              item.m_attacker.join(', ')
-            }}</span>
-          </div>
-          <div *ngIf="item.m_web_server?.length" class="dashboard__search-info-item">
-            <span class="dashboard__info-label">Web Server:</span> <span class="dashboard__info-value">{{
-              item.m_web_server.join(', ')
-            }}</span>
-          </div>
-          <div *ngIf="item.m_leak_date" class="dashboard__search-info-item">
-            <span class="dashboard__info-label">Leak Date:</span> <span class="dashboard__info-value">{{
-              item.m_leak_date | date: 'MMM d, y'
-            }}</span>
-          </div>
-          <div *ngIf="item.m_location" class="dashboard__search-info-item">
-            <span class="dashboard__info-label">Location:</span> <span class="dashboard__info-value">{{
-              item.m_location
-            }}</span>
-          </div>
+        <div class="mt-4 grid gap-3 text-sm text-[var(--color-text3)] md:grid-cols-2">
+          <div *ngIf="item.m_ip?.length"><span class="text-xs font-semibold uppercase text-[var(--color-text4)]">IP Addresses</span><div class="text-[var(--color-text1)]">{{ item.m_ip.join(', ') }}</div></div>
+          <div *ngIf="item.m_attacker?.length"><span class="text-xs font-semibold uppercase text-[var(--color-text4)]">Attacker</span><div class="text-[var(--color-text1)]">{{ item.m_attacker.join(', ') }}</div></div>
+          <div *ngIf="item.m_web_server?.length"><span class="text-xs font-semibold uppercase text-[var(--color-text4)]">Web Server</span><div class="text-[var(--color-text1)]">{{ item.m_web_server.join(', ') }}</div></div>
+          <div *ngIf="item.m_leak_date"><span class="text-xs font-semibold uppercase text-[var(--color-text4)]">Leak Date</span><div class="text-[var(--color-text1)]">{{ item.m_leak_date | date: 'MMM d, y' }}</div></div>
+          <div *ngIf="item.m_location"><span class="text-xs font-semibold uppercase text-[var(--color-text4)]">Location</span><div class="text-[var(--color-text1)]">{{ item.m_location }}</div></div>
         </div>
       </div>
     </ng-container>
 
-    <div class="see-more-wrapper" *ngIf="isExpandAble && searchResults.length > 2">
-      <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    <div class="flex justify-center" *ngIf="isExpandAble && searchResults.length > 2">
+      <span class="cursor-pointer text-sm font-semibold text-[var(--color-blue-640)] hover:underline" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
     </div>
   </div>
 </ng-template>

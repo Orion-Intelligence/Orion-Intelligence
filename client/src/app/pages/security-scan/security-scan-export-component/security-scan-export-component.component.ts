@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
 import { HelperService } from '../../../shared/services/helper.service';
@@ -14,7 +14,7 @@ interface FindingRow {
 @Component({
   selector: 'app-security-scan-export-component',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgClass],
   templateUrl: './security-scan-export-component.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

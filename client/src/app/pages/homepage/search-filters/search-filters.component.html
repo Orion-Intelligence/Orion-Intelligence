@@ -1,112 +1,139 @@
-<div class="filter-panel" [ngClass]="{ 'filter-panel__top-space-expand': showSorting, 'filter-panel__top-space-shrink': !showSorting }" @searchFilterAnimation>
+<div
+  class="w-full max-w-[910px] overflow-y-auto rounded-[8px] border border-[#FCFCFC12] bg-white px-[16px] pt-[16px] pb-[8px] font-[Inter] text-white shadow-[0_3px_6px_rgba(0,0,0,0.16),_0_3px_6px_rgba(0,0,0,0.23)] max-h-[500px] z-[1] max-[550px]:fixed max-[550px]:top-[125px] max-[550px]:left-0 max-[550px]:w-[calc(100%-20px)] max-[550px]:mx-[10px]"
+  [ngClass]="{ 'mt-[10px]': showSorting, 'mt-0': !showSorting }"
+  @searchFilterAnimation>
 
-  <div class="filter-panel__top-row">
-    <div class="filter-panel__title">Filters</div>
-    <div class="filter-panel__actions">
-      <button class="filter-panel__clear-btn" (click)="clearSelection()" [type]="homePage ? 'button' : 'submit'">
-        <img src="assets/images/shared/searchFIlter_clearSelaction.svg" alt="Clear" class="filter-panel__clear-btn__icon" />
-        Clear Selection</button>
+  <div class="flex items-center justify-between pb-[8px] max-[460px]:block">
+    <div class="mt-[-5px] text-[19px] font-medium text-[#0E1626]">Filters</div>
+    <div class="flex items-center gap-[20px]">
+      <button class="flex h-[32px] items-center gap-[6px] rounded-[5px] bg-[#a0b8d140] px-[12px] text-[12px] font-normal text-[#0E1626] transition-colors hover:bg-[#a0b8d160] focus:outline-none" (click)="clearSelection()" [type]="homePage ? 'button' : 'submit'">
+        <img src="assets/images/shared/searchFIlter_clearSelaction.svg" alt="Clear" class="h-[16px] w-[16px]" />
+        Clear Selection
+      </button>
     </div>
   </div>
-  <div class="filter-input-wrapper filter-search">
-    <input type="text" (keydown.enter)="$event.preventDefault()" [(ngModel)]="entitySearch" (ngModelChange)="initCategories($event)" placeholder="Search filter" class="filter-panel__tag-input" />
+
+  <div class="relative inline-block">
+    <input
+      type="text"
+      (keydown.enter)="$event.preventDefault()"
+      [(ngModel)]="entitySearch"
+      (ngModelChange)="initCategories($event)"
+      placeholder="Search filter"
+      class="h-[36px] w-[200px] rounded-[7px] border border-[#00000012] bg-white pl-[8px] pr-[32px] text-[14px] text-[#172235] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_2px_rgba(0,0,0,0.06)] transition focus:border-[#00000032] focus:bg-[#f8f8f8] focus:outline-none placeholder:text-[12px] placeholder:font-normal placeholder:text-[#a6a6a6] bg-[url('/assets/images/shared/magnifyingglassfilter.svg')] bg-no-repeat bg-[length:16px_16px] bg-[right_8px_center]" />
   </div>
 
-  <div class="filter-panel__category-scroll-container">
-    <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
+  <div class="relative my-[21px] mb-[16px] flex items-center gap-[10px] overflow-hidden">
+    <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_right,#fff,transparent)]" *ngIf="showLeftFade"></div>
 
-    <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollLeft()">
-      <div class="filter-panel__click-hitbox filter-panel__show">
-        <img src="assets/images/shared/searchFilter_leftButton.svg" alt="filter icon" />
-      </div>
+    <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center mt-[-12px] opacity-60 hover:opacity-100" (click)="scrollLeft()">
+      <div class="absolute inset-[-10px_-10px_-10px_-5px]"></div>
+      <img src="assets/images/shared/searchFilter_leftButton.svg" alt="filter icon" />
     </div>
 
-    <div class="filter-panel__category-scroll" #categoryScroll>
+    <div
+      class="flex flex-1 gap-[10px] overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] [mask-size:100%_100%] [mask-repeat:no-repeat]"
+      #categoryScroll>
       <div *ngIf="filteredCategories.length>0; else noEntity"></div>
-      <div *ngFor="let category of filteredCategories" class="filter-panel__category-tab" [class.selected]="category.id === selectedCategoryId" (click)="$event.stopPropagation();onCategoryClick(category.id)">
+      <div
+        *ngFor="let category of filteredCategories"
+        class="flex items-center whitespace-nowrap border-b-2 border-transparent px-[10px] pb-[6px] text-[14px] font-normal text-[#172235] cursor-pointer hover:text-[#0E162699] hover:border-[#0E162660]"
+        [ngClass]="{ 'text-[#0E1626] border-[#0E1626] font-semibold': category.id === selectedCategoryId }"
+        (click)="$event.stopPropagation();onCategoryClick(category.id)">
         {{ category.name }}
         <div *ngIf="(app_service.getConfig().localSettings.entityfilterCategories[category.id]?.length ?? 0) > 0"
-          class="filter-panel__category-count">
+          class="ml-[5px] inline-flex h-[16px] w-[17px] items-center justify-center rounded-full bg-[#A0B8D199] text-[12px] font-normal text-[#0E1626]">
           {{ app_service.getConfig().localSettings.entityfilterCategories[category.id].length }}
         </div>
       </div>
       <ng-template #noEntity>
-        <div class="filter-panel__no-filters-text">No entity filters available.</div>
+        <div class="text-[14px] text-[#0E162650]">No entity filters available.</div>
       </ng-template>
     </div>
 
-    <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollRight()">
-      <div class="filter-panel__click-hitbox filter-panel__show">
-        <img src="assets/images/shared/searchFilter_rightButton.svg" alt="filter" />
-      </div>
+    <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center mt-[-12px] opacity-60 hover:opacity-100" (click)="scrollRight()">
+      <div class="absolute inset-[-10px_-10px_-10px_-5px]"></div>
+      <img src="assets/images/shared/searchFilter_rightButton.svg" alt="filter" />
     </div>
 
-    <div class="filter-panel__fade-right" *ngIf="showRightFade"></div>
+    <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_left,#fff,transparent)]" *ngIf="showRightFade"></div>
   </div>
-  <hr class="filter-panel__category-scroll-divider">
+  <hr class="mt-[-17px] border-0 h-px bg-[#A0B8D140]">
 
-  <div class="filter-panel__input-row">
-    <div class="filter-panel__input-wrapper">
-      <div class="filter-input-wrapper filter-add">
-        <input type="text" [(ngModel)]="newValue" (input)="onFilterInputChange()" (keydown.enter)="$event.preventDefault();addTag()" placeholder="Enter entity" class="filter-panel__tag-input" />
-        <span class="filter-add__icon" (click)="addTag()"></span>
+  <div class="mb-[16px] flex justify-between gap-[12px] max-[460px]:flex-col max-[460px]:items-start max-[460px]:gap-[8px]">
+    <div class="relative inline-block w-[200px] max-[460px]:w-full">
+      <div class="relative inline-block w-full">
+        <input
+          type="text"
+          [(ngModel)]="newValue"
+          (input)="onFilterInputChange()"
+          (keydown.enter)="$event.preventDefault();addTag()"
+          placeholder="Enter entity"
+          class="h-[36px] w-full rounded-[7px] border border-[#00000012] bg-white pl-[8px] pr-[32px] text-[14px] text-[#172235] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_2px_rgba(0,0,0,0.06)] transition focus:border-[#00000032] focus:bg-[#f8f8f8] focus:outline-none placeholder:text-[12px] placeholder:font-normal placeholder:text-[#a6a6a6]">
+        <span class="absolute right-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 cursor-pointer bg-[url('/assets/images/shared/plus.svg')] bg-contain bg-no-repeat" (click)="addTag()"></span>
 
-        <ul *ngIf="showSuggestions && filteredSuggestions.length > 0" class="filter-panel__suggestion-list">
-          <li *ngFor="let suggestion of filteredSuggestions" (click)="onSuggestionClick($event, suggestion)">
+        <ul *ngIf="showSuggestions && filteredSuggestions.length > 0" class="absolute left-0 right-0 top-full z-[10] mt-[2px] max-h-[150px] overflow-y-auto rounded-[4px] border border-[#ccc] bg-white p-0 text-[#0E1626] shadow-[0_2px_5px_rgba(0,0,0,0.1)]">
+          <li *ngFor="let suggestion of filteredSuggestions" (click)="onSuggestionClick($event, suggestion)" class="cursor-pointer px-[10px] py-[6px] text-[12px] hover:bg-[#f0f0f0]">
             {{ suggestion }}
           </li>
         </ul>
       </div>
     </div>
-    <div class="filter-panel__match-row">
-      <label class="filter-panel__toggle-switch"> <input type="checkbox" [(ngModel)]="app_service.configData().localSettings.entityFilterCondition" (ngModelChange)="onEntityFilterToggle($event)" /> <span class="filter-panel__slider"></span> </label>
-      <div class="filter-panel__entity-condition">
+
+    <div class="flex items-center gap-[8px]">
+      <label class="relative inline-flex h-[16px] w-[26px] cursor-pointer items-center">
+        <input type="checkbox" class="sr-only peer" [(ngModel)]="app_service.configData().localSettings.entityFilterCondition" (ngModelChange)="onEntityFilterToggle($event)" />
+        <span class="absolute inset-0 rounded-[24px] bg-[#ccc] transition peer-checked:bg-[#57A5EB]"></span>
+        <span class="absolute left-[2px] top-[2px] h-[12px] w-[12px] rounded-full bg-white transition peer-checked:translate-x-[10px]"></span>
+      </label>
+      <div class="mt-[-3px] inline-block w-[80px] text-center text-[12px] font-normal text-[#0E1626]">
         {{ app_service.configData().localSettings.entityFilterCondition ? 'Exact Match' : 'Partial Match' }}
       </div>
     </div>
   </div>
 
-  <div class="filter-panel__selected-filters">
-    <div class="filter-panel__section-title">All Selected Filters</div>
+  <div class="mt-[16px]">
+    <div class="text-[14px] font-medium text-[#57A5EB]">All Selected Filters</div>
     <ng-container *ngIf="hasAnyTags(); else noFilters">
-      <div class="filter-panel__tag-list">
+      <div class="mt-[8px] flex flex-wrap gap-[8px]">
         <ng-container *ngFor="let category of filteredCategories">
-          <div *ngFor="let tag of (app_service.getConfig().localSettings.entityfilterCategories[category.id] ?? [])" class="filter-panel__filter-tag">
+          <div *ngFor="let tag of (app_service.getConfig().localSettings.entityfilterCategories[category.id] ?? [])" class="flex h-[30px] items-center rounded-[5px] bg-[#A0B8D11F] px-[10px] text-[12px] font-normal text-[#0E1626] hover:bg-[#A0B8D13D]">
             {{ tag }}
-            <img src="assets/images/shared/searchFilter_clossButton.svg" class="filter-panel__remove-x" (click)="removeTag($event, category.id, tag)" alt="filter" />
+            <img src="assets/images/shared/searchFilter_clossButton.svg" class="ml-[6px] h-[21px] w-[21px] cursor-pointer" (click)="removeTag($event, category.id, tag)" alt="filter" />
           </div>
         </ng-container>
       </div>
     </ng-container>
     <ng-template #noFilters>
-      <div class="filter-panel__no-filters-text">No filter selected</div>
+      <div class="mb-[10px] text-[14px] text-[#0E162650]">No filter selected</div>
     </ng-template>
   </div>
 
-  <div class="filter-panel__divider"></div>
+  <div class="my-[12px] h-px bg-[#A0B8D160]"></div>
 
-  <div class="filter-panel__expand-header">
-    <div class="filter-panel__expand-label">IOC’s</div>
-    <div class="filter-panel__expand-icon" [ngClass]="{ 'expand': app_service.configData().localSettings.iocExpanded }" (click)="toggleExpand()">
-      <img src="assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon" />
+  <div class="flex justify-between">
+    <div class="text-[14px] font-medium text-[#0E1626]">IOC’s</div>
+    <div class="relative inline-block cursor-pointer" (click)="toggleExpand()">
+      <img src="assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon" class="transition-transform duration-300 -rotate-90" [ngClass]="{ 'rotate-0': app_service.configData().localSettings.iocExpanded }" />
     </div>
   </div>
-  <div *ngIf="app_service.configData().localSettings.iocExpanded" class="filter-panel__summary-section">
-    <ng-container *ngIf="hasAnyTags(); else noFilters">
+
+  <div *ngIf="app_service.configData().localSettings.iocExpanded" class="mt-0">
+    <ng-container *ngIf="hasAnyTags(); else noFiltersExpanded">
       <ng-container *ngFor="let category of categories | keyvalue">
-        <div *ngIf="(getTags(category.key).length > 0)" class="filter-panel__summary-category">
-          <div class="filter-panel__category-title">{{ search_filter_labels[category.key] }}</div>
-          <div class="filter-panel__tag-list">
-            <div *ngFor="let tag of getTags(category.key)" class="filter-panel__filter-tag">
-              {{ tag }}<img src="assets/images/shared/searchFilter_clossButton.svg" class="filter-panel__remove-x" (click)="removeTag($event, category.key, tag)" alt="filter" />
+        <div *ngIf="(getTags(category.key).length > 0)" class="mb-[16px]">
+          <div class="text-[14px] font-medium text-[#57A5EB]">{{ search_filter_labels[category.key] }}</div>
+          <div class="mt-[8px] flex flex-wrap gap-[8px]">
+            <div *ngFor="let tag of getTags(category.key)" class="flex h-[30px] items-center rounded-[5px] bg-[#A0B8D11F] px-[10px] text-[12px] font-normal text-[#0E1626] hover:bg-[#A0B8D13D]">
+              {{ tag }}
+              <img src="assets/images/shared/searchFilter_clossButton.svg" class="ml-[6px] h-[21px] w-[21px] cursor-pointer" (click)="removeTag($event, category.key, tag)" alt="filter" />
             </div>
           </div>
         </div>
       </ng-container>
-
     </ng-container>
-    <ng-template #noFilters>
-      <div class="filter-panel__no-filters-text">No filter selected</div>
+    <ng-template #noFiltersExpanded>
+      <div class="mb-[10px] text-[14px] text-[#0E162650]">No filter selected</div>
     </ng-template>
   </div>
 

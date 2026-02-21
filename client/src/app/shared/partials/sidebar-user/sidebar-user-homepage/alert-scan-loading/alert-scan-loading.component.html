@@ -1,23 +1,23 @@
-<div class="alert-scan-loading-overlay" #overlay role="dialog" aria-modal="true">
-  <div class="loading-content">
-    <div class="loading-top">
-      <div class="spinner"></div>
-      <div class="loading-title">Scanning data</div>
+<div class="absolute inset-0 z-[1] -mb-[100px] grid place-items-center rounded-[12px] bg-[#020617C7] backdrop-blur-[8px]" #overlay role="dialog" aria-modal="true">
+  <div class="mt-[-200px] w-[calc(100%-32px)] max-w-[520px] rounded-[16px] border border-[rgba(148,163,184,0.18)] bg-[rgba(15,23,42,0.92)] p-[22px_22px_18px] text-center text-[#f8fafc] shadow-[0_24px_70px_rgba(0,0,0,0.55)]">
+    <div class="mb-[8px] flex items-center justify-center gap-[12px]">
+      <div class="h-[38px] w-[38px] animate-spin rounded-full border-[3px] border-[rgba(248,250,252,0.18)] border-t-[var(--color-blue-640)]"></div>
+      <div class="text-[16px] font-extrabold">Scanning data</div>
     </div>
 
-    <div class="loading-text">This may take a moment. Please keep this tab open.</div>
+    <div class="mb-[14px] text-[13px] text-[rgba(248,250,252,0.82)]">This may take a moment. Please keep this tab open.</div>
 
-    <div class="loading-progress">
-      <span class="loading-bar"></span>
+    <div class="relative mb-[14px] h-[10px] overflow-hidden rounded-[999px] border border-[rgba(148,163,184,0.18)] bg-[rgba(148,163,184,0.16)]">
+      <span class="absolute left-[-40%] h-full w-[40%] rounded-[999px] bg-[linear-gradient(90deg,rgba(87,165,235,0.25),rgba(87,165,235,0.95),rgba(87,165,235,0.25))] animate-[indeterminate_1.2s_ease-in-out_infinite]"></span>
     </div>
 
-    <div *ngIf="this.licenseService.getLicenses().includes('maintainer'); else brakLine" class="loading-actions">
-      <button type="button" class="loading-btn loading-btn--ghost" (click)="cancelScan()">
+    <div *ngIf="this.licenseService.getLicenses().includes('maintainer'); else brakLine" class="flex justify-center">
+      <button type="button" class="rounded-full border border-[rgba(148,163,184,0.22)] bg-[rgba(148,163,184,0.12)] px-[16px] py-[9px] text-[13px] font-extrabold text-[rgba(248,250,252,0.92)]" (click)="cancelScan()">
         Cancel
       </button>
     </div>
     <ng-template #brakLine>
-      <div class="alert-scan-loading_space"></div>
+      <div class="h-[10px]"></div>
     </ng-template>
   </div>
 </div>

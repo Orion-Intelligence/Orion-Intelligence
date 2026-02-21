@@ -1,9 +1,0 @@
-<div *ngIf="suggestion.length<10 && suggestion.length!=0" class="suggestion">
-  <div>
-    <h6 class="suggestion_error">
-      <span class="suggestion_header">Did you mean: </span> <span class="suggestion_info">
-          <a (click)="onUpdateQuery()" class="gc-clear-selection suggestion_select">&nbsp;<b>{{ suggestion }}</b>&nbsp;?</a>
-        </span>
-    </h6>
-  </div>
-</div>

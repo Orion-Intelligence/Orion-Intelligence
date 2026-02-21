@@ -1,90 +1,85 @@
 <app-report-header [csv_object]="{ m_url: defacementData?.m_url }" [url]="defacementData?.m_url"></app-report-header>
 
-<div class="search__result-detail">
-  <div class="report__defacement-detail-header-url">
+<div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
+  <div class="truncate text-sm font-semibold text-[var(--color-text1)]">
     {{ defacementData?.m_url }}
   </div>
 
-  <div class="report__defacement-detail-header-row">
-    <div class="report__defacement-detail-header-items">
-      <strong>Saved on:</strong>{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-'
-      }}
+  <div class="mt-4 grid gap-3 text-sm text-[var(--color-text3)] md:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <strong class="text-[var(--color-text4)]">Saved on:</strong>
+      <span class="ml-1 text-[var(--color-text1)]">{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
     </div>
 
-    <div class="report__defacement-detail-header-items" *ngIf="!defacementData?.m_ioc_type?.length">
-      <strong>Defacer:</strong> <span class="report__defacement-truncate">
-        {{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}
-      </span>
+    <div *ngIf="!defacementData?.m_ioc_type?.length">
+      <strong class="text-[var(--color-text4)]">Defacer:</strong>
+      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
     </div>
 
-    <div class="report__defacement-detail-header-items">
-      <strong>Team:</strong> <span class="report__defacement-truncate">{{ defacementData?.m_team }}</span>
+    <div>
+      <strong class="text-[var(--color-text4)]">Team:</strong>
+      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_team }}</span>
     </div>
 
-    <div class="report__defacement-detail-header-items" *ngIf="!defacementData?.m_ioc_type?.length; else iocTypeTpl">
-      <strong>Web Server:</strong> <span class="report__defacement-truncate">
-        {{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}
-      </span>
+    <div *ngIf="!defacementData?.m_ioc_type?.length; else iocTypeTpl">
+      <strong class="text-[var(--color-text4)]">Web Server:</strong>
+      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
     </div>
     <ng-template #iocTypeTpl>
-      <div class="report__defacement-detail-header-items">
-        <strong>IOC Type:</strong> <span class="report__defacement-truncate">{{ defacementData?.m_ioc_type?.join(', ')
-          }}</span>
+      <div>
+        <strong class="text-[var(--color-text4)]">IOC Type:</strong>
+        <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
       </div>
     </ng-template>
 
-    <div class="report__defacement-detail-header-items">
-      <strong>Breach:</strong> <span class="report__defacement-truncate">
-        {{ defacementData?.m_source_url ? defacementData?.m_source_url : '-' }}
-      </span>
+    <div>
+      <strong class="text-[var(--color-text4)]">Breach:</strong>
+      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_source_url ? defacementData?.m_source_url : '-' }}</span>
     </div>
 
-    <div class="report__defacement-detail-header-items">
-      <strong>IP:</strong> <span class="report__defacement-truncate">
-        {{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}
-      </span>
+    <div>
+      <strong class="text-[var(--color-text4)]">IP:</strong>
+      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
     </div>
 
-    <div class="report__defacement-detail-header-items">
-      <strong>Location:</strong> <span class="report__defacement-truncate">
-        {{ defacementData?.m_location ? defacementData?.m_location : '-' }}
-      </span>
+    <div>
+      <strong class="text-[var(--color-text4)]">Location:</strong>
+      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
     </div>
   </div>
 </div>
 
-<div class="search__result-detail" *ngIf="filteredArrayKeys.length">
-  <div (click)="metaadataToggleContent()" class="search__result__section__heading">
-    <div class="left-content">
-      Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
+<div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4" *ngIf="filteredArrayKeys.length">
+  <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-center justify-between">
+    <div class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text1)]">
+      Metadata
+      <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
     </div>
-    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-      <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+      <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 
-  <div *ngIf="isExpandedMetadata">
-    <div class="tabs d-flex align-items-center search__result-detail-container">
+  <div *ngIf="isExpandedMetadata" class="mt-4">
+    <div class="flex flex-wrap items-center gap-2">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
+        <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full px-4 py-1.5 text-xs font-semibold transition">
           {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
         </button>
-        <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
+        <div *ngIf="!last" class="h-5 w-px bg-[var(--color-divider)]"></div>
       </ng-container>
     </div>
 
-    <div class="search__result-tabs-line"></div>
+    <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
 
     <app-result-section *ngIf="activeTab === 'm_content'" [listItems]="[content]"></app-result-section>
-
     <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems"></app-result-section>
 
-    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
+    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3 text-xs text-[var(--color-text4)]">
       Names of people, organizations, and entities are handled separately, but may overlap in the results.
     </div>
 
-    <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" [activeTab]="activeTab"
-      [listItems]="listItems"></app-result-list>
+    <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
   </div>
 </div>
 

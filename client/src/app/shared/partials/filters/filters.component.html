@@ -1,54 +1,55 @@
-<div (click)="closeFilter()" *ngIf="isFilterOpen" @filterAnimation class="sidebar_overlay"></div>
-
-<label (click)="closeFilter()" class="sidebar_header d-flex align-items-center">
-  <div class="justify-content-start">
-    <h2 class="sidebar_heading">Filters</h2>
+<div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-5 py-3">
+  <div class="flex items-center justify-between">
+    <h2 class="text-base font-bold text-[var(--color-text1)]">Filters</h2>
+    <button type="button" (click)="closeFilter()" class="inline-flex h-9 w-9 items-center justify-center rounded-md text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+      <img alt="close" height="22" ngSrc="assets/images/shared/nav-next.svg" priority width="22">
+    </button>
   </div>
-  <div class="col-12 d-flex justify-content-end sidebar_close-label">
-    <img alt="close" height="16" ngSrc="assets/images/shared/nav-next.svg" priority width="16">
-  </div>
-</label>
+</div>
 
-<form class="sidebar_form">
-  <div class="sidebar_content">
+<form class="flex h-[calc(96vh-61px)] flex-col overflow-hidden bg-[var(--color-blue-830)] px-5 overflow-x-hidden">
+  <div class="flex-1 overflow-y-auto overflow-x-hidden pb-4">
     <div *ngFor="let key of Object.keys(filterModel.filters)">
-      <label appTooltip="{{filterModel.filters[key].tooltip}}" class="sidebar_label"> {{
-        filterModel.filters[key].title
-        }} </label>
+      <label appTooltip="{{filterModel.filters[key].tooltip}}" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
+        {{ filterModel.filters[key].title }}
+      </label>
+
       <ng-container *ngIf="filterModel.filters[key].type === 'daterange'">
         <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)"
           [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
       </ng-container>
+
       <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
-        <div class="dropdown">
-          <button aria-expanded="false" class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdown{{ key }}" type="button">
-            {{ getOptionLabel(key) }}
-          </button>
-          <ul [attr.aria-labelledby]="'dropdown' + key" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
-            <li *ngFor="let option of filterModel.filters[key].options; let last = last">
-              <a (click)="onSelectionChange(key, option.key)" class="dropdown-item py-0 d-flex align-items-center"> {{
-                option.label
-                }} </a>
-              <ng-container *ngIf="!last">
-            <li class="dropdown-divider m-0 mx-3"></li>
+        <select
+          class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none"
+          [ngModel]="selectedFilters[key]"
+          (ngModelChange)="onSelectionChange(key, $event)"
+          name="{{ key }}"
+        >
+          <option *ngFor="let option of filterModel.filters[key].options" [ngValue]="option.key">{{ option.label }}</option>
+        </select>
       </ng-container>
-      </li>
-      </ul>
+
+      <ng-container *ngIf="filterModel.filters[key].type === 'text'">
+        <div class="mb-2">
+          <input
+            (ngModelChange)="onSelectionChange(key, selectedFilters[key])"
+            [(ngModel)]="selectedFilters[key]"
+            class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none"
+            name="{{ key }}"
+            placeholder="{{ filterModel.filters[key].title }}"
+            type="text"
+          />
+        </div>
+      </ng-container>
     </div>
-    </ng-container>
-    <ng-container *ngIf="filterModel.filters[key].type === 'text'">
-      <div class="mb-2">
-        <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="sidebar_input w-100 text-start d-flex justify-content-between align-items-center" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text" />
-      </div>
-    </ng-container>
-  </div>
   </div>
 
-  <div class="sidebar_submit d-flex flex-column">
-    <button (click)="resetFilters()" class="btn btn-secondary mb-4 sidebar_submit-button" type="button">
+  <div class="mb-6 mt-auto flex flex-col pt-5">
+    <button (click)="resetFilters()" class="mb-4 h-[42px] w-full rounded-lg border-2 border-[var(--color-blue-640)] bg-transparent px-[14px] text-sm font-medium text-[var(--color-text1)] transition hover:bg-white/10" type="button">
       Reset
     </button>
-    <button (click)="applyFilters()" class="btn btn-primary sidebar_submit-button" type="button">
+    <button (click)="applyFilters()" class="h-[42px] w-full rounded-lg bg-[var(--color-blue-640)] px-[14px] text-sm font-medium text-[var(--color-text1)] transition" type="button">
       Apply
     </button>
   </div>

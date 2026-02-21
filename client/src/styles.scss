@@ -1,102 +1,55 @@
-@use 'assets/libs/bootstrap.min.css';
-@use 'assets/styles/shared/shared.css';
-@use 'assets/styles/shared/override.scss';
 @use 'assets/styles/fonts.scss';
-@use 'app/shared/partials/alert-notification/alert-notification.component.css';
-@use 'app/shared/partials/error-handler/error-handler.component.css';
-@use 'app/pages/homepage/homepage.component.css';
-@use 'app/shared/partials/chat-widget/chat-widget.component.css';
-@use 'app/shared/partials/header/login-header/header.component.css';
-@use 'app/pages/homepage/home-insight/home-insight.component.css';
-@use 'app/pages/homepage/search-filters/search-filters.component.css';
-@use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
-@use 'app/pages/homepage/world-heatmap/heatmap-report/heatmap-report.component.css';
-@use 'app/pages/homepage/world-heatmap/world-heatmap.component.css';
-@use 'app/pages/tenant/tenant.component.css';
-@use 'app/pages/tenant/tenant-management/view-tenant.component-shared.css';
-@use 'app/pages/tenant/tenant-management/view-profile/manage-profile.component.css';
-@use 'app/pages/tenant/tenant-management/add-tenant/add-tenant.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/alert-export-component/alert-export-component.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/alert-scan-loading/alert-scan-loading.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.css';
-@use 'app/shared/partials/confirmation-popup/confirmation-popup.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-settings/account-settings.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-settings/user-image-picker/user-image-picker.component.css';
-@use 'app/shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component.css';
-@use 'app/pages/welcome/welcome.component.css';
-@use 'app/shared/partials/loader/loader.component.css';
-@use 'app/pages/login/login-container/login-container.component.css';
-@use 'app/pages/signup/signup.component.css';
-@use 'assets/styles/shared/listing/list.component.css';
-@use 'assets/styles/shared/sidebar/filters-sidebar.component.css';
-@use 'assets/styles/shared/listing/directory.component.css';
-@use 'app/shared/partials/profile/profile.component.css';
-@use 'app/shared/partials/forgot-password/reset-password.component.css';
-@use 'app/shared/partials/empty-result/empty-result.component.css';
-@use 'app/shared/partials/header/dashboard-header/dashboard-header.component.css';
-@use 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
-@use 'app/shared/partials/pagination/pagination.component.css';
-@use 'app/shared/partials/customize-bar-chart/customize-bar-chart.component.css';
-@use 'app/pages/dashboard/dashboard.component.css';
-@use 'app/pages/credentials/credential.component.css';
-@use 'app/pages/credentials/credentials-search-bar/credentials-search-bar.component.css';
-@use 'app/pages/credentials/password-schema/password-schema.component.css';
-@use 'app/shared/partials/suggestion/suggestion.component.css';
-@use 'app/shared/partials/loading-form/loading-form.component.css';
-@use 'assets/styles/shared/report.component.css';
-@use 'assets/styles/shared/result/result-list.component.css';
-@use 'app/shared/partials/report/report-defacement/report-defacement.component.css';
-@use 'app/shared/partials/report-mapping/report-mapping.component.css';
-@use 'app/shared/partials/empty-query/empty-query.component.css';
-@use 'app/shared/partials/empty-ioc/empty-ioc.component.css';
-@use 'app/shared/partials/pro-subscription/pro-subscription.component.css';
-@use 'app/shared/partials/result/result.component.css';
-@use 'app/pages/intel-panel/dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component.css';
-@use 'app/pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component.scss';
-@use 'app/pages/intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component.css';
-@use 'app/pages/intel-panel/dashboard-api/dashboard-api.component.css';
-@use 'app/pages/intel-panel/result-insights/result-insights.component.css';
-@use 'app/pages/intel-panel/dashboard-consolidated/consolidated-apis/consolidated-apis.component.css';
-@use 'app/pages/intel-panel/dashboard-consolidated/consolidated-ioc/consolidated-ioc.component.css';
-@use 'app/pages/intel-panel/dashboard-consolidated/consolidated-scan/consolidated-scan.component.css';
-@use 'app/pages/intel-panel/dashboard-consolidated/defacement-results/threat-results.component.css';
-@use 'app/shared/partials/scroll-top/scroll-top.component.css';
-@use 'app/shared/partials/trail-notification/trail-notification.component.css';
-@use 'app/shared/partials/message-notification/message-notification.component.css';
-@use 'app/pages/graphs/cti-graph/graphs.component.css';
-@use 'app/pages/graphs/cti-graph/sidebar/sidebar.component.css';
-@use 'app/shared/partials/report/report-chat/report-chat.component.css';
-@use 'app/shared/partials/filters/date-picker/date-picker.component.css';
-@use 'app/shared/partials/json-api-viewer/json-viewer/json-viewer.component.css';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-day-view';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-month';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation';
-@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
-@use 'app/pages/credentials/expanded-row/expanded-row.component.css';
-@use 'app/pages/intel-panel/ioc-extractor/file-scanner.component.css';
-@use 'app/pages/security-scan/security-scan.component.css';
-@use 'app/pages/security-scan/security-scan-export-component/security-scan-export-component.component.css';
-@use 'app/shared/partials/scan-helper-methods/scan-helper-methods.component.css';
-@use 'app/pages/graphs/social-graph/social-mapper.scss';
-@import "bootstrap-icons/font/bootstrap-icons.css";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "bootstrap-icons/font/bootstrap-icons.css";
+@import "./app/pages/homepage/world-heatmap/world-heatmap.component.css";
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes loader_indeterminate {
+  0% {
+    transform: translateX(0) scaleX(0.05);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateX(25%) scaleX(0.3);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(50%) scaleX(0.6);
+    opacity: 1;
+  }
+  75% {
+    transform: translateX(75%) scaleX(0.3);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.1);
+    opacity: 0.5;
+  }
+}
 
 :root {
   --color-blur-920: #fff;
   --color-blur-910: #fff;
   --color-blue-900: #172235;
-  --color-blue-890: #F4F7FA;
+  --color-blue-890: #F7F9FC;
   --color-blue-880: #2A578459;
   --color-blue-870: #2A578435;
   --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
-  --color-blue-850: #F6F8FB;
+  --color-blue-850: #F7F9FC;
   --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
-  --color-blue-830: #F6F8FB;
+  --color-blue-830: #F7F9FC;
   --color-blue-820: #10335619;
   --color-blue-820-light: #ffffff;
   --color-blue-810: #E3E8EE;
@@ -109,10 +62,10 @@
   --color-blue-740: #0f263e;
   --color-blue-730: #fff;
   --color-blue-720: #ffffff;
-  --color-blue-710: #F6F8FB;
-  --color-blue-715: linear-gradient(to right, #cccccc50 50%, #cccccc40 70%, #cccccc30 80%, #cccccc20 100%);;
+  --color-blue-710: #F7F9FC;
+  --color-blue-715: linear-gradient(to right, #cccccc50 50%, #cccccc40 70%, #cccccc30 80%, #cccccc20 100%);
   --color-blue-700: #ffffff;
-  --color-blue-690: #E4E7EC;
+  --color-blue-690: #E5E7EB;
   --color-blue-680: #ffffff;
   --color-blue-670: #14335299;
   --color-blue-660: linear-gradient(to bottom, #174069, #2A5784);
@@ -128,16 +81,16 @@
   --color-green-100: #ceca5f;
   --color-mono: white;
   --color-white: white;
-  --color-border: #E4E7EC;
-  --color-divider: #ffffff15;
+  --color-border: #E5E7EB;
+  --color-divider: #00000010;
   --color-divider-dark: #00000035;
   --color-divider-code: #00000010;
-  --color-tags: #ECF3FF;
-  --color-header: #00000090;
+  --color-tags: #EAF2FF;
+  --color-header: #17223590;
   --color-banner: rgb(170 128 0 / 40%);
-  --color-text1: #373637;
-  --color-text2: #373637;
-  --color-text3: #172235;
+  --color-text1: #172235;
+  --color-text2: #344054;
+  --color-text3: #1f2e47;
   --color-text4: #667085;
   --color-text5: #57A5EB;
   --color-text6: #37363675;
@@ -170,6 +123,33 @@
 
   --filter-dropdown-icon: url('/assets/images/shared/theme/filter-dropdown-light-icon.svg');
 
+  --color-shadow-light: rgb(16 24 40 / 3%);
+  --color-shadow-medium: rgb(16 24 40 / 6%);
+  --color-shadow-strong: rgb(16 24 40 / 10%);
+
+  --color-scans-header: #00000080;
+  --color-scan-red: #ed0006;
+  --color-scan-red-100: #FFDFE0;
+  --color-scan-red-200: #fdbebf;
+  --color-scan-red-300: #fdc0c2;
+  --color-scan-green: #0fbb00;
+  --color-scan-green-100: #d1ffe0;
+  --color-scan-green-200: #c1ffd7;
+  --color-scan-gray: #d9d9d9;
+  --color-scan-gray-100: #E7EBF2;
+  --color-scan-gray-200: #d6dbe3;
+  --color-scan-orange: #ea8b00;
+  --color-scan-orange-100: #fef3e0;
+  --color-scan-orange-200: #fde8c1;
+  --color-scan-orange-300: #fde8c2;
+
+  --color-dark-900: #28313B;
+  --color-dark-800: #1B1F24;
+  --color-dark-700: #3B4B5E;
+  --color-dark-600: #6B7C93;
+  --color-dark-500: #D5DDE5;
+  --color-dark-400: #F1F4F8;
+  --color-dark-300: #F7F9FC;
 }
 
 .dark-theme {
@@ -257,219 +237,171 @@
   --filter-dropdown-icon: url('/assets/images/shared/theme/filter-dropdown-dark-icon.svg');
 }
 
-app-profile.topbar-profile-compact .profile {
-  gap: 0;
-}
-
-app-profile.topbar-profile-compact .profile_category {
-  padding: 0;
-}
-
-app-profile.topbar-profile-compact {
-  margin-right: 0;
-}
-
-app-profile.topbar-profile-compact .profile {
-  margin: 0;
-}
-
-app-profile.topbar-profile-compact .profile-dropdown-toggle {
-  display: flex;
-  align-items: center;
-  margin: 0;
-}
-
-app-profile.topbar-profile-compact .profile_logout_icon img {
-  width: 20px;
-  height: 20px;
-}
-
-img[src*="assets/images/shared/theme"]:not([data-ph]),
-img[src*="assets/images/sidebar/theme"]:not([data-ph]),
-img[src*="assets/images/statistics/"]:not([data-ph]) {
-  filter: brightness(0.3) contrast(95%) drop-shadow(0 0 0 var(--color-text1)) !important;
-}
-
-.dark-theme img[src*="assets/images/shared/theme"]:not([data-ph]),
-.dark-theme img[src*="assets/images/sidebar/theme"]:not([data-ph]),
-.dark-theme img[src*="assets/images/statistics/"]:not([data-ph]) {
-  filter: drop-shadow(0 0 0 var(--color-text1)) !important;
-}
-
-
-html {
-  background: #172235;
-  scrollbar-width: none;
-  overflow-x: hidden;
-  min-width: 350px !important;
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  background: #00000000;
-  height: 100dvh;
-  min-width: 350px !important;
-  min-height: 100dvh;
-  scrollbar-width: none;
-}
-
-body.dark-theme {
-  background-color: #0E1626;
-}
-
-.social-scanner-main{
-  min-height: 100vh !important;
-  height: auto !important;
-}
-
-.social-home .h-full{
-  height: 100vh !important;
-}
-.social-home{
-  height: 100vh !important;
-}
-
-body.light-theme {
-  background-color: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%);
-}
-
-body::-webkit-scrollbar,
-html::-webkit-scrollbar {
-  display: none;
-}
-
-.gc-clear-selection {
-  -webkit-touch-callout: none;
-  user-select: none;
-  outline: none;
-  text-decoration: none;
-  text-underline: none;
-}
-
-@media print {
-  * {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+@layer components {
+  .ui-page-container {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-consolidated-primary);
+    padding: 20px;
   }
 
-  .security-report-pre {
-    background: #0b1020 !important;
-    color: #e6edf3 !important;
-    border-color: #1f2a44 !important;
+  .ui-page-title {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-text1);
+  }
+
+  .ui-page-description {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text6);
+  }
+
+  .ui-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text1);
+  }
+
+  .ui-section-description {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text6);
+  }
+
+  .ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+  }
+
+  .ui-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(87 165 235 / 30%);
+  }
+
+  .ui-btn-primary {
+    border-color: rgb(87 165 235 / 35%);
+    background: linear-gradient(92.32deg, #4ea2f1 2.58%, #2c7ac5);
+    color: #fff;
+  }
+
+  .ui-btn-primary:hover {
+    background: linear-gradient(92.32deg, #3f96e8 2.58%, #236eb7);
+  }
+
+  .ui-btn-secondary {
+    border-color: var(--color-border);
+    background: var(--color-blue-820);
+    color: var(--color-text2);
+  }
+
+  .ui-btn-secondary:hover {
+    background: var(--color-blue-810);
+  }
+
+  .ui-btn-danger {
+    border-color: var(--color-border-red);
+    background: var(--color-red-200);
+    color: var(--color-text1);
+  }
+
+  .ui-btn-danger:hover {
+    background: var(--color-red-100);
+  }
+
+  .ui-table-shell {
+    margin-top: 16px;
+    overflow-x: auto;
+    border: 1.5px solid #ffffff1f;
+    border-radius: 10px;
+    background: var(--color-blue-830);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ui-table {
+    width: 100%;
+    min-width: 920px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+    color: var(--color-text1);
+  }
+
+  .ui-table thead {
+    background: var(--color-blue-820-light);
+    color: var(--color-text6);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: 13px;
+    border-bottom: 2px solid rgba(87, 165, 235, 0.3764705882);
+  }
+
+  .ui-table th,
+  .ui-table td {
+    padding: 12px;
+  }
+
+  .ui-table tbody tr {
+    border-top: 1px solid #ffffff12;
+    color: var(--color-text3);
+    transition: background-color .16s ease, border-color .16s ease;
+  }
+
+  .ui-table tbody tr:nth-child(odd) {
+    background: #131e30;
+  }
+
+  .ui-table tbody tr:nth-child(even) {
+    background: #172235;
+  }
+
+  .ui-table tbody tr:hover {
+    background: #20314a;
+    border-top-color: #ffffff24;
+  }
+
+  .ui-table tbody td {
+    white-space: nowrap;
+  }
+
+  .ui-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%239fb3c8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 14px 14px;
+  }
+
+  @media (width <= 768px) {
+    .ui-table {
+      min-width: 680px;
+      font-size: 13px;
+    }
+
+    .ui-table thead {
+      font-size: 12px;
+    }
+
+    .ui-table th,
+    .ui-table td {
+      padding: 10px;
+    }
   }
 }
 
-img[data-ph] {
-  background:
-    var(--color-placeholder),
-    url('/assets/images/shared/placeholder.svg') center/cover no-repeat;
-  object-fit: cover;
-  border-radius: 8px;
-  opacity: 0.85;
-  background-size: 200% 100%, cover;
-  animation: shimmer-dark 1.6s linear infinite;
-}
-
-.dark-theme img[data-ph] {
-  background:
-    var(--color-placeholder),
-    url('/assets/images/shared/theme/placeholder.svg') center/cover no-repeat;
-}
-
-@keyframes shimmer-dark {
-  0% {
-    background-position: -200% 0, center;
-  }
-
-  100% {
-    background-position: 200% 0, center;
-  }
-}
-
-img[data-ph]:not([width], [height]) {
-  aspect-ratio: 1/1;
-  min-width: 24px;
-  min-height: 24px;
-  display: inline-block;
-}
-
-.dropdown-item.text-muted {
-  opacity: 0.60;
-  pointer-events: none;
-}
-
-table tr td,
-table tr th {
-  vertical-align: middle !important;
-}
-
-.directory-list__table tbody tr {
-  overflow: visible !important;
-}
-
-.dropdown-short a {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.dropdown-short .dropdown-divider {
-  margin-top: 1px;
-  margin-bottom: 1px;
-}
-
-.view-tenant_dropdown-wrapper-min {
-  height: 40px;
-  margin-left: -60px;
-}
-
-.dropdown-item:hover {
-  background: #cccccc60;
-}
-
-.dropdown-menu {
-  opacity: 0;
-  transform: translateY(-2px);
-  visibility: hidden;
-  display: block !important;
-  transition: opacity .22s ease-in-out, transform .12s ease-out;
-}
-
-.show>.dropdown-menu,
-.dropdown-menu.show {
-  opacity: 1;
-  transform: translateY(0);
-  visibility: visible;
-}
-
-.dropdown-item:hover {
-  background: #cccccc60;
-}
-
-.table {
-  overflow: hidden;
-}
-
-table tr:last-child td {
-  border-bottom: none !important;
-}
-
-.btn-danger {
-  background: red !important;
-}
-
-.dropdown-menu {
-  max-height: 400px !important;
-}
-
-.quota-banner {
-  background: #2E2600;
-  border: 0;
-  border-bottom: 1px solid #6B5600;
-  color: #FFD966;
-}
-
-.dropdown-disabled {
-  opacity: 0.2;
-  pointer-events: none;
-}

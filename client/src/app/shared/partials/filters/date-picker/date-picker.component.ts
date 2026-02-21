@@ -1,88 +1,185 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, inject } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbDate, NgbDateParserFormatter, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
+interface CalendarCell {
+  date: Date;
+  inCurrentMonth: boolean;
+  iso: string;
+}
+
 @Component({
   selector: 'app-date-picker',
   standalone: true,
-  imports: [FormsModule, CommonModule, NgbModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './date-picker.component.html',
 })
 export class DatePickerComponent implements OnChanges {
-  formatter = inject(NgbDateParserFormatter);
-  hoveredDate: NgbDate | null = null;
-  fromDate: NgbDate | null = null;
-  toDate: NgbDate | null = null;
-  finalValue = '';
-  hiddenValue = '';
-
   @Input() key = '';
   @Input() filterModel: any;
   @Input() mSelectedFilters: any;
+  @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
+  @Output() dateSelected = new EventEmitter<{ key: string; value: string }>();
 
-  @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string; }>();
-  @Output() dateSelected = new EventEmitter<{ key: string; value: string; }>();
+  isOpen = false;
+  viewYear = 0;
+  viewMonth = 0; // 0-11
+  cells: CalendarCell[] = [];
 
-  onDateSelection(date: NgbDate): void {
-    if (!this.fromDate && !this.toDate) {
-      this.fromDate = date;
-      this.hiddenValue = this.formatter.format(this.fromDate);
-      this.finalValue = '';
-      return;
+  fromDate: Date | null = null;
+  toDate: Date | null = null;
+
+  readonly weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+  get displayValue(): string {
+    if (this.fromDate && this.toDate) {
+      return `${this.toIso(this.fromDate)},${this.toIso(this.toDate)}`;
     }
-    else if (this.fromDate && !this.toDate && (date.equals(this.fromDate) || date.after(this.fromDate))) {
-      this.toDate = date;
-      const v = `${this.formatter.format(this.fromDate)},${this.formatter.format(this.toDate)}`;
-      this.hiddenValue = v;
-      this.finalValue = v;
-      this.mSelectedFilters[this.key] = v;
-      this.selectedFiltersChange.emit({ key: this.key, value: v });
-      this.dateSelected.emit({ key: this.key, value: v });
-      return;
+    if (this.fromDate) {
+      return this.toIso(this.fromDate);
     }
-    else {
-      this.fromDate = date;
-      this.toDate = null;
-      this.hiddenValue = this.formatter.format(this.fromDate);
-      this.finalValue = '';
-      return;
-    }
+    return '';
   }
 
-  isHovered(date: NgbDate) {
-    return this.fromDate && !this.toDate && this.hoveredDate && date.after(this.fromDate) && date.before(this.hoveredDate);
-  }
-
-  isInside(date: NgbDate) {
-    return this.fromDate && this.toDate && date.after(this.fromDate) && date.before(this.toDate);
+  get monthLabel(): string {
+    return new Date(this.viewYear, this.viewMonth, 1).toLocaleString(undefined, {
+      month: 'long',
+      year: 'numeric'
+    });
   }
 
   ngOnChanges(): void {
-    const rawValue = this.mSelectedFilters?.[this.key];
-    if (!rawValue) {
+    const raw = this.mSelectedFilters?.[this.key];
+    if (!raw) {
       this.fromDate = null;
       this.toDate = null;
-      this.hoveredDate = null;
-      this.hiddenValue = '';
-      this.finalValue = '';
+      const now = new Date();
+      this.viewYear = now.getFullYear();
+      this.viewMonth = now.getMonth();
+      this.buildCalendar();
       return;
     }
-    const dates = rawValue.split(',');
-    const [startStr, endStr] = dates;
-    const parseDate = (str: string): NgbDate | null => {
-      const parts = str?.trim().split('-').map(Number);
-      return parts?.length === 3 ? new NgbDate(parts[0], parts[1], parts[2]) : null;
-    };
-    this.fromDate = parseDate(startStr);
-    this.toDate = parseDate(endStr);
-    this.hiddenValue = rawValue;
-    this.finalValue = this.fromDate && this.toDate ? rawValue : '';
+
+    const [start, end] = String(raw).split(',');
+    this.fromDate = this.parseIso(start);
+    this.toDate = this.parseIso(end);
+
+    const pivot = this.fromDate || new Date();
+    this.viewYear = pivot.getFullYear();
+    this.viewMonth = pivot.getMonth();
+    this.buildCalendar();
   }
 
-  isRange(date: NgbDate) {
-    return (date.equals(this.fromDate) ||
-          (this.toDate && date.equals(this.toDate)) ||
-          this.isInside(date) ||
-          this.isHovered(date));
+  togglePicker(): void {
+    this.isOpen = !this.isOpen;
+  }
+
+  closePicker(): void {
+    this.isOpen = false;
+  }
+
+  prevMonth(): void {
+    if (this.viewMonth === 0) {
+      this.viewMonth = 11;
+      this.viewYear -= 1;
+    } else {
+      this.viewMonth -= 1;
+    }
+    this.buildCalendar();
+  }
+
+  nextMonth(): void {
+    if (this.viewMonth === 11) {
+      this.viewMonth = 0;
+      this.viewYear += 1;
+    } else {
+      this.viewMonth += 1;
+    }
+    this.buildCalendar();
+  }
+
+  onSelect(cell: CalendarCell): void {
+    const picked = new Date(cell.date.getFullYear(), cell.date.getMonth(), cell.date.getDate());
+    if (!this.fromDate || (this.fromDate && this.toDate)) {
+      this.fromDate = picked;
+      this.toDate = null;
+      return;
+    }
+
+    if (picked.getTime() >= this.fromDate.getTime()) {
+      this.toDate = picked;
+      const value = `${this.toIso(this.fromDate)},${this.toIso(this.toDate)}`;
+      this.mSelectedFilters[this.key] = value;
+      this.selectedFiltersChange.emit({ key: this.key, value });
+      this.dateSelected.emit({ key: this.key, value });
+      this.closePicker();
+      return;
+    }
+
+    this.fromDate = picked;
+    this.toDate = null;
+  }
+
+  isStart(cell: CalendarCell): boolean {
+    return !!this.fromDate && this.sameDay(cell.date, this.fromDate);
+  }
+
+  isEnd(cell: CalendarCell): boolean {
+    return !!this.toDate && this.sameDay(cell.date, this.toDate);
+  }
+
+  isInRange(cell: CalendarCell): boolean {
+    if (!this.fromDate || !this.toDate) {
+      return false;
+    }
+    const t = cell.date.getTime();
+    return t > this.fromDate.getTime() && t < this.toDate.getTime();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    this.closePicker();
+  }
+
+  private buildCalendar(): void {
+    const first = new Date(this.viewYear, this.viewMonth, 1);
+    const startOffset = first.getDay(); // sunday-based
+    const start = new Date(this.viewYear, this.viewMonth, 1 - startOffset);
+
+    const next: CalendarCell[] = [];
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      next.push({
+        date: d,
+        inCurrentMonth: d.getMonth() === this.viewMonth,
+        iso: this.toIso(d)
+      });
+    }
+    this.cells = next;
+  }
+
+  private parseIso(value?: string): Date | null {
+    const v = (value || '').trim();
+    if (!v) {
+      return null;
+    }
+    const [y, m, d] = v.split('-').map(Number);
+    if (!y || !m || !d) {
+      return null;
+    }
+    return new Date(y, m - 1, d);
+  }
+
+  private toIso(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  private sameDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
   }
 }

@@ -5,14 +5,13 @@ import { FilterModel } from '../../model/filter/filter.model';
 import { last } from 'rxjs';
 import { filterAnimation } from '../../animations/filter.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
-  imports: [FormsModule, CommonModule, NgOptimizedImage, TooltipDirective, NgbModule, DatePickerComponent],
+  imports: [FormsModule, CommonModule, NgOptimizedImage, TooltipDirective, DatePickerComponent],
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {

@@ -1,87 +1,63 @@
 <ng-container>
-  <div class="search__result-detail">
-    <div (click)="toggleContent()" class="search__result__section__heading">
-      <div class="left-content">
+  <div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
+    <div (click)="toggleContent()" class="flex cursor-pointer items-center justify-between">
+      <div class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text1)]">
         Related reports <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="list of reports that are either directly or indirectly linked to this document ">
       </div>
-      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
-        <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+        <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
       </div>
     </div>
-    <div *ngIf="isExpanded" class="content pt-3">
-      <div class="list__container report-mapping">
-        <table class="table table-striped directory-list__table clear-paddings mb-0">
-          <thead *ngIf="loading || filteredItems.length>0 ">
+
+    <div *ngIf="isExpanded" class="mt-4">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead *ngIf="loading || filteredItems.length>0" class="text-[var(--color-text3)]">
             <tr>
-              <th class="narrow-col" scope="col">ID</th>
-              <th scope="col">Mapping To</th>
-              <th class="mid-col" scope="col">Mapping On</th>
-              <th scope="col">Mapping Value</th>
+              <th class="px-3 py-2 font-semibold">ID</th>
+              <th class="px-3 py-2 font-semibold">Mapping To</th>
+              <th class="px-3 py-2 font-semibold">Mapping On</th>
+              <th class="px-3 py-2 font-semibold">Mapping Value</th>
             </tr>
           </thead>
           <tbody *ngIf="filteredItems.length>0" @fadeInDashboardItem>
             <ng-container *ngFor="let item of filteredItems; let i = index">
-              <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer">
-                <td data-label="ID">
-                  {{ (i + 1) }}
-                </td>
-                <td data-label="Service URL">
-                  <a class="list__table-url text-decoration-none text-reset"> {{ extractId(item.edge._id) }} </a>
-                </td>
-                <td data-label="Category">
-                  <div class="d-flex flex-wrap">
-                    <div class="list__content-category px-2 py-1 text-truncate">
-                      {{ extractProperty(item.edge._id, "key") }}
-                    </div>
+              <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer border-t border-[var(--color-divider)] hover:bg-[var(--color-blue-720)]">
+                <td class="px-3 py-2 text-[var(--color-text1)]">{{ (i + 1) }}</td>
+                <td class="px-3 py-2 text-[var(--color-text1)]">{{ extractId(item.edge._id) }}</td>
+                <td class="px-3 py-2">
+                  <div class="inline-flex max-w-[240px] truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs text-[var(--color-text3)]">
+                    {{ extractProperty(item.edge._id, "key") }}
                   </div>
                 </td>
-                <td data-label="Category">
-                  <div class="d-flex flex-wrap">
-                    <div class="list__content-category px-2 py-1 text-truncate">
-                      {{ extractProperty(item.edge._id, "value") }}
-                    </div>
+                <td class="px-3 py-2">
+                  <div class="inline-flex max-w-[240px] truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs text-[var(--color-text3)]">
+                    {{ extractProperty(item.edge._id, "value") }}
                   </div>
                 </td>
               </tr>
             </ng-container>
           </tbody>
           <tbody *ngIf="loading" @fadeInDashboardItem>
-            <tr>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-75"></div>
-              </td>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-100"></div>
-              </td>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-75"></div>
-              </td>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-75"></div>
-              </td>
+            <tr class="border-t border-[var(--color-divider)]">
+              <td class="px-3 py-2"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+              <td class="px-3 py-2"><div class="h-3 w-40 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
             </tr>
-            <tr>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-75"></div>
-              </td>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-100"></div>
-              </td>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-75"></div>
-              </td>
-              <td>
-                <div class="skeleton_shimmer shimmer-line w-75"></div>
-              </td>
+            <tr class="border-t border-[var(--color-divider)]">
+              <td class="px-3 py-2"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+              <td class="px-3 py-2"><div class="h-3 w-40 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div *ngIf="!loading && filteredItems.length==0">
-        <br>
-        <div class="report-mapping-empty-header">No structured records found!</div>
-        <div class="report-mapping-empty-body">We’re watching this source — new breach or tracking data will appear here
-          once detected.</div>
+
+      <div *ngIf="!loading && filteredItems.length==0" class="mt-4">
+        <div class="text-sm font-semibold text-[var(--color-text1)]">No structured records found!</div>
+        <div class="mt-1 text-xs text-[var(--color-text4)]">We’re watching this source — new breach or tracking data will appear here once detected.</div>
       </div>
     </div>
   </div>

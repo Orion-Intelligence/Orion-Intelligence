@@ -1,107 +1,105 @@
-<div class="list__container">
+<div class="mt-[16px] overflow-x-auto rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-830)]">
   <ng-container *ngIf="(directoryData$ | async) as data; else loadingTpl">
-    <table class="table table-striped directory-list__table clear-paddings">
-      <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
+    <table class="w-full border-collapse text-left text-[13px] text-[var(--color-text1)]">
+      <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0" class="bg-[var(--color-blue-820-light)]">
         <tr>
-          <th class="list__column-id-min" scope="col">ID</th>
-          <th class="list__column-service-url" scope="col">Service URL</th>
-          <th class="list__column-category" scope="col">Category</th>
-          <th class="list__column-url-status" scope="col">General</th>
-          <th class="list__column-leak-status" scope="col">Leak</th>
-          <th class="list__column-network-type" scope="col">Network</th>
-          <th scope="col">Last Updated</th>
+          <th class="px-[12px] py-[10px] font-semibold">ID</th>
+          <th class="px-[12px] py-[10px] font-semibold">Service URL</th>
+          <th class="px-[12px] py-[10px] font-semibold">Category</th>
+          <th class="px-[12px] py-[10px] font-semibold">General</th>
+          <th class="px-[12px] py-[10px] font-semibold">Leak</th>
+          <th class="px-[12px] py-[10px] font-semibold">Network</th>
+          <th class="px-[12px] py-[10px] font-semibold">Last Updated</th>
         </tr>
       </thead>
       <tbody *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0" @fadeInDashboardItem>
         <ng-container *ngFor="let item of data.mDirectoryCallbackLinks | slice:0:visibleCount; let i = index">
-          <tr *ngIf="item.url?.trim()">
-            <td data-label="ID">
+          <tr *ngIf="item.url?.trim()" class="border-t border-[var(--color-border)]">
+            <td class="px-[12px] py-[10px]" data-label="ID">
               {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
             </td>
-            <td data-label="Service URL">
+            <td class="px-[12px] py-[10px]" data-label="Service URL">
               <ng-container *ngIf="item.network_type === 'telegram'; else nonTg">
-                <a class="list__table-url text-decoration-none text-reset">{{ item.name?.toLowerCase() }}</a>
+                <span class="text-[var(--color-text1)]">{{ item.name?.toLowerCase() }}</span>
               </ng-container>
               <ng-template #nonTg>
-                <a class="list__table-url text-decoration-none text-reset">{{ item.url }}</a>
+                <span class="text-[var(--color-text1)]">{{ item.url }}</span>
               </ng-template>
             </td>
-            <td data-label="Category">
-              <div class="d-flex flex-wrap">
+            <td class="px-[12px] py-[10px]" data-label="Category">
+              <div class="flex flex-wrap gap-[6px]">
                 <ng-container *ngIf="item.content_type?.length; else noCategory">
-                  <div *ngFor="let category of item.content_type | slice:0:2" class="list__content-category px-2 py-1">
+                  <div *ngFor="let category of item.content_type | slice:0:2" class="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[8px] py-[4px] text-[12px]">
                     {{ category | titlecase }}
                   </div>
                 </ng-container>
                 <ng-template #noCategory>
-                  <div class="list__content-category px-2 py-1">No categories available</div>
+                  <div class="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[8px] py-[4px] text-[12px]">No categories available</div>
                 </ng-template>
               </div>
             </td>
-            <td data-label="General Model Status">
-              <span class="list__status-default-pointer"></span>
+            <td class="px-[12px] py-[10px]" data-label="General Model Status">
+              <span class="mr-[6px] inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
               {{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
             </td>
-            <td data-label="Leak Model Status">
-              <span class="list__status-default-pointer"></span>
+            <td class="px-[12px] py-[10px]" data-label="Leak Model Status">
+              <span class="mr-[6px] inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
               {{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
             </td>
-            <td data-label="Network Type">
+            <td class="px-[12px] py-[10px]" data-label="Network Type">
               {{ item.network_type ? item.network_type : 'Unknown' }}
             </td>
-            <td data-label="Last Updated">
+            <td class="px-[12px] py-[10px]" data-label="Last Updated">
               {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}
             </td>
           </tr>
         </ng-container>
 
-        <tr *ngIf="loadingMore">
-          <td colspan="7" class="text-center py-3">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden"></span>
-            </div>
+        <tr *ngIf="loadingMore" class="border-t border-[var(--color-border)]">
+          <td colspan="7" class="px-[12px] py-[16px] text-center">
+            <div class="mx-auto h-[20px] w-[20px] animate-spin rounded-full border-2 border-[var(--color-border)] border-t-transparent"></div>
           </td>
         </tr>
       </tbody>
     </table>
-    <div *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) === 0" class="list__empty-padding">
-      <div class="report-mapping-empty-header">No links found!</div>
-      <div class="report-mapping-empty-body">
+    <div *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) === 0" class="px-[20px] py-[24px]">
+      <div class="text-[16px] font-semibold text-[var(--color-text1)]">No links found!</div>
+      <div class="mt-[6px] text-[13px] text-[var(--color-text4)]">
         We’re watching this source — new links will appear here once detected.
       </div>
     </div>
   </ng-container>
   <ng-template #loadingTpl>
-    <table class="table table-striped directory-list__table clear-paddings">
-      <thead>
+    <table class="w-full border-collapse text-left text-[13px] text-[var(--color-text1)]">
+      <thead class="bg-[var(--color-blue-820-light)]">
         <tr>
-          <th class="list__column-id-min" scope="col">ID</th>
-          <th class="list__column-service-url" scope="col">Service URL</th>
-          <th class="list__column-category" scope="col">Category</th>
-          <th class="list__column-url-status" scope="col">General</th>
-          <th class="list__column-leak-status" scope="col">Leak</th>
-          <th class="list__column-network-type" scope="col">Network</th>
-          <th scope="col">Last Updated</th>
+          <th class="px-[12px] py-[10px] font-semibold">ID</th>
+          <th class="px-[12px] py-[10px] font-semibold">Service URL</th>
+          <th class="px-[12px] py-[10px] font-semibold">Category</th>
+          <th class="px-[12px] py-[10px] font-semibold">General</th>
+          <th class="px-[12px] py-[10px] font-semibold">Leak</th>
+          <th class="px-[12px] py-[10px] font-semibold">Network</th>
+          <th class="px-[12px] py-[10px] font-semibold">Last Updated</th>
         </tr>
       </thead>
       <tbody @fadeInDashboardItem>
-        <tr>
-          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        <tr class="border-t border-[var(--color-border)]">
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
         </tr>
-        <tr>
-          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        <tr class="border-t border-[var(--color-border)]">
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          <td class="px-[12px] py-[10px]"><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
         </tr>
       </tbody>
     </table>

@@ -30,7 +30,7 @@
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
 
-            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full left-0 mt-2 w-48 bg-slate-700 rounded-md shadow-lg border border-slate-600 z-20 animate-dropdown p-1">
+            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 origin-top-left rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
                 <button (click)="createNewTab()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
                     <i class="bi bi-plus-square w-5 h-5 text-slate-400 group-hover:text-white"></i>
                     <span>New Session</span>
@@ -48,7 +48,7 @@
             <button (click)="toggleHeaderMenu($event)" class="flex items-center justify-center h-8 w-8 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white transition-colors" title="Session Menu">
                 <i class="bi bi-three-dots-vertical text-lg"></i>
             </button>
-            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full right-0 mt-2 w-56 bg-slate-700 rounded-md shadow-lg border border-slate-600 z-20 animate-dropdown-right p-1">
+            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 origin-top-right rounded-md border border-slate-600 bg-slate-700 p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
                 <button (click)="tabManager.exportActiveTab(); closeMenus()" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200 rounded-md hover:bg-indigo-500 hover:text-white transition-colors group">
                     <i class="bi bi-download w-5 h-5 text-slate-400 group-hover:text-white"></i>
                     <span>Export Current Session</span>
@@ -68,7 +68,7 @@
                 </button>
             </div>
         </div>
-        <app-profile class="topbar-profile-compact"></app-profile>
+        <app-profile></app-profile>
       </div>
     </div>
   </header>

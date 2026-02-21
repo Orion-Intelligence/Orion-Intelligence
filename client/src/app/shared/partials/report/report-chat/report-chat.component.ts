@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
-import { CommonModule, NgForOf, NgIf, SlicePipe, } from '@angular/common';
+import { CommonModule, NgClass, NgForOf, NgIf, SlicePipe, } from '@angular/common';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
@@ -23,7 +23,7 @@ import { AppService } from '../../../../services/core/app/app.service';
     NgForOf,
     ResultListComponent,
     ResultSectionComponent,
-    SlicePipe, CommonModule,
+    SlicePipe, CommonModule, NgClass,
     JsonApiViewerComponent, TooltipDirective, ReportHeaderComponent, ChatWidgetComponent
   ],
   animations: [fadeInDashboardItem]

@@ -1,28 +1,33 @@
-<ng-container><span id="top"></span>
-  <div class="directory-listing">
-    <div class="directory-listing_container">
-      <div class="directory-listing_main-container">
-        <div class="directory-listing_upper-heading">
-          <div class="directory-listing_pagination-heading">
-            <p class="directory-listing_header">Live Onion Services</p>
-          </div>
-
-          <div class="directory-listing_pagination col-7"></div>
-
-          <div class="side-menu-container"><label (click)="openSidebar()" class="filters-button"><img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24">Filter</label>
-
-            <div [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
-              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
-                (filterReset)="resetFilters()" [filterModel]="filterModel"
-                [isFilterOpen]="isFilterOpen$ | async"></app-filters>
-            </div>
-          </div>
+<ng-container>
+  <span id="top"></span>
+  <div class="mt-[30px]">
+    <div class="px-[20px]">
+      <div class="flex flex-wrap items-center justify-between gap-[12px]">
+        <div>
+          <p class="text-[16px] font-medium text-[var(--color-text1)]">Live Onion Services</p>
         </div>
 
-        <app-directory-list></app-directory-list>
+        <div class="flex items-center gap-[12px]">
+          <label (click)="openSidebar()" class="flex cursor-pointer items-center gap-[8px] text-[var(--color-text1)]">
+            <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24">Filter
+          </label>
+
+          <div
+            class="fixed top-0 h-[96vh] w-[300px] rounded-tl-[15px] bg-[#2A5784] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full"
+            [ngClass]="{
+              'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async),
+              'right-0': (isFilterOpen$ | async)
+            }">
+            <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
+              (filterReset)="resetFilters()" [filterModel]="filterModel"
+              [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+          </div>
+        </div>
       </div>
-      <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
+
+      <app-directory-list></app-directory-list>
     </div>
+    <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
   </div>
 
   <span id="bottom"></span>
