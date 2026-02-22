@@ -8,7 +8,7 @@ describe('Orion Intelligence – Full Stable Flow', () => {
   it('Full Flow', () => {
     cy.visit('/dashboard');
 
-    cy.contains('div.sidebar__item-dropdown', 'admin')
+    cy.contains('app-dashboard-sidebar-items div', 'admin')
       .scrollIntoView()
       .click({ force: true });
 
@@ -21,7 +21,7 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'System Settings'
     ];
 
-    cy.get('button.sidebar__header-menu')
+    cy.get('img[src*="nav_menu"]')
       .should('be.visible')
       .click();
 
@@ -30,12 +30,12 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       .click();
 
     adminSections.forEach((section) => {
-      cy.contains('.sidebar__subitem-content', section)
+      cy.contains('app-dashboard-sidebar-items div', section)
         .scrollIntoView()
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'General Intelligence')
+    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
       .click({ force: true });
 
     const sections = [
@@ -52,28 +52,28 @@ describe('Orion Intelligence – Full Stable Flow', () => {
     ];
 
     sections.forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
+      cy.contains('app-dashboard-sidebar-items div', s)
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Data Breach')
+    cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
       .click({ force: true });
 
-    cy.get('img.scroller[alt="scroll to top"]').click();
+    cy.get('img[alt="scroll to top"]').click();
     ['All', 'Databases', 'Tracking'].forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
+      cy.contains('app-dashboard-sidebar-items div', s)
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Defacement')
+    cy.contains('app-dashboard-sidebar-items div', 'Defacement')
       .click({ force: true });
 
     ['All', 'Hacked', 'Phishing', 'Databases'].forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
+      cy.contains('app-dashboard-sidebar-items div', s)
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Social')
+    cy.contains('app-dashboard-sidebar-items div', 'Social')
       .click({ force: true });
 
     [
@@ -85,32 +85,32 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'Forum',
       'Reddit'
     ].forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
+      cy.contains('app-dashboard-sidebar-items div', s)
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Exploit')
+    cy.contains('app-dashboard-sidebar-items div', 'Exploit')
       .click({ force: true });
 
     ['All', 'CVE', 'Tools', 'ZeroDay'].forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
+      cy.contains('app-dashboard-sidebar-items div', s)
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Feed')
+    cy.contains('app-dashboard-sidebar-items div', 'Feed')
       .click({ force: true });
 
-    cy.contains('.sidebar__item-dropdown', 'Stealer logs')
+    cy.contains('app-dashboard-sidebar-items div', 'Stealer logs')
       .click({ force: true });
 
-    cy.get('.credential_row_toggle')
+    cy.get('button[aria-label="Expand row"]')
       .each(($btn, index) => {
         if (index < 5) {
           cy.wrap($btn).click({ force: true });
         }
       });
 
-    cy.contains('.sidebar__item-dropdown', 'Web Scans')
+    cy.contains('app-dashboard-sidebar-items div', 'Web Scans')
       .click({ force: true });
 
     [
@@ -119,11 +119,11 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'Repository Scan',
       'SEO Scan'
     ].forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
+      cy.contains('app-dashboard-sidebar-items div', s)
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Live APIs')
+    cy.contains('app-dashboard-sidebar-items div', 'Live APIs')
       .click({ force: true });
 
     [
@@ -131,11 +131,11 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'Social Scanner',
       'Playstore Scanner'
     ].forEach((s) => {
-      cy.contains('.sidebar__subitem-content', s)
+      cy.contains('app-dashboard-sidebar-items div', s)
         .click({ force: true });
     });
 
-    cy.contains('.sidebar__item-dropdown', 'Dump')
+    cy.contains('app-dashboard-sidebar-items div', 'Dump')
       .click({ force: true });
 
     cy.contains('Links')
@@ -204,13 +204,13 @@ describe('Orion Intelligence - Heatmap Coverage', () => {
 
     openCountryReportFromMap();
     cy.contains('app-heatmap-report h3', 'Reports', { timeout: 10000 }).should('be.visible');
-    cy.get('app-heatmap-report .report-list').should('exist');
+    cy.get('app-heatmap-report .overflow-y-auto').should('exist');
 
-    cy.get('app-heatmap-report button.close-btn').click({ force: true });
+    cy.get('app-heatmap-report button[aria-label="Close"]').click({ force: true });
     cy.get('app-heatmap-report', { timeout: 15000 }).should('not.exist');
 
     openCountryReportFromMap();
-    cy.get('app-heatmap-report .overlay').click('topLeft', { force: true });
+    cy.get('app-heatmap-report > div.fixed').click('topLeft', { force: true });
     cy.get('app-heatmap-report', { timeout: 15000 }).should('not.exist');
   });
 

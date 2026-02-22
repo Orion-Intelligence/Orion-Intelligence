@@ -1,26 +1,26 @@
-<div class="ui-consolidated-main max-h-[850px] min-w-0 overflow-y-auto rounded-[8px] border p-[17px_24px_17px_17px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[14px] max-[640px]:max-h-none max-[640px]:p-[12px]">
+<div class="ui-consolidated-main max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
   <div class="flex cursor-pointer items-center justify-between max-[640px]:flex-wrap max-[640px]:gap-[10px]" (click)="toggleResultsBarCollapse()">
-    <div class="flex text-[17px] font-bold text-[var(--color-text1)]">
+    <div class="flex text-[16px] font-bold text-[var(--color-text1)]">
       {{ results_defacement ? 'IP Threat Report' : 'Stealer Log Report' }}
     </div>
 
     <div class="mr-[-10px] flex items-center gap-[20px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
       <ng-container *ngIf="results_defacement?.Result?.length && (threatTypeCounts | keyvalue).length > 0">
-        <div class="flex h-[30px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[10px] text-[12px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" *ngFor="let type of threatTypeCounts | keyvalue" (click)="onFilterTypeClick(type.key, $event)">
+        <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" *ngFor="let type of threatTypeCounts | keyvalue" (click)="onFilterTypeClick(type.key, $event)">
           {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
-          <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="icon" class="h-[10px] w-[10px] shrink-0 opacity-95">
+          <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
         </div>
       </ng-container>
 
       <ng-container *ngIf="results_stealerlog?.Result?.length as slCount">
-        <div class="flex h-[30px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[10px] text-[12px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick('stealerlog', $event)">
+        <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick('stealerlog', $event)">
           stealerlog ({{ slCount >= 100 ? '100+' : slCount }})
-          <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="icon" class="h-[10px] w-[10px] shrink-0 opacity-95">
+          <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
         </div>
       </ng-container>
 
       <div class="relative inline-block cursor-pointer before:absolute before:inset-[-10px_-15px] before:content-['']">
-        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="p-[5px_10px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
+        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="p-[3px_8px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
       </div>
     </div>
   </div>
@@ -30,18 +30,21 @@
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
         <div class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
-            <div>
+            <div class="min-w-0">
               <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">IOC THREAT | {{ item.m_ioc_type[0] }}</b>
+              <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
+                Date: <span class="font-[600] text-[var(--color-text2)]">{{ dateValue(item) }}</span>
+              </div>
             </div>
             <div (click)="explore(item.m_ioc_type[0], item.m_url)">
-              <span class="inline-flex h-[31px] cursor-pointer items-center justify-center rounded-[8px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-820)]/35 px-[13px] text-[11px] font-[700] uppercase tracking-[0.03em] text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[background,border-color,color] duration-150 hover:border-[var(--ui-consolidated-border)] hover:bg-[var(--color-blue-800)]/55 hover:text-[var(--color-text1)]">
+              <span class="inline-flex h-[32px] cursor-pointer items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)] transition-[background,transform,filter] duration-150 hover:bg-[var(--color-blue-820)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0">
                 Explore
               </span>
             </div>
           </div>
 
           <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Web Server</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="webServerValue(item)">
@@ -53,7 +56,7 @@
               </div>
             </div>
 
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Attacker</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="attackerValue(item)">
@@ -65,7 +68,7 @@
               </div>
             </div>
 
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Team</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="teamValue(item)">
@@ -77,7 +80,7 @@
               </div>
             </div>
 
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">IP(s)</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="ipValue(item)">
@@ -89,7 +92,7 @@
               </div>
             </div>
 
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] md:col-span-2" *ngIf="item.m_url">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] md:col-span-2 last:border-b-0" *ngIf="item.m_url">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">URL</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)]" [appTooltip]="urlValue(item)">
@@ -101,17 +104,6 @@
               </div>
             </div>
 
-            <div class="group flex min-w-0 items-center gap-[10px] py-[8px] md:col-span-2">
-              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Date</div>
-              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
-                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="dateValue(item)">
-                  {{ dateValue(item) }}
-                </div>
-                <button *ngIf="dateValue(item) && dateValue(item) !== '-'" type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(dateValue(item), 'copy-date-' + i, $event)" [appTooltip]="isCopied('copy-date-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-date-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

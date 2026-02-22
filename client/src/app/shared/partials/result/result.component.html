@@ -15,53 +15,55 @@
         <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
 
         <div class="relative">
-          <div class="flex w-full max-w-[910px] items-start gap-[8px] max-[900px]:max-w-full max-[900px]:flex-col">
-            <div class="mb-[6px] flex h-[40px] min-w-0 flex-1 flex-nowrap" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
+          <div class="flex w-full items-center justify-between gap-[8px] max-[900px]:flex-col max-[900px]:items-stretch">
+            <div class="relative min-w-0 max-w-[910px] flex-1 max-[900px]:max-w-full">
+              <div class="flex h-[40px] min-w-0 w-full flex-nowrap" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
 
-            <button class="flex h-[40px] w-[42px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" type="submit">
-              <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
-            </button>
-
-            <input #searchInput class="h-[40px] flex-1 border-y border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
-
-            <button type="button" class="ui-search-clear-btn flex h-[40px] items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px] max-[700px]:rounded-r-[8px] max-[700px]:border-r" aria-label="Clear" (click)="searchQuery=''; searchInput.focus(); onFormSubmit()" [disabled]="!searchQuery">
-              <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
-            </button>
-
-            <div class="flex h-[40px] shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[14px] font-normal text-[#292828] max-[700px]:w-0 max-[700px]:border-y-0 max-[700px]:border-r-0 max-[700px]:px-0 max-[700px]:overflow-hidden">
-              <ng-container>
-                <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
-                <span>Advance&nbsp;&nbsp;</span>
-                <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
-                  <input type="checkbox" class="sr-only peer" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
-                  <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-white transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
-                    <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition peer-checked:translate-x-[10px]"></span>
-                  </span>
-                </label>
-              </ng-container>
-              <ng-container>
-                <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
-                <button type="button" class="inline-flex items-center cursor-pointer" (click)="onToolToggle($event)">
-                  Tools
-                  <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="mt-[-1px] px-[10px] transition-transform duration-300" />
+                <button class="flex h-[40px] w-[42px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" type="submit">
+                  <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
                 </button>
-              </ng-container>
-            </div>
+
+                <input #searchInput class="h-[40px] flex-1 border-y border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
+
+                <button type="button" class="ui-search-clear-btn flex h-[40px] items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px] max-[700px]:rounded-r-[8px] max-[700px]:border-r" aria-label="Clear" (click)="searchQuery=''; searchInput.focus(); onFormSubmit()" [disabled]="!searchQuery">
+                  <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
+                </button>
+
+                <div class="flex h-[40px] shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[14px] font-normal text-[#292828] max-[700px]:w-0 max-[700px]:border-y-0 max-[700px]:border-r-0 max-[700px]:px-0 max-[700px]:overflow-hidden">
+                  <ng-container>
+                    <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
+                    <span>Advance&nbsp;&nbsp;</span>
+                    <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
+                      <input type="checkbox" class="sr-only peer" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
+                      <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-white transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
+                        <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition peer-checked:translate-x-[10px]"></span>
+                      </span>
+                    </label>
+                  </ng-container>
+                  <ng-container>
+                    <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
+                    <button type="button" class="inline-flex items-center cursor-pointer" (click)="onToolToggle($event)">
+                      Tools
+                      <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="mt-[-1px] px-[10px] transition-transform duration-300" />
+                    </button>
+                  </ng-container>
+                </div>
+              </div>
+
+              <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
+
+              <div #filtersWrapper class="absolute left-0 top-full z-[1] w-full" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+                <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
+              </div>
 
             </div>
 
-          <div *ngIf="!shrinkmenu && filterModel && !homeSearchService.showFiltersOverlay" class="z-[3] flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px]">
-            <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
-              <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
-              <span>Filter</span>
-            </label>
-          </div>
-          </div>
-
-          <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
-
-          <div #filtersWrapper class="absolute left-0 top-full z-[1] w-full max-w-[910px]" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
-            <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
+            <div *ngIf="!shrinkmenu && filterModel" class="z-[3] flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end">
+              <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
+                <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
+                <span>Filter</span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -123,7 +125,7 @@
 <div *ngIf="filterModel && !shrinkmenu && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[19]" (click)="sidebarService.closeSidebar()">
 </div>
 
-<div *ngIf="filterModel && !shrinkmenu" class="ui-filter-sidebar-panel fixed top-0 z-[20] h-[96vh] w-[300px] rounded-tl-[15px] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
+<div *ngIf="filterModel && !shrinkmenu" class="ui-filter-sidebar-panel fixed top-0 z-[20] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
   <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 

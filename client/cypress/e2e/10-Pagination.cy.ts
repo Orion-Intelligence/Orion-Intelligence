@@ -20,7 +20,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
   it('General Intelligence – tabs load & pagination', () => {
 
 
-    cy.contains('div.sidebar__item-dropdown', 'General Intelligence')
+    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
       .should('be.visible')
       .click({ force: true });
 
@@ -30,13 +30,13 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
       cy.log(`TAB: ${tab}`);
 
 
-      cy.contains('.sidebar__subitem-content', tab)
+      cy.contains('app-dashboard-sidebar-items div', tab)
         .scrollIntoView()
         .should('be.visible')
         .click({ force: true });
        cy.reload();
 
-      cy.get('.dashboard__search-main-div')
+      cy.get('.ui-result-card')
         .should('exist');
 
 
@@ -45,12 +45,12 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
       });
 
 
-      cy.get('.pagination_search-container')
+      cy.get('app-pagination')
         .should('exist')
         .scrollIntoView();
 
 
-      cy.get('button.pagination_navigation')
+      cy.get('app-pagination button')
         .not('.disabled')
         .find('img[alt="nav-next"]')
         .parents('button')
@@ -59,7 +59,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
             cy.wrap($btn).click({ force: true });
 
 
-            cy.get('.dashboard__search-main-div')
+            cy.get('.ui-result-card')
               .should('exist');
           }
         });
@@ -87,7 +87,7 @@ describe('Data Breach – Tabs & Pagination', () => {
 
   it('Data Breach – tabs load & pagination', () => {
 
-    cy.contains('div.sidebar__item-dropdown', 'Data Breach')
+    cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
       .click({ force: true });
 
 
@@ -95,18 +95,18 @@ describe('Data Breach – Tabs & Pagination', () => {
       cy.log(`TAB: ${tab}`);
 
 
-      cy.contains('.sidebar__subitem-content', tab)
+      cy.contains('app-dashboard-sidebar-items div', tab)
         .click({ force: true });
 
 
-      cy.get('.dashboard__search-main-div.ng-star-inserted')
+      cy.get('.ui-result-card')
         .should('exist');
 
 
-      cy.get('.pagination_search-container').should('exist');
+      cy.get('app-pagination').should('exist');
 
 
-      cy.get('button.pagination_navigation')
+      cy.get('app-pagination button')
         .not('.disabled')
         .find('img[alt="nav-next"]')
         .parents('button')
@@ -115,7 +115,7 @@ describe('Data Breach – Tabs & Pagination', () => {
             cy.wrap($btn).click({ force: true });
 
 
-            cy.get('.dashboard__search-main-div.ng-star-inserted')
+            cy.get('.ui-result-card')
               .should('exist');
           }
         });
@@ -138,14 +138,13 @@ describe('Defacement – Tabs & Pagination', () => {
 
   it('Defacement – tabs load & pagination with scoped clicks', () => {
 
-    cy.contains('div.sidebar__item-dropdown', 'Defacement')
+    cy.contains('app-dashboard-sidebar-items div', 'Defacement')
       .click({ force: true });
 
 
-    cy.get('div.sidebar__item-dropdown')
+    cy.get('app-dashboard-sidebar-items')
       .contains('Defacement')
       .parent()
-      .find('ul.sidebar__subitems')
       .as('defacementTabs');
 
     TABS.forEach((tab) => {
@@ -153,18 +152,18 @@ describe('Defacement – Tabs & Pagination', () => {
 
 
       cy.get('@defacementTabs')
-        .contains('.sidebar__subitem-content', tab)
+        .contains('div', tab)
         .click({ force: true });
 
 
-      cy.get('tr.ng-trigger.ng-trigger-fadeInDashboardItem.ng-star-inserted')
+      cy.get('tr[id^="item-"], .ui-result-card')
         .should('exist');
 
 
-      cy.get('.pagination_search-container').should('exist');
+      cy.get('app-pagination').should('exist');
 
 
-      cy.get('button.pagination_navigation')
+      cy.get('app-pagination button')
         .not('.disabled')
         .find('img[alt="nav-next"]')
         .parents('button')
@@ -173,7 +172,7 @@ describe('Defacement – Tabs & Pagination', () => {
             cy.wrap($btn).click({ force: true });
 
 
-            cy.get('tr.ng-trigger.ng-trigger-fadeInDashboardItem.ng-star-inserted')
+            cy.get('tr[id^="item-"], .ui-result-card')
               .should('exist');
           }
         });
@@ -201,14 +200,13 @@ describe('Social – Tabs & Pagination', () => {
 
   it('Social – tabs load & pagination with scoped clicks', () => {
 
-    cy.contains('div.sidebar__item-dropdown', 'Social')
+    cy.contains('app-dashboard-sidebar-items div', 'Social')
       .click({ force: true });
 
 
-    cy.get('div.sidebar__item-dropdown')
+    cy.get('app-dashboard-sidebar-items')
       .contains('Social')
       .parent()
-      .find('ul.sidebar__subitems')
       .as('socialTabs');
 
     TABS.forEach((tab) => {
@@ -216,23 +214,23 @@ describe('Social – Tabs & Pagination', () => {
 
 
       cy.get('@socialTabs')
-        .contains('.sidebar__subitem-content', tab)
+        .contains('div', tab)
         .click({ force: true });
 
 
-      cy.get('.dashboard__search-main-div')
+      cy.get('.ui-result-card')
         .should('exist');
 
 
-      cy.get('.dashboard__tag')
+      cy.get('.ui-result-card')
         .should('exist');
 
 
-      cy.get('.pagination_search-container')
+      cy.get('app-pagination')
         .should('exist');
 
 
-      cy.get('button.pagination_navigation')
+      cy.get('app-pagination button')
         .not('.disabled')
         .find('img[alt="nav-next"]')
         .parents('button')
@@ -241,10 +239,10 @@ describe('Social – Tabs & Pagination', () => {
             cy.wrap($btn).click({ force: true });
 
 
-            cy.get('.dashboard__search-main-div')
+            cy.get('.ui-result-card')
               .should('exist');
 
-            cy.get('.dashboard__tag')
+            cy.get('.ui-result-card')
               .should('exist');
           }
         });
@@ -265,33 +263,32 @@ describe('Exploit – Tabs & Pagination', () => {
   });
 
   it('Exploit – tabs load & pagination with scoped clicks', () => {
-    cy.contains('div.sidebar__item-dropdown', 'Exploit')
+    cy.contains('app-dashboard-sidebar-items div', 'Exploit')
       .click({ force: true });
 
-    cy.get('div.sidebar__item-dropdown')
+    cy.get('app-dashboard-sidebar-items')
       .contains('Exploit')
       .parent()
-      .find('ul.sidebar__subitems')
       .as('exploitTabs');
 
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
 
       cy.get('@exploitTabs')
-        .contains('.sidebar__subitem-content', tab)
+        .contains('div', tab)
         .click({ force: true });
 
-      cy.get('.dashboard__search-main-div')
+      cy.get('.ui-result-card')
         .should('exist');
 
 
-      cy.get('.dashboard__search-tags')
+      cy.get('.ui-result-card')
         .should('exist');
 
-      cy.get('.pagination_search-container')
+      cy.get('app-pagination')
         .should('exist');
 
-      cy.get('button.pagination_navigation')
+      cy.get('app-pagination button')
         .not('.disabled')
         .find('img[alt="nav-next"]')
         .parents('button')
@@ -299,9 +296,9 @@ describe('Exploit – Tabs & Pagination', () => {
           if ($btn.length) {
             cy.wrap($btn).click({ force: true });
 
-            cy.get('.dashboard__search-main-div')
+            cy.get('.ui-result-card')
               .should('exist');
-            cy.get('.dashboard__search-tags')
+            cy.get('.ui-result-card')
               .should('exist');
           }
         });
@@ -321,33 +318,32 @@ describe('Feed – Tabs & Pagination', () => {
   });
 
   it('Feed – tabs load & pagination with scoped clicks', () => {
-    cy.contains('div.sidebar__item-dropdown', 'Feed')
+    cy.contains('app-dashboard-sidebar-items div', 'Feed')
       .click({ force: true });
 
-    cy.get('div.sidebar__item-dropdown')
+    cy.get('app-dashboard-sidebar-items')
       .contains('Feed')
       .parent()
-      .find('ul.sidebar__subitems')
       .as('feedTabs');
 
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
 
       cy.get('@feedTabs')
-        .contains('.sidebar__subitem-content', tab)
+        .contains('div', tab)
         .click({ force: true });
 
-      cy.get('.dashboard__search-main-div')
+      cy.get('.ui-result-card')
         .should('exist');
 
 
-      cy.get('.dashboard__search-main-div')
+      cy.get('.ui-result-card')
         .should('exist');
 
-      cy.get('.pagination_search-container')
+      cy.get('app-pagination')
         .should('exist');
 
-      cy.get('button.pagination_navigation')
+      cy.get('app-pagination button')
         .not('.disabled')
         .find('img[alt="nav-next"]')
         .parents('button')
@@ -355,7 +351,7 @@ describe('Feed – Tabs & Pagination', () => {
           if ($btn.length) {
             cy.wrap($btn).click({ force: true });
             cy.reload();
-            cy.get('.dashboard__search-main-div')
+            cy.get('.ui-result-card')
               .should('exist');
           }
         });

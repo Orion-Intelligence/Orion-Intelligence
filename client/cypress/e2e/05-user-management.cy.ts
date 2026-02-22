@@ -8,11 +8,11 @@ describe('Users Page – Create 5 Different Users With License', () => {
   const openUsersPage = () => {
     cy.visit('/dashboard/profile/homepage');
 
-    cy.get('div.sidebar__item-dropdown.active')
+    cy.get('app-dashboard-sidebar-items div')
       .should('be.visible')
       .click({force: true});
 
-    cy.get('div.sidebar__subitem-content')
+    cy.get('app-dashboard-sidebar-items div')
       .contains('Users')
       .should('be.visible')
       .click({force: true});
@@ -31,7 +31,7 @@ describe('Users Page – Create 5 Different Users With License', () => {
   const addUser = (user: User) => {
     cy.contains('span', 'Add User').should('be.visible').click({force: true});
 
-    cy.get('form.add-tenant_form').should('exist').and('be.visible');
+    cy.get('app-add-tenant').should('exist').and('be.visible');
 
     cy.get('input[name="username"]').clear().type(user.username);
     cy.get('input[name="email"]').clear().type(user.email);
@@ -40,9 +40,9 @@ describe('Users Page – Create 5 Different Users With License', () => {
     cy.get('select[name="role"]').select(user.role);
     cy.get('select[name="status"]').select('Active');
 
-    cy.get('.license-card').each($card => {
-      const label = Cypress.$($card).find('.license-label').text().trim().toLowerCase();
-      const checkbox = Cypress.$($card).find('input.license-checkbox');
+    cy.get('button:has(input[type="checkbox"])').each($card => {
+      const label = Cypress.$($card).find('span').text().trim().toLowerCase();
+      const checkbox = Cypress.$($card).find('input[type="checkbox"]');
       const wanted = user.licenses.map(x => x.trim().toLowerCase()).includes(label);
 
       if (wanted) {
@@ -52,7 +52,7 @@ describe('Users Page – Create 5 Different Users With License', () => {
       }
     });
 
-    cy.get('div.add-tenant_footer button.add-tenant_btn-primary')
+    cy.contains('button', 'Add User')
       .should('be.visible')
       .click({force: true});
 
@@ -139,67 +139,67 @@ describe('Login & Sidebar Checks for Users', () => {
 
   it('Logs in as testing1, clicks sidebar items, then logs out', () => {
     const sidebarItems1 = [
-      {name: 'testing1', selector: 'div.sidebar__item-dropdown.active'},
-      {name: 'General Intelligence', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Whistle Blowing', selector: 'div.sidebar__item a.sidebar__item-dropdown-hotlink'}
+      {name: 'testing1', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'General Intelligence', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Whistle Blowing', selector: 'a'}
     ];
     loginAndClickSidebar('testing1', sidebarItems1);
   });
 
   it('Logs in as testing2, clicks all license sidebar items, then logs out', () => {
     const sidebarItems2 = [
-      {name: 'testing2', selector: 'div.sidebar__item-dropdown.active'},
-      {name: 'General Intelligence', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Data Breach', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Defacement', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Social', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Exploit', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Feed', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Dump', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Whistle Blowing', selector: 'div.sidebar__item a.sidebar__item-dropdown-hotlink'}
+      {name: 'testing2', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'General Intelligence', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Data Breach', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Defacement', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Social', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Exploit', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Feed', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Dump', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Whistle Blowing', selector: 'a'}
     ];
     loginAndClickSidebar('testing2', sidebarItems2);
   });
 
   it('Logs in as testing3, clicks all license sidebar items, then logs out', () => {
     const sidebarItems3 = [
-      {name: 'testing3', selector: 'div.sidebar__item-dropdown.active'},
-      {name: 'General Intelligence', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Data Breach', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Defacement', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Social', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Exploit', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Feed', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Stealer logs', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Dump', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Whistle Blowing', selector: 'div.sidebar__item a.sidebar__item-dropdown-hotlink'}
+      {name: 'testing3', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'General Intelligence', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Data Breach', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Defacement', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Social', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Exploit', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Feed', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Stealer logs', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Dump', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Whistle Blowing', selector: 'a'}
     ];
     loginAndClickSidebar('testing3', sidebarItems3);
   });
 
   it('Logs in as testing4, clicks all license sidebar items, then logs out', () => {
     const sidebarItems4 = [
-      {name: 'testing4', selector: 'div.sidebar__item-dropdown.active'},
-      {name: 'Web Scans', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Live APIs', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Whistle Blowing', selector: 'div.sidebar__item a.sidebar__item-dropdown-hotlink'}
+      {name: 'testing4', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Web Scans', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Live APIs', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Whistle Blowing', selector: 'a'}
     ];
     loginAndClickSidebar('testing4', sidebarItems4);
   });
 
   it('Logs in as testing5, clicks all license sidebar items, then logs out', () => {
     const sidebarItems5 = [
-      {name: 'General Intelligence', selector: 'div.sidebar__item-dropdown.active'},
-      {name: 'Data Breach', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Defacement', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Social', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Exploit', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Feed', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Stealer logs', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Web Scans', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Live APIs', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Dump', selector: 'div.sidebar__item-dropdown'},
-      {name: 'Whistle Blowing', selector: 'div.sidebar__item a.sidebar__item-dropdown-hotlink'}
+      {name: 'General Intelligence', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Data Breach', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Defacement', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Social', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Exploit', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Feed', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Stealer logs', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Web Scans', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Live APIs', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Dump', selector: 'app-dashboard-sidebar-items div'},
+      {name: 'Whistle Blowing', selector: 'a'}
     ];
     loginAndClickSidebar('testing5', sidebarItems5);
   });

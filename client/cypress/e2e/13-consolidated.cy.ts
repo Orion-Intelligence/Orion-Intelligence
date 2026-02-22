@@ -12,7 +12,7 @@ describe('Homepage – Consolidated Checker Full Flow', () => {
     cy.visit('/dashboard');
 
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
@@ -23,11 +23,11 @@ describe('Homepage – Consolidated Checker Full Flow', () => {
       .type('{enter}');
 
 
-    cy.contains('.home-defacement-result__title', 'IP Threat Report')
+    cy.contains('.ui-consolidated-main', 'IP Threat Report')
       .should('be.visible');
 
     const openCategoryAndReturn = (categoryName: string) => {
-      cy.contains('.home-defacement-result__filter-type', categoryName, {timeout: 30000}).should('be.visible').click({force: true});
+      cy.contains('.ui-consolidated-main div', categoryName, {timeout: 30000}).should('be.visible').click({force: true});
     };
 
     openCategoryAndReturn('hacked');
@@ -57,8 +57,8 @@ describe('Dashboard Sections Test', () => {
   };
 
   const openSection = (tagName: string) => {
-    cy.contains('.dashboard__tag', tagName)
-      .parents('.dashboard__search-main-div')
+    cy.contains('span', tagName)
+      .closest('.ui-result-card')
       .first()
       .as('currentItem');
 
@@ -68,7 +68,7 @@ describe('Dashboard Sections Test', () => {
 
     cy.get('@currentItem')
       .parent()
-      .find('span.see-more')
+      .find('span.ui-see-more-btn')
       .then($seeMore => {
         if ($seeMore.length) {
           cy.wrap($seeMore.first()).click({force: true});
@@ -81,14 +81,14 @@ describe('Dashboard Sections Test', () => {
     cy.visit('/dashboard');
 
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
     cy.get('[data-cy="dashboard-general-input"], input[type="search"], input')
       .should('be.visible');
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
@@ -98,7 +98,7 @@ describe('Dashboard Sections Test', () => {
       .type('{enter}');
 
 
-    cy.contains('.category-heading-enforced', 'Social Results')
+    cy.contains('.ui-result-card', 'Social')
       .should('be.visible');
 
     cy.get('app-dashboard-result-social')
@@ -108,34 +108,32 @@ describe('Dashboard Sections Test', () => {
 
 
     cy.get('@social')
-      .contains('span.see-more', 'See More')
+      .contains('span.ui-see-more-btn', 'See More')
       .click({force: true});
 
 
     openReportAndCTI(cy.get('@social'));
 
 
-    cy.get('div.search-bar')
+    cy.contains('div', 'Search in Threat Actor')
+      .parent()
       .find('input[type="text"]')
       .should('be.visible')
       .clear()
       .type('Website');
 
 
-    cy.get('div.filter-toggles')
-      .contains('label', 'Email')
+    cy.contains('label', 'Email')
       .find('input[type="radio"]')
       .check({force: true});
 
 
-    cy.get('div.filter-toggles')
-      .contains('label', 'Name')
+    cy.contains('label', 'Name')
       .find('input[type="radio"]')
       .check({force: true});
 
 
-    cy.get('div.filter-toggles')
-      .contains('label', 'All')
+    cy.contains('label', 'All')
       .find('input[type="radio"]')
       .check({force: true});
 
@@ -145,9 +143,9 @@ describe('Dashboard Sections Test', () => {
     ];
 
     insightCards.forEach(card => {
-      cy.contains('div.card_header span', card)
-        .parents('div.insight-card')
-        .find('div.toggle-btn')
+      cy.contains('span', card)
+        .parents('.ui-consolidated-main')
+        .find('img[alt="toggle icon"]')
         .click({force: true});
     });
   });
@@ -157,14 +155,14 @@ describe('Dashboard Sections Test', () => {
     cy.visit('/dashboard');
 
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
     cy.get('[data-cy="dashboard-general-input"], input[type="search"], input')
       .should('be.visible');
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
@@ -173,67 +171,76 @@ describe('Dashboard Sections Test', () => {
       .click({force: true})
       .type('{enter}');
 
-    cy.contains('li.nav-item a', 'IOCs')
+    cy.contains('button', 'IOCs')
       .should('be.visible')
       .click();
 
 
-    cy.get('form.credential_search_wrapper').should('exist');
+    cy.get('app-credentials-search-bar form').should('exist');
 
 
-    cy.get('form.credential_search_wrapper input[name="searchQuery"]')
+    cy.get('app-credentials-search-bar input[name="searchQuery"]')
       .should('exist')
       .type('gmail.com || \n' +
         'floflick@gmx.de{enter}');
 
 
     cy.wait(1000)
-    cy.get('button.credentials-search_mode-toggle')
+    cy.contains('button', 'Advanced')
       .click({force: true});
 
 
-    cy.get('div.credential_row')
+    cy.get('div.ui-ioc-table-row')
       .contains('floflick@gmx.de')
-      .parents('div.credential_row')
-      .find('button.credential_row_toggle')
+      .parents('div.ui-ioc-table-row')
+      .find('button[aria-label="Expand row"]')
       .click({force: true});
 
 
-    cy.get('select.credentials-search_tag-select')
+    cy.get('div.ui-ioc-adv-row')
+      .first()
+      .find('select')
+      .eq(1)
       .select('Email');
 
-    cy.get('input.credentials-search_filter-input')
+    cy.get('div.ui-ioc-adv-row')
+      .first()
+      .find('input[type="text"]')
       .first()
       .clear()
       .type('uzzalsen2530@gmail.com');
 
-    cy.contains('button.credentials-search_execute-btn', 'Execute')
+    cy.contains('button', 'Execute')
       .click({force: true});
 
 
-    cy.get('button.credentials-search_btn-icon.credentials-search_add')
-      .click({force: true});
-
-    cy.get('div.credentials-search_filter-row')
+    cy.get('button img[alt="add filter"]')
       .last()
-      .find('select.credentials-search_tag-select')
+      .parent()
+      .click({force: true});
+
+    cy.get('div.ui-ioc-adv-row')
+      .last()
+      .find('select')
+      .eq(1)
       .select('Email');
 
-    cy.get('div.credentials-search_filter-row')
+    cy.get('div.ui-ioc-adv-row')
       .last()
-      .find('input.credentials-search_filter-input')
+      .find('input[type="text"]')
       .type('hotmail.com');
 
-    cy.get('div.credentials-search_filter-row')
+    cy.get('div.ui-ioc-adv-row')
       .last()
-      .find('select.credentials-search_operator-select')
+      .find('select')
+      .first()
       .select('OR');
 
-    cy.contains('button.credentials-search_execute-btn', 'Execute')
+    cy.contains('button', 'Execute')
       .click({force: true});
 
 
-    cy.get('button.credentials-search_btn-icon.credentials-search_delete')
+    cy.get('button img[alt="delete filter"]')
       .each($btn => cy.wrap($btn).click({force: true}));
   });
 
@@ -261,8 +268,8 @@ describe('Dashboard Sections Test', () => {
   };
 
   const openSection = (tagName: string) => {
-    cy.contains('.dashboard__tag', tagName)
-      .parents('.dashboard__search-main-div')
+    cy.contains('span', tagName)
+      .closest('.ui-result-card')
       .first()
       .as('currentItem');
 
@@ -272,7 +279,7 @@ describe('Dashboard Sections Test', () => {
 
     cy.get('@currentItem')
       .parent()
-      .find('span.see-more')
+      .find('span.ui-see-more-btn')
       .then($seeMore => {
         if ($seeMore.length) {
           cy.wrap($seeMore.first()).click({force: true});
@@ -285,14 +292,14 @@ describe('Dashboard Sections Test', () => {
     cy.visit('/dashboard');
 
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
     cy.get('[data-cy="dashboard-general-input"], input[type="search"], input')
       .should('be.visible');
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
@@ -310,14 +317,14 @@ describe('Dashboard Sections Test', () => {
     cy.visit('/dashboard');
 
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
     cy.get('[data-cy="dashboard-general-input"], input[type="search"], input')
       .should('be.visible');
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
@@ -327,7 +334,7 @@ describe('Dashboard Sections Test', () => {
       .type('netflix{enter}');
 
 
-    cy.contains('li.nav-item a', 'IOCs')
+    cy.contains('button', 'IOCs')
       .should('be.visible')
       .click({force: true});
 
@@ -335,14 +342,14 @@ describe('Dashboard Sections Test', () => {
 
   it('Open Domain Scanner and run Subdomain, IP Lookup, and Wayback scans', () => {
     cy.visit('/dashboard');
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
     cy.get('[data-cy="dashboard-general-input"], input[type="search"], input')
       .should('be.visible');
 
-    cy.contains('.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
       .should('be.visible')
       .click({force: true});
 
@@ -351,22 +358,23 @@ describe('Dashboard Sections Test', () => {
       .click({force: true})
       .type('{enter}');
 
-    cy.contains('li.nav-item a', 'IOCs')
+    cy.contains('button', 'IOCs')
       .should('be.visible')
       .click();
 
-    cy.get('button.credential_action_btn img.password-schema-icon[src="assets/images/sidebar/theme/scanner.svg"]')
+    cy.get('button img[src*="scanner.svg"]')
       .should('be.visible')
+      .parent()
       .click({force: true});
 
-    cy.get('div.subdomain-popup')
+    cy.contains('div', 'Domain Scanner')
       .should('be.visible');
 
-    cy.contains('button.subdomain-tab', 'Subdomains')
+    cy.contains('button', 'Subdomains')
       .should('be.visible')
       .click({force: true});
 
-    cy.get('label.subdomain-toggle-container')
+    cy.contains('label', 'Show only live')
       .should('be.visible')
       .click({force: true});
 
@@ -375,7 +383,7 @@ describe('Dashboard Sections Test', () => {
       .clear({force: true})
       .type('abcderfghh', {force: true});
 
-    cy.contains('button.subdomain-btn.search span', 'Search')
+    cy.contains('button', 'Search')
       .click({force: true});
 
     ['example.com', 'google.com', 'openai.com'].forEach((d) => {
@@ -383,37 +391,36 @@ describe('Dashboard Sections Test', () => {
         .clear({force: true})
         .type(d, {force: true});
 
-      cy.contains('button.subdomain-btn.search span', 'Search')
+      cy.contains('button', 'Search')
         .click({force: true});
 
       cy.get('label.subdomain-toggle-container')
         .should('be.visible');
     });
 
-    cy.contains('button.subdomain-tab', 'IP Lookup')
+    cy.contains('button', 'IP Lookup')
       .should('be.visible')
       .click({force: true});
 
-    cy.get('input.subdomain-input')
+    cy.get('#domain-input')
       .should('be.visible')
       .clear({force: true})
       .type('1.1.1.1', {force: true});
 
-    cy.contains('button.subdomain-btn.search span', 'Lookup IP')
+    cy.contains('button', 'Lookup IP')
       .click({force: true});
 
-    cy.get('button.subdomain-tab')
+    cy.get('button')
       .contains(/^Wayback$/)
       .should('be.visible')
       .click({force: true});
 
-    cy.get('input.subdomain-input')
+    cy.get('#domain-input')
       .should('be.visible')
       .clear({force: true})
       .type('example.com', {force: true});
 
-    cy.get('button.subdomain-btn.search')
-      .first()
+    cy.contains('button', 'Search Wayback')
       .click({force: true});
 
   });

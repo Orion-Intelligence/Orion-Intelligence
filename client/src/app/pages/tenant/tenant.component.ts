@@ -8,9 +8,10 @@ import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../../services/core/app/app.service';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
 import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { HeaderComponent } from '../../shared/partials/header/login-header/header.component';
 @Component({
   selector: 'app-tenant',
-  imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, FormsModule, CommonModule, TooltipDirective, ConfirmationPopupComponent, NgClass],
+  imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, FormsModule, CommonModule, TooltipDirective, ConfirmationPopupComponent, NgClass, HeaderComponent],
   templateUrl: './tenant.component.html'
 })
 export class TenantComponent implements OnInit {
@@ -80,6 +81,10 @@ export class TenantComponent implements OnInit {
     if (this.currentStep > 1) {
       this.currentStep--;
     }
+  }
+
+  hasIocsWithValues(): boolean {
+    return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
   }
 
   getFilteredIocs() {

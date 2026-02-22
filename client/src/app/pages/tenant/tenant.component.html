@@ -1,145 +1,185 @@
-<div class="min-h-screen bg-[var(--color-blue-830)] text-[var(--color-text1)]">
-  <div class="mx-auto max-w-[980px] px-[20px] py-[24px]">
-    <div class="rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[20px]">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-[12px]">
-          <div class="flex items-center gap-[10px]">
-            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]" [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep >= 1 }">1</div>
-            <span class="text-[13px] font-medium">Company Info</span>
-          </div>
-          <div class="h-[1px] w-[40px] bg-[var(--color-border)]" [ngClass]="{ 'bg-[var(--color-blue-640)]': currentStep > 1 }"></div>
-          <div class="flex items-center gap-[10px]">
-            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]" [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep >= 2 }">2</div>
-            <span class="text-[13px] font-medium">Add IOCs</span>
-          </div>
-          <div class="h-[1px] w-[40px] bg-[var(--color-border)]" [ngClass]="{ 'bg-[var(--color-blue-640)]': currentStep > 2 }"></div>
-          <div class="flex items-center gap-[10px]">
-            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]" [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep === 3 }">3</div>
-            <span class="text-[13px] font-medium">Confirmation</span>
-          </div>
+<img alt="background" class="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover" src="/assets/images/shared/Bg.webp">
+
+<ng-container>
+  <app-header></app-header>
+</ng-container>
+
+<div class="relative z-[1] flex h-[calc(100vh-60px)] items-center justify-center px-4">
+  <div class="mt-[-100px] flex h-[687px] w-[1000px] max-w-[95vw] flex-col justify-between rounded-[16px] border border-[#fcfcfc12] bg-[#172235] p-8 max-[1024px]:mt-0 max-[1024px]:h-auto max-[1024px]:w-[90vw] max-[1024px]:p-6">
+    <div class="flex items-center gap-4 overflow-x-auto">
+      <div class="flex items-center gap-2">
+        <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'">
+          <ng-container *ngIf="currentStep > 1; else step1Number">
+            <img src="assets/images/shared/onboarding_tick.svg" alt="tick" class="h-[15px] w-[15px]">
+          </ng-container>
+          <ng-template #step1Number>1</ng-template>
         </div>
+        <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 1 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">Company Info</span>
       </div>
 
-      <div class="my-[16px] h-px bg-[var(--color-border)]"></div>
+      <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'"></div>
 
-      <div>
-        <ng-container [ngSwitch]="currentStep">
-          <div *ngSwitchCase="1">
-            <h2 class="text-[18px] font-semibold">Welcome to {{ this.appService.getConfig().appSettings.app_name }}</h2>
-            <p class="mt-[6px] text-[13px] text-[var(--color-text4)]">Let's get your tenant set up. Start by entering your company name.</p>
-            <div class="mt-[16px]">
-              <label for="company" class="mb-[6px] block text-[13px] font-medium">Company name</label>
-              <input type="text" id="company" class="h-[40px] w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[12px] text-[14px] text-[#3C3C43] outline-none" placeholder="Enter company name" [(ngModel)]="onboardingData.name" />
-            </div>
+      <div class="flex items-center gap-2">
+        <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'">
+          <ng-container *ngIf="currentStep > 2; else step2Number">
+            <img src="assets/images/shared/onboarding_tick.svg" alt="tick" class="h-[15px] w-[15px]">
+          </ng-container>
+          <ng-template #step2Number>2</ng-template>
+        </div>
+        <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 2 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">Add IOCs</span>
+      </div>
+
+      <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'"></div>
+
+      <div class="flex items-center gap-2">
+        <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full bg-[#fcfcfc0d] text-[14px] font-medium text-white">3</div>
+        <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep === 3 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">Confirmation</span>
+      </div>
+    </div>
+
+    <div class="my-5 h-[2px] w-full bg-[#fcfcfc0d]"></div>
+
+    <div class="min-h-0 flex-1">
+      <ng-container [ngSwitch]="currentStep">
+        <div *ngSwitchCase="1">
+          <h2 class="mb-2 text-[20px] font-bold text-white">Welcome to {{ this.appService.getConfig().appSettings.app_name }}</h2>
+          <p class="mb-6 text-[14px] font-normal text-[#a0b8d1]">Let us know a little about your company</p>
+
+          <div class="flex flex-col gap-2">
+            <label for="company" class="text-[14px] font-normal text-white">Company name</label>
+            <input id="company" type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none" placeholder="Enter company name" [(ngModel)]="onboardingData.name" />
           </div>
+        </div>
 
-          <div *ngSwitchCase="2">
-            <h2 class="text-[18px] font-semibold">Add IOCs</h2>
-            <div class="mt-[6px] text-[13px] text-[var(--color-text4)]">Add Indicators of Compromise to track.</div>
-
-            <div class="mt-[12px] flex items-center gap-[10px]">
-              <input type="text" class="h-[36px] w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[10px] text-[13px] text-[#3C3C43]" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
-              <div class="inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]" (click)="openConfirmationPopup()">
-                <button appTooltip="clear all" class="flex h-[36px] w-[36px] items-center justify-center border-0 bg-[var(--color-blue-750)]">
-                  <img ngSrc="assets/images/shared/searchFilter_clossButton.svg" alt="clear" width="18" height="18" />
+        <div *ngSwitchCase="2" class="text-white">
+          <h2 class="mb-1 text-[20px] font-bold">Add IOCs</h2>
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-[14px] font-normal text-[#a0b8d1]">Add IOCs description here...</p>
+            <div class="flex items-center gap-4">
+              <input type="text" class="h-[40px] w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-810)] px-3 text-[14px] text-[var(--color-text1)] outline-none focus:border-[#ffffff40] max-[640px]:w-[200px]" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+              <div class="m-0 inline-flex cursor-pointer items-center justify-center" (click)="openConfirmationPopup()">
+                <button appTooltip="clear all" class="inline-flex h-[34px] w-[34px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-750)] p-0">
+                  <img alt="clear" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
                 </button>
               </div>
             </div>
+          </div>
 
-            <div class="relative mt-[14px] flex items-center gap-[10px] overflow-hidden">
-              <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_right,#fff,transparent)]" *ngIf="showLeftFade"></div>
+          <div class="relative mt-[21px] flex items-center gap-[15px] overflow-hidden">
+            <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_right,#172235,transparent)]" *ngIf="showLeftFade"></div>
 
-              <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center opacity-60 hover:opacity-100" (click)="scrollLeft()">
-                <div class="absolute inset-[-10px_-10px_-10px_-5px]"></div>
-                <img src="assets/images/shared/searchFilter_leftButton.svg" alt="filter icon" />
-              </div>
+            <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center" (click)="scrollLeft()">
+              <div class="absolute inset-[-10px]"></div>
+              <img src="assets/images/shared/onboarding_leftButton.svg" alt="left" />
+            </div>
 
-              <div class="flex flex-1 gap-[10px] overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] [mask-size:100%_100%] [mask-repeat:no-repeat]" #categoryScroll>
-                <div *ngFor="let category of getFilteredIocs()" class="flex items-center whitespace-nowrap border-b-2 border-transparent px-[10px] pb-[6px] text-[13px] text-[var(--color-text1)] cursor-pointer" [ngClass]="{ 'border-[#0E1626] text-[#0E1626] font-semibold': category.ioc_id === selectedCategoryId }" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+            <div class="flex flex-1 gap-[25px] overflow-hidden px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%]" #categoryScroll>
+              <ng-container *ngIf="onboardingData.iocs.length > 0; else noEntity">
+                <div *ngFor="let category of getFilteredIocs()" class="cursor-pointer whitespace-nowrap border-b-2 border-transparent pb-[6px] text-[14px] font-normal text-[var(--color-text6)] hover:border-[#ffffff50]" [ngClass]="{ 'border-b-2 border-[var(--color-text1)] !text-[var(--color-text1)]': category.ioc_id === selectedCategoryId }" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                   {{ category.name }}
                 </div>
-                <div *ngIf="getFilteredIocs().length === 0" class="text-[13px] text-[#0E162650]">No entity filters available.</div>
-              </div>
-
-              <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center opacity-60 hover:opacity-100" (click)="scrollRight()">
-                <div class="absolute inset-[-10px_-10px_-10px_-5px]"></div>
-                <img src="assets/images/shared/searchFilter_rightButton.svg" alt="filter" />
-              </div>
-
-              <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_left,#fff,transparent)]" *ngIf="showRightFade"></div>
-            </div>
-
-            <div class="my-[12px] h-px bg-[var(--color-border)]"></div>
-
-            <label class="text-[13px] font-medium">Enter IOCs</label>
-            <div class="mt-[6px] flex items-center gap-[8px]">
-              <input type="text" class="h-[36px] flex-1 rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[10px] text-[13px] text-[#3C3C43]" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-              <button type="button" class="rounded-[7px] bg-[var(--color-blue-640)] px-[12px] py-[8px] text-[13px] text-white" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
-            </div>
-
-            <div class="my-[12px] h-px bg-[var(--color-border)]"></div>
-
-            <p class="text-[13px] font-medium">Added IOCs</p>
-            <div class="mt-[8px] space-y-[8px]">
-              <ng-container *ngIf="onboardingData.iocs?.length; else noIocs">
-                <div *ngFor="let ioc of onboardingData.iocs" class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-890)] p-[10px]">
-                  <p class="text-[13px] font-semibold">{{ ioc.name }}</p>
-                  <div class="mt-[6px] flex flex-wrap gap-[6px]">
-                    <div class="rounded-[999px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[8px] py-[4px] text-[12px]" *ngFor="let value of ioc.values">
-                      {{ value }}
-                      <span class="ml-[6px] cursor-pointer" (click)="removeIoc(ioc.ioc_id, value)">×</span>
-                    </div>
-                  </div>
-                </div>
               </ng-container>
-              <ng-template #noIocs>
-                <p class="text-[13px] text-[var(--color-text4)]">No IOCs added yet</p>
+              <ng-template #noEntity>
+                <div class="text-[14px] text-[var(--color-text6)]">No entity filters available.</div>
               </ng-template>
             </div>
+
+            <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center" (click)="scrollRight()">
+              <div class="absolute inset-[-10px]"></div>
+              <img src="assets/images/shared/onboarding_rightButton.svg" alt="right" />
+            </div>
+
+            <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_left,#172235,transparent)]" *ngIf="showRightFade"></div>
           </div>
 
-          <div *ngSwitchCase="3">
-            <h2 class="text-[18px] font-semibold">Confirm Your Information</h2>
-            <div class="mt-[10px]">
-              <p class="text-[13px] font-medium">Company Name</p>
-              <p class="text-[13px] text-[var(--color-text4)]">{{ onboardingData.name || '-' }}</p>
-            </div>
-            <div class="my-[12px] h-px bg-[var(--color-border)]"></div>
-            <p class="text-[13px] font-medium">Added IOCs</p>
-            <div class="mt-[8px] space-y-[8px]">
-              <ng-container *ngIf="onboardingData.iocs?.length; else noIocsConfirm">
-                <div *ngFor="let ioc of onboardingData.iocs" class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-890)] p-[10px]">
-                  <p class="text-[13px] font-semibold">{{ ioc.name }}</p>
-                  <div class="mt-[6px] flex flex-wrap gap-[6px]">
-                    <div class="rounded-[999px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[8px] py-[4px] text-[12px]" *ngFor="let value of ioc.values">
-                      {{ value }}
-                      <span class="ml-[6px] cursor-pointer" (click)="removeIoc(ioc.ioc_id, value)">×</span>
+          <div class="mb-4 mt-4 h-[2px] w-full bg-[var(--color-border)]"></div>
+
+          <label class="mb-2 block text-[14px] font-normal text-white">Enter IOCs</label>
+          <div class="relative w-full">
+            <input type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 pr-[96px] text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+            <button type="button" class="absolute right-2 top-1/2 h-[35px] w-[80px] -translate-y-1/2 rounded-[6px] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-[13px] text-white" (click)="addIoc(inputEl.value); inputEl.value=''">
+              Add
+            </button>
+          </div>
+
+          <div class="my-4 h-[2px] w-full bg-[var(--color-border)]"></div>
+
+          <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
+          <div class="max-h-[220px] overflow-y-auto max-[1024px]:max-h-[100px]">
+            <div *ngIf="hasIocsWithValues(); else noIocValues">
+              <div *ngFor="let ioc of onboardingData.iocs">
+                <ng-container *ngIf="ioc.values.length > 0">
+                  <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
+                  <div class="flex flex-wrap gap-2">
+                    <div class="flex cursor-pointer items-center gap-2 rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-1 text-[12px] font-normal text-[var(--color-text1)] hover:bg-[#FCFCFC20]" *ngFor="let value of ioc.values">
+                      <span>{{ value }}</span>
+                      <span (click)="removeIoc(ioc.ioc_id, value)">✕</span>
                     </div>
                   </div>
-                </div>
-              </ng-container>
-              <ng-template #noIocsConfirm>
-                <p class="text-[13px] text-[var(--color-text4)]">No IOCs added yet</p>
-              </ng-template>
+                </ng-container>
+              </div>
             </div>
+            <ng-template #noIocValues>
+              <p class="text-[14px] text-[var(--color-text1)]">No IOCs added yet</p>
+            </ng-template>
           </div>
-        </ng-container>
-      </div>
+        </div>
 
-      <div class="mt-[20px] flex items-center justify-between">
-        <button class="rounded-[8px] border border-[var(--color-border)] bg-transparent px-[12px] py-[8px] text-[13px] text-[var(--color-text4)] disabled:opacity-50" (click)="goBack()" [disabled]="currentStep === 1">Back</button>
-        <ng-container [ngSwitch]="currentStep">
-          <button *ngSwitchCase="1" class="rounded-[8px] bg-[var(--color-blue-640)] px-[14px] py-[8px] text-[13px] text-white disabled:opacity-50" (click)="goNext()" [disabled]="!onboardingData.name">Next</button>
-          <button *ngSwitchCase="2" class="rounded-[8px] bg-[var(--color-blue-640)] px-[14px] py-[8px] text-[13px] text-white" (click)="goNext()">Next</button>
-          <button *ngSwitchCase="3" class="rounded-[8px] bg-[var(--color-blue-640)] px-[14px] py-[8px] text-[13px] text-white" (click)="confirm()">Confirm</button>
-        </ng-container>
-      </div>
+        <div *ngSwitchCase="3">
+          <h2 class="mb-[25px] mt-[15px] text-[20px] font-bold text-white">Confirm Your Information</h2>
+
+          <div class="mb-2">
+            <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">Company Name</p>
+            <p class="text-[14px] font-medium text-white">{{ onboardingData.name }}</p>
+          </div>
+
+          <hr class="my-4 h-[2px] border-0 bg-[var(--color-border)]" />
+
+          <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
+          <div class="max-h-[290px] overflow-y-auto">
+            <div *ngIf="hasIocsWithValues(); else noIocConfirm">
+              <div *ngFor="let ioc of onboardingData.iocs">
+                <ng-container *ngIf="ioc.values.length > 0">
+                  <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
+                  <div class="flex flex-wrap gap-2">
+                    <div class="flex cursor-pointer items-center gap-2 rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-1 text-[12px] font-normal text-[var(--color-text1)] hover:bg-[#FCFCFC20]" *ngFor="let value of ioc.values">
+                      <span>{{ value }}</span>
+                      <span (click)="removeIoc(ioc.ioc_id, value)">✕</span>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+            <ng-template #noIocConfirm>
+              <p class="text-[14px] text-[var(--color-text1)]">No IOCs added yet</p>
+            </ng-template>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="mt-auto flex items-center justify-between max-[1024px]:mt-[30px]">
+      <button class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] border border-[#57a5eb] bg-transparent text-[13px] font-medium text-[#a0b8d1] shadow-[0_1px_2px_#1018280d] disabled:cursor-not-allowed disabled:opacity-50" (click)="goBack()" [disabled]="currentStep === 1">
+        Back
+      </button>
+
+      <ng-container [ngSwitch]="currentStep">
+        <button *ngSwitchCase="1" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] disabled:cursor-not-allowed disabled:bg-[#666] disabled:text-[#2c2d2f]" (click)="goNext()" [disabled]="!onboardingData.name">
+          Next
+        </button>
+        <button *ngSwitchCase="2" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d]" (click)="goNext()">
+          {{ hasIocsWithValues() ? 'Next' : 'Skip' }}
+        </button>
+        <button *ngSwitchCase="3" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d]" (click)="confirm()">
+          Confirm
+        </button>
+      </ng-container>
     </div>
   </div>
-
-  <app-confirmation-popup
-    *ngIf="isConfirmationOpen"
-    [message]="'Are you sure you want to clear all IOCs?'"
-    (confirmed)="clearAllIocs($event)">
-  </app-confirmation-popup>
 </div>
+
+<ng-container *ngIf="isConfirmationOpen">
+  <app-confirmation-popup
+    [message]="'Are you sure you want to clear all of your iocs?'"
+    (confirmed)="clearAllIocs($event)"></app-confirmation-popup>
+</ng-container>

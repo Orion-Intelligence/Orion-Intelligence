@@ -1,7 +1,7 @@
-<div class="relative flex h-[60px] items-center border-b border-[#092137BA] bg-[var(--color-blue-840)] text-black">
+<div class="relative flex h-[60px] items-center border-b text-black" [ngClass]="isLightTheme ? 'border-[#d5deea] bg-white' : 'border-[#092137BA] bg-[var(--color-blue-840)]'">
   <div class="flex h-[60px] w-full items-center justify-between pl-[10px]">
-    <a aria-label="Go to Homepage" class="flex h-[60px] w-[80px] items-center justify-center select-none" href="/">
-      <img alt="Trustly Logo" class="ml-[150px] h-full w-auto object-contain" height="35" ngSrc="assets/images/sidebar/search_nav_logo.png" priority width="197">
+    <a aria-label="Go to Homepage" class="flex h-[60px] items-center justify-center select-none" href="/">
+      <img alt="Logo" class="ml-[20px] h-[35px] w-auto object-contain max-[943px]:ml-[12px]" height="35" [ngSrc]="appService.getConfig().appSettings.logo_wide_dark || 'assets/images/sidebar/search_nav_logo.png'" priority width="197">
     </a>
     <div class="absolute right-[8px] top-0">
       <app-profile></app-profile>

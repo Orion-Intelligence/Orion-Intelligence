@@ -10,7 +10,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
 
     cy.visit('/dashboard');
-    cy.contains('div.sidebar__item-dropdown', 'General Intelligence')
+    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
       .scrollIntoView()
       .click({ force: true });
 
@@ -20,23 +20,25 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
 
 
-    cy.get('label.small-switch input[type="checkbox"]')
+    cy.contains('span', 'Advance')
+      .parent()
+      .find('input[type="checkbox"]')
       .should('exist')
       .check({ force: true });
 
-    cy.get('.filters-overlay', { timeout: 10000 }).should('be.visible');
+    cy.get('app-search-filters', { timeout: 10000 }).should('be.visible');
 
 
     const applyFilter = (name: string, value: string) => {
-      cy.contains('.filter-panel__category-tab', name)
+      cy.contains('app-search-filters div', name)
         .scrollIntoView()
         .click({ force: true });
 
-      cy.get('.filter-panel__input-row input[type="text"]')
+      cy.get('app-search-filters input[placeholder="Enter entity"]')
         .clear()
         .type(value);
 
-      cy.get('.filter-add__icon').click({ force: true });
+      cy.get('app-search-filters input[placeholder="Enter entity"] + span').click({ force: true });
 
     };
 
@@ -58,16 +60,16 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
     filters.forEach(([name, value]) => applyFilter(name, value));
 
 
-    cy.get('button.selected-filter-bar__clear-btn').should('exist').click({ force: true });
+    cy.contains('app-search-filters button', 'Clear Selection').should('exist').click({ force: true });
 
 
-    cy.contains('span', 'Tools').scrollIntoView().click({ force: true });
+    cy.contains('button', 'Tools').scrollIntoView().click({ force: true });
 
 
     const sortOptions = ['Newest first', 'Oldest first'];
     sortOptions.forEach(option => {
-      cy.get('#dropdownMenu1').click({ force: true });
-      cy.contains('.dropdown-item', option).click({ force: true });
+      cy.contains('button', 'sort by').click({ force: true });
+      cy.contains('.ui-result-dropdown-item', option).click({ force: true });
       cy.get('[data-cy="dashboard-general-input"]').type('{enter}');
 
     });
@@ -80,16 +82,16 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
     ];
 
     searchByOptions.forEach(option => {
-      cy.get('#dropdownMenu2').click({ force: true });
-      cy.contains('.dropdown-item', option).click({ force: true });
+      cy.contains('button', 'search by').click({ force: true });
+      cy.contains('.ui-result-dropdown-item', option).click({ force: true });
       cy.get('[data-cy="dashboard-general-input"]').clear().type('test query{enter}');
 
     });
 
 
     const openFilters = () => {
-      cy.get('div.filter-button-wrapper label.filters-button').click({ force: true });
-      cy.get('form.sidebar_form').should('be.visible');
+      cy.contains('label', 'Filter').click({ force: true });
+      cy.get('app-filters').should('be.visible');
     };
 
     openFilters();
@@ -97,8 +99,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
     const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
-      cy.get('#dropdownnetwork').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="network"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
@@ -107,8 +108,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
     const safeSearchOptions = ['Yes', 'No'];
     safeSearchOptions.forEach(option => {
-      cy.get('#dropdownsafe').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="safe"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
@@ -117,12 +117,12 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
     const selectDateRange = () => {
 
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
 
 
-      cy.contains('span.custom-day', '1').click({ force: true });
+      cy.contains('button', '1').click({ force: true });
 
-      cy.contains('span.custom-day', '25').click({ force: true });
+      cy.contains('button', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
 
@@ -136,15 +136,14 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
     ];
 
     contentTypes.forEach(option => {
-      cy.get('#dropdowncontent').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="content"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
     });
 
 
-    cy.get('button.default-input-button[type="submit"]').click({ force: true });
+    cy.get('form button[type="submit"]').first().click({ force: true });
 
   });
 
@@ -164,22 +163,24 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('div.sidebar__item-dropdown', 'Data Breach')
+    cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
       .scrollIntoView()
       .click({ force: true });
 
     cy.get('[data-cy="dashboard-general-input"]').should('be.visible');
 
 
-    cy.get('label.small-switch input[type="checkbox"]')
+    cy.contains('span', 'Advance')
+      .parent()
+      .find('input[type="checkbox"]')
       .should('exist')
       .check({ force: true });
 
 
 
     const openFilters = () => {
-      cy.get('div.filter-button-wrapper label.filters-button').click({ force: true });
-      cy.get('form.sidebar_form').should('be.visible');
+      cy.contains('label', 'Filter').click({ force: true });
+      cy.get('app-filters').should('be.visible');
     };
 
     openFilters();
@@ -187,8 +188,7 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
 
     const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
-      cy.get('#dropdownnetwork').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="network"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
       openFilters();
     });
@@ -196,27 +196,26 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
 
     const safeSearchOptions = ['Yes', 'No'];
     safeSearchOptions.forEach(option => {
-      cy.get('#dropdownsafe').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="safe"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
       openFilters();
     });
 
 
     const selectDateRange = () => {
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
 
 
-      cy.contains('span.custom-day', '1').click({ force: true });
+      cy.contains('button', '1').click({ force: true });
 
-      cy.contains('span.custom-day', '25').click({ force: true });
+      cy.contains('button', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
       openFilters();
     };
     selectDateRange();
 
-    cy.get('.sidebar_input_date-button').click({ force: true });
+    cy.contains('button', 'Select date range').click({ force: true });
     cy.contains('button', 'Clear').click({ force: true });
 
 
@@ -226,14 +225,13 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
     ];
 
     contentTypes.forEach(option => {
-      cy.get('#dropdowncontent').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="content_type"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
       openFilters();
     });
 
 
-    cy.get('button.default-input-button[type="submit"]').click({ force: true });
+    cy.get('form button[type="submit"]').first().click({ force: true });
 
   });
 
@@ -257,7 +255,7 @@ describe('Defacement – Full Filters Flow', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('div.sidebar__item-dropdown', 'Defacement')
+    cy.contains('app-dashboard-sidebar-items div', 'Defacement')
       .scrollIntoView()
       .click({ force: true });
 
@@ -266,25 +264,25 @@ describe('Defacement – Full Filters Flow', () => {
 
 
     const openFilters = () => {
-      cy.get('div.filter-button-wrapper label.filters-button')
+      cy.contains('label', 'Filter')
         .click({ force: true });
-      cy.get('form.sidebar_form')
+      cy.get('app-filters')
         .should('be.visible');
     };
     openFilters();
 
 
     const selectDateRange = () => {
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
 
-      cy.contains('span.custom-day', '1').click({ force: true });
+      cy.contains('button', '1').click({ force: true });
 
-      cy.contains('span.custom-day', '25').click({ force: true });
+      cy.contains('button', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
 
 
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
       cy.contains('button', 'Clear').click({ force: true });
 
       openFilters();
@@ -294,15 +292,14 @@ describe('Defacement – Full Filters Flow', () => {
 
     const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
-      cy.get('#dropdownnetwork').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="network"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
     });
 
 
-    cy.get('button.default-input-button[type="submit"]').click({ force: true });
+    cy.get('form button[type="submit"]').first().click({ force: true });
 
   });
 
@@ -324,7 +321,7 @@ describe('Social – Full Filters Flow', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('div.sidebar__item-dropdown', 'Social')
+    cy.contains('app-dashboard-sidebar-items div', 'Social')
       .scrollIntoView()
       .click({ force: true });
 
@@ -333,25 +330,25 @@ describe('Social – Full Filters Flow', () => {
 
 
     const openFilters = () => {
-      cy.get('div.filter-button-wrapper label.filters-button')
+      cy.contains('label', 'Filter')
         .click({ force: true });
-      cy.get('form.sidebar_form')
+      cy.get('app-filters')
         .should('be.visible');
     };
     openFilters();
 
 
     const selectDateRange = () => {
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
 
-      cy.contains('span.custom-day', '1').click({ force: true });
+      cy.contains('button', '1').click({ force: true });
 
-      cy.contains('span.custom-day', '25').click({ force: true });
+      cy.contains('button', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
 
 
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
       cy.contains('button', 'Clear').click({ force: true });
 
       openFilters();
@@ -361,8 +358,7 @@ describe('Social – Full Filters Flow', () => {
 
     const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
-      cy.get('#dropdownnetwork').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="network"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
@@ -374,15 +370,14 @@ describe('Social – Full Filters Flow', () => {
     ];
 
     contentTypes.forEach(option => {
-      cy.get('#dropdowncontent').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="content"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
     });
 
 
-    cy.get('button.default-input-button[type="submit"]').click({ force: true });
+    cy.get('form button[type="submit"]').first().click({ force: true });
 
   });
 
@@ -404,7 +399,7 @@ describe('Exploit – Full Filters Flow', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('div.sidebar__item-dropdown', 'Exploit')
+    cy.contains('app-dashboard-sidebar-items div', 'Exploit')
       .scrollIntoView()
       .click({ force: true });
 
@@ -413,25 +408,25 @@ describe('Exploit – Full Filters Flow', () => {
 
 
     const openFilters = () => {
-      cy.get('label.filters-button')
+      cy.contains('label', 'Filter')
         .click({ force: true });
-      cy.get('form.sidebar_form')
+      cy.get('app-filters')
         .should('be.visible');
     };
     openFilters();
 
 
     const selectDateRange = () => {
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
 
-      cy.contains('span.custom-day', '1').click({ force: true });
+      cy.contains('button', '1').click({ force: true });
 
-      cy.contains('span.custom-day', '25').click({ force: true });
+      cy.contains('button', '25').click({ force: true });
 
       cy.contains('button', 'Apply').click({ force: true });
 
 
-      cy.get('.sidebar_input_date-button').click({ force: true });
+      cy.contains('button', 'Select date range').click({ force: true });
       cy.contains('button', 'Clear').click({ force: true });
 
       openFilters();
@@ -443,8 +438,7 @@ describe('Exploit – Full Filters Flow', () => {
     ];
 
     contentTypes.forEach(option => {
-      cy.get('#dropdowncontent').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="content"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
@@ -453,22 +447,18 @@ describe('Exploit – Full Filters Flow', () => {
 
     const networkOptions = ['All', 'Onion'];
     networkOptions.forEach(option => {
-      cy.get('#dropdownnetwork').click({ force: true });
-      cy.contains('a.dropdown-item', option).click({ force: true });
+      cy.get('app-filters select[name="network"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
 
       openFilters();
     });
 
 
-    cy.get('button.default-input-button[type="submit"]').click({ force: true });
+    cy.get('form button[type="submit"]').first().click({ force: true });
 
   });
 
 });
-
-
-
 
 
 

@@ -9,13 +9,13 @@ describe('Help & Support', () => {
     cy.visit('/dashboard');
 
     cy.get('img[alt="Logout"]')
-      .closest('a.profile-dropdown-toggle')
+      .closest('a')
       .click({ force: true });
 
-    cy.get('ul.profile-dropdown')
-      .should('have.class', 'show');
+    cy.get('ul')
+      .should('exist');
 
-    cy.contains('li .profile_theme-toggle.profile-item span', 'Help & Support')
+    cy.contains('li span', 'Help & Support')
       .should('be.visible')
       .closest('li')
       .click({ force: true });

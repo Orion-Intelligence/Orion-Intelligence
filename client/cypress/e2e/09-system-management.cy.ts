@@ -1,7 +1,7 @@
 describe('Admin Flow – System Settings → Update Company Name → Logout', () => {
 
   const openSystemSettings = () => {
-    cy.contains('div.sidebar__subitem-content', 'System Settings')
+    cy.contains('app-dashboard-sidebar-items div', 'System Settings')
       .should('be.visible')
       .click({ force: true });
 
@@ -17,17 +17,19 @@ describe('Admin Flow – System Settings → Update Company Name → Logout', ()
     openSystemSettings();
 
 
-    cy.contains('button', 'Edit')
+    cy.get('button[aria-label="Edit settings"]')
       .should('be.visible')
       .click({ force: true });
 
 
-    cy.get('input.user-settings_info-value')
+    cy.contains('label', 'App Name')
+      .parent()
+      .find('input')
       .should('be.visible')
       .clear()
       .type('Dark Intelligence');
 
-    cy.contains('button', 'Save')
+    cy.get('button[aria-label="Save settings"]')
       .should('be.visible')
       .click({ force: true });
 

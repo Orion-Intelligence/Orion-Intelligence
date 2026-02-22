@@ -77,8 +77,8 @@
   </div>
 </div>
 
-<div *ngIf="twofaRequired" class="w-full min-h-[70vh] bg-[var(--color-blue-830)] relative text-white overflow-hidden flex justify-center items-center min-w-[300px]" [class.twofaextend]="otpSecret" id="content">
-  <div class="bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.04)_0,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_24px),radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.06)_0%,transparent_40%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.04)_0%,transparent_45%),linear-gradient(90deg,rgba(21,52,84,0.55)_0%,rgba(22,56,88,0.55)_100%)] p-[42px] px-[32px] rounded-[16px] border border-[rgba(255,255,255,0.12)]" [ngClass]="otpSecret ? 'w-[700px] mt-0' : 'w-auto'">
+<div *ngIf="twofaRequired" class="w-full min-h-[70vh] bg-[var(--color-blue-830)] relative text-white overflow-hidden flex justify-center items-center min-w-[300px]" id="content">
+  <div class="bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.04)_0,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_24px),radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.06)_0%,transparent_40%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.04)_0%,transparent_45%),linear-gradient(90deg,rgba(21,52,84,0.55)_0%,rgba(22,56,88,0.55)_100%)] p-[42px] px-[32px] rounded-[16px] border border-[rgba(255,255,255,0.12)] max-[943px]:mt-[-30vh] max-[943px]:mx-[20px] max-[943px]:w-full max-[943px]:px-[20px]" [ngClass]="otpSecret ? 'w-[700px] mt-[100px] max-[943px]:mt-[20px]' : 'w-auto'">
     <div class="flex items-center">
       <a class="inline-flex items-center gap-2 px-[14px] py-[6px] rounded-[20px] bg-[rgba(255,255,255,0.2)] border border-[rgba(255,255,255,0.35)] text-[14px] font-bold no-underline text-white transition-colors hover:bg-[rgba(255,255,255,0.3)] hover:border-[rgba(255,255,255,0.6)]" href="/">
         <img alt="back" src="assets/images/shared/theme/arrow.svg" class="w-[18px] h-[18px]">

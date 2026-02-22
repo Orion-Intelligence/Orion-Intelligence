@@ -4,7 +4,7 @@ import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs
 import { ResultComponent } from '../../shared/partials/result/result.component';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
-import { NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { CredentialListComponent } from './credential-list/credential-list.component';
 import { StealerLogCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
 import { SortType } from '../../shared/constants/shared-enums';
@@ -28,6 +28,7 @@ import { ScanHelperMethods } from '../../shared/partials/scan-helper-methods/sca
     FormsModule,
     EmptyQueryComponent,
     NgIf,
+    NgClass,
     PaginationComponent,
     CredentialsSearchBarComponent,
     PasswordSchemaComponent,
@@ -59,6 +60,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   showPasswordscheme = false;
   showSubdomains = false;
   subdomainList: string[] = [];
+  isStandaloneStealerlogsRoute = false;
 
   private setLoading(delta: 1 | -1) {
     this.pendingRequests += delta;
@@ -77,6 +79,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.isStandaloneStealerlogsRoute = this.router.url.includes('/stealerlogs/');
     this.stealerlogCallbackModel = { ...this.dashboardService.stealerlogCallbackModel };
     this.dashboardService.consolidatedParamModel.fullsearch = false;
     combineLatest([this.route.queryParams, this.route.url])

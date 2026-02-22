@@ -20,7 +20,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .should('be.visible')
       .click();
 
-    cy.get('.welcome-page__card').should('exist');
+    cy.get('img[alt="Tick"]').should('exist');
     cy.contains('Go to login').click();
     cy.openLastMailAndGetUrl().then(url => {
       cy.visit(url);
@@ -32,7 +32,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.openTenantsPage();
     cy.contains("Not Verified", { timeout: 10000 }).should("exist");
-    cy.get('.directory-listing_upper-heading').find('.directory-listing_header').should('have.text', 'Tenants');
+    cy.contains('h1.ui-page-title', 'Tenants').should('be.visible');
     cy.get('tbody tr').its('length').should('be.gte', 1);
 
     let verifiedCount = 0;
@@ -42,8 +42,8 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
       cy.get('tbody tr').then($rows => {
         const rows = $rows.filter((_: number, row: HTMLElement) => {
-          return Cypress.$(row).find('.badge-false').length > 0 &&
-            !Cypress.$(row).hasClass('table-active');
+          return Cypress.$(row).find('span:contains("Not Verified")').length > 0 &&
+            !Cypress.$(row).hasClass('!border-t-0');
         });
 
         verifiedCount++;
@@ -58,8 +58,9 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
         cy.wrap(false).as('changed');
 
-        cy.get('tr.table-active')
-          .find('button.pill-toggle')
+        cy.contains('tr', 'Edit Tenant')
+          .find('button')
+          .contains('Not Verified')
           .then($btn => {
             if ($btn.text().includes('Not Verified')) {
               cy.wrap($btn).click({force: true});
@@ -67,10 +68,8 @@ describe('Tenant Complete Flow – Correct Order', () => {
             }
           });
 
-        cy.get('tr.table-active')
-          .find('.license-card')
-          .contains('.license-label', 'Enterprise')
-          .closest('.license-card')
+        cy.contains('tr', 'Edit Tenant')
+          .contains('button', 'Enterprise')
           .find('input[type="checkbox"]')
           .then($cb => {
             if (!$cb.is(':checked')) {
@@ -106,28 +105,27 @@ describe('Tenant Complete Flow – Correct Order', () => {
   });
 
   const openManageIOCs = () => {
-    cy.contains('.sidebar__subitem-content', 'IOC')
+    cy.contains('app-dashboard-sidebar-items div', 'IOC')
       .should('be.visible')
       .click();
 
-    cy.get('.onboarding-step2__category-scroll')
+    cy.get('input[placeholder="Search IOCs..."]')
       .should('exist');
   };
 
   const addIOCValue = (value: string) => {
-    cy.get('.onboarding-step2__input')
+    cy.get('input[placeholder="Type"]')
       .should('be.visible')
       .clear()
       .type(value);
 
-    cy.get('button.onboarding-step2__add-btn')
+    cy.contains('button', 'Add')
       .should('be.visible')
       .click();
   };
 
   const addIOCForAllTabs = () => {
-    cy.get('.onboarding-step2__category-scroll')
-      .find('.onboarding-step2__tab')
+    cy.get('div.border-b-2.cursor-pointer')
       .then($tabs => {
         Cypress._.take($tabs.toArray(), 5).forEach((tab, index) => {
           cy.wrap(tab)
@@ -139,7 +137,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       });
 
     const goToHomepageAndScan = () => {
-      cy.contains('.sidebar__subitem-content', 'Homepage')
+      cy.contains('app-dashboard-sidebar-items div', 'Homepage')
         .should('be.visible')
         .click();
 
@@ -158,7 +156,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
 
-    cy.get('.onboarding-box', {timeout: 40000}).should('be.visible');
+    cy.get('#company', {timeout: 40000}).should('be.visible');
 
     cy.get('#company', {timeout: 40000})
       .clear()
@@ -168,11 +166,11 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .should('not.be.disabled')
       .click();
 
-    cy.contains('.onboarding-step2__tab', 'Country')
+    cy.contains('div.border-b-2.cursor-pointer', 'Country')
       .scrollIntoView()
       .click();
 
-    cy.get('.onboarding-step2__input')
+    cy.get('input[placeholder="Type"]')
       .clear()
       .type('austria{enter}');
 
@@ -191,12 +189,11 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="email"]').type('tenant1@gmail.com');
     cy.get('input[name="password"]').type('1qaz!QAZ', {log: false});
 
-    cy.get('.license-card')
-      .contains('.license-label', 'Enterprise')
-      .click();
+    cy.contains('button', 'Enterprise').click();
 
-    cy.contains('.add-tenant_footer button', 'Add User')
-      .click();
+    cy.contains('button', 'Add User')
+      .scrollIntoView()
+      .click({ force: true });
 
     openManageIOCs();
 
@@ -217,7 +214,9 @@ describe('Tenant Complete Flow – Correct Order', () => {
         cy.get('#edit-tenant').click();
       });
 
-    cy.get('input.tenant-input')
+    cy.contains('label', 'User Quota')
+      .parent()
+      .find('input[type="number"]')
       .clear()
       .type('1');
 
@@ -233,7 +232,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.contains('Sign In').click();
 
     cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
-    cy.contains('Homepage').click();
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage').click();
     cy.get('.user-homepage_cards').should('exist');
   });
 
@@ -249,27 +248,26 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('button[apptooltip="scan all"]', {timeout: 40000})
       .should('be.visible')
       .and('not.be.disabled')
-      .click();
+      .scrollIntoView()
+      .click({ force: true });
 
-    cy.get('div.loading-content', {timeout: 40000})
+    cy.get('app-alert-scan-loading', {timeout: 40000})
       .should('not.exist');
 
     cy.get('button[apptooltip="Print Alerts"]')
+      .scrollIntoView()
       .should('be.visible')
-      .click();
+      .click({ force: true });
 
-    cy.get('a.profile-dropdown-toggle.notification-icon')
-      .should('be.visible')
-      .click();
-
-    cy.get('.notification_sidebar-item', {timeout: 40000})
+    cy.get('app-profile a')
       .first()
-      .within(() => {
-        cy.contains('button', 'See Details').click();
-      });
+      .click();
 
-    cy.get('a.profile-dropdown-toggle.notification-icon')
-      .should('be.visible')
+    cy.contains('app-alert-notification button', 'See Details', {timeout: 40000})
+      .click();
+
+    cy.get('app-profile a')
+      .first()
       .click();
 
     cy.contains('button', 'Clear All')
@@ -279,17 +277,20 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.contains('.user-homepage_cards-card', 'Breach')
       .click();
 
-    cy.get('.category_report_burger-icon').first().click();
+    cy.get('details summary img[alt="menu"]').first().click();
 
-    cy.contains('.category_report_alert-btn', 'See Details').first().click();
+    cy.contains('div', 'See Details').first().click();
 
     cy.get('button[apptooltip="add alert"]').click();
 
     cy.get('input[name="title"]').type('Test Alert');
     cy.get('textarea[name="alert_description"]').type('Test description');
 
-    cy.get('#iocTypeDropdown').click();
-    cy.contains('.dropdown-item span', 'Domains').click();
+    cy.contains('label', 'Select IOC Type')
+      .next()
+      .find('summary')
+      .click();
+    cy.contains('button', 'Domains').click();
 
     cy.get('input[name="source"]').type('Automation');
     cy.get('input[name="url"]').type('https://example.com');
@@ -298,10 +299,10 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.contains('button', 'Add Alert').click();
 
     cy.get('button[apptooltip="open sidebar"]').click();
-    cy.get('.sidebar_input_date-button').click();
+    cy.contains('button', 'Select date range').click();
 
-    cy.contains('.ngb-dp-day', '1').click();
-    cy.contains('.ngb-dp-day', '25').click();
+    cy.contains('button', '1').click();
+    cy.contains('button', '25').click();
 
     cy.contains('button', 'Apply').click();
 

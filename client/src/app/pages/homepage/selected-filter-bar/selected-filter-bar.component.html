@@ -1,5 +1,5 @@
 <div [ngClass]="{ 'mt-[10px]': showSorting }" @fadeInDashboardItem>
-  <div class="ml-[31px] mt-[15px] min-w-[450px] max-w-[912px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-890)] px-[24px] py-[8px] pl-[17px] font-[Inter] text-[var(--color-text1)] shadow-[0_2px_10px_rgba(0,0,0,0.2)]" *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
+  <div class="mt-[15px] w-full max-w-[910px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-890)] px-[24px] py-[8px] pl-[17px] font-[Inter] text-[var(--color-text1)] shadow-[0_2px_10px_rgba(0,0,0,0.2)] max-[900px]:max-w-full" *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
 
     <div class="flex items-center justify-between">
       <div class="flex text-[18px] font-medium text-[var(--color-text1)]">Filters</div>

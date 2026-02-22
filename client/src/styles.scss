@@ -135,6 +135,10 @@
   }
 }
 
+.ui-main-loader-bar {
+  animation: loader_indeterminate 1.5s linear infinite;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;

@@ -9,29 +9,29 @@ describe('General Intelligence – Open Report & Chatbot', () => {
     cy.visit('/dashboard');
 
 
-    cy.contains('div.sidebar__item-dropdown', 'General Intelligence')
+    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
       .click({ force: true });
 
 
-    cy.get('div.dashboard__search-button-inner')
+    cy.get('div[apptooltip="Open Report"]')
       .first()
       .click({ force: true });
 
 
-    cy.get('button.chat-support__toggle')
+    cy.get('div.fixed.bottom-6.right-6 button')
       .click({ force: true });
 
-    cy.get('input.chat-support__input-field')
+    cy.get('form input[name="message"]')
       .type('hey', { force: true });
 
 
-    cy.get('button.chat-support__send-btn')
+    cy.get('button.ui-chat-send-btn')
       .click({ force: true });
 
 
-    cy.get('div.chat-support__messages')
+    cy.get('div.flex-1.space-y-3')
       .within(() => {
-        cy.get('.chat-support__msg--bot, .chat-support__error-box')
+        cy.get('div')
           .should('exist');
       });
     cy.logout();

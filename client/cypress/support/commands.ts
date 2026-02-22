@@ -28,22 +28,22 @@ Cypress.Commands.add("loginAsTest1", () => {
 });
 Cypress.Commands.add("logout", () => {
     cy.get('img[alt="Logout"]', { timeout: 10000 })
-        .closest('a.profile-dropdown-toggle')
+        .first()
         .click();
-    cy.contains('li.profile-item', 'Sign out')
+    cy.contains('li', 'Sign out')
         .first()
         .click({ force: true });
     cy.get('input[name="username"]', { timeout: 10000 })
         .should('exist');
 });
 Cypress.Commands.add("openTenantsPage", () => {
-    cy.contains('div.sidebar__subitem-content', 'Tenant')
+    cy.contains('app-dashboard-sidebar-items div', 'Tenant')
         .should('be.visible')
         .click();
     cy.url().should('include', '/dashboard/profile/tenant');
 });
 Cypress.Commands.add("openHomepage", () => {
-    cy.contains('div.sidebar__subitem-content', 'Homepage')
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
         .should('be.visible')
         .click();
 });

@@ -10,11 +10,11 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('.sidebar__item-dropdown', 'Web Scans')
+    cy.contains('app-dashboard-sidebar-items div', 'Web Scans')
       .should('be.visible')
       .click();
 
-    cy.contains('.sidebar__subitem-content', 'Basic Scan')
+    cy.contains('app-dashboard-sidebar-items div', 'Basic Scan')
       .click();
 
     cy.get('input[placeholder="Domain"]')
@@ -24,14 +24,14 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
     cy.contains('button', 'Search')
       .click();
 
-    cy.get('.search__result-detail')
+    cy.contains('div', 'Security Posture')
       .should('exist');
 
-    cy.get('.search__result__section__heading .toggle-btn')
+    cy.contains('h3', 'Findings')
       .first()
       .click();
 
-    cy.contains('.sidebar__subitem-content', 'Port Scan')
+    cy.contains('app-dashboard-sidebar-items div', 'Port Scan')
       .click();
 
     cy.get('input[placeholder="Domain"]')
@@ -41,10 +41,10 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
     cy.contains('button', 'Search')
       .click();
 
-    cy.get('.search__result-detail')
+    cy.contains('div', 'Security Posture')
       .should('exist');
 
-    cy.contains('.sidebar__subitem-content', 'Repository Scan')
+    cy.contains('app-dashboard-sidebar-items div', 'Repository Scan')
       .click();
 
     cy.get('input[placeholder="Repository"]')
@@ -57,13 +57,13 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
     cy.get('app-code-block')
       .should('exist');
 
-    cy.get('button[ng-reflect-tooltip-text="Download"]')
+    cy.get('button[apptooltip="Download"]')
       .click();
 
-    cy.get('button[ng-reflect-tooltip-text="Print"]')
+    cy.get('button[apptooltip="Print"]')
       .click();
 
-    cy.contains('.sidebar__subitem-content', 'SEO Scan')
+    cy.contains('app-dashboard-sidebar-items div', 'SEO Scan')
       .click();
 
     cy.get('input[placeholder="Domain"]')
@@ -73,7 +73,7 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
     cy.contains('button', 'Search')
       .click();
 
-    cy.contains('.sidebar__subitem-content', 'APK Scan')
+    cy.contains('app-dashboard-sidebar-items div', 'APK Scan')
       .should('be.visible')
       .click();
 
@@ -81,7 +81,7 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
       .should('exist')
       .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
 
-    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+    cy.contains('span', 'success', { timeout: 300000 })
       .should('be.visible');
 
     cy.get('button[aria-label="Download report"]', { timeout: 60000 })
@@ -98,7 +98,7 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
       .should('exist')
       .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
 
-    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+    cy.contains('span', 'success', { timeout: 300000 })
       .should('be.visible');
 
   });
@@ -107,11 +107,11 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('.sidebar__item-dropdown', 'Live APIs')
+    cy.contains('app-dashboard-sidebar-items div', 'Live APIs')
       .should('be.visible')
       .click();
 
-        cy.contains('.sidebar__subitem-content', 'File Scanner')
+        cy.contains('app-dashboard-sidebar-items div', 'File Scanner')
       .should('be.visible')
       .click();
 
@@ -123,7 +123,7 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
         mimeType: 'application/pdf'
       }, { force: true });
 
-    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+    cy.contains('span', 'success', { timeout: 300000 })
       .should('be.visible');
 
     cy.get('button[aria-label="Download report"]', { timeout: 60000 })
@@ -144,20 +144,20 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
         mimeType: 'application/pdf'
       }, { force: true });
 
-    cy.contains('span.ioc-report-pill.status-success', 'success', { timeout: 300000 })
+    cy.contains('span', 'success', { timeout: 300000 })
       .should('be.visible');
 
-    cy.contains('.sidebar__subitem-content', 'Email Breach')
+    cy.contains('app-dashboard-sidebar-items div', 'Email Breach')
       .click();
 
     cy.get('input[name="q2"]')
       .clear()
       .type('msmannan00@gmail.com');
 
-    cy.get('.dash-search-button')
+    cy.contains('button', 'Search')
       .click();
 
-    cy.contains('.sidebar__subitem-content', 'Social Scanner')
+    cy.contains('app-dashboard-sidebar-items div', 'Social Scanner')
       .click();
 
     cy.get('input[placeholder="Username"]')
@@ -165,7 +165,7 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
       .clear({ force: true })
       .type('Usama', { force: true });
 
-    cy.get('.dash-search-button')
+    cy.contains('button', 'Search')
       .click();
 
 
@@ -175,6 +175,5 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
 
 });
-
 
 
