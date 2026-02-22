@@ -49,7 +49,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       return {
         title: '#0f172a',
         tick: 'rgba(15, 23, 42, 0.45)',
-        tickLabel: '#ffffff',
+        tickLabel: '#1f2e47',
         border: 'rgba(15, 23, 42, 0.22)',
       };
     }

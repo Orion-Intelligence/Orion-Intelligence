@@ -11,7 +11,8 @@ type TelemetryGroup = {
   selector: 'app-expanded-row',
   standalone: true,
   imports: [NgIf, NgForOf, NgClass, TooltipDirective],
-  templateUrl: './expanded-row.component.html'
+  templateUrl: './expanded-row.component.html',
+  styleUrls: ['./expanded-row.component.css']
 })
 export class ExpandedRowComponent implements OnChanges {
   private copiedTimer: any = null;

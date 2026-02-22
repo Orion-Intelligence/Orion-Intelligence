@@ -72,38 +72,6 @@
   border-color: var(--ui-consolidated-border, #d7e2ef) !important;
 }
 
-.credential_section_title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: #10b981;
-  margin: 10px 0 14px;
-}
-
-.ui-ioc-striped-table {
-  background-color: #172235 !important;
-}
-
-.ui-ioc-striped-table .ui-ioc-header {
-  background-color: #172235 !important;
-}
-
-.ui-ioc-striped-table .ui-ioc-row:nth-child(odd) {
-  background-color: #172235 !important;
-}
-
-.ui-ioc-striped-table .ui-ioc-row:nth-child(even) {
-  background-color: #131e30 !important;
-}
-
-.ui-ioc-striped-table .ui-ioc-row:hover {
-  filter: brightness(1.05);
-}
-
 .dark-theme .ui-consolidated-theme {
   --ui-consolidated-main-bg: #101A2B;
   --ui-consolidated-sub-bg: #172235;
@@ -479,6 +447,78 @@
 
 .light-theme .ui-chat-send-icon {
   filter: brightness(0) saturate(100%) invert(15%) sepia(21%) saturate(1064%) hue-rotate(179deg) brightness(94%) contrast(89%);
+}
+
+.ui-result-tabs-strip {
+  border-bottom-color: var(--color-divider) !important;
+}
+
+.light-theme .ui-result-tabs-strip {
+  border-bottom-color: #0f172a26 !important;
+}
+
+.dark-theme .ui-result-tabs-strip {
+  border-bottom-color: #ffffff20 !important;
+}
+
+.light-theme .ui-home-insight-card {
+  background: #ffffff !important;
+  border-color: #d7e1ec !important;
+  box-shadow: 0 8px 20px rgb(16 24 40 / 7%) !important;
+}
+
+.light-theme .ui-home-insight-card:hover {
+  background: #f8fbff !important;
+  border-color: #c8d6e8 !important;
+}
+
+.light-theme .ui-ioc-table-shell {
+  background: #eaf1fa !important;
+  border-color: #ccd9e8 !important;
+}
+
+.light-theme .ui-ioc-table-head {
+  background: #e2ecf8 !important;
+  border-bottom-color: #ccdae9 !important;
+}
+
+.light-theme .ui-ioc-table-row {
+  border-bottom-color: #d2deeb !important;
+}
+
+.ui-ioc-row-even {
+  background: var(--color-blue-700);
+}
+
+.ui-ioc-row-odd {
+  background: var(--color-blue-720);
+}
+
+.light-theme .ui-ioc-row-even {
+  background: #f7fbff !important;
+}
+
+.light-theme .ui-ioc-row-odd {
+  background: #edf4fb !important;
+}
+
+.light-theme .ui-ioc-table-empty {
+  background: #f1f6fc !important;
+}
+
+.light-theme .ui-ioc-adv-row {
+  background: #e9f1fb !important;
+  border-color: #ccd9e8 !important;
+}
+
+.light-theme .ui-ioc-adv-control {
+  background: #ffffff !important;
+  border-color: #cfdced !important;
+  color: #1f2e47 !important;
+}
+
+.light-theme .ui-ioc-adv-control::placeholder {
+  color: #667085 !important;
 }
 
 .ui-result-card {
@@ -867,6 +907,11 @@
   border: 1px solid #d7e2ee;
   box-shadow: 0 8px 20px rgb(16 24 40 / 12%);
   backdrop-filter: none;
+}
+
+.light-theme app-world-heatmap svg .legend text,
+.light-theme app-world-heatmap svg .legend-tick-label {
+  fill: #1f2e47 !important;
 }
 
 /* Keep dashboard main sidebar dark even in light theme */

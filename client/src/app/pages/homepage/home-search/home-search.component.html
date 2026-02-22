@@ -7,10 +7,10 @@
         app_service.userSessionData().user.role === 'analyst'">
         <div class="relative">
           <div
-            class="flex w-[calc(100vw-840px)] flex-nowrap mb-[8px] h-[42px] max-[1000px]:w-full"
+            class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap"
             [ngClass]="{
               'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay,
-              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-auto max-[550px]:px-0 max-[550px]:mr-[100px]': !homeSearchService.showFiltersOverlay
+              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay
             }">
 
             <button class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" (click)="onSearchSubmit()" type="submit">

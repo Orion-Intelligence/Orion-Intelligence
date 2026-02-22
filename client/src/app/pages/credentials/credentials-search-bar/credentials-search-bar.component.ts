@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { NgFor, KeyValuePipe, NgIf, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
@@ -9,7 +10,18 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
   selector: 'app-credentials-search-bar',
   imports: [NgFor, NgIf, KeyValuePipe, FormsModule, TooltipDirective, NgClass],
   templateUrl: './credentials-search-bar.component.html',
-  animations: [fadeInDashboardItem],
+  animations: [
+    fadeInDashboardItem,
+    trigger('advancedRowMotion', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-6px) scale(0.995)' }),
+        animate('180ms ease-out', style({ opacity: 1, transform: 'translateY(0) scale(1)' }))
+      ]),
+      transition(':leave', [
+        animate('140ms ease-in', style({ opacity: 0, transform: 'translateY(-4px) scale(0.995)' }))
+      ])
+    ])
+  ],
 })
 export class CredentialsSearchBarComponent {
   private VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^\d{13,19}$/ ];
@@ -271,5 +283,9 @@ export class CredentialsSearchBarComponent {
 
   private generateId(): string {
     return Math.random().toString(36).substring(2, 9);
+  }
+
+  trackByFilterId(_: number, filter: StealerlogsAdvancedFilter): string {
+    return filter.id;
   }
 }

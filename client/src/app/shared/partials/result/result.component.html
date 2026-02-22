@@ -1,5 +1,5 @@
 <ng-container *ngIf="consolidated">
-  <div class="mx-[30px] mt-[14px] flex items-end border-b border-transparent pb-0 max-[1000px]:mx-[15px]" style="border-bottom: 1px solid #ffffff20 !important;" (click)="onTabClick($event)">
+  <div class="ui-result-tabs-strip mx-[30px] mt-[14px] flex items-end border-b pb-0 max-[1000px]:mx-[15px]" (click)="onTabClick($event)">
     <div class="inline-flex items-center gap-[2px] bg-transparent p-0">
     <button
       type="button"
@@ -101,7 +101,7 @@
 
           <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
 
-          <div #filtersWrapper class="absolute left-0 top-[calc(100%+2px)] z-[1] w-full max-w-[910px]" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+          <div #filtersWrapper class="absolute left-0 top-full z-[1] w-full max-w-[910px]" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
             <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
           </div>
         </div>
