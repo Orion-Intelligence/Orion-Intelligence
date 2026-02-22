@@ -112,6 +112,16 @@ export class HomeSearchComponent implements OnInit {
     this.homeSearchService.handleSearchInput(event);
   }
 
+  clearSearchInput(): void {
+    this.searchQuery = '';
+    const input = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    if (input) {
+      input.value = '';
+      input.focus();
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
   onInsightToggleClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();

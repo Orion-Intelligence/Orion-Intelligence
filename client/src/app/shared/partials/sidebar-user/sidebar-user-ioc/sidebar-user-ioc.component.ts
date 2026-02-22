@@ -9,13 +9,13 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
+
 @Component({
   selector: 'app-sidebar-user-ioc',
   imports: [NgIf, NgFor, NgClass, CommonModule, FormsModule, TooltipDirective, ConfirmationPopupComponent],
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {
-  @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
   onboardingData!: TenantModel;
   showLeftFade = false;
   showRightFade = false;
@@ -23,12 +23,14 @@ export class SidebarUserIocComponent implements OnInit {
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
   isConfirmationOpen: boolean = false;
+  @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
 
   constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
 
   ngOnInit(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
     const backendData = this.appService.tenantData();
+
     if (backendData && backendData.iocs) {
       this.onboardingData = {
         name: backendData.name,
@@ -41,6 +43,7 @@ export class SidebarUserIocComponent implements OnInit {
           };
         })
       };
+
       this.selectedCategoryId = this.onboardingData?.iocs[0]?.ioc_id;
       this.setIocLocal();
     }
@@ -48,7 +51,8 @@ export class SidebarUserIocComponent implements OnInit {
 
   get filteredIocs() {
     const search = this.iocSearchText?.toLowerCase() || '';
-    return (this.onboardingData?.iocs || []).filter(ioc => ioc.name.toLowerCase().includes(search));
+    return (this.onboardingData?.iocs || []).filter(ioc =>
+      ioc.name.toLowerCase().includes(search))
   }
 
   onCategoryClick(categoryId: string): void {
@@ -59,11 +63,12 @@ export class SidebarUserIocComponent implements OnInit {
     if (!value.trim() || !this.selectedCategoryId) {
       return;
     }
+
     const category = this.onboardingData?.iocs.find(c => c.ioc_id === this.selectedCategoryId);
     if (category && !category.values.includes(value.trim())) {
       category.values.push(value.trim());
     }
-    this.update();
+    this.update()
   }
 
   removeIoc(iocId: string, value: string): void {
@@ -71,7 +76,7 @@ export class SidebarUserIocComponent implements OnInit {
     if (ioc) {
       ioc.values = ioc.values.filter(v => v !== value);
     }
-    this.update();
+    this.update()
   }
 
   scrollLeft() {
@@ -121,11 +126,14 @@ export class SidebarUserIocComponent implements OnInit {
           ioc.values = [];
         });
       }
+
       this.setIocLocal();
+
       const filteredOnboardingData: TenantModel = {
         name: this.onboardingData?.name || '',
         iocs: []
       };
+
       this.appService.tenantData.set({ ...filteredOnboardingData });
       this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
         next: () => {

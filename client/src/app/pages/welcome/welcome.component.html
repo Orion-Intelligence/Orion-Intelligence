@@ -1,12 +1,12 @@
-<ng-container>
-  <app-header></app-header>
-</ng-container>
-<img alt="background" class="fixed inset-0 h-full w-full object-cover" src="/assets/images/shared/Bg.webp">
-<div class="relative z-[1] flex min-h-[calc(100vh-60px)] items-center justify-center px-[20px]">
+<div class="dark-theme min-h-[100dvh] bg-[#172235]">
+  <app-header [forceDark]="true"></app-header>
+  <img alt="background" class="fixed inset-0 h-full w-full object-cover" src="/assets/images/shared/Bg.webp">
+<div class="relative z-[1] flex min-h-[calc(100dvh-60px)] items-center justify-center px-[20px]">
   <div class="w-full max-w-[420px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[24px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
     <img src="/assets/images/shared/welcom_icon.svg" alt="Tick" class="mx-auto h-[64px] w-[64px]">
     <div class="mt-[12px] text-[20px] font-semibold text-[var(--color-text1)]">{{ heading }}</div>
     <div class="mt-[6px] text-[14px] text-[var(--color-text4)]">{{ message }}</div>
     <button (click)="goToLogin()" class="mt-[16px] rounded-[8px] bg-[var(--color-blue-640)] px-[16px] py-[10px] text-[14px] font-medium text-white">Go to login</button>
   </div>
+</div>
 </div>

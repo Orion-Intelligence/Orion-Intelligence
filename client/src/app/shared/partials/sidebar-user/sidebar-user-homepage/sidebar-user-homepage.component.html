@@ -1,120 +1,119 @@
 <div *ngIf="!isAdmin() && !appService.userSessionData().tenant.isDefault; else showAdmin">
     <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst() && !isDemo();else showFree">
-        <div class="ioc-dashboard-content-wrapper">
+        <div class="relative min-h-[500px] w-full px-[30px] py-[20px] font-[Inter,sans-serif] text-[var(--color-text1)] max-[1000px]:px-[10px]">
             <div *ngIf="alertService.isAlertScanLoading()">
                 <app-alert-scan-loading></app-alert-scan-loading>
             </div>
-            <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')" class="category_report_searchbar">
+            <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')" class="mb-[15px]">
                 <app-home-search [isRoleAdmin]="false"></app-home-search>
 
-                <div class="category_report_flex category_report_flex-margin">
-                    <div class="btn-group report-menu-option-container mr-0">
-                        <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true" appTooltip="Print Alerts" class="p-0 report-menu-option">
+                <div class="mt-[12px] flex justify-end">
+                    <div class="inline-flex items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[8px] py-[6px]">
+                        <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true" appTooltip="Print Alerts" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[#fcfcfc0d] p-0 hover:bg-[#fcfcfc1a]">
                             <img src="assets/images/shared/theme/print.svg" height="25" alt="print" />
                         </button>
-                        <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
-                        <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()">
+                        <div *ngIf="licenseService.isMaintainer()" class="h-[20px] w-px bg-[var(--color-divider)]"></div>
+                        <button (click)="flushAll()" appTooltip="flush all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[#fcfcfc0d] p-0 hover:bg-[#fcfcfc1a]" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()">
                             <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" />
                         </button>
-                        <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
-                        <button *ngIf="licenseService.isMaintainer()" (click)="scanIOCs()" appTooltip="scan all" class="p-0 report-menu-option">
+                        <div *ngIf="licenseService.isMaintainer()" class="h-[20px] w-px bg-[var(--color-divider)]"></div>
+                        <button *ngIf="licenseService.isMaintainer()" (click)="scanIOCs()" appTooltip="scan all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[#fcfcfc0d] p-0 hover:bg-[#fcfcfc1a]">
                             <img alt="scan" height="20" ngSrc="assets/images/sidebar/theme/scanner.svg" width="20" />
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="user-homepage">
+            <div>
 
-                <div *ngIf="licenseService.isMaintainer() " class="user-homepage_header">
+                <div *ngIf="licenseService.isMaintainer() " class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[20px] py-[12px]">
 
-                    <div class="user-homepage_header-title">IOC’s</div>
+                    <div class="text-[16px] font-medium text-[var(--color-text1)]">IOC’s</div>
 
-                    <div class="user-homepage_header-actions">
-                        <button class="user-homepage_header-actions-entity-btn">
+                    <div class="flex gap-[10px]">
+                        <button class="rounded-[5px] border border-[var(--color-border)] bg-[#fcfcfc0d] px-[10px] py-[6px] text-[12px] font-normal text-[#57a5eb]">
                             Entity ({{ entityFiltersCount() }})
                         </button>
 
-                        <button class="user-homepage_header-actions-edit-btn" (click)="editIocs()">
-                            <img alt="edit-icon" src="assets/images/shared/theme/edit.svg">
-                            <i class="fa fa-edit"></i>
+                        <button class="inline-flex items-center gap-[5px] rounded-full border border-[var(--color-border)] bg-[#fcfcfc0d] px-[12px] py-[6px] text-[14px] font-medium text-[#a0b8d1] hover:bg-[#fcfcfc1a]" (click)="editIocs()">
+                            <img alt="edit-icon" src="assets/images/shared/theme/edit.svg" class="h-[12px] w-[12px]">
                             Edit
                         </button>
                     </div>
 
                 </div>
 
-                <div class="user-homepage_alerts">
-                    <div class="user-homepage_alerts-card critical">
-                        <div class="user-homepage_alerts-card-content">
-                            <div class="user-homepage_alerts-card-count">
+                <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[12px]">
+                    <div class="rounded-[8px] border border-[var(--color-border)] px-[16px] py-[14px]" [ngClass]="'bg-[#ff4c4c1a]'">
+                        <div class="flex items-center justify-between">
+                            <div class="text-[20px] font-semibold text-[var(--color-text1)]">
                                 {{ criticalRisks }}
                             </div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total critical alert types" />
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total critical alert types" />
                         </div>
-                        <div class="user-homepage_alerts-card-label">
+                        <div class="text-[16px] font-semibold text-[#ff4c4c]">
                             Critical Alerts
                         </div>
                     </div>
 
-                    <div class="user-homepage_alerts-card high">
-                        <div class="user-homepage_alerts-card-content">
-                            <div class="user-homepage_alerts-card-count">{{ highRisks }}</div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total high risk alert types" />
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px]">
+                        <div class="flex items-center justify-between">
+                            <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ highRisks }}</div>
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total high risk alert types" />
                         </div>
-                        <div class="user-homepage_alerts-card-label">High Risk Alerts</div>
+                        <div class="text-[16px] font-semibold text-[#ffb347]">High Risk Alerts</div>
                     </div>
 
-                    <div class="user-homepage_alerts-card medium">
-                        <div class="user-homepage_alerts-card-content">
-                            <div class="user-homepage_alerts-card-count">{{ mediumRisks }}</div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total medium risk alert types" />
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px]">
+                        <div class="flex items-center justify-between">
+                            <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ mediumRisks }}</div>
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total medium risk alert types" />
                         </div>
-                        <div class="user-homepage_alerts-card-label">Medium Risk</div>
+                        <div class="text-[16px] font-semibold text-[#ffd966]">Medium Risk</div>
                     </div>
 
-                    <div class="user-homepage_alerts-card low">
-                        <div class="user-homepage_alerts-card-content">
-                            <div class="user-homepage_alerts-card-count">{{ lowRisks }}</div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total low rish alert types" />
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px]">
+                        <div class="flex items-center justify-between">
+                            <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ lowRisks }}</div>
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total low rish alert types" />
                         </div>
-                        <div class="user-homepage_alerts-card-label">Low Risk</div>
+                        <div class="text-[16px] font-semibold text-[#6ccf7e]">Low Risk</div>
                     </div>
 
                 </div>
 
-                <div class="user-homepage_cards">
+                <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-[16px]">
 
                     <ng-container *ngFor="let category of alertCategories">
 
-                        <div class="user-homepage_cards-card" (click)="openAlerts(category.categoryName)">
+                        <div class="flex cursor-pointer flex-col gap-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[16px] hover:bg-[var(--color-blue-810)]" (click)="openAlerts(category.categoryName)">
 
-                            <div class="user-homepage_cards-card-header">
+                            <div class="flex items-center justify-between">
 
-                                <div class="user-homepage_cards-card-header-title">
-                                    <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg">
+                                <div class="flex items-center gap-[6px] text-[16px] font-semibold">
+                                    <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="h-[24px] w-[24px]">
                                     {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
                                 </div>
 
-                                <div class="user-homepage_cards-card-header-badge" [ngClass]="category.risk.toLowerCase()">
+                                <div class="rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c]': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347]': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966]': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e]': category.risk.toLowerCase() === 'low' }">
                                     {{ category.risk }} Risk
                                 </div>
 
                             </div>
 
-                            <div class="user-homepage_cards-card-row">
+                            <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1]">
                                 <span>IOC’s found</span>
-                                <span class="value">{{ category.iocCount }}</span>
+                                <span class="font-semibold text-[var(--color-text1)]">{{ category.iocCount }}</span>
                             </div>
 
-                            <div class="user-homepage_cards-card-row">
+                            <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1]">
                                 <span>Detected on</span>
-                                <span class="value">
+                                <span class="font-semibold text-[var(--color-text1)]">
                                     {{ category.detectedDate ? (category.detectedDate | date:'dd/MM/yyyy') : '-' }}
                                 </span>
                             </div>
 
-                            <div class="user-homepage_cards-card-tags">
-                                <span *ngFor="let tag of category.tags">{{ tag }}</span>
+                            <div class="mt-[6px] flex flex-wrap gap-[6px]">
+                                <span *ngFor="let tag of category.tags" class="rounded-[100px] bg-[var(--color-tags)] px-[10px] py-[4px] text-[12px] font-normal text-[var(--color-text1)]">{{ tag }}</span>
                             </div>
 
                         </div>
@@ -146,7 +145,7 @@
         <app-message-popup [message]="'There are no IOCs in your tenant'"
             (confirmed)="clossNoIocPopup()"></app-message-popup>
     </ng-container>
-    <div id="allAlertsReport" class="d-none">
+    <div id="allAlertsReport" class="hidden">
         <app-alert-export-component [alerts]="appService.userSessionData().alerts"></app-alert-export-component>
     </div>
 </div>

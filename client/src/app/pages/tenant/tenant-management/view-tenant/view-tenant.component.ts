@@ -14,6 +14,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   imports: [NgFor, FormsModule, CommonModule],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
+  styleUrls: ['../view-tenant.component-shared.css'],
 })
 export class ViewTenantComponent implements OnInit {
   protected readonly JSON = JSON;

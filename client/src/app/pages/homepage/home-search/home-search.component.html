@@ -15,8 +15,8 @@
             <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 border-y border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" maxlength="350" name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)">
             <input type="hidden" value="1">
 
-            <button type="button" class="ui-search-clear-btn flex items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px]" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()" [disabled]="!searchQuery">
-              <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
+            <button type="button" class="ui-search-clear-btn group flex h-[42px] w-[38px] items-center justify-center border-y border-[var(--color-border)] bg-white px-0 transition-colors hover:bg-[#f3f4f6]" aria-label="Clear input" title="Clear input" (click)="clearSearchInput()" [disabled]="!searchQuery">
+              <i class="bi bi-x-circle-fill text-[14px] text-[#374151] transition-colors group-hover:text-[#111827]" [ngClass]="{ 'invisible': !searchQuery }"></i>
             </button>
 
             <div class="flex shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[15px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden">

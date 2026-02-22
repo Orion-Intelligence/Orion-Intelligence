@@ -6,11 +6,11 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { Subscription } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 import QRCode from 'qrcode';
-import { DashboardHeaderComponent } from '../../../shared/partials/header/dashboard-header/dashboard-header.component';
+import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, NgIf, CommonModule, DashboardHeaderComponent],
+  imports: [FormsModule, NgIf, CommonModule, HeaderComponent],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {

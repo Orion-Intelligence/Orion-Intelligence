@@ -18,7 +18,8 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   selector: 'app-view-profile',
   imports: [NgFor, FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective],
   animations: [fadeInDashboardItem],
-  templateUrl: './manage-profile.component.html'
+  templateUrl: './manage-profile.component.html',
+  styleUrls: ['../view-tenant.component-shared.css']
 })
 export class ManageProfileComponent implements OnInit {
   protected readonly JSON = JSON;

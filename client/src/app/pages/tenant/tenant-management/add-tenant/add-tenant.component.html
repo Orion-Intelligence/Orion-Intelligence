@@ -1,76 +1,78 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4" @overlayAnimation (click)="onClose()">
-  <div class="w-full max-w-[1000px] overflow-y-auto rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-6 text-[var(--color-text1)] shadow-[0_0_30px_rgba(0,0,0,0.30)] sm:p-8" @popupAnimation (click)="$event.stopPropagation()">
-    <div class="relative flex items-center justify-between">
-      <div class="text-2xl font-semibold leading-8 text-[var(--color-text1)]">Add User</div>
-      <button type="button" class="absolute right-0 top-0 border-0 bg-transparent text-[32px] leading-6 text-[#ccc] transition hover:text-white" (click)="onClose()">
-        ×
-      </button>
+<div class="add-tenant_wrapper" @overlayAnimation (click)="onClose()">
+    <div class="add-tenant_container" @popupAnimation (click)="$event.stopPropagation()">
+        <div class="add-tenant_header">
+            <div class="add-tenant_heading">Add User</div>
+            <button class="add-tenant_close-btn" (click)="onClose()">×</button>
+        </div>
+
+        <form class="add-tenant_form">
+
+            <label class="add-tenant_label">Username</label>
+            <input type="text" class="add-tenant_input" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
+            <div class="username-suggestion" *ngIf="usernameSuggestion">
+                <div class="suggestion-title">Username already taken, suggested usernames below</div>
+                <div class="suggestion-list">
+                    {{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}
+                </div>
+            </div>
+
+            <label class="add-tenant_label">Email</label>
+            <input type="email" class="add-tenant_input" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
+
+            <label class="add-tenant_label">Password</label>
+            <input type="password" class="add-tenant_input" placeholder="Enter password" [(ngModel)]="model.password" name="password" />
+
+            <div class="add-tenant_two-column">
+                <div>
+                    <label class="add-tenant_label">Role</label>
+                    <select class="add-tenant_select" [(ngModel)]="model.role" name="role">
+                        <ng-container *ngIf="isAdmin; else nonAdminRoles">
+                            <option [ngValue]="'analyst'">Analyst</option>
+                            <option [ngValue]="'member'">Member</option>
+                            <option [ngValue]="'demo'">Demo</option>
+                        </ng-container>
+                        <ng-template #nonAdminRoles>
+                            <option [ngValue]="'analyst'">Analyst</option>
+                            <option [ngValue]="'member'">Member</option>
+                        </ng-template>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="add-tenant_label">Status</label>
+                    <select class="add-tenant_select" [(ngModel)]="model.status" name="status">
+                        <option [ngValue]="'active'">Active</option>
+                        <option [ngValue]="'disable'">Disable</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="add-tenant_label" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">Licenses</div>
+            <div class="license-grid" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
+                <ng-container *ngFor="let license of licenseList">
+                    <div class="license-card" *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" (click)="toggleTenantLicense(model, license)">
+                        <input type="checkbox" class="license-checkbox" [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
+                        <span class="license-label">
+                            {{ licenseService.getLicenseLabel(license) }}
+                        </span>
+                    </div>
+                </ng-container>
+            </div>
+
+            <hr class="tenant-divider">
+
+            <div *ngIf="errorText" class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm d-block">
+
+                <i class="bi bi-exclamation-diamond-fill me-2"></i>
+                {{ errorText }}
+            </div>
+
+        </form>
+
+        <div class="add-tenant_footer">
+            <button class="add-tenant_btn-outline" (click)="onClose()">Cancel</button>
+            <button class="add-tenant_btn-primary" (click)="onSubmit()">Add User</button>
+        </div>
+
     </div>
-
-    <form novalidate class="mt-5" (submit)="$event.preventDefault()">
-      <label class="mb-1 mt-4 block text-sm text-[var(--color-text2)]">Username</label>
-      <input type="text" placeholder="Enter username" name="username" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300" [(ngModel)]="model.username" />
-
-      <div *ngIf="usernameSuggestion" class="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-        <div class="font-semibold">Username already taken, suggested usernames below</div>
-        <div class="text-xs">{{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}</div>
-      </div>
-
-      <label class="mb-1 mt-4 block text-sm text-[var(--color-text2)]">Email</label>
-      <input type="email" placeholder="Enter email" name="email" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300" [(ngModel)]="model.email" />
-
-      <label class="mb-1 mt-4 block text-sm text-[var(--color-text2)]">Password</label>
-      <input type="password" placeholder="Enter password" name="password" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[#57718D] focus:ring-2 focus:ring-sky-300" [(ngModel)]="model.password" />
-
-      <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <div>
-          <label class="mb-1 block text-sm text-[var(--color-text2)]">Role</label>
-          <select name="role" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none focus:ring-2 focus:ring-sky-300" [(ngModel)]="model.role">
-            <ng-container *ngIf="isAdmin; else nonAdminRoles">
-              <option [ngValue]="'analyst'">Analyst</option>
-              <option [ngValue]="'member'">Member</option>
-              <option [ngValue]="'demo'">Demo</option>
-            </ng-container>
-            <ng-template #nonAdminRoles>
-              <option [ngValue]="'analyst'">Analyst</option>
-              <option [ngValue]="'member'">Member</option>
-            </ng-template>
-          </select>
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm text-[var(--color-text2)]">Status</label>
-          <select name="status" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3.5 py-3 text-sm text-[var(--color-text1)] outline-none focus:ring-2 focus:ring-sky-300" [(ngModel)]="model.status">
-            <option [ngValue]="'active'">Active</option>
-            <option [ngValue]="'disable'">Disable</option>
-          </select>
-        </div>
-      </div>
-
-      <ng-container *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
-        <div class="mb-1 mt-4 block text-sm text-[var(--color-text2)]">Licenses</div>
-        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          <button type="button" *ngFor="let license of licenseList" [hidden]="!((hasFullLicenseAccess || tenantLicenses.includes(license)) && license !== 'maintainer')" class="group flex min-h-[34px] select-none items-center justify-center rounded-[8px] border px-2 py-[0.45rem] text-center text-xs font-medium shadow-[0_1px_1px_rgba(0,0,0,0.16)] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-sky-300" [attr.aria-pressed]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" [ngClass]="{ 'border-sky-400/60 bg-sky-500/15 text-sky-200': model.licenses?.includes(license) || (!model.licenses?.length && license === 'free'), 'border-white/10 bg-[var(--color-blue-820)] text-[var(--color-text2)] hover:-translate-y-px hover:border-sky-400/30 hover:bg-[var(--color-blue-810)]': !model.licenses?.includes(license) && !(!model.licenses?.length && license === 'free') }" (click)="toggleTenantLicense(model, license)">
-            <input type="checkbox" class="mr-2 h-4 w-4 pointer-events-none accent-sky-500" [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
-            <span>{{ licenseService.getLicenseLabel(license) }}</span>
-          </button>
-        </div>
-      </ng-container>
-
-      <hr class="mt-5 border-0 border-t border-[var(--color-divider)]" />
-
-      <div *ngIf="errorText" class="mt-4 rounded-md border border-[var(--color-border-red)] bg-[var(--color-red-200)] px-3 py-2 text-sm text-[var(--color-text1)]">
-        {{ errorText }}
-      </div>
-    </form>
-
-    <div class="mt-6 flex items-center justify-between gap-4">
-      <button type="button" class="ui-btn ui-btn-secondary" (click)="onClose()">
-        Cancel
-      </button>
-      <button type="button" class="ui-btn ui-btn-primary" (click)="onSubmit()">
-        Add User
-      </button>
-    </div>
-  </div>
 </div>

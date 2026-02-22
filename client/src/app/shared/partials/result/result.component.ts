@@ -323,4 +323,16 @@ export class ResultComponent implements OnInit, OnChanges {
       this.closeMenus();
     }
   }
+
+  clearSearchInput(): void {
+    this.searchQuery = '';
+    this.local_query = '';
+    const input = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+    this.updateQuery.emit('');
+    this.init_domains();
+  }
 }

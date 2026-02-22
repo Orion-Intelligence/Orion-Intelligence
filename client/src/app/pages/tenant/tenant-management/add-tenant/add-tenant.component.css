@@ -1,0 +1,152 @@
+.add-tenant_wrapper {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.add-tenant_container {
+    background: var(--color-blue-830);
+    width: 100%;
+    max-width: 1000px;
+    border: 1px solid var(--color-border);
+    max-height: 800px;
+    border-radius: 14px;
+    padding: 35px;
+    position: relative;
+    overflow-y: auto;
+    color: var(--color-text1);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+.add-tenant_header .add-tenant_heading {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.add-tenant_close-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    color: #ccc;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.add-tenant_label {
+    display: block;
+    margin-bottom: 6px;
+    margin-top: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text2);
+}
+
+.add-tenant_input,
+.add-tenant_select {
+    width: 100%;
+    background: white;
+    border: 1px solid #2C3A4A;
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #172235;
+    font-size: 14px;
+    outline: none;
+}
+
+.add-tenant_input::placeholder {
+    color: #57718D;
+}
+
+.add-tenant_two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.add-tenant_footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.add-tenant_btn-outline {
+    min-width: 132px;
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid #A0B8D1;
+    color: var(--color-text1);
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.add-tenant_btn-primary {
+    min-width: 132px;
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #57A5EB;
+    color: #373637;
+    border: none;
+    transition: background-color 0.18s ease;
+}
+
+.add-tenant_btn-outline:hover {
+    background: rgba(160, 184, 209, 0.14);
+    border-color: #c3d4e6;
+}
+
+.add-tenant_btn-primary:hover {
+    background: #6ab3f0;
+}
+
+.username-suggestion {
+    background: #fff4e5;
+    border: 1px solid #ffcc80;
+    color: #a66300;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.username-suggestion .suggestion-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.username-suggestion .suggestion-list {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.light-theme .add-tenant_container {
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+}
+
+.light-theme .add-tenant_close-btn:hover {
+    color: #172235;
+}
