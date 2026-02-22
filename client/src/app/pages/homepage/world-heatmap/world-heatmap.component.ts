@@ -37,6 +37,31 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   public mapData: CountryData[] = [];
   public isOpenCountryReport = false;
 
+  private isLightTheme(): boolean {
+    if (typeof document === 'undefined') {
+      return false;
+    }
+    return document.body.classList.contains('light-theme') || document.documentElement.classList.contains('light-theme');
+  }
+
+  private getLegendColors(): { title: string; tick: string; tickLabel: string; border: string } {
+    if (this.isLightTheme()) {
+      return {
+        title: '#0f172a',
+        tick: 'rgba(15, 23, 42, 0.45)',
+        tickLabel: '#ffffff',
+        border: 'rgba(15, 23, 42, 0.22)',
+      };
+    }
+
+    return {
+      title: 'rgba(226, 232, 240, 0.96)',
+      tick: 'rgba(226, 232, 240, 0.52)',
+      tickLabel: '#ffffff',
+      border: 'rgba(255, 255, 255, 0.24)',
+    };
+  }
+
   constructor(private route: ActivatedRoute, private appService: AppService) {
   }
 
@@ -139,6 +164,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const el = this.chartContainer.nativeElement as HTMLElement;
     const width = el.offsetWidth || 800;
     this.ensureLegendDefs();
+    const legendColors = this.getLegendColors();
     const values = this.mapData.map(d => d.value).filter(v => v != null);
     const max = Math.max(...values, 1);
     const legend = this.svg.selectAll<SVGGElement, any>('g.legend').data([0]).join('g').attr('class', 'legend');
@@ -151,7 +177,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .join('text')
       .attr('class', 'legend-title')
       .attr('x', 0)
-      .attr('y', 0);
+      .attr('y', 0)
+      .attr('font-size', 11)
+      .attr('font-weight', 600)
+      .attr('fill', legendColors.title);
     title
       .transition()
       .duration(400)
@@ -170,6 +199,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .attr('height', barH)
       .attr('rx', 4)
       .attr('ry', 4)
+      .attr('stroke', legendColors.border)
+      .attr('stroke-width', 1)
       .attr('fill', 'url(#legend-gradient)');
     const ticks = [0, Math.round(max * 0.33), Math.round(max * 0.66), max];
     const tickSelection = legend
@@ -181,10 +212,14 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .attr('y2', 8 + barH + 6)
       .attr('x1', 0)
       .attr('x2', 0)
+      .attr('stroke', legendColors.tick)
+      .attr('stroke-width', 1)
       .transition()
       .duration(600)
       .attr('x1', d => (d / max) * barW)
       .attr('x2', d => (d / max) * barW), update => update
+      .attr('stroke', legendColors.tick)
+      .attr('stroke-width', 1)
       .transition()
       .duration(600)
       .attr('x1', d => (d / max) * barW)
@@ -194,13 +229,23 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .join(enter => enter.append('text')
         .attr('class', 'legend-tick-label')
         .attr('y', 8 + barH + 18)
+        .attr('font-size', 11)
+        .attr('font-weight', 500)
         .attr('text-anchor', 'middle')
+        .attr('fill', legendColors.tickLabel)
+        .style('fill', legendColors.tickLabel)
+        .style('opacity', '1')
         .attr('opacity', 0)
         .transition()
         .duration(600)
         .attr('opacity', 1)
         .attr('x', d => (d / max) * barW)
         .text(d => String(d)), update => update
+        .attr('fill', legendColors.tickLabel)
+        .style('fill', legendColors.tickLabel)
+        .style('opacity', '1')
+        .attr('font-size', 11)
+        .attr('font-weight', 500)
         .transition()
         .duration(600)
         .attr('x', d => (d / max) * barW)

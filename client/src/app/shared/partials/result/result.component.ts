@@ -97,18 +97,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Output() updateQuery = new EventEmitter<string>();
   @Output() onToggleSort = new EventEmitter<SortType>();
 
-  constructor(
-    protected scrollService: ScrollService,
-    private router: Router,
-    public helperService: HelperService,
-    public app_service: AppService,
-    protected dashboardService: DashboardService,
-    public sidebarService: SidebarService,
-    private route: ActivatedRoute,
-    public authService: AuthService,
-    protected licenseService: LicenseService,
-    protected homeSearchService: HomeSearchService
-  ) {
+  constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -276,11 +265,9 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onScanSelected(domain: string) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/dashboard/scan'], {
-        queryParams: { domain }
-      })
-    );
+    const url = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan'], {
+      queryParams: { domain }
+    }));
     window.open(url, '_blank');
   }
 

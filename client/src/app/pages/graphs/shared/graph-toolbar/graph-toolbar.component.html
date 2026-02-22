@@ -3,39 +3,39 @@
     <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
       <i class="bi bi-search h-5 w-5 leading-none text-[var(--color-text4)]"></i>
     </div>
-    <input data-cy="graph-toolbar-search-input" type="text" [placeholder]="searchPlaceholder()" [value]="searchTerm()" (input)="onSearchInput($event)" (keyup.enter)="searchSubmitted.emit()" class="relative z-0 block w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 py-3 pl-11 pr-40 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
-    <div class="absolute inset-y-1.5 right-1.5 flex items-center rounded-full bg-[var(--color-blue-720)]/80 p-1">
-      <button data-cy="graph-toolbar-image-search" *ngIf="showImageButton()" type="button" title="Search by image" (click)="imageSearchClicked.emit()" class="flex h-7 w-7 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
+    <input data-cy="graph-toolbar-search-input" type="text" [placeholder]="searchPlaceholder()" [value]="searchTerm()" (input)="onSearchInput($event)" (keyup.enter)="searchSubmitted.emit()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" class="ui-graph-toolbar-input relative z-0 block h-10 w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 pl-11 pr-44 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+    <div class="ui-graph-toolbar-action-shell absolute inset-y-1 right-1 flex items-center rounded-full bg-[var(--color-blue-720)]/80 py-1 pl-1 pr-0">
+      <button data-cy="graph-toolbar-image-search" *ngIf="showImageButton()" type="button" title="Search by image" (click)="imageSearchClicked.emit()" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
         <i class="bi bi-image"></i>
       </button>
-      <button data-cy="graph-toolbar-clear-search" *ngIf="showClearButton()" type="button" title="Clear search" (click)="clearSearchClicked.emit()" class="flex h-7 w-7 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]" [class.ml-1]="showImageButton()">
+      <button data-cy="graph-toolbar-clear-search" *ngIf="showClearButton()" type="button" title="Clear search" (click)="clearSearchClicked.emit()" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]" [class.ml-1]="showImageButton()">
         <i class="bi bi-x"></i>
       </button>
-      <button data-cy="graph-toolbar-search-button" *ngIf="showSearchActionButton()" type="button" (click)="searchSubmitted.emit()" [disabled]="isSearchDisabled()" class="ml-1 flex h-7 items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
+      <button data-cy="graph-toolbar-search-button" *ngIf="showSearchActionButton()" type="button" (click)="searchSubmitted.emit()" [disabled]="isSearchDisabled()" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
         {{ searchActionLabel() }}
       </button>
     </div>
   </div>
 
   <div class="flex w-full items-center justify-start gap-2 lg:w-full lg:max-w-md">
-    <div data-cy="graph-toolbar-view-toggle" *ngIf="showViewModeToggle()" class="relative hidden items-center rounded-full bg-white p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm lg:flex">
+    <div data-cy="graph-toolbar-view-toggle" *ngIf="showViewModeToggle()" class="ui-graph-toolbar-view-shell relative hidden h-10 items-center rounded-full bg-[var(--color-blue-800)]/90 p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm lg:flex">
       <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
 
-      <button data-cy="graph-toolbar-view-graph" type="button" title="Graph View" (click)="onSetViewMode('graph')" [class]="'relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+      <button data-cy="graph-toolbar-view-graph" type="button" title="Graph View" (click)="onSetViewMode('graph')" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
         <i class="bi bi-share-fill"></i> Graph
       </button>
-      <button data-cy="graph-toolbar-view-list" type="button" title="List View" (click)="onSetViewMode('list')" [class]="'relative z-10 flex w-24 items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+      <button data-cy="graph-toolbar-view-list" type="button" title="List View" (click)="onSetViewMode('list')" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
         <i class="bi bi-list-ul"></i> List
       </button>
     </div>
 
     <ng-container *ngIf="viewMode() === 'graph'">
-      <button data-cy="graph-toolbar-physics-toggle" *ngIf="showPhysicsToggle()" type="button" (click)="physicsToggled.emit()" [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')" [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
+      <button data-cy="graph-toolbar-physics-toggle" *ngIf="showPhysicsToggle()" type="button" (click)="physicsToggled.emit()" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')" [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
         <i [class]="'bi ' + (isPhysicsEnabled() ? 'bi-pause-fill' : 'bi-play-fill')"></i>
         <span>Physics</span>
       </button>
 
-      <button data-cy="graph-toolbar-edit-toggle" *ngIf="showEditToggle() && canEditConnections()" type="button" (click)="editModeToggled.emit()" [class]="'flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')">
+      <button data-cy="graph-toolbar-edit-toggle" *ngIf="showEditToggle() && canEditConnections()" type="button" (click)="editModeToggled.emit()" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')">
         <i [class]="'bi ' + (isEditMode() ? 'bi-check-circle-fill' : 'bi-pencil-fill')"></i>
         <span>{{ isEditMode() ? 'Done Editing' : 'Edit Connections' }}</span>
       </button>

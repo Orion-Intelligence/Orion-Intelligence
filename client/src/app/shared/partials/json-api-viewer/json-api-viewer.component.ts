@@ -9,9 +9,10 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
   templateUrl: './json-api-viewer.component.html',
 })
 export class JsonApiViewerComponent {
+  private copyTimer: ReturnType<typeof setTimeout> | null = null;
+
   isExpanded = false;
   copied = false;
-  private copyTimer: ReturnType<typeof setTimeout> | null = null;
 
   @Input() jsonData: any;
 

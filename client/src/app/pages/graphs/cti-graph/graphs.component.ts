@@ -53,6 +53,49 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly graphType = 'graph';
   private hasLoadedSessions = false;
   private lastSavedSessionSignature = '';
+  private readonly globalPointerDownListener = (event: Event) => {
+    const target = event.target as Node | null;
+    const insideAdd = !!(target && this.addMenuWrapper?.nativeElement.contains(target));
+    const insideHeader = !!(target && this.headerMenuWrapper?.nativeElement.contains(target));
+    if (!insideAdd && !insideHeader) {
+      this.closeMenus();
+    }
+  };
+  private readonly globalKeyDownListener = (event: KeyboardEvent) => {
+    if (!this.network || !this.isGraphView) {
+      return;
+    }
+    const target = event.target as HTMLElement | null;
+    const tag = target?.tagName?.toLowerCase() || '';
+    const isEditable = !!target?.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
+    if (isEditable) {
+      return;
+    }
+    const panStep = 60;
+    const current = this.network.getViewPosition();
+    let nextX = current.x;
+    let nextY = current.y;
+    if (event.key === 'ArrowLeft') {
+      nextX -= panStep;
+    }
+    else if (event.key === 'ArrowRight') {
+      nextX += panStep;
+    }
+    else if (event.key === 'ArrowUp') {
+      nextY -= panStep;
+    }
+    else if (event.key === 'ArrowDown') {
+      nextY += panStep;
+    }
+    else {
+      return;
+    }
+    event.preventDefault();
+    this.network.moveTo({
+      position: { x: nextX, y: nextY },
+      animation: false
+    });
+  };
   private static sessionCounter = 1;
   private pendingFilters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
 
@@ -100,6 +143,22 @@ export class GraphComponent implements OnInit, OnDestroy {
   isAddMenuVisible = false;
   isHeaderMenuVisible = false;
   isReportExportModalOpen = false;
+  @ViewChild('addMenuWrapper', { static: false }) addMenuWrapper?: ElementRef<HTMLElement>;
+  @ViewChild('headerMenuWrapper', { static: false }) headerMenuWrapper?: ElementRef<HTMLElement>;
+
+  private getNodeLabelColor(): string {
+    if (isPlatformBrowser(this.platformId)) {
+      const bodyColor = getComputedStyle(document.body).getPropertyValue('--color-text1').trim();
+      if (bodyColor) {
+        return bodyColor;
+      }
+      const rootColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text1').trim();
+      if (rootColor) {
+        return rootColor;
+      }
+    }
+    return '#e5e7eb';
+  }
 
   @ViewChild('networkContainer')
   set networkContainerRef(ref: ElementRef | undefined) {
@@ -112,6 +171,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: GraphReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      document.addEventListener('pointerdown', this.globalPointerDownListener, true);
+      document.addEventListener('keydown', this.globalKeyDownListener, true);
+    }
     this.loadTailwindStyles();
     this.restoreSessionState();
     this.loadSessions();
@@ -136,6 +199,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      document.removeEventListener('pointerdown', this.globalPointerDownListener, true);
+      document.removeEventListener('keydown', this.globalKeyDownListener, true);
+    }
     if (isPlatformBrowser(this.platformId) && this.ownsTailwindLink) {
       this.tailwindLinkEl?.remove();
       this.tailwindLinkEl = null;
@@ -1362,7 +1429,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           hover: { border: '#a5b4fc', background: this.nodeFillColor }
         },
         shape: 'dot',
-        font: { size: 14, color: '#e5e7eb' },
+        font: { size: 14, color: this.getNodeLabelColor() },
         size: 18
       });
     };
@@ -1418,7 +1485,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           isGroup: true,
           physics: false,
           subNodes,
-          font: { size: 14, color: '#e5e7eb', strokeWidth: 1 },
+          font: { size: 14, color: this.getNodeLabelColor(), strokeWidth: 1 },
           size: 40,
           image: this.createGroupNodeSvg(clusterDocumentIds.length, false, `${this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`),
           borderWidth: 0
@@ -1589,7 +1656,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         shapeProperties: {
           useBorderWithImage: true
         },
-        font: { size: 14, color: '#e5e7eb' },
+        font: { size: 14, color: this.getNodeLabelColor() },
         color: {
           highlight: { border: '#c4b5fd', background: '#6d28d9' },
           hover: { border: '#a5b4fc', background: '#5b21b6' }
@@ -1601,7 +1668,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         hideEdgesOnDrag: false,
         hover: true,
         navigationButtons: false,
-        keyboard: true,
+        keyboard: false,
         zoomView: true,
         dragView: true
       },

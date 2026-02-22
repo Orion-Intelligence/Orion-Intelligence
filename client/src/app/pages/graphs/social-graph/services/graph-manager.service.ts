@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { NetworkNode, PlatformResult, CustomEntity } from '../../../../shared/model/social/social-scan.models';
 import { getPlatformColor } from '../../../../shared/utils/formatters';
+import { getSocialGraphLabelColor } from './theme-color.util';
 @Injectable({ providedIn: 'root' })
 export class GraphManagerService {
+  public getGraphLabelColor(): string {
+    return getSocialGraphLabelColor();
+  }
+
   public createEntityNode(entity: CustomEntity): NetworkNode {
     const entityConfig = this.getEntityVisualConfig(entity.type);
     return {
@@ -11,7 +16,7 @@ export class GraphManagerService {
       shape: 'circularImage',
       image: this.createEntityNodeSvg(entity.type),
       size: 25,
-      font: { color: '#e2e8f0', size: 12 },
+      font: { color: this.getGraphLabelColor(), size: 12 },
       color: {
         border: entityConfig.border,
         background: entityConfig.background,
@@ -32,7 +37,7 @@ export class GraphManagerService {
       shape: 'circularImage',
       image: iconUrlMap.get(platform.platform),
       size: 25,
-      font: { color: '#e5e7eb' },
+      font: { color: this.getGraphLabelColor() },
       color: { border: getPlatformColor(platform.platform), background: '#334155', highlight: { border: '#facc15', background: '#475569' }, hover: { border: '#2dd4bf', background: '#475569' } },
       borderWidth: 2,
       borderWidthSelected: 4
@@ -46,7 +51,7 @@ export class GraphManagerService {
       shape: 'icon',
       icon: { face: 'bootstrap-icons', code: '\uf4d7', size: 60, color: '#a5b4fc' },
       size: 40,
-      font: { color: '#ffffff' },
+      font: { color: this.getGraphLabelColor() },
       color: { border: '#818cf8', background: '#3730a3', highlight: { border: '#facc15', background: '#4f46e5' }, hover: { border: '#a5b4fc', background: '#4338ca' } },
       shadow: { enabled: true, color: 'rgba(99, 102, 241, 0.6)', size: 25, x: 0, y: 0 },
       borderWidth: 3,

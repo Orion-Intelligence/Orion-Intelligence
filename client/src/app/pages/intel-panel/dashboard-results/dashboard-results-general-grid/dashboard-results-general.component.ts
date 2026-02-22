@@ -24,6 +24,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   queryParams: any = {};
   isCollapsed = true;
   isFreeStrategic = false;
+  isConsolidatedView = false;
 
   @Input() query!: string;
   @Input() type!: string;
@@ -49,6 +50,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
+    this.isConsolidatedView = this.currentUrl.includes('/consolidated/');
     const ci = this.type === 'leak' ? 'leak' : this.type === 'tracking' ? 'leak' : this.type === 'news' ? 'leak' : this.type === 'general' ? 'general' : this.type === 'Strategic' ? 'strategic' : 'leak';
     if (this.currentUrl.includes('/consolidated/all') || this.currentUrl.includes('/profile/homepage/all')) {
       this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);

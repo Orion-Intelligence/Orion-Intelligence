@@ -27,6 +27,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   currentUrl = '';
   queryParams: any = {};
   isCollapsed = true;
+  isConsolidatedView = false;
 
   @Input() searchResults: SocialResultItem[] = [];
   @Input() isExpandAble: boolean = false;
@@ -64,6 +65,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
+    this.isConsolidatedView = this.currentUrl.includes('/consolidated/');
     if (this.currentUrl.includes('consolidated')) {
       this.currentUrl = this.currentUrl.replace('/all', '/social');
     }

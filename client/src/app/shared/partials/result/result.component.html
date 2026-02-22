@@ -1,21 +1,23 @@
 <ng-container *ngIf="consolidated">
-  <div class="mt-[32px] mx-[30px] flex border-b border-[var(--color-border)]" (click)="onTabClick($event)">
+  <div class="mx-[30px] mt-[14px] flex items-end border-b border-transparent pb-0 max-[1000px]:mx-[15px]" style="border-bottom: 1px solid #ffffff20 !important;" (click)="onTabClick($event)">
+    <div class="inline-flex items-center gap-[2px] bg-transparent p-0">
     <button
       type="button"
       data-tab="Group"
-      class="cursor-pointer px-[24px] py-[10px] font-[Inter] text-[14px] text-[#A0B8D1]"
+      class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]"
       [ngClass]="{
-        'bg-[var(--color-blur-920)] border border-[var(--color-border)] border-b-2 border-b-[var(--color-text1)] rounded-t-[8px] text-[var(--color-text1)] font-medium': activeTab === 'Group',
-        'hover:bg-[var(--color-blue-810)] hover:border hover:border-[#ffffff08] hover:border-b-2 hover:border-b-[var(--color-divider-dark)] hover:rounded-t-[8px] hover:text-[var(--color-text1)]': activeTab !== 'Group'
+        'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Group',
+        'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Group'
       }">Group</button>
     <button
       type="button"
       data-tab="IOCs"
-      class="cursor-pointer px-[24px] py-[10px] font-[Inter] text-[14px] text-[#A0B8D1]"
+      class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]"
       [ngClass]="{
-        'bg-[var(--color-blur-920)] border border-[var(--color-border)] border-b-2 border-b-[var(--color-text1)] rounded-t-[8px] text-[var(--color-text1)] font-medium': activeTab === 'IOCs',
-        'hover:bg-[var(--color-blue-810)] hover:border hover:border-[#ffffff08] hover:border-b-2 hover:border-b-[var(--color-divider-dark)] hover:rounded-t-[8px] hover:text-[var(--color-text1)]': activeTab !== 'IOCs'
+        'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'IOCs',
+        'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'IOCs'
       }">IOCs</button>
+    </div>
   </div>
   <br *ngIf="activeTab !== 'IOCs'">
 </ng-container>
@@ -24,7 +26,7 @@
   <form
     (submit)="onFormSubmit()"
     @fadeInDashboardItem
-    class="mt-[24px] mx-[30px] flex items-center max-[550px]:grid"
+    class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid"
     [ngClass]="{ 'mt-0': consolidated }"
     *ngIf="!domain">
     <div class="flex w-full flex-wrap items-start justify-between">
@@ -32,11 +34,12 @@
         <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
 
         <div class="relative">
-          <div
-            class="flex w-full max-w-[910px] flex-nowrap mb-[6px] h-[40px]"
+          <div class="flex w-full max-w-[910px] items-start gap-[8px] max-[900px]:max-w-full max-[900px]:flex-col">
+            <div
+            class="mb-[6px] flex h-[40px] min-w-0 flex-1 flex-nowrap"
             [ngClass]="{
               'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay,
-              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-auto max-[550px]:px-0 max-[550px]:mr-[100px]': !homeSearchService.showFiltersOverlay
+              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay
             }">
 
             <button class="flex h-[40px] w-[42px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" type="submit">
@@ -59,14 +62,14 @@
 
             <button
               type="button"
-              class="ui-search-clear-btn flex h-[40px] items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px]"
+              class="ui-search-clear-btn flex h-[40px] items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px] max-[700px]:rounded-r-[8px] max-[700px]:border-r"
               aria-label="Clear"
               (click)="searchQuery=''; searchInput.focus(); onFormSubmit()"
               [disabled]="!searchQuery">
               <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
             </button>
 
-            <div class="flex h-[40px] shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[14px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden">
+            <div class="flex h-[40px] shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[14px] font-normal text-[#292828] max-[700px]:w-0 max-[700px]:border-y-0 max-[700px]:border-r-0 max-[700px]:px-0 max-[700px]:overflow-hidden">
               <ng-container>
                 <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
                 <span>Advance&nbsp;&nbsp;</span>
@@ -86,13 +89,14 @@
               </ng-container>
             </div>
 
-          </div>
+            </div>
 
-          <div *ngIf="!shrinkmenu && filterModel" class="absolute right-0 top-0 z-[3] flex items-center max-[900px]:relative max-[900px]:mt-[8px]">
-            <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)]">
+          <div *ngIf="!shrinkmenu && filterModel && !homeSearchService.showFiltersOverlay" class="z-[3] flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px]">
+            <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
               <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
               <span>Filter</span>
             </label>
+          </div>
           </div>
 
           <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
@@ -177,7 +181,7 @@
 
 <div
   *ngIf="filterModel && !shrinkmenu && (isFilterOpen$ | async)"
-  class="fixed inset-0 z-[19] bg-[rgba(0,0,0,0.45)]"
+  class="ui-filter-sidebar-overlay fixed inset-0 z-[19]"
   (click)="sidebarService.closeSidebar()">
 </div>
 

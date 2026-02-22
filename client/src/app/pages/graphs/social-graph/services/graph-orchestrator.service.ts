@@ -5,6 +5,7 @@ import { IconService } from '../../../../shared/services/icon.service';
 import { FetchingStateService } from './fetching-state.service';
 import { PlatformResult, TabState, NetworkNode } from '../../../../shared/model/social/social-scan.models';
 import { RelationshipResolverService } from './relationship-resolver.service';
+import { getSocialGraphLabelColor } from './theme-color.util';
 const INITIAL_GRAPH_NODES = 30;
 const GROUPING_THRESHOLD = 30;
 const MAX_GROUP_SIZE = 25;
@@ -14,6 +15,10 @@ export class GraphOrchestratorService {
   private iconService = inject(IconService);
   private fetchingState = inject(FetchingStateService);
   private relationshipResolver = inject(RelationshipResolverService);
+
+  private getGraphLabelColor(): string {
+    return getSocialGraphLabelColor();
+  }
 
   private wait(milliseconds: number): Promise<void> {
     return new Promise(resolve => {
@@ -104,7 +109,7 @@ export class GraphOrchestratorService {
       const groupStart = index * chunkSize + 1, groupEnd = groupStart + group.length - 1;
       newNodes.push({
         id: groupId, label: ``, shape: 'circularImage', image: this.graphManager.createGroupNodeSvg(group.length), size: 45,
-        font: { color: '#e5e7eb' }, color: { border: 'transparent', background: 'transparent', hover: { border: '#7dd3fc', background: 'transparent' }, highlight: { border: '#7dd3fc', background: 'transparent' } },
+        font: { color: this.getGraphLabelColor() }, color: { border: 'transparent', background: 'transparent', hover: { border: '#7dd3fc', background: 'transparent' }, highlight: { border: '#7dd3fc', background: 'transparent' } },
         borderWidth: 0, borderWidthSelected: 3, title: `Platforms ${groupStart}-${groupEnd} | ${group.length} platforms | Double-click to expand.`,
         groupedPlatforms: group,
       });
@@ -357,7 +362,7 @@ export class GraphOrchestratorService {
           label: `${detectorProfileCount}`,
           shape: 'dot',
           size: 14,
-          font: { color: '#ffffff', size: 10 },
+          font: { color: this.getGraphLabelColor(), size: 10 },
           color: {
             border: '#fbbf24',
             background: '#78350f',

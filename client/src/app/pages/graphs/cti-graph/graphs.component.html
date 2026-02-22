@@ -5,7 +5,7 @@
       <nav class="flex h-full items-end gap-1.5">
         <div *ngFor="let tab of tabs" (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center border border-b-2 pl-3 pr-2 pt-2 pb-1.5 text-sm font-medium rounded-t-md transition-colors ' + (activeTabId === tab.id ? 'border-[var(--color-border)] border-b-indigo-400 bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-[0_1px_0_0_var(--color-blue-700)]' : 'border-transparent border-b-transparent text-[var(--color-text4)] hover:border-[var(--color-border)] hover:border-b-[var(--color-border)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
           <div *ngIf="editingTabId === tab.id; else graphTabName">
-            <input #renameInput type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500">
+            <input #renameInput type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500">
           </div>
           <ng-template #graphTabName>
             <span (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1">{{ tab.name }}</span>
@@ -18,7 +18,7 @@
         </div>
 
         <div class="pl-1">
-          <div class="relative">
+          <div #addMenuWrapper class="relative">
             <input type="file" class="hidden" id="graphSessionFileInput" (change)="importSessionFile($event)" accept=".json">
             <button data-cy="cti-tab-add-menu" (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="New Session">
               <i class="bi bi-plus-lg text-lg"></i>
@@ -36,9 +36,9 @@
           </div>
         </div>
       </nav>
-      <div class="self-center flex items-center gap-1 pr-2">
-        <div class="relative">
-          <button data-cy="cti-tab-session-menu" (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
+      <div class="self-center flex items-center gap-1 pr-0">
+        <div #headerMenuWrapper class="relative">
+          <button data-cy="cti-tab-session-menu" (click)="toggleHeaderMenu($event)" class="ui-cti-session-menu-btn flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
             <i class="bi bi-three-dots-vertical text-lg"></i>
           </button>
           <div *ngIf="isHeaderMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
@@ -170,7 +170,7 @@
     </div>
 
     <div *ngIf="rawNodes.length> 0 && isGraphView"
-      class="pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
+      class="ui-graph-legend-shell pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
       <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">Legend</h3>
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">

@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, input, viewChild, ElementRef, effec
 import { CommonModule } from '@angular/common';
 import { Network, Options, Position } from 'vis-network';
 import { DataSet } from 'vis-data';
+import { getSocialGraphLabelColor } from '../services/theme-color.util';
 import { NetworkData, PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
@@ -362,6 +363,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       nodes: {
         brokenImage: fallbackIcon,
         borderWidth: 2,
+        font: { size: 14, color: getSocialGraphLabelColor() },
         shadow: {
           enabled: true,
           color: 'rgba(0,0,0,0.5)',

@@ -153,8 +153,10 @@ svg .legend-tick {
 }
 
 svg .legend-tick-label {
-  font-size: 10px;
-  fill: rgb(226 232 240 / 75%);
+  font-size: 11px;
+  font-weight: 600;
+  fill: #fff !important;
+  opacity: 1 !important;
 }
 
 svg .map-type .map-type-text {

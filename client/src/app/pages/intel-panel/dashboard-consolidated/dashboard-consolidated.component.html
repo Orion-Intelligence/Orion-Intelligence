@@ -4,109 +4,109 @@
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
   (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
 
-<div class="mt-4"></div>
+<div class="ui-consolidated-theme mt-4 mx-[30px] w-auto space-y-4 max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]">
+  <ng-container *ngIf="!isIOC; else IOCBlock">
+    <ng-container *ngIf="licenseService.canUseScanning()">
+      <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
+    </ng-container>
 
-<ng-container *ngIf="!isIOC; else IOCBlock">
-  <ng-container *ngIf="licenseService.canUseScanning()">
-    <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
-  </ng-container>
-
-  <div *ngIf="!isLoading()" @fadeInDashboardItem>
-    <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div class="space-y-4">
-        <ng-container *ngIf="isGrouped; else rankedMode">
-          <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4" *ngIf="showScanCard(); else showResults">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
-                <div class="text-sm text-[var(--color-text3)]">
-                  <strong class="text-[var(--color-text1)]">IP Threads or Stealerlogs</strong>
-                  <div>Searching in progress... Please wait.</div>
-                </div>
-              </div>
-              <button class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] opacity-50" [disabled]="true">
-                <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle" class="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <ng-template #showResults>
-            <app-defacement-results [isExpandable]="false" @scanAnimation
-              [results_defacement]="consolidatedCallbackModel.defacement_model"
-              [results_stealerlog]="stealerlogCallbackModel"
-              *ngIf="(consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || stealerlogCallbackModel?.Result?.length ?? 0) > 0">
-            </app-defacement-results>
-          </ng-template>
-
-          <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
-            <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4" *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
+    <div *ngIf="!isLoading()" @fadeInDashboardItem>
+      <div class="grid gap-5 xl:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] max-[640px]:gap-4">
+        <div class="min-w-0 space-y-4">
+          <ng-container *ngIf="isGrouped; else rankedMode">
+            <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-4" *ngIf="showScanCard(); else showResults">
               <div class="flex items-center justify-between">
-                <span>
-                  <div class="text-sm font-semibold text-[var(--color-text1)]">{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
-                  <div class="text-xs text-[var(--color-text4)]">Result count {{ pageCounts[index.key] || 0 }}</div>
-                </span>
-                <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-blue-640)]" *ngIf="!this.licenseService.isMaintainer()">
-                  Explore
-                  <button appTooltip="Open Page" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)]" [disabled]="!(index.value.length > 0)">
-                    <img alt="background" height="16" src="/assets/images/shared/theme/explore_icon.svg" width="16">
-                  </button>
-                </span>
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
+                  <div class="text-sm text-[var(--color-text3)]">
+                    <strong class="text-[var(--color-text1)]">IP Threads or Stealerlogs</strong>
+                    <div>Searching in progress... Please wait.</div>
+                  </div>
+                </div>
+                <button class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] opacity-50" [disabled]="true">
+                  <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle" class="h-4 w-4" />
+                </button>
               </div>
-
-              <ng-container *ngIf="index.value.length > 0; else noDataTemplate">
-                <app-dashboard-results-general-grid
-                  *ngIf="index.key === 'leak_model' || index.key === 'generic_model' || index.key === 'tracking_model' || index.key === 'news_model'"
-                  @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
-                  [type]="index.key === 'leak_model' ? 'leak' : index.key === 'tracking_model' ? 'tracking' : index.key === 'news_model' ? 'news' : 'general'">
-                </app-dashboard-results-general-grid>
-
-                <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem
-                  [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-exploit>
-
-                <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem
-                  [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-social>
-
-                <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem
-                  [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-chat>
-              </ng-container>
-
-              <ng-template #noDataTemplate></ng-template>
             </div>
+
+            <ng-template #showResults>
+              <app-defacement-results [isExpandable]="false" @scanAnimation
+                [results_defacement]="consolidatedCallbackModel.defacement_model"
+                [results_stealerlog]="stealerlogCallbackModel"
+                *ngIf="(consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || stealerlogCallbackModel?.Result?.length ?? 0) > 0">
+              </app-defacement-results>
+            </ng-template>
+
+            <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
+              <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-4 max-[640px]:p-3" *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
+                <div class="flex items-center justify-between">
+                  <span class="mb-[10px] block">
+                    <div class="text-sm font-semibold text-[var(--color-text1)]">{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
+                    <div class="text-xs text-[var(--color-text4)]">Result count {{ pageCounts[index.key] || 0 }}</div>
+                  </span>
+                  <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-blue-640)]" *ngIf="!this.licenseService.isMaintainer()">
+                    Explore
+                    <button appTooltip="Open Page" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)]" [disabled]="!(index.value.length > 0)">
+                      <img alt="background" height="16" src="/assets/images/shared/theme/explore_icon.svg" width="16">
+                    </button>
+                  </span>
+                </div>
+
+                <ng-container *ngIf="index.value.length > 0; else noDataTemplate">
+                  <app-dashboard-results-general-grid
+                    *ngIf="index.key === 'leak_model' || index.key === 'generic_model' || index.key === 'tracking_model' || index.key === 'news_model'"
+                    @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
+                    [type]="index.key === 'leak_model' ? 'leak' : index.key === 'tracking_model' ? 'tracking' : index.key === 'news_model' ? 'news' : 'general'">
+                  </app-dashboard-results-general-grid>
+
+                  <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem
+                    [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-exploit>
+
+                  <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem
+                    [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-social>
+
+                  <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem
+                    [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-chat>
+                </ng-container>
+
+                <ng-template #noDataTemplate></ng-template>
+              </div>
+            </ng-container>
           </ng-container>
-        </ng-container>
-      </div>
+        </div>
 
-      <div>
-        <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="response"
-          [rankedResults]="rankedResult" [isGrouped]="isGrouped"
-          [result_count]="getTotalResultCount()"></app-result-insights>
-      </div>
-    </div>
-
-    <ng-template #rankedMode>
-      <div *ngFor="let item of rankedResult.result" class="mt-4">
-        <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-2">
-          <app-dashboard-results-general-grid
-            *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query"
-            [searchResults]="[item]" [isExpandAble]="false"
-            [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
-          <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false"
-            [searchResults]="[item]"></app-dashboard-result-exploit>
-          <app-dashboard-result-social *ngIf="item.rank_index === 'social_model'" [isExpandAble]="false"
-            [searchResults]="[item]"></app-dashboard-result-social>
-          <app-dashboard-result-chat *ngIf="item.rank_index === 'chat_model'" [isExpandAble]="false"
-            [searchResults]="[item]"></app-dashboard-result-chat>
+        <div class="min-w-0">
+          <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="response"
+            [rankedResults]="rankedResult" [isGrouped]="isGrouped"
+            [result_count]="getTotalResultCount()"></app-result-insights>
         </div>
       </div>
-    </ng-template>
-  </div>
-</ng-container>
 
-<ng-template #IOCBlock>
-  <ng-container *ngIf="isLoading(); else showIOC"></ng-container>
-  <ng-template #showIOC>
-    <div class="w-full">
-      <app-consolidated-ioc></app-consolidated-ioc>
+      <ng-template #rankedMode>
+        <div *ngFor="let item of rankedResult.result" class="mt-4">
+          <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-3">
+            <app-dashboard-results-general-grid
+              *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query"
+              [searchResults]="[item]" [isExpandAble]="false"
+              [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
+            <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false"
+              [searchResults]="[item]"></app-dashboard-result-exploit>
+            <app-dashboard-result-social *ngIf="item.rank_index === 'social_model'" [isExpandAble]="false"
+              [searchResults]="[item]"></app-dashboard-result-social>
+            <app-dashboard-result-chat *ngIf="item.rank_index === 'chat_model'" [isExpandAble]="false"
+              [searchResults]="[item]"></app-dashboard-result-chat>
+          </div>
+        </div>
+      </ng-template>
     </div>
+  </ng-container>
+
+  <ng-template #IOCBlock>
+    <ng-container *ngIf="isLoading(); else showIOC"></ng-container>
+    <ng-template #showIOC>
+      <div class="w-full">
+        <app-consolidated-ioc></app-consolidated-ioc>
+      </div>
+    </ng-template>
   </ng-template>
-</ng-template>
+</div>

@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-  <div id="customContextMenu" class="hidden fixed z-[1000] w-64 rounded-xl border border-slate-700/80 bg-slate-900/95 backdrop-blur-sm shadow-2xl focus:outline-none">
+  <div id="customContextMenu" class="ui-graph-flyout hidden fixed z-[1000] w-64 rounded-xl border border-slate-700/80 bg-slate-900/95 backdrop-blur-sm shadow-2xl focus:outline-none animate-[social-mapper-slide-down_0.12s_ease-out_forwards]">
     <div class="px-3 py-2 border-b border-slate-700/70">
       <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-slate-400">Node Actions</p>
       <p class="mt-1 mb-0 truncate text-xs text-slate-500">{{ nodeId }}</p>

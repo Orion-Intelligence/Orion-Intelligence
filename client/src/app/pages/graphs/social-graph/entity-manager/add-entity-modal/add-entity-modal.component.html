@@ -1,5 +1,5 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-blue-850)]/80 backdrop-blur-sm animate-[social-mapper-fade-in_0.4s_ease-in-out]" (click)="close.emit()">
-    <div class="w-full max-w-sm overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl animate-[social-mapper-slide-in-up_0.4s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]" (click)="$event.stopPropagation()">
+<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="close.emit()">
+    <div class="ui-graph-popup-panel w-full max-w-sm overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
         <div>
             <div class="flex items-start justify-between border-b border-[var(--color-border)] bg-[var(--color-blue-850)] p-3 rounded-t-lg">
                 <div class="flex items-start gap-3">

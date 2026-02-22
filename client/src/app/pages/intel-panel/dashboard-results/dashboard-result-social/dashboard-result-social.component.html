@@ -1,14 +1,14 @@
-<div class="w-full max-w-[910px] min-w-0 px-2 sm:px-0">
+<div [ngClass]="isConsolidatedView ? 'w-full min-w-0' : 'w-full max-w-[910px] min-w-0 px-2 sm:px-0'">
   <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="mb-[20px]" [@fadeInDashboardItem]>
-    <div [id]="'item-' + item.m_message_id" class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)]">
+    <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]">
 
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
         <div class="flex max-w-[80%] flex-wrap gap-[10px]">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_content_type | slice:0:15" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">{{ tag }}</span>
+            <span *ngFor="let tag of item.m_content_type | slice:0:15" [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">{{ tag }}</span>
           </ng-container>
           <ng-template #unknownTag>
-            <span class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">unknown</span>
+            <span [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">unknown</span>
           </ng-template>
         </div>
 
@@ -28,7 +28,7 @@
 
       <div class="d-flex items-center gap-2 overflow-hidden whitespace-nowrap">
         <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
-        <h2 class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)]">
+        <h2 class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)] max-[640px]:text-[18px]">
           <ng-container *ngIf="item.m_sender_name as senderName; else showTitle">{{ senderName.substring(1) }}</ng-container>
           <ng-template #showTitle><span>{{ item.m_title | removeEmojis }}</span></ng-template>
         </h2>
@@ -41,7 +41,7 @@
       <ng-container *ngIf="item.m_platform !== 'forum'; else otherSection">
         <ng-container *ngIf="hasCodeType(item); else normalContent">
           <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">Code snippet - content not available</p>
-          <div class="mb-[12px] mt-[10px] rounded-[8px] border border-[#ffffff15] bg-[rgb(0,0,0,0.161)] p-[12px]">
+          <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
             <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
           </div>
         </ng-container>
@@ -62,7 +62,7 @@
         <ng-container *ngIf="getContentLines(item).length > 0">
           <div class="mb-[12px] mt-[10px] space-y-[10px]">
             <ng-container *ngFor="let section of getContentLines(item).slice(0, 5); let i = index; let isLast = last">
-              <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[12px]">
+              <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[12px]">
                 <h3 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
                 <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
               </div>
@@ -88,7 +88,7 @@
   </div>
 
   <div class="flex justify-center" *ngIf="isExpandAble && searchResults.length > 2">
-    <span class="cursor-pointer text-[14px] font-medium text-[var(--color-blue-640)]" (click)="isCollapsed = !isCollapsed">
+    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed">
       {{ isCollapsed ? 'See More' : 'See Less' }}
     </span>
   </div>

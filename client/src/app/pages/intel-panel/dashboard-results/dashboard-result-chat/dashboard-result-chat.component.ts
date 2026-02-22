@@ -21,6 +21,7 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   currentUrl = '';
   queryParams: any = {};
   isCollapsed = true;
+  isConsolidatedView = false;
 
   @Input() searchResults: ChatResultItem[] = [];
   @Input() isExpandAble: boolean = false;
@@ -34,6 +35,7 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
+    this.isConsolidatedView = this.currentUrl.includes('/consolidated/');
     if (this.currentUrl.includes('consolidated')) {
       this.currentUrl = this.currentUrl.replace("/all", "/chat");
     }

@@ -1,13 +1,13 @@
-<div class="w-full max-w-[910px] px-2 sm:px-0 space-y-4">
+<div [ngClass]="isConsolidatedView ? 'w-full min-w-0 space-y-4' : 'w-full max-w-[910px] px-2 sm:px-0 space-y-4'">
   <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))">
-    <div [id]="'item-' + item.m_message_id" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
+    <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)] max-[640px]:p-[12px]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_content_type" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">{{ tag }}</span>
+            <span *ngFor="let tag of item.m_content_type" [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">{{ tag }}</span>
           </ng-container>
           <ng-template #unknownTag>
-            <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">unknown</span>
+            <span [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">unknown</span>
           </ng-template>
         </div>
 
@@ -37,7 +37,7 @@
 
       <ng-container *ngIf="item.m_file_name?.length">
         <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Embedded Files</h5>
-        <div *ngFor="let file of item.m_file_name | slice:0:3" class="mt-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-xs text-[var(--color-text3)]">
+        <div *ngFor="let file of item.m_file_name | slice:0:3" [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="mt-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-xs text-[var(--color-text3)]">
           <ng-container *ngFor="let part of file.split(' - ')">
             <div>{{ part | normalizeUnicode}}</div>
           </ng-container>
@@ -115,6 +115,6 @@
   </ng-container>
 
   <div class="flex justify-center" *ngIf="isExpandAble && searchResults.length > 2">
-    <span class="cursor-pointer text-sm font-semibold text-[var(--color-blue-640)] hover:underline" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
   </div>
 </div>

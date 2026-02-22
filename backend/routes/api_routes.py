@@ -468,7 +468,7 @@ async def scrape_social(payload: SocialScrapeRequest):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_social(param: search_dynamic_social_model = Body(...)):
-    return await search_model.getInstance().dynamic_search(param, "social_models")
+    return await search_model.getInstance().dynamic_search(param, "social")
 
 
 @api_routes.get(
