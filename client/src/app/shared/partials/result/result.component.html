@@ -187,7 +187,7 @@
 
 <div
   *ngIf="filterModel && !shrinkmenu"
-  class="fixed top-0 z-[20] h-[96vh] w-[300px] rounded-tl-[15px] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full"
+  class="ui-filter-sidebar-panel fixed top-0 z-[20] h-[96vh] w-[300px] rounded-tl-[15px] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full"
   [ngClass]="{
     'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async),
     'right-0': (isFilterOpen$ | async)

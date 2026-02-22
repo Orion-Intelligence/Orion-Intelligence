@@ -82,7 +82,7 @@
   <div *ngFor="let model of models">
     <div
       [appTooltip]=" model === 'general' ? 'Track Data States/Crawl Insights Panel' : model === 'leak' ? 'This is the Leaked Data' : 'This is the Defacement' "
-      class="mb-[10px] inline-flex rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text1)] shadow-[0_4px_10px_var(--color-shadow-light)]">
+      class="ui-home-insight-index-chip mb-[10px] inline-flex rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text1)] shadow-[0_4px_10px_var(--color-shadow-light)]">
       {{
         model === 'general'
           ? 'Generic Index'
@@ -92,10 +92,10 @@
       }}
     </div>
     <div class="grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
-      <div *ngFor="let key of getKeys(insights[model]); let first = first" class="flex min-h-[132px] w-full items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[18px] text-[var(--color-text1)] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_3px_rgba(0,0,0,0.1)] transition-shadow hover:shadow-[0_3px_6px_rgba(0,0,0,0.11),_0_3px_6px_rgba(0,0,0,0.16)]">
+      <div *ngFor="let key of getKeys(insights[model]); let first = first" class="ui-home-insight-metric-card flex min-h-[132px] w-full items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[18px] text-[var(--color-text1)] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_3px_rgba(0,0,0,0.1)] transition-shadow hover:shadow-[0_3px_6px_rgba(0,0,0,0.11),_0_3px_6px_rgba(0,0,0,0.16)]">
         <div class="grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-[10px]">
           <div class="w-[40px] flex-shrink-0">
-            <img alt="{{ key }}" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
+            <img alt="{{ key }}" class="ui-home-insight-stat-icon" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
           </div>
 
           <div class="min-w-0">
