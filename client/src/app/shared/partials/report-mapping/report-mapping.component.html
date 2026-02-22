@@ -1,11 +1,15 @@
 <ng-container>
-  <div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
-    <div (click)="toggleContent()" class="flex cursor-pointer items-center justify-between">
-      <div class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text1)]">
-        Related reports <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="list of reports that are either directly or indirectly linked to this document ">
+  <div class="mt-4 ml-[30px] w-[calc(100%-60px)] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 max-[1000px]:ml-[15px] max-[1000px]:w-[calc(100%-30px)]">
+    <div (click)="toggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
+          <span class="truncate">Related Reports</span>
+          <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0" appTooltip="list of reports that are either directly or indirectly linked to this document ">
+        </div>
+        <p class="mt-1 text-[12px] text-[var(--color-text4)]">Reports linked directly or indirectly through mapped entities.</p>
       </div>
-      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]">
-        <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+        <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="toggle icon" class="h-[18px] w-[18px] transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
       </div>
     </div>
 

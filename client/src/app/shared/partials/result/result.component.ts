@@ -7,12 +7,13 @@ import { LoadingFormComponent } from '../loading-form/loading-form.component';
 import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { SidebarService } from '../../services/sidebar.service';
 import { FiltersComponent } from '../filters/filters.component';
-import { FilterModel } from '../../model/filter/filter.model';
+import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
 import { SortType } from '../../constants/shared-enums';
 import { EmptyQueryComponent } from '../empty-query/empty-query.component';
 import { Suggestion } from '../../model/results/shared/common-result';
+import { query } from '@angular/animations';
 import { Category } from "../../constants/pages";
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { AppService } from '../../../services/core/app/app.service';
@@ -20,8 +21,10 @@ import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/s
 import { searchFilterAnimation } from '../../animations/search.filter.animation';
 import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { HelperService } from '../../services/helper.service';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 
 @Component({
@@ -34,11 +37,17 @@ import { HomeSearchService } from '../../../services/home_search/home.search.ser
 export class ResultComponent implements OnInit, OnChanges {
   protected readonly SortType = SortType;
   protected readonly Category = Category;
+  protected readonly query = query;
 
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
   isFilterOpen$: Observable<boolean>;
+  result_triggered = true;
   selectedSortBy: SortType = SortType.DEFAULT;
+  selectedSearchBy = 'Match any term';
+  local_query = '';
+  showScans = false;
+  scandomains: string[] = [];
   matchTypeLabel = computed(() => {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
     if (matchtype === "full") {
@@ -53,33 +62,61 @@ export class ResultComponent implements OnInit, OnChanges {
     return "Match any term";
   });
 
+  @Input() result_count_enabled: boolean = true;
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
   @Input() showNoResult: boolean = true;
+  @Input() isList!: boolean;
+  @Input() isTool: boolean = true;
   @Input() showEmptyQuery = false;
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery = '';
+  @Input() analyticsToggle = false;
+  @Input() list_grid = false;
   @Input() shrinkmenu = false;
   @Input() disableScroll = false;
   @Input() type!: Category;
+  @Input() discussion = false;
   @Input() consolidated = false;
   @Input() domain = false;
+  @Input() showTabs = true;
   @Input() filterModel!: FilterModel;
   @Input() showSorting: boolean = true;
   @Input() showSelectedFilters: boolean = true;
   @Input() activeTab: string = 'Group';
 
+  @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
+  @Output() resetFilter = new EventEmitter<void>();
   @Output() onToggleSwitch = new EventEmitter<string>();
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
   @Output() reloadData = new EventEmitter<void>();
   @Output() updateQuery = new EventEmitter<string>();
   @Output() onToggleSort = new EventEmitter<SortType>();
 
-  constructor(protected scrollService: ScrollService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected homeSearchService: HomeSearchService) {
+  constructor(
+    protected scrollService: ScrollService,
+    private router: Router,
+    public helperService: HelperService,
+    public app_service: AppService,
+    protected dashboardService: DashboardService,
+    public sidebarService: SidebarService,
+    private route: ActivatedRoute,
+    public authService: AuthService,
+    protected licenseService: LicenseService,
+    protected homeSearchService: HomeSearchService
+  ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
-  ngOnChanges(_: SimpleChanges): void {}
+  ngOnChanges(_: SimpleChanges): void {
+    if (!this.local_query) {
+      this.local_query = this.searchQuery
+        ?.replace(/"/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim() || '';
+    }
+    this.init_domains();
+  }
 
   onSetMatchType(type: string) {
     this.homeSearchService.setMatchType(type);
@@ -95,10 +132,10 @@ export class ResultComponent implements OnInit, OnChanges {
     if (!tab || tab === this.activeTab) {
       return;
     }
-    this.onToggleMenu(tab);
+    this.onToggleAnalytics(tab);
   }
 
-  onToggleMenu(_tab: string) {
+  onToggleAnalytics(_tab: string) {
     this.activeTab = _tab;
     this.onToggleSwitch.emit(_tab);
   }
@@ -123,6 +160,9 @@ export class ResultComponent implements OnInit, OnChanges {
         this.filterModel = { ...this.filterModel, filters: newFilters };
       }
     });
+    if (this.local_query) {
+      this.result_triggered = true;
+    }
     this.onFormSubmit();
   }
 
@@ -130,10 +170,32 @@ export class ResultComponent implements OnInit, OnChanges {
     this.scrollService.resetOnReload();
     this.dashboardService.consolidatedParamModel.page = 1;
     this.dashboardService.consolidatedParamModel.tab = "";
-    const query = this.searchQuery.trim();
+    const query = (this.searchQuery || this.local_query || '').trim();
     this.searchInputRef?.nativeElement.blur();
+    this.searchQuery = query;
+    this.local_query = query;
+    this.result_triggered = true;
+    this.showScans = false;
     this.updateQuery.emit(query);
     this.reloadData.emit();
+    this.init_domains();
+  }
+
+  onGetSuggestion() {
+    if (this.searchQuery && this.suggestion && this.suggestion.options.length > 0 && this.suggestion.options.length < 15) {
+      return this.searchQuery.replace(this.suggestion?.text, this.suggestion?.options[0].text);
+    }
+    return '';
+  }
+
+  onUpdateSuggestion(suggestion: string) {
+    if (this.suggestion && this.suggestion.options.length) {
+      this.searchQuery = suggestion;
+      this.local_query = suggestion;
+      this.updateQuery.emit(suggestion);
+    }
+    this.reloadData.emit();
+    this.result_triggered = true;
   }
 
   onToolToggle(event: Event): void {
@@ -173,6 +235,28 @@ export class ResultComponent implements OnInit, OnChanges {
     this.reloadFilters.emit();
   }
 
+  init_domains() {
+    const filters = this.app_service.configData().localSettings.entityfilterCategories;
+    const queryDomains = this.helperService.extractLinks(this.searchQuery) || [];
+    const filterDomains = Array.isArray(filters['m_domain'])
+      ? filters['m_domain'].map((domain: string) => `https://${domain}`)
+      : [];
+    this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
+  }
+
+  toggleScan() {
+    this.showScans = !this.showScans;
+  }
+
+  onScanSelected(domain: string) {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/dashboard/scan'], {
+        queryParams: { domain }
+      })
+    );
+    window.open(url, '_blank');
+  }
+
   checkMember(): boolean {
     return this.app_service.userSessionData().user.role === 'member';
   }
@@ -183,6 +267,10 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    if (target) {
+      this.local_query = target.value;
+    }
     this.homeSearchService.handleSearchInput(event);
   }
 
