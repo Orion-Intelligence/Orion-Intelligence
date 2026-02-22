@@ -1,75 +1,88 @@
 <app-report-header [csv_object]="{ m_url: defacementData?.m_url }" [url]="defacementData?.m_url"></app-report-header>
 
-<div class="mt-4 ml-[30px] w-[calc(100%-60px)] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 max-[1000px]:ml-[15px] max-[1000px]:w-[calc(100%-30px)]">
-  <div class="truncate text-sm font-semibold text-[var(--color-text1)]">
-    {{ defacementData?.m_url }}
+<div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+  <div class="mb-4 pb-3">
+    <div class="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">Target</div>
+    <a
+      [href]="defacementData?.m_url"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="block min-w-0 truncate text-[20px] font-semibold leading-tight text-[var(--color-text1)] hover:text-[var(--color-blue-640)] hover:underline">
+      {{ formatTitleUrl(defacementData?.m_url) }}
+    </a>
   </div>
 
-  <div class="mt-4 grid gap-x-4 gap-y-3 text-sm text-[var(--color-text3)] md:grid-cols-2 lg:grid-cols-3">
-    <div>
-      <strong class="text-[var(--color-text4)]">Saved on:</strong>
-      <span class="ml-1 text-[var(--color-text1)]">{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
+  <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2 xl:grid-cols-3">
+    <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Saved on</p>
+      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
     </div>
 
-    <div *ngIf="!defacementData?.m_ioc_type?.length">
-      <strong class="text-[var(--color-text4)]">Defacer:</strong>
-      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
+    <div *ngIf="!defacementData?.m_ioc_type?.length" class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Defacer</p>
+      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
     </div>
 
-    <div>
-      <strong class="text-[var(--color-text4)]">Team:</strong>
-      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_team }}</span>
+    <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Team</p>
+      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_team }}</span>
     </div>
 
-    <div *ngIf="!defacementData?.m_ioc_type?.length; else iocTypeTpl">
-      <strong class="text-[var(--color-text4)]">Web Server:</strong>
-      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
+    <div *ngIf="!defacementData?.m_ioc_type?.length; else iocTypeTpl" class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Web Server</p>
+      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
     </div>
     <ng-template #iocTypeTpl>
-      <div>
-        <strong class="text-[var(--color-text4)]">IOC Type:</strong>
-        <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">IOC Type</p>
+        <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
       </div>
     </ng-template>
 
-    <div>
-      <strong class="text-[var(--color-text4)]">Breach:</strong>
-      <span class="ml-1 block truncate text-[var(--color-text1)]">{{ defacementData?.m_source_url ? defacementData?.m_source_url : '-' }}</span>
+    <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Breach</p>
+      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ normalizeDisplayUrl(defacementData?.m_source_url) }}</span>
     </div>
 
-    <div>
-      <strong class="text-[var(--color-text4)]">IP:</strong>
-      <span class="ml-1 truncate text-[var(--color-text1)]">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
+    <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">IP</p>
+      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
     </div>
 
-    <div>
-      <strong class="text-[var(--color-text4)]">Location:</strong>
-      <span class="ml-1 block truncate text-[var(--color-text1)]">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
+    <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Location</p>
+      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
     </div>
   </div>
 </div>
 
-<div class="mt-4 ml-[30px] w-[calc(100%-60px)] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 max-[1000px]:ml-[15px] max-[1000px]:w-[calc(100%-30px)]" *ngIf="filteredArrayKeys.length">
+<div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4" *ngIf="filteredArrayKeys.length">
   <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
     <div class="min-w-0">
       <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
         <span class="truncate">Metadata</span>
-        <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0" appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
+        <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
       </div>
       <p class="mt-1 text-[12px] text-[var(--color-text4)]">Detected entities, extracted sections, and structured attributes.</p>
     </div>
-    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
-      <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="h-[18px] w-[18px] transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+      <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 
   <div *ngIf="isExpandedMetadata" class="mt-4">
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2.5">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full px-4 py-1.5 text-xs font-semibold transition">
+        <button
+          (click)="setActiveTab(key)"
+          [ngClass]="activeTab === key
+            ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]'
+            : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'"
+          appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}"
+          class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
           {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
         </button>
-        <div *ngIf="!last" class="h-5 w-px bg-[var(--color-divider)]"></div>
+        <div *ngIf="!last" class="h-4 w-px bg-[var(--color-divider)]/70"></div>
       </ng-container>
     </div>
 
@@ -78,7 +91,7 @@
     <app-result-section *ngIf="activeTab === 'm_content'" [listItems]="[content]"></app-result-section>
     <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems"></app-result-section>
 
-    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-xs text-[var(--color-text4)]">
+    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft p-3 text-xs text-[var(--color-text4)]">
       Names of people, organizations, and entities are handled separately, but may overlap in the results.
     </div>
 

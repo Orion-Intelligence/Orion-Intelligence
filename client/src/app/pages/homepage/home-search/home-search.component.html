@@ -22,7 +22,7 @@
               [(ngModel)]="searchQuery"
               autocapitalize="none"
               autocomplete="off"
-              class="h-[42px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
+              class="h-[42px] flex-1 border-y border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
               data-cy="dashboard-general-input"
               maxlength="350"
               name="q"
@@ -34,7 +34,7 @@
 
             <button
               type="button"
-              class="flex items-center justify-center border-y border-r border-[var(--color-border)] bg-white px-[10px]"
+              class="ui-search-clear-btn flex items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px]"
               aria-label="Clear"
               (click)="searchQuery=''; searchInput.focus()"
               [disabled]="!searchQuery">

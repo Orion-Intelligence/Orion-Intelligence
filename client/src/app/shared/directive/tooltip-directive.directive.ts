@@ -81,7 +81,18 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
       this.renderer.addClass(this.tooltip, 'custom-tooltip');
       this.renderer.setStyle(this.tooltip, 'position', 'fixed');
       this.renderer.setStyle(this.tooltip, 'opacity', '0');
-      this.renderer.setStyle(this.tooltip, 'text-transform', 'capitalize');
+      this.renderer.setStyle(this.tooltip, 'z-index', '2147483000');
+      this.renderer.setStyle(this.tooltip, 'max-width', '320px');
+      this.renderer.setStyle(this.tooltip, 'padding', '6px 10px');
+      this.renderer.setStyle(this.tooltip, 'border-radius', '8px');
+      this.renderer.setStyle(this.tooltip, 'font-size', '12px');
+      this.renderer.setStyle(this.tooltip, 'line-height', '1.35');
+      this.renderer.setStyle(this.tooltip, 'font-weight', '500');
+      this.renderer.setStyle(this.tooltip, 'background', 'rgba(9, 14, 24, 0.96)');
+      this.renderer.setStyle(this.tooltip, 'color', '#fff');
+      this.renderer.setStyle(this.tooltip, 'box-shadow', '0 8px 22px rgba(0, 0, 0, 0.35)');
+      this.renderer.setStyle(this.tooltip, 'white-space', 'normal');
+      this.renderer.setStyle(this.tooltip, 'word-break', 'break-word');
       this.renderer.setStyle(this.tooltip, 'pointer-events', 'none');
       this.renderer.appendChild(document.body, this.tooltip);
     }

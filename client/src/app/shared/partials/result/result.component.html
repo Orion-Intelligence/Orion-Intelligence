@@ -45,7 +45,7 @@
 
             <input
               #searchInput
-              class="h-[40px] flex-1 border-y border-r border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]"
+              class="h-[40px] flex-1 border-y border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]"
               data-cy="dashboard-general-input"
               [(ngModel)]="searchQuery"
               autocapitalize="none"
@@ -59,7 +59,7 @@
 
             <button
               type="button"
-              class="flex h-[40px] items-center justify-center border-y border-r border-[var(--color-border)] bg-white px-[10px]"
+              class="ui-search-clear-btn flex h-[40px] items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px]"
               aria-label="Clear"
               (click)="searchQuery=''; searchInput.focus(); onFormSubmit()"
               [disabled]="!searchQuery">
@@ -104,33 +104,51 @@
 
         <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools">
           <div class="mt-[8px] flex gap-[12px]" @fadeInDashboardItem>
-            <details class="relative" *ngIf="showSorting">
-              <summary class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)] list-none [&::-webkit-details-marker]:hidden">
+            <div #sortMenuRef class="relative" *ngIf="showSorting">
+              <button
+                type="button"
+                class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]"
+                (click)="toggleSortMenu($event)">
                 sort by <b>({{ selectedSortBy }})</b>
-                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-              </summary>
-              <div class="absolute z-[10] mt-[12px] w-[220px] rounded-[8px] border border-[#e5e7eb] bg-white p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
-                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSortChange(SortType.NEWEST_FIRST)">Newest first</button>
+                <img
+                  src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+                  alt="chevron"
+                  width="16"
+                  height="16"
+                  class="ui-action-icon transition-transform duration-200"
+                  [ngClass]="{ 'rotate-180': sortMenuOpen }">
+              </button>
+              <div *ngIf="sortMenuOpen" class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[220px] rounded-[8px] border border-[#e5e7eb] bg-white p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+                <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSortChange(SortType.NEWEST_FIRST); closeMenus()">Newest first</button>
                 <div class="mx-[8px] my-[6px] h-px bg-[var(--color-divider)]"></div>
-                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSortChange(SortType.OLDEST_FIRST)">Oldest first</button>
+                <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSortChange(SortType.OLDEST_FIRST); closeMenus()">Oldest first</button>
               </div>
-            </details>
+            </div>
 
-            <details class="relative">
-              <summary class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)] list-none [&::-webkit-details-marker]:hidden">
+            <div #searchMenuRef class="relative">
+              <button
+                type="button"
+                class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]"
+                (click)="toggleSearchMenu($event)">
                 search by <b>({{ matchTypeLabel() }})</b>
-                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-              </summary>
-              <div class="absolute z-[10] mt-[12px] w-[240px] rounded-[8px] border border-[#e5e7eb] bg-white p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
-                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('or'); onFormSubmit()">Match Semantic</button>
+                <img
+                  src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+                  alt="chevron"
+                  width="16"
+                  height="16"
+                  class="ui-action-icon transition-transform duration-200"
+                  [ngClass]="{ 'rotate-180': searchMenuOpen }">
+              </button>
+              <div *ngIf="searchMenuOpen" class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[240px] rounded-[8px] border border-[#e5e7eb] bg-white p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+                <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('semantic'); onFormSubmit(); closeMenus()">Match Semantic</button>
                 <div class="mx-[8px] my-[6px] h-px bg-[var(--color-divider)]"></div>
-                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('or'); onFormSubmit()">Match any term (OR)</button>
+                <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('or'); onFormSubmit(); closeMenus()">Match any term (OR)</button>
                 <div class="mx-[8px] my-[6px] h-px bg-[var(--color-divider)]"></div>
-                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('and'); onFormSubmit()">Match indivisual terms (AND)</button>
+                <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('and'); onFormSubmit(); closeMenus()">Match indivisual terms (AND)</button>
                 <div class="mx-[8px] my-[6px] h-px bg-[var(--color-divider)]"></div>
-                <button class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('full'); onFormSubmit()">Match full query (AND)</button>
+                <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('full'); onFormSubmit(); closeMenus()">Match full query (AND)</button>
               </div>
-            </details>
+            </div>
           </div>
         </ng-container>
 
@@ -146,7 +164,7 @@
 
 <ng-container *ngIf="!consolidated">
   <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs()); else noResults" @fadeInDashboardItem>
-    <div class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] text-[18px] font-[Inter] font-medium text-[var(--color-text1)] max-[1000px]:ml-[15px]">
+    <div class="mt-[26px] mb-[8px] mx-[30px] flex w-full max-w-[910px] items-center text-[15px] leading-[1.35] font-[Inter] font-semibold tracking-[0.01em] text-[var(--color-text4)] max-[1000px]:mx-[15px]">
       <span>{{ result_count }} Results Found</span>
     </div>
   </div>
@@ -173,7 +191,7 @@
   <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 
-<div *ngIf="isLoading" class="ml-[30px] w-full max-w-[910px] max-[1000px]:ml-[15px]" @fadeInDashboardItem>
+<div *ngIf="isLoading" class="mx-[30px] w-full max-w-[910px] max-[1000px]:mx-[15px]" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
 

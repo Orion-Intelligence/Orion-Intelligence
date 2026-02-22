@@ -41,12 +41,16 @@ export class ResultComponent implements OnInit, OnChanges {
 
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  @ViewChild('sortMenuRef', { static: false }) sortMenuRef?: ElementRef;
+  @ViewChild('searchMenuRef', { static: false }) searchMenuRef?: ElementRef;
   isFilterOpen$: Observable<boolean>;
   result_triggered = true;
   selectedSortBy: SortType = SortType.DEFAULT;
   selectedSearchBy = 'Match any term';
   local_query = '';
   showScans = false;
+  sortMenuOpen = false;
+  searchMenuOpen = false;
   scandomains: string[] = [];
   matchTypeLabel = computed(() => {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
@@ -225,6 +229,29 @@ export class ResultComponent implements OnInit, OnChanges {
     this.onToggleSort.emit(type);
   }
 
+  toggleSortMenu(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.sortMenuOpen = !this.sortMenuOpen;
+    if (this.sortMenuOpen) {
+      this.searchMenuOpen = false;
+    }
+  }
+
+  toggleSearchMenu(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.searchMenuOpen = !this.searchMenuOpen;
+    if (this.searchMenuOpen) {
+      this.sortMenuOpen = false;
+    }
+  }
+
+  closeMenus(): void {
+    this.sortMenuOpen = false;
+    this.searchMenuOpen = false;
+  }
+
   setFilterOverlay(newValue: boolean) {
     if (!this.authService.getIsMobileDemo()) {
       this.homeSearchService.showFiltersOverlay = newValue;
@@ -257,6 +284,31 @@ export class ResultComponent implements OnInit, OnChanges {
     window.open(url, '_blank');
   }
 
+  normalizeDisplayUrl(url?: string | null): string {
+    if (!url) {
+      return '';
+    }
+    const trimmed = url.trim();
+    if (!trimmed) {
+      return '';
+    }
+    try {
+      const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      const parsed = new URL(normalized);
+      const host = parsed.hostname.replace(/^www\./i, '');
+      const path = parsed.pathname.replace(/\/+$/, '');
+      return `${host}${path}` || host;
+    }
+    catch {
+      return trimmed
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .split('?')[0]
+        .split('#')[0]
+        .replace(/\/+$/, '');
+    }
+  }
+
   checkMember(): boolean {
     return this.app_service.userSessionData().user.role === 'member';
   }
@@ -277,5 +329,11 @@ export class ResultComponent implements OnInit, OnChanges {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
+    const target = event.target as Node | null;
+    const isInsideSort = !!(target && this.sortMenuRef?.nativeElement?.contains(target));
+    const isInsideSearch = !!(target && this.searchMenuRef?.nativeElement?.contains(target));
+    if (!isInsideSort && !isInsideSearch) {
+      this.closeMenus();
+    }
   }
 }

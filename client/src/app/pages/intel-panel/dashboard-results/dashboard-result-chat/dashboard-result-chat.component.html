@@ -1,6 +1,6 @@
-<div class="w-full max-w-[910px] space-y-4">
+<div class="w-full max-w-[910px] px-2 sm:px-0 space-y-4">
   <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))">
-    <div [id]="'item-' + item.m_message_id" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
+    <div [id]="'item-' + item.m_message_id" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
@@ -13,16 +13,16 @@
 
         <div class="flex items-center gap-2">
           <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
-            <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" />
+            <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" class="ui-action-icon" />
           </div>
           <div appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
-            <img height="18" src="/assets/images/shared/theme/redirect.svg" width="18" alt="redirect" />
+            <img height="18" src="/assets/images/shared/theme/redirect.svg" width="18" alt="redirect" class="ui-action-icon" />
           </div>
         </div>
       </div>
 
       <div class="mt-3 flex items-center gap-2">
-        <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" />
+        <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="ui-action-icon" />
         <h2 class="text-lg font-semibold text-[var(--color-text1)]">{{ item.m_channel_name || 'Untitled' }}</h2>
       </div>
 

@@ -193,4 +193,62 @@ export class ReportComponent implements OnInit {
     const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
     return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
   }
+
+  private isLikelyUrl(value: string): boolean {
+    const v = value.trim();
+    return /^(https?:\/\/|www\.)/i.test(v) || /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}/i.test(v);
+  }
+
+  private formatTitleUrl(url?: string | null): string {
+    if (!url) {
+      return '';
+    }
+    try {
+      const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      const parsed = new URL(normalized);
+      return parsed.hostname.replace(/^www\./i, '') || '';
+    }
+    catch {
+      return url
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0];
+    }
+  }
+
+  getDisplayTitle(rawTitle?: string | null, fallbackUrl?: string | null): string {
+    const title = (rawTitle || '').trim();
+    if (title) {
+      return this.isLikelyUrl(title) ? this.formatTitleUrl(title) : title;
+    }
+    const cleanUrl = this.formatTitleUrl(fallbackUrl || '');
+    return cleanUrl || 'Title not available';
+  }
+
+  normalizeDisplayUrl(url?: string | null): string {
+    if (!url) {
+      return '-';
+    }
+    const trimmed = url.trim();
+    if (!trimmed) {
+      return '-';
+    }
+    try {
+      const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      const parsed = new URL(normalized);
+      const host = parsed.hostname.replace(/^www\./i, '');
+      const path = parsed.pathname.replace(/\/+$/, '');
+      return `${host}${path}` || host || '-';
+    }
+    catch {
+      return trimmed
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .split('?')[0]
+        .split('#')[0]
+        .replace(/\/+$/, '') || '-';
+    }
+  }
 }

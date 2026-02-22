@@ -1,6 +1,6 @@
-<div class="w-full max-w-[910px] min-w-[150px]">
+<div class="w-full max-w-[910px] min-w-0 px-2 sm:px-0">
   <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="mb-[20px]" [@fadeInDashboardItem]>
-    <div [id]="'item-' + item.m_message_id" class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)]">
+    <div [id]="'item-' + item.m_message_id" class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)]">
 
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
         <div class="flex max-w-[80%] flex-wrap gap-[10px]">
@@ -15,19 +15,19 @@
         <div class="ml-auto flex gap-[20px]">
           <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
             <div class="p-[0_0_10px_10px]">
-              <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
+              <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
             </div>
           </div>
           <div [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
             <div class="p-[0_0_10px_10px]">
-              <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
+              <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
             </div>
           </div>
         </div>
       </div>
 
       <div class="d-flex items-center gap-2 overflow-hidden whitespace-nowrap">
-        <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0" />
+        <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
         <h2 class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)]">
           <ng-container *ngIf="item.m_sender_name as senderName; else showTitle">{{ senderName.substring(1) }}</ng-container>
           <ng-template #showTitle><span>{{ item.m_title | removeEmojis }}</span></ng-template>

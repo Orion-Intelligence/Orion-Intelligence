@@ -1,39 +1,39 @@
 <div class="flex justify-end">
-  <div class="inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)] mr-[35px] mt-[20px]">
-    <button (click)="downloadCSV()" appTooltip="Download" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" />
+  <div class="mr-[12px] mt-[16px] inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)] ui-result-card-soft sm:mr-[35px] sm:mt-[20px]">
+    <button (click)="downloadCSV()" appTooltip="Download" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
     </button>
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-    <button (click)="printPage()" appTooltip="Print" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" />
+    <button (click)="printPage()" appTooltip="Print" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
     </button>
 
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-    <button (click)="langUpdate()" *ngIf="lang!==lang_detected" appTooltip="Translator" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25">
+    <button (click)="langUpdate()" *ngIf="lang!==lang_detected" appTooltip="Translator" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25" class="ui-action-icon">
     </button>
 
     <ng-container *ngIf="appService.getConfig().appSettings.ai_endpoint && content">
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-      <button (click)="aiSuggest()" appTooltip="AI Summary" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="AI Summary" height="25" ngSrc="assets/images/shared/theme/ai.svg" width="25" />
+      <button (click)="aiSuggest()" appTooltip="AI Summary" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+        <img alt="AI Summary" height="25" ngSrc="assets/images/shared/theme/ai.svg" width="25" class="ui-action-icon" />
       </button>
     </ng-container>
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-    <button (click)="shareResult()" appTooltip="Share" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" />
+    <button (click)="shareResult()" appTooltip="Share" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon" />
     </button>
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-    <button (click)="redirectToUrl()" appTooltip="Open Breach Link" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Open Breach Link" height="16" ngSrc="assets/images/shared/theme/redirect.svg" width="16" />
+    <button (click)="redirectToUrl()" appTooltip="Open Breach Link" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <img alt="Open Breach Link" height="16" ngSrc="assets/images/shared/theme/redirect.svg" width="16" class="ui-action-icon" />
     </button>
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-    <button (click)="open_graph()" appTooltip="Open CTI Graph" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" />
+    <button (click)="open_graph()" appTooltip="Open CTI Graph" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" class="ui-action-icon" />
     </button>
   </div>
 </div>
@@ -43,7 +43,7 @@
   @fadeInDashboardItem
   class="m-[15px] mx-[32px] max-h-[40vh] overflow-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-730)] px-[19px] py-[15px] shadow-[0_4px_8px_rgba(0,0,0,0.1)] [scrollbar-width:auto] [scrollbar-color:var(--color-blue-880)_transparent] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-880)] [&::-webkit-scrollbar-thumb]:rounded-[10px]">
   <div class="flex items-start">
-    <img alt="AI" class="mt-[3px]" height="25" src="assets/images/shared/theme/ai.svg" width="25" />
+    <img alt="AI" class="mt-[3px] ui-action-icon" height="25" src="assets/images/shared/theme/ai.svg" width="25" />
     <p class="ml-[8px] mb-[24px] text-[22px] font-medium font-[Roboto] text-[var(--color-text1)]">AI Report</p>
   </div>
   <p class="text-[14px] font-normal text-[var(--color-text1)]">

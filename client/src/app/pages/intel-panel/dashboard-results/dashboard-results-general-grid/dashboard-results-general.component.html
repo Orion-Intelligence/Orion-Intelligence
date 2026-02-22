@@ -1,8 +1,8 @@
-<div class="mb-8 w-full max-w-[910px] min-w-[150px]">
+<div class="mb-8 w-full max-w-[910px] min-w-0 px-2 sm:px-0">
   <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))">
     <div
       [id]="'item-' + item.m_hash"
-      class="mb-[20px] w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)]"
+      class="mb-[20px] w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)]"
       (click)="isMobileMode() && item?.m_url ? window.open(item.m_url, '_blank') : null">
 
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
@@ -13,21 +13,21 @@
         <div class="ml-auto flex gap-[20px]" *ngIf="!isMobileMode()">
           <div *ngIf="!licenseService.isMaintainer() && (type === 'strategic' || type === 'general') && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/')); else elseBlock" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center">
             <div class="p-[0_0_10px_10px]">
-              <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
+              <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
             </div>
           </div>
 
           <ng-template #elseBlock>
             <div *ngIf="type !== 'Strategic' && type !== 'general'" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center">
               <div class="p-[0_0_10px_10px]">
-                <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
+                <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
               </div>
             </div>
           </ng-template>
 
           <div [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center">
             <div class="p-[0_0_10px_10px]">
-              <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
+              <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
             </div>
           </div>
         </div>

@@ -101,4 +101,49 @@ export class ReportDefacementComponent implements OnInit {
       this.setActiveTab(keys[0]);
     }
   }
+
+  formatTitleUrl(url?: string | null): string {
+    if (!url) {
+      return '-';
+    }
+    try {
+      const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      const parsed = new URL(normalized);
+      return parsed.hostname.replace(/^www\./i, '') || '-';
+    }
+    catch {
+      return url
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0] || '-';
+    }
+  }
+
+  normalizeDisplayUrl(url?: string | string[] | null): string {
+    const rawUrl = Array.isArray(url) ? (url[0] || '') : (url || '');
+    if (!rawUrl) {
+      return '-';
+    }
+    const trimmed = rawUrl.trim();
+    if (!trimmed) {
+      return '-';
+    }
+    try {
+      const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      const parsed = new URL(normalized);
+      const host = parsed.hostname.replace(/^www\./i, '');
+      const path = parsed.pathname.replace(/\/+$/, '');
+      return `${host}${path}` || host || '-';
+    }
+    catch {
+      return trimmed
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .split('?')[0]
+        .split('#')[0]
+        .replace(/\/+$/, '') || '-';
+    }
+  }
 }

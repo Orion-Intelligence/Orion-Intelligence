@@ -150,4 +150,114 @@ export class ReportChatComponent implements OnInit {
     const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
     return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
   }
+
+  private isLikelyUrl(value: string): boolean {
+    const v = value.trim();
+    return /^(https?:\/\/|www\.)/i.test(v) || /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}/i.test(v);
+  }
+
+  private formatTitleUrl(url?: string | null): string {
+    if (!url) {
+      return '';
+    }
+    try {
+      const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      const parsed = new URL(normalized);
+      return parsed.hostname.replace(/^www\./i, '') || '';
+    }
+    catch {
+      return url
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0];
+    }
+  }
+
+  getDisplayChannelTitle(name?: string | null, fallbackUrl?: string | null): string {
+    const title = (name || '').trim();
+    if (title) {
+      return this.isLikelyUrl(title) ? this.formatTitleUrl(title) : title;
+    }
+    const cleanUrl = this.formatTitleUrl(fallbackUrl || '');
+    return cleanUrl || 'Untitled Channel';
+  }
+
+  normalizeDisplayUrl(url?: string | null): string {
+    if (!url) {
+      return '-';
+    }
+    const trimmed = url.trim();
+    if (!trimmed) {
+      return '-';
+    }
+    try {
+      const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      const parsed = new URL(normalized);
+      const host = parsed.hostname.replace(/^www\./i, '');
+      const path = parsed.pathname.replace(/\/+$/, '');
+      return `${host}${path}` || host || '-';
+    }
+    catch {
+      return trimmed
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .split('?')[0]
+        .split('#')[0]
+        .replace(/\/+$/, '') || '-';
+    }
+  }
+
+  hasValue(value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return true;
+  }
+
+  getMetadataRows(): Array<{ label: string; value: string; long?: boolean }> {
+    if (!this.resultItem) {
+      return [];
+    }
+
+    const item = this.resultItem as any;
+    const rows: Array<{ label: string; value: string; long?: boolean }> = [];
+    const add = (label: string, value: unknown, long = false) => {
+      if (!this.hasValue(value)) {
+        return;
+      }
+      rows.push({
+        label,
+        value: Array.isArray(value) ? value.join(', ') : String(value),
+        long
+      });
+    };
+
+    add('Message Date', item.m_message_date);
+    add('Views', item.m_views);
+    add('Sender Username', item.m_sender_username);
+    add('Sender', item.m_sender_name);
+    add('Message ID', item.m_message_id, true);
+    add('Platform', item.m_platform);
+    add('Network', item.m_network);
+    add('Post Likes', item.m_post_likes);
+    add('Post Shares', item.m_post_shares);
+    add('Post Comments', item.m_post_comments_count);
+    add('Post Tags', item.m_post_tags, true);
+    add('Post Views', item.m_post_views);
+    add('Post Expiry', item.m_post_expiry);
+    add('Comment Count', item.m_comment_count);
+    add('Likes', item.m_likes);
+    add('Retweets', item.m_retweets);
+    add('Commenters', item.m_commenters, true);
+
+    return rows;
+  }
 }

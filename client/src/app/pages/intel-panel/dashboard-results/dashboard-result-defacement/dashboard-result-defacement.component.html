@@ -74,7 +74,7 @@
 <ng-template #cardView>
   <div class="space-y-4">
     <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0,2) : searchResults).slice(0,30)">
-      <div [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
+      <div [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap gap-2">
             <ng-container *ngIf="item.m_ioc_type?.length; else unknownTag">
@@ -87,11 +87,11 @@
 
           <div class="flex items-center gap-2" *ngIf="!isMobileMode()">
             <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
-              <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" />
+              <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" class="ui-action-icon" />
             </div>
 
             <div appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
-              <img height="18" src="/assets/images/shared/theme/redirect.svg" width="18" alt="redirect" />
+              <img height="18" src="/assets/images/shared/theme/redirect.svg" width="18" alt="redirect" class="ui-action-icon" />
             </div>
           </div>
         </div>

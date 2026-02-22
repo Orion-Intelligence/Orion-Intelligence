@@ -14,8 +14,8 @@
         </div>
         <div class="text-sm font-semibold text-[var(--color-text1)]">Orion Analyst</div>
       </div>
-      <button class="h-8 w-8 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]" (click)="closeChat()">
-        <img src="assets/images/shared/cross.svg" alt="close" class="h-4 w-4" />
+      <button class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]" (click)="closeChat()">
+        <img src="assets/images/shared/cross.svg" alt="close" class="h-[14px] w-[14px] ui-action-icon" />
       </button>
     </div>
 
@@ -60,8 +60,8 @@
     <form class="border-t border-[var(--color-border)] p-3" (submit)="sendMessage($event)">
       <div class="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
         <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" [disabled]="isBotTyping" required />
-        <button #submitBtn type="submit" class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-blue-640)]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
-          <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4" />
+        <button #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-blue-640)]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
+          <img src="assets/images/shared/chat_small.svg" alt="chat" class="ui-chat-send-icon h-4 w-4" />
         </button>
       </div>
     </form>

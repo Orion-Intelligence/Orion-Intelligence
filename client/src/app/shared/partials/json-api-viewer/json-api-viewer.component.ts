@@ -10,10 +10,29 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 })
 export class JsonApiViewerComponent {
   isExpanded = false;
+  copied = false;
+  private copyTimer: ReturnType<typeof setTimeout> | null = null;
 
   @Input() jsonData: any;
 
   toggleContent(): void {
     this.isExpanded = !this.isExpanded;
+  }
+
+  copyJson(event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.jsonData == null) {
+      return;
+    }
+    const payload = JSON.stringify(this.jsonData, null, 2);
+    navigator.clipboard?.writeText(payload).then(() => {
+      this.copied = true;
+      if (this.copyTimer) {
+        clearTimeout(this.copyTimer);
+      }
+      this.copyTimer = setTimeout(() => {
+        this.copied = false;
+      }, 1400);
+    });
   }
 }

@@ -118,10 +118,11 @@
               ]
             },
             "development": {
-              "aot": true,
+              "aot": false,
+              "buildOptimizer": false,
               "optimization": false,
               "sourceMap": {
-                "scripts": true,
+                "scripts": false,
                 "styles": true,
                 "vendor": false
               },
@@ -143,7 +144,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "proxyConfig": "proxy.conf.json",
-            "hmr": false
+            "hmr": true
           },
           "configurations": {
             "production": {

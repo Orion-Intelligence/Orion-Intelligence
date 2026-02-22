@@ -34,9 +34,10 @@
       </app-dashboard-sidebar>
     </div>
 
-    <div class="m-0 h-auto max-h-full flex-1 overflow-hidden bg-[var(--color-blue-850)] z-[1]" data-cy="dashboard-container">
+    <div class="relative m-0 h-auto max-h-full flex-1 overflow-hidden bg-[var(--color-blue-850)] z-[1]" data-cy="dashboard-container">
+      <div class="pointer-events-none absolute inset-x-0 top-0 h-[220px] bg-[var(--color-mono)]"></div>
       <div
-        class="h-[1vh] min-h-full overflow-y-auto bg-[var(--color-blue-830)] pb-[100px]"
+        class="relative z-[1] flex h-[1vh] min-h-full flex-col overflow-y-auto pb-[100px]"
         id="dashboard-container"
         data-cy="dashboard-sub-container">
 
@@ -44,7 +45,7 @@
 
         <span
           [@dashboard-global-animation]="prepareRoute(routerOutlet)"
-          class="m-0"
+          class="ui-dashboard-grid-bg m-0 block flex-1"
           data-cy="dashboard-body">
 
           <router-outlet #routerOutlet="outlet" data-cy="router-outlet"></router-outlet>

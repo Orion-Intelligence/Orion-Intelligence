@@ -1,29 +1,72 @@
-<ul class="space-y-2" [style.paddingLeft.px]="level * 12">
+<div *ngIf="showRootBraces" class="font-mono text-[13px] text-[var(--color-text4)]">{{ '{' }}</div>
+
+<div class="relative" [class.pl-4]="level > 0" [style.marginLeft.px]="depthMargin(level)">
+  <span class="pointer-events-none absolute bottom-0 left-[3px] top-0 border-l-[1.5px] border-[var(--color-divider)]"></span>
+<ul class="list-none pl-0 font-mono text-[13px] leading-[1.55]">
   <ng-container *ngFor="let key of keys(json); let last = last">
-    <li class="rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
-      <div (click)="isCollapsible(json[key]) && toggle(pathKey(parentPath, key))" class="flex cursor-pointer items-center gap-2 text-xs text-[var(--color-text3)]">
-        <span *ngIf="isCollapsible(json[key])" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-730)]">
-          <img *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedIcon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Expanded" class="h-3 w-3" />
-          <ng-template #collapsedIcon>
-            <img [ngClass]="{ 'rotate-180': !isExpanded(pathKey(parentPath, key)) }" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Collapsed" class="h-3 w-3 transition" />
+    <li class="relative py-[1px]" [class.mb-[3px]]="!last">
+      <ng-container *ngIf="isCollapsible(json[key]); else primitiveRow">
+        <div
+          (click)="toggle(pathKey(parentPath, key))"
+          class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
+          <span *ngIf="level > 0" class="pointer-events-none absolute left-[-11px] top-1/2 w-[20px] -translate-y-1/2 border-t-[1.5px] border-[var(--color-divider)]"></span>
+          <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+            <img
+              src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+              alt="toggle icon"
+              class="h-[14px] w-[14px] transition ui-action-icon"
+              [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
+          </span>
+          <span class="min-w-0 truncate text-[14px] text-[var(--color-blue-640)]">"{{ key }}"</span>
+          <span class="mx-[2px] text-[var(--color-text4)]">:</span>
+          <ng-container *ngIf="!isExpanded(pathKey(parentPath, key)); else expandedToken">
+            <span class="text-[var(--color-text4)]">{{ openToken(json[key]) }}</span>
+            <span class="mx-1 text-[12px] text-[var(--color-text4)] opacity-80">{{ collapsedSummary(json[key]) }}</span>
+            <span class="text-[var(--color-text4)]">{{ closeToken(json[key]) }}<span *ngIf="!last">,</span></span>
+          </ng-container>
+          <ng-template #expandedToken>
+            <span class="text-[var(--color-text4)]">{{ openToken(json[key]) }}</span>
           </ng-template>
-        </span>
-        <span class="font-semibold text-[var(--color-text4)]">{{ key }}</span>
-      </div>
+        </div>
 
-      <div *ngIf="isExpanded(pathKey(parentPath, key))" class="mt-2">
-        <ng-container *ngIf="isObject(json[key]); else jsonLeaf">
-          <app-json-viewer [json]="json[key]" [level]="level + 1" [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
-        </ng-container>
+        <div *ngIf="isExpanded(pathKey(parentPath, key))" class="ml-5 mt-[2px] border-l-[1.5px] border-[var(--color-divider)] pl-3 pt-[1px]">
+          <app-json-viewer
+            [json]="json[key]"
+            [level]="level + 1"
+            [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
+          <div class="px-2 py-[2px] text-[var(--color-text4)]">
+            {{ closeToken(json[key]) }}<span *ngIf="!last">,</span>
+          </div>
+        </div>
+      </ng-container>
 
-        <ng-template #jsonLeaf>
-          <ul class="mt-2" [style.paddingLeft.px]="(level + 1) * 12">
-            <li class="rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-xs text-[var(--color-text1)]">
-              <strong>{{ json[key] }}</strong>
-            </li>
-          </ul>
-        </ng-template>
-      </div>
+      <ng-template #primitiveRow>
+        <div
+          (click)="toggle(pathKey(parentPath, key))"
+          class="group relative flex cursor-pointer items-start gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
+          <span *ngIf="level > 0" class="pointer-events-none absolute left-[-11px] top-[14px] w-[20px] border-t-[1.5px] border-[var(--color-divider)]"></span>
+          <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+            <img
+              src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+              alt="toggle icon"
+              class="h-[14px] w-[14px] transition ui-action-icon"
+              [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
+          </span>
+          <span class="min-w-0 truncate text-[14px] text-[var(--color-blue-640)]">"{{ key }}"</span>
+          <span class="mx-[2px] text-[var(--color-text4)]">:</span>
+          <ng-container *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedPrimitive">
+            <span class="break-all" [ngClass]="primitiveClass(json[key])">{{ formatPrimitive(json[key]) }}</span>
+            <span *ngIf="!last" class="text-[var(--color-text4)]">,</span>
+          </ng-container>
+          <ng-template #collapsedPrimitive>
+            <span class="text-[12px] text-[var(--color-text4)] opacity-85">{{ primitiveSummary(json[key]) }}</span>
+            <span *ngIf="!last" class="text-[var(--color-text4)]">,</span>
+          </ng-template>
+        </div>
+      </ng-template>
     </li>
   </ng-container>
 </ul>
+</div>
+
+<div *ngIf="showRootBraces" class="font-mono text-[13px] text-[var(--color-text4)]">{{ '}' }}</div>
