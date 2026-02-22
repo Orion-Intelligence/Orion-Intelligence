@@ -1,58 +1,73 @@
-<div *ngIf="isList; else cardView" class="mt-4" @fadeInDashboardItem>
-  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-sm">
-    <table class="w-full text-left text-sm" *ngIf="isLoading || (!isLoading && searchResults.length>0)">
-      <thead class="text-[var(--color-text3)]">
-      <tr>
-        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="px-4 py-3 font-semibold" scope="col">#</th>
-        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="px-4 py-3 font-semibold" scope="col">Base URL</th>
-        <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="px-4 py-3 font-semibold" scope="col">IP Addresses</th>
-        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="px-4 py-3 font-semibold" scope="col">Attacker</th>
-        <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="px-4 py-3 font-semibold" scope="col">Team</th>
-        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="px-4 py-3 font-semibold" scope="col">Web Server</th>
-        <th (click)="sortTable('m_leak_date')" [ngClass]="getSortClass('m_leak_date')" class="px-4 py-3 font-semibold" scope="col">Leak Date</th>
-        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="px-4 py-3 font-semibold" scope="col">Web URL</th>
-        <th class="px-4 py-3" scope="col"></th>
-      </tr>
+<div
+  *ngIf="isList; else cardView"
+  class="mt-4 mx-[30px] w-[calc(100%-60px)] max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]"
+  @fadeInDashboardItem>
+  <div class="ui-table-shell">
+    <table class="ui-table" *ngIf="isLoading || (!isLoading && searchResults.length > 0)">
+      <thead>
+        <tr>
+          <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="cursor-pointer" scope="col">#</th>
+          <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="cursor-pointer" scope="col">Base URL</th>
+          <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="cursor-pointer" scope="col">IP Addresses</th>
+          <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="cursor-pointer" scope="col">Attacker</th>
+          <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="cursor-pointer" scope="col">Team</th>
+          <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="cursor-pointer" scope="col">Web Server</th>
+          <th (click)="sortTable('m_leak_date')" [ngClass]="getSortClass('m_leak_date')" class="cursor-pointer" scope="col">Leak Date</th>
+          <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="cursor-pointer" scope="col">Web URL</th>
+          <th scope="col"></th>
+        </tr>
       </thead>
       <tbody>
-      <ng-container *ngIf="isLoading">
-        <tr class="border-t border-[var(--color-divider)]">
-          <td class="px-4 py-3"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-32 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-20 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-          <td class="px-4 py-3"><div class="h-3 w-10 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-        </tr>
-      </ng-container>
+        <ng-container *ngIf="isLoading" @fadeInDashboardItem>
+          <tr *ngFor="let _ of [1,2,3,4,5]">
+            <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-[70%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-[65%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-[70%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+            <td><div class="h-[12px] w-[40%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+          </tr>
+        </ng-container>
 
-      <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults : searchResults); let i = index">
-        <tr *ngIf="!isLoading" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem class="border-t border-[var(--color-divider)] hover:bg-[var(--color-blue-720)]">
-          <td class="px-4 py-3 text-[var(--color-text1)]">
-            <span>{{ i + 1 }}</span>
-            <img class="ml-2 inline-block" alt="click" width="15" height="15" src="assets/images/shared/arrow-right-click.svg">
-          </td>
-          <td class="px-4 py-3 text-[var(--color-text1)]">{{ item.m_url || '-' }}</td>
-          <td class="px-4 py-3 text-[var(--color-text1)]">{{ (item.m_ip || []).length ? (item.m_ip || []).join(', ') : '-' }}</td>
-          <td class="px-4 py-3 text-[var(--color-text1)]">{{ (item.m_attacker || []).length ? (item.m_attacker || []).join(', ') : '-' }}</td>
-          <td class="px-4 py-3 text-[var(--color-text1)]">{{ item.m_team || '-' }}</td>
-          <td class="px-4 py-3 text-[var(--color-text1)]">{{ (item.m_web_server || []).length ? (item.m_web_server || []).join(', ') : '-' }}</td>
-          <td class="px-4 py-3 text-[var(--color-text1)]">{{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</td>
-          <td class="px-4 py-3 text-[var(--color-text1)]">
-            <a *ngIf="item.m_source_url?.length" [href]="item.m_source_url[0]" class="text-[var(--color-blue-640)] hover:underline">{{ item.m_source_url[0] }}</a>
-            <span *ngIf="!item.m_source_url?.length">-</span>
-          </td>
-          <td class="px-4 py-3"><img alt="click" width="15" height="15" class="ml-4 inline-block" src="assets/images/shared/arrow-right-click.svg"></td>
-        </tr>
-      </ng-container>
+        <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30)); let i = index">
+          <tr
+            *ngIf="!isLoading"
+            [id]="'item-' + item.m_hash"
+            [routerLink]="[currentUrl, item.m_hash]"
+            [queryParams]="queryParams"
+            @fadeInDashboardItem
+            class="cursor-pointer">
+            <td>
+              <span>{{ i + 1 }}</span>
+            </td>
+            <td class="max-w-[280px] truncate">{{ item.m_url || '-' }}</td>
+            <td class="max-w-[220px] truncate">{{ (item.m_ip || []).length ? (item.m_ip || []).join(', ') : '-' }}</td>
+            <td class="max-w-[220px] truncate">{{ (item.m_attacker || []).length ? (item.m_attacker || []).join(', ') : '-' }}</td>
+            <td class="max-w-[180px] truncate">{{ item.m_team || '-' }}</td>
+            <td class="max-w-[220px] truncate">{{ (item.m_web_server || []).length ? (item.m_web_server || []).join(', ') : '-' }}</td>
+            <td>{{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</td>
+            <td class="max-w-[260px]">
+              <a
+                *ngIf="item.m_source_url?.length"
+                [href]="item.m_source_url[0]"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block truncate text-[var(--color-blue-640)] hover:underline">
+                {{ item.m_source_url[0] }}
+              </a>
+              <span *ngIf="!item.m_source_url?.length">-</span>
+            </td>
+            <td class="text-right"><img alt="click" width="15" height="15" class="inline-block" src="assets/images/shared/arrow-right-click.svg" /></td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
-    <div class="flex justify-center py-3" *ngIf="isExpandAble && searchResults.length > 2">
-      <span class="cursor-pointer text-sm font-semibold text-[var(--color-blue-640)] hover:underline" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
-    </div>
+  </div>
+  <div class="flex justify-center py-3" *ngIf="isExpandAble && searchResults.length > 2">
+    <span class="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[16px] py-[6px] text-[13px] font-semibold text-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
   </div>
 </div>
 
