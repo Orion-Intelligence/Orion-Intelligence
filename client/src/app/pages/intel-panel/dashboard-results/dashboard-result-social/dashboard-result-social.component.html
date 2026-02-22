@@ -1,53 +1,54 @@
-<div class="w-full max-w-[910px] space-y-4">
-  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="mb-[20px] w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)]" [@fadeInDashboardItem]>
-    <div [id]="'item-' + item.m_message_id">
+<div class="w-full max-w-[910px] min-w-[150px]">
+  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="mb-[20px]" [@fadeInDashboardItem]>
+    <div [id]="'item-' + item.m_message_id" class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)]">
+
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
         <div class="flex max-w-[80%] flex-wrap gap-[10px]">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_content_type | slice:0:15" class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
+            <span *ngFor="let tag of item.m_content_type | slice:0:15" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
           </ng-container>
           <ng-template #unknownTag>
-            <span class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
+            <span class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
           </ng-template>
         </div>
 
         <div class="ml-auto flex gap-[20px]">
           <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
             <div class="p-[0_0_10px_10px]">
-            <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" />
+              <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
           <div [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
             <div class="p-[0_0_10px_10px]">
-            <img height="18" src="/assets/images/shared/theme/redirect.svg" width="18" alt="redirect" />
+              <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
             </div>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="d-flex align-items-center gap-2 whitespace-nowrap">
         <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" />
-        <h2 class="mb-[12px] mt-0 block max-w-[700px] overflow-hidden text-ellipsis whitespace-nowrap text-[24px] font-medium text-[var(--color-text1)]">
-          <div *ngIf="item.m_sender_name as senderName; else showTitle">{{ senderName.substring(1) }}</div>
-          <ng-template #showTitle>{{ item.m_title | removeEmojis }}</ng-template>
+        <h2 class="mb-0 ml-2 inline-block max-w-[700px] overflow-hidden text-ellipsis whitespace-nowrap text-[24px] font-[500] text-[var(--color-text1)]">
+          <ng-container *ngIf="item.m_sender_name as senderName; else showTitle">{{ senderName.substring(1) }}</ng-container>
+          <ng-template #showTitle><span>{{ item.m_title | removeEmojis }}</span></ng-template>
         </h2>
       </div>
 
-      <div *ngIf="item.m_message_sharable_link" class="dashboard__search-link-chat mb-[20px] mt-[5px] block overflow-hidden text-ellipsis text-[12px] font-medium text-[var(--color-text8)]">
+      <div *ngIf="item.m_message_sharable_link" class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[500] text-[var(--color-text8)]">
         {{ item.m_message_sharable_link }}
       </div>
 
       <ng-container *ngIf="item.m_platform !== 'forum'; else otherSection">
         <ng-container *ngIf="hasCodeType(item); else normalContent">
-          <p class="mb-[12px] mt-[10px] text-[14px] font-normal text-[var(--color-text8)]">Code snippet - content not available</p>
-          <div class="mt-[10px] rounded-[8px] border border-[#ffffff15] bg-[rgb(0,0,0,0.161)] p-[12px]">
-            <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="block text-xs text-[var(--color-text1)]"></code>
+          <p class="mt-[10px] mb-[12px] overflow-hidden break-all text-[14px] font-[400] text-[var(--color-text8)] select-text">Code snippet - content not available</p>
+          <div class="mb-[12px] mt-[10px] rounded-[8px] border border-[#ffffff15] bg-[rgb(0,0,0,0.161)] p-[12px]">
+            <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
           </div>
         </ng-container>
         <ng-template #normalContent>
           <ng-container *ngIf="item.m_content">
-            <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Content</h5>
-            <p class="mb-[12px] mt-[10px] break-all text-[14px] font-normal text-[var(--color-text8)]">
+            <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">Content</h5>
+            <p class="mt-[10px] mb-[12px] overflow-hidden break-all text-[14px] font-[400] text-[var(--color-text8)] select-text">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
                 {{ part }}<br *ngIf="!last" />
               </ng-container>
@@ -59,11 +60,11 @@
 
       <ng-template #otherSection>
         <ng-container *ngIf="getContentLines(item).length > 0">
-          <div class="mt-3 space-y-3">
+          <div class="mb-[12px] mt-[10px] space-y-[10px]">
             <ng-container *ngFor="let section of getContentLines(item).slice(0, 5); let i = index; let isLast = last">
               <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[12px]">
-                <h3 class="text-sm font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
-                <p class="mt-2 text-[14px] font-normal text-[var(--color-text8)]">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
+                <h3 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
+                <p class="mt-[10px] mb-[12px] overflow-hidden break-all text-[14px] font-[400] text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
               </div>
             </ng-container>
           </div>
@@ -71,25 +72,23 @@
       </ng-template>
 
       <ng-container *ngIf="item.m_weblink?.length">
-        <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Embedded URL</h5>
-        <div *ngFor="let link of item.m_weblink | slice:0:3" class="mb-[8px] mt-[5px] block overflow-hidden text-ellipsis text-[12px] font-medium text-[var(--color-text8)]">
+        <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
+        <div *ngFor="let link of item.m_weblink | slice:0:3" class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[500] text-[var(--color-text8)]">
           {{ link }}
         </div>
       </ng-container>
 
-      <div class="mt-[20px] flex flex-wrap items-center justify-between gap-[15px] rounded-[5px] pt-[10px] pr-[10px] text-[12px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:text-start">
-        <div class="flex flex-col gap-[2px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
-          <span class="text-[var(--color-text4)]">Message Date</span>
-          <span class="font-medium text-[var(--color-text1)]">
-          {{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : 'Not available' }}
-          </span>
+      <div class="mt-[20px] flex flex-wrap items-start justify-start gap-[15px] pt-[10px] pr-[10px] text-[12px]">
+        <div class="flex flex-col gap-[2px]">
+          <span class="text-[var(--color-text4)]">Message Date:</span>
+          <span class="font-medium text-[var(--color-text1)]">{{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : 'Not available' }}</span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="flex justify-center" *ngIf="isExpandAble && searchResults.length > 2">
-    <span class="cursor-pointer text-sm font-semibold text-[var(--color-blue-640)] hover:underline" (click)="isCollapsed = !isCollapsed">
+    <span class="cursor-pointer text-[14px] font-medium text-[var(--color-blue-640)]" (click)="isCollapsed = !isCollapsed">
       {{ isCollapsed ? 'See More' : 'See Less' }}
     </span>
   </div>
