@@ -51,33 +51,14 @@
       </div>
     </div>
 
-    <div
-      class="relative overflow-hidden rounded-[14px] border p-[18px] sm:p-[22px]"
-      [ngClass]="{
-        'border-[var(--color-border-red)] bg-[var(--color-red-100)]': grade === 'D' || grade === 'F',
-        'border-[var(--color-border-orange)] bg-[var(--color-orange-100)]': grade === 'C',
-        'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C')
-      }"
-      *ngIf="!hasError">
-      <div
-        class="pointer-events-none absolute inset-x-0 top-0 h-[235px] opacity-70 md:h-[135px]"
-        [ngClass]="{
-          'bg-[radial-gradient(circle_at_top_left,rgba(220,53,69,0.30),transparent_65%)]': !isLoading && (grade === 'D' || grade === 'F'),
-          'bg-[radial-gradient(circle_at_top_left,rgba(255,193,7,0.35),transparent_65%)]': !isLoading && grade === 'C',
-          'bg-[radial-gradient(circle_at_top_left,rgba(78,162,241,0.30),transparent_65%)]': !isLoading && !(grade === 'D' || grade === 'F' || grade === 'C')
-        }"></div>
+    <div class="relative overflow-hidden rounded-[14px] border p-[18px] sm:p-[22px]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-100)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-100)]': grade === 'C', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }" *ngIf="!hasError">
+      <div class="pointer-events-none absolute inset-x-0 top-0 h-[235px] opacity-70 md:h-[135px]" [ngClass]="{ 'bg-[radial-gradient(circle_at_top_left,rgba(220,53,69,0.30),transparent_65%)]': !isLoading && (grade === 'D' || grade === 'F'), 'bg-[radial-gradient(circle_at_top_left,rgba(255,193,7,0.35),transparent_65%)]': !isLoading && grade === 'C', 'bg-[radial-gradient(circle_at_top_left,rgba(78,162,241,0.30),transparent_65%)]': !isLoading && !(grade === 'D' || grade === 'F' || grade === 'C') }"></div>
 
       <div class="relative">
         <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton">
           <div class="flex flex-col gap-[14px] lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div
-                class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]"
-                [ngClass]="{
-                  'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F',
-                  'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C',
-                  'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C')
-                }">Security Posture</div>
+              <div class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">Security Posture</div>
               <h3 class="mt-[10px] text-[22px] font-semibold leading-tight sm:text-[24px]">
                 Report for
                 <a class="ml-1 underline decoration-dotted underline-offset-4" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ displayHost }}</a>
@@ -85,13 +66,7 @@
               <p class="mt-[4px] text-[13px] text-[var(--color-text4)]">Snapshot of core endpoint metadata and scan context.</p>
             </div>
 
-            <div
-              class="min-w-[140px] rounded-[12px] border px-[14px] py-[12px] text-center"
-              [ngClass]="{
-                'border-[var(--color-border-red)] bg-[var(--color-red-200)]': grade === 'D' || grade === 'F',
-                'border-[var(--color-border-orange)] bg-[var(--color-orange-200)]': grade === 'C',
-                'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15': !(grade === 'D' || grade === 'F' || grade === 'C')
-              }">
+            <div class="min-w-[140px] rounded-[12px] border px-[14px] py-[12px] text-center" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15': !(grade === 'D' || grade === 'F' || grade === 'C') }">
               <div class="text-[46px] font-bold leading-none text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{{ grade || '—' }}</div>
               <div class="mt-[6px] text-[12px] text-[var(--color-text4)]">
                 {{ (grade === 'D' || grade === 'F') ? 'High Risk' : (grade === 'C' ? 'Needs Attention' : 'Good Posture') }}
@@ -100,11 +75,7 @@
           </div>
         </ng-container>
 
-        <div class="my-[16px] h-px w-full" [ngClass]="{
-          'bg-[var(--color-border-red)]': grade === 'D' || grade === 'F',
-          'bg-[var(--color-border-orange)]': grade === 'C',
-          'bg-[var(--color-divider)]': !(grade === 'D' || grade === 'F' || grade === 'C')
-        }"></div>
+        <div class="my-[16px] h-px w-full" [ngClass]="{ 'bg-[var(--color-border-red)]': grade === 'D' || grade === 'F', 'bg-[var(--color-border-orange)]': grade === 'C', 'bg-[var(--color-divider)]': !(grade === 'D' || grade === 'F' || grade === 'C') }"></div>
 
         <ng-container *ngIf="!isLoading && meta; else metaGridSkeleton">
           <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-12" @fadeInDashboardItem>
@@ -125,9 +96,7 @@
 
             <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
               <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">TLS Status</p>
-              <span
-                class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize"
-                [ngClass]="hasSSL ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
+              <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="hasSSL ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
                 {{ hasSSL ? 'ssl enabled' : 'no ssl detected' }}
               </span>
             </div>
@@ -154,25 +123,13 @@
           <div class="flex flex-col gap-[15px]">
             <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
               <div class="flex items-center gap-[8px]">
-                <span class="h-[10px] w-[10px] rounded-full"
-                  [ngClass]="{
-                    'bg-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high',
-                    'bg-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium',
-                    'bg-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low',
-                    'bg-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational'
-                  }"></span>
+                <span class="h-[10px] w-[10px] rounded-full" [ngClass]="{ 'bg-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'bg-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'bg-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'bg-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }"></span>
                 <h4 class="text-[16px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
               </div>
 
               <p class="mt-[10px] text-[14px] text-[var(--color-text4)]">{{ item.description }}</p>
               <div class="mt-[10px]">
-                <span class="inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium"
-                  [ngClass]="{
-                    'text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high',
-                    'text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium',
-                    'text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low',
-                    'text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational'
-                  }">
+                <span class="inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium" [ngClass]="{ 'text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
                   {{ item.risk }} Risk ({{ item.confidence }} Confidence)
                 </span>
               </div>

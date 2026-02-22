@@ -3,7 +3,6 @@ import { Category } from '../../constants/pages';
 @Component({
   selector: 'app-empty-result',
   templateUrl: './empty-result.component.html',
-  styleUrls: ['./empty-result.component.css'],
   standalone: true,
   imports: [],
 })

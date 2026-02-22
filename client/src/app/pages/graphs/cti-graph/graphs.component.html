@@ -10,9 +10,7 @@
           <ng-template #graphTabName>
             <span (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1">{{ tab.name }}</span>
           </ng-template>
-          <button *ngIf="tabs.length> 1"
-            (click)="$event.stopPropagation(); closeSession(tab.id)"
-            [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+          <button *ngIf="tabs.length> 1" (click)="$event.stopPropagation(); closeSession(tab.id)" [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
             <i class="bi bi-x-lg text-xs"></i>
           </button>
         </div>
@@ -169,8 +167,7 @@
       </div>
     </div>
 
-    <div *ngIf="rawNodes.length> 0 && isGraphView"
-      class="ui-graph-legend-shell pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
+    <div *ngIf="rawNodes.length> 0 && isGraphView" class="ui-graph-legend-shell pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
       <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">Legend</h3>
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">

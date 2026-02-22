@@ -4,20 +4,17 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-[12px]">
           <div class="flex items-center gap-[10px]">
-            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]"
-              [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep >= 1 }">1</div>
+            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]" [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep >= 1 }">1</div>
             <span class="text-[13px] font-medium">Company Info</span>
           </div>
           <div class="h-[1px] w-[40px] bg-[var(--color-border)]" [ngClass]="{ 'bg-[var(--color-blue-640)]': currentStep > 1 }"></div>
           <div class="flex items-center gap-[10px]">
-            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]"
-              [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep >= 2 }">2</div>
+            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]" [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep >= 2 }">2</div>
             <span class="text-[13px] font-medium">Add IOCs</span>
           </div>
           <div class="h-[1px] w-[40px] bg-[var(--color-border)]" [ngClass]="{ 'bg-[var(--color-blue-640)]': currentStep > 2 }"></div>
           <div class="flex items-center gap-[10px]">
-            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]"
-              [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep === 3 }">3</div>
+            <div class="flex h-[32px] w-[32px] items-center justify-center rounded-full border text-[12px]" [ngClass]="{ 'bg-[var(--color-blue-640)] text-white border-transparent': currentStep === 3 }">3</div>
             <span class="text-[13px] font-medium">Confirmation</span>
           </div>
         </div>
@@ -58,9 +55,7 @@
               </div>
 
               <div class="flex flex-1 gap-[10px] overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] [mask-size:100%_100%] [mask-repeat:no-repeat]" #categoryScroll>
-                <div *ngFor="let category of getFilteredIocs()" class="flex items-center whitespace-nowrap border-b-2 border-transparent px-[10px] pb-[6px] text-[13px] text-[var(--color-text1)] cursor-pointer"
-                  [ngClass]="{ 'border-[#0E1626] text-[#0E1626] font-semibold': category.ioc_id === selectedCategoryId }"
-                  (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+                <div *ngFor="let category of getFilteredIocs()" class="flex items-center whitespace-nowrap border-b-2 border-transparent px-[10px] pb-[6px] text-[13px] text-[var(--color-text1)] cursor-pointer" [ngClass]="{ 'border-[#0E1626] text-[#0E1626] font-semibold': category.ioc_id === selectedCategoryId }" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                   {{ category.name }}
                 </div>
                 <div *ngIf="getFilteredIocs().length === 0" class="text-[13px] text-[#0E162650]">No entity filters available.</div>

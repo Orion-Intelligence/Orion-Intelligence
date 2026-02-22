@@ -26,38 +26,22 @@
       <div class="mt-3 grid gap-3 sm:grid-cols-2">
       <div>
         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Username</label>
-        <input
-          type="text"
-          [(ngModel)]="editableUsername"
-          name="username"
-          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
+        <input type="text" [(ngModel)]="editableUsername" name="username" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
       </div>
 
       <div>
         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Role</label>
-        <input
-          type="text"
-          [value]="(appService.userSessionData().user.role | titlecase)"
-          disabled
-          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+        <input type="text" [value]="(appService.userSessionData().user.role | titlecase)" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
       </div>
 
       <div>
         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Tenant / Location</label>
-        <input
-          type="text"
-          [value]="getLocationDisplay() || appService.userSessionData().user.username"
-          disabled
-          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+        <input type="text" [value]="getLocationDisplay() || appService.userSessionData().user.username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
       </div>
 
       <div>
         <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Licenses</label>
-        <input
-          type="text"
-          [value]="getUserLicensesLabel(userSessionData.user) || 'No licenses assigned'"
-          disabled
-          class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+        <input type="text" [value]="getUserLicensesLabel(userSessionData.user) || 'No licenses assigned'" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
       </div>
       </div>
     </div>
@@ -66,10 +50,7 @@
       <div class="ui-section-title">Preferences</div>
       <div class="ui-section-description">Security and appearance settings.</div>
       <div class="mt-3 space-y-3">
-      <div
-        class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35"
-        (click)="twoFactorEnabled = !twoFactorEnabled; toggleTwoFa()"
-      >
+      <div class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="twoFactorEnabled = !twoFactorEnabled; toggleTwoFa()">
         <div class="flex items-center justify-between gap-3">
           <div>
             <label class="block text-sm font-semibold text-[var(--color-text1)]">2 Factor Authentication</label>
@@ -82,10 +63,7 @@
         </div>
       </div>
 
-      <div
-        class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35"
-        (click)="isDarkMode = !isDarkMode; toggleTheme()"
-      >
+      <div class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isDarkMode = !isDarkMode; toggleTheme()">
         <div class="flex items-center justify-between gap-3">
           <div>
             <label class="block text-sm font-semibold text-[var(--color-text1)]">Theme</label>

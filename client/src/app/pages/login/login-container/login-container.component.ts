@@ -96,7 +96,6 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
           if (!this.authService.isAuthenticated()) {
             return;
           }
-          // keep 2FA UI state intact to avoid flicker before redirect
         },
         error: (err) => {
           this.errorMessage =

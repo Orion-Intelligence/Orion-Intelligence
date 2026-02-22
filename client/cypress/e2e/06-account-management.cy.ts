@@ -36,19 +36,19 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
     cy.visit('/login');
     cy.get('input[name="username"]').should('exist').type('testing4');
     cy.get('input[name="password"]').should('exist').type('1qaz!QAZ', {log: false});
-    cy.get('input.login-button').should('exist').click();
+    cy.get('[data-cy="login-button"], input.login-button').first().should('exist').click();
 
-    cy.get('.twofa-center').should('be.visible');
+    cy.get('[data-cy="twofa-center"], .twofa-center').should('be.visible');
     cy.get('img[alt="2FA QR"]').should('exist');
     cy.get('input[name="otpCode"]').should('exist');
-    cy.get('.twofa_title')
+    cy.get('[data-cy="twofa_title"], .twofa_title')
       .should('contain.text', 'Enter 2FA code')
       .and('be.visible');
 
     cy.visit('/');
     cy.clearAllEmails()
 
-    cy.contains('span.reset-password', 'Reset password?')
+    cy.contains('[data-cy="reset-password"], span.reset-password', 'Reset password?')
       .should('be.visible')
       .click({force: true});
 
@@ -93,7 +93,7 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
 
       cy.get('input[name="username"]').clear().type('testing4');
       cy.get('input[name="password"]').clear().type('WRONG_PASSWORD', {log: false});
-      cy.get('input.login-button').should('be.enabled').click();
+      cy.get('[data-cy="login-button"], input.login-button').first().should('be.enabled').click();
 
       cy.contains(
         'div.d-inline-block.mt-2.px-3.py-2.rounded-lg.bg-danger.bg-opacity-75.text-white.shadow-sm.text-center',
@@ -102,9 +102,9 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
       ).should('be.visible');
 
       cy.get('input[name="password"]').clear().type('Doorsoffreedom@00', {log: false});
-      cy.get('input.login-button').should('be.enabled').click();
+      cy.get('[data-cy="login-button"], input.login-button').first().should('be.enabled').click();
 
-      cy.get('.twofa-center').should('be.visible');
+      cy.get('[data-cy="twofa-center"], .twofa-center').should('be.visible');
     });
 
   });

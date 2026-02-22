@@ -107,7 +107,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
           .click({force: true});
       });
 
-    cy.get('input[name="q"]').clear().type(`${term}{enter}`);
+    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type(`${term}{enter}`);
 
     cy.get('.dashboard__buttons').first().should('be.visible');
 
@@ -276,7 +276,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     openDefacementSubTab('Hacked');
 
-    cy.get('input[name="q"]').clear().type('102.212.246.99{enter}');
+    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type('102.212.246.99{enter}');
     cy.get('tr[id^="item-"]').first().click({force: true});
 
     cy.get('.search__result-detail').should('be.visible');
@@ -286,7 +286,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     openDefacementSubTab('Phishing');
 
-    cy.get('input[name="q"]').clear().type('phishunt{enter}');
+    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type('phishunt{enter}');
     cy.get('tr[id^="item-"]').first().click({force: true});
 
     cy.get('.search__result-detail').should('be.visible');
@@ -295,7 +295,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     openDefacementSubTab('Databases');
 
-    cy.get('input[name="q"]').clear().type('urldna_bot{enter}');
+    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type('urldna_bot{enter}');
     cy.get('tr[id^="item-"]').first().click({force: true});
 
     cy.get('.search__result-detail').should('be.visible');
@@ -376,7 +376,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     cy.contains('button', 'Search').click({force: true});
 
-    cy.get('.dashboard_container, .list__table, .search__result-detail').should('exist');
+    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container, .list__table, .search__result-detail').should('exist');
     cy.logout();
   });
 });

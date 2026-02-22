@@ -54,7 +54,6 @@ export class HomeSearchComponent implements OnInit {
   private computeInsightMax() {
     this.insightMax = Math.round(window.innerHeight * 0.30);
     if (!this.insightDragging && this.insightDragY == null) {
-      // keep state consistent on resize
     }
   }
 

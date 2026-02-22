@@ -8,11 +8,7 @@
       <p class="mt-1 text-[12px] leading-relaxed text-[var(--color-text4)]">Complete API payload for this report in structured JSON format.</p>
     </div>
     <div class="mt-[2px] flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        (click)="copyJson($event)"
-        class="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] text-[var(--color-text1)] transition hover:bg-[var(--color-blue-720)]"
-        appTooltip="Copy JSON">
+      <button type="button" (click)="copyJson($event)" class="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] text-[var(--color-text1)] transition hover:bg-[var(--color-blue-720)]" appTooltip="Copy JSON">
         <i class="bi bi-clipboard-fill text-[17px] font-bold"></i>
         <span *ngIf="copied" class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-[var(--color-blue-640)] px-2 py-[2px] text-[10px] font-semibold text-white">Copied</span>
       </button>

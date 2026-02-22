@@ -1,71 +1,30 @@
 <ng-container *ngIf="consolidated">
   <div class="ui-result-tabs-strip mx-[30px] mt-[14px] flex items-end border-b pb-0 max-[1000px]:mx-[15px]" (click)="onTabClick($event)">
     <div class="inline-flex items-center gap-[2px] bg-transparent p-0">
-    <button
-      type="button"
-      data-tab="Group"
-      class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]"
-      [ngClass]="{
-        'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Group',
-        'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Group'
-      }">Group</button>
-    <button
-      type="button"
-      data-tab="IOCs"
-      class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]"
-      [ngClass]="{
-        'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'IOCs',
-        'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'IOCs'
-      }">IOCs</button>
+    <button type="button" data-tab="Group" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Group', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Group' }">Group</button>
+    <button type="button" data-tab="IOCs" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'IOCs', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'IOCs' }">IOCs</button>
     </div>
   </div>
   <br *ngIf="activeTab !== 'IOCs'">
 </ng-container>
 
 <ng-container *ngIf="activeTab !== 'IOCs'">
-  <form
-    (submit)="onFormSubmit()"
-    @fadeInDashboardItem
-    class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid"
-    [ngClass]="{ 'mt-0': consolidated }"
-    *ngIf="!domain">
+  <form (submit)="onFormSubmit()" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }" *ngIf="!domain">
     <div class="flex w-full flex-wrap items-start justify-between">
       <div class="w-full">
         <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
 
         <div class="relative">
           <div class="flex w-full max-w-[910px] items-start gap-[8px] max-[900px]:max-w-full max-[900px]:flex-col">
-            <div
-            class="mb-[6px] flex h-[40px] min-w-0 flex-1 flex-nowrap"
-            [ngClass]="{
-              'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay,
-              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay
-            }">
+            <div class="mb-[6px] flex h-[40px] min-w-0 flex-1 flex-nowrap" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
 
             <button class="flex h-[40px] w-[42px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" type="submit">
               <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
             </button>
 
-            <input
-              #searchInput
-              class="h-[40px] flex-1 border-y border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]"
-              data-cy="dashboard-general-input"
-              [(ngModel)]="searchQuery"
-              autocapitalize="none"
-              autocomplete="off"
-              maxlength="350"
-              name="q"
-              placeholder="Search..."
-              type="search"
-              (focus)="setFilterOverlay(true)"
-              (input)="onSearchInput($event)" />
+            <input #searchInput class="h-[40px] flex-1 border-y border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
 
-            <button
-              type="button"
-              class="ui-search-clear-btn flex h-[40px] items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px] max-[700px]:rounded-r-[8px] max-[700px]:border-r"
-              aria-label="Clear"
-              (click)="searchQuery=''; searchInput.focus(); onFormSubmit()"
-              [disabled]="!searchQuery">
+            <button type="button" class="ui-search-clear-btn flex h-[40px] items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px] max-[700px]:rounded-r-[8px] max-[700px]:border-r" aria-label="Clear" (click)="searchQuery=''; searchInput.focus(); onFormSubmit()" [disabled]="!searchQuery">
               <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
             </button>
 
@@ -109,18 +68,9 @@
         <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools">
           <div class="mt-[8px] flex gap-[12px]" @fadeInDashboardItem>
             <div #sortMenuRef class="relative" *ngIf="showSorting">
-              <button
-                type="button"
-                class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]"
-                (click)="toggleSortMenu($event)">
+              <button type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSortMenu($event)">
                 sort by <b>({{ selectedSortBy }})</b>
-                <img
-                  src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-                  alt="chevron"
-                  width="16"
-                  height="16"
-                  class="ui-action-icon transition-transform duration-200"
-                  [ngClass]="{ 'rotate-180': sortMenuOpen }">
+                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': sortMenuOpen }">
               </button>
               <div *ngIf="sortMenuOpen" class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[220px] rounded-[8px] border border-[#e5e7eb] bg-white p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
                 <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSortChange(SortType.NEWEST_FIRST); closeMenus()">Newest first</button>
@@ -130,18 +80,9 @@
             </div>
 
             <div #searchMenuRef class="relative">
-              <button
-                type="button"
-                class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]"
-                (click)="toggleSearchMenu($event)">
+              <button type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSearchMenu($event)">
                 search by <b>({{ matchTypeLabel() }})</b>
-                <img
-                  src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-                  alt="chevron"
-                  width="16"
-                  height="16"
-                  class="ui-action-icon transition-transform duration-200"
-                  [ngClass]="{ 'rotate-180': searchMenuOpen }">
+                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': searchMenuOpen }">
               </button>
               <div *ngIf="searchMenuOpen" class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[240px] rounded-[8px] border border-[#e5e7eb] bg-white p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
                 <button class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[#172235] hover:bg-[#f5f7fa]" (click)="onSetMatchType('semantic'); onFormSubmit(); closeMenus()">Match Semantic</button>
@@ -179,19 +120,10 @@
   </ng-template>
 </ng-container>
 
-<div
-  *ngIf="filterModel && !shrinkmenu && (isFilterOpen$ | async)"
-  class="ui-filter-sidebar-overlay fixed inset-0 z-[19]"
-  (click)="sidebarService.closeSidebar()">
+<div *ngIf="filterModel && !shrinkmenu && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[19]" (click)="sidebarService.closeSidebar()">
 </div>
 
-<div
-  *ngIf="filterModel && !shrinkmenu"
-  class="ui-filter-sidebar-panel fixed top-0 z-[20] h-[96vh] w-[300px] rounded-tl-[15px] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full"
-  [ngClass]="{
-    'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async),
-    'right-0': (isFilterOpen$ | async)
-  }">
+<div *ngIf="filterModel && !shrinkmenu" class="ui-filter-sidebar-panel fixed top-0 z-[20] h-[96vh] w-[300px] rounded-tl-[15px] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
   <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 

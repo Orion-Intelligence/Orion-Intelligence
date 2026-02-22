@@ -232,7 +232,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
 
-    cy.get('.dashboard_container').should('be.visible');
+    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
     cy.contains('Homepage').click();
     cy.get('.user-homepage_cards').should('exist');
   });
@@ -243,7 +243,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
 
-    cy.get('.dashboard_container').should('be.visible');
+    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
 
     cy.wait(2000)
     cy.get('button[apptooltip="scan all"]', {timeout: 40000})

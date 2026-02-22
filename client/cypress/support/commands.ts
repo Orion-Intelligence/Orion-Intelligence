@@ -17,14 +17,14 @@ Cypress.Commands.add("loginAsAdmin", () => {
     cy.get('input[name="username"]').type(Cypress.env("ADMIN_USERNAME"));
     cy.get('input[name="password"]').type(Cypress.env("ADMIN_PASSWORD"), { log: false });
     cy.get('[data-cy="login-button"], input.login-button').first().click();
-    cy.get('[data-cy="dashboard-main-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
+    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
 });
 Cypress.Commands.add("loginAsTest1", () => {
     cy.visit("/login");
     cy.get('input[name="username"]').type("testing4");
     cy.get('input[name="password"]').type("1qaz!QAZ", { log: false });
     cy.get('[data-cy="login-button"], input.login-button').first().click();
-    cy.get('[data-cy="dashboard-main-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
+    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
 });
 Cypress.Commands.add("logout", () => {
     cy.get('img[alt="Logout"]', { timeout: 10000 })

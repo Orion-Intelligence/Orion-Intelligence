@@ -1,4 +1,3 @@
-// src/app/security-scan/security-scan.component.ts
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';

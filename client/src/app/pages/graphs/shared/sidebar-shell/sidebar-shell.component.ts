@@ -5,7 +5,9 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './sidebar-shell.component.html',
-  styleUrls: ['./sidebar-shell.component.scss'],
+  host: {
+    class: 'block h-[calc(100vh-3rem)] w-full min-h-0',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarShellComponent {

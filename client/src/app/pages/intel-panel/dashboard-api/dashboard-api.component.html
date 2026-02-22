@@ -1,33 +1,15 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 pb-4 lg:px-8">
 <form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">
-  <div
-    class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3"
-    [ngClass]="{
-      'xl:max-w-[620px]': (apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'),
-      'xl:max-w-[980px]': !(apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto')
-    }">
+  <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3" [ngClass]="{ 'xl:max-w-[620px]': (apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'), 'xl:max-w-[980px]': !(apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto') }">
     <div class="flex w-full items-center gap-3">
       <div class="min-w-0 flex-1">
       <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
         <div class="flex w-[45px] items-center justify-center bg-white">
           <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20" class="brightness-0 opacity-80">
         </div>
-        <input
-          [(ngModel)]="q1"
-          autocapitalize="none"
-          autocomplete="off"
-          class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]"
-          [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'cracked' || apiType === 'crypto' }"
-          maxlength="150"
-          [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))"
-          [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))"
-          [type]="apiType === 'cracked' ? 'url' : 'text'"
-          [required]="apiType === 'crypto' ? true : ((apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim())))">
+        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'cracked' || apiType === 'crypto' }" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))" [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="apiType === 'crypto' ? true : ((apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim())))">
         <input type="hidden" value="1">
-        <button
-          *ngIf="apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'"
-          [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)"
-          class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
+        <button *ngIf="apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
           Search
         </button>
       </div>
@@ -38,21 +20,9 @@
         <div class="flex w-[45px] items-center justify-center bg-white">
           <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20" class="brightness-0 opacity-80">
         </div>
-        <input
-          [(ngModel)]="q2"
-          autocapitalize="none"
-          autocomplete="off"
-          class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]"
-          email
-          maxlength="150"
-          name="q2"
-          [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'"
-          type="email"
-          [required]="apiType === 'email' ? true : !(q1 && q1.trim())">
+        <input [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" email maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email" [required]="apiType === 'email' ? true : !(q1 && q1.trim())">
         <input type="hidden" value="1">
-        <button
-          [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)"
-          class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
+        <button [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
           Search
         </button>
       </div>

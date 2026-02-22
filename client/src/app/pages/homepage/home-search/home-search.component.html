@@ -6,38 +6,16 @@
       <ng-container *ngIf="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise') ||
         app_service.userSessionData().user.role === 'analyst'">
         <div class="relative">
-          <div
-            class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap"
-            [ngClass]="{
-              'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay,
-              'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay
-            }">
+          <div class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay }">
 
             <button class="flex w-[45px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" (click)="onSearchSubmit()" type="submit">
               <img alt="Search" height="16" class="ml-[6px] mb-[1px] opacity-80" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
             </button>
 
-            <input
-              #searchInput
-              [(ngModel)]="searchQuery"
-              autocapitalize="none"
-              autocomplete="off"
-              class="h-[42px] flex-1 border-y border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]"
-              data-cy="dashboard-general-input"
-              maxlength="350"
-              name="q"
-              placeholder="Search ..."
-              type="search"
-              (focus)="setFilterOverlay(true)"
-              (input)="onSearchInput($event)">
+            <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 border-y border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" maxlength="350" name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)">
             <input type="hidden" value="1">
 
-            <button
-              type="button"
-              class="ui-search-clear-btn flex items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px]"
-              aria-label="Clear"
-              (click)="searchQuery=''; searchInput.focus()"
-              [disabled]="!searchQuery">
+            <button type="button" class="ui-search-clear-btn flex items-center justify-center border-y border-[var(--color-border)] bg-white px-[10px]" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()" [disabled]="!searchQuery">
               <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [ngClass]="{ 'invisible': !searchQuery }" class="mt-[-3px]">
             </button>
 
@@ -56,13 +34,7 @@
                   <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]">
                   <button type="button" (click)="onToolToggle($event)" class="inline-flex items-center cursor-pointer">
                     Tools
-                    <img
-                      src="assets/images/shared/theme/cheveron-right.svg"
-                      width="27"
-                      height="27"
-                      alt="Toggle Icon"
-                      [ngClass]="{ 'rotate-90': app_service.configData().localSettings.enable_advanced_tools }"
-                      class="mt-[-1px] px-[10px] transition-transform duration-300">
+                    <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [ngClass]="{ 'rotate-90': app_service.configData().localSettings.enable_advanced_tools }" class="mt-[-1px] px-[10px] transition-transform duration-300">
                   </button>
                 </ng-container>
               </ng-container>
@@ -71,10 +43,7 @@
 
           <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
 
-          <div
-            #filtersWrapper
-            class="absolute z-[1] w-full max-w-[910px]"
-            *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+          <div #filtersWrapper class="absolute z-[1] w-full max-w-[910px]" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
             <app-search-filters
               [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
               [homePage]="true"></app-search-filters>
@@ -106,30 +75,10 @@
           <app-world-heatmap></app-world-heatmap>
         </div>
 
-<div
-  class="relative will-change-transform transition-transform duration-300 ease-out"
-  [class.transition-none]="insightDragging"
-  [style.transform]="getInsightTransform()"
->
-<div
-  class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none"
-  (click)="onInsightToggleClick($event)"
-  (pointerdown)="onInsightPointerDown($event)"
->
-  <button
-    type="button"
-    aria-label="Drag Panel"
-    class="ui-home-insight-drag-btn group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-text1)] shadow-[0_12px_28px_rgba(0,0,0,0.28)] transition hover:border-[rgba(148,163,184,0.6)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.32)] active:scale-[0.97]"
-  >
-    <svg
-      class="ui-home-insight-drag-icon h-4 w-4 opacity-80 transition-transform duration-200 group-hover:-translate-y-0.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
+<div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [style.transform]="getInsightTransform()">
+<div class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)">
+  <button type="button" aria-label="Drag Panel" class="ui-home-insight-drag-btn group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-text1)] shadow-[0_12px_28px_rgba(0,0,0,0.28)] transition hover:border-[rgba(148,163,184,0.6)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.32)] active:scale-[0.97]">
+    <svg class="ui-home-insight-drag-icon h-4 w-4 opacity-80 transition-transform duration-200 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 5v14" />
       <path d="M8 9l4-4 4 4" />
       <path d="M16 15l-4 4-4-4" />

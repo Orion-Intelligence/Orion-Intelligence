@@ -21,26 +21,14 @@
   <h2 class="mt-[16px] text-[18px] font-semibold">Findings</h2>
 
   <ng-container *ngIf="viewFindings.length; else noFindings">
-    <section *ngFor="let item of viewFindings" class="mt-[12px] rounded-[8px] border p-[12px]"
-      [ngClass]="{
-        'border-[#dc3545] bg-[#fff5f5]': $any(riskClass(item.risk)) === 'scan_high',
-        'border-[#ffc107] bg-[#fff9f3]': $any(riskClass(item.risk)) === 'scan_medium',
-        'border-[#4caf50] bg-[#f0fdf4]': $any(riskClass(item.risk)) === 'scan_low',
-        'border-[#17a2b8] bg-[#f0f9ff]': $any(riskClass(item.risk)) === 'scan_info'
-      }">
+    <section *ngFor="let item of viewFindings" class="mt-[12px] rounded-[8px] border p-[12px]" [ngClass]="{ 'border-[#dc3545] bg-[#fff5f5]': $any(riskClass(item.risk)) === 'scan_high', 'border-[#ffc107] bg-[#fff9f3]': $any(riskClass(item.risk)) === 'scan_medium', 'border-[#4caf50] bg-[#f0fdf4]': $any(riskClass(item.risk)) === 'scan_low', 'border-[#17a2b8] bg-[#f0f9ff]': $any(riskClass(item.risk)) === 'scan_info' }">
       <header class="flex items-center justify-between">
         <div class="text-[14px] font-semibold">
           <span class="mr-[6px]">{{ item.n }}.</span>
           <span>{{ item.header }}</span>
         </div>
         <div class="text-[12px]">
-          <span class="rounded-full border px-[8px] py-[2px]"
-            [ngClass]="{
-              'border-[#dc3545] text-[#dc3545]': $any(riskClass(item.risk)) === 'scan_high',
-              'border-[#ffc107] text-[#b45309]': $any(riskClass(item.risk)) === 'scan_medium',
-              'border-[#4caf50] text-[#16a34a]': $any(riskClass(item.risk)) === 'scan_low',
-              'border-[#17a2b8] text-[#0284c7]': $any(riskClass(item.risk)) === 'scan_info'
-            }">{{ item.risk }}</span>
+          <span class="rounded-full border px-[8px] py-[2px]" [ngClass]="{ 'border-[#dc3545] text-[#dc3545]': $any(riskClass(item.risk)) === 'scan_high', 'border-[#ffc107] text-[#b45309]': $any(riskClass(item.risk)) === 'scan_medium', 'border-[#4caf50] text-[#16a34a]': $any(riskClass(item.risk)) === 'scan_low', 'border-[#17a2b8] text-[#0284c7]': $any(riskClass(item.risk)) === 'scan_info' }">{{ item.risk }}</span>
           <span class="ml-[6px] text-[#334155]">{{ item.confidence }}</span>
         </div>
       </header>

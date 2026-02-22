@@ -1,16 +1,8 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
+import { FindingRow } from '../../../shared/model/security-scan/finding-row.model';
 import { HelperService } from '../../../shared/services/helper.service';
-interface FindingRow {
-    n: number;
-    category: string;
-    header: string;
-    description: string;
-    risk: string;
-    confidence: string;
-    proof?: string;
-}
 @Component({
   selector: 'app-security-scan-export-component',
   standalone: true,

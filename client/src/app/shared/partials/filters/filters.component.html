@@ -20,12 +20,7 @@
       </ng-container>
 
       <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
-        <select
-          class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none"
-          [ngModel]="selectedFilters[key] ?? ''"
-          (ngModelChange)="onSelectionChange(key, $event)"
-          name="{{ key }}"
-        >
+        <select class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" name="{{ key }}">
           <option [ngValue]="''">Select</option>
           <option *ngFor="let option of filterModel.filters[key].options" [ngValue]="option.key">{{ option.label }}</option>
         </select>
@@ -33,14 +28,7 @@
 
       <ng-container *ngIf="filterModel.filters[key].type === 'text'">
         <div class="mb-2">
-          <input
-            (ngModelChange)="onSelectionChange(key, selectedFilters[key])"
-            [(ngModel)]="selectedFilters[key]"
-            class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none"
-            name="{{ key }}"
-            placeholder="{{ filterModel.filters[key].title }}"
-            type="text"
-          />
+          <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text" />
         </div>
       </ng-container>
     </div>

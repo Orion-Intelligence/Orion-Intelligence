@@ -1,12 +1,7 @@
 <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4" @fadeInDashboardItem>
   <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('profile')">
     <span class="text-sm font-semibold text-[var(--color-text1)]">Tenant Data</span>
-    <img
-      src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-      class="h-4 w-4 transition"
-      [ngClass]="isAccountSectionOpen ? 'rotate-180' : 'rotate-0'"
-      alt=""
-    />
+    <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-4 w-4 transition" [ngClass]="isAccountSectionOpen ? 'rotate-180' : 'rotate-0'" alt="" />
   </div>
 
   <span class="mt-2 block text-xs text-[var(--color-text4)]">
@@ -62,14 +57,7 @@
 
         <div>
           <div class="text-xs font-semibold text-[var(--color-text3)]">Phone</div>
-          <input
-            type="text"
-            [(ngModel)]="userSessionData.tenant.phone"
-            class="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]"
-            [disabled]="!isEditing"
-            [ngClass]="isEditing ? 'ring-1 ring-[var(--color-blue-640)]' : ''"
-            placeholder="Enter phone..."
-          />
+          <input type="text" [(ngModel)]="userSessionData.tenant.phone" class="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" [disabled]="!isEditing" [ngClass]="isEditing ? 'ring-1 ring-[var(--color-blue-640)]' : ''" placeholder="Enter phone..." />
         </div>
       </div>
     </div>
@@ -87,26 +75,12 @@
       <div class="mt-3 grid gap-4 sm:grid-cols-2">
         <div>
           <div class="text-xs font-semibold text-[var(--color-text3)]">Country</div>
-          <input
-            type="text"
-            [(ngModel)]="userSessionData.tenant.country"
-            class="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]"
-            [disabled]="!isEditing"
-            [ngClass]="isEditing ? 'ring-1 ring-[var(--color-blue-640)]' : ''"
-            placeholder="Enter country..."
-          />
+          <input type="text" [(ngModel)]="userSessionData.tenant.country" class="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" [disabled]="!isEditing" [ngClass]="isEditing ? 'ring-1 ring-[var(--color-blue-640)]' : ''" placeholder="Enter country..." />
         </div>
 
         <div>
           <div class="text-xs font-semibold text-[var(--color-text3)]">City/State</div>
-          <input
-            type="text"
-            [(ngModel)]="userSessionData.tenant .city"
-            class="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]"
-            [disabled]="!isEditing"
-            [ngClass]="isEditing ? 'ring-1 ring-[var(--color-blue-640)]' : ''"
-            placeholder="Enter city/state..."
-          />
+          <input type="text" [(ngModel)]="userSessionData.tenant .city" class="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" [disabled]="!isEditing" [ngClass]="isEditing ? 'ring-1 ring-[var(--color-blue-640)]' : ''" placeholder="Enter city/state..." />
         </div>
       </div>
     </div>

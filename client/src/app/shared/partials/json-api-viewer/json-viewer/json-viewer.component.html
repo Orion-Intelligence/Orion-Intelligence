@@ -6,16 +6,10 @@
   <ng-container *ngFor="let key of keys(json); let last = last">
     <li class="relative py-[1px]" [class.mb-[3px]]="!last">
       <ng-container *ngIf="isCollapsible(json[key]); else primitiveRow">
-        <div
-          (click)="toggle(pathKey(parentPath, key))"
-          class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
+        <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
           <span *ngIf="level > 0" class="pointer-events-none absolute left-[-11px] top-1/2 w-[20px] -translate-y-1/2 border-t-[1.5px] border-[var(--color-divider)]"></span>
           <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
-            <img
-              src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-              alt="toggle icon"
-              class="h-[14px] w-[14px] transition ui-action-icon"
-              [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
+            <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-[14px] w-[14px] transition ui-action-icon" [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
           </span>
           <span class="min-w-0 truncate text-[14px] text-[var(--color-blue-640)]">"{{ key }}"</span>
           <span class="mx-[2px] text-[var(--color-text4)]">:</span>
@@ -41,16 +35,10 @@
       </ng-container>
 
       <ng-template #primitiveRow>
-        <div
-          (click)="toggle(pathKey(parentPath, key))"
-          class="group relative flex cursor-pointer items-start gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
+        <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-start gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
           <span *ngIf="level > 0" class="pointer-events-none absolute left-[-11px] top-[14px] w-[20px] border-t-[1.5px] border-[var(--color-divider)]"></span>
           <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
-            <img
-              src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-              alt="toggle icon"
-              class="h-[14px] w-[14px] transition ui-action-icon"
-              [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
+            <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-[14px] w-[14px] transition ui-action-icon" [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
           </span>
           <span class="min-w-0 truncate text-[14px] text-[var(--color-blue-640)]">"{{ key }}"</span>
           <span class="mx-[2px] text-[var(--color-text4)]">:</span>

@@ -8,13 +8,7 @@
           <p class="ui-page-description">Manage user access, status, and licenses.</p>
         </div>
         <span [appTooltip]="appService.userSessionData().tenant.quotaExceeded ? 'Access blocked' : ''">
-          <button
-            type="button"
-            class="ui-btn"
-            [ngClass]="appService.userSessionData().tenant.quotaExceeded ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'"
-            [disabled]="appService.userSessionData().tenant.quotaExceeded"
-            (click)="addtenant()"
-          >
+          <button type="button" class="ui-btn" [ngClass]="appService.userSessionData().tenant.quotaExceeded ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'" [disabled]="appService.userSessionData().tenant.quotaExceeded" (click)="addtenant()">
             Add User
           </button>
         </span>
@@ -41,10 +35,7 @@
 
               <tbody *ngIf="(users?.length || 0) > 0" class="text-[15px] font-normal text-[var(--color-text3)]" @fadeInDashboardItem>
                 <ng-container *ngFor="let user of users; let i = index">
-                  <tr
-                    class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]"
-                    [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''"
-                  >
+                  <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''">
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
                       <div class="flex items-center gap-2">
@@ -63,52 +54,26 @@
                       </span>
                     </td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span
-                        class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize"
-                        [ngClass]="getStatusBadgeClass(user.status)"
-                      >
+                      <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
                         {{ user.status }}
                       </span>
                     </td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span
-                        class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold"
-                        [ngClass]="getSubscriptionBadgeClass(user.subscription)"
-                      >
+                      <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
                         {{ user.subscription ? 'Paid' : 'Free' }}
                       </span>
                     </td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span
-                        class="mr-0 block max-w-[290px] truncate rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]"
-                        [attr.title]="getUserLicensesLabel(user)"
-                      >
+                      <span class="mr-0 block max-w-[290px] truncate rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]" [attr.title]="getUserLicensesLabel(user)">
                         {{ getUserLicensesLabel(user) }}
                       </span>
                     </td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                      <button
-                        *ngIf="!canEditUser(user); else editAction"
-                        type="button"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]"
-                        aria-label="View user"
-                        (click)="toggleExpandedUser(i)"
-                      >
-                        <img
-                          src="assets/images/shared/view.svg"
-                          width="18"
-                          alt="view"
-                          class="tenant-action-icon cursor-pointer"
-                        />
+                      <button *ngIf="!canEditUser(user); else editAction" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View user" (click)="toggleExpandedUser(i)">
+                        <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon cursor-pointer" />
                       </button>
                       <ng-template #editAction>
-                        <button
-                          id="edit-profile"
-                          type="button"
-                          class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]"
-                          [attr.aria-label]="'Edit user'"
-                          (click)="toggleExpandedUser(i)"
-                        >
+                        <button id="edit-profile" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'Edit user'" (click)="toggleExpandedUser(i)">
                           <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
                         </button>
                       </ng-template>
@@ -152,10 +117,7 @@
                             <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
                               <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                               <div *ngIf="user.licenses?.length; else noUserLicenses" class="flex flex-wrap gap-1.5">
-                                <span
-                                  *ngFor="let license of user.licenses"
-                                  class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]"
-                                >
+                                <span *ngFor="let license of user.licenses" class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]">
                                   {{ licenseService.getLicenseLabel(license) }}
                                 </span>
                               </div>
@@ -171,11 +133,7 @@
                           <div class="mt-2 space-y-3 pt-1">
                             <div>
                               <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                              <select
-                                class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/40"
-                                [disabled]="appService.userSessionData().tenant.quotaExceeded"
-                                [(ngModel)]="user.status"
-                              >
+                              <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/40" [disabled]="appService.userSessionData().tenant.quotaExceeded" [(ngModel)]="user.status">
                                 <option [ngValue]="'active'">Active</option>
                                 <option [ngValue]="'disable'">Disable</option>
                               </select>
@@ -185,24 +143,9 @@
                               <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                               <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <button
-                                    type="button"
-                                    *ngIf="canAssignLicense(license)"
-                                  class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0"
-                                    [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1"
-                                    [ngClass]="{
-                                      'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1,
-                                      'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1,
-                                      'cursor-not-allowed opacity-60': isLicenseDisabled()
-                                    }"
-                                    (click)="!isLicenseDisabled() && toggleUserLicense(user, license)"
-                                  >
+                                  <button type="button" *ngIf="canAssignLicense(license)" class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0" [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1" [ngClass]="{ 'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1, 'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1, 'cursor-not-allowed opacity-60': isLicenseDisabled() }" (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
                                     <span class="truncate">{{ licenseService.getLicenseLabel(license) }}</span>
-                                    <input
-                                      type="checkbox"
-                                      class="ml-2 h-4 w-4 shrink-0 pointer-events-none accent-sky-500"
-                                      [checked]="(user.licenses || []).indexOf(license) > -1"
-                                    />
+                                    <input type="checkbox" class="ml-2 h-4 w-4 shrink-0 pointer-events-none accent-sky-500" [checked]="(user.licenses || []).indexOf(license) > -1" />
                                   </button>
                                 </ng-container>
                               </div>
@@ -210,18 +153,10 @@
                           </div>
 
                           <div class="mt-3 flex flex-wrap justify-end gap-2">
-                            <button
-                              type="button"
-                              class="ui-btn ui-btn-danger"
-                              (click)="deleteUser(user)"
-                            >
+                            <button type="button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">
                               Delete User
                             </button>
-                            <button
-                              type="button"
-                              class="ui-btn ui-btn-primary"
-                              (click)="updateUser(user)"
-                            >
+                            <button type="button" class="ui-btn ui-btn-primary" (click)="updateUser(user)">
                               Save changes
                             </button>
                           </div>
@@ -248,12 +183,7 @@
                     <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ user.username || '-' }}</div>
                     <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ user.role }}</div>
                   </div>
-                  <button
-                    type="button"
-                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]"
-                    [attr.aria-label]="canEditUser(user) ? 'Edit user' : 'View user'"
-                    (click)="toggleExpandedUser(i)"
-                  >
+                  <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" [attr.aria-label]="canEditUser(user) ? 'Edit user' : 'View user'" (click)="toggleExpandedUser(i)">
                     <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" [alt]="canEditUser(user) ? 'edit' : 'view'" class="tenant-action-icon" />
                   </button>
                 </div>
@@ -307,17 +237,7 @@
                       <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                       <div class="mt-2 grid grid-cols-1 gap-2">
                         <ng-container *ngFor="let license of licenseList">
-                          <button
-                            type="button"
-                            *ngIf="canAssignLicense(license)"
-                            class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0"
-                            [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1"
-                            [ngClass]="{
-                              'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1,
-                              'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1
-                            }"
-                            (click)="toggleUserLicense(user, license)"
-                          >
+                          <button type="button" *ngIf="canAssignLicense(license)" class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0" [attr.aria-pressed]="(user.licenses || []).indexOf(license) > -1" [ngClass]="{ 'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': (user.licenses || []).indexOf(license) > -1, 'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': (user.licenses || []).indexOf(license) === -1 }" (click)="toggleUserLicense(user, license)">
                             <span class="truncate">{{ licenseService.getLicenseLabel(license) }}</span>
                             <input type="checkbox" class="ml-2 h-4 w-4 shrink-0 pointer-events-none accent-sky-500" [checked]="(user.licenses || []).indexOf(license) > -1" />
                           </button>

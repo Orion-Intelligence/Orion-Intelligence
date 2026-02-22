@@ -13,10 +13,7 @@
             <span (dblclick)="$event.stopPropagation(); tabManager.startEditing(tab.id)" class="py-1 pr-1" title="Double-click to rename">{{ tab.name }}</span>
           </ng-template>
           
-          <button *ngIf="tabManager.tabs().length > 1"
-            (click)="$event.stopPropagation(); tabManager.closeTab(tab.id)"
-            [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + 
-                     (tabManager.activeTabId() === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+          <button *ngIf="tabManager.tabs().length > 1" (click)="$event.stopPropagation(); tabManager.closeTab(tab.id)" [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (tabManager.activeTabId() === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
             <i class="bi bi-x-lg text-xs"></i>
           </button>
         </div>
@@ -24,9 +21,7 @@
         <div class="pl-1">
           <div class="relative">
             <input data-cy="graph-tab-file-input" type="file" class="hidden" id="fileInput" (change)="onFileSelected($event)" accept=".json">
-            <button data-cy="graph-tab-add-menu" (click)="toggleAddMenu($event)" [disabled]="tabManager.tabs().length>= 4"
-              class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-              title="New Session">
+            <button data-cy="graph-tab-add-menu" (click)="toggleAddMenu($event)" [disabled]="tabManager.tabs().length>= 4" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50" title="New Session">
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
 

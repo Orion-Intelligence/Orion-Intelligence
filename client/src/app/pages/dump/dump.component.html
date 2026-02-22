@@ -14,9 +14,7 @@
       </button>
 
       <div *ngIf="isFilterOpen$ | async" class="fixed inset-0 z-50 bg-[#0b1220]/55 backdrop-blur-[1px]" (click)="closeSidebar()"></div>
-      <div
-        class="ui-filter-drawer fixed right-0 top-0 z-[60] h-screen w-[320px] max-w-[92vw] bg-[#2A5784] shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-transform duration-200 max-[450px]:w-screen"
-        [ngClass]="(isFilterOpen$ | async) ? 'translate-x-0' : 'translate-x-full'">
+      <div class="ui-filter-drawer fixed right-0 top-0 z-[60] h-screen w-[320px] max-w-[92vw] bg-[#2A5784] shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-transform duration-200 max-[450px]:w-screen" [ngClass]="(isFilterOpen$ | async) ? 'translate-x-0' : 'translate-x-full'">
         <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
           (filterReset)="resetFilters()" [filterModel]="filterModel"
           [isFilterOpen]="isFilterOpen$ | async"></app-filters>

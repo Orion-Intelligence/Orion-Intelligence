@@ -65,16 +65,6 @@ export class ViewTenantComponent implements OnInit {
     }
   }
 
-  getStatusClass(status: TenantStatus): string {
-    if (status === TenantStatusValues.ACTIVE) {
-      return 'status-active';
-    }
-    if (status === TenantStatusValues.DISABLE) {
-      return 'status-disabled';
-    }
-    return 'status-other';
-  }
-
   updateTenant(tenant: any): void {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];

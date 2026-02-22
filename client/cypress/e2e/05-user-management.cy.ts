@@ -98,9 +98,9 @@ describe('Login & Sidebar Checks for Users', () => {
     cy.visit('/login');
     cy.get('input[name="username"]').should('exist').type(username);
     cy.get('input[name="password"]').should('exist').type('1qaz!QAZ', {log: false});
-    cy.get('input.login-button').should('exist').click();
+    cy.get('[data-cy="login-button"], input.login-button').first().should('exist').click();
 
-    cy.get('.dashboard_container').should('exist');
+    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container').should('exist');
     cy.contains(username).should('exist');
 
     sidebarItems.forEach(item => {

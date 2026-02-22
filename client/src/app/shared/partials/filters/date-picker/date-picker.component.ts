@@ -1,12 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-interface CalendarCell {
-  date: Date;
-  inCurrentMonth: boolean;
-  iso: string;
-}
+import { CalendarCell } from '../../../model/filter/calendar-cell.model';
 
 @Component({
   selector: 'app-date-picker',

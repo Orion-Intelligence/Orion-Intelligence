@@ -8,8 +8,7 @@ import { ScanHelperMethodsService } from './scan-helper-methods-service.service'
   selector: 'app-scan-helper',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './scan-helper-methods.component.html',
-  styleUrls: ['./scan-helper-methods.component.css']
+  templateUrl: './scan-helper-methods.component.html'
 })
 export class ScanHelperMethods implements OnDestroy {
   private destroy$ = new Subject<void>();

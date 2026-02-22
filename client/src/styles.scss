@@ -1,7 +1,4 @@
 @use 'assets/styles/fonts.scss';
-@use "./app/pages/graphs/shared/sidebar-shell/sidebar-shell.component.scss";
-@use "./app/pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component.scss";
-@use "./app/shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component.scss";
 
 @tailwind base;
 @tailwind components;
@@ -9,7 +6,6 @@
 
 @import "bootstrap-icons/font/bootstrap-icons.css";
 @import "./app/pages/homepage/world-heatmap/world-heatmap.component.css";
-@import "./app/shared/partials/scan-helper-methods/scan-helper-methods.component.css";
 
 .ui-see-more-btn {
   display: inline-flex;
@@ -139,14 +135,34 @@
   }
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 :root {
   --color-blur-920: #f4f8fd;
-  --color-blur-910: #eff5fc;
   --color-blue-900: #172235;
   --color-blue-890: #edf4fb;
   --color-blue-880: #2A578459;
   --color-blue-870: #2A578435;
-  --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
   --color-blue-850: #e7eff8;
   --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
   --color-blue-830: #edf4fb;
@@ -155,30 +171,21 @@
   --color-blue-810: #E3E8EE;
   --color-blue-800: #eaf2fb;
   --color-blue-790: #e5eef9;
-  --color-blue-780: #0f335775;
   --color-blue-770: #f7f7f7;
   --color-blue-760: linear-gradient(to right, #cccccc50 50%, #cccccc40 70%, #cccccc30 80%, #cccccc20 100%);
   --color-blue-750: #eef4fb;
-  --color-blue-740: #0f263e;
   --color-blue-730: #f2f7fd;
   --color-blue-720: #edf4fb;
   --color-blue-710: #F7F9FC;
-  --color-blue-715: linear-gradient(to right, #cccccc50 50%, #cccccc40 70%, #cccccc30 80%, #cccccc20 100%);
   --color-blue-700: #e8f0f8;
   --color-blue-690: #E5E7EB;
   --color-blue-680: #eef4fb;
-  --color-blue-670: #14335299;
-  --color-blue-660: linear-gradient(to bottom, #174069, #2A5784);
-  --color-blue-650: #153454;
   --color-blue-640: #2b90ee;
   --color-blue-630: #1176d4;
   --color-blue-620: #1176d4;
-  --color-blue-610: #295785;
   --color-blue-600: #153454;
   --color-gray-100: #ececec;
   --color-gray-900: #667085;
-  --color-gray-910: #667085;
-  --color-green-100: #ceca5f;
   --color-mono: white;
   --color-white: white;
   --color-border: #E5E7EB;
@@ -196,10 +203,6 @@
   --color-text6: #37363675;
   --color-text7: #8E1E1E;
   --color-text8: #969696;
-  --color-text9: #000000;
-  --color-pagination: #ffffff;
-  --color-pagination-hover: #E3E8EE;
-  --color-scan-light: #c2c2c2;
   --color-consolidated-primary: #f2f7fd;
   --color-consolidated-secondary: #ecf3fb;
 
@@ -207,10 +210,6 @@
   --color-red-200: #FDE8E8;
   --color-border-red: #F5B5B5;
 
-  --color-scan-light-100: #F6F8FB;
-  --color-scan-light-200: #E7EBF2;
-  --color-border-scan-light: #D6DBE3;
-  --color-text-scan-light: #2E3A59;
 
   --color-orange-100: #FFF9F3;
   --color-orange-200: #FFF1E0;
@@ -225,31 +224,12 @@
 
   --color-shadow-light: rgb(16 24 40 / 3%);
   --color-shadow-medium: rgb(16 24 40 / 6%);
-  --color-shadow-strong: rgb(16 24 40 / 10%);
 
-  --color-scans-header: #00000080;
   --color-scan-red: #ed0006;
-  --color-scan-red-100: #FFDFE0;
-  --color-scan-red-200: #fdbebf;
-  --color-scan-red-300: #fdc0c2;
   --color-scan-green: #0fbb00;
   --color-scan-green-100: #d1ffe0;
-  --color-scan-green-200: #c1ffd7;
-  --color-scan-gray: #d9d9d9;
-  --color-scan-gray-100: #E7EBF2;
-  --color-scan-gray-200: #d6dbe3;
   --color-scan-orange: #ea8b00;
-  --color-scan-orange-100: #fef3e0;
-  --color-scan-orange-200: #fde8c1;
-  --color-scan-orange-300: #fde8c2;
 
-  --color-dark-900: #28313B;
-  --color-dark-800: #1B1F24;
-  --color-dark-700: #3B4B5E;
-  --color-dark-600: #6B7C93;
-  --color-dark-500: #D5DDE5;
-  --color-dark-400: #F1F4F8;
-  --color-dark-300: #F7F9FC;
 
   --ui-table-shell-border: #dbe5f0;
   --ui-table-row-border: #dfe7f1;
@@ -269,12 +249,10 @@
 
 .dark-theme {
   --color-blur-920: #172235;
-  --color-blur-910: #0b1020;
   --color-blue-900: #172235;
   --color-blue-890: #17223550;
   --color-blue-880: #1D2D47;
   --color-blue-870: #1D2D47;
-  --color-blue-860: #1D2D47;
   --color-blue-850: #0E1626;
   --color-blue-840: #0E1626;
   --color-blue-830: #0E1626;
@@ -283,30 +261,21 @@
   --color-blue-810: #1f2e47;
   --color-blue-800: #172235;
   --color-blue-790: #172235;
-  --color-blue-780: #172235;
   --color-blue-770: #101A2B;
   --color-blue-760: linear-gradient(to right, #FCFCFC20 0%, #FCFCFC30 50%, #FCFCFC20 100%);
   --color-blue-750: #172235;
-  --color-blue-740: #4d5155;
   --color-blue-730: #172235;
   --color-blue-720: #131E30;
   --color-blue-710: #172235;
-  --color-blue-715: #172235;
   --color-blue-700: #131E30;
   --color-blue-690: #1D2A41;
   --color-blue-680: #1f2e47;
-  --color-blue-670: #172235;
-  --color-blue-660: #0e1626;
-  --color-blue-650: #1f2e47;
   --color-blue-640: #57A5EB;
   --color-blue-630: #1792fe;
   --color-blue-620: #0E1626;
-  --color-blue-610: #0E1626;
   --color-blue-600: #294170;
   --color-gray-100: #f2f2f2;
   --color-gray-900: #A0B8D1;
-  --color-gray-910: #34435e;
-  --color-green-100: #2b2a0f;
   --color-border: #FCFCFC12;
   --color-mono: #00000000;
   --color-white: #172235;
@@ -324,10 +293,6 @@
   --color-text6: #A0B8D190;
   --color-text7: #fff;
   --color-text8: #D0D0D0;
-  --color-text9: #a0b8d1;
-  --color-pagination: #15345475;
-  --color-pagination-hover: #102A4685;
-  --color-scan-light: #172235;
   --color-consolidated-primary: #17223550;
   --color-consolidated-secondary: #172235;
   --color-button-secondary: #2a3952;
@@ -337,14 +302,10 @@
   --color-red-200: #7a1c1c30;
   --color-border-red: #7a1c1c;
 
-  --color-scan-light-200: #172235;
-  --color-border-scan-light: rgba(255, 255, 255, .0274509804);
-  --color-text-scan-light: #fff;
 
   --color-orange-100: #2b2a0f;
   --color-orange-200: rgb(122 106 28 / 40%);
   --color-border-orange: #7a6a1c;
-  --color-border-progress: #111827;
   --color-progress: #111827;
   --color-placeholder: linear-gradient(90deg,
       rgba(14, 22, 38, 0) 0%,
@@ -370,7 +331,7 @@
 .light-theme {
   color-scheme: light;
 
-  /* Layered light surfaces: page -> card -> field */
+  
   --color-blue-850: #dfe9f5;
   --color-blue-830: #e7eff9;
   --color-blue-820: #dbe6f3;
@@ -437,7 +398,7 @@
   filter: var(--ui-icon-filter-light);
 }
 
-/* Global light-mode icon harmonization for monochrome SVG action icons */
+
 .light-theme img[src*='assets/images/shared/theme/'][src$='.svg']:not([src*='info-light']):not([src*='magnifyingglasswhite']):not([src*='searchFilter_clossButton_white']) {
   filter: var(--ui-icon-filter-light);
 }
@@ -784,7 +745,7 @@
   box-shadow: 0 16px 42px rgb(15 23 42 / 16%);
 }
 
-/* Normalize older slate utility usage inside graph popups when light theme is active. */
+
 .light-theme .ui-graph-popup-panel [class*='bg-slate-900'] {
   background: var(--color-blue-850) !important;
 }
@@ -1007,7 +968,7 @@
   fill: #1f2e47 !important;
 }
 
-/* Keep dashboard main sidebar dark even in light theme */
+
 .light-theme [data-cy='dashboard-sidebar'],
 .light-theme app-dashboard-sidebar {
   background: #172235 !important;

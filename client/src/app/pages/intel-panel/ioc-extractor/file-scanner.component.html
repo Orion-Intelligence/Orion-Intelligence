@@ -75,8 +75,7 @@
               <span class="font-mono">{{ extractionResult?.original_filename || apkResult?.original_filename || fileName || 'file' }}</span>
             </div>
             <div>
-              <span class="inline-flex items-center gap-[6px] rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize"
-                [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
+              <span class="inline-flex items-center gap-[6px] rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
                 <i class="bi" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
                 {{ (extractionResult?.status || apkResult?.status || 'completed') | lowercase }}
               </span>
@@ -127,10 +126,7 @@
                     </div>
                     <div class="flex items-center gap-[8px]">
                       <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ category.name }}</span>
-                      <button class="inline-flex items-center gap-[6px] rounded-full border border-[var(--color-border)] px-[10px] py-[2px] text-[11px]"
-                        type="button"
-                        [ngClass]="{ 'bg-[var(--color-scan-green-100)] text-[var(--color-scan-green)]': copiedValue() === item.value, 'bg-[var(--color-blue-820)] text-[var(--color-text1)]': copiedValue() !== item.value }"
-                        (click)="copyValue(item.value)">
+                      <button class="inline-flex items-center gap-[6px] rounded-full border border-[var(--color-border)] px-[10px] py-[2px] text-[11px]" type="button" [ngClass]="{ 'bg-[var(--color-scan-green-100)] text-[var(--color-scan-green)]': copiedValue() === item.value, 'bg-[var(--color-blue-820)] text-[var(--color-text1)]': copiedValue() !== item.value }" (click)="copyValue(item.value)">
                         <i class="bi" [ngClass]="copiedValue() === item.value ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                         <span>{{ copiedValue() === item.value ? 'Copied!' : 'Copy' }}</span>
                       </button>

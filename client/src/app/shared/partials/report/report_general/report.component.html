@@ -62,14 +62,7 @@
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Status</p>
       <div class="flex items-center gap-2">
-        <span
-          class="h-2.5 w-2.5 rounded-full"
-          [ngClass]="{
-            'bg-green-500': isWithinDays(resultItem!.m_creation_date, 5),
-            'bg-yellow-500': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5),
-            'bg-red-500': !isWithinDays(resultItem!.m_creation_date, 10)
-          }"
-        ></span>
+        <span class="h-2.5 w-2.5 rounded-full" [ngClass]="{ 'bg-green-500': isWithinDays(resultItem!.m_creation_date, 5), 'bg-yellow-500': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5), 'bg-red-500': !isWithinDays(resultItem!.m_creation_date, 10) }"></span>
         <span class="text-[14px] font-medium text-[var(--color-text1)]">{{ getStatusText(resultItem?.m_creation_date) }}</span>
       </div>
     </div>
@@ -97,13 +90,7 @@
   <div *ngIf="isExpandedMetadata" class="mt-4">
     <div class="flex flex-wrap items-center gap-2.5">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button
-          (click)="setActiveTab(key)"
-          [ngClass]="activeTab === key
-            ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]'
-            : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'"
-          appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}"
-          class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
+        <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
           {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
         </button>
         <div *ngIf="!last" class="h-4 w-px bg-[var(--color-divider)]/70"></div>

@@ -19,9 +19,7 @@
     <div class="mx-10 overflow-x-auto" #categoryScroll>
       <div class="flex gap-2">
         <ng-container *ngIf="filteredIocs.length > 0; else noEntity">
-          <div *ngFor="let category of filteredIocs" class="cursor-pointer rounded-full px-4 py-1.5 text-xs font-semibold"
-            [ngClass]="category.ioc_id === selectedCategoryId ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)]'"
-            (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+          <div *ngFor="let category of filteredIocs" class="cursor-pointer rounded-full px-4 py-1.5 text-xs font-semibold" [ngClass]="category.ioc_id === selectedCategoryId ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
             {{ category.name }}
           </div>
         </ng-container>

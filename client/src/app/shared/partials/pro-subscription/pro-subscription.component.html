@@ -46,11 +46,7 @@
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
               <label for="name" class="text-xs font-semibold text-[var(--color-text4)]">Your Name</label>
-              <input type="text" id="name" name="userName" [(ngModel)]="userName" required minlength="2" #userNameCtrl="ngModel"
-                [ngClass]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'"
-                [attr.aria-invalid]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)"
-                [placeholder]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'Required' : ''"
-                class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
+              <input type="text" id="name" name="userName" [(ngModel)]="userName" required minlength="2" #userNameCtrl="ngModel" [ngClass]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" [attr.aria-invalid]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)" [placeholder]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'Required' : ''" class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
               <span class="mt-1 block text-xs text-[var(--color-text4)]" *ngIf="userNameCtrl.errors && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)">
                 {{ userNameCtrl.errors['required'] ? 'Required' : (userNameCtrl.errors['minlength'] ? 'Too short' : '') }}
               </span>
@@ -58,11 +54,7 @@
 
             <div>
               <label for="phone" class="text-xs font-semibold text-[var(--color-text4)]">Phone</label>
-              <input type="tel" id="phone" name="userPhone" [(ngModel)]="userPhone" required pattern="^[0-9()+\-\s]{7,15}$" #userPhoneCtrl="ngModel"
-                [ngClass]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'"
-                [attr.aria-invalid]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)"
-                [placeholder]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'Required' : ''"
-                class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
+              <input type="tel" id="phone" name="userPhone" [(ngModel)]="userPhone" required pattern="^[0-9()+\-\s]{7,15}$" #userPhoneCtrl="ngModel" [ngClass]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" [attr.aria-invalid]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)" [placeholder]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'Required' : ''" class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
               <span class="mt-1 block text-xs text-[var(--color-text4)]" *ngIf="userPhoneCtrl.errors && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)">
                 {{ userPhoneCtrl.errors['required'] ? 'Required' : 'Invalid' }}
               </span>
@@ -71,11 +63,7 @@
 
           <div>
             <label for="email" class="text-xs font-semibold text-[var(--color-text4)]">Email Address</label>
-            <input type="email" id="email" name="userEmail" [(ngModel)]="userEmail" required email #userEmailCtrl="ngModel"
-              [ngClass]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'"
-              [attr.aria-invalid]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)"
-              [placeholder]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'Required' : ''"
-              class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
+            <input type="email" id="email" name="userEmail" [(ngModel)]="userEmail" required email #userEmailCtrl="ngModel" [ngClass]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" [attr.aria-invalid]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)" [placeholder]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'Required' : ''" class="mt-2 w-full rounded-md border bg-[var(--color-blue-730)] px-3 py-2 text-sm text-[var(--color-text1)]" />
             <span class="mt-1 block text-xs text-[var(--color-text4)]" *ngIf="userEmailCtrl.errors && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)">
               {{ userEmailCtrl.errors['required'] ? 'Required' : 'Invalid' }}
             </span>

@@ -4,7 +4,8 @@ import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../services/authetication/auth.service';
 import { AppService } from '../../services/core/app/app.service';
-import { PasswordChecks, PasswordStrength, areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput } from '../../shared/utils/auth-form.util';
+import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../shared/utils/auth-form.util';
+
 @Component({
   selector: 'app-signup',
   standalone: true,
@@ -26,8 +27,7 @@ export class SignupComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(() => {
-      const isScreenMobile = window.innerWidth <= 480;
-      this.isMobile = isScreenMobile;
+      this.isMobile = window.innerWidth <= 480;
     });
   }
 

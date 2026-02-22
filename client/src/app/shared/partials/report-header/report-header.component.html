@@ -38,10 +38,7 @@
   </div>
 </div>
 
-<div
-  *ngIf="aiSuggestStatus"
-  @fadeInDashboardItem
-  class="m-[15px] mx-[32px] max-h-[40vh] overflow-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-730)] px-[19px] py-[15px] shadow-[0_4px_8px_rgba(0,0,0,0.1)] [scrollbar-width:auto] [scrollbar-color:var(--color-blue-880)_transparent] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-880)] [&::-webkit-scrollbar-thumb]:rounded-[10px]">
+<div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="m-[15px] mx-[32px] max-h-[40vh] overflow-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-730)] px-[19px] py-[15px] shadow-[0_4px_8px_rgba(0,0,0,0.1)] [scrollbar-width:auto] [scrollbar-color:var(--color-blue-880)_transparent] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-880)] [&::-webkit-scrollbar-thumb]:rounded-[10px]">
   <div class="flex items-start">
     <img alt="AI" class="mt-[3px] ui-action-icon" height="25" src="assets/images/shared/theme/ai.svg" width="25" />
     <p class="ml-[8px] mb-[24px] text-[22px] font-medium font-[Roboto] text-[var(--color-text1)]">AI Report</p>

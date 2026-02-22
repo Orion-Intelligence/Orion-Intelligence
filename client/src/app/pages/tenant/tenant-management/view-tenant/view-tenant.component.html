@@ -31,10 +31,7 @@
 
               <tbody *ngIf="(tenants?.length || 0) > 0" @fadeInDashboardItem>
                 <ng-container *ngFor="let tenant of tenants; let i = index">
-                  <tr
-                    class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]"
-                    [ngClass]="tenant._expanded ? '!border-t-0' : ''"
-                  >
+                  <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="tenant._expanded ? '!border-t-0' : ''">
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
                       <span class="inline-block max-w-full truncate font-medium text-[var(--color-text1)]">
@@ -149,12 +146,7 @@
                           <div class="mt-2 space-y-3 pt-1">
                             <div>
                               <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</label>
-                              <button
-                                type="button"
-                                class="mt-2 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold"
-                                [ngClass]="getVerifiedBadgeClass(tenant.verified)"
-                                (click)="tenant.verified = !tenant.verified"
-                              >
+                              <button type="button" class="mt-2 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)" (click)="tenant.verified = !tenant.verified">
                                 {{ tenant.verified ? 'Verified' : 'Not Verified' }}
                               </button>
                             </div>
@@ -176,17 +168,7 @@
                               <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                               <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <button
-                                    type="button"
-                                    *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'"
-                                    class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0"
-                                    [attr.aria-pressed]="tenant.licenses?.includes(license)"
-                                    [ngClass]="{
-                                      'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': tenant.licenses?.includes(license),
-                                      'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': !tenant.licenses?.includes(license)
-                                    }"
-                                    (click)="toggleTenantLicense(tenant, license)"
-                                  >
+                                  <button type="button" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0" [attr.aria-pressed]="tenant.licenses?.includes(license)" [ngClass]="{ 'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': tenant.licenses?.includes(license), 'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': !tenant.licenses?.includes(license) }" (click)="toggleTenantLicense(tenant, license)">
                                     <span class="truncate">{{ licenseService.getLicenseLabel(license) }}</span>
                                     <input type="checkbox" class="ml-2 h-4 w-4 shrink-0 pointer-events-none accent-sky-500" [checked]="tenant.licenses?.includes(license)" />
                                   </button>
@@ -282,17 +264,7 @@
                       <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                       <div class="mt-2 grid grid-cols-1 gap-2">
                         <ng-container *ngFor="let license of licenseList">
-                          <button
-                            type="button"
-                            *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'"
-                            class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0"
-                            [attr.aria-pressed]="tenant.licenses?.includes(license)"
-                            [ngClass]="{
-                              'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': tenant.licenses?.includes(license),
-                              'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': !tenant.licenses?.includes(license)
-                            }"
-                            (click)="toggleTenantLicense(tenant, license)"
-                          >
+                          <button type="button" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" class="group flex min-h-[38px] select-none items-center justify-between gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs font-semibold transition-all duration-150 outline-none focus:outline-none focus:ring-0" [attr.aria-pressed]="tenant.licenses?.includes(license)" [ngClass]="{ 'border-sky-300/55 bg-sky-400/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.22)]': tenant.licenses?.includes(license), 'border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text2)] hover:border-[var(--tenant-line)] hover:bg-[var(--color-blue-730)]': !tenant.licenses?.includes(license) }" (click)="toggleTenantLicense(tenant, license)">
                             <span class="truncate">{{ licenseService.getLicenseLabel(license) }}</span>
                             <input type="checkbox" class="ml-2 h-4 w-4 shrink-0 pointer-events-none accent-sky-500" [checked]="tenant.licenses?.includes(license)" />
                           </button>

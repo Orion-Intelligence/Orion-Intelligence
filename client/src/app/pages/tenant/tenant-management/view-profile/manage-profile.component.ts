@@ -150,14 +150,6 @@ export class ManageProfileComponent implements OnInit {
       : 'bg-slate-500/10 text-slate-300';
   }
 
-  get activeUsersCount(): number {
-    return this.users.filter(user => user.status === 'active').length;
-  }
-
-  get editableUsersCount(): number {
-    return this.users.filter(user => this.canEditUser(user)).length;
-  }
-
   addtenant() {
     this.showAddTenantPopup = true;
   }
@@ -166,7 +158,4 @@ export class ManageProfileComponent implements OnInit {
     this.showAddTenantPopup = false;
   }
 
-  setStatus(user: User, status: 'active' | 'disable') {
-    user.status = status;
-  }
 }

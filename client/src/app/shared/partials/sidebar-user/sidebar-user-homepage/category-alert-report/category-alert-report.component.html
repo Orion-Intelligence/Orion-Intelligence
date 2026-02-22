@@ -66,12 +66,7 @@
   <div class="grid gap-3">
     <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4" *ngFor="let item of filteredAlerts">
       <div class="flex items-center justify-between">
-        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"
-          [ngClass]="{
-            'bg-[var(--color-red-200)] text-[var(--color-text1)]': item.risk.toLowerCase() === 'critical' || item.risk.toLowerCase() === 'high',
-            'bg-[var(--color-orange-200)] text-[var(--color-text1)]': item.risk.toLowerCase() === 'medium',
-            'bg-[var(--color-blue-720)] text-[var(--color-text3)] border border-[var(--color-border)]': item.risk.toLowerCase() === 'low'
-          }">
+        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="{ 'bg-[var(--color-red-200)] text-[var(--color-text1)]': item.risk.toLowerCase() === 'critical' || item.risk.toLowerCase() === 'high', 'bg-[var(--color-orange-200)] text-[var(--color-text1)]': item.risk.toLowerCase() === 'medium', 'bg-[var(--color-blue-720)] text-[var(--color-text3)] border border-[var(--color-border)]': item.risk.toLowerCase() === 'low' }">
           <span *ngIf="!item.seen" class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-red-200)]">
             <img src="/assets/images/shared/exclamation.svg" alt="report" class="h-3 w-3" />
           </span>

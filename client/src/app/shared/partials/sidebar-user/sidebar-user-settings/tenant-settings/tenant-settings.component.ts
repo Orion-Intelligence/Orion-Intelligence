@@ -14,8 +14,7 @@ import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.u
   selector: 'app-tenant-settings',
   imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
   animations: [fadeInDashboardItem],
-  templateUrl: './tenant-settings.component.html',
-  styleUrls: ['./tenant-settings.component.scss']
+  templateUrl: './tenant-settings.component.html'
 })
 export class TenantSettingsComponent implements OnInit {
   isAccountSectionOpen = true;

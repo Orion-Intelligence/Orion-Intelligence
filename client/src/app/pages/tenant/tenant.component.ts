@@ -82,10 +82,6 @@ export class TenantComponent implements OnInit {
     }
   }
 
-  hasIocsWithValues(): boolean {
-    return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
-  }
-
   getFilteredIocs() {
     if (!this.iocSearchText) {
       return this.onboardingData.iocs;

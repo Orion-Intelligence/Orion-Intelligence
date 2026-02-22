@@ -34,7 +34,6 @@ import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manage
   standalone: true,
   imports: [NgIf, ResultComponent, DashboardResultsGeneralComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent],
   templateUrl: './dashboard-consolidated.component.html',
-  styleUrls: ['./dashboard-consolidated.component.scss'],
   animations: [scanAnimation, fadeInDashboardItem],
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
