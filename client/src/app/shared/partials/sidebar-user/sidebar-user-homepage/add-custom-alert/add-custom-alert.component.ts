@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlertAllIoc, AlertModel } from '../../../../model/company-profile/node.model';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import { MessageNotificationService } from '../../../../../services/message_noti
 export class AddCustomAlertComponent implements OnInit {
   protected readonly decodeURIComponent = decodeURIComponent;
 
+  iocDropdownOpen = false;
   alert: AlertModel = { type: '', status: 'active', title: '', description: '', url: '', source: '', all_ioc: [], content_types: [], first_seen: new Date(), last_seen: new Date(), ioc_type: '', ioc_value: '' };
   formError: string = '';
   alertTypes = [ { key: 'general', label: 'General' }, { key: 'breach', label: 'Breach' }, { key: 'exploit', label: 'Exploit' }, { key: 'social', label: 'Social' }, { key: 'defacement', label: 'Defacement' } ];
@@ -61,6 +62,7 @@ export class AddCustomAlertComponent implements OnInit {
     this.alert.ioc_type = newValue;
     this.formError = '';
     this.syncAllIoc();
+    this.iocDropdownOpen = false;
   }
 
   onIocValueChange(newValue: string) {
@@ -139,6 +141,16 @@ export class AddCustomAlertComponent implements OnInit {
         this.messageNotificationService.show(err?.error?.detail || 'alert operation failed');
       }
     });
+  }
+
+  toggleIocDropdown(event: Event) {
+    event.stopPropagation();
+    this.iocDropdownOpen = !this.iocDropdownOpen;
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    this.iocDropdownOpen = false;
   }
 
   cancleAlert(refresh: boolean) {

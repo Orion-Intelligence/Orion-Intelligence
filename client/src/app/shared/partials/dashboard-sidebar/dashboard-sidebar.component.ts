@@ -14,10 +14,11 @@ import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { sidebarModeAnimation } from '../../animations/sidebar.mode.animation';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent],
+  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective],
   templateUrl: './dashboard-sidebar.component.html',
   animations: [sidebarModeAnimation],
 })

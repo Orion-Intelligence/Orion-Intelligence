@@ -1,0 +1,9 @@
+.dashboard-collapsed-nav-btn {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dashboard-collapsed-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(87 165 235 / 32%);
+}

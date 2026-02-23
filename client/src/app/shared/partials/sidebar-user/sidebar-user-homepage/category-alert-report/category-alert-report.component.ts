@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, signal, ViewChild } from '@angular/core';
 import { NgFor, NgIf, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -44,6 +44,7 @@ export class CategoryAlertReportComponent implements OnInit {
   selectedDeleteAlertId: string = '';
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
+  openedActionMenuId: string | null = null;
   @ViewChild('printBtn') printBtn!: ElementRef<HTMLButtonElement>;
 
   constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService ) {
@@ -101,6 +102,20 @@ export class CategoryAlertReportComponent implements OnInit {
         console.warn(`Unknown action: ${action}`);
         break;
     }
+  }
+
+  toggleActionMenu(id: string, event: Event) {
+    event.stopPropagation();
+    this.openedActionMenuId = this.openedActionMenuId === id ? null : id;
+  }
+
+  closeActionMenus() {
+    this.openedActionMenuId = null;
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    this.closeActionMenus();
   }
 
   exportAlert(hash: string) {
@@ -375,6 +390,36 @@ export class CategoryAlertReportComponent implements OnInit {
 
       default:
         return 'Unknown';
+    }
+  }
+
+  getRiskIcon(risk: string): string {
+    switch ((risk || '').toLowerCase()) {
+      case 'critical':
+        return 'bi-exclamation-octagon-fill';
+      case 'high':
+        return 'bi-exclamation-triangle-fill';
+      case 'medium':
+        return 'bi-exclamation-circle-fill';
+      case 'low':
+        return 'bi-info-circle-fill';
+      default:
+        return 'bi-info-circle-fill';
+    }
+  }
+
+  getRiskIconColorClass(risk: string): string {
+    switch ((risk || '').toLowerCase()) {
+      case 'critical':
+        return 'category_report_status-critical';
+      case 'high':
+        return 'category_report_status-high';
+      case 'medium':
+        return 'category_report_status-medium';
+      case 'low':
+        return 'category_report_status-low';
+      default:
+        return 'category_report_status-low';
     }
   }
 

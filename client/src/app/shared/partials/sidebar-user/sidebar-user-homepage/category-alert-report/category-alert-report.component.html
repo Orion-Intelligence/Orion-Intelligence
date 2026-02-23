@@ -76,31 +76,30 @@
             <div class="category_report_alert-header">
                 <div class="category_report_alert-card-top">
                     <span class="category_report_flex" [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
-                        <div *ngIf="!item.seen" class="category_report_status-icon">
-                            <img src="/assets/images/shared/exclamation.svg" alt="report">
+                        <div class="category_report_status-icon" [ngClass]="getRiskIconColorClass(item.risk)">
+                            <i class="bi" [ngClass]="getRiskIcon(item.risk)" aria-hidden="true"></i>
                         </div>
                         {{ item.risk }} Risk
                     </span>
                 </div>
                 <div class="dropdown category_report_alert-dropdown" *ngIf="canExportstix()||licenseService.isMaintainer()">
-                    <button type="button" class="category_report_burger-icon category_report_burger-btn" [attr.id]="'dropdownMenu' + item.id" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Alert actions">
+                    <button type="button" class="category_report_burger-icon category_report_burger-btn" [attr.id]="'dropdownMenu' + item.id" aria-expanded="false" aria-label="Alert actions" (click)="toggleActionMenu(item.id, $event)">
                         <img src="/assets/images/shared/theme/burger_icon.svg" alt="menu">
                     </button>
 
-                    <ul class="dropdown-menu dropdown-menu-end category_report_alert_no-arrow" [attr.aria-labelledby]="'dropdownMenu' + item.id">
+                    <ul class="dropdown-menu dropdown-menu-end category_report_alert_no-arrow category_report_dropdown-menu-animated" [attr.aria-labelledby]="'dropdownMenu' + item.id" *ngIf="openedActionMenuId === item.id" (click)="$event.stopPropagation()">
                         <li *ngIf="item.custom&&licenseService.isMaintainer()">
-                            <a class="dropdown-item" (click)="showAlertPopup('edit', item.id)">Edit Alert</a>
+                            <button type="button" class="dropdown-item" (click)="showAlertPopup('edit', item.id); closeActionMenus()">Edit Alert</button>
                         </li>
                         <li *ngIf="item.custom &&licenseService.isMaintainer()">
                             <hr class="dropdown-divider mx-3" />
                         </li>
-                        <li *ngIf="canExportstix()"><a class="dropdown-item" (click)="exportAlert(item.hash)">Export
-                                Alert</a></li>
+                        <li *ngIf="canExportstix()"><button type="button" class="dropdown-item" (click)="exportAlert(item.hash); closeActionMenus()">Export Alert</button></li>
                         <li *ngIf="canExportstix()&&licenseService.isMaintainer()">
                             <hr class="dropdown-divider mx-3" />
                         </li>
                         <li>
-                            <a *ngIf="licenseService.isMaintainer()" class="dropdown-item" (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
+                            <button *ngIf="licenseService.isMaintainer()" type="button" class="dropdown-item" (click)="deleteAlertConfirmation(item.id); closeActionMenus()">Delete Alert</button>
                         </li>
                     </ul>
                 </div>
@@ -174,9 +173,10 @@
         [editAlertData]="selectedAlert"></app-add-custom-alert>
 </ng-container>
 
-<div *ngIf="filterModel" [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
-    <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel"
-        (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+<div *ngIf="filterModel && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[19]" (click)="sidebarService.closeSidebar()"></div>
+
+<div *ngIf="filterModel" class="ui-filter-sidebar-panel fixed top-0 z-[20] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
+    <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel" (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 
 <ng-container *ngIf="isFlushAllConfirmationOpen()">

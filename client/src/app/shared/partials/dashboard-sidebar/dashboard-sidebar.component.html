@@ -3,7 +3,7 @@
     <a href="">
       <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
     </a>
-    <button (click)="onToggleSidebar(false)" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
+    <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
       <img alt="Menu" height="28" src="/assets/images/sidebar/nav_menu.svg" width="24" />
     </button>
   </div>
@@ -148,7 +148,7 @@
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <div class="mt-[6px] rounded-[8px] select-none">
-        <a class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/ctigraph" target="_blank">
+        <a class="flex items-center gap-[8px] p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/ctigraph" target="_blank">
           <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
           CTI Graph
         </a>
@@ -157,7 +157,7 @@
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
       <div class="mt-[6px] rounded-[8px] select-none">
-        <a class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/social-mapper" target="_blank">
+        <a class="flex items-center gap-[8px] p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/social-mapper" target="_blank">
           <img alt="Social Mapper" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
           Social Mapper
         </a>
@@ -166,43 +166,46 @@
 
     <ng-container>
       <div class="mt-[6px] rounded-[8px] select-none">
-        <a class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
-          <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
+        <a class="flex items-center gap-[8px] p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
+          <img alt="Links" class="mr-[8px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
           Whistle Blowing
         </a>
       </div>
     </ng-container>
 
-    <div class="mt-[20px] text-[13px] font-bold text-white">Help & Support</div>
+    <div class="mt-[20px] flex items-center gap-[6px] text-[13px] font-bold text-white max-[943px]:hidden">
+      <img alt="Help & Support" class="h-[14px] w-[14px] opacity-80" ngSrc="/assets/images/sidebar/documentation.svg" width="14" height="14">
+      <span>Help &amp; Support</span>
+    </div>
     <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
 
-    <a class="select-none" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
+    <a class="select-none p-0" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
       <div class="mt-[6px] rounded-[8px] select-none">
-        <div class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="mr-[8px] opacity-60 mb-[4px]" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
+        <div class="flex items-center gap-[8px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
+          <img alt="Documentation" class="mr-[8px] mb-[1px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
         </div>
       </div>
     </a>
 
     <div class="mt-[6px] rounded-[8px] select-none">
-      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
-        <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
+      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex items-center gap-[8px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+        <img alt="Links" class="mr-[8px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
         Links
       </div>
     </div>
 
-    <a class="select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+    <a class="select-none p-0" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="mt-[6px] rounded-[8px] select-none">
-        <div class="flex items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
+        <div class="flex items-center gap-[8px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
+          <img alt="Documentation" class="mr-[8px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
         </div>
       </div>
     </a>
   </ul>
 </nav>
 
-<nav *ngIf="!this.sidebar_default" @sidebarMode class="w-full px-2 pt-0">
-  <button (click)="onToggleSidebar(true)" aria-label="Expand sidebar" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+<nav *ngIf="!this.sidebar_default" @sidebarMode class="w-full pt-0">
+  <button (click)="onToggleSidebar(true)" appTooltip="Expand sidebar" aria-label="Expand sidebar" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
     <img alt="Menu" height="20" ngSrc="/assets/images/sidebar/menu-mini.svg" width="20" />
   </button>
   <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">
@@ -359,52 +362,50 @@
     </ng-container>
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
-      <div class="mt-[6px] rounded-[8px] select-none">
-        <a class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/ctigraph" target="_blank">
+      <li class="my-[6px] rounded-[8px] select-none">
+        <a appTooltip="CTI Graph" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="/dashboard/ctigraph" target="_blank">
           <img alt="Links" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
         </a>
-      </div>
+      </li>
     </ng-container>
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
-      <div class="mt-[6px] rounded-[8px] select-none">
-        <a class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/social-mapper" target="_blank">
+      <li class="my-[6px] rounded-[8px] select-none">
+        <a appTooltip="Social Mapper" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="/dashboard/social-mapper" target="_blank">
           <img alt="Social Mapper" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
         </a>
-      </div>
+      </li>
     </ng-container>
 
     <ng-container>
-      <div class="mt-[6px] rounded-[8px] select-none">
-        <a class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
+      <li class="my-[6px] rounded-[8px] select-none">
+        <a appTooltip="Whistle Blowing" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
           <img alt="Links" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
         </a>
-      </div>
+      </li>
     </ng-container>
 
-    <div class="mt-[20px] text-[13px] font-bold text-white">Help & Support</div>
+    <div class="mt-[20px] flex items-center gap-[6px] text-[13px] font-bold text-white max-[943px]:hidden">
+      <img alt="Help & Support" class="h-[14px] w-[14px] opacity-80" ngSrc="/assets/images/sidebar/documentation.svg" width="14" height="14">
+    </div>
     <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)] w-[50px]"></div>
 
-    <a href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank" class="select-none">
-      <div class="mt-[6px] rounded-[8px] select-none">
-        <div class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
-        </div>
-      </div>
-    </a>
+    <li class="my-[6px] rounded-[8px] select-none">
+      <a appTooltip="Onion Link" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
+        <img alt="Documentation" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
+      </a>
+    </li>
 
-    <div class="mt-[6px] rounded-[8px] select-none">
-      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+    <li class="my-[6px] rounded-[8px] select-none">
+      <div (click)="onSectionSelected(category.DIRECTORY)" appTooltip="Links" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" queryParamsHandling="merge">
         <img alt="Links" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
       </div>
-    </div>
+    </li>
 
-    <a class="select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
-      <div class="mt-[6px] rounded-[8px] select-none">
-        <div class="flex items-center px-[14px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent">
-          <img alt="Documentation" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
-        </div>
-      </div>
-    </a>
+    <li class="my-[6px] rounded-[8px] select-none">
+      <a appTooltip="Documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+        <img alt="Documentation" class="opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
+      </a>
+    </li>
   </ul>
 </nav>

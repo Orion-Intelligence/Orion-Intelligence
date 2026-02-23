@@ -2,12 +2,9 @@
     font-family: 'Inter', sans-serif;
     color: white;
     padding: 24px 28px 28px;
-    border: 1px solid var(--color-border);
-    border-radius: 14px;
-    background:
-        radial-gradient(circle at 0 0, rgb(255 255 255 / 4%) 0, transparent 34%),
-        linear-gradient(180deg, rgb(255 255 255 / 2%) 0%, transparent 22%),
-        var(--color-blue-820-light);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
 }
 
 .category_report_searchbar {
@@ -53,15 +50,14 @@
     justify-content: center;
     width: 30px;
     height: 30px;
-    border: 0;
+    border: 1px solid transparent;
     border-radius: 6px;
     background: transparent;
     cursor: pointer;
-    transition: background-color 150ms ease;
 }
 
 .category_report_flex .report-menu-option:hover {
-    background: #fcfcfc1a;
+    border-color: #ffffff2d;
 }
 
 .category_report_flex .report-menu-divider {
@@ -171,6 +167,17 @@
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
 }
 
+.category_report_summary-card .user-homepage_alerts-card-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.category_report_summary-card .user-homepage_alerts-card-icon {
+    margin-left: auto;
+}
+
 .category_report_summary-card-heading {
     color: var(--color-text6);
     font-size: 11px;
@@ -215,13 +222,11 @@
     padding: 14px;
     box-sizing: border-box;
     min-width: 300px;
-    box-shadow: 0 10px 30px rgb(0 0 0 / 16%);
-    transition: border-color 150ms ease, transform 150ms ease;
+    box-shadow: 0 6px 18px rgb(0 0 0 / 14%);
 }
 
 .category_report_alert-card:hover {
-    border-color: rgb(255 255 255 / 22%);
-    transform: translateY(-1px);
+    border-color: rgb(255 255 255 / 30%);
 }
 
 .category_report_alert-header {
@@ -245,18 +250,16 @@
 }
 
 .category_report_burger-btn {
-    width: 30px;
-    height: 30px;
-    border: 1px solid var(--color-border);
-    border-radius: 7px;
-    background: #fcfcfc0d;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
     padding: 0;
-    transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .category_report_burger-btn:hover {
-    background: #fcfcfc1a;
-    border-color: #ffffff28;
+    background: rgb(255 255 255 / 10%);
 }
 
 .category_report_burger-btn:focus-visible {
@@ -265,8 +268,33 @@
 }
 
 .category_report_alert-dropdown .dropdown-menu {
-    margin-top: 8px !important;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+    margin-top: 2px !important;
     z-index: 1100;
+    display: block;
+}
+
+.category_report_alert-dropdown {
+    position: relative;
+}
+
+.category_report_dropdown-menu-animated {
+    transform-origin: top right;
+    animation: categoryReportDropdownIn 170ms ease-out;
+}
+
+@keyframes categoryReportDropdownIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px) scale(.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .category_report_alert-card .dropdown-menu {
@@ -280,6 +308,9 @@
 .category_report_alert-card .dropdown-item {
     display: block;
     width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
     border-radius: 6px;
     padding: 7px 10px;
     font-size: 12px;
@@ -345,22 +376,61 @@
     letter-spacing: .02em;
 }
 
+.category_report_alert-label-critical,
+.category_report_alert-label-high,
+.category_report_alert-label-medium,
+.category_report_alert-label-low {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+}
+
 
 .category_report_alert-card-top {
     display: flex;
     justify-content: flex-start;
+    align-items: center;
+    min-height: 22px;
     font-weight: 600;
     font-size: 12px;
 }
 
-.category_report_status-icon img {
-    width: 16px;
-    height: 16px;
+.category_report_status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+}
+
+.category_report_status-icon i {
+    font-size: 12px;
+    line-height: 1;
+    color: #60a5fa;
+    opacity: .95;
+}
+
+.category_report_status-critical i {
+    color: #ef4444;
+}
+
+.category_report_status-high i {
+    color: #f97316;
+}
+
+.category_report_status-medium i {
+    color: #f59e0b;
+}
+
+.category_report_status-low i {
+    color: #60a5fa;
 }
 
 .category_report_burger-icon img {
-    width: 25px;
-    height: 25px;
+    width: 14px;
+    height: 14px;
 }
 
 .category_report_alert-title {
@@ -417,6 +487,10 @@
     font-size: 12px;
     font-weight: 600;
     margin-top: 2px;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 
@@ -486,13 +560,10 @@
     background: rgb(87 165 235 / 10%);
     cursor: pointer;
     margin-top: 4px;
-    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
 
 .category_report_alert-btn:hover {
-    background: rgb(87 165 235 / 20%);
-    border-color: #57a5eb8a;
-    color: #cbe5ff;
+    border-color: #7ec1ff;
 }
 
 .dropdown-menu.category_report_alert_no-arrow::before {
@@ -531,6 +602,7 @@
     .category_report_alerts {
         grid-template-columns: 1fr;
     }
+
 }
 
 @media (max-width: 640px) {
@@ -539,15 +611,43 @@
         border-radius: 12px;
     }
 
+    .category_report_searchbar {
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
     .category_report_searchbar-input {
         max-width: 100%;
+        width: 100%;
+    }
+
+    .category_report_flex {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .category_report_flex .report-menu-option-container {
+        width: 100%;
+        justify-content: center;
     }
 
     .category_report_summary-row {
         grid-template-columns: 1fr;
     }
 
+    .category_report_alert-row > * {
+        flex: 1 1 calc(50% - 6px);
+        max-width: calc(50% - 6px);
+    }
+
     .category_report_alert-footer-buttons {
         justify-content: flex-start;
+    }
+}
+
+@media (max-width: 420px) {
+    .category_report_alert-row > * {
+        flex: 1 1 100%;
+        max-width: 100%;
     }
 }
