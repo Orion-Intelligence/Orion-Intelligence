@@ -10,7 +10,8 @@ import { MessageNotificationService } from '../../../../../services/message_noti
 @Component({
   selector: 'app-add-custom-alert',
   imports: [CommonModule, FormsModule],
-  templateUrl: './add-custom-alert.component.html'
+  templateUrl: './add-custom-alert.component.html',
+  styleUrls: ['./add-custom-alert.component.css']
 })
 export class AddCustomAlertComponent implements OnInit {
   protected readonly decodeURIComponent = decodeURIComponent;

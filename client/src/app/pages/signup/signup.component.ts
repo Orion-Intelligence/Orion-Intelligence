@@ -72,7 +72,10 @@ export class SignupComponent implements OnInit {
       return;
     }
     this.auth_service.signup(this.user.username, this.user.mail, this.user.password).subscribe({
-      next: () => this.router.navigate(['/welcome']),
+      next: () => {
+        sessionStorage.setItem('allow_welcome_once', '1');
+        this.router.navigate(['/welcome']).then();
+      },
       error: (err) => {
         this.errorMessage = err?.error?.detail || 'Signup failed';
       }

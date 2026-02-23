@@ -1,14 +1,14 @@
 <div class="add-tenant_wrapper" @overlayAnimation (click)="onClose()">
-    <div class="add-tenant_container" @popupAnimation (click)="$event.stopPropagation()">
-        <div class="add-tenant_header">
-            <div class="add-tenant_heading">Add User</div>
-            <button class="add-tenant_close-btn" (click)="onClose()">×</button>
+    <div class="add-tenant_container ui-popup-shell" @popupAnimation (click)="$event.stopPropagation()">
+        <div class="add-tenant_header ui-popup-header">
+            <div class="add-tenant_heading ui-popup-title">Add User</div>
+            <button class="add-tenant_close-btn ui-popup-close" (click)="onClose()">×</button>
         </div>
 
         <form class="add-tenant_form">
 
-            <label class="add-tenant_label">Username</label>
-            <input type="text" class="add-tenant_input" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
+            <label class="add-tenant_label ui-popup-label">Username</label>
+            <input type="text" class="add-tenant_input ui-popup-input" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
             <div class="username-suggestion" *ngIf="usernameSuggestion">
                 <div class="suggestion-title">Username already taken, suggested usernames below</div>
                 <div class="suggestion-list">
@@ -16,16 +16,16 @@
                 </div>
             </div>
 
-            <label class="add-tenant_label">Email</label>
-            <input type="email" class="add-tenant_input" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
+            <label class="add-tenant_label ui-popup-label">Email</label>
+            <input type="email" class="add-tenant_input ui-popup-input" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
 
-            <label class="add-tenant_label">Password</label>
-            <input type="password" class="add-tenant_input" placeholder="Enter password" [(ngModel)]="model.password" name="password" />
+            <label class="add-tenant_label ui-popup-label">Password</label>
+            <input type="password" class="add-tenant_input ui-popup-input" placeholder="Enter password" [(ngModel)]="model.password" name="password" />
 
             <div class="add-tenant_two-column">
                 <div>
-                    <label class="add-tenant_label">Role</label>
-                    <select class="add-tenant_select" [(ngModel)]="model.role" name="role">
+                    <label class="add-tenant_label ui-popup-label">Role</label>
+                    <select class="add-tenant_select ui-popup-select" [(ngModel)]="model.role" name="role">
                         <ng-container *ngIf="isAdmin; else nonAdminRoles">
                             <option [ngValue]="'analyst'">Analyst</option>
                             <option [ngValue]="'member'">Member</option>
@@ -39,15 +39,15 @@
                 </div>
 
                 <div>
-                    <label class="add-tenant_label">Status</label>
-                    <select class="add-tenant_select" [(ngModel)]="model.status" name="status">
+                    <label class="add-tenant_label ui-popup-label">Status</label>
+                    <select class="add-tenant_select ui-popup-select" [(ngModel)]="model.status" name="status">
                         <option [ngValue]="'active'">Active</option>
                         <option [ngValue]="'disable'">Disable</option>
                     </select>
                 </div>
             </div>
 
-            <div class="add-tenant_label" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">Licenses</div>
+            <div class="add-tenant_label ui-popup-label" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">Licenses</div>
             <div class="license-grid" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
                 <ng-container *ngFor="let license of licenseList">
                     <div class="license-card" *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" (click)="toggleTenantLicense(model, license)">
@@ -69,9 +69,9 @@
 
         </form>
 
-        <div class="add-tenant_footer">
-            <button class="add-tenant_btn-outline" (click)="onClose()">Cancel</button>
-            <button class="add-tenant_btn-primary" (click)="onSubmit()">Add User</button>
+        <div class="add-tenant_footer ui-popup-footer">
+            <button class="add-tenant_btn-outline ui-popup-btn-secondary" (click)="onClose()">Cancel</button>
+            <button class="add-tenant_btn-primary ui-popup-btn-primary" (click)="onSubmit()">Add User</button>
         </div>
 
     </div>

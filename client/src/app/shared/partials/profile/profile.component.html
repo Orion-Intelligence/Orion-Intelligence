@@ -46,11 +46,11 @@
       <img src="assets/images/shared/settings.svg" alt="Account settings" class="h-[18px] w-[18px]" />
       <span class="text-[14px] font-medium text-[#172235]">Account settings</span>
     </li>
-    <li *ngIf="isAdmin()" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
-      <a class="flex items-center gap-[10px]" href="admin/" target="_blank">
+    <li *ngIf="isAdmin()" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="openAccountSettings();closeDropdown($event)">
+      <div class="flex items-center gap-[10px]">
         <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15" class="h-[18px] w-[18px]">
         <span class="text-[14px] font-medium text-[#172235]">Settings</span>
-      </a>
+      </div>
     </li>
     <li *ngIf="appService.userSessionData().tenant.hasOnboarding" (click)="toggleThemeByClick();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
       <div class="flex items-center gap-[10px]">

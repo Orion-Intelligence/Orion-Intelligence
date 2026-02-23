@@ -1,8 +1,8 @@
 <div *ngIf="visible" class="ui-graph-popup-overlay report-export-overlay fixed inset-0 z-[1200] flex items-center justify-center p-4" (click)="onOverlayClick($event)">
-  <div class="ui-graph-popup-panel w-full max-w-lg rounded-xl border border-slate-600 bg-slate-800 p-4 shadow-2xl">
+  <div class="ui-graph-popup-panel ui-popup-shell w-full max-w-lg rounded-xl p-4">
     <div class="mb-3 flex items-center justify-between">
-      <h3 class="text-base font-semibold text-white">{{ title }}</h3>
-      <button type="button" class="rounded-md p-1 text-slate-300 hover:bg-slate-700 hover:text-white" (click)="closed.emit()">
+      <h3 class="ui-popup-title text-base font-semibold">{{ title }}</h3>
+      <button type="button" class="ui-popup-close inline-flex items-center justify-center text-[20px]" (click)="closed.emit()">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>

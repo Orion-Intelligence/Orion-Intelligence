@@ -784,6 +784,131 @@ html:has(body.dark-theme) {
   transform-origin: center top;
 }
 
+.ui-popup-shell {
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-blue-830) !important;
+  color: var(--color-text1) !important;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ui-popup-header {
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.ui-popup-footer {
+  border-top: 1px solid var(--color-border) !important;
+}
+
+.ui-popup-title {
+  color: var(--color-text1) !important;
+}
+
+.ui-popup-subtitle {
+  color: var(--color-text4) !important;
+}
+
+.ui-popup-label {
+  color: var(--color-text2) !important;
+}
+
+.ui-popup-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  font-size: 28px;
+  line-height: 1;
+  color: #ccc;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.ui-popup-close:hover {
+  background: var(--color-blue-700) !important;
+  color: var(--color-blue-640) !important;
+}
+
+.ui-popup-input,
+.ui-popup-select,
+.ui-popup-textarea {
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-blue-700) !important;
+  color: var(--color-text1) !important;
+  box-shadow: none !important;
+}
+
+.ui-popup-input::placeholder,
+.ui-popup-textarea::placeholder {
+  color: var(--color-text4) !important;
+}
+
+.ui-popup-input:focus,
+.ui-popup-select:focus,
+.ui-popup-textarea:focus {
+  border-color: #57a5eb !important;
+  box-shadow: 0 0 0 2px rgb(87 165 235 / 22%) !important;
+  outline: none !important;
+}
+
+.ui-popup-btn-secondary {
+  min-width: 132px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #4f6479 !important;
+  background: rgba(79, 100, 121, 0.12) !important;
+  color: var(--color-text1) !important;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.ui-popup-btn-secondary:hover {
+  background: rgba(79, 100, 121, 0.2) !important;
+  border-color: #627b93 !important;
+}
+
+.ui-popup-btn-primary {
+  min-width: 132px;
+  height: 42px;
+  border-radius: 8px;
+  border: none !important;
+  background: #57a5eb !important;
+  color: #0e1626 !important;
+  transition: background-color 0.18s ease;
+}
+
+.ui-popup-btn-primary:hover {
+  background: #4b98dc !important;
+}
+
+.ui-graph-popup-panel input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']),
+.ui-graph-popup-panel textarea,
+.ui-graph-popup-panel select {
+  border: 1px solid var(--color-border);
+  background: var(--color-blue-700);
+  color: var(--color-text1);
+}
+
+.ui-graph-popup-panel input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color'])::placeholder,
+.ui-graph-popup-panel textarea::placeholder {
+  color: var(--color-text4);
+}
+
+.ui-graph-popup-panel input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):focus,
+.ui-graph-popup-panel textarea:focus,
+.ui-graph-popup-panel select:focus {
+  border-color: #57a5eb;
+  box-shadow: 0 0 0 2px rgb(87 165 235 / 22%);
+  outline: none;
+}
+
+.ui-graph-popup-panel button[aria-label='Close'],
+.ui-graph-popup-panel button[title='Close'] {
+  color: #ccc;
+}
+
+.ui-graph-popup-panel button[aria-label='Close']:hover,
+.ui-graph-popup-panel button[title='Close']:hover {
+  background: var(--color-blue-700);
+  color: var(--color-blue-640);
+}
+
 .light-theme .ui-graph-popup-overlay {
   background: rgb(23 34 53 / 20%);
   backdrop-filter: blur(3px);
@@ -794,6 +919,70 @@ html:has(body.dark-theme) {
   background: #ffffff !important;
   border-color: #cfdbeb !important;
   box-shadow: 0 16px 42px rgb(15 23 42 / 16%);
+}
+
+.light-theme .ui-popup-shell {
+  border-color: #cfdbeb !important;
+  background: #ffffff !important;
+  color: #172235 !important;
+  box-shadow: 0 16px 42px rgb(15 23 42 / 16%) !important;
+}
+
+.light-theme .ui-popup-close {
+  color: #667085 !important;
+}
+
+.light-theme .ui-popup-close:hover {
+  background: #eef5ff !important;
+  color: #1f2e47 !important;
+}
+
+.light-theme .ui-popup-input,
+.light-theme .ui-popup-select,
+.light-theme .ui-popup-textarea {
+  border-color: #c7d5e6 !important;
+  background: #edf5fd !important;
+  color: #172235 !important;
+}
+
+.light-theme .ui-popup-input::placeholder,
+.light-theme .ui-popup-textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.light-theme .ui-popup-btn-secondary {
+  border-color: #c7d5e6 !important;
+  background: #ffffff !important;
+  color: #1f2e47 !important;
+}
+
+.light-theme .ui-popup-btn-secondary:hover {
+  background: #f8fbff !important;
+  border-color: #bfd0e3 !important;
+}
+
+.light-theme .ui-graph-popup-panel input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']),
+.light-theme .ui-graph-popup-panel textarea,
+.light-theme .ui-graph-popup-panel select {
+  border-color: #c7d5e6 !important;
+  background: #edf5fd !important;
+  color: #172235 !important;
+}
+
+.light-theme .ui-graph-popup-panel input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color'])::placeholder,
+.light-theme .ui-graph-popup-panel textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.light-theme .ui-graph-popup-panel button[aria-label='Close'],
+.light-theme .ui-graph-popup-panel button[title='Close'] {
+  color: #667085 !important;
+}
+
+.light-theme .ui-graph-popup-panel button[aria-label='Close']:hover,
+.light-theme .ui-graph-popup-panel button[title='Close']:hover {
+  background: #eef5ff !important;
+  color: #1f2e47 !important;
 }
 
 
@@ -860,7 +1049,7 @@ html:has(body.dark-theme) {
 .light-theme .ui-graph-popup-panel select {
   border: 1px solid #cfdbeb !important;
   box-shadow: none !important;
-  background: #ffffff !important;
+  background: #edf5fd !important;
   color: var(--color-text1) !important;
 }
 
@@ -928,6 +1117,31 @@ html:has(body.dark-theme) {
 .light-theme .ui-graph-flyout [class*='text-red-300'],
 .light-theme .ui-graph-flyout [class*='text-red-400'] {
   color: #c24141 !important;
+}
+
+.ui-alert-cancel-btn {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #4f6479 !important;
+  background: rgba(79, 100, 121, 0.12) !important;
+  color: var(--color-text1) !important;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.ui-alert-cancel-btn:hover {
+  background: rgba(79, 100, 121, 0.2) !important;
+  border-color: #627b93 !important;
+}
+
+.light-theme .ui-alert-cancel-btn {
+  border-color: #8ea6c1 !important;
+  background: #ffffff !important;
+  color: #1f2e47 !important;
+}
+
+.light-theme .ui-alert-cancel-btn:hover {
+  border-color: #7f9ab8 !important;
+  background: #f8fbff !important;
 }
 
 .light-theme .ui-graph-legend-shell {

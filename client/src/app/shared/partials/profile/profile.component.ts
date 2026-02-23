@@ -134,7 +134,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openAccountSettings() {
-    this.router.navigate(['/dashboard/profile/account']).then();
+    this.router.navigate(['/dashboard/profile/system-settings']).then();
   }
 
   changePassword() {

@@ -126,7 +126,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
 
   resendMail() {
     this.authService.signup_verification(this.user.mail, this.user.password).subscribe({
-      next: () => this.router.navigate(['/welcome']),
+      next: () => {
+        sessionStorage.setItem('allow_welcome_once', '1');
+        this.router.navigate(['/welcome']).then();
+      },
       error: (err) => {
         const vErr = err?.error?.validation_errors?.[0];
         this.errorMessage = vErr?.message || err?.error?.detail || 'Signup failed';

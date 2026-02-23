@@ -12,7 +12,7 @@
     </div>
 
     <div *ngIf="this.licenseService.getLicenses().includes('maintainer'); else brakLine" class="flex justify-center">
-      <button type="button" class="rounded-full border px-[16px] py-[9px] text-[13px] font-extrabold transition-colors" [ngClass]="isLightTheme ? 'border-[#d3deed] bg-[#f4f8ff] text-[#1f3d63] hover:bg-[#e9f1ff]' : 'border-[rgba(148,163,184,0.22)] bg-[rgba(148,163,184,0.12)] text-[rgba(248,250,252,0.92)]'" (click)="cancelScan()">
+      <button type="button" class="ui-alert-cancel-btn rounded-full px-[16px] py-[9px] text-[13px] font-extrabold" (click)="cancelScan()">
         Cancel
       </button>
     </div>

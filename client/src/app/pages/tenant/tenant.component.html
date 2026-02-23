@@ -1,11 +1,12 @@
-<img alt="background" class="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover" src="/assets/images/shared/Bg.webp">
+<img alt="background" src="/assets/images/shared/Bg.webp" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover opacity-[0.35]">
 
 <ng-container>
   <app-header [forceDark]="true"></app-header>
 </ng-container>
 
-<div class="relative z-[1] flex h-[calc(100vh-60px)] items-center justify-center px-4">
-  <div class="mt-[-100px] flex h-[687px] w-[1000px] max-w-[95vw] flex-col justify-between rounded-[16px] border border-[#fcfcfc12] bg-[#172235] p-8 max-[1024px]:mt-0 max-[1024px]:h-auto max-[1024px]:w-[90vw] max-[1024px]:p-6">
+<div class="relative z-[1] min-h-[calc(100dvh-60px)] w-screen">
+  <div class="flex min-h-[calc(100dvh-60px)] w-full items-center justify-center bg-[#0e1626d9] px-4">
+    <div class="mt-[-100px] flex h-[687px] w-[1000px] max-w-[95vw] flex-col justify-between rounded-[16px] border border-[#fcfcfc12] bg-[#172235] p-8 max-[1024px]:mt-0 max-[1024px]:h-auto max-[1024px]:w-[90vw] max-[1024px]:p-6">
     <div class="flex items-center gap-4 overflow-x-auto">
       <div class="flex items-center gap-2">
         <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'">
@@ -174,6 +175,7 @@
           Confirm
         </button>
       </ng-container>
+    </div>
     </div>
   </div>
 </div>
