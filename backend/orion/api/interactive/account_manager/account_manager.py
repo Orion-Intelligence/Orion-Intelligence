@@ -257,8 +257,12 @@ class AccountManager:
         user_image_file = self.IMAGE_DIR / f"{str(user.id)}.png"
         user_image_path = "/api/s/static/user/" + (str(user.id) if user_image_file.is_file() else "default")
 
+        theme = (user.preferences or {}).get("theme") if isinstance(user.preferences, dict) else None
+        if theme not in ("dark-theme", "light-theme"):
+            theme = "dark-theme"
+
         node = NodeCallbackModel.model_validate(
-            {"user": {"email": user.email, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "license": [
+            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "license": [
                 license.value for license in
                 user.licenses], "image": user_image_path, }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(

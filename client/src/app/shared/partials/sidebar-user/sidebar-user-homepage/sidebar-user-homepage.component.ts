@@ -168,8 +168,8 @@ import { countFilterValues } from '../../../utils/filter-values.util';
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   private loadingDisplayTimer: ReturnType<typeof setTimeout> | null = null;
   private isManualLoadingTrigger = false;
-  hoveredHomeTool: 'print' | 'flush' | 'scan' | null = null;
 
+  hoveredHomeTool: 'print' | 'flush' | 'scan' | null = null;
   alertCategories: AlertCategorySummary[] = [];
   criticalRisks: number = 0;
   highRisks: number = 0;

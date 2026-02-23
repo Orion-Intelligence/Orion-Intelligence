@@ -37,6 +37,7 @@ export interface userMetaData {
     username: string;
     twofa_enabled: boolean;
     preferences?: {
+        theme?: 'dark-theme' | 'light-theme';
         [key: string]: any;
     };
 }

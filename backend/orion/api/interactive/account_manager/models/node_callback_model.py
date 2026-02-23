@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 from pydantic import BaseModel, Field
 
@@ -17,6 +17,7 @@ class UserDataModel(BaseModel):
     verificationDate: Optional[datetime]
     license: List[LicenseName]
     image: Optional[str] = None
+    theme: Literal["dark-theme", "light-theme"] = "dark-theme"
 
 
 class TenantDataModel(BaseModel):

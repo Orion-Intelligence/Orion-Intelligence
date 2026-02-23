@@ -115,13 +115,7 @@
                 <span class="category_report_alert-field-value">{{ sliceString(item.url,70) }}</span>
             </div>
 
-            <button
-                type="button"
-                class="category_report_alert-expand-btn"
-                [class.is-expanded]="isAlertExpanded(item.id)"
-                [attr.aria-expanded]="isAlertExpanded(item.id)"
-                (click)="toggleAlertExpanded(item.id)"
-            >
+            <button type="button" class="category_report_alert-expand-btn" [class.is-expanded]="isAlertExpanded(item.id)" [attr.aria-expanded]="isAlertExpanded(item.id)" (click)="toggleAlertExpanded(item.id)">
                 {{ isAlertExpanded(item.id) ? 'Hide Details' : 'Show Details' }}
             </button>
 

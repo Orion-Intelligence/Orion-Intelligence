@@ -61,8 +61,12 @@ export class AccountSettingsComponent implements OnInit {
     body.classList.add(this.isDarkMode ? 'dark-theme' : 'light-theme');
   }
 
+  private getCurrentTheme(): 'dark-theme' | 'light-theme' {
+    return this.isDarkMode ? 'dark-theme' : 'light-theme';
+  }
+
   toggleTheme() {
-    const theme = this.isDarkMode ? 'dark-theme' : 'light-theme';
+    const theme = this.getCurrentTheme();
     this.appStorage.setTheme(theme);
     this.appService.userSessionData.update(state => {
       if (!state) {
@@ -95,10 +99,16 @@ export class AccountSettingsComponent implements OnInit {
   updateUser() {
     const route = "update/current/user";
     this.userSessionData.user.username = this.editableUsername.trim() || this.userSessionData.user.username;
+    const theme = this.getCurrentTheme();
+    const preferences = {
+      ...(this.userSessionData.user.preferences || {}),
+      theme
+    };
+    this.userSessionData.user.preferences = preferences;
     const userMeta: userMetaData = {
       username: this.userSessionData.user.username,
       twofa_enabled: this.userSessionData.user.twofa_enabled,
-      preferences: this.userSessionData.user.preferences,
+      preferences,
     };
     this.apiService.post(route, userMeta).subscribe({
       next: () => {
