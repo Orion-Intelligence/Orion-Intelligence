@@ -39,6 +39,21 @@ html:has(body.dark-theme) {
   background: #0e1626;
 }
 
+.app-background {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+.app-background-dark {}
+
 .ui-see-more-btn {
   display: inline-flex;
   align-items: center;

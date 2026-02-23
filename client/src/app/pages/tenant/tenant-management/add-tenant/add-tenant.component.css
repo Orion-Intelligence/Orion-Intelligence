@@ -1,9 +1,32 @@
+/*
+ Popup UI Reference (reuse in other popups)
+ 1) Overlay:
+    - background: rgba(0, 0, 0, 0.55)
+    - no backdrop blur
+ 2) Container:
+    - border: 1px solid var(--color-border)
+    - background: var(--color-blue-830)
+    - shadow: 0 0 30px rgba(0, 0, 0, 0.3)
+ 3) Header/Footer separators:
+    - border-bottom/top: 1px solid var(--color-border)
+ 4) Close button:
+    - 42x42, 8px radius, base color #ccc
+    - hover bg: var(--color-blue-700)
+    - hover icon: var(--color-blue-640)
+ 5) Inputs/Selects:
+    - background: var(--color-blue-700)
+    - border: 1px solid var(--color-border)
+    - text: var(--color-text1)
+    - placeholder: var(--color-text4)
+ 6) Actions:
+    - Cancel: transparent + #A0B8D1 border
+    - Primary: #57A5EB, text #0e1626, hover #4b98dc
+*/
+
 .add-tenant_wrapper {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -30,15 +53,25 @@
     font-weight: 600;
 }
 
+.add-tenant_header {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 16px;
+}
+
 .add-tenant_close-btn {
     position: absolute;
     right: 20px;
     top: 20px;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
     font-size: 28px;
     color: #ccc;
     background: none;
     border: none;
     cursor: pointer;
+    line-height: 1;
+    transition: color 0.18s ease, background-color 0.18s ease;
 }
 
 .add-tenant_label {
@@ -54,17 +87,17 @@
 .add-tenant_input,
 .add-tenant_select {
     width: 100%;
-    background: white;
-    border: 1px solid #2C3A4A;
+    background: var(--color-blue-700);
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 12px 14px;
-    color: #172235;
+    color: var(--color-text1);
     font-size: 14px;
     outline: none;
 }
 
 .add-tenant_input::placeholder {
-    color: #57718D;
+    color: var(--color-text4);
 }
 
 .add-tenant_two-column {
@@ -77,6 +110,8 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 30px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
     gap: 15px;
 }
 
@@ -87,7 +122,7 @@
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -104,12 +139,12 @@
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: #57A5EB;
-    color: #373637;
+    color: #0e1626;
     border: none;
     transition: background-color 0.18s ease;
 }
@@ -120,7 +155,12 @@
 }
 
 .add-tenant_btn-primary:hover {
-    background: #6ab3f0;
+    background: #4b98dc;
+}
+
+.add-tenant_close-btn:hover {
+    background: var(--color-blue-700);
+    color: var(--color-blue-640);
 }
 
 .username-suggestion {
@@ -145,8 +185,4 @@
 
 .light-theme .add-tenant_container {
     box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
-}
-
-.light-theme .add-tenant_close-btn:hover {
-    color: #172235;
 }

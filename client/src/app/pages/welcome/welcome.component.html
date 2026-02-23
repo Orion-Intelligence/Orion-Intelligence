@@ -1,12 +1,12 @@
 <app-header [forceDark]="true"></app-header>
 
-<div class="relative z-[1] flex min-h-[calc(100dvh-60px)] w-screen bg-[#172235]" style="background: #172235 url('/assets/images/shared/Bg.webp') no-repeat center center; background-size: cover;">
-    <div class="flex min-h-[600px] flex-1 items-center justify-center bg-[#0e1626f6] px-4 max-[640px]:p-[10px]">
-        <div class="welcome-page__card">
-            <img src="/assets/images/shared/welcom_icon.svg" alt="Tick">
-            <div class="welcome-page__card-heading">{{ heading }}</div>
-            <div class="welcome-page__card-paragraph">{{ message }}</div>
-            <button (click)="goToLogin()">Go to login</button>
-        </div>
+<img alt="background" src="/assets/images/shared/Bg.webp" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover opacity-[0.05]">
+
+<div class="welcome-page-wrapper">
+    <div class="welcome-page__card">
+        <img src="/assets/images/shared/welcom_icon.svg" alt="Tick">
+        <div class="welcome-page__card-heading">{{ heading }}</div>
+        <div class="welcome-page__card-paragraph">{{ message }}</div>
+        <button (click)="goToLogin()">Go to login</button>
     </div>
 </div>

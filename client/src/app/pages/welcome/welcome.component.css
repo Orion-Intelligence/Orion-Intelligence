@@ -1,19 +1,19 @@
 .welcome-page-wrapper {
-    position: relative;
-    z-index: 1;
-    justify-content: center;
-    align-items: center;
     display: flex;
+    align-items: center;
+    justify-content: center;
     min-height: calc(100dvh - 60px);
+    padding: 16px;
+    position: relative;
     width: 100%;
-    background-size: cover;
+    z-index: 1;
 }
 
 .welcome-page__card {
     max-width: 1000px;
     width: 90%;
     max-height: 502px;
-    background-color: #172235;
+    background-color: rgba(23, 34, 53, 0.55);
     border: 1px solid #FCFCFC12;
     border-radius: 16px;
     padding: 60px;
@@ -66,8 +66,16 @@
 }
 
 @media (width <= 600px) {
+    .welcome-page-wrapper {
+        align-items: flex-start;
+        justify-content: center;
+        padding: 15px;
+    }
+
     .welcome-page__card {
         margin-top: 0;
+        width: 100%;
+        max-width: none;
         padding: 30px 20px;
     }
 
