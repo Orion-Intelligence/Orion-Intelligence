@@ -22,6 +22,8 @@ from orion.api.interactive.search_manager.search_data_model.social.search_social
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
+from orion.api.server.crawl_manager.class_model.shodan_dns_request_model import (shodan_dns_request)
+from orion.api.server.crawl_manager.class_model.shodan_scan_request_model import (shodan_scan_request)
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -63,7 +65,8 @@ REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("repo
 
 DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dynamic_cracked": _doc(
     "dynamic/dynamic_cracked.md"), "dynamic_software": _doc("dynamic/dynamic_software.md"), "dynamic_social": _doc(
-    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"),"ip_scan": _doc("dynamic/ip_scan.md"), }
+    "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"),"ip_scan": _doc("dynamic/ip_scan.md"),
+    "shodan_dns": _doc("dynamic/shodan_dns.md"), "shodan_scan": _doc("dynamic/shodan_scan.md")}
 
 SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
     "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
@@ -395,6 +398,7 @@ async def search_defacement(param: search_defacement_param_model = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement",bypass_licenses=["maintainer"]))], )
 async def get_defacement_document(doc_id: str):
+
     return await search_model.getInstance().request_defacement_doc(doc_id)
 
 
@@ -588,6 +592,37 @@ async def parse_text(payload: DomainScanRequest):
 )
 async def parse_ip(payload: IPScanRequest):
     return await crawl_model.getInstance().scan_ip(payload)
+
+@api_routes.post(
+    "/api/resolve_ip",
+    summary="Domain scan to find Ips",
+    description=DYNAMIC_DOCS["shodan_dns"]["description"],
+    tags=["Live Dynamic Scan"],
+    operation_id="scanDomainforIps",
+    response_description=DYNAMIC_DOCS["shodan_dns"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
+        Depends(license_required("scanning")), ], )
+async def parse_text(payload: DomainScanRequest):
+    return await crawl_model.getInstance().shodan_dns(payload)
+
+@api_routes.post(
+    "/api/shodan/scanner",
+    summary="IP scan to find details about IP",
+    description=DYNAMIC_DOCS["shodan_scan"]["description"],
+    tags=["Live Dynamic Scan"],
+    operation_id="scanIP",
+    response_description=DYNAMIC_DOCS["shodan_scan"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
+        Depends(license_required("scanning")), ], )
+async def parse_text(payload: DomainScanRequest):
+    return await crawl_model.getInstance().shodan_scanner(payload)
+
 
 @api_routes.post(
     "/api/social/scrape",
