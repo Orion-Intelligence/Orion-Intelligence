@@ -42,6 +42,7 @@ import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { FileScannerComponent } from './pages/intel-panel/ioc-extractor/file-scanner.component';
 import { SocialMapperComponent } from './pages/graphs/social-graph/social-mapper.component';
+import { NotificationGuard } from './shared/guards/notification.guard';
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -111,11 +112,13 @@ export const routes: Routes = [
   {
     path: 'welcome',
     component: WelcomeComponent,
+    canActivate: [NotificationGuard],
     data: { animation: 'WelcomePage' }
   },
   {
     path: 'welcome/:token',
     component: WelcomeComponent,
+    canActivate: [NotificationGuard],
     data: { animation: 'WelcomePage' }
   },
   {
@@ -126,6 +129,7 @@ export const routes: Routes = [
   {
     path: 'reset',
     component: ResetPasswordComponent,
+    canActivate: [NotificationGuard],
     data: { animation: 'ForgotPasswordComponent' }
   },
   {
@@ -136,6 +140,7 @@ export const routes: Routes = [
   {
     path: 'reset/:token',
     component: ResetPasswordComponent,
+    canActivate: [NotificationGuard],
     data: { animation: 'ForgotPasswordComponent' }
   },
   {
