@@ -8,6 +8,7 @@ from .general_model import GeneralDataModel
 from .leak_model import LeakDataModel
 from .log_model import LogModel, LogBatchModel
 from .nlp_data_model import nlp_data_model
+from .open_sanctions_model import open_sanctions_data_model
 from .report_chat_data_model import ReportChatRequest
 from .social_model import social_data_model
 from .social_scrape_request_model import SocialScrapeRequest
@@ -25,6 +26,7 @@ __all__ = [
     "LogModel",
     "LogBatchModel",
     "nlp_data_model",
+    "open_sanctions_data_model",
     "ReportChatRequest",
     "social_data_model",
     "SocialScrapeRequest",

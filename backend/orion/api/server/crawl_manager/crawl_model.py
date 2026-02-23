@@ -207,6 +207,21 @@ class crawl_model:
             network_type=social_index.m_network,
             is_leak_update=False)
 
+    async def invoke_sanctions_index(self, sanctions_index):
+        if isinstance(sanctions_index, list):
+            payload = sanctions_index
+        elif hasattr(sanctions_index, "model_dump"):
+            payload = sanctions_index.model_dump(by_alias=True)
+        else:
+            payload = sanctions_index
+
+        m_data = elastic_request_generator().index_query_sanctions(payload)
+        if not m_data:
+            return {"message": "no valid sanctions records to index"}
+
+        await elastic_controller.get_instance().index_data(m_data, bypass_empty_embedding=True)
+        return {"message": "sanctions indexed successfully", "indexed": len(m_data)}
+
     async def invoke_chat_index(self, chat_index: chat_data_model):
         m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)

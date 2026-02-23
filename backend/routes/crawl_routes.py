@@ -117,6 +117,36 @@ async def index_social_data(request: Request):
     body = await request.json()
     return await crawl_model.getInstance().invoke_social_index(social_data_model(**body))
 
+
+@crawl_routes.post("/api/index/sanctions", dependencies=_leak_deps)
+async def index_sanctions_data(request: Request):
+    instance = crawl_model.getInstance()
+    body = await request.json()
+
+    if isinstance(body, dict) and isinstance(body.get("m_data"), list):
+        records = [
+            open_sanctions_data_model(**item).model_dump(by_alias=True)
+            for item in body["m_data"] if isinstance(item, dict)
+        ]
+        return await instance.invoke_sanctions_index(records)
+
+    if isinstance(body, dict) and isinstance(body.get("m_chat_data"), list):
+        records = [
+            open_sanctions_data_model(**item).model_dump(by_alias=True)
+            for item in body["m_chat_data"] if isinstance(item, dict)
+        ]
+        return await instance.invoke_sanctions_index(records)
+
+    if isinstance(body, list):
+        records = [
+            open_sanctions_data_model(**item).model_dump(by_alias=True)
+            for item in body if isinstance(item, dict)
+        ]
+        return await instance.invoke_sanctions_index(records)
+
+    return await instance.invoke_sanctions_index(open_sanctions_data_model(**body))
+
+
 @crawl_routes.post(
     "/api/index/entity",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])

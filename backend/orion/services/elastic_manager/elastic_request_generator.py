@@ -824,6 +824,45 @@ class elastic_request_generator:
         return index_entries
 
     @staticmethod
+    def index_query_sanctions(p_index_data):
+        index_entries = []
+
+        if isinstance(p_index_data, list):
+            for item in p_index_data:
+                if not isinstance(item, dict):
+                    continue
+
+                data = {k: v for k, v in item.items() if v is not None}
+                schema_value = data.pop("schema_name", None)
+                if schema_value:
+                    data["schema"] = schema_value
+
+                identifier = data.get("id")
+                if not identifier:
+                    continue
+
+                data["m_hash"] = helper_controller.generate_data_hash(str(identifier))
+                index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, ELASTIC_KEYS.S_VALUE: data})
+
+            return index_entries
+
+        if not isinstance(p_index_data, dict):
+            return index_entries
+
+        data = {k: v for k, v in p_index_data.items() if v is not None}
+        schema_value = data.pop("schema_name", None)
+        if schema_value:
+            data["schema"] = schema_value
+
+        identifier = data.get("id")
+        if not identifier:
+            return index_entries
+
+        data["m_hash"] = helper_controller.generate_data_hash(str(identifier))
+        index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, ELASTIC_KEYS.S_VALUE: data})
+        return index_entries
+
+    @staticmethod
     def index_query_stealerlog(p_index_data):
         bulk_entries = []
         bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
