@@ -36,6 +36,7 @@ export class HomeSearchComponent implements OnInit {
   public insightDragY: number | null = null;
 
   @Input() isRoleAdmin: boolean = true;
+  @Input() hideToolsSection: boolean = false;
 
   constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
 

@@ -1,40 +1,44 @@
 <div *ngIf="!isAdmin() && !appService.userSessionData().tenant.isDefault; else showAdmin">
     <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst() && !isDemo();else showFree">
         <div class="relative min-h-[500px] w-full px-[30px] py-[20px] font-[Inter,sans-serif] text-[var(--color-text1)] max-[1000px]:px-[10px]">
-            <div *ngIf="alertService.isAlertScanLoading()">
+            <div *ngIf="showAlertScanLoading()">
                 <app-alert-scan-loading></app-alert-scan-loading>
             </div>
             <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')" class="mb-[15px]">
-                <app-home-search [isRoleAdmin]="false"></app-home-search>
+                <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true"></app-home-search>
 
                 <div class="mt-[12px] flex justify-end">
-                    <div class="inline-flex items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[8px] py-[6px]">
-                        <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true" appTooltip="Print Alerts" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[#fcfcfc0d] p-0 hover:bg-[#fcfcfc1a]">
+                    <div class="inline-flex items-center gap-2 rounded-[8px] border border-[#ffffff15] bg-[var(--color-blue-800)] px-[8px] py-[6px]">
+                        <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true" appTooltip="Print Alerts" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]">
                             <img src="assets/images/shared/theme/print.svg" height="25" alt="print" />
                         </button>
-                        <div *ngIf="licenseService.isMaintainer()" class="h-[20px] w-px bg-[var(--color-divider)]"></div>
-                        <button (click)="flushAll()" appTooltip="flush all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[#fcfcfc0d] p-0 hover:bg-[#fcfcfc1a]" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()">
-                            <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" />
-                        </button>
-                        <div *ngIf="licenseService.isMaintainer()" class="h-[20px] w-px bg-[var(--color-divider)]"></div>
-                        <button *ngIf="licenseService.isMaintainer()" (click)="scanIOCs()" appTooltip="scan all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[#fcfcfc0d] p-0 hover:bg-[#fcfcfc1a]">
-                            <img alt="scan" height="20" ngSrc="assets/images/sidebar/theme/scanner.svg" width="20" />
-                        </button>
+                        <div *ngIf="licenseService.isMaintainer()" class="h-[20px] w-px bg-[#ffffff20]"></div>
+                        <div class="inline-flex items-center gap-2">
+                            <button (click)="flushAll()" appTooltip="flush all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()">
+                                <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" />
+                            </button>
+                            <button *ngIf="licenseService.isMaintainer()" (click)="scanIOCs()" appTooltip="scan all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]">
+                                <img alt="scan" height="20" ngSrc="assets/images/sidebar/theme/scanner.svg" width="20" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div>
 
-                <div *ngIf="licenseService.isMaintainer() " class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[20px] py-[12px]">
+                <div *ngIf="licenseService.isMaintainer() " class="flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[16px] py-[10px] max-[620px]:flex-wrap">
 
-                    <div class="text-[16px] font-medium text-[var(--color-text1)]">IOC’s</div>
+                    <div>
+                        <div class="text-[16px] font-semibold text-[var(--color-text1)]">IOC’s</div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Monitored entities and filters</div>
+                    </div>
 
-                    <div class="flex gap-[10px]">
-                        <button class="rounded-[5px] border border-[var(--color-border)] bg-[#fcfcfc0d] px-[10px] py-[6px] text-[12px] font-normal text-[#57a5eb]">
+                    <div class="flex items-center gap-[8px]">
+                        <button class="inline-flex h-[30px] items-center rounded-[7px] border border-[#57a5eb4a] bg-[#57a5eb1a] px-[10px] text-[12px] font-medium text-[#8bc6f7]">
                             Entity ({{ entityFiltersCount() }})
                         </button>
 
-                        <button class="inline-flex items-center gap-[5px] rounded-full border border-[var(--color-border)] bg-[#fcfcfc0d] px-[12px] py-[6px] text-[14px] font-medium text-[#a0b8d1] hover:bg-[#fcfcfc1a]" (click)="editIocs()">
+                        <button class="inline-flex h-[30px] items-center gap-[6px] rounded-[7px] border border-[var(--color-border)] bg-[#fcfcfc12] px-[11px] text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[#fcfcfc1f]" (click)="editIocs()">
                             <img alt="edit-icon" src="assets/images/shared/theme/edit.svg" class="h-[12px] w-[12px]">
                             Edit
                         </button>

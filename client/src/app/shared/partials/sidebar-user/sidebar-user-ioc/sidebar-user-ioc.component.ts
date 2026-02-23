@@ -6,7 +6,6 @@ import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../constants/shared-enums';
 import { AppService } from '../../../../services/core/app/app.service';
-import { Router } from '@angular/router';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
 
@@ -25,7 +24,7 @@ export class SidebarUserIocComponent implements OnInit {
   isConfirmationOpen: boolean = false;
   @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
 
-  constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
+  constructor(protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
 
   ngOnInit(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
@@ -105,10 +104,6 @@ export class SidebarUserIocComponent implements OnInit {
       error: (_err) => {
       },
     });
-  }
-
-  goBack() {
-    this.router.navigate(['/dashboard']).then();
   }
 
   setIocLocal() {

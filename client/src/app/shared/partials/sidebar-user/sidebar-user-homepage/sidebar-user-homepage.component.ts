@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
+import { Component, effect, OnDestroy, OnInit, signal } from '@angular/core';
 import { NgFor, CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -26,9 +26,17 @@ import { countFilterValues } from '../../../utils/filter-values.util';
   selector: 'app-sidebar-user-homepage',
   imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
   templateUrl: './sidebar-user-homepage.component.html',
+  styles: [`
+    :host ::ng-deep app-home-search.homepage-search-no-margin form {
+      margin-left: 0 !important;
+    }
+  `],
   animations: [overlayAnimation],
 })
-export class SidebarUserHomepageComponent implements OnInit {
+export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
+  private loadingDisplayTimer: ReturnType<typeof setTimeout> | null = null;
+  private isManualLoadingTrigger = false;
+
   alertCategories: AlertCategorySummary[] = [];
   criticalRisks: number = 0;
   highRisks: number = 0;
@@ -36,12 +44,33 @@ export class SidebarUserHomepageComponent implements OnInit {
   lowRisks: number = 0;
   isConfirmationOpen = signal(false);
   noIocPopup = signal(false);
+  showAlertScanLoading = signal(false);
 
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
     effect(() => {
       if (!this.alertService.isAlertScanLoading()) {
         this.initializeData();
       }
+    });
+    effect(() => {
+      const isLoading = this.alertService.isAlertScanLoading();
+      if (!isLoading) {
+        this.clearLoadingDisplayTimer();
+        this.showAlertScanLoading.set(false);
+        this.isManualLoadingTrigger = false;
+        return;
+      }
+      if (this.isManualLoadingTrigger) {
+        this.clearLoadingDisplayTimer();
+        this.showAlertScanLoading.set(true);
+        return;
+      }
+      this.clearLoadingDisplayTimer();
+      this.loadingDisplayTimer = setTimeout(() => {
+        if (this.alertService.isAlertScanLoading() && !this.isManualLoadingTrigger) {
+          this.showAlertScanLoading.set(true);
+        }
+      }, 5000);
     });
   }
 
@@ -214,6 +243,7 @@ export class SidebarUserHomepageComponent implements OnInit {
       this.noIocPopup.set(true);
       return;
     }
+    this.startManualLoadingDisplay();
     this.alertService.scanIOCs();
   }
 
@@ -228,6 +258,7 @@ export class SidebarUserHomepageComponent implements OnInit {
   flushAllConfirmation(value: boolean) {
     this.isConfirmationOpen.set(false);
     if (value) {
+      this.startManualLoadingDisplay();
       this.alertService.isAlertScanLoading.set(true);
       this.apiService.post('profile/alerts/delete/all', null).subscribe({
         next: () => {
@@ -240,6 +271,23 @@ export class SidebarUserHomepageComponent implements OnInit {
           this.messageNotificationService.show(err?.error?.detail || 'Failed to delete');
         },
       });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.clearLoadingDisplayTimer();
+  }
+
+  private startManualLoadingDisplay(): void {
+    this.isManualLoadingTrigger = true;
+    this.clearLoadingDisplayTimer();
+    this.showAlertScanLoading.set(true);
+  }
+
+  private clearLoadingDisplayTimer(): void {
+    if (this.loadingDisplayTimer) {
+      clearTimeout(this.loadingDisplayTimer);
+      this.loadingDisplayTimer = null;
     }
   }
 }

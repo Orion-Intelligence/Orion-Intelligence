@@ -1,9 +1,9 @@
 <div *ngIf="this.username()" class="relative flex items-center gap-[2px]">
   <ng-container *ngIf="licenseService.isMaintainer()">
     <a *ngIf="isMember()" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
-      <div *ngIf="!this.appService.userSessionData().tenant.hasOnboarding" class="relative">
-        <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24" class="ui-topbar-icon">
-        <span class="absolute top-[18px] right-[18px] flex h-[13px] w-[13px] items-center justify-center rounded-full text-[6px] font-semibold text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
+      <div *ngIf="!this.appService.userSessionData().tenant.hasOnboarding" class="relative p-0">
+        <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24" class="h-6 w-6">
+        <span class="absolute right-[-4px] top-[-3px] mt-[2px] flex h-[13px] w-[13px] items-center justify-center rounded-full text-[6px] font-semibold text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
           {{ getUnseenAlertCount() }}
         </span>
       </div>

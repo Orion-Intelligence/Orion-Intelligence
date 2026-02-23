@@ -1,81 +1,78 @@
-<div class="w-full p-3 md:p-4">
-  <div class="ui-page-container w-full max-w-[2400px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-    <div class="ui-section-title">Manage IOCs</div>
-    <div class="ui-section-description">Add, remove, and organize IOC values used by your tenant searches.</div>
-
-    <div class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <label class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">IOC Categories</label>
-        <div class="flex items-center gap-2">
-          <input type="text" class="h-10 w-full max-w-[240px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 text-xs text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
-          <button appTooltip="clear all" class="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
-            <img alt="scan" src="assets/images/shared/theme/bin.svg" class="h-4 w-4" />
-          </button>
-        </div>
+<div class="relative m-[30px] overflow-hidden rounded-[16px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[20px] pb-[20px] pt-[12px] text-white max-[1024px]:m-[15px]">
+  <div class="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]"></div>
+  <div class="relative z-[1]">
+  <div class="flex items-center justify-between gap-2 max-[760px]:flex-wrap">
+    <h2 class="ui-section-title !mb-0">Manage IOCs</h2>
+    <div class="flex items-center gap-2 max-[760px]:w-full max-[760px]:justify-between">
+      <div class="relative max-[760px]:flex-1">
+        <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" class="pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300" />
+        <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
       </div>
+      <button appTooltip="clear all" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
+        <img alt="scan" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
+      </button>
+    </div>
+  </div>
+  <p class="ui-section-description mt-0">Manage and organize IOC values used by your tenant searches.</p>
 
-      <div class="relative mt-4">
-        <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-10 bg-gradient-to-r from-[var(--color-blue-700)] to-transparent" *ngIf="showLeftFade"></div>
+  <div class="relative mt-[21px] flex h-10 items-center gap-[15px] overflow-hidden">
+    <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-r from-[var(--color-blue-820-light)] to-transparent" *ngIf="showLeftFade"></div>
 
-        <button class="absolute left-0 top-1/2 z-[2] inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]" (click)="scrollLeft()">
-          <img src="assets/images/shared/onboarding_leftButton.svg" alt="filter icon" class="h-4 w-4" />
-        </button>
+    <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollLeft()" [disabled]="filteredIocs.length === 0">
+      <img src="assets/images/shared/onboarding_leftButton.svg" alt="filter icon" class="h-4 w-4" />
+    </button>
 
-        <div class="mx-10 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" #categoryScroll>
-          <div class="flex gap-2">
-            <ng-container *ngIf="filteredIocs.length > 0; else noEntity">
-              <div *ngFor="let category of filteredIocs" class="cursor-pointer rounded-full px-4 py-1.5 text-xs font-semibold transition-colors" [ngClass]="category.ioc_id === selectedCategoryId ? 'bg-[var(--color-blue-640)] text-white' : 'bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
-                {{ category.name }}
-              </div>
-            </ng-container>
-            <ng-template #noEntity>
-              <div class="text-xs text-[var(--color-text4)]">No entity filters available.</div>
-            </ng-template>
+    <div class="flex h-full flex-1 items-center gap-[8px] overflow-x-auto px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" #categoryScroll>
+      <ng-container *ngIf="filteredIocs.length > 0; else noEntity">
+        <div *ngFor="let category of filteredIocs" class="cursor-pointer whitespace-nowrap rounded-full border px-4 py-1.5 font-[Inter] text-xs font-semibold transition-colors" [ngClass]="category.ioc_id === selectedCategoryId ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+          {{ category.name }}
+        </div>
+      </ng-container>
+      <ng-template #noEntity>
+        <div class="flex h-full w-full min-w-full items-center justify-start rounded-[8px] bg-[var(--color-blue-810)]/35 px-3 text-left font-[Inter] text-[12px] text-[var(--color-text4)]">
+          No entity filters available.
+        </div>
+      </ng-template>
+    </div>
+
+    <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollRight()" [disabled]="filteredIocs.length === 0">
+      <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" class="h-4 w-4" />
+    </button>
+
+    <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-l from-[var(--color-blue-820-light)] to-transparent" *ngIf="showRightFade"></div>
+  </div>
+
+  <div class="mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]"></div>
+
+  <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">Enter IOCs</label>
+  <div class="relative w-full">
+    <input type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+    <button type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
+  </div>
+
+  <div class="my-[16px] h-[2px] w-full bg-[var(--color-border)]"></div>
+
+  <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
+  <div class="max-h-[500px] min-h-[20px] space-y-3 overflow-y-auto">
+    <div *ngIf="hasIocsWithValues(); else _noEntity">
+      <div *ngFor="let ioc of onboardingData?.iocs">
+        <ng-container *ngIf="ioc.values.length > 0">
+          <p class="my-[12px] mb-[8px] font-[Inter] text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
+          <div class="flex flex-wrap gap-[8px]">
+            <div class="flex cursor-pointer items-center gap-[8px] rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-[4px] font-[Inter] text-[12px] font-normal text-[var(--color-text1)] transition hover:bg-[#FCFCFC20]" appTooltip="remove IOC" *ngFor="let value of ioc.values" (click)="removeIoc(ioc.ioc_id, value)">
+              <span>{{ value }}</span>
+              <span>✕</span>
+            </div>
           </div>
-        </div>
-
-        <button class="absolute right-0 top-1/2 z-[2] inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]" (click)="scrollRight()">
-          <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" class="h-4 w-4" />
-        </button>
-
-        <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-10 bg-gradient-to-l from-[var(--color-blue-700)] to-transparent" *ngIf="showRightFade"></div>
-      </div>
-
-      <div class="mt-4 h-px w-full bg-[var(--color-divider)]"></div>
-
-      <label class="mt-4 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Enter IOCs</label>
-      <div class="mt-2 flex items-center gap-2">
-        <input type="text" class="h-10 flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] px-3 text-xs text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-        <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-xs font-semibold text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
-      </div>
-
-      <div class="mt-4 h-px w-full bg-[var(--color-divider)]"></div>
-
-      <p class="mt-4 text-sm font-semibold text-[var(--color-text1)]">Added IOCs</p>
-      <div class="mt-3 max-h-[260px] space-y-3 overflow-y-auto">
-        <div *ngIf="hasIocsWithValues(); else _noEntity">
-          <div *ngFor="let ioc of onboardingData?.iocs">
-            <ng-container *ngIf="ioc.values.length > 0">
-              <p class="text-xs font-semibold text-[var(--color-text4)]">{{ ioc.name }}</p>
-              <div class="mt-2 flex flex-wrap gap-2">
-                <div class="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)]" appTooltip="remove IOC" *ngFor="let value of ioc.values" (click)="removeIoc(ioc.ioc_id, value)">
-                  <span>{{ value }}</span>
-                  <span class="text-[10px]">✕</span>
-                </div>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-
-        <ng-template #_noEntity>
-          <div class="text-xs text-[var(--color-text4)]">No IOCs added yet</div>
-        </ng-template>
+        </ng-container>
       </div>
     </div>
 
-    <div class="mt-4 flex justify-end">
-      <button class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] px-4 text-xs font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-700)]" (click)="goBack()">Back</button>
-    </div>
+    <ng-template #_noEntity>
+      <div class="mt-0 font-[Inter] text-[14px] text-[var(--color-text1)]">No IOCs added yet</div>
+    </ng-template>
+  </div>
+
   </div>
 </div>
 <ng-container *ngIf="isConfirmationOpen">
