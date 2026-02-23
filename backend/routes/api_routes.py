@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
-from configs.app_dependency import license_required, role_required, status_required
+from configs.app_dependency import license_required, role_required, status_required, get_current_user
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (directory_param_model, )
@@ -30,10 +30,10 @@ STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_requ
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
 
 
-async def _scan_domain_with_type(payload: DomainScanRequest, scan_type: Optional[str] = None):
+async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_type: Optional[str] = None):
     if scan_type:
         payload.scanType = scan_type
-    return await crawl_model.getInstance().scan_domain(payload)
+    return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
 
 
 @api_routes.post(
@@ -354,8 +354,8 @@ async def get_screenshot(filename: str):
     response_description=DYNAMIC_DOCS["dynamic_user_email"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
-    return await search_model.getInstance().dynamic_search(param, "user")
+async def search_dynamic_email(param: search_dynamic_param_model = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().dynamic_search(param, "user", user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -367,8 +367,8 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     response_description=DYNAMIC_DOCS["dynamic_cracked"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...)):
-    return await search_model.getInstance().dynamic_search(param, "cracked")
+async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().dynamic_search(param, "cracked", user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -380,8 +380,8 @@ async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...)):
     response_description=DYNAMIC_DOCS["dynamic_software"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_software(param: search_dynamic_crack_model = Body(...)):
-    return await search_model.getInstance().dynamic_search(param, "software")
+async def search_dynamic_software(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().dynamic_search(param, "software", user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -393,8 +393,8 @@ async def search_dynamic_software(param: search_dynamic_crack_model = Body(...))
     response_description=DYNAMIC_DOCS["domain_scan"]["response_description"],
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
-async def parse_domain_scan(payload: DomainScanRequest):
-    return await _scan_domain_with_type(payload)
+async def parse_domain_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    return await _scan_domain_with_type(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -406,8 +406,8 @@ async def parse_domain_scan(payload: DomainScanRequest):
     response_description=SUPPORT_METHOD_DOCS["subdomain_scan"]["response_description"],
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
-async def parse_subdomain_scan(payload: DomainScanRequest):
-    return await _scan_domain_with_type(payload, 'subdomains')
+async def parse_subdomain_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    return await _scan_domain_with_type(payload, user_id=str(current_user.id), scan_type='subdomains')
 
 
 @api_routes.post(
@@ -419,8 +419,8 @@ async def parse_subdomain_scan(payload: DomainScanRequest):
     response_description=SUPPORT_METHOD_DOCS["dns_scan"]["response_description"],
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
-async def parse_dns_scan(payload: DomainScanRequest):
-    return await _scan_domain_with_type(payload, 'dns')
+async def parse_dns_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    return await _scan_domain_with_type(payload, user_id=str(current_user.id), scan_type='dns')
 
 
 @api_routes.post(
@@ -432,8 +432,8 @@ async def parse_dns_scan(payload: DomainScanRequest):
     response_description=SUPPORT_METHOD_DOCS["wayback_scan"]["response_description"],
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
-async def parse_wayback_scan(payload: DomainScanRequest):
-    return await _scan_domain_with_type(payload, 'wayback')
+async def parse_wayback_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    return await _scan_domain_with_type(payload, user_id=str(current_user.id), scan_type='wayback')
 
 
 @api_routes.post(
@@ -441,16 +441,16 @@ async def parse_wayback_scan(payload: DomainScanRequest):
     include_in_schema=False,
     dependencies=SCAN_WITH_LIMITER_DEPS,
 )
-async def parse_ip(payload: IPScanRequest):
-    return await crawl_model.getInstance().scan_ip(payload)
+async def parse_ip(payload: IPScanRequest, current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().scan_ip(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
     "/api/social/scrape",
     include_in_schema=False,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
-async def scrape_social(payload: SocialScrapeRequest):
-    return await crawl_model.getInstance().scrape_social(payload)
+async def scrape_social(payload: SocialScrapeRequest, current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().scrape_social(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -464,8 +464,8 @@ async def scrape_social(payload: SocialScrapeRequest):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_social(param: search_dynamic_social_model = Body(...)):
-    return await search_model.getInstance().dynamic_search(param, "social")
+async def search_dynamic_social(param: search_dynamic_social_model = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().dynamic_search(param, "social", user_id=str(current_user.id))
 
 
 @api_routes.get(
@@ -602,9 +602,9 @@ async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST, Depends(license_required("scanning"))])),
     ],
 )
-async def extract_ioc(file: UploadFile = File(...)):
+async def extract_ioc(file: UploadFile = File(...), current_user=Depends(get_current_user)):
     file_content = await file.read()
-    result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename)
+    result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename, user_id=str(current_user.id))
     return result
 
 
@@ -619,9 +619,9 @@ async def extract_ioc(file: UploadFile = File(...)):
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning"))],
 )
-async def scan_apk(file: UploadFile = File(...)):
+async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_current_user)):
     file_content = await file.read()
-    result = await search_model.getInstance().scan_apk(file_content, file.filename)
+    result = await search_model.getInstance().scan_apk(file_content, file.filename, user_id=str(current_user.id))
 
     return result
 
@@ -639,6 +639,6 @@ async def scan_apk(file: UploadFile = File(...)):
         Depends(license_required("scanning"))
     ],
 )
-async def crypto_scan(param: search_dynamic_crypto_model = Body(...)):
-    return await search_model.getInstance().dynamic_search(param, "crypto")
+async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
 

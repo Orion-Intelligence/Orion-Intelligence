@@ -103,11 +103,11 @@ class crawl_model:
             return {"error": str(ex)}
 
     @staticmethod
-    async def scan_domain(model):
+    async def scan_domain(model, user_id: str = "system"):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-micros-api:8010/urlscan/domain", json=model.model_dump(), timeout=120)
+                    f"http://trusted-micros-api:8010/urlscan/domain/{user_id}", json=model.model_dump(), timeout=120)
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
@@ -118,11 +118,11 @@ class crawl_model:
                 status_code=500, content={"detail": "Something happened while calling urlscan/domain"})
 
     @staticmethod
-    async def scan_ip(model):
+    async def scan_ip(model, user_id: str = "system"):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-micros-api:8010/urlscan/ip",
+                    f"http://trusted-micros-api:8010/urlscan/ip/{user_id}",
                     json=model.model_dump(),
                     timeout=120
                 )
@@ -142,11 +142,11 @@ class crawl_model:
             )
 
     @staticmethod
-    async def scrape_social(model):
+    async def scrape_social(model, user_id: str = "system"):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-micros-api:8010/social/scrape", json=model.model_dump(), timeout=120)
+                    f"http://trusted-micros-api:8010/social/scrape/{user_id}", json=model.model_dump(), timeout=120)
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
@@ -157,11 +157,11 @@ class crawl_model:
                 status_code=500, content={"detail": "Something happened while calling social/scrape"})
 
     @staticmethod
-    async def ioc_extract(model):
+    async def ioc_extract(model, user_id: str = "system"):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-micros-api:8010/ioc/extract", json=model.model_dump(), timeout=120)
+                    f"http://trusted-micros-api:8010/ioc/extract/{user_id}", json=model.model_dump(), timeout=120)
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,

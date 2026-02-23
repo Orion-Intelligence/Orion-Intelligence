@@ -43,11 +43,11 @@ class search_model:
             search_model.__instance = self
 
     @staticmethod
-    async def dynamic_search(model, api):
+    async def dynamic_search(model, api, user_id: str = "system"):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-micros-api:8010/runtime/parse/" + api, json=model.model_dump(), timeout=120)
+                    f"http://trusted-micros-api:8010/runtime/parse/{api}/{user_id}", json=model.model_dump(), timeout=120)
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
@@ -267,7 +267,7 @@ class search_model:
 
         return response
 
-    async def extract_ioc_from_file(self, file_content: bytes, filename: str):
+    async def extract_ioc_from_file(self, file_content: bytes, filename: str, user_id: str = "system"):
 
         async with httpx.AsyncClient(timeout=120) as client:
             files = {
@@ -275,7 +275,7 @@ class search_model:
             }
 
             response = await client.post(
-                "http://trusted-micros-api:8010/ioc/extract",
+                f"http://trusted-micros-api:8010/ioc/extract/{user_id}",
                 files=files
             )
 
@@ -287,7 +287,7 @@ class search_model:
 
         return response.json()
 
-    async def scan_apk(self, file_content: bytes, filename: str):
+    async def scan_apk(self, file_content: bytes, filename: str, user_id: str = "system"):
 
         async with httpx.AsyncClient(timeout=120) as client:
             files = {
@@ -295,7 +295,7 @@ class search_model:
             }
 
             response = await client.post(
-                "http://trusted-micros-api:8010/apk/scan",
+                f"http://trusted-micros-api:8010/apk/scan/{user_id}",
                 files=files
             )
 
