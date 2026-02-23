@@ -140,14 +140,26 @@ export class ManageProfileComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: string): string {
-    return status === 'active'
-      ? 'bg-emerald-500/10 text-emerald-300'
+    const isLightTheme = document.body.classList.contains('light-theme');
+    if (status === 'active') {
+      return isLightTheme
+        ? 'bg-emerald-100 text-emerald-800'
+        : 'bg-emerald-500/10 text-emerald-300';
+    }
+    return isLightTheme
+      ? 'bg-rose-100 text-rose-800'
       : 'bg-rose-500/10 text-rose-300';
   }
 
   getSubscriptionBadgeClass(subscription?: boolean): string {
-    return subscription
-      ? 'bg-sky-500/10 text-sky-300'
+    const isLightTheme = document.body.classList.contains('light-theme');
+    if (subscription) {
+      return isLightTheme
+        ? 'bg-sky-100 text-sky-800'
+        : 'bg-sky-500/10 text-sky-300';
+    }
+    return isLightTheme
+      ? 'bg-slate-100 text-slate-700'
       : 'bg-slate-500/10 text-slate-300';
   }
 

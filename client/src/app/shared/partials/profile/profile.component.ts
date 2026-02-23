@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
-import { AppStorageService } from '../../../services/core/app/app-storage.service';
 import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
 import { LicenseService } from '../../../services/licenses/licenses.service';
 @Component({
@@ -39,7 +38,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Output() openPopup = new EventEmitter<void>();
 
-  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, private appStorage: AppStorageService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
     this.role.set(this.appService.userSessionData()?.user?.role);
     effect(() => {
@@ -49,17 +48,13 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       const data = this.appService.userSessionData();
       this.username.set(data?.user?.username ?? '');
       this.role.set(data?.user?.role ?? '');
+      this.isDarkTheme = (data?.user?.theme ?? 'dark-theme') === 'dark-theme';
+      this.applyTheme();
     });
   }
 
   ngOnInit(): void {
-    const storedTheme = this.appStorage.getTheme();
-    if (storedTheme === 'dark-theme') {
-      this.isDarkTheme = true;
-    }
-    else if (storedTheme === 'light-theme') {
-      this.isDarkTheme = false;
-    }
+    this.isDarkTheme = (this.appService.userSessionData()?.user?.theme ?? 'dark-theme') === 'dark-theme';
     this.applyTheme();
   }
 
@@ -85,7 +80,22 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleThemeByClick() {
     this.isDarkTheme = !this.isDarkTheme;
     const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';
-    this.appStorage.setTheme(theme);
+    this.appService.userSessionData.update(state => {
+      if (!state) {
+        return state;
+      }
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          theme,
+          preferences: {
+            ...(state.user.preferences || {}),
+            theme
+          }
+        }
+      };
+    });
     this.applyTheme();
   }
 

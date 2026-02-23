@@ -5,6 +5,7 @@ export interface userSessionData {
 }
 export interface UserDataModel {
     email: string;
+    theme?: 'dark-theme' | 'light-theme';
     twofa_enabled: boolean;
     username: string;
     role: string;
@@ -36,6 +37,7 @@ export interface TenantDataModel {
 export interface userMetaData {
     username: string;
     twofa_enabled: boolean;
+    theme?: 'dark-theme' | 'light-theme';
     preferences?: {
         theme?: 'dark-theme' | 'light-theme';
         [key: string]: any;

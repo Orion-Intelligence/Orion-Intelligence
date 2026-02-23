@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Subscription, Subject } from 'rxjs';
 import { DnsRecord, WaybackSnapshot } from '../../model/scanners/scanner.models';
 import { ScanHelperMethodsService } from './scan-helper-methods-service.service';
+import { AppService } from '../../../services/core/app/app.service';
 @Component({
   selector: 'app-scan-helper',
   standalone: true,
@@ -36,10 +37,10 @@ export class ScanHelperMethods implements OnDestroy {
   @Output() search = new EventEmitter<string[]>();
 
   get isLightTheme(): boolean {
-    return document.body.classList.contains('light-theme') || localStorage.getItem('theme') === 'light-theme';
+    return this.appService.userSessionData()?.user?.theme === 'light-theme';
   }
 
-  constructor(private scanService: ScanHelperMethodsService) {
+  constructor(private scanService: ScanHelperMethodsService, private appService: AppService) {
     effect(() => {
       this.progress = this.scanService.progress();
     });

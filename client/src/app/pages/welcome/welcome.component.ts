@@ -16,7 +16,7 @@ export class WelcomeComponent implements OnInit {
   message: string = "Your registration has been submitted! We've received your information and are now reviewing your request. You will receive an email notification once your account has been approved by an administrator.";
   heading: string = "Thank you for registering with ";
 
-  constructor(private router: Router, private route: ActivatedRoute, public apiService: ApiService, appService:AppService) {
+  constructor(private router: Router, private route: ActivatedRoute, public apiService: ApiService, private appService: AppService) {
     this.heading += appService.getConfig().appSettings.app_name + "!"
   }
 
@@ -27,8 +27,8 @@ export class WelcomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    const storedTheme = localStorage.getItem('theme');
-    this.applyTheme(storedTheme === 'light-theme' ? 'light-theme' : 'dark-theme');
+    const theme = this.appService.userSessionData()?.user?.theme ?? 'dark-theme';
+    this.applyTheme(theme);
 
     const token = this.route.snapshot.paramMap.get('token');
     if (token != null) {

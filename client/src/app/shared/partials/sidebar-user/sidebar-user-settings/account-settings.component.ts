@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 import { userMetaData, userSessionData } from '../../../model/company-profile/node.model';
 import { UserImagePickerComponent } from "./user-image-picker/user-image-picker.component";
-import { AppStorageService } from '../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
@@ -24,7 +23,7 @@ export class AccountSettingsComponent implements OnInit {
   isDarkMode = true;
   editableUsername = '';
 
-  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
@@ -37,18 +36,10 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   setItemsFromPreferences() {
-    if (this.userSessionData?.user.preferences?.["theme"]) {
-      this.isDarkMode = this.userSessionData?.user.preferences?.["theme"] === 'dark-theme';
-    }
-    else {
-      const storedTheme = this.appStorage.getTheme();
-      if (storedTheme === 'dark-theme') {
-        this.isDarkMode = true;
-      }
-      else if (storedTheme === 'light-theme') {
-        this.isDarkMode = false;
-      }
-    }
+    const userTheme = this.userSessionData?.user?.theme;
+    const preferenceTheme = this.userSessionData?.user?.preferences?.["theme"];
+    const theme = userTheme || preferenceTheme || 'dark-theme';
+    this.isDarkMode = theme === 'dark-theme';
   }
 
   isAdmin(): boolean {
@@ -67,7 +58,6 @@ export class AccountSettingsComponent implements OnInit {
 
   toggleTheme() {
     const theme = this.getCurrentTheme();
-    this.appStorage.setTheme(theme);
     this.appService.userSessionData.update(state => {
       if (!state) {
         return state;
@@ -76,6 +66,7 @@ export class AccountSettingsComponent implements OnInit {
         ...state,
         user: {
           ...state.user,
+          theme,
           preferences: {
             ...(state.user.preferences || {}),
             theme
@@ -104,10 +95,12 @@ export class AccountSettingsComponent implements OnInit {
       ...(this.userSessionData.user.preferences || {}),
       theme
     };
+    this.userSessionData.user.theme = theme;
     this.userSessionData.user.preferences = preferences;
     const userMeta: userMetaData = {
       username: this.userSessionData.user.username,
       twofa_enabled: this.userSessionData.user.twofa_enabled,
+      theme,
       preferences,
     };
     this.apiService.post(route, userMeta).subscribe({

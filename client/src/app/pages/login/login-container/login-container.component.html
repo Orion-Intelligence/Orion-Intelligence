@@ -10,8 +10,8 @@
       </div>
       <div class="flex flex-col mt-[100px] items-center flex-grow">
         <div class="w-full max-w-[500px] flex flex-col items-center">
-          <div *ngIf="!twofaRequired">
-            <img [src]="appService.getConfig().appSettings.logo_wide_light" width="80px" height="54px" alt="logo" class="mb-[14px] w-[300px]" />
+          <div *ngIf="!twofaRequired" class="mb-[14px] h-[54px] w-[300px]">
+            <img [src]="appService.getConfig().appSettings.logo_wide_light" width="300" height="54" alt="logo" class="h-[54px] w-[300px] object-contain" />
           </div>
 
           <div class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[16px] text-center mb-8">Login to get started!</div>

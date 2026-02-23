@@ -20,6 +20,6 @@ export class HeaderComponent {
     if (this.forceDark) {
       return false;
     }
-    return document.body.classList.contains('light-theme') || localStorage.getItem('theme') === 'light-theme';
+    return this.appService.userSessionData()?.user?.theme === 'light-theme';
   }
 }

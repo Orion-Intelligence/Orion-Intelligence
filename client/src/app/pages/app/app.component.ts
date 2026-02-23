@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { ErrorStoreService } from '../../shared/services/error-store.service';
 import { filter, map, Observable } from 'rxjs';
@@ -24,8 +24,10 @@ export class AppComponent {
   isVisible = true;
 
   constructor(private router: Router, private errorStore: ErrorStoreService, protected appService: AppService) {
-    const theme = localStorage.getItem('theme') || 'dark-theme';
-    document.body.classList.add(theme);
+    effect(() => {
+      const theme = this.appService.userSessionData()?.user?.theme ?? 'dark-theme';
+      this.applyTheme(theme);
+    });
     this.error$ = this.errorStore.error$;
     this.router.events.pipe(filter(event => event instanceof NavigationEnd), map(() => {
       const path = this.router.parseUrl(this.router.url).root.children['primary']?.segments.map(s => s.path).join('/') || '';
@@ -37,5 +39,10 @@ export class AppComponent {
 
   shouldAnimate(): boolean {
     return !this.currentRoute().startsWith('/dashboard');
+  }
+
+  private applyTheme(theme: 'light-theme' | 'dark-theme'): void {
+    document.body.classList.remove('light-theme', 'dark-theme');
+    document.body.classList.add(theme);
   }
 }
