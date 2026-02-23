@@ -45,10 +45,20 @@ export class CategoryAlertReportComponent implements OnInit {
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
   openedActionMenuId: string | null = null;
+  expandedAlertIds = new Set<string>();
+  hoveredReportTool: 'add' | 'import' | 'flush' | 'sidebar' | null = null;
   @ViewChild('printBtn') printBtn!: ElementRef<HTMLButtonElement>;
 
   constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+  }
+
+  isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme');
+  }
+
+  setReportToolHover(tool: 'add' | 'import' | 'flush' | 'sidebar' | null): void {
+    this.hoveredReportTool = tool;
   }
 
   ngOnInit(): void {
@@ -99,7 +109,6 @@ export class CategoryAlertReportComponent implements OnInit {
         break;
 
       default:
-        console.warn(`Unknown action: ${action}`);
         break;
     }
   }
@@ -111,6 +120,18 @@ export class CategoryAlertReportComponent implements OnInit {
 
   closeActionMenus() {
     this.openedActionMenuId = null;
+  }
+
+  isAlertExpanded(id: string): boolean {
+    return this.expandedAlertIds.has(id);
+  }
+
+  toggleAlertExpanded(id: string): void {
+    if (this.expandedAlertIds.has(id)) {
+      this.expandedAlertIds.delete(id);
+      return;
+    }
+    this.expandedAlertIds.add(id);
   }
 
   @HostListener('document:click')
@@ -323,7 +344,7 @@ export class CategoryAlertReportComponent implements OnInit {
           });
         }
         else {
-          (alert("null"))
+
         }
       }
       else {

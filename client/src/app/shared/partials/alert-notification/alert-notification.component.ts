@@ -243,4 +243,8 @@ export class AlertNotificationComponent implements OnChanges {
     const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
     return domainRegex.test(value);
   }
+
+  isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme');
+  }
 }

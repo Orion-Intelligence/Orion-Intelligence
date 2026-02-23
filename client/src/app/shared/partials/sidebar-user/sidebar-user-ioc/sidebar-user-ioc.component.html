@@ -5,8 +5,8 @@
     <h2 class="ui-section-title !mb-0">Manage IOCs</h2>
     <div class="flex items-center gap-2 max-[760px]:w-full max-[760px]:justify-between">
       <div class="relative max-[760px]:flex-1">
-        <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" class="pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300" />
-        <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+        <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" [ngClass]="isLightTheme() ? 'pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-75 transition-all duration-300 [filter:brightness(0)_saturate(100%)_invert(16%)_sepia(16%)_saturate(934%)_hue-rotate(177deg)_brightness(92%)_contrast(92%)]' : 'pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300'" />
+        <input type="text" [ngClass]="isLightTheme() ? 'h-10 w-[280px] rounded-[8px] border border-[#d0d5dd] bg-white py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[#0f172a] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-[#93c5fd] focus:bg-white focus:ring-2 focus:ring-[#93c5fd33] max-[1024px]:w-[220px] max-[760px]:w-full' : 'h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full'" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
       </div>
       <button appTooltip="clear all" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
         <img alt="scan" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
@@ -18,8 +18,8 @@
   <div class="relative mt-[21px] flex h-10 items-center gap-[15px] overflow-hidden">
     <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-r from-[var(--color-blue-820-light)] to-transparent" *ngIf="showLeftFade"></div>
 
-    <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollLeft()" [disabled]="filteredIocs.length === 0">
-      <img src="assets/images/shared/onboarding_leftButton.svg" alt="filter icon" class="h-4 w-4" />
+    <button [ngClass]="isLightTheme() ? 'relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#d0d5dd] bg-white opacity-90 transition-all duration-150 hover:bg-[#f8fafc] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-white' : 'relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]'" (click)="scrollLeft()" [disabled]="filteredIocs.length === 0">
+      <img src="assets/images/shared/onboarding_leftButton.svg" alt="filter icon" [ngClass]="isLightTheme() ? 'h-4 w-4 [filter:brightness(0)_saturate(100%)_invert(23%)_sepia(14%)_saturate(1007%)_hue-rotate(175deg)_brightness(92%)_contrast(89%)]' : 'h-4 w-4'" />
     </button>
 
     <div class="flex h-full flex-1 items-center gap-[8px] overflow-x-auto px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" #categoryScroll>
@@ -35,14 +35,14 @@
       </ng-template>
     </div>
 
-    <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollRight()" [disabled]="filteredIocs.length === 0">
-      <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" class="h-4 w-4" />
+    <button [ngClass]="isLightTheme() ? 'relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#d0d5dd] bg-white opacity-90 transition-all duration-150 hover:bg-[#f8fafc] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-white' : 'relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]'" (click)="scrollRight()" [disabled]="filteredIocs.length === 0">
+      <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" [ngClass]="isLightTheme() ? 'h-4 w-4 [filter:brightness(0)_saturate(100%)_invert(23%)_sepia(14%)_saturate(1007%)_hue-rotate(175deg)_brightness(92%)_contrast(89%)]' : 'h-4 w-4'" />
     </button>
 
     <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-l from-[var(--color-blue-820-light)] to-transparent" *ngIf="showRightFade"></div>
   </div>
 
-  <div class="mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]"></div>
+  <div [ngClass]="isLightTheme() ? 'mb-[16px] mt-[10px] h-px w-full bg-[#dbe3ef]' : 'mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]'"></div>
 
   <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">Enter IOCs</label>
   <div class="relative w-full">
@@ -50,7 +50,7 @@
     <button type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
   </div>
 
-  <div class="my-[16px] h-[2px] w-full bg-[var(--color-border)]"></div>
+  <div [ngClass]="isLightTheme() ? 'my-[16px] h-px w-full bg-[#dbe3ef]' : 'my-[16px] h-[2px] w-full bg-[var(--color-border)]'"></div>
 
   <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
   <div class="max-h-[500px] min-h-[20px] space-y-3 overflow-y-auto">
@@ -59,7 +59,7 @@
         <ng-container *ngIf="ioc.values.length > 0">
           <p class="my-[12px] mb-[8px] font-[Inter] text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
           <div class="flex flex-wrap gap-[8px]">
-            <div class="flex cursor-pointer items-center gap-[8px] rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-[4px] font-[Inter] text-[12px] font-normal text-[var(--color-text1)] transition hover:bg-[#FCFCFC20]" appTooltip="remove IOC" *ngFor="let value of ioc.values" (click)="removeIoc(ioc.ioc_id, value)">
+            <div [ngClass]="isLightTheme() ? 'flex cursor-pointer items-center gap-[8px] rounded-[6px] border border-[#d0d5dd] bg-white px-[10px] py-[4px] font-[Inter] text-[12px] font-medium text-[#344054] shadow-[0_1px_1px_rgba(16,24,40,0.04)] transition hover:border-[#b8c7dc] hover:bg-[#f8fafc]' : 'flex cursor-pointer items-center gap-[8px] rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-[4px] font-[Inter] text-[12px] font-normal text-[var(--color-text1)] transition hover:bg-[#FCFCFC20]'" appTooltip="remove IOC" *ngFor="let value of ioc.values" (click)="removeIoc(ioc.ioc_id, value)">
               <span>{{ value }}</span>
               <span>✕</span>
             </div>

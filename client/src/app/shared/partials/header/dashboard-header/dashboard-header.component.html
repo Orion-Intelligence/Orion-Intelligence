@@ -1,17 +1,17 @@
 <div class="flex h-[60px] w-full items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
   <ng-container *ngIf="!authService.getIsMobileDemo()">
-    <div class="ml-[20px] flex max-w-[80vw] items-center overflow-hidden text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
+    <div class="ml-[20px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
       <img (click)="goBack()" [ngClass]="{ 'hidden cursor-not-allowed opacity-50': breadcrumb.length <= 2 && breadcrumb[0].label !== 'ctigraph', 'cursor-pointer': !(breadcrumb.length <= 2 && breadcrumb[0].label !== 'ctigraph') }" alt="Back" class="ui-breadcrumb-chevron mt-[-1px] mr-[10px] ml-[5px] h-[50px] w-[50px] p-[10px]" height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
 
       <span *ngFor="let crumb of breadcrumb; let i = index; let last = last">
-        <span *ngIf="!last" (click)="navigateToCrumb(i)" [ngClass]="{ 'cursor-default opacity-50 pointer-events-none': breadcrumb.length <= 2 }" class="inline-flex items-center cursor-pointer font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-header)] hover:text-[#fcfcfc]">
-          {{ crumb.label.replace('-', ' ') | titlecase }}
+        <span *ngIf="!last" (click)="navigateToCrumb(i)" [ngClass]="{ 'cursor-default opacity-50 pointer-events-none': breadcrumb.length <= 2 }" class="inline-flex min-w-0 items-center cursor-pointer font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-header)] hover:text-[#fcfcfc]">
+          <span class="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[110px]">{{ crumb.label.replace('-', ' ') | titlecase }}</span>
           <img alt="breadcrumb" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
         </span>
 
-        <span *ngIf="last" class="font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">
+        <span *ngIf="last" class="inline-flex min-w-0 font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">
           <ng-container *ngIf="crumb.label.toLowerCase() !== 'login'; else loginLogo">
-            {{ crumb.label.replace('-', ' ') | titlecase }}
+            <span class="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[130px]">{{ crumb.label.replace('-', ' ') | titlecase }}</span>
           </ng-container>
         </span>
 
@@ -25,14 +25,14 @@
     </div>
   </ng-container>
   <ng-container *ngIf="authService.getIsMobileDemo()">
-    <div class="ml-[20px] flex max-w-[80vw] items-center overflow-hidden text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
+    <div class="ml-[20px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
       <span class="ml-3 font-[Inter,sans-serif] text-[19px] font-medium text-[var(--color-text1)]">
         {{ this.appService.getConfig().appSettings.app_name }}
       </span>
     </div>
   </ng-container>
 
-  <div class="flex items-center" *ngIf="!authService.getIsMobileDemo()">
+  <div class="mr-[20px] flex shrink-0 items-center" *ngIf="!authService.getIsMobileDemo()">
     <app-profile (openPopup)="supportOpenPopup()"></app-profile>
   </div>
 </div>

@@ -147,4 +147,8 @@ export class SidebarUserIocComponent implements OnInit {
   openConfirmationPopup() {
     this.isConfirmationOpen = true;
   }
+
+  isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme');
+  }
 }

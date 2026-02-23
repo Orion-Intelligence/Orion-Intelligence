@@ -8,7 +8,7 @@
   <div id="top" data-cy="top"></div>
   <div class="flex h-screen min-h-[800px] overflow-x-hidden overflow-y-visible bg-[var(--color-blue-900)]" id="dashboard__sidebar-main" data-cy="dashboard-sidebar-main">
     <input class="hidden" id="dashboard__menu-toggle" name="menu-input" type="radio" data-cy="menu-toggle">
-    <div *ngIf="!authService.getIsMobileDemo()" [ngClass]="{ 'w-[300px] p-0 overflow-y-auto': isMenuOpen, 'w-[70px] py-[8px] overflow-hidden': !isMenuOpen }" class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]" data-cy="dashboard-sidebar">
+    <div *ngIf="!authService.getIsMobileDemo()" [ngClass]="{ 'w-[300px] p-0 overflow-y-auto': isMenuOpen, 'w-[70px] px-[7px] py-[8px] overflow-hidden': !isMenuOpen }" class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]" data-cy="dashboard-sidebar">
       <app-dashboard-sidebar
         (menuToggle)="toggleNavigation()"
         data-cy="dashboard-sidebar-component">

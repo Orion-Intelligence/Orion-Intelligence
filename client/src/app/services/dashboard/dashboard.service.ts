@@ -144,7 +144,6 @@ export class DashboardService {
         m_update_date: string;
     }>(resultItems: T[]): any {
     if (!resultItems) {
-      console.warn("No data available in Result");
       return null;
     }
     return {

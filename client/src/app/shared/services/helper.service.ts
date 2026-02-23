@@ -123,10 +123,7 @@ export class HelperService {
         title: this.appService.getConfig().appSettings.app_name,
         text: 'Sharing a relevant CTI resource for review.',
         url: url
-      }).catch(error => console.error('Error sharing:', error));
-    }
-    else {
-      alert('Sharing is not supported on this browser.');
+      }).catch(() => {});
     }
   }
 

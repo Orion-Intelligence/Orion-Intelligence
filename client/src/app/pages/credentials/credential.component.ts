@@ -103,7 +103,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.searchQuery = searchQuery;
     this.dashboardService.consolidatedParamModel.page = 1;
     this.fetchSearchResults();
-    console.log("xxxxxxx4");
     this.fetchRanked();
   }
 
@@ -169,7 +168,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     }
     else if (sort === SortType.DEFAULT) {
       this.fetchSearchResults();
-      console.log("xxxxxxx5");
       this.fetchRanked();
       return;
     }
@@ -179,13 +177,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   reloadFilters(_: Record<string, string | null>) {
     this.fetchSearchResults();
-    console.log("xxxxxxx6");
     this.fetchRanked();
   }
 
   resetFilters(_: void) {
     this.fetchSearchResults(true);
-    console.log("xxxxxxx1");
     this.fetchRanked();
   }
 
@@ -233,7 +229,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   onPageChange(step: number) {
     this.dashboardService.consolidatedParamModel.page = step;
     this.fetchSearchResults();
-    console.log("xxxxxxx2");
     this.fetchRanked();
   }
 

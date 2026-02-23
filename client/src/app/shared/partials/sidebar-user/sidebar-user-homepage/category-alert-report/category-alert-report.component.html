@@ -2,28 +2,28 @@
 
     <div class="category_report_searchbar">
         <div class="category_report_searchbar-input">
-            <img src="assets/images/shared/theme/magnifyingglassblack.svg" alt="search" />
+            <img src="assets/images/shared/theme/magnifyingglassblack.svg" alt="search" class="category_report_search-icon" />
             <input type="text" placeholder="Search..." [(ngModel)]="searchText" />
             <button *ngIf="searchText" class="category_report_searchbar-clear" (click)="searchText = ''">
                 <img src="/assets/images/shared/cross-dark.svg" alt="close"></button>
         </div>
         <div class="category_report_flex">
-            <div class="btn-group report-menu-option-container mr-0">
-                <button *ngIf="licenseService.isMaintainer()" (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option">
-                    <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
+            <div class="btn-group report-menu-option-container mr-0" [style.background-color]="isLightTheme() ? '#f7fbff' : null" [style.border-color]="isLightTheme() ? '#d3deeb' : null">
+                <button *ngIf="licenseService.isMaintainer()" (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('add')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='add' ? '#cfe0f4' : null">
+                    <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" class="category_report_tool-icon" />
                 </button>
-                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
-                <button *ngIf="canExportstix()&& licenseService.isMaintainer()" type="button" (click)="fileInput.click()" appTooltip="import alert" class="p-0 report-menu-option">
-                    <img alt="add" height="30" width="30" src="/assets/images/shared/theme/print.svg" class="rotate-180" />
+                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider" [style.background-color]="isLightTheme() ? '#a9bbd0' : null" [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null" [style.color]="isLightTheme() ? '#a9bbd0' : null" [style.opacity]="isLightTheme() ? '1' : null"></div>
+                <button *ngIf="canExportstix()&& licenseService.isMaintainer()" type="button" (click)="fileInput.click()" appTooltip="import alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('import')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='import' ? '#cfe0f4' : null">
+                    <img alt="add" height="30" width="30" src="/assets/images/shared/theme/print.svg" class="rotate-180 category_report_tool-icon" />
                 </button>
                 <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
-                <div *ngIf="canExportstix() && licenseService.isMaintainer()" class="vr report-menu-divider"></div>
-                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="this.alerts.length>0 &&licenseService.isMaintainer()">
-                    <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" />
+                <div *ngIf="canExportstix() && licenseService.isMaintainer()" class="vr report-menu-divider" [style.background-color]="isLightTheme() ? '#a9bbd0' : null" [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null" [style.color]="isLightTheme() ? '#a9bbd0' : null" [style.opacity]="isLightTheme() ? '1' : null"></div>
+                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="this.alerts.length>0 &&licenseService.isMaintainer()" (mouseenter)="setReportToolHover('flush')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='flush' ? '#cfe0f4' : null">
+                    <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" class="category_report_tool-icon" />
                 </button>
-                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider"></div>
-                <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option">
-                    <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" />
+                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider" [style.background-color]="isLightTheme() ? '#a9bbd0' : null" [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null" [style.color]="isLightTheme() ? '#a9bbd0' : null" [style.opacity]="isLightTheme() ? '1' : null"></div>
+                <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('sidebar')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='sidebar' ? '#cfe0f4' : null">
+                    <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" class="category_report_tool-icon" />
                 </button>
             </div>
         </div>
@@ -34,34 +34,34 @@
     </div>
 
     <div class="category_report_summary-row" *ngIf="filteredAlerts.length>0">
-        <div class="category_report_summary-card">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#e9f2ff_0%,#ffffff_100%)] !border-[#bfd2ea]' : ''">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Total IOC</span>
-                <img src="/assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total unique IOCs found in alerts" />
+                <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : '/assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Total unique IOCs found in alerts" />
             </div>
             <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(filteredAlerts)}}</span>
         </div>
 
-        <div class="category_report_summary-card">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#fff4e7_0%,#ffffff_100%)] !border-[#f2d5ad]' : ''">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Newly Found</span>
-                <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total non seen alert report" />
+                <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : 'assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Total non seen alert report" />
             </div>
             <span class="category_report_summary-card-value">{{getNewAlertCount()}}</span>
         </div>
 
-        <div class="category_report_summary-card">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#f2faff_0%,#ffffff_100%)] !border-[#c9dde9]' : ''">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Last Update</span>
-                <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Alerts update on" />
+                <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : 'assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Alerts update on" />
             </div>
             <span class="category_report_summary-card-value">{{getLatestDetectedDate(filteredAlerts)}}</span>
         </div>
 
-        <div class="category_report_summary-card">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#edf8ef_0%,#ffffff_100%)] !border-[#c6e1cc]' : ''">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Sources</span>
-                <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="user-homepage_alerts-card-icon" appTooltip="Total sources found in alerts" />
+                <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : 'assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Total sources found in alerts" />
             </div>
             <span class="category_report_summary-card-value">{{countUniqueSources(filteredAlerts)}}</span>
         </div>
@@ -115,36 +115,50 @@
                 <span class="category_report_alert-field-value">{{ sliceString(item.url,70) }}</span>
             </div>
 
-            <div class="category_report_alert-row">
-                <div class="category_report_alert-field">
-                    <span class="category_report_alert-field-heading">Category</span>
-                    <span class="category_report_alert-field-value">{{ item.category }}</span>
-                </div>
+            <button
+                type="button"
+                class="category_report_alert-expand-btn"
+                [class.is-expanded]="isAlertExpanded(item.id)"
+                [attr.aria-expanded]="isAlertExpanded(item.id)"
+                (click)="toggleAlertExpanded(item.id)"
+            >
+                {{ isAlertExpanded(item.id) ? 'Hide Details' : 'Show Details' }}
+            </button>
 
-                <div class="category_report_alert-field">
-                    <span class="category_report_alert-field-heading">Source</span>
-                    <span class="category_report_alert-field-value">{{ item.source }}</span>
-                </div>
+            <ng-container *ngIf="isAlertExpanded(item.id)">
+                <div class="category_report_alert-expand-content">
+                    <div class="category_report_alert-row">
+                        <div class="category_report_alert-field">
+                            <span class="category_report_alert-field-heading">Category</span>
+                            <span class="category_report_alert-field-value">{{ item.category }}</span>
+                        </div>
 
-                <div class="category_report_alert-field">
-                    <span class="category_report_alert-field-heading">Entity</span>
-                    <span class="category_report_alert-field-value">{{ sliceString(item.entity,15) }}</span>
-                </div>
+                        <div class="category_report_alert-field">
+                            <span class="category_report_alert-field-heading">Source</span>
+                            <span class="category_report_alert-field-value">{{ item.source }}</span>
+                        </div>
 
-                <div class="category_report_alert-field">
-                    <span class="category_report_alert-field-heading">Detected On</span>
-                    <span class="category_report_alert-field-value">{{ item.detectedOn| date:'MM/dd/yyyy' }}</span>
-                </div>
-            </div>
+                        <div class="category_report_alert-field">
+                            <span class="category_report_alert-field-heading">Entity</span>
+                            <span class="category_report_alert-field-value">{{ sliceString(item.entity,15) }}</span>
+                        </div>
 
-            <div class="category_report_alert-iocs">
-                <span class="category_report_alert-iocs-heading">IOCs</span>
-                <div class="category_report_alert-iocs-tags">
-                    <div class="category_report_alert-iocs-tag" *ngFor="let ioc of getFilteredIocs(item.allIOC)">
-                        {{ ioc.label }}({{ ioc.count }})
+                        <div class="category_report_alert-field">
+                            <span class="category_report_alert-field-heading">Detected On</span>
+                            <span class="category_report_alert-field-value">{{ item.detectedOn| date:'MM/dd/yyyy' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="category_report_alert-iocs">
+                        <span class="category_report_alert-iocs-heading">IOCs</span>
+                        <div class="category_report_alert-iocs-tags">
+                            <div class="category_report_alert-iocs-tag" *ngFor="let ioc of getFilteredIocs(item.allIOC)">
+                                {{ ioc.label }}({{ ioc.count }})
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </ng-container>
 
             <div class="category_report_alert-footer">
                 <div class="category_report_alert-divider"></div>

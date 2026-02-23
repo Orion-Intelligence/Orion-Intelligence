@@ -8,17 +8,23 @@
                 <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true"></app-home-search>
 
                 <div class="mt-[12px] flex justify-end max-[640px]:justify-start">
-                    <div class="inline-flex items-center gap-2 rounded-[8px] border border-[#ffffff15] bg-[var(--color-blue-800)] px-[8px] py-[6px] max-[640px]:w-full max-[640px]:justify-center">
-                        <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true" appTooltip="Print Alerts" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]">
-                            <img src="assets/images/shared/theme/print.svg" height="25" alt="print" />
+                    <div class="ioc-action-toolbar inline-flex items-center gap-2 rounded-[8px] border border-[#ffffff15] bg-[var(--color-blue-800)] px-[8px] py-[6px] max-[640px]:w-full max-[640px]:justify-center" [style.background-color]="isLightTheme() ? '#f7fbff' : null" [style.border-color]="isLightTheme() ? '#d3deeb' : null">
+                        <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true" appTooltip="Print Alerts" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('print')" (mouseleave)="setHomeToolHover(null)" [style.background-color]="isLightTheme() && hoveredHomeTool==='print' ? '#cfe0f4' : null">
+                            <img src="assets/images/shared/theme/print.svg" height="25" alt="print" class="ioc-action-icon" />
                         </button>
-                        <div *ngIf="licenseService.isMaintainer()" class="h-[20px] w-px bg-[#ffffff20]"></div>
+                        <div
+                            *ngIf="licenseService.isMaintainer()"
+                            class="ioc-action-divider h-[20px] w-px bg-[#ffffff20]"
+                            [style.background-color]="isLightTheme() ? '#a9bbd0' : null"
+                            [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null"
+                            [style.opacity]="isLightTheme() ? '1' : null"
+                        ></div>
                         <div class="inline-flex items-center gap-2">
-                            <button (click)="flushAll()" appTooltip="flush all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()">
-                                <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" />
+                            <button (click)="flushAll()" appTooltip="flush all" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()" (mouseenter)="setHomeToolHover('flush')" (mouseleave)="setHomeToolHover(null)" [style.background-color]="isLightTheme() && hoveredHomeTool==='flush' ? '#cfe0f4' : null">
+                                <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" class="ioc-action-icon" />
                             </button>
-                            <button *ngIf="licenseService.isMaintainer()" (click)="scanIOCs()" appTooltip="scan all" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]">
-                                <img alt="scan" height="20" ngSrc="assets/images/sidebar/theme/scanner.svg" width="20" />
+                            <button *ngIf="licenseService.isMaintainer()" (click)="scanIOCs()" appTooltip="scan all" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('scan')" (mouseleave)="setHomeToolHover(null)" [style.background-color]="isLightTheme() && hoveredHomeTool==='scan' ? '#cfe0f4' : null">
+                                <img alt="scan" height="20" ngSrc="assets/images/sidebar/theme/scanner.svg" width="20" class="ioc-action-icon" />
                             </button>
                         </div>
                     </div>
@@ -26,7 +32,7 @@
             </div>
             <div>
 
-                <div *ngIf="licenseService.isMaintainer() " class="flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[16px] py-[10px] max-[620px]:flex-wrap max-[620px]:gap-2 max-[620px]:px-[12px] max-[620px]:py-[12px]">
+                <div *ngIf="licenseService.isMaintainer() " class="ioc-summary-bar flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[16px] py-[10px] max-[620px]:flex-wrap max-[620px]:gap-2 max-[620px]:px-[12px] max-[620px]:py-[12px]">
 
                     <div>
                         <div class="text-[16px] font-semibold text-[var(--color-text1)]">IOC’s</div>
@@ -34,12 +40,12 @@
                     </div>
 
                     <div class="flex items-center gap-[8px] max-[620px]:w-full max-[620px]:justify-between">
-                        <button class="inline-flex h-[30px] items-center rounded-[7px] border border-[#57a5eb4a] bg-[#57a5eb1a] px-[10px] text-[12px] font-medium text-[#8bc6f7] max-[620px]:flex-1 max-[620px]:justify-center">
+                        <button class="ioc-entity-pill inline-flex h-[30px] items-center rounded-[7px] border border-[#57a5eb4a] bg-[#57a5eb1a] px-[10px] text-[12px] font-medium text-[#8bc6f7] max-[620px]:flex-1 max-[620px]:justify-center">
                             Entity ({{ entityFiltersCount() }})
                         </button>
 
-                        <button class="inline-flex h-[30px] items-center gap-[6px] rounded-[7px] border border-[var(--color-border)] bg-[#fcfcfc12] px-[11px] text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[#fcfcfc1f] max-[620px]:flex-1 max-[620px]:justify-center" (click)="editIocs()">
-                            <img alt="edit-icon" src="assets/images/shared/theme/edit.svg" class="h-[12px] w-[12px]">
+                        <button class="ioc-edit-btn inline-flex h-[30px] items-center gap-[6px] rounded-[7px] border border-[var(--color-border)] bg-[#fcfcfc12] px-[11px] text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[#fcfcfc1f] max-[620px]:flex-1 max-[620px]:justify-center" (click)="editIocs()">
+                            <img alt="edit-icon" src="assets/images/shared/theme/edit.svg" class="ioc-edit-icon h-[12px] w-[12px]">
                             Edit
                         </button>
                     </div>
@@ -47,38 +53,38 @@
                 </div>
 
                 <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[12px]">
-                    <div class="rounded-[8px] border border-[var(--color-border)] px-[16px] py-[14px]" [ngClass]="'bg-[#ff4c4c1a]'">
+                    <div class="risk-summary-card risk-summary-card--critical rounded-[8px] border border-[var(--color-border)] px-[16px] py-[14px]" [ngClass]="'bg-[#ff4c4c1a]'">
                         <div class="flex items-center justify-between">
                             <div class="text-[20px] font-semibold text-[var(--color-text1)]">
                                 {{ criticalRisks }}
                             </div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total critical alert types" />
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total critical alert types" />
                         </div>
                         <div class="text-[16px] font-semibold text-[#ff4c4c]">
                             Critical Alerts
                         </div>
                     </div>
 
-                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px]">
+                    <div class="risk-summary-card risk-summary-card--high rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px]">
                         <div class="flex items-center justify-between">
                             <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ highRisks }}</div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total high risk alert types" />
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total high risk alert types" />
                         </div>
                         <div class="text-[16px] font-semibold text-[#ffb347]">High Risk Alerts</div>
                     </div>
 
-                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px]">
+                    <div class="risk-summary-card risk-summary-card--medium rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px]">
                         <div class="flex items-center justify-between">
                             <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ mediumRisks }}</div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total medium risk alert types" />
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total medium risk alert types" />
                         </div>
                         <div class="text-[16px] font-semibold text-[#ffd966]">Medium Risk</div>
                     </div>
 
-                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px]">
+                    <div class="risk-summary-card risk-summary-card--low rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px]">
                         <div class="flex items-center justify-between">
                             <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ lowRisks }}</div>
-                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="h-[18px] w-[18px]" appTooltip="Total low rish alert types" />
+                            <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total low rish alert types" />
                         </div>
                         <div class="text-[16px] font-semibold text-[#6ccf7e]">Low Risk</div>
                     </div>
@@ -89,16 +95,16 @@
 
                     <ng-container *ngFor="let category of alertCategories">
 
-                        <div class="flex cursor-pointer flex-col gap-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[16px] hover:bg-[var(--color-blue-810)] max-[640px]:p-[12px]" (click)="openAlerts(category.categoryName)">
+                        <div class="category-alert-card flex cursor-pointer flex-col gap-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[16px] hover:bg-[var(--color-blue-810)] max-[640px]:p-[12px]" (click)="openAlerts(category.categoryName)">
 
                             <div class="flex items-center justify-between gap-[8px] max-[640px]:flex-wrap">
 
                                 <div class="flex items-center gap-[6px] text-[16px] font-semibold max-[640px]:text-[14px]">
-                                    <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="h-[24px] w-[24px]">
+                                    <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="category-alert-icon h-[24px] w-[24px]">
                                     {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
                                 </div>
 
-                                <div class="rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c]': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347]': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966]': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e]': category.risk.toLowerCase() === 'low' }">
+                                <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] category-risk-badge--critical': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] category-risk-badge--high': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] category-risk-badge--medium': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] category-risk-badge--low': category.risk.toLowerCase() === 'low' }">
                                     {{ category.risk }} Risk
                                 </div>
 
@@ -117,7 +123,7 @@
                             </div>
 
                             <div class="mt-[6px] flex flex-wrap gap-[6px]">
-                                <span *ngFor="let tag of category.tags" class="rounded-[100px] bg-[var(--color-tags)] px-[10px] py-[4px] text-[12px] font-normal text-[var(--color-text1)] max-[640px]:text-[11px]">{{ tag }}</span>
+                                <span *ngFor="let tag of category.tags" class="category-alert-tag rounded-[100px] bg-[var(--color-tags)] px-[10px] py-[4px] text-[12px] font-normal text-[var(--color-text1)] max-[640px]:text-[11px]">{{ tag }}</span>
                             </div>
 
                         </div>

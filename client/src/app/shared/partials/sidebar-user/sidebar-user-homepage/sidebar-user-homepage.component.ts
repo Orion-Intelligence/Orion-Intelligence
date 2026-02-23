@@ -30,12 +30,145 @@ import { countFilterValues } from '../../../utils/filter-values.util';
     :host ::ng-deep app-home-search.homepage-search-no-margin form {
       margin-left: 0 !important;
     }
+
+    :host-context(.light-theme) .ioc-summary-bar {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+      border-color: #d7dee8 !important;
+      box-shadow: 0 6px 16px rgb(15 23 42 / 8%);
+    }
+
+    :host-context(.light-theme) .ioc-entity-pill {
+      border-color: #bfdbfe !important;
+      background: #eff6ff !important;
+      color: #2563eb !important;
+    }
+
+    :host-context(.light-theme) .ioc-edit-btn {
+      border-color: #d7dee8 !important;
+      background: #ffffff !important;
+      color: #334155 !important;
+    }
+
+    :host-context(.light-theme) .ioc-edit-btn:hover {
+      background: #f8fafc !important;
+    }
+
+    :host-context(.light-theme) .ioc-edit-icon,
+    :host-context(.light-theme) .summary-info-icon,
+    :host-context(.light-theme) .category-alert-icon {
+      filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
+      opacity: .92;
+    }
+
+    :host-context(.light-theme) .ioc-action-icon {
+      filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
+      opacity: .92;
+    }
+
+    :host-context(.light-theme) .ioc-action-toolbar {
+      border-color: #d3deeb !important;
+      background: #f7fbff !important;
+      box-shadow: none !important;
+    }
+
+    :host-context(.light-theme) .ioc-action-divider {
+      background: #a9bbd0 !important;
+      border-left: 1px solid #a9bbd0 !important;
+      opacity: 1 !important;
+    }
+
+    :host-context(.light-theme) .ioc-action-btn {
+      background: transparent !important;
+      transition: background-color .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+
+    :host-context(.light-theme) .ioc-action-btn:hover {
+      background: #cfe0f4 !important;
+      box-shadow: inset 0 0 0 1px #9bb7d8;
+      transform: translateY(-1px);
+    }
+
+    :host-context(.light-theme) .ioc-action-btn:focus-visible,
+    :host-context(.light-theme) .ioc-action-btn:active {
+      background: #bfd4ee !important;
+      box-shadow: inset 0 0 0 1px #8eadd2;
+      outline: none;
+    }
+
+    :host-context(.light-theme) .risk-summary-card {
+      border-color: #d7dee8 !important;
+      box-shadow: 0 8px 20px rgb(15 23 42 / 10%);
+      background: #ffffff !important;
+    }
+
+    :host-context(.light-theme) .risk-summary-card--critical {
+      background: linear-gradient(180deg, #ffe7e9 0%, #fff8f8 100%) !important;
+      border-color: #f1b3b8 !important;
+    }
+
+    :host-context(.light-theme) .risk-summary-card--high {
+      background: linear-gradient(180deg, #fff3e2 0%, #fffaf3 100%) !important;
+      border-color: #f3d09e !important;
+    }
+
+    :host-context(.light-theme) .risk-summary-card--medium {
+      background: linear-gradient(180deg, #fffadf 0%, #fffdf3 100%) !important;
+      border-color: #e8dc98 !important;
+    }
+
+    :host-context(.light-theme) .risk-summary-card--low {
+      background: linear-gradient(180deg, #e8f8eb 0%, #f7fdf8 100%) !important;
+      border-color: #b8ddc0 !important;
+    }
+
+    :host-context(.light-theme) .category-alert-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+      border-color: #d7dee8 !important;
+      box-shadow: 0 6px 18px rgb(15 23 42 / 8%);
+    }
+
+    :host-context(.light-theme) .category-alert-card:hover {
+      background: #f8fbff !important;
+      border-color: #bfd0e4 !important;
+    }
+
+    :host-context(.light-theme) .category-alert-tag {
+      background: #eef4fb !important;
+      border: 1px solid #c7d5e6 !important;
+      color: #334155 !important;
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 70%);
+    }
+
+    :host-context(.light-theme) .category-risk-badge {
+      border-width: 1px !important;
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 65%);
+    }
+
+    :host-context(.light-theme) .category-risk-badge--critical {
+      border-color: #f3a7af !important;
+    }
+
+    :host-context(.light-theme) .category-risk-badge--high {
+      border-color: #efcd97 !important;
+    }
+
+    :host-context(.light-theme) .category-risk-badge--medium {
+      border-color: #e6d690 !important;
+    }
+
+    :host-context(.light-theme) .category-risk-badge--low {
+      background: #dcfce7 !important;
+      border-color: #86efac !important;
+      color: #166534 !important;
+      font-weight: 600;
+    }
   `],
   animations: [overlayAnimation],
 })
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   private loadingDisplayTimer: ReturnType<typeof setTimeout> | null = null;
   private isManualLoadingTrigger = false;
+  hoveredHomeTool: 'print' | 'flush' | 'scan' | null = null;
 
   alertCategories: AlertCategorySummary[] = [];
   criticalRisks: number = 0;
@@ -289,5 +422,13 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
       clearTimeout(this.loadingDisplayTimer);
       this.loadingDisplayTimer = null;
     }
+  }
+
+  isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme');
+  }
+
+  setHomeToolHover(tool: 'print' | 'flush' | 'scan' | null): void {
+    this.hoveredHomeTool = tool;
   }
 }

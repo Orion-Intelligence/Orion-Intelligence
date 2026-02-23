@@ -125,9 +125,7 @@ export class TenantComponent implements OnInit {
           return updated;
         });
       },
-      error: (err) => {
-        alert(err?.error?.detail || 'Onboarding failed');
-      },
+      error: () => {},
     });
   }
 

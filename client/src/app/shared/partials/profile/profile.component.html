@@ -10,7 +10,7 @@
     </a>
   </ng-container>
 
-  <a *ngIf="router.url !== '/login'" (click)="toggleDropdown($event)" appTooltip="" class="inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+  <a *ngIf="router.url !== '/login'" (click)="toggleDropdown($event)" appTooltip="" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
     <img alt="Logout" height="24" [ngSrc]="isDarkTheme ? 'assets/images/shared/theme/profile-icon.svg' : 'assets/images/shared/profile-icon-dark.svg'" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
   </a>
 
