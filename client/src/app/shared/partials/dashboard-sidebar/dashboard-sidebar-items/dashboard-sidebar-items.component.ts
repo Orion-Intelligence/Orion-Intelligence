@@ -11,6 +11,14 @@ import { SubscriptionService } from '../../../../services/dashboard/subscription
   standalone: true,
   imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective, LowerPipe],
   templateUrl: './dashboard-sidebar-items.component.html',
+  styles: [
+    `
+      .dashboard-scanner-main-icon {
+        filter: brightness(0) saturate(100%) invert(100%) !important;
+        opacity: 1 !important;
+      }
+    `,
+  ],
 })
 export class DashboardSidebarItemsComponent {
   @Input() title = '';

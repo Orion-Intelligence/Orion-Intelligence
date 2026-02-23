@@ -25,6 +25,10 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   constructor(protected helperService: HelperService, private dashboardService: DashboardService, private rowHelper: ResultRowHelperService) { }
 
+  isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme');
+  }
+
   ngOnInit(): void {
     if (this.results_defacement?.Result?.length) {
       this.updateThreatTypeCounts(this.results_defacement.Result);

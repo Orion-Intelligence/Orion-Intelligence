@@ -4,6 +4,7 @@ import { HeaderComponent } from "../../shared/partials/header/login-header/heade
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../../services/core/app/app.service';
+
 @Component({
   selector: 'app-welcome',
   imports: [HeaderComponent],
@@ -11,14 +12,24 @@ import { AppService } from '../../services/core/app/app.service';
 })
 export class WelcomeComponent implements OnInit {
   hasToken: boolean = false;
+  isLightTheme = false;
   message: string = "Your registration has been submitted! We've received your information and are now reviewing your request. You will receive an email notification once your account has been approved by an administrator.";
   heading: string = "Thank you for registering with ";
 
-  constructor(private router: Router, private route: ActivatedRoute, public apiService: ApiService, appService: AppService) {
-    this.heading += appService.getConfig().appSettings.app_name + "!";
+  constructor(private router: Router, private route: ActivatedRoute, public apiService: ApiService, appService:AppService) {
+    this.heading += appService.getConfig().appSettings.app_name + "!"
+  }
+
+  private applyTheme(theme: 'light-theme' | 'dark-theme') {
+    document.body.classList.remove('light-theme', 'dark-theme');
+    document.body.classList.add(theme);
+    this.isLightTheme = theme === 'light-theme';
   }
 
   ngOnInit() {
+    const storedTheme = localStorage.getItem('theme');
+    this.applyTheme(storedTheme === 'light-theme' ? 'light-theme' : 'dark-theme');
+
     const token = this.route.snapshot.paramMap.get('token');
     if (token != null) {
       this.hasToken = true;

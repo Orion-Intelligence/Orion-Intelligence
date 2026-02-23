@@ -1,4 +1,5 @@
 @use 'assets/styles/fonts.scss';
+@use 'app/shared/partials/error-handler/error-handler.component.css';
 
 @tailwind base;
 @tailwind components;
@@ -6,6 +7,7 @@
 
 @import "bootstrap-icons/font/bootstrap-icons.css";
 @import "./app/pages/homepage/world-heatmap/world-heatmap.component.css";
+@import "./app/pages/welcome/welcome.component.css";
 
 .ui-see-more-btn {
   display: inline-flex;

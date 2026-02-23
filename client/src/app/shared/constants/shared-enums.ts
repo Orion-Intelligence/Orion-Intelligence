@@ -86,6 +86,14 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Cracked': 'Cracked',
   'View': 'View',
   'Auditlog': 'Audit Logs',
+  'Basic-Scan': 'Basic Scan',
+  'Port-Scan': 'Port Scan',
+  'Repository-Scan': 'Repository Scan',
+  'SEO-Scan': 'SEO Scan',
+  'APK-Scan': 'APK Scan',
+  'File-Scanner': 'File Scanner',
+  'Crypto-Scanner': 'Crypto Scanner',
+  'IOCS': 'IOCs',
 };
 export const dashboardTooltips: Record<string, string> = {
   'Top Teams (Leak)': 'Displays the teams most frequently involved in leak incidents.',

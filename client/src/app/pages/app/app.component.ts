@@ -8,10 +8,11 @@ import { appAnimation } from '../../shared/animations/app.animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MessageNotificationComponent } from '../../shared/partials/message-notification/message-notification.component';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
+import { WelcomeComponent } from '../welcome/welcome.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NgIf, FormsModule, ReactiveFormsModule, MessageNotificationComponent, LoaderComponent,],
+  imports: [RouterOutlet, NgIf, FormsModule, ReactiveFormsModule, MessageNotificationComponent, LoaderComponent, WelcomeComponent,],
   templateUrl: './app.component.html',
   animations: [appAnimation],
 })

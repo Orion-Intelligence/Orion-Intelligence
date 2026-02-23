@@ -25,19 +25,19 @@
   </div>
 
   <div class="mt-[12px] flex justify-end" *ngIf="!hasError && !isLoading">
-    <div class="inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
-      <button (click)="exportReport()" appTooltip="Download" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+    <div class="security-scan-action-menu inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
+      <button (click)="exportReport()" appTooltip="Download" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Download" height="25" ngSrc="../../../assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
       </button>
-      <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
+      <div class="security-scan-action-divider my-[10px] w-px bg-[var(--color-border)]"></div>
 
-      <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Print" height="25" ngSrc="../../../assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
       </button>
     </div>
   </div>
 
-  <div class="mt-[12px] rounded-[10px] bg-[var(--color-blue-720)] p-[20px] text-[var(--color-text1)]">
+  <div class="mt-[12px] rounded-[10px] bg-[var(--color-blue-720)] p-0 text-[var(--color-text1)]">
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
       <div class="text-[18px] font-semibold text-[var(--color-text7)]">Scan Failed</div>
       <div class="mt-[6px] text-[14px] text-[var(--color-text7)]">{{ errorMessage }}</div>
@@ -96,7 +96,7 @@
 
             <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
               <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">TLS Status</p>
-              <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="hasSSL ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
+              <span class="security-scan-tls-pill mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="hasSSL ? 'bg-emerald-500/10 text-emerald-300 security-scan-tls-pill--ok' : 'bg-rose-500/10 text-rose-300 security-scan-tls-pill--bad'">
                 {{ hasSSL ? 'ssl enabled' : 'no ssl detected' }}
               </span>
             </div>
@@ -117,11 +117,11 @@
 
     <ng-container *ngIf="!isLoading && !hasError; else categoriesSkeleton">
       <ng-container *ngIf="categories.length">
-        <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngFor="let cat of categories; trackBy: trackByCategory" @fadeInDashboardItem>
+        <div class="security-scan-findings-section mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngFor="let cat of categories; trackBy: trackByCategory" @fadeInDashboardItem>
           <h3 class="text-[18px] font-medium text-[var(--color-blue-640)]">{{ cat.name }} Findings ({{ cat.total }})</h3>
           <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
           <div class="flex flex-col gap-[15px]">
-            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
+            <div class="security-scan-finding-card rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
               <div class="flex items-center gap-[8px]">
                 <span class="h-[10px] w-[10px] rounded-full" [ngClass]="{ 'bg-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'bg-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'bg-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'bg-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }"></span>
                 <h4 class="text-[16px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
@@ -129,7 +129,7 @@
 
               <p class="mt-[10px] text-[14px] text-[var(--color-text4)]">{{ item.description }}</p>
               <div class="mt-[10px]">
-                <span class="inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium" [ngClass]="{ 'text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
+                <span class="security-scan-risk-pill inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium" [ngClass]="{ 'text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
                   {{ item.risk }} Risk ({{ item.confidence }} Confidence)
                 </span>
               </div>
@@ -198,11 +198,11 @@
 
     <ng-template #categoriesSkeleton>
       <ng-container *ngIf="isLoading">
-        <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngFor="let i of skeletonCards; index as idx" @fadeInDashboardItem>
+        <div class="security-scan-findings-section security-scan-findings-skeleton mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngFor="let i of skeletonCards; index as idx" @fadeInDashboardItem>
           <div class="ui-shimmer h-[18px] w-[220px] rounded-[6px] bg-[var(--color-divider)]"></div>
           <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
           <div class="flex flex-col gap-[12px]">
-            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let j of skeletonCards; index as jdx">
+            <div class="security-scan-finding-card security-scan-finding-skeleton rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let j of skeletonCards; index as jdx">
               <div class="flex items-center gap-[8px]">
                 <div class="ui-shimmer h-[10px] w-[10px] rounded-full bg-[var(--color-divider)]"></div>
                 <div class="ui-shimmer h-[14px] w-[200px] rounded-[4px] bg-[var(--color-divider)]"></div>

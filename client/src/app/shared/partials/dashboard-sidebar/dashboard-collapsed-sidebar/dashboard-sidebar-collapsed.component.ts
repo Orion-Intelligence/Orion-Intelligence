@@ -32,4 +32,12 @@ export class SidebarSectionComponent {
   selectOption(item: string) {
     this.optionSelected.emit(item);
   }
+
+  getItemTooltip(item: string): string {
+    const mapped = this.itemTooltips[item];
+    if (mapped) {
+      return mapped;
+    }
+    return item.replace(/-/g, ' ');
+  }
 }

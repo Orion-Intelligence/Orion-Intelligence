@@ -148,8 +148,8 @@
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
       <div class="my-[6px] rounded-[8px] select-none">
-        <a class="flex h-[46px] items-center gap-[8px] px-[14px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/ctigraph" target="_blank">
-          <img alt="Links" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
+        <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/ctigraph" target="_blank">
+          <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
           CTI Graph
         </a>
       </div>
@@ -157,8 +157,8 @@
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
       <div class="my-[6px] rounded-[8px] select-none">
-        <a class="flex h-[46px] items-center gap-[8px] px-[14px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/social-mapper" target="_blank">
-          <img alt="Social Mapper" class="mr-[8px] opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
+        <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/social-mapper" target="_blank">
+          <img alt="Social Mapper" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
           Social Mapper
         </a>
       </div>
@@ -166,8 +166,8 @@
 
     <ng-container>
       <div class="my-[6px] rounded-[8px] select-none">
-        <a class="flex h-[46px] items-center gap-[8px] px-[14px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
-          <img alt="Links" class="mr-[8px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
+        <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
+          <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
           Whistle Blowing
         </a>
       </div>
@@ -181,23 +181,23 @@
 
     <a class="select-none p-0" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
       <div class="my-[6px] rounded-[8px] select-none">
-        <div class="flex h-[46px] items-center gap-[8px] px-[14px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-          <img alt="Documentation" class="mr-[8px] mb-[1px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
+        <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
+          <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
         </div>
       </div>
     </a>
 
     <div class="my-[6px] rounded-[8px] select-none">
-      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] items-center gap-[8px] px-[14px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
-        <img alt="Links" class="mr-[8px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
+      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+        <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
         Links
       </div>
     </div>
 
     <a class="select-none p-0" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
       <div class="my-[6px] rounded-[8px] select-none">
-        <div class="flex h-[46px] items-center gap-[8px] px-[14px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-          <img alt="Documentation" class="mr-[8px] h-[22px] w-[22px] shrink-0 opacity-70" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
+        <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
+          <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
         </div>
       </div>
     </a>

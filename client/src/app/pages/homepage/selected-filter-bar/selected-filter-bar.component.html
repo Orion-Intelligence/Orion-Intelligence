@@ -1,31 +1,31 @@
 <div [ngClass]="{ 'mt-[10px]': showSorting }" @fadeInDashboardItem>
   <div class="selected-filter-shell mt-[15px] w-full max-w-[910px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-890)] px-[24px] py-[8px] pl-[17px] font-[Inter] text-[var(--color-text1)] max-[900px]:max-w-full" *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
 
-    <div class="flex items-center justify-between">
-      <div class="flex text-[18px] font-medium text-[var(--color-text1)]">Filters</div>
-      <div class="flex items-center gap-[20px] mr-[-10px]">
+    <div class="flex items-center justify-between gap-[10px] max-[640px]:flex-wrap max-[640px]:items-start">
+      <div class="flex text-[18px] font-medium text-[var(--color-text1)] max-[640px]:text-[16px]">Filters</div>
+      <div class="flex items-center gap-[20px] mr-[-10px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
         <ng-container *ngIf="isConsolidatedRoute()">
-          <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="entityFiltersCount()>0">
+          <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB] max-[640px]:h-[28px] max-[640px]:text-[11px]" *ngIf="entityFiltersCount()>0">
             Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
           </div>
-          <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="entityFiltersCount()>0">
+          <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB] max-[640px]:h-[28px] max-[640px]:text-[11px]" *ngIf="entityFiltersCount()>0">
             Entity({{ entityFiltersCount() }})
             <img [src]="isLightTheme() ? 'assets/images/shared/searchFilter_clossButton.svg' : 'assets/images/shared/theme/searchFilter_clossButton_white.svg'" class="selected-filter-close-icon ml-[8px] h-[9px] w-[9px] cursor-pointer" (click)="clearFilters('entity')" alt="close"/>
           </div>
         </ng-container>
 
-        <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="sidebarFilterCount()>0">
+        <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB] max-[640px]:h-[28px] max-[640px]:text-[11px]" *ngIf="sidebarFilterCount()>0">
           Sidebar({{ sidebarFilterCount() }})
           <img [src]="isLightTheme() ? 'assets/images/shared/searchFilter_clossButton.svg' : 'assets/images/shared/theme/searchFilter_clossButton_white.svg'" class="selected-filter-close-icon ml-[8px] h-[9px] w-[9px] cursor-pointer" (click)="clearFilters('sidebar')" alt="close"/>
         </div>
 
-        <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB]" *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
+        <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB] max-[640px]:h-[28px] max-[640px]:text-[11px]" *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
           Search Type ({{ this.app_service.getConfig().localSettings.matchType }})
           <img [src]="isLightTheme() ? 'assets/images/shared/searchFilter_clossButton.svg' : 'assets/images/shared/theme/searchFilter_clossButton_white.svg'" class="selected-filter-close-icon ml-[8px] h-[9px] w-[9px] cursor-pointer" (click)="clearMatchType()" alt="close"/>
         </div>
 
-        <button class="selected-filter-clear-btn h-[32px] w-[110px] rounded-[6px] border border-[#57A5EB] bg-transparent text-[13px] font-medium text-[#57A5EB]" (click)="clearFilters('all')">Clear Selection</button>
-        <div class="relative inline-block cursor-pointer" (click)="toggleFilterBarCollapse()">
+        <button class="selected-filter-clear-btn h-[32px] w-[110px] rounded-[6px] border border-[#57A5EB] bg-transparent text-[13px] font-medium text-[#57A5EB] max-[640px]:h-[30px] max-[640px]:w-auto max-[640px]:px-[10px] max-[640px]:text-[12px]" (click)="clearFilters('all')">Clear Selection</button>
+        <div class="relative inline-block cursor-pointer max-[640px]:ml-auto" (click)="toggleFilterBarCollapse()">
           <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="selected-filter-chevron px-[10px] py-[5px] transition-transform duration-300" [ngClass]="{ 'rotate-90': isFilterBarExpanded }" />
         </div>
       </div>
