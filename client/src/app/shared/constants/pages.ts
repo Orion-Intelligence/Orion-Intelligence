@@ -63,6 +63,7 @@ export enum DefacementSubCategory {
 export enum ApiSubCategory {
     EMAIL = 'Email-Breach',
     SOCIAL = 'Social-Scanner',
+    WANTED = 'Wanted-List',
     CRACKED = 'Playstore-Scanner',
     SOFTWARE = 'Software-Scanner',
     FILE = 'File-Scanner',

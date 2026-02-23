@@ -58,6 +58,53 @@ class search_model:
                 status_code=500, content={"detail": "Something happened while calling parse/" + api})
 
     @staticmethod
+    async def search_wanted_list(model):
+        text = getattr(model, "text", {}) or {}
+        query = (
+            text.get("query")
+            or text.get("name")
+            or text.get("username")
+            or ""
+        ).strip()
+
+        if not query:
+            return {"cards_data": [], "total": 0}
+
+        data_filter = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"match": {"caption": {"query": query, "operator": "and"}}},
+                        {"match": {"name": {"query": query, "operator": "and"}}},
+                        {"match": {"alias": {"query": query, "operator": "and"}}},
+                        {"match": {"referents": {"query": query, "operator": "and"}}},
+                        {"match": {"keywords": {"query": query, "operator": "and"}}}
+                    ],
+                    "minimum_should_match": 1
+                }
+            },
+            "size": 100,
+            "sort": [
+                {"_score": {"order": "desc"}},
+                {"last_seen": {"order": "desc", "missing": "_last"}}
+            ]
+        }
+
+        m_status, m_documents = await elastic_controller.get_instance().search_query(
+            ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, data_filter
+        )
+        if not m_status:
+            return {"cards_data": [], "total": 0}
+
+        hits = (m_documents or {}).get("hits", {}).get("hits", [])
+        cards = []
+        for hit in hits:
+            source = hit.get("_source", {}) or {}
+            cards.append(source)
+
+        return {"cards_data": cards, "total": len(cards)}
+
+    @staticmethod
     async def social_search(model, key):
         try:
             async with httpx.AsyncClient() as client:

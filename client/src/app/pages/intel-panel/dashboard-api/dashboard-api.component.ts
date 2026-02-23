@@ -170,6 +170,12 @@ export class DashboardApiComponent implements OnInit {
         }
         this.q2 = '';
       }
+      else if (this.apiType === 'wanted') {
+        if (params['query']) {
+          this.q1 = params['query'];
+        }
+        this.q2 = '';
+      }
       else if (this.apiType === 'cracked') {
         if (params['playstore']) {
           this.q1 = params['playstore'];
@@ -263,6 +269,9 @@ export class DashboardApiComponent implements OnInit {
     else if (this.apiType === 'social') {
       payload = { text: { username: this.q1 } };
     }
+    else if (this.apiType === 'wanted') {
+      payload = { text: { query: this.q1 } };
+    }
     else if (this.apiType === 'cracked') {
       payload = { text: { playstore: this.q1 } };
     }
@@ -277,17 +286,25 @@ export class DashboardApiComponent implements OnInit {
     else {
       payload = { text: { q1: this.q1, q2: this.q2 } };
     }
-    const endpoint = this.apiType === 'user'
-      ? '/api/dynamic/user'
-      : this.apiType === 'social'
-        ? '/api/dynamic/social'
-        : this.apiType === 'cracked'
-          ? '/api/dynamic/cracked'
-          : this.apiType === 'software'
-            ? '/api/dynamic/software'
-            : this.apiType === 'crypto'
-              ? '/api/crypto/scan'
-              : '/api/dynamic/';
+    let endpoint = '/api/dynamic/';
+    if (this.apiType === 'user') {
+      endpoint = '/api/dynamic/user';
+    }
+    else if (this.apiType === 'social') {
+      endpoint = '/api/dynamic/social';
+    }
+    else if (this.apiType === 'wanted') {
+      endpoint = '/api/dynamic/wanted';
+    }
+    else if (this.apiType === 'cracked') {
+      endpoint = '/api/dynamic/cracked';
+    }
+    else if (this.apiType === 'software') {
+      endpoint = '/api/dynamic/software';
+    }
+    else if (this.apiType === 'crypto') {
+      endpoint = '/api/crypto/scan';
+    }
     this.fetchSearchResults(endpoint, payload)
       .pipe(finalize(() => {
         this.loading = false;

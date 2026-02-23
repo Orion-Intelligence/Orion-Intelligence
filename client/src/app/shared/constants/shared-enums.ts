@@ -83,6 +83,7 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Forum': 'Forum',
   'Reddit': 'Reddit',
   'Social': 'Social',
+  'Wanted-List': 'Wanted List',
   'Cracked': 'Cracked',
   'View': 'View',
   'Auditlog': 'Audit Logs',

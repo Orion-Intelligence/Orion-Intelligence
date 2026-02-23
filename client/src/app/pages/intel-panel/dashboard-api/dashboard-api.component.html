@@ -1,21 +1,21 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 pb-4 lg:px-8">
 <form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">
-  <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3" [ngClass]="{ 'xl:max-w-[620px]': (apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'), 'xl:max-w-[980px]': !(apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto') }">
+  <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3" [ngClass]="{ 'xl:max-w-[620px]': (apiType === 'social' || apiType === 'wanted' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'), 'xl:max-w-[980px]': !(apiType === 'social' || apiType === 'wanted' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto') }">
     <div class="flex w-full items-center gap-3">
       <div class="min-w-0 flex-1">
       <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
         <div class="flex w-[45px] items-center justify-center bg-white">
           <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20" class="brightness-0 opacity-80">
         </div>
-        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'cracked' || apiType === 'crypto' }" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))" [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="apiType === 'crypto' ? true : ((apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim())))">
+        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'wanted' || apiType === 'cracked' || apiType === 'crypto' }" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'wanted' ? 'query' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1')))))" [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'wanted' ? 'Person Name / Alias' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1'))))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="(apiType === 'crypto' || apiType === 'wanted' || apiType === 'cracked' || apiType === 'social' || apiType === 'software') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))">
         <input type="hidden" value="1">
-        <button *ngIf="apiType === 'social' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
+        <button *ngIf="apiType === 'social' || apiType === 'wanted' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
           Search
         </button>
       </div>
     </div>
 
-    <div class="min-w-0 flex-1" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software' && apiType !== 'crypto'">
+    <div class="min-w-0 flex-1" *ngIf="apiType !== 'social' && apiType !== 'wanted' && apiType !== 'cracked' && apiType !== 'software' && apiType !== 'crypto'">
       <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
         <div class="flex w-[45px] items-center justify-center bg-white">
           <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20" class="brightness-0 opacity-80">
@@ -35,7 +35,7 @@
   <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)]">
     <span>
       <img alt="Info Icon" class="mr-[8px] inline-block" src="/assets/images/shared/hint.svg"/>
-      <span>{{ apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '' }}</span>
+      <span>{{ apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'wanted' ? 'Searches OpenSanctions wanted/watchlist records for the provided person query.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '' }}</span>
     </span>
   </div>
 </div>
@@ -87,7 +87,7 @@
         <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-person-badge"></i> Query 1</div>
         <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ1 || q1) || 'not found' }}</div>
       </div>
-      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]" *ngIf="apiType !== 'social' && apiType !== 'cracked' && apiType !== 'software'">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]" *ngIf="apiType !== 'social' && apiType !== 'wanted' && apiType !== 'cracked' && apiType !== 'software'">
         <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-envelope"></i> Query 2</div>
         <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ2 || q2) || 'not found' }}</div>
       </div>

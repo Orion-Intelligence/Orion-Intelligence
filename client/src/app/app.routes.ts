@@ -210,6 +210,11 @@ export const routes: Routes = [
             data: { animation: 'SocialAPI', type: 'social' }
           },
           {
+            path: 'wanted-list',
+            component: DashboardApiComponent,
+            data: { animation: 'WantedAPI', type: 'wanted' }
+          },
+          {
             path: 'playstore-scanner',
             component: DashboardApiComponent,
             data: { animation: 'CrackedAPI', type: 'cracked' }

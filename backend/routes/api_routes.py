@@ -467,6 +467,15 @@ async def scrape_social(payload: SocialScrapeRequest, current_user=Depends(get_c
 async def search_dynamic_social(param: search_dynamic_social_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "social", user_id=str(current_user.id))
 
+@api_routes.post(
+    "/api/dynamic/wanted",
+    include_in_schema=False,
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
+    return await search_model.getInstance().search_wanted_list(param)
+
 
 @api_routes.get(
     "/api/search/breach/stix/{doc_id}",
@@ -641,4 +650,3 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
 )
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
-
