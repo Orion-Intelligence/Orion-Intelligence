@@ -250,25 +250,30 @@ class alert_job:
 
             search_data_category = 'all'
             if category == "defacement":
+                base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
                 ParamModel = search_defacement_param_model
-                search_func = self._search_model.search_defacement_result
+                search_func = self._search_model.search_consolidated_ranked_result
             elif category == "breach":
+                base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
                 ParamModel = search_leak_param_model
-                search_func = self._search_model.search_leak_result
+                search_func = self._search_model.search_consolidated_ranked_result
             elif category == "feed":
+                base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
                 search_data_category = 'news'
                 ParamModel = search_leak_param_model
-                search_func = self._search_model.search_leak_result
+                search_func = self._search_model.search_consolidated_ranked_result
             elif category == "social":
                 base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
                 ParamModel = search_consolidated_param_model
                 search_func = self._search_model.search_consolidated_ranked_result
             elif category == "exploit":
+                base_index = [ELASTIC_INDEX.S_EXPLOIT_INDEX]
                 ParamModel = search_leak_param_model
-                search_func = self._search_model.search_exploit_result
+                search_func = self._search_model.search_consolidated_ranked_result
             elif category == "general":
+                base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
                 ParamModel = search_general_param_model
-                search_func = self._search_model.search_general_result
+                search_func = self._search_model.search_consolidated_ranked_result
             elif category == "discussion":
                 base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
                 ParamModel = search_leak_param_model
@@ -301,6 +306,16 @@ class alert_job:
                         elif category == "social":
                             es_response = await search_func(search_param, base_index, [], [])
                         elif category == "discussion":
+                            es_response = await search_func(search_param, base_index, [], [])
+                        if category == "defacement":
+                            es_response = await search_func(search_param, base_index, [], [])
+                        elif category == "breach":
+                            es_response = await search_func(search_param, base_index,  ["news"], ["leaks", "tracking"])
+                        elif category == "feed":
+                            es_response = await search_func(search_param, base_index, [], ["news"])
+                        elif category == "exploit":
+                            es_response = await search_func(search_param, base_index, [], [])
+                        elif category == "general":
                             es_response = await search_func(search_param, base_index, [], [])
                         else:
                             es_response = await search_func(search_param)
