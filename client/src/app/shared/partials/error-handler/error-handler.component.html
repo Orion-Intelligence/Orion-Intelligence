@@ -1,28 +1,34 @@
-<div class="notice_container">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-6">
-        <div class="notice">
-          <h2>
-            Oops! Server Error 404</h2><br>
-          <hr class="notice_header-divider">
-          <br>
-          <h1>
-            Something went wrong!</h1>
-          <div>
-            <p>The requested URL was not found on this server</p>
-          </div>
-          <br>
-          <div class="notice_actions">
-            <a class="btn btn-info btn-lg notice_action-button" href="https://github.com/msmannan00/Orion-Search"> <span class="glyphicon glyphicon-home"></span> Explore Project </a>
-          </div>
-          <div class="notice_actions">
-            <a class="btn btn-info btn-lg notice_action-button" href="/"> <span class="glyphicon glyphicon-home"></span> Homepage </a>
-          </div>
+<div
+  class="min-h-screen bg-[#172235]"
+  style="background-image: url('/assets/images/shared/error-page.png'); margin-left: -5px; height: 100vh;"
+>
+  <div class="mx-auto w-full max-w-[1140px] px-3">
+    <div class="grid grid-cols-1 lg:grid-cols-2">
+      <div class="mt-[100px] px-[15px] text-center max-[943px]:mt-[30px]">
+        <h2 class="text-[32px] font-medium text-[#212529]">Oops! Server Error 404</h2>
+        <div class="my-[5px] mx-auto h-[5px] w-[150px] bg-orange-500"></div>
+        <h1 class="mt-4 text-[48px] font-medium leading-tight text-[#212529]">Something went wrong!</h1>
+        <p class="mt-4 text-[16px] text-[#212529]">The requested URL was not found on this server</p>
+
+        <div class="mt-[15px] mb-[15px] flex justify-center">
+          <a
+            class="mt-[10px] inline-flex w-[300px] items-center justify-center rounded-[6px] border border-[#0dcaf0] bg-[#0dcaf0] px-4 py-[10px] text-[20px] font-normal text-[#000000] transition hover:border-[#31d2f2] hover:bg-[#31d2f2]"
+            href="https://github.com/msmannan00/Orion-Search"
+          >
+            Explore Project
+          </a>
+        </div>
+        <div class="mt-[15px] mb-[15px] flex justify-center">
+          <a
+            class="mt-[10px] inline-flex w-[300px] items-center justify-center rounded-[6px] border border-[#0dcaf0] bg-[#0dcaf0] px-4 py-[10px] text-[20px] font-normal text-[#000000] transition hover:border-[#31d2f2] hover:bg-[#31d2f2]"
+            href="/"
+          >
+            Homepage
+          </a>
         </div>
       </div>
-      <div class="col-md-6">
-        <img alt="Brand Logo" fill="true" ngSrc="/assets/images/shared/server-icon.svg" priority>
+      <div class="flex items-center justify-center px-[15px]">
+        <img alt="Brand Logo" class="h-auto w-full max-w-[540px]" src="/assets/images/shared/server-icon.svg">
       </div>
     </div>
   </div>
