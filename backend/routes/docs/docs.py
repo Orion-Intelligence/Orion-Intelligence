@@ -2338,7 +2338,22 @@ from pathlib import Path
 import re
 
 
-_DOCS_DIR = Path(__file__).resolve().parent / "api_docs"
+_DOCS_DIR_DEFAULT = Path(__file__).resolve().parent / "api_docs"
+_DOCS_DIR_CANDIDATES = [
+    _DOCS_DIR_DEFAULT,
+    Path(__file__).resolve().parents[3] / "docs" / "api_docs",
+    Path(__file__).resolve().parents[2] / "docs" / "api_docs",
+]
+
+
+def _resolve_docs_dir() -> Path:
+    for candidate in _DOCS_DIR_CANDIDATES:
+        if candidate.exists():
+            return candidate
+    return _DOCS_DIR_DEFAULT
+
+
+_DOCS_DIR = _resolve_docs_dir()
 
 
 def _read_md(rel_path: str) -> str:

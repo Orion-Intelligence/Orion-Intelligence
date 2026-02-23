@@ -152,7 +152,7 @@ services:
     image: axllent/mailpit:latest
     restart: unless-stopped
     ports:
-      - "8025:dont"
+      - "8025:8025"
       - "1025:1025"
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: "true"
