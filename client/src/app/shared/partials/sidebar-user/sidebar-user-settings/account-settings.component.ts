@@ -80,6 +80,7 @@ export class AccountSettingsComponent implements OnInit {
       };
     });
     this.applyTheme();
+    this.updateUser();
   }
 
   toggleTwoFa() {

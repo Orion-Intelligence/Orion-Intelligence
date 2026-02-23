@@ -1,9 +1,9 @@
-<div *ngIf="this.username()" class="relative flex items-center gap-[2px]">
+<div *ngIf="this.username()" class="relative z-[1200] flex items-center gap-[2px]">
   <ng-container *ngIf="licenseService.isMaintainer()">
     <a *ngIf="isMember()" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
       <div *ngIf="!this.appService.userSessionData().tenant.hasOnboarding" class="relative p-0">
         <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24" class="h-6 w-6">
-        <span class="absolute right-[-4px] top-[-3px] mt-[2px] flex h-[13px] w-[13px] items-center justify-center rounded-full text-[6px] font-semibold text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
+        <span class="absolute right-[-7px] top-[-6px] mt-[2px] inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold leading-none text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
           {{ getUnseenAlertCount() }}
         </span>
       </div>
@@ -14,7 +14,7 @@
     <img alt="Logout" height="24" [ngSrc]="isDarkTheme ? 'assets/images/shared/theme/profile-icon.svg' : 'assets/images/shared/profile-icon-dark.svg'" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
   </a>
 
-  <ul *ngIf="dropdownOpen()" class="absolute right-[10px] top-[calc(100%+8px)] z-[3] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
+  <ul *ngIf="dropdownOpen()" class="absolute right-[10px] top-[calc(100%+8px)] z-[1300] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
     <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
 
     <li class="mb-[6px] flex min-w-full items-center rounded-[10px] border border-[#eef2f6] bg-[#f8fafc] p-[8px]">

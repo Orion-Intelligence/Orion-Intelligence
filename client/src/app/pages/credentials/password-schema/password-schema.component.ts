@@ -1,10 +1,10 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 @Component({
   selector: 'app-password-schema',
-  imports: [FormsModule, NgIf],
+  imports: [FormsModule, NgIf, NgClass],
   templateUrl: './password-schema.component.html'
 })
 export class PasswordSchemaComponent {
@@ -14,6 +14,10 @@ export class PasswordSchemaComponent {
 
   @Output() close = new EventEmitter<void>();
   @Output() search = new EventEmitter<PasswordSchemaFilter>();
+
+  get isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme') || localStorage.getItem('theme') === 'light-theme';
+  }
 
   onSearch() {
     this.normalizeRange();

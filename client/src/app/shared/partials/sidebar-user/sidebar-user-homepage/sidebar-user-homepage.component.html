@@ -1,6 +1,6 @@
 <div *ngIf="!isAdmin() && !appService.userSessionData().tenant.isDefault; else showAdmin">
     <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst() && !isDemo();else showFree">
-        <div class="relative min-h-[500px] w-full overflow-x-hidden px-[30px] py-[20px] font-[Inter,sans-serif] text-[var(--color-text1)] max-[1000px]:px-[10px] max-[640px]:px-[8px] max-[640px]:py-[12px]">
+        <div class="relative min-h-[calc(100dvh-60px)] w-full overflow-x-hidden px-[30px] py-[20px] font-[Inter,sans-serif] text-[var(--color-text1)] max-[1000px]:px-[10px] max-[640px]:px-[8px] max-[640px]:py-[12px]">
             <div *ngIf="showAlertScanLoading()">
                 <app-alert-scan-loading></app-alert-scan-loading>
             </div>
@@ -12,13 +12,7 @@
                         <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true" appTooltip="Print Alerts" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('print')" (mouseleave)="setHomeToolHover(null)" [style.background-color]="isLightTheme() && hoveredHomeTool==='print' ? '#cfe0f4' : null">
                             <img src="assets/images/shared/theme/print.svg" height="25" alt="print" class="ioc-action-icon" />
                         </button>
-                        <div
-                            *ngIf="licenseService.isMaintainer()"
-                            class="ioc-action-divider h-[20px] w-px bg-[#ffffff20]"
-                            [style.background-color]="isLightTheme() ? '#a9bbd0' : null"
-                            [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null"
-                            [style.opacity]="isLightTheme() ? '1' : null"
-                        ></div>
+                        <div *ngIf="licenseService.isMaintainer()" class="ioc-action-divider h-[20px] w-px bg-[#ffffff20]" [style.background-color]="isLightTheme() ? '#a9bbd0' : null" [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null" [style.opacity]="isLightTheme() ? '1' : null"></div>
                         <div class="inline-flex items-center gap-2">
                             <button (click)="flushAll()" appTooltip="flush all" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" *ngIf="(this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks)>0 && licenseService.isMaintainer()" (mouseenter)="setHomeToolHover('flush')" (mouseleave)="setHomeToolHover(null)" [style.background-color]="isLightTheme() && hoveredHomeTool==='flush' ? '#cfe0f4' : null">
                                 <img alt="flush" height="20" ngSrc="assets/images/shared/theme/bin.svg" width="20" class="ioc-action-icon" />

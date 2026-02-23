@@ -35,6 +35,10 @@ export class ScanHelperMethods implements OnDestroy {
   @Output() close = new EventEmitter<void>();
   @Output() search = new EventEmitter<string[]>();
 
+  get isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme') || localStorage.getItem('theme') === 'light-theme';
+  }
+
   constructor(private scanService: ScanHelperMethodsService) {
     effect(() => {
       this.progress = this.scanService.progress();

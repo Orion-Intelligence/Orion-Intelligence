@@ -1,34 +1,35 @@
 <div
-  class="min-h-screen bg-[#172235]"
-  style="background-image: url('/assets/images/shared/error-page.png'); margin-left: -5px; height: 100vh;"
+  class="min-h-[100dvh] h-auto md:-ml-[5px]"
+  style="background-image: url('/assets/images/shared/error-page.png'); font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans','Liberation Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';"
 >
-  <div class="mx-auto w-full max-w-[1140px] px-3">
-    <div class="grid grid-cols-1 lg:grid-cols-2">
-      <div class="mt-[100px] px-[15px] text-center max-[943px]:mt-[30px]">
-        <h2 class="text-[32px] font-medium text-[#212529]">Oops! Server Error 404</h2>
-        <div class="my-[5px] mx-auto h-[5px] w-[150px] bg-orange-500"></div>
-        <h1 class="mt-4 text-[48px] font-medium leading-tight text-[#212529]">Something went wrong!</h1>
-        <p class="mt-4 text-[16px] text-[#212529]">The requested URL was not found on this server</p>
-
-        <div class="mt-[15px] mb-[15px] flex justify-center">
+  <div class="mx-auto w-full px-4 py-8 sm:max-w-[540px] md:max-w-[720px] md:py-10 lg:max-w-[960px] xl:max-w-[1140px]">
+    <div class="-mx-[15px] flex flex-wrap items-center">
+      <div class="mt-6 w-full px-[15px] text-center md:mt-[100px] md:w-1/2">
+        <h2 class="text-[28px] font-medium leading-[1.2] text-[#212529] md:text-[32px]">Oops! Server Error 404</h2>
+        <div class="mx-auto my-[10px] h-[5px] w-[150px] bg-orange-500"></div>
+        <h1 class="text-[34px] font-medium leading-[1.2] text-[#212529] md:text-[40px]">Something went wrong!</h1>
+        <div>
+          <p class="text-[16px] leading-[1.5] text-[#212529]">The requested URL was not found on this server</p>
+        </div>
+        <div class="mt-6 flex justify-center">
           <a
-            class="mt-[10px] inline-flex w-[300px] items-center justify-center rounded-[6px] border border-[#0dcaf0] bg-[#0dcaf0] px-4 py-[10px] text-[20px] font-normal text-[#000000] transition hover:border-[#31d2f2] hover:bg-[#31d2f2]"
+            class="inline-flex h-[50px] w-full max-w-[300px] items-center justify-center rounded-[4.8px] border border-[#17a2b8] bg-[#17a2b8] px-4 py-2 text-[20px] font-normal leading-[1.5] text-white transition-colors hover:border-[#138496] hover:bg-[#138496]"
             href="https://github.com/msmannan00/Orion-Search"
           >
             Explore Project
           </a>
         </div>
-        <div class="mt-[15px] mb-[15px] flex justify-center">
+        <div class="mt-4 flex justify-center">
           <a
-            class="mt-[10px] inline-flex w-[300px] items-center justify-center rounded-[6px] border border-[#0dcaf0] bg-[#0dcaf0] px-4 py-[10px] text-[20px] font-normal text-[#000000] transition hover:border-[#31d2f2] hover:bg-[#31d2f2]"
+            class="inline-flex h-[50px] w-full max-w-[300px] items-center justify-center rounded-[4.8px] border border-[#17a2b8] bg-[#17a2b8] px-4 py-2 text-[20px] font-normal leading-[1.5] text-white transition-colors hover:border-[#138496] hover:bg-[#138496]"
             href="/"
           >
             Homepage
           </a>
         </div>
       </div>
-      <div class="flex items-center justify-center px-[15px]">
-        <img alt="Brand Logo" class="h-auto w-full max-w-[540px]" src="/assets/images/shared/server-icon.svg">
+      <div class="order-first w-full px-[15px] md:order-none md:w-1/2 md:pl-0">
+        <img alt="Brand Logo" class="mx-auto h-[34vh] w-auto sm:h-[42vh] md:mr-auto md:ml-0 md:h-[70vh]" src="/assets/images/shared/server-icon.svg">
       </div>
     </div>
   </div>

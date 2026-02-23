@@ -1,4 +1,4 @@
-<div class="flex h-[60px] w-full items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
+<div class="relative z-[1100] flex h-[60px] w-full items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
   <ng-container *ngIf="!authService.getIsMobileDemo()">
     <div class="ml-[20px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
       <img (click)="goBack()" [ngClass]="{ 'hidden cursor-not-allowed opacity-50': breadcrumb.length <= 2 && breadcrumb[0].label !== 'ctigraph', 'cursor-pointer': !(breadcrumb.length <= 2 && breadcrumb[0].label !== 'ctigraph') }" alt="Back" class="ui-breadcrumb-chevron mt-[-1px] mr-[10px] ml-[5px] h-[50px] w-[50px] p-[10px]" height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />

@@ -8,6 +8,37 @@
 @import "./app/pages/homepage/world-heatmap/world-heatmap.component.css";
 @import "./app/pages/welcome/welcome.component.css";
 
+html,
+body {
+  min-height: 100%;
+}
+
+html {
+  background: #0e1626;
+}
+
+body {
+  background: var(--color-blue-830);
+}
+
+html.light-theme,
+body.light-theme {
+  background: #ffffff;
+}
+
+html.dark-theme,
+body.dark-theme {
+  background: #0e1626;
+}
+
+html:has(body.light-theme) {
+  background: #ffffff;
+}
+
+html:has(body.dark-theme) {
+  background: #0e1626;
+}
+
 .ui-see-more-btn {
   display: inline-flex;
   align-items: center;
