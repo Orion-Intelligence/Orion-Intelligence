@@ -591,6 +591,58 @@ class elastic_request_generator:
             ],
         )
 
+    def on_search_sanctions(self, p_query_model, pfilter=None, index_name=None):
+
+        if getattr(p_query_model, "matchtype", None):
+            p_query_model.q = helper_controller.transform_query_match(
+                p_query_model.q, p_query_model.matchtype
+            )
+
+        if p_query_model.q != "*":
+            raw_query = p_query_model.q
+            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+        else:
+            raw_query = "*"
+
+        if raw_query == "":
+            raw_query = "*"
+
+        if not raw_query:
+            idx = index_name if index_name else ELASTIC_INDEX.S_GENERIC_INDEX
+            return idx, {"query": {"match_none": {}}, "size": 0}
+
+        exact_phrases = re.findall(r'"([^"]+)"', raw_query)
+        loose_terms = re.sub(r'"[^"]+"', "", raw_query).strip().split()
+        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
+        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+
+        must_clauses = []
+        must_not_clause = []
+
+        phrase_fields = [
+            ("m_title", 5),
+            ("m_content", 3),
+            ("m_important_content", 4),
+            ("m_ref_html", 2),
+        ]
+
+        query_statement = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=getattr(p_query_model, "page", 1),
+            date_field=None,
+        )
+
+        idx = index_name if index_name else ELASTIC_INDEX.S_OPENSANCTIONS_INDEX
+        return idx, query_statement
+
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False, alert=False):
 

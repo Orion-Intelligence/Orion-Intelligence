@@ -170,6 +170,12 @@ export class DashboardApiComponent implements OnInit {
         }
         this.q2 = '';
       }
+      else if (this.apiType === 'sanctions') {
+        if (params['sanction']) {
+          this.q1 = params['sanction'];
+        }
+        this.q2 = '';
+      }
       else if (this.apiType === 'cracked') {
         if (params['playstore']) {
           this.q1 = params['playstore'];
@@ -263,6 +269,9 @@ export class DashboardApiComponent implements OnInit {
     else if (this.apiType === 'social') {
       payload = { text: { username: this.q1 } };
     }
+    else if (this.apiType === 'sanctions') {
+      payload = { text: { sanction: this.q1 } };
+    }
     else if (this.apiType === 'cracked') {
       payload = { text: { playstore: this.q1 } };
     }
@@ -287,7 +296,9 @@ export class DashboardApiComponent implements OnInit {
             ? '/api/dynamic/software'
             : this.apiType === 'crypto'
               ? '/api/crypto/scan'
-              : '/api/dynamic/';
+              : this.apiType === 'sanctions'
+                ? '/api/dynamic/sanctions'
+                : '/api/dynamic/';
     this.fetchSearchResults(endpoint, payload)
       .pipe(finalize(() => {
         this.loading = false;

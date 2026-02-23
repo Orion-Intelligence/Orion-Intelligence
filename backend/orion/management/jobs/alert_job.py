@@ -281,6 +281,9 @@ class alert_job:
             elif category == "stealerlogs":
                 ParamModel = search_credential_param_model
                 search_func = self._search_model.search_stealerlogs_result
+            elif category == "OpenSanctions":
+                base_index = [ELASTIC_INDEX.S_OPENSANCTIONS_INDEX]
+                ParamModel = search_leak_param_model
             else:
                 return
 

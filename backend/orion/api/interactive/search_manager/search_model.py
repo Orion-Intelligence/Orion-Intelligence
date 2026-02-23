@@ -20,6 +20,8 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_par
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import search_social_callback_model
 from orion.helper_manager.helper_controller import helper_controller
+from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model, \
+    search_open_sanctions_param_model
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -160,6 +162,12 @@ class search_model:
 
         return search_model._build_ranked_response(response, query, 15)
 
+    async def search_open_sanctions_result(self, param: search_open_sanctions_param_model):
+        document, data_filter = elastic_request_generator().on_search_sanctions(param, param.entity_filter)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        return await self.__search_callback.search_handler(
+            m_status, m_documents, search_general_callback_model, general_listing)
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
         document, data_filter = elastic_request_generator().on_search_persona(param)

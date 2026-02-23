@@ -74,6 +74,18 @@ async def search_leak(param: search_consolidated_param_model = Body(...)):
 
 
 @api_routes.post(
+    "/api/dynamic/sanctions",
+    summary="Search strategic reports",
+    description=SEARCH_DOCS["strategic"]["description"],
+    tags=["Search"],
+    operation_id="searchStrategicReports",
+    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general")), ], )
+async def search_sanctions(param: search_consolidated_param_model = Body(...)):
+    return await search_model.getInstance().search_open_sanctions_result(param)
+
+@api_routes.post(
     "/api/search/social",
     summary="Search strategic reports",
     description=SEARCH_DOCS["strategic"]["description"],

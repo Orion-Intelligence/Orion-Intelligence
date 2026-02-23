@@ -33,6 +33,9 @@ class search_news_param_model(_search_base_param_model):
     pass
 
 
+class search_open_sanctions_param_model(_search_base_param_model):
+    category: str = "sanctions"
+
 class search_news_internal_param_model(search_news_param_model):
     mContentType: str = "news"
     category: str = "news"
