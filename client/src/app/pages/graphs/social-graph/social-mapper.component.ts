@@ -3,7 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { NetworkGraphComponent } from './network-graph/network-graph.component';
 import { MetadataPopupComponent } from './metadata-popup/metadata-popup.component';
 import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-summary-popup.component';
-import { Job, PlatformResult, TabState } from '../../../shared/model/social/social-scan.models';
+import { CustomEntity, Job, PlatformResult, TabState } from '../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../shared/services/social-scan.service';
 import { TabManagerService } from '../shared/services/tab-manager.service';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
@@ -86,6 +86,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         username: string;
     } | null>(null);
   platformAliasInput = signal('');
+  selectedEntityReport = signal<CustomEntity | null>(null);
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   entityManager = viewChild(EntityManagerComponent);
   isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
@@ -334,9 +335,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   confirmDeletion() {
     const usernameToDelete = this.state.deleteUsername();
+    const entityIdToDelete = this.state.deleteEntityId();
     if (usernameToDelete) {
       this.cancelAllFetchesForUser(usernameToDelete);
       this.removeUserScanData(usernameToDelete);
+    }
+    else if (entityIdToDelete) {
+      this.entityManager()?.deleteCustomEntity(entityIdToDelete);
     }
     this.state.closeDeleteConfirmation();
   }
@@ -529,7 +534,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   onPlatformNodeClicked(nodeId: string) {
     if (this.isCustomEntityNode(nodeId)) {
-      this.entityManager()?.openEditEntityModal(nodeId);
+      const selectedEntity = this.customEntities().find(entity => entity.id === nodeId) || null;
+      this.selectedEntityReport.set(selectedEntity);
       return;
     }
     if (!nodeId.startsWith('platform-')) {
@@ -540,6 +546,71 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return;
     }
     this.state.openPlatformNodePopup(nodeId);
+  }
+
+  closeEntityReportPopup() {
+    this.selectedEntityReport.set(null);
+  }
+
+  getEntityReportRecords(entity: CustomEntity): Array<Record<string, unknown>> {
+    const report = entity.reportData;
+    if (!report || typeof report !== 'object') {
+      return [];
+    }
+    const nestedResult = (report as any)?.result;
+    if (Array.isArray(nestedResult)) {
+      return nestedResult as Array<Record<string, unknown>>;
+    }
+    if (Array.isArray(nestedResult?.result)) {
+      return nestedResult.result as Array<Record<string, unknown>>;
+    }
+    return [report as Record<string, unknown>];
+  }
+
+  getEntityRecordEntries(record: Record<string, unknown>): Array<{ key: string; label: string; values: string[]; }> {
+    return Object.entries(record)
+      .filter(([, value]) => value !== null && value !== undefined && !(Array.isArray(value) && value.length === 0))
+      .map(([key, value]) => ({
+        key,
+        label: this.toFieldLabel(key),
+        values: this.toDisplayValues(value)
+      }));
+  }
+
+  private toFieldLabel(key: string): string {
+    const normalized = key.replace(/^m_/, '').replace(/_/g, ' ').trim();
+    if (!normalized) {
+      return key;
+    }
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  }
+
+  private toDisplayValues(value: unknown): string[] {
+    if (Array.isArray(value)) {
+      const values = value
+        .filter(item => item !== null && item !== undefined && `${item}`.trim() !== '')
+        .map(item => `${item}`);
+      return values.length > 0 ? values : ['-'];
+    }
+    return [this.toDisplayValue(value)];
+  }
+
+  private toDisplayValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '-';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    try {
+      return JSON.stringify(value, null, 2);
+    }
+    catch {
+      return String(value);
+    }
   }
 
   onRelationshipNodeClicked(nodeId: string) {
@@ -619,7 +690,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   deleteCustomEntity(nodeId: string) {
-    this.entityManager()?.deleteCustomEntity(nodeId);
+    const entity = this.customEntities().find(e => e.id === nodeId);
+    this.state.openDeleteEntityConfirmation(nodeId, entity?.label || entity?.value || nodeId);
     this.state.closeContextMenu();
   }
 

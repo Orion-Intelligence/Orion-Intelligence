@@ -95,17 +95,44 @@
             <div>
               <div class="flex flex-col gap-2">
                 <div *ngFor="let entity of displayEntities(); trackBy: trackByEntityId; let i = index" class="home-menu-created-item">
-                  <div>
+                  <div class="home-menu-fade-row">
                     <div [class]="getEntityClasses(entity)" (click)="entityClicked.emit(entity.id)" class="transition-opacity duration-300">
-                      <div class="flex justify-between items-center">
+                      <div class="flex justify-between items-start">
                         <div class="flex items-center gap-3 min-w-0">
-                          <i [class]="getIconForEntityType(entity.type) + ' w-4 h-4'"></i>
-                          <p class="font-medium mb-0 truncate text-slate-300">{{ entity.label }}</p>
-                          <div *ngIf="entity.status === 'pending'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                          <div [ngSwitch]="entity.status">
+                            <div *ngSwitchCase="'in_progress'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" role="status"></div>
+                            <div *ngSwitchCase="'pending'" class="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" role="status"></div>
+                            <i *ngSwitchCase="'added'" class="bi bi-check-circle-fill w-4 h-4 text-green-500"></i>
+                            <i *ngSwitchCase="'failed'" class="bi bi-x-circle-fill w-4 h-4 text-red-500"></i>
+                          </div>
+                          <p class="font-bold mb-0 truncate text-indigo-300">{{ entity.label }}</p>
                         </div>
-                        <div *ngIf="entity.onGraph && entity.status === 'added'" class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap">
-                          <i class="bi bi-check-circle-fill"></i>
-                          <span>On Graph</span>
+                        <div *ngIf="entity.status === 'in_progress' || entity.status === 'pending'" class="flex items-center gap-2 shrink-0">
+                          <div class="font-mono text-xs text-slate-400">{{ getAnimatedEntityProgress(entity) }}%</div>
+                          <button (click)="$event.stopPropagation(); cancelEntityScan.emit(entity.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                            <i class="bi bi-x-lg"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <progress *ngIf="showEntityProgress(entity)" class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
+                      <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ entity.step || (entity.status === 'added' ? 'Completed' : (entity.status === 'failed' ? 'Extraction failed' : 'Queued')) }}</p>
+                      <div *ngIf="entity.status === 'added' || entity.status === 'failed'" class="flex justify-between items-center mt-3">
+                        <div *ngIf="entity.onGraph; else entityNotOnGraph">
+                          <div class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>On Graph</span>
+                          </div>
+                        </div>
+                        <ng-template #entityNotOnGraph>
+                          <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-full">
+                            <i class="bi bi-node-minus"></i>
+                            <span>Not on Graph</span>
+                          </div>
+                        </ng-template>
+                        <div class="flex items-center gap-2">
+                          <button (click)="$event.stopPropagation(); deleteEntity.emit(entity.id)" title="Delete Entity" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                            <i class="bi bi-trash3 w-4 h-4 leading-none block"></i>
+                          </button>
                         </div>
                       </div>
                     </div>

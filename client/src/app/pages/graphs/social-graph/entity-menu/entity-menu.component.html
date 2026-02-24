@@ -10,17 +10,12 @@
 
   <div class="flex-grow overflow-hidden">
     <div *ngIf="!isCollapsed()" class="h-full w-72 p-3 flex flex-col gap-2 overflow-y-auto transition-all duration-300 ease-out">
-      <button data-cy="entity-add-wallet" (click)="addEntityClicked.emit('wallet')" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
-        <i class="bi bi-wallet2 w-4 h-4 text-green-400"></i>
-        <span>Add Wallet</span>
-      </button>
-      <button data-cy="entity-add-email" (click)="addEntityClicked.emit('email')" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
-        <i class="bi bi-envelope-at w-4 h-4 text-yellow-400"></i>
-        <span>Add Email</span>
-      </button>
-      <button data-cy="entity-add-domain" (click)="addEntityClicked.emit('domain')" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
-        <i class="bi bi-globe w-4 h-4 text-sky-400"></i>
-        <span>Add Domain</span>
+      <div class="mb-1">
+        <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block w-full rounded-md border-0 bg-[var(--color-blue-700)] px-3 py-1.5 text-[12px] text-[var(--color-text1)] shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none">
+      </div>
+      <button *ngFor="let option of filteredEntityAddOptions" (click)="addEntityClicked.emit(option.type)" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
+        <i [class]="option.iconClass + ' w-4 h-4'"></i>
+        <span>{{ option.label }}</span>
       </button>
 
       <div class="my-2 h-px bg-[var(--color-border)]"></div>
@@ -39,14 +34,8 @@
       </div>
     </div>
     <div *ngIf="isCollapsed()" class="h-full w-14 flex flex-col items-center py-4 gap-4 transition-all duration-300 ease-in opacity-100">
-      <button (click)="addEntityClicked.emit('wallet')" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" title="Add Wallet">
-        <i class="bi bi-wallet2 text-xl text-green-400"></i>
-      </button>
-      <button (click)="addEntityClicked.emit('email')" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" title="Add Email">
-        <i class="bi bi-envelope-at text-xl text-yellow-400"></i>
-      </button>
-      <button (click)="addEntityClicked.emit('domain')" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" title="Add Domain">
-        <i class="bi bi-globe text-xl text-sky-400"></i>
+      <button *ngFor="let option of entityAddOptions" (click)="addEntityClicked.emit(option.type)" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" [title]="option.label">
+        <i [class]="option.iconClass + ' text-xl'"></i>
       </button>
     </div>
   </div>
@@ -63,17 +52,12 @@
       </button>
     </div>
     <div class="p-3 flex flex-col gap-2 overflow-y-auto">
-      <button (click)="addEntityClicked.emit('wallet'); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
-        <i class="bi bi-wallet2 w-5 h-5 text-green-400"></i>
-        <span>Add Wallet</span>
-      </button>
-      <button (click)="addEntityClicked.emit('email'); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
-        <i class="bi bi-envelope-at w-5 h-5 text-yellow-400"></i>
-        <span>Add Email</span>
-      </button>
-      <button (click)="addEntityClicked.emit('domain'); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
-        <i class="bi bi-globe w-5 h-5 text-sky-400"></i>
-        <span>Add Domain</span>
+      <div class="mb-1">
+        <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block w-full rounded-md border-0 bg-[var(--color-blue-700)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none">
+      </div>
+      <button *ngFor="let option of filteredEntityAddOptions" (click)="addEntityClicked.emit(option.type); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
+        <i [class]="option.iconClass + ' w-5 h-5'"></i>
+        <span>{{ option.label }}</span>
       </button>
 
       <div class="my-1 h-px bg-[var(--color-border)]"></div>

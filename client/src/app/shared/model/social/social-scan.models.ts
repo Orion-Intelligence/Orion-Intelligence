@@ -116,11 +116,31 @@ export type ScanEvent = {
 };
 export interface CustomEntity {
     id: string;
-    type: 'wallet' | 'email' | 'domain';
+    type:
+    | 'wallet'
+    | 'email'
+    | 'domain'
+    | 'email-breach'
+    | 'social-scanner'
+    | 'wanted-list'
+    | 'national-identity'
+    | 'playstore-scanner'
+    | 'software-scanner'
+    | 'domain-scan'
+    | 'subdomains-scan'
+    | 'dns-scan'
+    | 'wayback-scan'
+    | 'ioc-extract'
+    | 'apk-scan'
+    | 'crypto-scanner';
     label: string;
     value: string;
     onGraph: boolean;
-    status: 'pending' | 'added';
+    status: 'pending' | 'in_progress' | 'added' | 'failed';
+    progress?: number;
+    step?: string;
+    source?: 'manual' | 'api';
+    reportData?: Record<string, any> | null;
 }
 export interface GraphPlatformBatch {
     all: PlatformResult[];

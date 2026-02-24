@@ -49,6 +49,7 @@ export class SocialMapperStateService {
   contextMenuData = signal<ContextMenuData | null>(null);
   deleteConfirmationData = signal<DeleteConfirmationData | null>(null);
   deleteUsername = signal<string | null>(null);
+  deleteEntityId = signal<string | null>(null);
   infoModalData = signal<InfoPopupData | null>(null);
   manageProfilesModalData = signal<ManageProfilesModalData | null>(null);
   isFollowerScanPopupVisible = signal(false);
@@ -84,6 +85,7 @@ export class SocialMapperStateService {
 
   openDeleteConfirmation(username: string) {
     const job = this.jobs().find(j => j.username === username);
+    this.deleteEntityId.set(null);
     this.deleteUsername.set(username);
     this.deleteConfirmationData.set({
       message: `Are you sure you want to delete the profile for ${job?.displayName || username}? This will remove all associated data and cannot be undone.`,
@@ -91,8 +93,17 @@ export class SocialMapperStateService {
     this.closeContextMenu();
   }
 
+  openDeleteEntityConfirmation(entityId: string, entityLabel: string) {
+    this.deleteUsername.set(null);
+    this.deleteEntityId.set(entityId);
+    this.deleteConfirmationData.set({
+      message: `Are you sure you want to delete the entity ${entityLabel}? This will remove all associated data and cannot be undone.`,
+    });
+    this.closeContextMenu();
+  }
+
   closeDeleteConfirmation() {
-    this.deleteConfirmationData.set(null); this.deleteUsername.set(null); 
+    this.deleteConfirmationData.set(null); this.deleteUsername.set(null); this.deleteEntityId.set(null); 
   }
 
   openInfoModal(type: 'info' | 'warning', title: string, message: string, confirmText: string = 'OK') {

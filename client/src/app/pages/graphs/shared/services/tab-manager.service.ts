@@ -177,6 +177,10 @@ export class TabManagerService {
   }
 
   private tryPeriodicSave() {
+    if (!this.hasAuthToken()) {
+      this.hasPendingSave = false;
+      return;
+    }
     if (!this.hasLoadedState) {
       return;
     }
@@ -199,6 +203,9 @@ export class TabManagerService {
   }
 
   private persistAddedTab(tab: Tab) {
+    if (!this.hasAuthToken()) {
+      return;
+    }
     if (!this.hasLoadedState) {
       return;
     }
@@ -214,6 +221,20 @@ export class TabManagerService {
   }
 
   private loadState() {
+    if (!this.hasAuthToken()) {
+      this.hasLoadedState = true;
+      this.hasPendingSave = false;
+      if (this.tabs().length === 0) {
+        const localTab: Tab = {
+          id: self.crypto.randomUUID(),
+          name: `Session ${TabManagerService.tabCounter++}`,
+          state: this.createNewState(),
+        };
+        this.tabs.set([localTab]);
+        this.activeTabId.set(localTab.id);
+      }
+      return;
+    }
     this.api.get<any>(`social/session/tabs?graph_type=${this.graphType}`).subscribe({
       next: (savedState) => {
         const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
@@ -245,6 +266,10 @@ export class TabManagerService {
         this.addTab();
       },
     });
+  }
+
+  private hasAuthToken(): boolean {
+    return !!localStorage.getItem('token');
   }
 
   private serializeTabState(state: TabState): SerializableTabState {

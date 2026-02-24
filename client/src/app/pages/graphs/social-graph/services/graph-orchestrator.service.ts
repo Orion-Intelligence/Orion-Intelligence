@@ -179,7 +179,7 @@ export class GraphOrchestratorService {
 
   public addEntityToGraph(state: TabState, entityId: string) {
     const entity = state.customEntities().find(e => e.id === entityId);
-    if (!entity || entity.onGraph || entity.status === 'pending') {
+    if (!entity || entity.onGraph || entity.status !== 'added') {
       return;
     }
     const newNode = this.graphManager.createEntityNode(entity);

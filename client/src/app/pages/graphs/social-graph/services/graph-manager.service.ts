@@ -15,7 +15,7 @@ export class GraphManagerService {
       label: entity.label,
       shape: 'circularImage',
       image: this.createEntityNodeSvg(entity.type),
-      size: 25,
+      size: 34,
       font: { color: this.getGraphLabelColor(), size: 12 },
       color: {
         border: entityConfig.border,

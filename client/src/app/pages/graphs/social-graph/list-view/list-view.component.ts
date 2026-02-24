@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, computed, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NetworkData, PlatformResult, CustomEntity, NetworkNode } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
@@ -23,6 +23,7 @@ export class ListViewComponent {
   platformNodeClicked = output<string>();
   deleteCustomEntity = output<string>();
   public state = inject(SocialMapperStateService);
+  expandedEntityIds = signal<Set<string>>(new Set<string>());
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
   public isUrl = isUrl;
@@ -86,6 +87,31 @@ export class ListViewComponent {
     return this.customEntities().find(e => e.id === entityNodeId);
   }
 
+  getEntityReportRecords(entity: CustomEntity): Array<Record<string, unknown>> {
+    const report = entity.reportData;
+    if (!report || typeof report !== 'object') {
+      return [];
+    }
+    const nestedResult = (report as any)?.result;
+    if (Array.isArray(nestedResult)) {
+      return nestedResult as Array<Record<string, unknown>>;
+    }
+    if (Array.isArray(nestedResult?.result)) {
+      return nestedResult.result as Array<Record<string, unknown>>;
+    }
+    return [report as Record<string, unknown>];
+  }
+
+  getEntityRecordEntries(record: Record<string, unknown>): Array<{ key: string; label: string; values: string[]; }> {
+    return Object.entries(record)
+      .filter(([, value]) => value !== null && value !== undefined && !(Array.isArray(value) && value.length === 0))
+      .map(([key, value]) => ({
+        key,
+        label: this.toFieldLabel(key),
+        values: this.toDisplayValues(value)
+      }));
+  }
+
   getNodeById(nodeId: string | number): NetworkNode | undefined {
     return this.networkData().nodes.find(n => n.id === nodeId);
   }
@@ -132,6 +158,20 @@ export class ListViewComponent {
       case 'wallet': return 'bi bi-wallet2 text-green-400';
       case 'email': return 'bi bi-envelope-at text-yellow-400';
       case 'domain': return 'bi bi-globe text-sky-400';
+      case 'domain-scan': return 'bi bi-globe2 text-sky-400';
+      case 'subdomains-scan': return 'bi bi-diagram-3 text-sky-400';
+      case 'dns-scan': return 'bi bi-broadcast text-sky-400';
+      case 'wayback-scan': return 'bi bi-clock-history text-sky-400';
+      case 'email-breach': return 'bi bi-person-badge text-indigo-400';
+      case 'social-scanner': return 'bi bi-people text-indigo-400';
+      case 'wanted-list': return 'bi bi-person-exclamation text-indigo-400';
+      case 'national-identity': return 'bi bi-card-text text-indigo-400';
+      case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
+      case 'software-scanner': return 'bi bi-window text-indigo-400';
+      case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
+      case 'apk-scan': return 'bi bi-android2 text-indigo-400';
+      case 'crypto-scanner': return 'bi bi-currency-bitcoin text-green-400';
+      default: return 'bi bi-circle text-slate-400';
     }
   }
 
@@ -157,5 +197,58 @@ export class ListViewComponent {
 
   trackConnectionById( _index: number, item: { node: NetworkNode; } ): string | number {
     return item.node.id;
+  }
+
+  isEntityExpanded(entityId: string): boolean {
+    return this.expandedEntityIds().has(entityId);
+  }
+
+  toggleEntity(entityId: string) {
+    this.expandedEntityIds.update(current => {
+      const next = new Set(current);
+      if (next.has(entityId)) {
+        next.delete(entityId);
+      }
+      else {
+        next.add(entityId);
+      }
+      return next;
+    });
+  }
+
+  private toFieldLabel(key: string): string {
+    const normalized = key.replace(/^m_/, '').replace(/_/g, ' ').trim();
+    if (!normalized) {
+      return key;
+    }
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  }
+
+  private toDisplayValues(value: unknown): string[] {
+    if (Array.isArray(value)) {
+      const values = value
+        .filter(item => item !== null && item !== undefined && `${item}`.trim() !== '')
+        .map(item => `${item}`);
+      return values.length > 0 ? values : ['-'];
+    }
+    return [this.toDisplayValue(value)];
+  }
+
+  private toDisplayValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '-';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    try {
+      return JSON.stringify(value, null, 2);
+    }
+    catch {
+      return String(value);
+    }
   }
 }

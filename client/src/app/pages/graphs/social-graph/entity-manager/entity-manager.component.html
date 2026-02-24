@@ -5,5 +5,5 @@
   (toggle)="toggle.emit()"
   (addEntityClicked)="openAddEntityModal($event)"
   (entityClicked)="addEntityToGraph($event)"
-  (deleteEntityClicked)="deleteCustomEntity($event)">
+  (deleteEntityClicked)="deleteEntityRequested.emit($event)">
 </app-entity-menu>

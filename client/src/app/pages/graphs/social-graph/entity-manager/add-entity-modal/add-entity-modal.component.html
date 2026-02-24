@@ -15,17 +15,31 @@
             </div>
 
             <div class="p-5">
-                <label for="entityValue" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
-                <div class="mt-2">
-                    <input data-cy="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-md border-0 py-1.5 px-3 text-[var(--color-text1)] shadow-sm ring-1 ring-inset placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 ring-red-500/60' : 'bg-[var(--color-blue-700)] ring-[var(--color-border)]')">
+                <div *ngIf="data()?.mode !== 'edit'" class="mb-4 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] p-1">
+                    <button type="button" (click)="setInputMode('manual')" [ngClass]="inputMode() === 'manual' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">Manual</button>
+                    <button type="button" (click)="setInputMode('api')" [ngClass]="inputMode() === 'api' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">From API</button>
                 </div>
+
+                <div *ngIf="inputMode() === 'manual'; else apiModeBlock">
+                    <label for="entityValue" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
+                    <div class="mt-2">
+                        <input data-cy="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-md border-0 py-1.5 px-3 text-[var(--color-text1)] shadow-sm ring-1 ring-inset placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 ring-red-500/60' : 'bg-[var(--color-blue-700)] ring-[var(--color-border)]')">
+                    </div>
+                </div>
+
+                <ng-template #apiModeBlock>
+                    <label for="apiQuery" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
+                    <div class="mt-2">
+                        <input data-cy="add-entity-api-query-input" type="text" id="apiQuery" name="apiQuery" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="apiQuery()" (input)="onApiQueryChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-md border-0 py-1.5 px-3 text-[var(--color-text1)] shadow-sm ring-1 ring-inset placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 ring-red-500/60' : 'bg-[var(--color-blue-700)] ring-[var(--color-border)]')">
+                    </div>
+                </ng-template>
+
                 <p *ngIf="isTouched() && validationError()" class="mt-2 text-xs text-red-400">{{ validationError() }}</p>
 
                 <label for="entityLabel" class="mt-4 block text-sm font-medium leading-6 text-[var(--color-text2)]">Label (Optional)</label>
                 <div class="mt-2">
                     <input data-cy="add-entity-label-input" type="text" id="entityLabel" name="entityLabel" autocomplete="off" placeholder="Shown on graph and lists" [value]="entityLabel()" (input)="onEntityLabelChange($event)" (keyup.enter)="confirm()" class="block w-full rounded-md border-0 bg-[var(--color-blue-700)] px-3 py-1.5 text-[var(--color-text1)] shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6">
                 </div>
-                <p class="mt-1 text-xs text-[var(--color-text4)]">If left empty, value will be used as label.</p>
             </div>
 
             <div class="flex justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-850)] p-4 rounded-b-lg">

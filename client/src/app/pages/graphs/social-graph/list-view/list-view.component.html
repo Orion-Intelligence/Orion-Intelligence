@@ -144,24 +144,45 @@
             <div class="space-y-4">
               <div *ngFor="let entityNode of activeEntityNodesOnGraph(); trackBy: trackById; let i = index" class="overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50 animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
                 <ng-container *ngIf="getEntityData(entityNode.id.toString()) as entity">
-                  <div class="p-4 flex items-start gap-4">
+                  <div class="p-4 flex items-start gap-4 cursor-pointer hover:bg-slate-800/70 transition-colors" (click)="toggleEntity(entity.id)">
                     <i [class]="getIconForEntityType(entity.type) + ' text-3xl mt-1'"></i>
                     <div class="flex-grow">
                       <h3 class="text-md font-bold text-slate-300">{{entity.label}}</h3>
                       <p class="text-sm text-slate-400 capitalize">{{entity.type}}</p>
                     </div>
                     <div class="flex items-center gap-2 flex-shrink-0">
-                       <button (click)="deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 bg-slate-700 hover:bg-red-500/20 hover:text-red-400 transition-colors"><i class="bi bi-trash3"></i></button>
+                       <i class="bi bi-chevron-down text-slate-400 transition-transform duration-300" [class.rotate-180]="isEntityExpanded(entity.id)"></i>
+                       <button (click)="$event.stopPropagation(); deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 bg-slate-700 hover:bg-red-500/20 hover:text-red-400 transition-colors"><i class="bi bi-trash3"></i></button>
                     </div>
                   </div>
-                  <div *ngIf="getConnectionsForNode(entityNode.id.toString()).length > 0" class="p-4 border-t border-slate-700/50">
-                      <h4 class="text-sm font-semibold text-slate-400 mb-2">Connections</h4>
-                      <div class="flex flex-wrap gap-2">
-                          <div *ngFor="let connection of getConnectionsForNode(entityNode.id.toString()); trackBy: trackConnectionById" class="flex items-center gap-2 bg-slate-700/50 px-3 py-1 rounded-full text-sm">
-                            <i [class]="getNodeIcon(connection.node) + ' text-base'"></i>
-                            <span class="text-slate-300">{{connection.node.label}}</span>
+                  <div class="grid transition-all duration-300 ease-in-out" [class.grid-rows-[1fr]]="isEntityExpanded(entity.id)" [class.grid-rows-[0fr]]="!isEntityExpanded(entity.id)">
+                    <div class="overflow-hidden">
+                      <div *ngIf="getConnectionsForNode(entityNode.id.toString()).length > 0" class="p-4 border-t border-slate-700/50">
+                          <h4 class="text-sm font-semibold text-slate-400 mb-2">Connections</h4>
+                          <div class="flex flex-wrap gap-2">
+                              <div *ngFor="let connection of getConnectionsForNode(entityNode.id.toString()); trackBy: trackConnectionById" class="flex items-center gap-2 bg-slate-700/50 px-3 py-1 rounded-full text-sm">
+                                <i [class]="getNodeIcon(connection.node) + ' text-base'"></i>
+                                <span class="text-slate-300">{{connection.node.label}}</span>
+                              </div>
                           </div>
                       </div>
+                      <div *ngIf="getEntityReportRecords(entity).length > 0" class="p-4 border-t border-slate-700/50">
+                          <h4 class="text-sm font-semibold text-slate-400 mb-2">Extracted Data</h4>
+                          <div class="space-y-3">
+                            <div *ngFor="let record of getEntityReportRecords(entity); let recordIndex = index" class="rounded-lg border border-slate-700/70 bg-slate-900/20 p-3">
+                              <div *ngIf="getEntityReportRecords(entity).length > 1" class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Record {{ recordIndex + 1 }}</div>
+                              <div class="space-y-2">
+                                <div *ngFor="let item of getEntityRecordEntries(record)" class="rounded-md border border-slate-700/60 bg-slate-800/40 p-2">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ item.label }}</div>
+                                  <div class="mt-1 space-y-1">
+                                    <div *ngFor="let valueItem of item.values" class="text-sm break-words text-slate-200">{{ valueItem }}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                      </div>
+                    </div>
                   </div>
                 </ng-container>
               </div>
