@@ -655,7 +655,7 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
     "/api/crypto/scan",
     summary="Scan cryptocurrency wallet address or transaction hash",
     description=CRYPTO_DOCS["crypto_scan"]["description"],
-    tags=["Crypto Analysis"],
+    tags=["Entity Scans"],
     operation_id="dynamicCryptoScan",
     response_description=CRYPTO_DOCS["crypto_scan"]["response_description"],
     status_code=200,
