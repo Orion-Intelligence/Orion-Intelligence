@@ -78,9 +78,9 @@ html:has(body.dark-theme) {
 .ui-consolidated-theme {
   --ui-consolidated-main-bg: #f8fafd;
   --ui-consolidated-sub-bg: #ffffff;
-  --ui-consolidated-inner-bg: #f3f6fb;
-  --ui-consolidated-border: #dce5f0;
-  --ui-consolidated-divider: #e6edf5;
+  --ui-consolidated-inner-bg: #f8fafd;
+  --ui-consolidated-border: #d4e0ed;
+  --ui-consolidated-divider: #dde7f2;
   --ui-consolidated-sub-hover: #fbfdff;
 }
 
@@ -382,18 +382,18 @@ html:has(body.dark-theme) {
 .light-theme {
   color-scheme: light;
 
-  
-  --color-blue-850: #dfe9f5;
-  --color-blue-830: #e7eff9;
-  --color-blue-820: #dbe6f3;
-  --color-blue-820-light: #f5f9ff;
-  --color-blue-810: #d3dfef;
-  --color-blue-730: #edf4fc;
-  --color-blue-720: #e6effa;
-  --color-blue-700: #edf5fd;
-  --color-consolidated-primary: #edf4fc;
-  --color-consolidated-secondary: #e4edf8;
-  --color-border: #b7c9de;
+
+  --color-blue-850: #f8fafd;
+  --color-blue-830: #f8fafd;
+  --color-blue-820: #f1f5fb;
+  --color-blue-820-light: #ffffff;
+  --color-blue-810: #eef3fa;
+  --color-blue-730: #f8fafd;
+  --color-blue-720: #f8fafd;
+  --color-blue-700: #ffffff;
+  --color-consolidated-primary: #f8fafd;
+  --color-consolidated-secondary: #ffffff;
+  --color-border: #d7e2ef;
   --color-divider: #0f172a16;
   --color-divider-dark: #0f172a26;
   --color-tags: #deecff;
@@ -419,8 +419,8 @@ html:has(body.dark-theme) {
 }
 
 .light-theme .ui-page-container {
-  border-color: #bfd0e3;
-  background: #ecf4fc;
+  border-color: #d7e2ef;
+  background: #f8fafd;
   box-shadow: 0 10px 28px rgb(16 24 40 / 6%);
 }
 
@@ -619,9 +619,15 @@ html:has(body.dark-theme) {
   background-color: #f6faff !important;
 }
 
-.light-theme .ui-result-card-hover:hover {
-  background-color: #f4f9ff !important;
-  border-color: #cfdceb !important;
+.light-theme .ui-result-card-hover {
+  transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.light-theme .ui-result-card-hover:hover,
+.light-theme .ui-result-card.ui-result-card-hover:hover {
+  background-color: #f2f7ff !important;
+  border-color: #c6d6ea !important;
+  box-shadow: 0 1px 0 rgb(15 23 42 / 4%), 0 10px 24px rgb(15 23 42 / 6%) !important;
 }
 
 .light-theme .ui-pagination-shell .ui-pagination-btn {
@@ -1241,6 +1247,12 @@ html:has(body.dark-theme) {
 
 .light-theme [data-cy='dashboard-sidebar'] {
   border-right-color: #ffffff15 !important;
+}
+
+.light-theme [data-cy='dashboard-container'],
+.light-theme [data-cy='dashboard-body'],
+.light-theme .ui-dashboard-grid-bg {
+  background: #e7eff9 !important;
 }
 
 @layer components {
