@@ -9,6 +9,7 @@ import { ReportHeaderComponent } from '../../report-header/report-header.compone
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
@@ -73,10 +74,7 @@ export class ReportDefacementComponent implements OnInit {
   }
 
   formatKeyLabel(key: string): string {
-    const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
-    return cleaned.length < 4
-      ? cleaned.toUpperCase()
-      : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
+    return formatKeyLabelUtil(key);
   }
 
   private prepareMetadata(): void {
@@ -103,47 +101,11 @@ export class ReportDefacementComponent implements OnInit {
   }
 
   formatTitleUrl(url?: string | null): string {
-    if (!url) {
-      return '-';
-    }
-    try {
-      const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-      const parsed = new URL(normalized);
-      return parsed.hostname.replace(/^www\./i, '') || '-';
-    }
-    catch {
-      return url
-        .replace(/^https?:\/\//i, '')
-        .replace(/^www\./i, '')
-        .split('/')[0]
-        .split('?')[0]
-        .split('#')[0] || '-';
-    }
+    return formatTitleUrlUtil(url, '-');
   }
 
   normalizeDisplayUrl(url?: string | string[] | null): string {
     const rawUrl = Array.isArray(url) ? (url[0] || '') : (url || '');
-    if (!rawUrl) {
-      return '-';
-    }
-    const trimmed = rawUrl.trim();
-    if (!trimmed) {
-      return '-';
-    }
-    try {
-      const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-      const parsed = new URL(normalized);
-      const host = parsed.hostname.replace(/^www\./i, '');
-      const path = parsed.pathname.replace(/\/+$/, '');
-      return `${host}${path}` || host || '-';
-    }
-    catch {
-      return trimmed
-        .replace(/^https?:\/\//i, '')
-        .replace(/^www\./i, '')
-        .split('?')[0]
-        .split('#')[0]
-        .replace(/\/+$/, '') || '-';
-    }
+    return normalizeDisplayUrlUtil(rawUrl, '-');
   }
 }

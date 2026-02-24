@@ -4,6 +4,7 @@ import { CommonModule, NgClass } from '@angular/common';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { UniqueLinkItem } from '../../../shared/model/homepage/consolidation_insights';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
+import { getStatusFlag } from '../../../shared/utils/intel-report.util';
 @Component({
   selector: 'app-result-insights',
   imports: [CommonModule, FormsModule, NgClass],
@@ -160,18 +161,7 @@ export class ResultInsightsComponent implements OnInit {
   }
 
   getStatus(dateString?: string): boolean {
-    if (!dateString) {
-      return false;
-    }
-    const createdDate = new Date(dateString);
-    const today = new Date();
-    const diffInDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-    if (diffInDays <= 5) {
-      return true;
-    }
-    else {
-      return diffInDays <= 10;
-    }
+    return getStatusFlag(dateString);
   }
 
   extractNamesAndEmails(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): {

@@ -26,6 +26,7 @@ import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
+import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
 
 @Component({
   selector: 'app-result',
@@ -272,28 +273,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   normalizeDisplayUrl(url?: string | null): string {
-    if (!url) {
-      return '';
-    }
-    const trimmed = url.trim();
-    if (!trimmed) {
-      return '';
-    }
-    try {
-      const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-      const parsed = new URL(normalized);
-      const host = parsed.hostname.replace(/^www\./i, '');
-      const path = parsed.pathname.replace(/\/+$/, '');
-      return `${host}${path}` || host;
-    }
-    catch {
-      return trimmed
-        .replace(/^https?:\/\//i, '')
-        .replace(/^www\./i, '')
-        .split('?')[0]
-        .split('#')[0]
-        .replace(/\/+$/, '');
-    }
+    return normalizeDisplayUrlUtil(url, '');
   }
 
   checkMember(): boolean {

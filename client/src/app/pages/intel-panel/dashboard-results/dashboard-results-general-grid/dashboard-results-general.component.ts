@@ -9,6 +9,7 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
@@ -69,13 +70,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   }
 
   isWithinDays(dateString = '', days: number): boolean {
-    if (!dateString) {
-      return false;
-    }
-    const createdDate = new Date(dateString);
-    const today = new Date();
-    const diffInDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-    return diffInDays <= days;
+    return isWithinDaysUtil(dateString, days);
   }
 
   isMobileMode(): boolean {
