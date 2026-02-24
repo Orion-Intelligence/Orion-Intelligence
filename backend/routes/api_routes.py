@@ -469,7 +469,12 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...), 
 
 @api_routes.post(
     "/api/dynamic/wanted",
-    include_in_schema=False,
+    summary="Searches wanted people around the Globe",
+    description=DYNAMIC_DOCS["wanted_scanner"]["description"],
+    tags=["Entity Scans"],
+    operation_id="dynamicWantedPeopleSearch",
+    response_description=DYNAMIC_DOCS["wanted_scanner"]["response_description"],
+    status_code=200,
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )

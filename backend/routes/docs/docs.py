@@ -2386,7 +2386,7 @@ REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("repo
 DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dynamic_cracked": _doc(
     "dynamic/dynamic_cracked.md"), "dynamic_software": _doc("dynamic/dynamic_software.md"), "dynamic_social": _doc(
     "dynamic/dynamic_social.md"), "domain_scan": _doc("dynamic/domain_scan.md"), "ip_scan": _doc("dynamic/ip_scan.md"),
-    "ioc_extract": _doc("dynamic/ioc_extract.md"),"apk_scan": _doc("dynamic/apk_scan.md"),}
+    "ioc_extract": _doc("dynamic/ioc_extract.md"),"apk_scan": _doc("dynamic/apk_scan.md"), "wanted_scanner" :_doc("dynamic/wanted_scan.md") }
 
 CRYPTO_DOCS = {"crypto_scan": _doc("dynamic/crypto_scan.md"),}
 
