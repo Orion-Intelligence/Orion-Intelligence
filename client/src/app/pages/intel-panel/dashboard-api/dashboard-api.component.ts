@@ -8,6 +8,7 @@ import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operato
 import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { GraphReportExportService, GraphReportPayload } from '../../graphs/shared/services/graph-report-export.service';
 @Component({
   selector: 'app-dashboard-api',
   imports: [FormsModule, NgForOf, NgOptimizedImage, NgIf, EmptyResultComponent, EmptyQueryComponent, NgClass],
@@ -36,7 +37,7 @@ export class DashboardApiComponent implements OnInit {
   expandedResultIndex: number | null = null;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: GraphReportExportService) { }
 
   get cardsData(): any[] {
     const r = this.responseData;
@@ -421,5 +422,108 @@ export class DashboardApiComponent implements OnInit {
 
   toggleResultItem(index: number): void {
     this.expandedResultIndex = this.expandedResultIndex === index ? null : index;
+  }
+
+  exportPdfReport(): void {
+    if (!this.hasResults) {
+      return;
+    }
+
+    const query = (this.displayQ1 || this.q1 || 'query').trim();
+    const now = new Date().toISOString();
+    const apiLabel = (this.apiType || 'api').replace(/-/g, ' ');
+    const toCompact = (v: any): string => {
+      const raw = this.isObjectValue(v) || this.isArrayValue(v) ? this.stringifyJson(v) : this.stringifyPrimitive(v);
+      return raw.length > 500 ? `${raw.slice(0, 497)}...` : raw;
+    };
+
+    if (this.apiType === 'crypto' && this.cryptoResult) {
+      const r = this.cryptoResult;
+      const values: Record<string, string> = {};
+      Object.entries(r || {}).forEach(([k, v]) => {
+        values[this.displayFieldLabel(k)] = toCompact(v);
+      });
+
+      const payload: GraphReportPayload = {
+        graphKind: 'cti',
+        title: `Entity API Report - ${this.displayFieldLabel(apiLabel)}`,
+        sessionName: `${this.apiType || 'api'}-${query || 'query'}`.slice(0, 80),
+        generatedAtIso: now,
+        nodes: Object.keys(values).map((k, i) => ({ id: `field-${i + 1}`, label: k, type: 'field' })),
+        edges: Object.keys(values).map((k, i) => ({ id: `edge-${i + 1}`, from: query || 'query', to: k, label: 'contains' })),
+        summary: {
+          api_type: this.displayFieldLabel(apiLabel),
+          query,
+          status: this.stringifyPrimitive(r?.status),
+          network: this.stringifyPrimitive(r?.network || r?.detected_network),
+          query_type: this.stringifyPrimitive(r?.query_type),
+          total_fields: Object.keys(values).length,
+          exported_at: now
+        },
+        tables: [
+          {
+            title: 'Request Context',
+            values: {
+              'API Type': this.displayFieldLabel(apiLabel),
+              'Query': query || 'not available',
+              'Query 2': this.displayQ2 || this.q2 || 'not available',
+              'Exported At': new Date(now).toLocaleString()
+            }
+          },
+          { title: 'Crypto Result', values }
+        ]
+      };
+      this.graphReportExport.exportByType(payload, 'doc_pdf');
+      return;
+    }
+
+    const items = this.genericItems || [];
+    const tables = items.slice(0, 40).map((item, idx) => {
+      const values: Record<string, string> = {};
+      this.getObjectEntries(item).slice(0, 25).forEach(entry => {
+        values[this.displayFieldLabel(entry.key)] = toCompact(entry.value);
+      });
+      return { title: `Result ${idx + 1}`, values };
+    });
+
+    const payload: GraphReportPayload = {
+      graphKind: (this.apiType === 'social' || this.apiType === 'wanted' || this.apiType === 'national-identity') ? 'social' : 'cti',
+      title: `Entity API Report - ${this.displayFieldLabel(apiLabel)}`,
+      sessionName: `${this.apiType || 'api'}-${query || 'query'}`.slice(0, 80),
+      generatedAtIso: now,
+      nodes: items.slice(0, 200).map((item, idx) => ({
+        id: `result-${idx + 1}`,
+        label: this.stringifyPrimitive(item?.m_title || item?.m_app_name || item?.title || `Result ${idx + 1}`),
+        type: 'record'
+      })),
+      edges: items.slice(0, 200).map((_, idx) => ({
+        id: `edge-result-${idx + 1}`,
+        from: query || 'query',
+        to: `result-${idx + 1}`,
+        label: 'matched'
+      })),
+      summary: {
+        api_type: this.displayFieldLabel(apiLabel),
+        query,
+        total_results: items.length,
+        expanded_default: items.length === 1 ? 'yes' : 'no',
+        exported_at: now
+      },
+      tables: [
+        {
+          title: 'Request Context',
+          values: {
+            'API Type': this.displayFieldLabel(apiLabel),
+            'Query': query || 'not available',
+            'Query 2': this.displayQ2 || this.q2 || 'not available',
+            'Result Count': String(items.length),
+            'Exported At': new Date(now).toLocaleString()
+          }
+        },
+        ...tables
+      ]
+    };
+
+    this.graphReportExport.exportByType(payload, 'doc_pdf');
   }
 }

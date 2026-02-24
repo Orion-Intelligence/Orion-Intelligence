@@ -11,6 +11,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { UrlScanMeta, UrlScanThreatItem, } from '../../shared/model/security-scan/security.scan.results.model';
 import { ScannerService } from './scanner-service.service';
+import { GraphReportExportService, GraphReportPayload } from '../graphs/shared/services/graph-report-export.service';
 @Component({
   selector: 'app-security-scan',
   standalone: true,
@@ -150,7 +151,7 @@ export class SecurityScanComponent implements OnInit {
   trackByCategory = ( _: number, c: { name: string; } ) => c.name;
   trackByItem = (i: number) => i;
 
-  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: GraphReportExportService) { }
 
   ngOnInit(): void {
     this.scanType = this.route.snapshot.data['type'];
@@ -277,22 +278,80 @@ export class SecurityScanComponent implements OnInit {
   }
 
   exportReport(): void {
-    const payload = {
-      meta: this.meta,
-      grade: this.grade,
-      grade_counts: this.gradeCounts,
-      threats: Object.fromEntries(this.categories.map((c) => [c.name, c.items])),
+    if (!this.meta) {
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const host = this.displayHost || 'report';
+    const totalFindings = this.categories.reduce((acc, c) => acc + (c.items?.length || 0), 0);
+    const summarize = (text: string, limit: number = 180): string => {
+      const v = (text || '').replace(/\s+/g, ' ').trim();
+      return v.length > limit ? `${v.slice(0, limit - 3)}...` : (v || 'not available');
     };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    const host = this.displayHost?.replace(/[^a-z0-9.-]/gi, '_') || 'report';
-    const dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    a.href = URL.createObjectURL(blob);
-    a.download = `security-scan-${host}-${dt}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
+
+    const metaValues: Record<string, string> = {
+      target_url: this.meta.URL || 'not available',
+      host: this.displayHost || 'not available',
+      port: this.displayPort || 'not available',
+      tls_status: this.hasSSL ? 'ssl enabled' : 'no ssl detected',
+      scanned_on: this.meta.Scanned_on_date || 'not available',
+      scanned_by: this.meta.Scanned_by || 'not available',
+      scan_type: this.scanType || 'basic',
+      grade: this.grade || 'not available',
+      high_risk: String(this.gradeCounts.high ?? 0),
+      medium_risk: String(this.gradeCounts.medium ?? 0),
+      low_risk: String(this.gradeCounts.low ?? 0),
+      informational_risk: String(this.gradeCounts.informational ?? 0),
+    };
+
+    const tables = [
+      { title: 'Scan Summary', values: metaValues },
+      ...this.categories.slice(0, 20).map((cat) => {
+        const values: Record<string, string> = {};
+        cat.items.slice(0, 25).forEach((item, idx) => {
+          values[`${idx + 1}. ${item.header}`] = `${item.risk} Risk (${item.confidence} Confidence) | ${summarize(item.description)}`;
+        });
+        return { title: `${cat.name} Findings`, values };
+      })
+    ];
+
+    const nodes = this.categories.flatMap((cat) => [
+      { id: `category-${cat.name}`, label: cat.name, type: 'category' },
+      ...cat.items.slice(0, 40).map((item, idx) => ({
+        id: `finding-${cat.name}-${idx + 1}`,
+        label: item.header || `Finding ${idx + 1}`,
+        type: 'finding'
+      }))
+    ]);
+
+    const edges = this.categories.flatMap((cat) => cat.items.slice(0, 40).map((_, idx) => ({
+      id: `edge-${cat.name}-${idx + 1}`,
+      from: `category-${cat.name}`,
+      to: `finding-${cat.name}-${idx + 1}`,
+      label: 'contains'
+    })));
+
+    const payload: GraphReportPayload = {
+      graphKind: 'cti',
+      title: 'Web Scan Report',
+      sessionName: host,
+      generatedAtIso: now,
+      nodes,
+      edges,
+      summary: {
+        target: host,
+        scan_type: this.scanType || 'basic',
+        total_categories: this.categories.length,
+        total_findings: totalFindings,
+        grade: this.grade || 'not available',
+        tls_status: this.hasSSL ? 'enabled' : 'not detected',
+        exported_at: now
+      },
+      tables
+    };
+
+    this.graphReportExport.exportByType(payload, 'doc_pdf');
   }
 
   private resolveRequestedUrl(input: string): string {

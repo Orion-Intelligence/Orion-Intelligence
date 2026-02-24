@@ -63,8 +63,11 @@
 <div class="mt-[15px] mx-0" *ngIf="query_triggered && !loading && hasResults" @fadeInDashboardItem>
   <section class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] p-[15px]">
     <div class="flex items-center justify-between" @fadeInDashboardItem>
-      <div class="text-[16px] font-semibold text-[var(--color-text1)]">Search Results for <span class="mx-[6px]">〡</span><span class="font-mono">{{ (apiType === 'user' ? (displayQ1 || q1) : (q1 || displayQ1)) || 'query' }}</span></div>
+      <div class="text-[16px] font-semibold text-[var(--color-text1)]">Search Results for <span class="mx-[6px]">〡</span><span class="font-mono">{{ displayQ1 || 'query' }}</span></div>
       <div class="flex items-center gap-[8px]">
+        <button type="button" appTooltip="Download report" (click)="exportPdfReport()" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-0 transition-colors hover:bg-[var(--color-blue-710)]">
+          <img src="/assets/images/shared/theme/download.svg" height="18" width="18" alt="download" class="ui-action-icon" />
+        </button>
         <span class="inline-flex items-center gap-[6px] rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize bg-emerald-500/10 text-emerald-300">
           <i class="bi bi-check-circle-fill"></i> success
         </span>
