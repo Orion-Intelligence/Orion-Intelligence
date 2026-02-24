@@ -1,4 +1,11 @@
 exclude_paths:
+  - "client/build/**"
+  - "client/coverage/**"
+  - "client/.angular/**"
+  - "client/node_modules/**"
+  - "client/.nyc_output/**"
+  - "client/src/assets/**"
+  - "client/*.config.*"
   - "**/*.html"
   - "**/*.css"
   - "**/*.scss"
@@ -8,6 +15,7 @@ exclude_paths:
   - "**/*.yaml"
   - "**/*.json"
   - "**/*.map"
+  - "**/eslint.config.js"
   - ".nyc_output/**"
   - "coverage/**"
   - "backend/static/**"
@@ -21,9 +29,17 @@ exclude_paths:
 engines:
   duplication:
     exclude_paths:
+      - "client/build/**"
+      - "client/coverage/**"
+      - "client/.angular/**"
+      - "client/node_modules/**"
+      - "client/.nyc_output/**"
+      - "client/src/assets/**"
+      - "client/*.config.*"
       - "**/*.html"
       - "**/*.css"
       - "**/*.scss"
+      - "**/eslint.config.js"
       - ".nyc_output/**"
       - "coverage/**"
       - "backend/static/**"
