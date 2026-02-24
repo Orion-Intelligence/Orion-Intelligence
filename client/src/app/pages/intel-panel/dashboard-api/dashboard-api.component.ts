@@ -33,6 +33,7 @@ export class DashboardApiComponent implements OnInit {
   prevDisplayQ1 = '';
   prevDisplayQ2 = '';
   prevBreachData: any | null = null;
+  expandedResultIndex: number | null = null;
   trackByIndex = (index: number) => index;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
@@ -92,6 +93,18 @@ export class DashboardApiComponent implements OnInit {
   get genericItems(): any[] {
     if (this.apiType === 'crypto') {
       return [];
+    }
+    if (
+      this.responseData &&
+      typeof this.responseData === 'object' &&
+      (
+        Array.isArray((this.responseData as any).cards_data) ||
+        Array.isArray((this.responseData as any).result) ||
+        Array.isArray((this.responseData as any).data?.cards_data) ||
+        Array.isArray((this.responseData as any).result?.cards_data)
+      )
+    ) {
+      return this.cardsData;
     }
     if (this.cardsData.length > 0) {
       return this.cardsData;
@@ -262,6 +275,7 @@ export class DashboardApiComponent implements OnInit {
     this.progress = 0;
     this.currentStep = '';
     this.query_triggered = true;
+    this.expandedResultIndex = null;
     let payload: any;
     if (this.apiType === 'user') {
       payload = { text: { username: this.q1, email: this.q2 } };
@@ -329,6 +343,7 @@ export class DashboardApiComponent implements OnInit {
           }
           if (this.apiType === 'crypto') {
             this.responseData = res;
+            this.expandedResultIndex = null;
           }
           else {
             const normalized = (res && typeof res === 'object')
@@ -336,6 +351,7 @@ export class DashboardApiComponent implements OnInit {
               : res;
             this.responseData = normalized;
             this.breachData = (this.cardsData && this.cardsData.length > 0) ? this.cardsData[0] : null;
+            this.expandedResultIndex = this.genericItems.length === 1 ? 0 : null;
           }
           this.displayQ1 = this.q1;
           this.displayQ2 = this.q2;
@@ -389,5 +405,9 @@ export class DashboardApiComponent implements OnInit {
 
   private shouldContinuePolling(res: any): boolean {
     return this.isPendingResponse(res) && !this.isFailedPendingResponse(res);
+  }
+
+  toggleResultItem(index: number): void {
+    this.expandedResultIndex = this.expandedResultIndex === index ? null : index;
   }
 }

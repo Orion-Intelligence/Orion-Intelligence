@@ -127,7 +127,7 @@
         [icon]="'assets/images/sidebar/live_api.svg'"
         [items]="apiCategories"
         [routePrefix]="'api'"
-        [title]="'Live APIs'"></app-dashboard-sidebar-items>
+        [title]="'Entity API'"></app-dashboard-sidebar-items>
     </ng-container>
 
     <ng-container *ngIf="licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')">
@@ -336,7 +336,7 @@
         [items]="apiCategories"
         [routePrefix]="'api'"
         [selectionStore]="selectionStore"
-        [title]="'Live APIs'"></app-dashboard-sidebar-collapsed>
+        [title]="'Entity API'"></app-dashboard-sidebar-collapsed>
     </ng-container>
 
     <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">

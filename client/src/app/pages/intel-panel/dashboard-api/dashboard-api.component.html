@@ -264,14 +264,15 @@
         <ng-container *ngIf="genericItems.length > 0; else emptyResult">
           <div class="space-y-[16px]">
             <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" *ngFor="let item of genericItems; let idx = index; trackBy: trackByIndex" @fadeInDashboardItem>
-              <div class="flex items-center justify-between">
+              <button type="button" class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[9px] text-left transition hover:bg-[var(--color-blue-710)]" (click)="toggleResultItem(idx)">
                 <div>
                   <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_title || item?.m_app_name || item?.title || ('Result ' + (idx + 1)) }}</div>
                   <div class="text-[12px] text-[var(--color-text4)]">{{ getObjectEntries(item).length }} Fields</div>
                 </div>
-              </div>
+                <i class="bi text-[13px] text-[var(--color-text4)]" [ngClass]="expandedResultIndex === idx ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+              </button>
 
-              <div class="mt-[12px] space-y-[10px]">
+              <div class="mt-[12px] space-y-[10px]" *ngIf="expandedResultIndex === idx">
                 <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]" *ngFor="let entry of getObjectEntries(item)">
                   <div class="text-[12px] text-[var(--color-text4)]">{{ displayFieldLabel(entry.key) }}</div>
 
@@ -301,7 +302,7 @@
 
 <div class="mt-[15px] mx-0" *ngIf="query_triggered && !loading && !hasResults" @fadeInDashboardItem>
   <section class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[20px] text-center">
-    <div class="text-[16px] font-semibold text-[var(--color-text1)]">No result found</div>
+    <div class="text-[16px] font-semibold text-[var(--color-text1)]">No response was found</div>
     <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">Try a different query and run the scan again.</div>
   </section>
 </div>
