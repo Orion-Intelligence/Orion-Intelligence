@@ -28,6 +28,8 @@ SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.A
 SCAN_WITH_LIMITER_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(limiter_dependency), Depends(license_required("scanning"))]
 STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:stealer_logs", bypass_roles=[], bypass_licenses=["maintainer"]))]
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
+GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
+SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
 
 
 async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_type: Optional[str] = None):
@@ -44,7 +46,7 @@ async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_
     operation_id="searchStrategicReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general")), ], )
+    dependencies=GENERAL_MODULE_DEPS, )
 async def search_general(param: search_consolidated_param_model = Body(...)):
     base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
@@ -72,13 +74,13 @@ async def search_leak(param: search_consolidated_param_model = Body(...)):
 
 @api_routes.post(
     "/api/search/social",
-    summary="Search strategic reports",
+    summary="Search social reports",
     description=SEARCH_DOCS["strategic"]["description"],
     tags=["Search"],
-    operation_id="searchStrategicReports",
+    operation_id="searchSocialReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general")), ], )
+    dependencies=GENERAL_MODULE_DEPS, )
 async def search_social(param: search_consolidated_param_model = Body(...)):
     if param.category == "all":
         base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
@@ -96,13 +98,13 @@ async def search_social(param: search_consolidated_param_model = Body(...)):
 
 @api_routes.post(
     "/api/search/exploit",
-    summary="Search strategic reports",
+    summary="Search exploit reports",
     description=SEARCH_DOCS["strategic"]["description"],
     tags=["Search"],
-    operation_id="searchStrategicReports",
+    operation_id="searchExploitReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general")), ], )
+    dependencies=GENERAL_MODULE_DEPS, )
 async def search_exploit(param: search_consolidated_param_model = Body(...)):
     base_index = [ELASTIC_INDEX.S_EXPLOIT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
@@ -110,14 +112,14 @@ async def search_exploit(param: search_consolidated_param_model = Body(...)):
 
 @api_routes.post(
     "/api/search/defacement",
-    summary="Search strategic reports",
+    summary="Search defacement reports",
     description=SEARCH_DOCS["strategic"]["description"],
     tags=["Search"],
-    operation_id="searchStrategicReports",
+    operation_id="searchDefacementReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general")), ], )
-async def search_exploit(param: search_consolidated_param_model = Body(...)):
+    dependencies=GENERAL_MODULE_DEPS, )
+async def search_defacement(param: search_consolidated_param_model = Body(...)):
     param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
@@ -353,7 +355,7 @@ async def get_screenshot(filename: str):
     operation_id="dynamicUserEmailExposureSearch",
     response_description=DYNAMIC_DOCS["dynamic_user_email"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=SCANNING_DEPS, )
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "user", user_id=str(current_user.id))
 
@@ -366,7 +368,7 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...), cu
     operation_id="dynamicCrackedCredentialSearch",
     response_description=DYNAMIC_DOCS["dynamic_cracked"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=SCANNING_DEPS, )
 async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "cracked", user_id=str(current_user.id))
 
@@ -379,7 +381,7 @@ async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...), 
     operation_id="dynamicSoftwareCredentialSearch",
     response_description=DYNAMIC_DOCS["dynamic_software"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=SCANNING_DEPS, )
 async def search_dynamic_software(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "software", user_id=str(current_user.id))
 
@@ -461,9 +463,7 @@ async def scrape_social(payload: SocialScrapeRequest, current_user=Depends(get_c
     operation_id="dynamicSocialIdentifierExposureSearch",
     response_description=DYNAMIC_DOCS["dynamic_social"]["response_description"],
     status_code=200,
-    dependencies=[Depends(
-        role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=SCANNING_DEPS, )
 async def search_dynamic_social(param: search_dynamic_social_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "social", user_id=str(current_user.id))
 
@@ -475,22 +475,20 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...), 
     operation_id="dynamicWantedPeopleSearch",
     response_description=DYNAMIC_DOCS["wanted_scanner"]["response_description"],
     status_code=200,
-    dependencies=[Depends(
-        role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=SCANNING_DEPS, )
 async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
     return await search_model.getInstance().search_wanted_list(param)
 
 @api_routes.post(
     "/api/dynamic/national-identity",
-    summary="Dynamic software credential search",
+    summary="Dynamic national identity search",
     description=DYNAMIC_DOCS["dynamic_software"]["description"],
     tags=["Entity Scans"],
-    operation_id="dynamicSoftwareCredentialSearch",
+    operation_id="dynamicNationalIdentitySearch",
     response_description=DYNAMIC_DOCS["dynamic_software"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_software(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
+    dependencies=SCANNING_DEPS, )
+async def search_dynamic_national_identity(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "pak_database", user_id=str(current_user.id))
 
 @api_routes.get(
