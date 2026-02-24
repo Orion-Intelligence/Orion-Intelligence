@@ -170,6 +170,7 @@ export class HomeMenuComponent implements OnDestroy {
       case 'national-identity': return 'bi bi-card-text text-indigo-400';
       case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
       case 'software-scanner': return 'bi bi-window text-indigo-400';
+      case 'phone': return 'bi bi-telephone text-indigo-400';
       case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
       case 'apk-scan': return 'bi bi-android2 text-indigo-400';
       case 'crypto-scanner': return 'bi bi-currency-bitcoin text-green-400';

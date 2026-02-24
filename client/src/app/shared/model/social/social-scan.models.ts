@@ -132,6 +132,7 @@ export interface CustomEntity {
     | 'wayback-scan'
     | 'ioc-extract'
     | 'apk-scan'
+    | 'phone'
     | 'crypto-scanner';
     label: string;
     value: string;

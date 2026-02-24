@@ -564,6 +564,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (Array.isArray(nestedResult?.result)) {
       return nestedResult.result as Array<Record<string, unknown>>;
     }
+    if (nestedResult?.result && typeof nestedResult.result === 'object') {
+      return [nestedResult.result as Record<string, unknown>];
+    }
+    if (nestedResult && typeof nestedResult === 'object') {
+      return [nestedResult as Record<string, unknown>];
+    }
     return [report as Record<string, unknown>];
   }
 

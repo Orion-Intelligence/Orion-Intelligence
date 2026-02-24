@@ -114,9 +114,10 @@ class search_model:
                         files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
                         timeout=120)
                 else:
+                    payload = model.model_dump() if hasattr(model, "model_dump") else model
                     response = await client.post(
                         "http://trusted-social-api:8020/social/" + key,
-                        json=model.model_dump(),
+                        json=payload,
                         timeout=120)
 
                 if response.status_code != 200:

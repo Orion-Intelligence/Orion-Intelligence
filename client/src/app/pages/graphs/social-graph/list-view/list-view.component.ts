@@ -99,6 +99,12 @@ export class ListViewComponent {
     if (Array.isArray(nestedResult?.result)) {
       return nestedResult.result as Array<Record<string, unknown>>;
     }
+    if (nestedResult?.result && typeof nestedResult.result === 'object') {
+      return [nestedResult.result as Record<string, unknown>];
+    }
+    if (nestedResult && typeof nestedResult === 'object') {
+      return [nestedResult as Record<string, unknown>];
+    }
     return [report as Record<string, unknown>];
   }
 
@@ -168,6 +174,7 @@ export class ListViewComponent {
       case 'national-identity': return 'bi bi-card-text text-indigo-400';
       case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
       case 'software-scanner': return 'bi bi-window text-indigo-400';
+      case 'phone': return 'bi bi-telephone text-indigo-400';
       case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
       case 'apk-scan': return 'bi bi-android2 text-indigo-400';
       case 'crypto-scanner': return 'bi bi-currency-bitcoin text-green-400';

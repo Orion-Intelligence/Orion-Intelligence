@@ -180,6 +180,8 @@ export class EntityManagerComponent {
         return { endpoint: 'dynamic/cracked', payload: { text: { playstore: query } } };
       case 'software-scanner':
         return { endpoint: 'dynamic/software', payload: { text: { name: query } } };
+      case 'phone':
+        return { endpoint: 'social/phone/recon', payload: { query } };
       case 'domain-scan':
         return { endpoint: 'urlscan/domain', payload: { text: { domain: query } } };
       case 'subdomains-scan':
@@ -215,6 +217,19 @@ export class EntityManagerComponent {
   }
 
   private extractBestValue(response: any, fallback: string): string {
+    const nestedResult = response?.result?.result ?? response?.result ?? response;
+    const prioritized = [
+      nestedResult?.number,
+      nestedResult?.phone,
+      nestedResult?.query,
+      nestedResult?.username,
+      nestedResult?.email,
+      response?.query,
+      response?.phone
+    ].find(v => typeof v === 'string' && v.trim().length > 0);
+    if (prioritized) {
+      return prioritized.trim();
+    }
     const candidates = this.flattenStrings(response);
     const valid = candidates.find(v => v.length > 2 && v.length < 260);
     return valid || fallback;

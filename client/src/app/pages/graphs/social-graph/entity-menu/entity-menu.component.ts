@@ -8,6 +8,7 @@ const ENTITY_ADD_OPTIONS: Array<{ type: CustomEntity['type']; label: string; ico
   { type: 'national-identity', label: 'Add National Identity', iconClass: 'bi bi-card-text text-indigo-400' },
   { type: 'playstore-scanner', label: 'Add Playstore Scanner', iconClass: 'bi bi-google-play text-indigo-400' },
   { type: 'software-scanner', label: 'Add Software Scanner', iconClass: 'bi bi-window text-indigo-400' },
+  { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' },
   { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' }
 ];
 @Component({
@@ -56,6 +57,7 @@ export class EntityMenuComponent {
       case 'national-identity': return 'bi bi-card-text text-indigo-400';
       case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
       case 'software-scanner': return 'bi bi-window text-indigo-400';
+      case 'phone': return 'bi bi-telephone text-indigo-400';
       case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
       case 'apk-scan': return 'bi bi-android2 text-indigo-400';
       case 'crypto-scanner': return 'bi bi-currency-bitcoin text-green-400';

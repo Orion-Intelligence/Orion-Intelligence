@@ -25,6 +25,13 @@ async def search_dynamic_email(param: SocialReconRequest = Body(...)):
 
 
 @social_routes.post(
+    "/api/social/phone/recon",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_phone_recon(param: SocialReconRequest = Body(...)):
+    return await search_model.getInstance().social_search(param, "phone")
+
+
+@social_routes.post(
     "/api/social/profile",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_profile(param: SocialProfileRequest = Body(...)):
