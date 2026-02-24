@@ -189,6 +189,12 @@ export class DashboardApiComponent implements OnInit {
         }
         this.q2 = '';
       }
+      else if (this.apiType === 'national-identity') {
+        if (params['cnic']) {
+          this.q1 = params['cnic'];
+        }
+        this.q2 = '';
+      }
       else if (this.apiType === 'cracked') {
         if (params['playstore']) {
           this.q1 = params['playstore'];
@@ -286,6 +292,9 @@ export class DashboardApiComponent implements OnInit {
     else if (this.apiType === 'wanted') {
       payload = { text: { query: this.q1 } };
     }
+    else if (this.apiType === 'national-identity') {
+      payload = { text: { pak_query: this.q1 } };
+    }
     else if (this.apiType === 'cracked') {
       payload = { text: { playstore: this.q1 } };
     }
@@ -309,6 +318,9 @@ export class DashboardApiComponent implements OnInit {
     }
     else if (this.apiType === 'wanted') {
       endpoint = '/api/dynamic/wanted';
+    }
+    else if (this.apiType === 'national-identity') {
+      endpoint = '/api/dynamic/national-identity';
     }
     else if (this.apiType === 'cracked') {
       endpoint = '/api/dynamic/cracked';

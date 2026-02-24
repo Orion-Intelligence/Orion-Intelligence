@@ -481,6 +481,17 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...), 
 async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
     return await search_model.getInstance().search_wanted_list(param)
 
+@api_routes.post(
+    "/api/dynamic/national-identity",
+    summary="Dynamic software credential search",
+    description=DYNAMIC_DOCS["dynamic_software"]["description"],
+    tags=["Entity Scans"],
+    operation_id="dynamicSoftwareCredentialSearch",
+    response_description=DYNAMIC_DOCS["dynamic_software"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_software(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().dynamic_search(param, "pak_database", user_id=str(current_user.id))
 
 @api_routes.get(
     "/api/search/breach/stix/{doc_id}",

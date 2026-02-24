@@ -64,6 +64,7 @@ export enum ApiSubCategory {
     EMAIL = 'Email-Breach',
     SOCIAL = 'Social-Scanner',
     WANTED = 'Wanted-List',
+    NATIONAL_IDENTITY = 'National-Identity',
     CRACKED = 'Playstore-Scanner',
     SOFTWARE = 'Software-Scanner',
     FILE = 'File-Scanner',

@@ -215,6 +215,11 @@ export const routes: Routes = [
             data: { animation: 'WantedAPI', type: 'wanted' }
           },
           {
+            path: 'national-identity',
+            component: DashboardApiComponent,
+            data: { animation: 'NationalIdentityAPI', type: 'national-identity' }
+          },
+          {
             path: 'playstore-scanner',
             component: DashboardApiComponent,
             data: { animation: 'CrackedAPI', type: 'cracked' }
