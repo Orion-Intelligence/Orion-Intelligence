@@ -2,7 +2,6 @@ import { Component, ChangeDetectionStrategy, input, viewChild, ElementRef, effec
 import { CommonModule } from '@angular/common';
 import { Network, Options, Position } from 'vis-network';
 import { DataSet } from 'vis-data';
-import { getSocialGraphLabelColor } from '../services/theme-color.util';
 import { NetworkData, PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
@@ -98,6 +97,16 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
 
   private normalizeSearchValue(value: string): string {
     return value.trim().toLowerCase().replace(/^@+/, '').replace(/[\s_-]+/g, '');
+  }
+
+  private getGraphNodeLabelColor(): string {
+    if (typeof document === 'undefined') {
+      return '#ffffff';
+    }
+    const root = document.documentElement;
+    const body = document.body;
+    const isLight = body?.classList.contains('light-theme') || root.classList.contains('light-theme');
+    return isLight ? '#1f2937' : '#ffffff';
   }
 
   constructor() {
@@ -335,7 +344,14 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   }
 
   private updateNetworkData(networkData: NetworkData) {
-    const newNodes = networkData.nodes;
+    const labelColor = this.getGraphNodeLabelColor();
+    const newNodes = networkData.nodes.map(node => ({
+      ...node,
+      font: {
+        ...(node.font || {}),
+        color: labelColor
+      }
+    }));
     const newEdges = networkData.edges;
     const currentNodeIds = this.visData.nodes.getIds();
     const newNodeIds = newNodes.map(n => n.id);
@@ -363,7 +379,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       nodes: {
         brokenImage: fallbackIcon,
         borderWidth: 2,
-        font: { size: 14, color: getSocialGraphLabelColor() },
+        font: { size: 14, color: this.getGraphNodeLabelColor() },
         shadow: {
           enabled: true,
           color: 'rgba(0,0,0,0.5)',
