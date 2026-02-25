@@ -328,6 +328,8 @@ export class GraphOrchestratorService {
         const userBHandles = this.relationshipResolver.getUserHandleSet(userB, userBPlatforms);
         let followsAtoB = false;
         let followsBtoA = false;
+        let mentionsAtoB = false;
+        let mentionsBtoA = false;
         const matchedPlatforms = new Set<string>();
         const detectorProfiles = new Set<string>();
         for (const platformA of userAPlatforms) {
@@ -335,6 +337,12 @@ export class GraphOrchestratorService {
                         || this.relationshipResolver.containsAnyHandle(platformA.followers_list, userBHandles);
           if (aToBDetected) {
             followsAtoB = true;
+            matchedPlatforms.add(platformA.platform);
+            detectorProfiles.add(`${userA}|${platformA.platform}|${platformA.username}`);
+          }
+          const aMentionDetected = this.relationshipResolver.containsAnyHandle(platformA.post_connections, userBHandles);
+          if (aMentionDetected) {
+            mentionsAtoB = true;
             matchedPlatforms.add(platformA.platform);
             detectorProfiles.add(`${userA}|${platformA.platform}|${platformA.username}`);
           }
@@ -347,16 +355,33 @@ export class GraphOrchestratorService {
             matchedPlatforms.add(platformB.platform);
             detectorProfiles.add(`${userB}|${platformB.platform}|${platformB.username}`);
           }
+          const bMentionDetected = this.relationshipResolver.containsAnyHandle(platformB.post_connections, userAHandles);
+          if (bMentionDetected) {
+            mentionsBtoA = true;
+            matchedPlatforms.add(platformB.platform);
+            detectorProfiles.add(`${userB}|${platformB.platform}|${platformB.username}`);
+          }
         }
-        if (!followsAtoB && !followsBtoA) {
+        if (!followsAtoB && !followsBtoA && !mentionsAtoB && !mentionsBtoA) {
           continue;
         }
         const relationshipKey = [userA, userB].sort().join('--');
         const relationshipNodeId = `relationship-node-${relationshipKey}`;
         const detectorProfileCount = detectorProfiles.size;
         const matchedPlatformsText = Array.from(matchedPlatforms).sort().join(', ') || 'Unknown';
-        const isMutual = followsAtoB && followsBtoA;
-        const directionTitle = isMutual ? `${userA} and ${userB} follow each other` : (followsAtoB ? `${userA} follows ${userB}` : `${userB} follows ${userA}`);
+        const isMutualFollow = followsAtoB && followsBtoA;
+        const isMutualMention = mentionsAtoB && mentionsBtoA;
+        const directionTitle = isMutualFollow
+          ? `${userA} and ${userB} follow each other`
+          : isMutualMention
+            ? `${userA} and ${userB} mention each other`
+            : followsAtoB
+              ? `${userA} follows ${userB}`
+              : followsBtoA
+                ? `${userB} follows ${userA}`
+                : mentionsAtoB
+                  ? `${userA} mentioned ${userB}`
+                  : `${userB} mentioned ${userA}`;
         newRelationshipNodes.push({
           id: relationshipNodeId,
           label: `${detectorProfileCount}`,
@@ -378,7 +403,7 @@ export class GraphOrchestratorService {
           width: 2.5,
           smooth: { type: 'dynamic', roundness: 0.18 }
         };
-        if (isMutual) {
+        if (isMutualFollow || isMutualMention) {
           newRelationshipEdges.push({
             id: `relationship-edge-${relationshipKey}-a`,
             from: userANodeId,

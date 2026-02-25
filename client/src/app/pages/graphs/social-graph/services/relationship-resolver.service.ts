@@ -77,10 +77,11 @@ export class RelationshipResolverService {
     for (const platform of sourcePlatforms) {
       this.tryAddRelationshipConnection(sourceUser, targetUser, platform, 'follows', this.containsAnyHandle(platform.following_list, targetHandles), connections, unique);
       this.tryAddRelationshipConnection(sourceUser, targetUser, platform, 'followed_by', this.containsAnyHandle(platform.followers_list, targetHandles), connections, unique);
+      this.tryAddRelationshipConnection(sourceUser, targetUser, platform, 'mentioned', this.containsAnyHandle(platform.post_connections, targetHandles), connections, unique);
     }
   }
 
-  private tryAddRelationshipConnection(sourceUser: string, targetUser: string, platform: PlatformResult, relation: 'follows' | 'followed_by', matches: boolean, connections: RelationshipConnectionItem[], unique: Set<string>): void {
+  private tryAddRelationshipConnection(sourceUser: string, targetUser: string, platform: PlatformResult, relation: 'follows' | 'followed_by' | 'mentioned', matches: boolean, connections: RelationshipConnectionItem[], unique: Set<string>): void {
     if (!matches) {
       return;
     }

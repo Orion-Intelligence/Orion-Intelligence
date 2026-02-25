@@ -21,6 +21,9 @@ export class RelationshipDetailsPopupComponent {
     if (item.relation === 'follows') {
       return `${item.sourceUser} follows ${item.targetUser}`;
     }
+    if (item.relation === 'mentioned') {
+      return `${item.sourceUser} mentioned ${item.targetUser}`;
+    }
     return `${item.targetUser} follows ${item.sourceUser}`;
   }
 

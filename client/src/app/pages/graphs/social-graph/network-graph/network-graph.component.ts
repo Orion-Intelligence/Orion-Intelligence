@@ -61,6 +61,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         nodeId: string;
         x: number;
         y: number;
+        size: number;
     }[]>([]);
   loadingNodeIds = computed(() => {
     const loadingIds = new Set<string>();
@@ -516,18 +517,24 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
                 nodeId: string;
                 x: number;
                 y: number;
+                size: number;
             }[] = [];
+      const scale = network.getScale();
       for (const nodeId of nodesToDraw) {
         const nodePosition = network.getPosition(nodeId as string);
         if (nodePosition) {
-          const boundingBox = network.getBoundingBox(nodeId as string);
-          const radius = (boundingBox.right - boundingBox.left) / 2;
-          const iconCanvasPos = {
-            x: nodePosition.x + radius * 0.707,
-            y: nodePosition.y - radius * 0.707,
-          };
-          const domPosition = network.canvasToDOM(iconCanvasPos);
-          overlays.push({ nodeId: nodeId as string, x: domPosition.x, y: domPosition.y });
+          const domPosition = network.canvasToDOM(nodePosition);
+          const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId as string);
+          const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 25;
+          const domRadius = baseSize * scale;
+          const overlaySize = Math.max(8, domRadius * 0.9);
+          const offset = domRadius * 0.707;
+          overlays.push({
+            nodeId: nodeId as string,
+            x: domPosition.x + offset,
+            y: domPosition.y - offset,
+            size: overlaySize
+          });
         }
       }
       this.iconOverlayNodes.set(overlays);

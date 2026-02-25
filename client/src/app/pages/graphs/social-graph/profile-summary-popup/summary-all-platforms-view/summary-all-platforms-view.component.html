@@ -232,6 +232,51 @@
   <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
     <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
+      <span>Post Connections</span>
+    </summary>
+    <div class="p-3 border-t border-slate-700 space-y-3">
+      <div class="relative">
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
+        <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+        <button *ngIf="postsSearchTerm()" (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+      </div>
+
+      <div class="space-y-2">
+        <div *ngFor="let platform of displayPlatformsForPosts(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+          <div class="bg-slate-800/50 rounded-lg p-3">
+            <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+              <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+              <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+              <div *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+            </div>
+            <div *ngIf="platform.post_connections?.length; else noConnectionData">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ platform.post_connections.length }} connections</span>
+              </div>
+              <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
+                <button *ngFor="let connection of getVisiblePostConnections(platform)" type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
+                  {{ '@' + connection }}
+                </button>
+              </div>
+              <button *ngIf="canLoadMorePostConnections(platform)" (click)="loadMorePostConnections(platform)" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">
+                Load More
+              </button>
+            </div>
+            <ng-template #noConnectionData>
+              <p class="text-center text-sm text-slate-500 py-2">No connections detected in posts.</p>
+            </ng-template>
+          </div>
+        </div>
+        <p *ngIf="filteredPlatformsForPosts().length === 0" class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+      </div>
+
+      <button *ngIf="displayPlatformsForPosts().length < filteredPlatformsForPosts().length" (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+    </div>
+  </details>
+
+  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
       <span>Associated Images</span>
     </summary>
     <div class="p-3 border-t border-slate-700 space-y-4">

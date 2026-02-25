@@ -51,7 +51,7 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     super();
     effect(() => {
       const p = this.platform();
-      this.resetFeedState(p?.posts, p?.images, p?.followers_list, p?.following_list);
+      this.resetFeedState(p?.posts, p?.images, p?.followers_list, p?.following_list, p?.post_connections);
     });
   }
 
@@ -75,6 +75,10 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     super.loadMoreFollowing(this.platform()?.following_list);
   }
 
+  override loadMorePostConnections() {
+    super.loadMorePostConnections(this.platform()?.post_connections);
+  }
+
   getProfileDetailEntries(platform: PlatformResult | null): {
         key: string;
         value: any;
@@ -84,6 +88,10 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
 
   getAccountUrl(platform: PlatformResult): string {
     return buildSocialProfileUrl(platform.platform, platform.username, platform.url);
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
   fetchPlatformMetadata(): void {

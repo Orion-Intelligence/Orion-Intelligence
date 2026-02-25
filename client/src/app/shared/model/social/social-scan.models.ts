@@ -95,6 +95,7 @@ export interface PlatformResult {
     allMetadata: Record<string, any>;
     profileDetails?: ProfileDetails | null;
     posts?: SocialPost[] | null;
+    post_connections?: string[] | null;
     images?: SocialImage[] | null;
     followers_list?: string[] | null;
     following_list?: string[] | null;

@@ -57,7 +57,10 @@ export class PlatformFetchService {
           const dataKey = Object.keys(response)[0];
           const data = response[dataKey];
           const hasData = data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0);
-          const newData = { [(propertyMap as any)[stateKey]]: hasData ? data : null };
+          const newData: Partial<PlatformResult> = { [(propertyMap as any)[stateKey]]: hasData ? data : null } as Partial<PlatformResult>;
+          if (stateKey === 'posts') {
+            newData.post_connections = hasData ? this.extractConnections(data) : null;
+          }
           updateState(tabState => {
             tabState.scanResults.update(currentMap => {
               const newMap = new Map(currentMap);
@@ -69,7 +72,7 @@ export class PlatformFetchService {
             });
           });
           this.updateUIPopups(state, platformResult, newData);
-          if (stateKey === 'followers' || stateKey === 'following') {
+          if (stateKey === 'followers' || stateKey === 'following' || stateKey === 'posts') {
             const tabState = activeTabState();
             if (tabState) {
               graphOrchestrator.updateUserConnections(tabState).then();
@@ -82,6 +85,31 @@ export class PlatformFetchService {
           cancelMap.delete(key);
         }
       });
+  }
+
+  private extractConnections(posts: any): string[] | null {
+    if (!Array.isArray(posts)) {
+      return null;
+    }
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const post of posts) {
+      const connections = Array.isArray(post?.connections) ? post.connections : [];
+      for (const connection of connections) {
+        const trimmed = String(connection || '').trim();
+        if (!trimmed) {
+          continue;
+        }
+        const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+        const key = normalized.toLowerCase();
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        result.push(normalized);
+      }
+    }
+    return result;
   }
 
   cancelFetch(p: PlatformResult, stateKey: FetchStateKey, cancelMap: Map<string, Subject<void>>, fetchingState: FetchingStateService): void {

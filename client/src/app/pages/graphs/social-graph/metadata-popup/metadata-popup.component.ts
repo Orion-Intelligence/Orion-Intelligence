@@ -44,7 +44,7 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
     super();
     this.fetchingState = fetchingState;
     effect(() => {
-      this.resetFeedState(this.data().posts, this.data().images, this.data().followers_list, this.data().following_list);
+      this.resetFeedState(this.data().posts, this.data().images, this.data().followers_list, this.data().following_list, this.data().post_connections);
     });
   }
 
@@ -66,6 +66,10 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
 
   override loadMoreFollowing() {
     super.loadMoreFollowing(this.data().following_list);
+  }
+
+  override loadMorePostConnections() {
+    super.loadMorePostConnections(this.data().post_connections);
   }
 
   onClose() {
@@ -100,6 +104,10 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
 
   trackByImageUrl(_index: number, image: SocialImage): string {
     return image.image_url;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
   getAccountUrl(): string {

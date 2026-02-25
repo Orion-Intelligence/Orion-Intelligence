@@ -19,7 +19,7 @@ export interface RelationshipConnectionItem {
     sourceUsername: string;
     sourceUrl: string;
     targetUser: string;
-    relation: 'follows' | 'followed_by';
+    relation: 'follows' | 'followed_by' | 'mentioned';
 }
 export interface RelationshipPopupData {
     userA: string;

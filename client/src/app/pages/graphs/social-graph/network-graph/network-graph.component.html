@@ -3,12 +3,21 @@
     <i class="bi bi-x-lg text-sm font-bold"></i>
   </button>
   <div class="absolute inset-0 z-10 pointer-events-none">
-    <svg *ngIf="iconOverlayNodes().length > 0" class="absolute inset-0 w-full h-full pointer-events-none">
-      <g *ngFor="let overlay of iconOverlayNodes(); trackBy: trackByOverlayNodeId" (click)="onFollowersShortcutClick($event, overlay.nodeId)" class="pointer-events-auto cursor-pointer">
-        <circle [attr.cx]="overlay.x" [attr.cy]="overlay.y" r="10" class="network-graph-followers-overlay-circle"></circle>
-        <text [attr.x]="overlay.x" [attr.y]="overlay.y + 3.5" class="network-graph-followers-overlay-icon">F</text>
-      </g>
-    </svg>
+    <ng-container *ngIf="iconOverlayNodes().length > 0">
+      <button *ngFor="let overlay of iconOverlayNodes(); trackBy: trackByOverlayNodeId"
+        type="button"
+        class="network-graph-followers-overlay pointer-events-auto"
+        [style.left.px]="overlay.x"
+        [style.top.px]="overlay.y"
+        [style.width.px]="overlay.size"
+        [style.height.px]="overlay.size"
+        (click)="onFollowersShortcutClick($event, overlay.nodeId)">
+        <svg viewBox="0 0 16 16" class="network-graph-followers-overlay-svg" [style.width.px]="overlay.size * 0.6" [style.height.px]="overlay.size * 0.6" aria-hidden="true">
+          <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7z"></path>
+          <path d="M4.5 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM12.5 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path>
+        </svg>
+      </button>
+    </ng-container>
   </div>
   <div #networkContainer class="w-full h-full absolute top-0 left-0"></div>
 </div>

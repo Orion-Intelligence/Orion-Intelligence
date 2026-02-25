@@ -116,9 +116,9 @@
                   <p class="mt-1 text-sm">No posts found for this account.</p>
                 </div>
                 <div *ngIf="data().posts?.length" class="space-y-3">
-                  <div *ngFor="let post of displayPosts(); trackBy: trackByPostUrl" class="rounded-lg bg-[var(--color-blue-720)]/80 p-3 text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                    <p class="text-[var(--color-text2)] mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
-                    <div class="flex items-center justify-between text-[var(--color-text4)]">
+                <div *ngFor="let post of displayPosts(); trackBy: trackByPostUrl" class="bg-slate-700/50 p-3 rounded-lg text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                    <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
+                    <div class="flex items-center justify-between text-slate-400">
                       <div class="flex items-center gap-4">
                         <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
                         <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
@@ -134,6 +134,32 @@
                   </button>
                 </div>
             </div>
+          </div>
+        </details>
+
+        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+            <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
+            <span>Post Connections</span>
+          </summary>
+          <div class="p-3 border-t border-[var(--color-border)]">
+            <div *ngIf="!data().post_connections?.length" class="text-center py-4 text-[var(--color-text4)]">
+              <i class="bi bi-x-circle text-2xl"></i>
+              <p class="mt-1 text-sm">No connections detected in posts.</p>
+            </div>
+            <ng-container *ngIf="data().post_connections?.length">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">{{ data().post_connections.length }} connections</span>
+              </div>
+              <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
+                <button *ngFor="let connection of displayPostConnections(); trackBy: trackByIndex" type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
+                  {{ '@' + connection }}
+                </button>
+              </div>
+              <button *ngIf="displayPostConnections().length < (data().post_connections || []).length" (click)="loadMorePostConnections()" [disabled]="isLoadingMorePostConnections()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
+                {{ isLoadingMorePostConnections() ? 'Loading...' : 'Load More' }}
+              </button>
+            </ng-container>
           </div>
         </details>
         
@@ -171,9 +197,9 @@
                 </div>
                 <ng-container *ngIf="data().followers_list?.length">
                   <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-                    <div *ngFor="let follower of displayFollowers(); trackBy: trackByUsername" class="rounded-md bg-[var(--color-blue-720)]/80 px-3 py-1.5 text-sm font-mono text-[var(--color-text2)] animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                      {{ follower }}
-                    </div>
+                  <button *ngFor="let follower of displayFollowers(); trackBy: trackByUsername" type="button" (click)="scanConnections([follower])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                    {{ '@' + follower }}
+                  </button>
                   </div>
                   <button *ngIf="displayFollowers().length < (data().followers_list || []).length" (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
                     <span *ngIf="isLoadingMoreFollowers(); else loadMoreFollowersText">Loading...</span>
@@ -218,9 +244,9 @@
                 </div>
                 <ng-container *ngIf="data().following_list?.length">
                   <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-                    <div *ngFor="let user of displayFollowing(); trackBy: trackByUsername" class="rounded-md bg-[var(--color-blue-720)]/80 px-3 py-1.5 text-sm font-mono text-[var(--color-text2)] animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                      {{ user }}
-                    </div>
+                  <button *ngFor="let user of displayFollowing(); trackBy: trackByUsername" type="button" (click)="scanConnections([user])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                    {{ '@' + user }}
+                  </button>
                   </div>
                    <button *ngIf="displayFollowing().length < (data().following_list || []).length" (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
                     <span *ngIf="isLoadingMoreFollowing(); else loadMoreFollowingText">Loading...</span>

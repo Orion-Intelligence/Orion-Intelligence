@@ -22,16 +22,19 @@ export class FollowerScanPopupComponent {
   scan = output<string[]>();
   fetchFollowers = output<void>();
   fetchFollowing = output<void>();
-  activeTab = signal<'followers' | 'following'>('followers');
+  activeTab = signal<'followers' | 'following' | 'connections'>('followers');
   searchTerm = signal('');
   selectedUsernames = signal(new Set<string>());
   displayFollowers = signal<string[]>([]);
   displayFollowing = signal<string[]>([]);
+  displayConnections = signal<string[]>([]);
   isLoadingMoreFollowers = signal(false);
   isLoadingMoreFollowing = signal(false);
+  isLoadingMoreConnections = signal(false);
   readonly MAX_SELECTION = 3;
   followers = computed(() => this.platform().followers_list || []);
   following = computed(() => this.platform().following_list || []);
+  connections = computed(() => this.platform().post_connections || []);
   filteredFollowers = computed(() => {
     const term = this.searchTerm().toLowerCase();
     if (!term) {
@@ -46,6 +49,13 @@ export class FollowerScanPopupComponent {
     }
     return this.following().filter(u => u.toLowerCase().includes(term));
   });
+  filteredConnections = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) {
+      return this.connections();
+    }
+    return this.connections().filter(u => u.toLowerCase().includes(term));
+  });
 
   constructor() {
     effect(() => {
@@ -55,12 +65,18 @@ export class FollowerScanPopupComponent {
       this.displayFollowing.set(this.filteredFollowing().slice(0, this.initialLoadCount));
     });
     effect(() => {
+      this.displayConnections.set(this.filteredConnections().slice(0, this.initialLoadCount));
+    });
+    effect(() => {
       const platform = this.platform();
       if ((platform.followers_list?.length ?? 0) > 0) {
         this.activeTab.set('followers');
       }
       else if ((platform.following_list?.length ?? 0) > 0) {
         this.activeTab.set('following');
+      }
+      else if ((platform.post_connections?.length ?? 0) > 0) {
+        this.activeTab.set('connections');
       }
       else {
         this.activeTab.set('followers');
@@ -93,10 +109,12 @@ export class FollowerScanPopupComponent {
 
   confirmScan() {
     this.scan.emit(Array.from(this.selectedUsernames()));
+    this.close.emit();
   }
 
   scanSingle(username: string) {
     this.scan.emit([username]);
+    this.close.emit();
   }
 
   loadMoreFollowers() {
@@ -107,9 +125,15 @@ export class FollowerScanPopupComponent {
     this._loadMore(this.isLoadingMoreFollowing, this.displayFollowing, this.filteredFollowing(), this.increment);
   }
 
+  loadMoreConnections() {
+    this._loadMore(this.isLoadingMoreConnections, this.displayConnections, this.filteredConnections(), this.increment);
+  }
+
+
   trackByUsername(_index: number, username: string): string {
     return username;
   }
+
 
   getProfileUrl(username: string): string {
     const platform = this.platform();
@@ -120,7 +144,7 @@ export class FollowerScanPopupComponent {
     return this.platform().url || '#';
   }
 
-  private addItems(displaySignal: WritableSignal<string[]>, itemsToAdd: string[], onComplete: () => void) {
+  private addItems<T>(displaySignal: WritableSignal<T[]>, itemsToAdd: T[], onComplete: () => void) {
     if (itemsToAdd.length === 0) {
       onComplete();
       return;
@@ -129,7 +153,7 @@ export class FollowerScanPopupComponent {
     onComplete();
   }
 
-  private _loadMore(isLoadingSignal: WritableSignal<boolean>, displaySignal: WritableSignal<string[]>, allItems: string[], increment: number) {
+  private _loadMore<T>(isLoadingSignal: WritableSignal<boolean>, displaySignal: WritableSignal<T[]>, allItems: T[], increment: number) {
     if (isLoadingSignal()) {
       return;
     }

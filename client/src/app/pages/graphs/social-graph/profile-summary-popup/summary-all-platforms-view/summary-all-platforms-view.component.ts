@@ -56,6 +56,9 @@ export class SummaryAllPlatformsViewComponent {
   displayPlatformsForDetails = computed(() => this.filteredPlatformsForDetails().slice(0, this.visibleDetailsPlatformsCount()));
   displayPlatformsForPosts = computed(() => this.filteredPlatformsForPosts().slice(0, this.visiblePostsPlatformsCount()));
   displayPlatformsForImages = computed(() => this.filteredPlatformsForImages().slice(0, this.visibleImagesPlatformsCount()));
+  visiblePostConnectionsCount = signal<Record<string, number>>({});
+  readonly postConnectionsInitial = 10;
+  readonly postConnectionsIncrement = 10;
 
   loadMoreDetailsPlatforms() {
     this.incrementVisible(this.visibleDetailsPlatformsCount); 
@@ -102,6 +105,26 @@ export class SummaryAllPlatformsViewComponent {
 
   getPlatformUniqueKey(platform: PlatformResult): string {
     return `platform-${platform.keyUsername}|${platform.platform}|${platform.username}`;
+  }
+
+  getVisiblePostConnections(platform: PlatformResult): string[] {
+    const key = this.getPlatformUniqueKey(platform);
+    const current = this.visiblePostConnectionsCount()[key] ?? this.postConnectionsInitial;
+    return (platform.post_connections || []).slice(0, current);
+  }
+
+  canLoadMorePostConnections(platform: PlatformResult): boolean {
+    const key = this.getPlatformUniqueKey(platform);
+    const current = this.visiblePostConnectionsCount()[key] ?? this.postConnectionsInitial;
+    return (platform.post_connections || []).length > current;
+  }
+
+  loadMorePostConnections(platform: PlatformResult): void {
+    const key = this.getPlatformUniqueKey(platform);
+    this.visiblePostConnectionsCount.update(current => ({
+      ...current,
+      [key]: (current[key] ?? this.postConnectionsInitial) + this.postConnectionsIncrement
+    }));
   }
 
   fetchProfileLeaks(): void {

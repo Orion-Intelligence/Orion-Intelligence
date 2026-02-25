@@ -7,25 +7,30 @@ export abstract class PlatformFeedViewBase {
   protected readonly initialImages = 8;
   protected readonly initialFollowers = 10;
   protected readonly initialFollowing = 10;
+  protected readonly initialPostConnections = 10;
   protected readonly postsIncrement = 3;
   protected readonly imagesIncrement = 4;
   protected readonly followersIncrement = 10;
   protected readonly followingIncrement = 10;
+  protected readonly postConnectionsIncrement = 10;
 
   displayPosts = signal<SocialPost[]>([]);
   displayImages = signal<SocialImage[]>([]);
   displayFollowers = signal<string[]>([]);
   displayFollowing = signal<string[]>([]);
+  displayPostConnections = signal<string[]>([]);
   isLoadingMorePosts = signal(false);
   isLoadingMoreImages = signal(false);
   isLoadingMoreFollowers = signal(false);
   isLoadingMoreFollowing = signal(false);
+  isLoadingMorePostConnections = signal(false);
 
-  protected resetFeedState(posts: SocialPost[] | undefined | null, images: SocialImage[] | undefined | null, followers: string[] | undefined | null, following: string[] | undefined | null): void {
+  protected resetFeedState(posts: SocialPost[] | undefined | null, images: SocialImage[] | undefined | null, followers: string[] | undefined | null, following: string[] | undefined | null, postConnections?: string[] | null): void {
     this.displayPosts.set((posts || []).slice(0, this.initialPosts));
     this.displayImages.set((images || []).slice(0, this.initialImages));
     this.displayFollowers.set((followers || []).slice(0, this.initialFollowers));
     this.displayFollowing.set((following || []).slice(0, this.initialFollowing));
+    this.displayPostConnections.set((postConnections || []).slice(0, this.initialPostConnections));
   }
 
   protected loadMorePosts(items: SocialPost[] | undefined | null): void {
@@ -42,5 +47,9 @@ export abstract class PlatformFeedViewBase {
 
   protected loadMoreFollowing(items: string[] | undefined | null): void {
     loadMoreIncrementally(this.isLoadingMoreFollowing, this.displayFollowing, items, this.followingIncrement);
+  }
+
+  protected loadMorePostConnections(items: string[] | undefined | null): void {
+    loadMoreIncrementally(this.isLoadingMorePostConnections, this.displayPostConnections, items, this.postConnectionsIncrement);
   }
 }

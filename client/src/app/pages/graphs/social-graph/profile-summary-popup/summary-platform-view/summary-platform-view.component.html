@@ -161,6 +161,32 @@
     <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
       <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
         <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
+        <span>Post Connections</span>
+      </summary>
+      <div class="p-3 border-t border-slate-700">
+        <div *ngIf="!p.post_connections?.length" class="text-center py-4 text-slate-500">
+          <i class="bi bi-x-circle text-2xl"></i>
+          <p class="mt-1 text-sm">No connections detected in posts.</p>
+        </div>
+        <ng-container *ngIf="p.post_connections?.length">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ p.post_connections.length }} connections</span>
+          </div>
+          <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
+            <button *ngFor="let connection of displayPostConnections(); trackBy: trackByIndex" type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
+              {{ '@' + connection }}
+            </button>
+          </div>
+          <button *ngIf="displayPostConnections().length < (p.post_connections || []).length" (click)="loadMorePostConnections()" [disabled]="isLoadingMorePostConnections()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-wait">
+            {{ isLoadingMorePostConnections() ? 'Loading...' : 'Load More' }}
+          </button>
+        </ng-container>
+      </div>
+    </details>
+
+    <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+      <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+        <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
         <span>Followers</span>
         <button *ngIf="p.followers_list !== undefined" (click)="$event.preventDefault(); fetchFollowers.emit(p)" [disabled]="isScanInProgress() || fetchingState.followers()[getPlatformUniqueKey(p)]" class="h-7 w-7 flex items-center justify-center rounded-full text-slate-400 bg-slate-700/60 border border-slate-600/80 hover:bg-slate-600/80 hover:border-slate-500 hover:text-slate-100 transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Followers">
           <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="fetchingState.followers()[getPlatformUniqueKey(p)]"></i>
@@ -187,7 +213,9 @@
           </div>
           <ng-template #followersList>
             <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-              <div *ngFor="let follower of displayFollowers()" class="rounded-md bg-slate-700/50 px-3 py-1.5 text-sm font-mono text-slate-300 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">{{ follower }}</div>
+              <button *ngFor="let follower of displayFollowers()" type="button" (click)="scanConnections([follower])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                {{ '@' + follower }}
+              </button>
             </div>
             <button *ngIf="displayFollowers().length < (p.followers_list || []).length" (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-wait">
               {{ isLoadingMoreFollowers() ? 'Loading...' : 'Load More' }}
@@ -226,7 +254,9 @@
           </div>
           <ng-template #followingList>
             <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-              <div *ngFor="let user of displayFollowing()" class="rounded-md bg-slate-700/50 px-3 py-1.5 text-sm font-mono text-slate-300 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">{{ user }}</div>
+              <button *ngFor="let user of displayFollowing()" type="button" (click)="scanConnections([user])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                {{ '@' + user }}
+              </button>
             </div>
             <button *ngIf="displayFollowing().length < (p.following_list || []).length" (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-wait">
               {{ isLoadingMoreFollowing() ? 'Loading...' : 'Load More' }}
