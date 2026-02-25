@@ -1,54 +1,73 @@
 <div [ngClass]="isConsolidatedView ? 'w-full min-w-0' : 'w-full max-w-[910px] min-w-0 px-2 sm:px-0'">
-  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="mb-[20px]" [@fadeInDashboardItem]>
-    <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]">
+  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))"
+    class="mb-[20px]" [@fadeInDashboardItem]>
+    <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''"
+      class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]">
 
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
         <div class="flex max-w-[80%] flex-wrap gap-[10px]">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_content_type | slice:0:15" [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">{{ tag }}</span>
+            <span *ngFor="let tag of item.m_content_type | slice:0:15"
+              [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''"
+              class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">{{
+              tag }}</span>
           </ng-container>
           <ng-template #unknownTag>
-            <span [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">unknown</span>
+            <span [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''"
+              class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">unknown</span>
           </ng-template>
         </div>
 
         <div class="ml-auto flex gap-[20px]">
-          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
+          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph"
+            class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
             <div class="p-[0_0_10px_10px]">
-              <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+              <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph"
+                class="ui-action-icon" />
             </div>
           </div>
-          <div [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
+          <div [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]"
+            class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
             <div class="p-[0_0_10px_10px]">
-              <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
+              <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect"
+                class="ui-action-icon" />
             </div>
           </div>
         </div>
       </div>
 
-      <div class="d-flex items-center gap-2 overflow-hidden whitespace-nowrap">
-        <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
-        <h2 class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)] max-[640px]:text-[18px]">
-          <ng-container *ngIf="item.m_sender_name as senderName; else showTitle">{{ senderName.substring(1) }}</ng-container>
+      <div class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
+        <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20"
+          class="shrink-0 ui-action-icon" />
+        <h2
+          class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)] max-[640px]:text-[18px]">
+          <ng-container *ngIf="item.m_sender_name as senderName; else showTitle">{{ senderName.substring(1)
+            }}</ng-container>
           <ng-template #showTitle><span>{{ item.m_title | removeEmojis }}</span></ng-template>
         </h2>
       </div>
 
-      <div *ngIf="item.m_message_sharable_link" class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
+      <div *ngIf="item.m_message_sharable_link"
+        class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
         {{ item.m_message_sharable_link }}
       </div>
 
       <ng-container *ngIf="item.m_platform !== 'forum'; else otherSection">
         <ng-container *ngIf="hasCodeType(item); else normalContent">
-          <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">Code snippet - content not available</p>
-          <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
-            <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
+          <p
+            class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
+            Code snippet - content not available</p>
+          <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''"
+            class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
+            <code [innerText]="getContentWithoutEmptyLines(item.m_content)"
+              class="text-[14px] text-[var(--color-text1)]"></code>
           </div>
         </ng-container>
         <ng-template #normalContent>
           <ng-container *ngIf="item.m_content">
             <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">Content</h5>
-            <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
+            <p
+              class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
                 {{ part }}<br *ngIf="!last" />
               </ng-container>
@@ -62,9 +81,11 @@
         <ng-container *ngIf="getContentLines(item).length > 0">
           <div class="mb-[12px] mt-[10px] space-y-[10px]">
             <ng-container *ngFor="let section of getContentLines(item).slice(0, 5); let i = index; let isLast = last">
-              <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[12px]">
+              <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''"
+                class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[12px]">
                 <h3 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
-                <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
+                <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text"
+                  [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
               </div>
             </ng-container>
           </div>
@@ -73,7 +94,8 @@
 
       <ng-container *ngIf="item.m_weblink?.length">
         <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
-        <div *ngFor="let link of item.m_weblink | slice:0:3" class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
+        <div *ngFor="let link of item.m_weblink | slice:0:3"
+          class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
           {{ link }}
         </div>
       </ng-container>
@@ -81,7 +103,8 @@
       <div class="mt-[20px] flex flex-wrap items-start justify-start gap-[15px] pt-[10px] pr-[10px] text-[12px]">
         <div class="flex flex-col gap-[2px]">
           <span class="font-[Roboto] text-[12px] font-[400] text-[var(--color-text4)]">Message Date:</span>
-          <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : 'Not available' }}</span>
+          <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ item.m_message_date ?
+            (item.m_message_date | date: 'MMM d, y') : 'Not available' }}</span>
         </div>
       </div>
     </div>
