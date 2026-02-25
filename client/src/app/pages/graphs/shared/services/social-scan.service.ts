@@ -271,6 +271,36 @@ export class SocialScanService {
     catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
   }
 
+  fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<{
+        query: string;
+        total_found: number;
+        timestamp?: string;
+        results: Array<{
+          title?: string;
+          url?: string;
+          snippet?: string;
+          timestamp?: string;
+        }>;
+    }> {
+    const payload: any = { tokens, username };
+    if (platform) {
+      payload.platform = platform;
+    }
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<any>>('social/metadata', payload),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => {
+        const r = (res as any)?.result ?? {};
+        return {
+          query: r?.query ?? '',
+          total_found: Number(r?.total_found ?? 0),
+          timestamp: r?.timestamp,
+          results: Array.isArray(r?.results) ? r.results : []
+        };
+      },
+    }).pipe(retry(3));
+  }
+
   private shouldContinueDynamicPolling(res: any): boolean {
     const topStatus = (res?.status || '').toLowerCase();
     const nestedStatus = (res?.result?.status || '').toLowerCase();

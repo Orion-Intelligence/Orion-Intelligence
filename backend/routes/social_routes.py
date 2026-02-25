@@ -6,6 +6,7 @@ from configs.app_dependency import get_current_user, license_required, role_requ
 from orion.api.interactive.graph_manager.graph_models.search_social_param_model import (
     SocialFollowersRequest,
     SocialFollowingRequest,
+    SocialMetadataRequest,
     SocialOnlineImages,
     SocialProfileRequest,
     SocialReconRequest,
@@ -91,6 +92,13 @@ async def search_dynamic_posts(param: SocialProfileRequest = Body(...)):
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_entity(param: SocialProfileRequest = Body(...)):
     return await graphs_model.getInstance().social_search(param, "entity")
+
+
+@social_routes.post(
+    "/api/social/metadata",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_social_metadata(param: SocialMetadataRequest = Body(...)):
+    return await search_model.getInstance().social_search(param, "metadata")
 
 
 @social_routes.post(

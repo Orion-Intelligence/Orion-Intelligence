@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabManagerService } from '../services/tab-manager.service';
 import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
@@ -17,6 +17,7 @@ export class TabBarComponent {
   isAddMenuVisible = signal(false);
   isHeaderMenuVisible = signal(false);
   isReportExportModalOpen = signal(false);
+  private hostRef = inject(ElementRef<HTMLElement>);
 
   constructor(public tabManager: TabManagerService) { }
 
@@ -35,6 +36,17 @@ export class TabBarComponent {
   closeMenus() {
     this.isAddMenuVisible.set(false);
     this.isHeaderMenuVisible.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as Node | null;
+    if (!target) {
+      return;
+    }
+    if (!this.hostRef.nativeElement.contains(target)) {
+      this.closeMenus();
+    }
   }
 
   createNewTab() {

@@ -60,3 +60,16 @@ class SocialOnlineImages(PlatformUsernameRequest):
 
 class SocialFollowingRequest(PlatformUsernameRequest):
     max_following: int = Field(default=50, ge=1, le=5000)
+
+
+class SocialMetadataRequest(BaseModel):
+    tokens: List[str] = Field(..., min_length=1)
+    username: str = Field(..., min_length=1)
+    platform: Optional[str] = Field(default=None, min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def lower_platform(cls, values):
+        if isinstance(values, dict) and "platform" in values and values["platform"]:
+            values["platform"] = values["platform"].lower()
+        return values

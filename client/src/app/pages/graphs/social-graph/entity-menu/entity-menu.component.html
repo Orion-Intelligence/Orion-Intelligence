@@ -1,4 +1,4 @@
-<div *ngIf="!isSmallScreen()" class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-72]="!isCollapsed()" [class.w-14]="isCollapsed()">
+<div *ngIf="!isSmallScreen()" class="h-full min-h-0 flex flex-col transition-all duration-300 ease-in-out" [class.w-72]="!isCollapsed()" [class.w-14]="isCollapsed()">
   <div class="flex shrink-0 items-center border-b border-[var(--color-border)] p-3" [class.gap-3]="!isCollapsed()" [class.justify-between]="!isCollapsed()" [class.justify-center]="isCollapsed()">
     <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isCollapsed()" [class.w-0]="isCollapsed()" [class.opacity-0]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
       <h2 class="text-md whitespace-nowrap font-semibold text-[var(--color-text2)]">Add Entity</h2>
@@ -8,8 +8,8 @@
     </button>
   </div>
 
-  <div class="flex-grow overflow-hidden">
-    <div *ngIf="!isCollapsed()" class="h-full w-72 p-3 flex flex-col gap-2 overflow-y-auto transition-all duration-300 ease-out">
+  <div class="flex-grow min-h-0 overflow-hidden h-full">
+    <div *ngIf="!isCollapsed()" class="h-full min-h-0 w-72 p-3 flex flex-col gap-2 overflow-y-auto transition-all duration-300 ease-out">
       <div class="mb-1">
         <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block w-full rounded-md border-0 bg-[var(--color-blue-700)] px-3 py-1.5 text-[12px] text-[var(--color-text1)] shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none">
       </div>

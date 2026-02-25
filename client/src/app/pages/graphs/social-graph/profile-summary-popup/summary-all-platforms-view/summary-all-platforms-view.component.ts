@@ -39,6 +39,17 @@ export class SummaryAllPlatformsViewComponent {
   profileLeaksError = signal('');
   profileBreachCards = signal<any[]>([]);
   profileStealerRows = signal<any[]>([]);
+  profileMetadataTokenInput = signal('');
+  profileMetadataTokens = signal<string[]>([]);
+  profileMetadataLoading = signal(false);
+  profileMetadataLoaded = signal(false);
+  profileMetadataError = signal('');
+  profileMetadataResult = signal<{
+        query: string;
+        total_found: number;
+        timestamp?: string;
+        results: any[];
+    } | null>(null);
   filteredPlatformsForDetails = computed(() => this.filterPlatforms(this.detailsSearchTerm(), p => p.profileDetails !== undefined));
   filteredPlatformsForPosts = computed(() => this.filterPlatforms(this.postsSearchTerm(), p => p.posts !== undefined));
   filteredPlatformsForImages = computed(() => this.filterPlatforms(this.imagesSearchTerm(), p => p.images !== undefined));
@@ -128,6 +139,66 @@ export class SummaryAllPlatformsViewComponent {
     });
   }
 
+  fetchProfileMetadata(): void {
+    const username = (this.username() || '').trim();
+    if (!username) {
+      this.profileMetadataError.set('No username found for this profile.');
+      this.profileMetadataLoaded.set(true);
+      this.profileMetadataResult.set(null);
+      return;
+    }
+    this.addTokensFromInput();
+    const tokens = this.profileMetadataTokens();
+    if (!tokens.length) {
+      this.profileMetadataError.set('Enter at least one token to search.');
+      this.profileMetadataLoaded.set(true);
+      this.profileMetadataResult.set(null);
+      return;
+    }
+    this.profileMetadataLoading.set(true);
+    this.profileMetadataLoaded.set(false);
+    this.profileMetadataError.set('');
+    this.socialScanService.fetchProfileMetadataTokens(tokens, username).pipe(finalize(() => {
+      this.profileMetadataLoading.set(false);
+      this.profileMetadataLoaded.set(true);
+    })).subscribe({
+      next: (res) => {
+        this.profileMetadataResult.set(res || null);
+      },
+      error: () => {
+        this.profileMetadataError.set('Failed to fetch profile metadata results.');
+        this.profileMetadataResult.set(null);
+      }
+    });
+  }
+
+  onMetadataTokenKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addTokensFromInput();
+    }
+  }
+
+  addTokensFromInput(): void {
+    const input = this.profileMetadataTokenInput();
+    const tokens = this.parseTokens(input);
+    if (!tokens.length) {
+      return;
+    }
+    const next = [...this.profileMetadataTokens()];
+    for (const token of tokens) {
+      if (!next.includes(token)) {
+        next.push(token);
+      }
+    }
+    this.profileMetadataTokens.set(next);
+    this.profileMetadataTokenInput.set('');
+  }
+
+  removeMetadataToken(token: string): void {
+    this.profileMetadataTokens.set(this.profileMetadataTokens().filter(t => t !== token));
+  }
+
   getObjectEntries(item: any): Array<{
         key: string;
         value: any;
@@ -202,5 +273,12 @@ export class SummaryAllPlatformsViewComponent {
       unique.push(row);
     }
     return unique;
+  }
+
+  private parseTokens(input: string): string[] {
+    return String(input || '')
+      .split(/[,\n\r\t]+|\s+/)
+      .map(token => token.trim())
+      .filter(Boolean);
   }
 }
