@@ -12,6 +12,7 @@ import { general_filters } from '../../../shared/constants/filters';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardResultExploitComponent } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultSocialComponent } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
@@ -26,6 +27,7 @@ import { DashboardResultDefacementComponent } from '../dashboard-results/dashboa
     ResultComponent,
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
+    DashboardResultChatComponent,
     NgForOf,
     DashboardResultDefacementComponent
   ],

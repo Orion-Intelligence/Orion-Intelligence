@@ -42,6 +42,12 @@
         [isExpandAble]="false"
         [searchResults]="[item]">
       </app-dashboard-result-social>
+
+      <app-dashboard-result-chat
+        *ngIf="item.rank_index === 'chat_model'"
+        [isExpandAble]="false"
+        [searchResults]="[item]">
+      </app-dashboard-result-chat>
     </div>
   </div>
 </div>
