@@ -9,29 +9,6 @@ import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.
   templateUrl: './home-menu.component.html',
   standalone: true,
   imports: [CommonModule, SidebarShellComponent],
-  styles: [`
-    .home-menu-progress-track {
-      width: 100%;
-      height: 5px;
-      border-radius: 999px;
-      overflow: hidden;
-      appearance: none;
-      border: 0;
-      background: rgba(148, 163, 184, 0.25);
-    }
-    .home-menu-progress-track::-webkit-progress-bar {
-      background: rgba(148, 163, 184, 0.25);
-      border-radius: 999px;
-    }
-    .home-menu-progress-track::-webkit-progress-value {
-      background: linear-gradient(90deg, #fb923c 0%, #f97316 100%);
-      border-radius: 999px;
-    }
-    .home-menu-progress-track::-moz-progress-bar {
-      background: linear-gradient(90deg, #fb923c 0%, #f97316 100%);
-      border-radius: 999px;
-    }
-  `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent implements OnDestroy {
