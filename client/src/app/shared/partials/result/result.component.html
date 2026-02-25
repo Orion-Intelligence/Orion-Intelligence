@@ -111,12 +111,12 @@
 
 <ng-container *ngIf="!consolidated">
   <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs()); else noResults" @fadeInDashboardItem>
-    <div class="mt-[26px] mb-[8px] mx-[30px] flex w-full max-w-[910px] items-center text-[15px] leading-[1.35] font-[Inter] font-semibold tracking-[0.01em] text-[var(--color-text4)] max-[1000px]:mx-[15px]">
-      <span>{{ result_count }} Results Found</span>
+    <div class="mt-[26px] mb-[8px] mx-[30px] flex w-full max-w-[910px] items-center text-[14px] leading-[1.35] font-[Roboto] font-medium tracking-[0.01em] text-[var(--color-text3)] max-[1000px]:mx-[15px]">
+      <span class="text-[var(--color-text2)]">{{ result_count }} Results Found</span>
     </div>
   </div>
   <ng-template #noResults>
-    <div *ngIf="(!checkMember() || hasIOCs()) && isLoading" class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] text-[18px] font-[Inter] font-medium text-[var(--color-text1)] max-[1000px]:ml-[15px]">
+    <div *ngIf="(!checkMember() || hasIOCs()) && isLoading" class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] text-[14px] font-[Roboto] font-medium text-[var(--color-text2)] max-[1000px]:ml-[15px]">
       <span>Searching for results ...</span><br><br>
     </div>
   </ng-template>
