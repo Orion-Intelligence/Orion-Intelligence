@@ -34,6 +34,19 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "base-uri 'self'; "
                                                            "upgrade-insecure-requests; "
                                                            "report-to csp-endpoint;")
+        elif request.url.path.startswith("/dashboard/social-mapper"):
+            response.headers["Content-Security-Policy"] = ("default-src 'self'; "
+                                                           "script-src 'self'; "
+                                                           "style-src 'self'; "
+                                                           "img-src 'self' data: https:; "
+                                                           "font-src 'self'; "
+                                                           "connect-src 'self'; "
+                                                           "media-src 'self'; "
+                                                           "frame-ancestors 'self'; "
+                                                           "object-src 'none'; "
+                                                           "form-action 'self'; "
+                                                           "base-uri 'self'; "
+                                                           "report-to csp-endpoint;")
         else:
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "
                                                            "script-src 'self'; "
