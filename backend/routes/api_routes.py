@@ -482,10 +482,10 @@ async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
 @api_routes.post(
     "/api/dynamic/national-identity",
     summary="Dynamic national identity search",
-    description=DYNAMIC_DOCS["dynamic_software"]["description"],
+    description=DYNAMIC_DOCS["dynamin_national_identity"]["description"],
     tags=["Entity Scans"],
     operation_id="dynamicNationalIdentitySearch",
-    response_description=DYNAMIC_DOCS["dynamic_software"]["response_description"],
+    response_description=DYNAMIC_DOCS["dynamin_national_identity"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS, )
 async def search_dynamic_national_identity(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
