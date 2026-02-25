@@ -46,14 +46,14 @@
 
       <ng-container *ngIf="item">
         <ng-container *ngIf="item.m_caption && item.m_caption.length > 5; else checkMedia">
-          <p class="mt-2 text-sm text-[var(--color-text3)]">{{ item.m_caption.slice(0, 300) | normalizeUnicode}}...</p>
+          <p class="mt-2 mb-3 text-sm text-[var(--color-text3)]">{{ item.m_caption.slice(0, 300) | normalizeUnicode}}...</p>
           <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5">
             <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Media Caption</h5>
-            <div class="mt-2 text-sm text-[var(--color-text3)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode}}...</div>
+            <div class="mt-2 mb-3 text-sm text-[var(--color-text3)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode}}...</div>
           </ng-container>
           <ng-container *ngIf="item.m_content">
             <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Raw Data Content</h5>
-            <p class="mt-2 text-sm text-[var(--color-text3)]">
+            <p class="mt-2 mb-3 text-sm text-[var(--color-text3)]">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
                 {{ part | normalizeUnicode }}<br *ngIf="!last" />
               </ng-container>
@@ -64,10 +64,10 @@
 
         <ng-template #checkMedia>
           <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5; else checkContent">
-            <p class="mt-2 text-sm text-[var(--color-text3)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode }}...</p>
+            <p class="mt-2 mb-3 text-sm text-[var(--color-text3)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode }}...</p>
             <ng-container *ngIf="item.m_content">
               <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Raw Data Content</h5>
-              <p class="mt-2 text-sm text-[var(--color-text3)]">
+              <p class="mt-2 mb-3 text-sm text-[var(--color-text3)]">
                 <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
                   {{ part | normalizeUnicode }}<br *ngIf="!last" />
                 </ng-container>
@@ -79,7 +79,7 @@
 
         <ng-template #checkContent>
           <ng-container *ngIf="item.m_content; else noContent">
-            <p class="mt-2 text-sm text-[var(--color-text3)]">
+            <p class="mt-2 mb-3 text-sm text-[var(--color-text3)]">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
                 {{ part | normalizeUnicode}}<br *ngIf="!last" />
               </ng-container>

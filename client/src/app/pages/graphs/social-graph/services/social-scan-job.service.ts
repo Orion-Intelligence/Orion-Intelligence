@@ -2,12 +2,44 @@ import { DestroyRef, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Job, ScanEvent, TabState } from '../../../../shared/model/social/social-scan.models';
+import { Job, ScanEvent, TabState, PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../../shared/services/social-scan.service';
 import { SocialMapperStateService } from './social-mapper-state.service';
 type UpdateStateFn = (updater: (state: TabState) => void, shouldScheduleSave?: boolean) => void;
 @Injectable({ providedIn: 'root' })
 export class SocialScanJobService {
+  private getPlatformIdentityKey(platform: PlatformResult): string {
+    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
+  }
+
+  private mergePlatformsWithExisting(existing: PlatformResult[] | undefined, incoming: PlatformResult[], username: string): PlatformResult[] {
+    const existingMap = new Map<string, PlatformResult>();
+    (existing || []).forEach(platform => {
+      existingMap.set(this.getPlatformIdentityKey(platform), platform);
+    });
+    return incoming.map(platform => {
+      const next = { ...platform, keyUsername: username };
+      const key = this.getPlatformIdentityKey(next);
+      const previous = existingMap.get(key);
+      if (!previous) {
+        return next;
+      }
+      return {
+        ...previous,
+        ...next,
+        keyUsername: username,
+        isSelected: previous.isSelected ?? next.isSelected,
+        posts: previous.posts ?? next.posts,
+        post_connections: previous.post_connections ?? next.post_connections,
+        images: previous.images ?? next.images,
+        followers_list: previous.followers_list ?? next.followers_list,
+        following_list: previous.following_list ?? next.following_list,
+        profileDetails: previous.profileDetails ?? next.profileDetails,
+        allMetadata: next.allMetadata ?? previous.allMetadata,
+      };
+    });
+  }
+
   private getScanObserver(job: Job, isImageScan: boolean, updateState: UpdateStateFn, state: SocialMapperStateService, cancelScanSubjects: Map<string, Subject<void>>) {
     return {
       next: (event: ScanEvent) => {
@@ -16,9 +48,12 @@ export class SocialScanJobService {
           return;
         }
         if (event.type === 'complete') {
-          const finalPlatforms = event.payload.map(p => ({ ...p, keyUsername: job.username }));
           updateState(tabState => {
-            tabState.scanResults.update(currentMap => new Map(currentMap).set(job.username, finalPlatforms));
+            tabState.scanResults.update(currentMap => {
+              const existing = currentMap.get(job.username);
+              const mergedPlatforms = this.mergePlatformsWithExisting(existing, event.payload, job.username);
+              return new Map(currentMap).set(job.username, mergedPlatforms);
+            });
             tabState.jobs.update(jobs => jobs.map(j => j.id === job.id ? { ...j, status: 'completed', progress: 100, step: 'Completed' } : j));
           });
           if (isImageScan) {
