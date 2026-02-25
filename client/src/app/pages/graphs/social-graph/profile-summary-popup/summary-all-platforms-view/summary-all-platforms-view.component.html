@@ -12,6 +12,61 @@
   <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
     <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
+      <span>Profile Leak Intelligence</span>
+    </summary>
+    <div class="p-3 border-t border-slate-700 space-y-3">
+      <button (click)="fetchProfileLeaks()" [disabled]="profileLeaksLoading()" class="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+        <i class="bi" [ngClass]="profileLeaksLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-shield-exclamation'"></i>
+        <span>{{ profileLeaksLoading() ? 'Fetching...' : 'Fetch Profile Leaks' }}</span>
+      </button>
+      <p *ngIf="profileLeaksError()" class="text-sm text-red-400">{{ profileLeaksError() }}</p>
+      <ng-container *ngIf="profileLeaksLoaded()">
+        <div class="rounded-lg bg-slate-800/50 p-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
+            <h4 class="font-semibold text-slate-200">Email Breach Results</h4>
+            <span class="text-xs text-slate-400">{{ profileBreachCards().length }}</span>
+          </div>
+          <div *ngIf="profileBreachCards().length > 0; else noBreachData" class="space-y-2 mt-2">
+            <div *ngFor="let card of profileBreachCards().slice(0, 5)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
+              <div *ngFor="let entry of getObjectEntries(card).slice(0, 8)" class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
+                <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
+                <span class="text-slate-200 ml-1 break-words" *ngIf="!isArrayValue(entry.value) && !isObjectValue(entry.value)">{{ stringifyPrimitive(entry.value) }}</span>
+                <span class="text-slate-200 ml-1 break-words" *ngIf="isArrayValue(entry.value)">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                <span class="text-slate-200 ml-1 break-words" *ngIf="isObjectValue(entry.value)">[object]</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noBreachData>
+            <p class="text-sm text-slate-500 mt-2">No response was found.</p>
+          </ng-template>
+        </div>
+
+        <div class="rounded-lg bg-slate-800/50 p-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
+            <h4 class="font-semibold text-slate-200">Stealer Log Results</h4>
+            <span class="text-xs text-slate-400">{{ profileStealerRows().length }}</span>
+          </div>
+          <div *ngIf="profileStealerRows().length > 0; else noStealerData" class="space-y-2 mt-2">
+            <div *ngFor="let row of profileStealerRows().slice(0, 10)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
+              <div *ngFor="let entry of getObjectEntries(row).slice(0, 8)" class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
+                <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
+                <span class="text-slate-200 ml-1 break-words" *ngIf="!isArrayValue(entry.value) && !isObjectValue(entry.value)">{{ stringifyPrimitive(entry.value) }}</span>
+                <span class="text-slate-200 ml-1 break-words" *ngIf="isArrayValue(entry.value)">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                <span class="text-slate-200 ml-1 break-words" *ngIf="isObjectValue(entry.value)">[object]</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noStealerData>
+            <p class="text-sm text-slate-500 mt-2">No response was found.</p>
+          </ng-template>
+        </div>
+      </ng-container>
+    </div>
+  </details>
+
+  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
+    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
       <span>Profile Details</span>
     </summary>
     <div class="p-3 border-t border-slate-700 space-y-4">

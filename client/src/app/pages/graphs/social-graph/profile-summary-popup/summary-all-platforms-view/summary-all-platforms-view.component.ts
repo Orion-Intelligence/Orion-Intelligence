@@ -6,6 +6,9 @@ import { SocialIconComponent } from '../../../../../shared/components/social-ico
 import { FetchingStateService } from '../../services/fetching-state.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
+import { SocialScanService } from '../../../shared/services/social-scan.service';
+import { catchError, finalize, map } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 @Component({
   selector: 'app-summary-all-platforms-view',
   standalone: true,
@@ -14,7 +17,10 @@ import { getProfileDetailEntries } from '../../utils/summary-view.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryAllPlatformsViewComponent {
+  private socialScanService = inject(SocialScanService);
+
   username = input.required<string>();
+  email = input<string | undefined>();
   platforms = input.required<PlatformResult[]>();
   isScanInProgress = input<boolean>(false);
   fetchProfile = output<PlatformResult>();
@@ -28,6 +34,11 @@ export class SummaryAllPlatformsViewComponent {
   visibleImagesPlatformsCount = signal(5);
   public fetchingState = inject(FetchingStateService);
   public formatKey = formatKey;
+  profileLeaksLoading = signal(false);
+  profileLeaksLoaded = signal(false);
+  profileLeaksError = signal('');
+  profileBreachCards = signal<any[]>([]);
+  profileStealerRows = signal<any[]>([]);
   filteredPlatformsForDetails = computed(() => this.filterPlatforms(this.detailsSearchTerm(), p => p.profileDetails !== undefined));
   filteredPlatformsForPosts = computed(() => this.filterPlatforms(this.postsSearchTerm(), p => p.posts !== undefined));
   filteredPlatformsForImages = computed(() => this.filterPlatforms(this.imagesSearchTerm(), p => p.images !== undefined));
@@ -82,6 +93,69 @@ export class SummaryAllPlatformsViewComponent {
     return `platform-${platform.keyUsername}|${platform.platform}|${platform.username}`;
   }
 
+  fetchProfileLeaks(): void {
+    const username = (this.username() || '').trim();
+    const email = (this.email() || '').trim();
+    const stealerQueries = Array.from(new Set([username, email].filter(v => !!v)));
+    if (!username && !email) {
+      this.profileLeaksError.set('No username or email found for this profile.');
+      this.profileLeaksLoaded.set(true);
+      this.profileBreachCards.set([]);
+      this.profileStealerRows.set([]);
+      return;
+    }
+    this.profileLeaksLoading.set(true);
+    this.profileLeaksLoaded.set(false);
+    this.profileLeaksError.set('');
+    forkJoin({
+      breach: this.socialScanService.fetchProfileBreachData(username, email).pipe(catchError(() => of({ cards_data: [] }))),
+      stealer: stealerQueries.length > 0
+        ? forkJoin(stealerQueries.map((query) => this.socialScanService.fetchStealerLogsByIdentity(query).pipe(catchError(() => of([]))))).pipe(map((groups: any[][]) => this.dedupeStealerRows(groups.flat())))
+        : of([])
+    }).pipe(finalize(() => {
+      this.profileLeaksLoading.set(false);
+      this.profileLeaksLoaded.set(true);
+    })).subscribe({
+      next: ({ breach, stealer }) => {
+        this.profileBreachCards.set(Array.isArray(breach?.cards_data) ? breach.cards_data : []);
+        this.profileStealerRows.set(Array.isArray(stealer) ? stealer : []);
+      },
+      error: () => {
+        this.profileLeaksError.set('Failed to fetch profile leak data.');
+        this.profileBreachCards.set([]);
+        this.profileStealerRows.set([]);
+      }
+    });
+  }
+
+  getObjectEntries(item: any): Array<{
+        key: string;
+        value: any;
+    }> {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      return [];
+    }
+    return Object.entries(item).map(([key, value]) => ({ key, value }));
+  }
+
+  isArrayValue(value: any): boolean {
+    return Array.isArray(value);
+  }
+
+  isObjectValue(value: any): boolean {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
+  }
+
+  stringifyPrimitive(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'not available';
+    }
+    if (typeof value === 'boolean') {
+      return value ? 'true' : 'false';
+    }
+    return String(value);
+  }
+
   private filterPlatforms(term: string, hasData: (platform: PlatformResult) => boolean): PlatformResult[] {
     const normalizedTerm = term.toLowerCase();
     const allPlatforms = [...this.platforms()];
@@ -114,5 +188,19 @@ export class SummaryAllPlatformsViewComponent {
   private clearSearch(termSignal: WritableSignal<string>, visibleSignal: WritableSignal<number>): void {
     termSignal.set('');
     visibleSignal.set(5);
+  }
+
+  private dedupeStealerRows(rows: any[]): any[] {
+    const seen = new Set<string>();
+    const unique: any[] = [];
+    for (const row of rows || []) {
+      const key = `${row?.domain || ''}|${row?.username || ''}|${row?.channel || ''}|${row?.timestamp || ''}|${row?.raw || ''}`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      unique.push(row);
+    }
+    return unique;
   }
 }

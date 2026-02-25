@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError, timer } from 'rxjs';
-import { catchError, filter, map, retry, switchMap, take, tap } from 'rxjs/operators';
+import { Observable, throwError, timer, EMPTY } from 'rxjs';
+import { catchError, expand, filter, map, retry, switchMap, take, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
 import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
 type ApiEnvelope<T> = {
@@ -222,5 +222,63 @@ export class SocialScanService {
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ following: (res.result as any)?.following ?? [] }),
     }).pipe(retry(3));
+  }
+
+  fetchProfileBreachData(username?: string, email?: string): Observable<any> {
+    const payload = { text: { username: username || '', email: email || '' } };
+    return this.api.post<any>('dynamic/user', payload).pipe(expand((res) => this.shouldContinueDynamicPolling(res)
+      ? timer(2000).pipe(switchMap(() => this.api.post<any>('dynamic/user', payload)))
+      : EMPTY),
+    takeWhile((res) => this.shouldContinueDynamicPolling(res), true),
+    map((res) => {
+      if (!res || this.shouldContinueDynamicPolling(res)) {
+        return { cards_data: [] };
+      }
+      const normalized = (res && typeof res === 'object')
+        ? ((res as any).data ?? (res as any).result ?? res)
+        : res;
+      const cards = Array.isArray((normalized as any)?.cards_data)
+        ? (normalized as any).cards_data
+        : Array.isArray((normalized as any)?.result)
+          ? (normalized as any).result
+          : [];
+      return { cards_data: cards };
+    }),
+    catchError(() => throwError(() => new Error('Failed to fetch breach data'))));
+  }
+
+  fetchStealerLogsByIdentity(query: string): Observable<any[]> {
+    const payload = {
+      daterange: '',
+      q: '',
+      url: '',
+      user: query,
+      ioc: '',
+      type: 'c',
+      page: 1,
+      category: '',
+      fullsearch: false
+    };
+    return this.api.post<any>('search/stealerlogs', payload).pipe(map((res) => {
+      if (Array.isArray(res?.Result)) {
+        return res.Result;
+      }
+      if (Array.isArray(res?.result?.Result)) {
+        return res.result.Result;
+      }
+      return [];
+    }),
+    catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
+  }
+
+  private shouldContinueDynamicPolling(res: any): boolean {
+    const topStatus = (res?.status || '').toLowerCase();
+    const nestedStatus = (res?.result?.status || '').toLowerCase();
+    const isPending = ['pending', 'processing', 'running', 'busy'].includes(topStatus) ||
+      ['pending', 'processing', 'running', 'busy'].includes(nestedStatus);
+    const isFailedPending = (topStatus === 'pending' || nestedStatus === 'pending') &&
+      ((res?.result?.progress ?? res?.progress) === 0) &&
+      ((res?.result?.step ?? res?.step) === 'failed');
+    return isPending && !isFailedPending;
   }
 }

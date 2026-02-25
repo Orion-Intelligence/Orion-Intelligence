@@ -354,6 +354,14 @@ export class DashboardApiComponent implements OnInit {
             }
             return;
           }
+          if (this.isFailedDoneResponse(res)) {
+            this.responseData = null;
+            this.breachData = null;
+            this.expandedResultIndex = null;
+            this.displayQ1 = this.q1;
+            this.displayQ2 = this.q2;
+            return;
+          }
           if (this.apiType === 'crypto') {
             this.responseData = res;
             this.expandedResultIndex = null;
@@ -414,6 +422,12 @@ export class DashboardApiComponent implements OnInit {
     return (res?.status === 'pending' || res?.result?.status === 'pending') &&
             ((res?.result?.progress ?? res?.progress) === 0) &&
             ((res?.result?.step ?? res?.step) === 'failed');
+  }
+
+  private isFailedDoneResponse(res: any): boolean {
+    const status = (res?.result?.status ?? res?.status ?? '').toLowerCase();
+    const step = (res?.result?.step ?? res?.step ?? '').toLowerCase();
+    return status === 'done' && step === 'failed';
   }
 
   private shouldContinuePolling(res: any): boolean {

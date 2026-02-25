@@ -96,6 +96,7 @@
         <ng-template #allPlatformsView>
             <app-summary-all-platforms-view *ngIf="isAllPlatformsSelected()"
                 [username]="username()"
+                [email]="email()"
                 [platforms]="platforms()"
                 [isScanInProgress]="isScanInProgress()"
                 (fetchProfile)="fetchProfile.emit($event)"
