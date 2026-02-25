@@ -73,14 +73,14 @@
               <i class="bi bi-shield-check text-[12px] text-[#7fb8ec]"></i>
               Licenses Count
             </div>
-            <div class="mt-2 text-[20px] font-[800] leading-none text-[var(--color-text1)]">{{ userSessionData.tenant.licenses?.length || 0 }}</div>
+            <div class="mt-2 text-[20px] font-[800] leading-none text-[var(--color-text1)]">{{ userSessionData.tenant.licenses.length || 0 }}</div>
           </div>
         </div>
 
         <div class="mt-4">
           <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text6)]">Assigned Licenses</div>
           <div class="flex flex-wrap gap-2">
-            <ng-container *ngIf="userSessionData.tenant.licenses?.length; else noTenantLicenses">
+            <ng-container *ngIf="userSessionData.tenant.licenses.length; else noTenantLicenses">
               <span *ngFor="let license of userSessionData.tenant.licenses" class="inline-flex items-center rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-3 py-1 text-[11px] font-semibold text-[#b9ddff]">
                 {{ license }}
               </span>

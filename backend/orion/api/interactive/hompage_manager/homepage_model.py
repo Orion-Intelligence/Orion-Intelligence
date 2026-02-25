@@ -82,7 +82,7 @@ class homepage_model:
     async def get_country_specific_insights():
         redis_instance = redis_controller.getInstance()
         redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}:country"
-        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key])
+        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
         if cached:
             try:
                 return json.loads(cached)
