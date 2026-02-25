@@ -129,11 +129,9 @@ export class FollowerScanPopupComponent {
     this._loadMore(this.isLoadingMoreConnections, this.displayConnections, this.filteredConnections(), this.increment);
   }
 
-
   trackByUsername(_index: number, username: string): string {
     return username;
   }
-
 
   getProfileUrl(username: string): string {
     const platform = this.platform();

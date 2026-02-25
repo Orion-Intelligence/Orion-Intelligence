@@ -14,10 +14,11 @@ import { getFirstFileFromInputEvent, readFileAsText } from '../../../../shared/u
   imports: [CommonModule, AutofocusDirective, ProfileComponent, ReportExportModalComponent],
 })
 export class TabBarComponent {
+  private hostRef = inject(ElementRef<HTMLElement>);
+
   isAddMenuVisible = signal(false);
   isHeaderMenuVisible = signal(false);
   isReportExportModalOpen = signal(false);
-  private hostRef = inject(ElementRef<HTMLElement>);
 
   constructor(public tabManager: TabManagerService) { }
 
