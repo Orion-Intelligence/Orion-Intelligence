@@ -80,6 +80,15 @@ class homepage_model:
 
     @staticmethod
     async def get_country_specific_insights():
+        redis_instance = redis_controller.getInstance()
+        redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}:country"
+        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key])
+        if cached:
+            try:
+                return json.loads(cached)
+            except json.JSONDecodeError:
+                pass
+
         indices, query = elastic_insight_generator().on_insight_consolidated_country()
         queries = [query.copy() for _ in indices]
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
@@ -110,6 +119,7 @@ class homepage_model:
             elif index_name == ELASTIC_INDEX.S_DEFACEMENT_INDEX:
                 grouped_results["defacement"] = sources
 
+        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(grouped_results), 86400])
         return grouped_results
 
     @staticmethod
