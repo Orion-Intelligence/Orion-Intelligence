@@ -60,8 +60,8 @@
           <div *ngIf="metadataResult() as meta">
             <p *ngIf="meta.query" class="text-xs text-slate-400">Query: {{ meta.query }}</p>
             <p *ngIf="meta.timestamp" class="text-xs text-slate-500">Timestamp: {{ meta.timestamp }}</p>
-            <div *ngIf="meta?.results?.length > 0; else noMetadataResults" class="space-y-2 mt-2">
-              <div *ngFor="let row of meta.results.slice(0, 10)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
+            <div *ngIf="(meta?.results?.length || 0) > 0; else noMetadataResults" class="space-y-2 mt-2">
+              <div *ngFor="let row of (meta?.results || []).slice(0, 10)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
                 <div class="text-xs text-slate-300 font-semibold">{{ row.title || 'Untitled' }}</div>
                 <a *ngIf="row.url" [href]="row.url" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 break-words hover:underline">{{ row.url }}</a>
                 <p *ngIf="row.snippet" class="text-xs text-slate-400 mt-1">{{ row.snippet }}</p>
