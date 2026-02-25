@@ -60,7 +60,7 @@
           <div *ngIf="metadataResult() as meta">
             <p *ngIf="meta.query" class="text-xs text-slate-400">Query: {{ meta.query }}</p>
             <p *ngIf="meta.timestamp" class="text-xs text-slate-500">Timestamp: {{ meta.timestamp }}</p>
-            <div *ngIf="meta.results?.length > 0; else noMetadataResults" class="space-y-2 mt-2">
+            <div *ngIf="meta?.results?.length > 0; else noMetadataResults" class="space-y-2 mt-2">
               <div *ngFor="let row of meta.results.slice(0, 10)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
                 <div class="text-xs text-slate-300 font-semibold">{{ row.title || 'Untitled' }}</div>
                 <a *ngIf="row.url" [href]="row.url" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 break-words hover:underline">{{ row.url }}</a>
@@ -170,7 +170,7 @@
         </div>
         <ng-container *ngIf="p.post_connections?.length">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ p.post_connections.length }} connections</span>
+            <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ p.post_connections?.length || 0 }} connections</span>
           </div>
           <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
             <button *ngFor="let connection of displayPostConnections(); trackBy: trackByIndex" type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">

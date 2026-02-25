@@ -26,6 +26,7 @@ export class SummaryAllPlatformsViewComponent {
   fetchProfile = output<PlatformResult>();
   fetchPosts = output<PlatformResult>();
   fetchPlatformImages = output<PlatformResult>();
+  scanUsernames = output<string[]>();
   detailsSearchTerm = signal('');
   postsSearchTerm = signal('');
   imagesSearchTerm = signal('');
@@ -160,6 +161,14 @@ export class SummaryAllPlatformsViewComponent {
         this.profileStealerRows.set([]);
       }
     });
+  }
+
+  scanConnections(usernames: string[] | null | undefined): void {
+    const normalized = this.normalizeUsernames(usernames);
+    if (normalized.length === 0) {
+      return;
+    }
+    this.scanUsernames.emit(normalized);
   }
 
   fetchProfileMetadata(): void {
@@ -303,5 +312,27 @@ export class SummaryAllPlatformsViewComponent {
       .split(/[,\n\r\t]+|\s+/)
       .map(token => token.trim())
       .filter(Boolean);
+  }
+
+  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const name of usernames || []) {
+      const trimmed = String(name || '').trim();
+      if (!trimmed) {
+        continue;
+      }
+      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+      if (!normalized) {
+        continue;
+      }
+      const key = normalized.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      result.push(normalized);
+    }
+    return result;
   }
 }

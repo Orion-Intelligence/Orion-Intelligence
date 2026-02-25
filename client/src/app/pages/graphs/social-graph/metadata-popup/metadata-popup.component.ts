@@ -24,6 +24,7 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   fetchImages = output<PlatformResult>();
   fetchFollowers = output<PlatformResult>();
   fetchFollowing = output<PlatformResult>();
+  scanUsernames = output<string[]>();
   cancelFetchProfile = output<PlatformResult>();
   cancelFetchPosts = output<PlatformResult>();
   cancelFetchImages = output<PlatformResult>();
@@ -113,5 +114,35 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   getAccountUrl(): string {
     const platformData = this.data();
     return buildSocialProfileUrl(platformData.platform, platformData.username, platformData.url);
+  }
+
+  scanConnections(usernames: string[] | null | undefined): void {
+    const normalized = this.normalizeUsernames(usernames);
+    if (normalized.length === 0) {
+      return;
+    }
+    this.scanUsernames.emit(normalized);
+  }
+
+  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const name of usernames || []) {
+      const trimmed = String(name || '').trim();
+      if (!trimmed) {
+        continue;
+      }
+      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+      if (!normalized) {
+        continue;
+      }
+      const key = normalized.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      result.push(normalized);
+    }
+    return result;
   }
 }

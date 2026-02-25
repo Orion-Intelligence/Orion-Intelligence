@@ -27,6 +27,7 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   fetchFollowers = output<PlatformResult>();
   fetchFollowing = output<PlatformResult>();
   fetchPlatformImages = output<PlatformResult>();
+  scanUsernames = output<string[]>();
   cancelFetchProfile = output<PlatformResult>();
   cancelFetchPosts = output<PlatformResult>();
   cancelFetchFollowers = output<PlatformResult>();
@@ -94,6 +95,14 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     return index;
   }
 
+  scanConnections(usernames: string[] | null | undefined): void {
+    const normalized = this.normalizeUsernames(usernames);
+    if (normalized.length === 0) {
+      return;
+    }
+    this.scanUsernames.emit(normalized);
+  }
+
   fetchPlatformMetadata(): void {
     const p = this.platform();
     if (!p) {
@@ -156,5 +165,27 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
       .split(/[,\n\r\t]+|\s+/)
       .map(token => token.trim())
       .filter(Boolean);
+  }
+
+  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const name of usernames || []) {
+      const trimmed = String(name || '').trim();
+      if (!trimmed) {
+        continue;
+      }
+      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+      if (!normalized) {
+        continue;
+      }
+      const key = normalized.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      result.push(normalized);
+    }
+    return result;
   }
 }
