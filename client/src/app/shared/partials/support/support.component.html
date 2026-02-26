@@ -1,9 +1,4 @@
-<div
-  class="ui-graph-popup-overlay fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-opacity duration-150"
-  [class.opacity-0]="!isTailwindReady"
-  [class.pointer-events-none]="!isTailwindReady"
-  [@.disabled]="!isTailwindReady"
-  @overlayAnimation>
+<div class="ui-graph-popup-overlay fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-opacity duration-150" [class.opacity-0]="!isTailwindReady" [class.pointer-events-none]="!isTailwindReady" [@.disabled]="!isTailwindReady" @overlayAnimation>
   <div class="ui-graph-popup-panel ui-popup-shell w-full max-w-lg rounded-2xl" @popupAnimation>
     <div class="ui-popup-header flex items-center justify-between px-5 py-4">
       <h2 class="ui-popup-title text-lg font-semibold">Contact Support</h2>
