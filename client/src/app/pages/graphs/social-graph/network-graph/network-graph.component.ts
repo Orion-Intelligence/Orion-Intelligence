@@ -545,7 +545,8 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       }
       const { nodes } = properties;
       if (nodes.length > 0) {
-        const clickedNodeId = nodes[0] as string;
+        const rawNodeId = nodes[0] as string | number;
+        const clickedNodeId = String(rawNodeId);
         if (clickedNodeId.startsWith('user-')) {
           this.nodeClicked.emit(clickedNodeId);
         }
@@ -563,7 +564,8 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       }
       const { nodes, pointer } = properties;
       if (nodes.length > 0) {
-        const clickedNodeId = nodes[0] as string;
+        const rawNodeId = nodes[0] as string | number;
+        const clickedNodeId = String(rawNodeId);
         if (clickedNodeId.startsWith('group-')) {
           this.groupClicked.emit({ nodeId: clickedNodeId, position: pointer.canvas });
         }
