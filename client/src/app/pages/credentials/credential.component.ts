@@ -91,6 +91,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
         if (this.firstTrigger) {
           this.firstTrigger = false;
+          if(params['q']){
+            this.searchQuery="m_search_all:"+params['q'];
+          }
           this.fetchSearchResults(false);
           this.fetchRanked();
         }

@@ -47,8 +47,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   public groupedResults: { [index: string]: any[]; } = {};
   public response: any;
   public pageCounts: { [key: string]: number; } = {};
-  isGrouped = true;
-  isIOC = false;
+  isGrouped = false;
+  isIOC = true;
   query: string = '';
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
@@ -130,7 +130,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.domainScanComponent.clearResults();
     }
     if (!this.isGrouped) {
-      this.fetchRanked();
       return;
     }
     if (this.licenseService.canUseScanning() && this.domainScanComponent) {
@@ -341,7 +340,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onToggleMenu(tab: string): void {
     this.dashboardService.consolidatedParamModel.tab = tab;
-    if (tab == "Group") {
+    if (tab == "Deep Search") {
       this.isGrouped = true;
       this.isIOC = false;
       this.fetchSearchResults();

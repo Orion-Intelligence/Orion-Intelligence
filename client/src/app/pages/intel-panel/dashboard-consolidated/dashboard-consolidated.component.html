@@ -1,6 +1,6 @@
 <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
   (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
-  [activeTab]="isIOC ? 'IOCs' : 'Group'" [isLoading]="isLoading()" [searchQuery]="query"
+  [activeTab]="isIOC ? 'IOCs' : 'Deep Search'" [isLoading]="isLoading()" [searchQuery]="query"
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
   (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
 

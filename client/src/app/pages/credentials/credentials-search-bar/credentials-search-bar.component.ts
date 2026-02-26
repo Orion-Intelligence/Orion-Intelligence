@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { NgFor, KeyValuePipe, NgIf, NgClass } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { advancedRowMotionAnimation } from '../../../shared/animations/advanced.row.motion.animation';
@@ -12,7 +13,7 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
   templateUrl: './credentials-search-bar.component.html',
   animations: [fadeInDashboardItem, advancedRowMotionAnimation],
 })
-export class CredentialsSearchBarComponent {
+export class CredentialsSearchBarComponent implements OnInit{
   private VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^(?:\d{6}|\d{13,19})$/ ];
   private TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
 
@@ -27,7 +28,16 @@ export class CredentialsSearchBarComponent {
 
   @Output() searchTriggered = new EventEmitter<string>();
 
-  constructor(protected sidebarService: SidebarService) { }
+  constructor(protected sidebarService: SidebarService,private route: ActivatedRoute) { }
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const q = params['q'];
+      if (q) {
+        this.basicQuery = q;
+      }
+    });
+  }
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;

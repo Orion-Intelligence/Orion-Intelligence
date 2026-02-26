@@ -88,7 +88,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() filterModel!: FilterModel;
   @Input() showSorting: boolean = true;
   @Input() showSelectedFilters: boolean = true;
-  @Input() activeTab: string = 'Group';
+  @Input() activeTab: string = 'IOCs';
 
   @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
   @Output() resetFilter = new EventEmitter<void>();
