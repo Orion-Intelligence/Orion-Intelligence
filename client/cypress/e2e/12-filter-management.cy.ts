@@ -96,14 +96,23 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
     openFilters();
 
+    // ✅ same function name, fixed selector (label-based, works even if select has no name attr)
+    const getNetworkTypeSelect = () =>
+      cy.contains('app-filters label', /^Network Type$/i, { timeout: 30000 })
+      .should('be.visible')
+      .parent()
+      .find('select')
+      .first()
+      .should('exist');
 
     const networkOptions = ['All', 'Onion'];
-    networkOptions.forEach(option => {
-      cy.get('app-filters select[name="network"]').select(option, { force: true });
-      cy.contains('button', 'Apply').click({ force: true });
 
-      openFilters();
-    });
+    networkOptions.forEach((option) => {
+      getNetworkTypeSelect().select(option, { force: true });
+      cy.contains('button', /^Apply$/i).click({ force: true });
+
+  openFilters();
+});
 
 
     const safeSearchOptions = ['Yes', 'No'];
