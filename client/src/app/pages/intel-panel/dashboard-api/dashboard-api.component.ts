@@ -134,6 +134,18 @@ export class DashboardApiComponent implements OnInit {
     return Array.isArray(value);
   }
 
+  deduplicateWithCount(arr: any[]): Array<{ value: any; count: number }> {
+    if (!Array.isArray(arr)) {
+      return [];
+    }
+    const map = new Map<string, number>();
+    arr.forEach(item => {
+      const key = String(item);
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+    return Array.from(map.entries()).map(([value, count]) => ({ value, count }));
+  }
+
   isObjectValue(value: any): boolean {
     return !!value && typeof value === 'object' && !Array.isArray(value);
   }

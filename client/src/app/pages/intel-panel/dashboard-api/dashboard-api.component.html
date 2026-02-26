@@ -7,7 +7,7 @@
         <div class="flex w-[45px] items-center justify-center bg-white">
           <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20" class="brightness-0 opacity-80">
         </div>
-        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'crypto' }" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'wanted' ? 'query' : (apiType === 'national-identity' ? 'cnic' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))))" [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'wanted' ? 'Person Name / Alias' : (apiType === 'national-identity' ? 'CNIC' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="(apiType === 'crypto' || apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'social' || apiType === 'software') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))">
+        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" [ngClass]="{ 'w-[150px]': apiType === 'social' || apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'crypto' }" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'wanted' ? 'query' : (apiType === 'national-identity' ? 'cnic' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))))" [placeholder]="apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'wanted' ? 'Person Name / Alias' : (apiType === 'national-identity' ? 'CNIC / Mobile Number' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="(apiType === 'crypto' || apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'social' || apiType === 'software') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))">
         <input type="hidden" value="1">
         <button *ngIf="apiType === 'social' || apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40">
           Search
@@ -35,8 +35,8 @@
   <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)]">
     <span>
       <img alt="Info Icon" class="mr-[8px] inline-block" src="/assets/images/shared/hint.svg"/>
-      <span>{{ apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'wanted' ? 'Searches OpenSanctions wanted/watchlist records for the provided person query.' : apiType === 'national-identity' ? 'Searches national identity records using the provided CNIC.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '' }}</span>
-    </span>
+      <span>{{ apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'wanted' ? 'Searches OpenSanctions wanted/watchlist records for the provided person query.' : apiType === 'national-identity' ? 'Searches national identity records using the provided CNIC or Mobile Number.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '' }}</span>
+      </span>
   </div>
 </div>
 
@@ -364,9 +364,12 @@
                   </div>
 
                   <div class="mt-[4px] flex flex-wrap gap-[6px]" *ngIf="isArrayValue(entry.value)">
-                    <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]" *ngFor="let v of entry.value; trackBy: trackByIndex">{{ stringifyPrimitive(v) }}</span>
-                    <span class="text-[13px] text-[var(--color-text4)]" *ngIf="entry.value.length === 0">[]</span>
-                  </div>
+    <span class="inline-flex items-center gap-[4px] rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]" *ngFor="let item of deduplicateWithCount(entry.value); trackBy: trackByIndex">
+        {{ stringifyPrimitive(item.value) }}
+        <span *ngIf="item.count > 1" class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide">×{{ item.count }}</span>
+    </span>
+    <span class="text-[13px] text-[var(--color-text4)]" *ngIf="entry.value.length === 0">[]</span>
+</div>
 
                   <pre class="mt-[6px] overflow-x-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[8px] text-[12px] text-[var(--color-text1)]" *ngIf="isObjectValue(entry.value)">{{ stringifyJson(entry.value) }}</pre>
                 </div>
