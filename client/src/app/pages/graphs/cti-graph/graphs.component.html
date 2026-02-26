@@ -21,13 +21,17 @@
             <button data-cy="cti-tab-add-menu" (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="New Session">
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
-            <div *ngIf="isAddMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
-              <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
-                <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
+            <div *ngIf="isAddMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-52 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/95 p-1.5 shadow-2xl ring-1 ring-white/5 backdrop-blur-md">
+              <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
+                <span class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-blue-700)]/60 text-[var(--color-text3)] transition-colors group-hover:bg-indigo-500 group-hover:text-white">
+                  <i class="bi bi-plus-square text-lg"></i>
+                </span>
                 <span>New Session</span>
               </button>
-              <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
-                <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
+              <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
+                <span class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-blue-700)]/60 text-[var(--color-text3)] transition-colors group-hover:bg-indigo-500 group-hover:text-white">
+                  <i class="bi bi-upload text-lg"></i>
+                </span>
                 <span>Import Session</span>
               </label>
             </div>

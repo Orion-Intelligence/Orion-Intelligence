@@ -293,6 +293,9 @@
               <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
                 <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
                 <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress() || fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                  Fetch Images
+                </button>
                 <div *ngIf="fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
               </div>
               <div *ngIf="platform.images?.length; else noImagesData" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
@@ -314,8 +317,8 @@
                 <span>Fetching...</span>
               </div>
               <ng-template #imagesFetchBtn>
-                <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                  <i class="bi bi-images"></i><span>Fetch</span>
+                <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                  Fetch Images
                 </button>
               </ng-template>
             </div>

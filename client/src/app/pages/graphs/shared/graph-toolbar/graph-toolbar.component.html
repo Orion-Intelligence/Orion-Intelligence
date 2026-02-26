@@ -18,13 +18,13 @@
   </div>
 
   <div class="flex w-full items-center justify-start gap-2 lg:w-full lg:max-w-md">
-    <div data-cy="graph-toolbar-view-toggle" *ngIf="showViewModeToggle()" class="ui-graph-toolbar-view-shell relative hidden h-10 items-center rounded-full bg-[var(--color-blue-800)]/90 p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm lg:flex">
+    <div data-cy="graph-toolbar-view-toggle" *ngIf="showViewModeToggle()" (click)="toggleViewMode()" class="ui-graph-toolbar-view-shell relative hidden h-10 items-center rounded-full bg-[var(--color-blue-800)]/90 p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm lg:flex">
       <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
 
-      <button data-cy="graph-toolbar-view-graph" type="button" title="Graph View" (click)="onSetViewMode('graph')" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+      <button data-cy="graph-toolbar-view-graph" type="button" title="Graph View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
         <i class="bi bi-share-fill"></i> Graph
       </button>
-      <button data-cy="graph-toolbar-view-list" type="button" title="List View" (click)="onSetViewMode('list')" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+      <button data-cy="graph-toolbar-view-list" type="button" title="List View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
         <i class="bi bi-list-ul"></i> List
       </button>
     </div>

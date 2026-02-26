@@ -16,8 +16,8 @@
 
             <div class="p-5">
                 <div *ngIf="data()?.mode !== 'edit'" class="mb-4 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] p-1">
-                    <button type="button" (click)="setInputMode('manual')" [ngClass]="inputMode() === 'manual' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">Manual</button>
                     <button type="button" (click)="setInputMode('api')" [ngClass]="inputMode() === 'api' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">From API</button>
+                    <button type="button" (click)="setInputMode('manual')" [ngClass]="inputMode() === 'manual' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">Manual</button>
                 </div>
 
                 <div *ngIf="inputMode() === 'manual'; else apiModeBlock">

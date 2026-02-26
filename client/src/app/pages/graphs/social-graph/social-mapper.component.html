@@ -60,7 +60,7 @@
                       <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
                         <i class="bi bi-search w-5 h-5 text-[var(--color-text4)] leading-none"></i>
                       </div>
-                      <input type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+                      <input type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border-0 bg-[var(--color-blue-690)] py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
                       <button *ngIf="graphSearchTerm()" (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
                         <i class="bi bi-x-circle-fill"></i>
                       </button>
@@ -246,7 +246,8 @@
     <app-manage-profiles-modal *ngIf="state.manageProfilesModalData() as data"
         [data]="data"
         (close)="state.closeManageProfilesModal()"
-        (updateGraph)="updateGraphFromModal($event)">
+        (updateGraph)="updateGraphFromModal($event)"
+        (searchUsername)="handleImageFlowSearch($event)">
     </app-manage-profiles-modal>
 
     <app-add-entity-modal *ngIf="entityManager()?.addEntityModalData() as data"

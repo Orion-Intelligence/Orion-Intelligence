@@ -24,7 +24,7 @@ export class AddEntityModalComponent {
   entityValue = signal('');
   entityLabel = signal('');
   apiQuery = signal('');
-  inputMode = signal<'manual' | 'api'>('manual');
+  inputMode = signal<'manual' | 'api'>('api');
   isTouched = signal(false);
   validationError = computed(() => this.getValidationError());
   isValidInput = computed(() => this.validationError() === null);
@@ -34,7 +34,7 @@ export class AddEntityModalComponent {
       this.entityValue.set(this.data()?.value || '');
       this.entityLabel.set(this.data()?.label || '');
       this.apiQuery.set(this.data()?.apiQuery || '');
-      this.inputMode.set(this.data()?.mode === 'edit' ? 'manual' : (this.data()?.inputMode || 'manual'));
+      this.inputMode.set(this.data()?.mode === 'edit' ? 'manual' : (this.data()?.inputMode || 'api'));
       this.isTouched.set(false);
     });
   }

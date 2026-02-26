@@ -96,13 +96,15 @@ export class SocialScanService {
   private buildPlatformResult(item: any, keyUsername: string, rawPlatform: string): PlatformResult {
     const capitalizedPlatform = this.capitalizePlatform(rawPlatform);
     const extractedData = this.extractMetadata(capitalizedPlatform, item.data);
+    const rawStatus = item?.metadata?.status ?? item?.data?.status;
+    const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : rawStatus;
     const platformResult = {
       keyUsername,
       platform: capitalizedPlatform,
       username: item.metadata.username,
       url: item.metadata.url,
       isSelected: false,
-      status: item.metadata.status,
+      status: normalizedStatus,
       ...extractedData
     } as PlatformResult;
     if (!platformResult.allMetadata || Object.keys(platformResult.allMetadata).length === 0) {

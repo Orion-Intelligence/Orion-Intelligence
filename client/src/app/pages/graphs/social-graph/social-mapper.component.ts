@@ -107,7 +107,9 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const nodeIdsWithFollowData = new Set<string>();
     for (const platformResults of this.scanResults().values()) {
       for (const platform of platformResults) {
-        const hasData = (platform.followers_list?.length ?? 0) > 0 || (platform.following_list?.length ?? 0) > 0;
+        const hasData = (platform.followers_list?.length ?? 0) > 0
+          || (platform.following_list?.length ?? 0) > 0
+          || (platform.post_connections?.length ?? 0) > 0;
         if (hasData) {
           nodeIdsWithFollowData.add(this.fetchingState.getPlatformUniqueKey(platform));
         }
@@ -660,6 +662,15 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
     await this.graphOrchestrator.updateGraphFromModal(this.activeTabState()!, username, selectedPlatforms);
     this.tabManager.scheduleSave();
+  }
+
+  handleImageFlowSearch(username: string) {
+    const normalizedUsername = (username || '').trim();
+    if (!normalizedUsername) {
+      return;
+    }
+    this.state.closeManageProfilesModal();
+    this.initiateScan(normalizedUsername);
   }
 
   handleContextMenuAction(action: ContextMenuAction) {

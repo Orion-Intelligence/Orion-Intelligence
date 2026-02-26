@@ -87,7 +87,7 @@ export interface PlatformResult {
     username: string;
     url: string;
     isSelected: boolean;
-    status?: 'active' | 'suggested';
+    status?: 'active' | 'suggested' | 'informational';
     description?: string;
     followers?: number;
     joiningDate?: string;

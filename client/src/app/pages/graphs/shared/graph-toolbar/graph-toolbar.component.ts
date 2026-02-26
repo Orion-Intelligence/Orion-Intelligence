@@ -40,4 +40,9 @@ export class GraphToolbarComponent {
       this.viewModeChanged.emit(mode);
     }
   }
+
+  toggleViewMode(): void {
+    const nextMode = this.viewMode() === 'graph' ? 'list' : 'graph';
+    this.viewModeChanged.emit(nextMode);
+  }
 }

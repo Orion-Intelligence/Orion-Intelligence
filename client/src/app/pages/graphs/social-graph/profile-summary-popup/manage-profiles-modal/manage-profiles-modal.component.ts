@@ -18,6 +18,7 @@ export class ManageProfilesModalComponent {
   data = input.required<ManageProfilesModalData | null>();
   close = output<void>();
   updateGraph = output<PlatformResult[]>();
+  searchUsername = output<string>();
   platforms = signal<ManagedPlatformRow[]>([]);
   searchTerm = signal('');
   visibleCount = signal(20);
@@ -29,11 +30,12 @@ export class ManageProfilesModalComponent {
     if (term) {
       return filtered;
     }
-    const suggested = filtered.filter(p => p.status !== 'active');
+    const informational = filtered.filter(p => p.status === 'informational');
+    const suggested = filtered.filter(p => p.status !== 'active' && p.status !== 'informational');
     const active = filtered.filter(p => p.status === 'active');
     const topSuggested = suggested.slice(0, 3);
     const remainingSuggested = suggested.slice(3);
-    return [...topSuggested, ...active, ...remainingSuggested];
+    return [...topSuggested, ...active, ...remainingSuggested, ...informational];
   });
   displayPlatforms = computed(() => {
     const filtered = this.filteredPlatforms();
@@ -43,7 +45,6 @@ export class ManageProfilesModalComponent {
     return filtered.slice(0, this.visibleCount());
   });
   hasMatches = computed(() => this.filteredPlatforms().length > 0);
-  pendingConfirmationCount = computed(() => this.platforms().filter(p => !p.matches || !this.hasValidDraftUsername(p)).length);
   areAllVisibleSelected = computed(() => {
     const filtered = this.filteredPlatforms();
     if (filtered.length === 0) {
@@ -58,7 +59,6 @@ export class ManageProfilesModalComponent {
     }
     return filtered.every(p => !p.isSelected);
   });
-  allProfilesConfirmed = computed(() => this.platforms().every(p => p.matches && this.hasValidDraftUsername(p)));
 
   constructor() {
     effect(() => {
@@ -70,14 +70,21 @@ export class ManageProfilesModalComponent {
           stableKey: `${index}|${p.platform}|${p.url}`,
           draftUsername: (p.username || '').trim(),
           initialUsername: (p.username || '').trim(),
-          matches: isImageFlow ? false : true,
+          matches: !isImageFlow,
           isSelected: isImageFlow ? false : p.isSelected,
         })).sort((a, b) => {
-          if (a.status === 'active' && b.status !== 'active') {
-            return -1;
-          }
-          if (a.status !== 'active' && b.status === 'active') {
+          const weight = (status?: string) => {
+            if (status === 'active') {
+              return 0;
+            }
+            if (status === 'informational') {
+              return 2;
+            }
             return 1;
+          };
+          const weightDelta = weight(a.status) - weight(b.status);
+          if (weightDelta !== 0) {
+            return weightDelta;
           }
           return a.platform.localeCompare(b.platform);
         }));
@@ -107,78 +114,16 @@ export class ManageProfilesModalComponent {
     return this.isImageFlowUsername(modalData.username);
   }
 
+  isInformational(platform: ManagedPlatformRow): boolean {
+    return platform.status === 'informational';
+  }
+
   loadMore() {
     this.visibleCount.update(c => c + 20);
   }
 
   hasValidDraftUsername(platform: ManagedPlatformRow): boolean {
     return (platform.draftUsername || '').trim().length > 0;
-  }
-
-  onUsernameChanged(platformToUpdate: ManagedPlatformRow, event: Event) {
-    if (!this.isImageExtractedFlow()) {
-      return;
-    }
-    const value = (event.target as HTMLInputElement).value;
-    this.platforms.update(current => current.map(p => {
-      if (p.stableKey !== platformToUpdate.stableKey) {
-        return p;
-      }
-      return { ...p, draftUsername: value, matches: false, isSelected: false };
-    }));
-  }
-
-  confirmUsername(platformToUpdate: ManagedPlatformRow) {
-    const isImageFlow = this.isImageExtractedFlow();
-    if (!isImageFlow) {
-      return;
-    }
-    this.platforms.update(current => current.map(p => {
-      if (p.stableKey !== platformToUpdate.stableKey) {
-        return p;
-      }
-      const normalizedUsername = (p.draftUsername || '').trim();
-      if (normalizedUsername.length === 0) {
-        return { ...p, matches: false, isSelected: false };
-      }
-      return { ...p, username: normalizedUsername, matches: true, isSelected: isImageFlow ? true : p.isSelected };
-    }));
-  }
-
-  unconfirmUsername(platformToUpdate: ManagedPlatformRow) {
-    if (!this.isImageExtractedFlow()) {
-      return;
-    }
-    this.platforms.update(current => current.map(p => {
-      if (p.stableKey !== platformToUpdate.stableKey) {
-        return p;
-      }
-      return { ...p, matches: false, isSelected: false };
-    }));
-  }
-
-  toggleSelection(platformToToggle: ManagedPlatformRow) {
-    const isImageFlow = this.isImageExtractedFlow();
-    this.platforms.update(current => current.map(p => {
-      if (p.stableKey !== platformToToggle.stableKey) {
-        return p;
-      }
-      const imageFlowBlocked = this.applyImageFlowSelectionGuard(p, isImageFlow);
-      if (imageFlowBlocked) {
-        return imageFlowBlocked;
-      }
-      return { ...p, isSelected: !p.isSelected };
-    }));
-  }
-
-  isSelectionDisabled(platform: ManagedPlatformRow): boolean {
-    if (!this.isImageExtractedFlow()) {
-      return false;
-    }
-    if (platform.matches && this.hasValidDraftUsername(platform)) {
-      return false;
-    }
-    return true;
   }
 
   private extractMatchedPageUrl(platform: ManagedPlatformRow): string {
@@ -248,24 +193,60 @@ export class ManageProfilesModalComponent {
     event.stopPropagation();
   }
 
+  onUsernameChanged(platformToUpdate: ManagedPlatformRow, event: Event) {
+    if (!this.isImageExtractedFlow()) {
+      return;
+    }
+    const value = (event.target as HTMLInputElement).value;
+    this.platforms.update(current => current.map(p => {
+      if (p.stableKey !== platformToUpdate.stableKey) {
+        return p;
+      }
+      return { ...p, draftUsername: value };
+    }));
+  }
+
+  onSearchUsernameClick(event: Event, platformToSearch: ManagedPlatformRow) {
+    event.stopPropagation();
+    if (!this.isImageExtractedFlow()) {
+      return;
+    }
+    if (this.isInformational(platformToSearch)) {
+      return;
+    }
+    const username = (platformToSearch.draftUsername || '').trim();
+    if (!username) {
+      return;
+    }
+    this.searchUsername.emit(username);
+  }
+
+  onPlatformCardClick(event: Event, platformToToggle: ManagedPlatformRow) {
+    event.stopPropagation();
+    if (this.isImageExtractedFlow()) {
+      return;
+    }
+    this.toggleSelection(platformToToggle);
+  }
+
+  toggleSelection(platformToToggle: ManagedPlatformRow) {
+    if (this.isImageExtractedFlow()) {
+      return;
+    }
+    this.platforms.update(current => current.map(p => {
+      if (p.stableKey !== platformToToggle.stableKey) {
+        return p;
+      }
+      return { ...p, isSelected: !p.isSelected };
+    }));
+  }
+
   onUsernameInputClick(event: Event) {
     event.stopPropagation();
   }
 
-  onToggleConfirmUsernameClick(event: Event, platformToUpdate: ManagedPlatformRow) {
-    event.stopPropagation();
-    if (platformToUpdate.matches) {
-      this.unconfirmUsername(platformToUpdate);
-      return;
-    }
-    this.confirmUsername(platformToUpdate);
-  }
-
   onSelectionSwitchClick(event: Event, platformToToggle: ManagedPlatformRow) {
     event.stopPropagation();
-    if (this.isSelectionDisabled(platformToToggle)) {
-      return;
-    }
     this.toggleSelection(platformToToggle);
   }
 
@@ -283,19 +264,10 @@ export class ManageProfilesModalComponent {
     }));
   }
 
-  private applyImageFlowSelectionGuard(platform: ManagedPlatformRow, isImageFlow: boolean): ManagedPlatformRow | null {
-    if (isImageFlow && (!platform.matches || !this.hasValidDraftUsername(platform))) {
-      return { ...platform, isSelected: false, matches: false };
-    }
-    return null;
-  }
-
   selectAllVisible() {
-    const isImageFlow = this.isImageExtractedFlow();
     this.updateVisiblePlatforms((p) => {
-      const imageFlowBlocked = this.applyImageFlowSelectionGuard(p, isImageFlow);
-      if (imageFlowBlocked) {
-        return imageFlowBlocked;
+      if (this.isInformational(p)) {
+        return { ...p, isSelected: false };
       }
       return { ...p, isSelected: true };
     });
@@ -307,51 +279,11 @@ export class ManageProfilesModalComponent {
     });
   }
 
-  usernameStatusLabel(platform: ManagedPlatformRow): string {
-    if (!this.hasValidDraftUsername(platform)) {
-      return 'Username required';
-    }
-    if (platform.matches) {
-      return 'Confirmed';
-    }
-    return 'Needs confirmation';
-  }
-
-  usernameStatusClass(platform: ManagedPlatformRow): string {
-    if (!this.hasValidDraftUsername(platform)) {
-      return 'text-red-400 bg-red-500/10';
-    }
-    if (platform.matches) {
-      return 'text-green-400 bg-green-500/10';
-    }
-    return 'text-yellow-400 bg-yellow-500/10';
-  }
-
-  isConfirmDisabled(platform: ManagedPlatformRow): boolean {
-    if (platform.matches) {
-      return false;
-    }
-    if (!this.hasValidDraftUsername(platform)) {
-      return true;
-    }
-    return false;
-  }
-
-  confirmButtonLabel(platform: ManagedPlatformRow): string {
-    if (platform.matches) {
-      return 'Unconfirm';
-    }
-    return 'Confirm now';
-  }
-
   trackByPlatformKey(_index: number, platform: ManagedPlatformRow): string {
     return platform.stableKey;
   }
 
   onUpdateGraph(): void {
-    if (this.isImageExtractedFlow() && !this.allProfilesConfirmed()) {
-      return;
-    }
-    this.updateGraph.emit(this.platforms().filter(p => p.isSelected));
+    this.updateGraph.emit(this.platforms().filter(p => p.isSelected && !this.isInformational(p)));
   }
 }

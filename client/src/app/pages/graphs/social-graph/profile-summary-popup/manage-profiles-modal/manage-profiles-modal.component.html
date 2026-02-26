@@ -27,7 +27,7 @@
             <i class="bi bi-x-circle-fill"></i>
           </button>
         </div>
-        <div class="flex items-center justify-between">
+        <div *ngIf="!isImageExtractedFlow()" class="flex items-center justify-between">
           <span class="text-xs text-slate-500">Active Profiles</span>
           <div class="flex items-center gap-2">
             <button (click)="selectAllVisible()" [disabled]="areAllVisibleSelected()" class="px-2.5 py-1 text-xs font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
@@ -44,43 +44,53 @@
         <ng-container *ngIf="hasMatches(); else noMatches">
           <div class="flex flex-col gap-2">
             <ng-container *ngFor="let platform of displayPlatforms(); trackBy: trackByPlatformKey; let i = index">
-              <div *ngIf="i > 0 && platform.status !== 'active' && displayPlatforms()[i - 1].status === 'active'" class="flex items-center py-2">
-                  <div class="flex-grow h-px bg-slate-700"></div>
-                  <span class="flex-shrink-0 text-xs text-slate-500 px-4 font-semibold uppercase tracking-wider">Suggested Profiles</span>
-                  <div class="flex-grow h-px bg-slate-700"></div>
+              <div *ngIf="i > 0 && platform.status !== 'active' && platform.status !== 'informational' && displayPlatforms()[i - 1].status === 'active'" class="flex items-center py-2">
+                <div class="flex-grow h-px bg-slate-700"></div>
+                <span class="flex-shrink-0 text-xs text-slate-500 px-4 font-semibold uppercase tracking-wider">Suggested Profiles</span>
+                <div class="flex-grow h-px bg-slate-700"></div>
+              </div>
+              <div *ngIf="platform.status === 'informational' && (i === 0 || displayPlatforms()[i - 1].status !== 'informational')" class="flex items-center py-2">
+                <div class="flex-grow h-px bg-slate-700"></div>
+                <span class="flex-shrink-0 text-xs text-slate-500 px-4 font-semibold uppercase tracking-wider">Informational Links</span>
+                <div class="flex-grow h-px bg-slate-700"></div>
               </div>
               <div class="rounded-lg">
-                <div (click)="toggleSelection(platform)" class="flex flex-col gap-3 p-3 rounded-lg cursor-pointer border transition-colors" [class.bg-slate-700]="platform.isSelected" [class.border-slate-500]="platform.isSelected" [class.border-slate-700]="!platform.isSelected">
+                <div (click)="onPlatformCardClick($event, platform)" class="flex flex-col gap-3 p-3 rounded-lg border transition-colors" [class.cursor-pointer]="!isImageExtractedFlow()" [class.bg-slate-700]="platform.isSelected && !isImageExtractedFlow()" [class.border-slate-500]="platform.isSelected && !isImageExtractedFlow()" [class.border-slate-700]="!platform.isSelected || isImageExtractedFlow()">
                   <div class="flex items-center">
                   <div [socialMapperPlatformBg]="platform.platform" class="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-[#64748b] bg-[#475569] p-2 text-lg font-bold text-white shadow-[inset_0_0_0_1px_#64748b]">
                     <app-social-icon [platformName]="platform.platform"></app-social-icon>
                   </div>
                   <div class="flex-grow min-w-0">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
                       <p class="font-bold text-slate-200 truncate">{{ platform.platform }}</p>
-                      <span *ngIf="platform.status === 'active'; else suggestedBadge" class="flex items-center gap-1 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
+                      <span *ngIf="platform.status === 'active'" class="flex items-center gap-1 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
                         <i class="bi bi-check-circle-fill"></i> Active
                       </span>
-                      <ng-template #suggestedBadge>
-                        <span *ngIf="!isImageExtractedFlow()" class="flex items-center gap-1 text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full">
-                          <i class="bi bi-lightbulb-fill"></i> Suggested
-                        </span>
-                      </ng-template>
+                      <span *ngIf="platform.status === 'informational'" class="flex items-center gap-1 text-xs text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                        <i class="bi bi-info-circle-fill"></i> Informational
+                      </span>
+                      <span *ngIf="!isImageExtractedFlow() && platform.status !== 'active' && platform.status !== 'informational'" class="flex items-center gap-1 text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full">
+                        <i class="bi bi-lightbulb-fill"></i> Suggested
+                      </span>
+                      <a *ngIf="isImageExtractedFlow() && isInformational(platform)" [href]="getProfileUrl(platform)" target="_blank" rel="noopener noreferrer" (click)="onOpenProfileClick($event)" [class.pointer-events-none]="isProfileUrlDisabled(platform)" [class.opacity-40]="isProfileUrlDisabled(platform)" class="ml-auto h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-slate-200 bg-slate-700 hover:bg-slate-600 transition-colors inline-flex items-center justify-center leading-none">
+                        View link
+                      </a>
                     </div>
-                    <p *ngIf="isImageExtractedFlow()" class="text-xs mt-1 px-2 py-0.5 rounded-full inline-flex items-center {{ usernameStatusClass(platform) }}">{{ usernameStatusLabel(platform) }}</p>
-                    <p *ngIf="!isImageExtractedFlow()" class="text-sm text-slate-400 truncate mb-0">{{ platform.username }}</p>
+                    <p *ngIf="!isImageExtractedFlow() && !isInformational(platform)" class="text-sm text-slate-400 truncate mb-0">{{ platform.username }}</p>
                   </div>
-                  <div class="ml-4 flex-shrink-0">
-                    <button type="button" (click)="onSelectionSwitchClick($event, platform)" [disabled]="isSelectionDisabled(platform)" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition-colors ease-in-out duration-300 disabled:opacity-40 disabled:cursor-not-allowed" role="switch" [attr.aria-checked]="platform.isSelected" [class.bg-indigo-600]="platform.isSelected" [class.bg-slate-600]="!platform.isSelected">
+                  <div class="ml-4 flex-shrink-0" *ngIf="!isImageExtractedFlow() && !isInformational(platform)">
+                    <button type="button" (click)="onSelectionSwitchClick($event, platform)" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition-colors ease-in-out duration-300 disabled:opacity-40 disabled:cursor-not-allowed" role="switch" [attr.aria-checked]="platform.isSelected" [class.bg-indigo-600]="platform.isSelected" [class.bg-slate-600]="!platform.isSelected">
                       <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ease-in-out duration-300" [class.translate-x-5]="platform.isSelected" [class.translate-x-0]="!platform.isSelected"></span>
                     </button>
                   </div>
                 </div>
-                  <div *ngIf="isImageExtractedFlow()" class="flex items-center gap-2">
-                    <input type="text" [value]="platform.draftUsername" (click)="onUsernameInputClick($event)" (input)="onUsernameChanged(platform, $event)" placeholder="Enter username to enable selection" class="block flex-grow rounded-md border-0 bg-slate-900/50 py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none sm:text-sm sm:leading-6" />
-                    <button type="button" (click)="onToggleConfirmUsernameClick($event, platform)" [disabled]="isConfirmDisabled(platform)" class="h-9 px-3 text-xs font-medium rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed" [ngClass]="platform.matches ? 'text-yellow-300 bg-yellow-500/20 hover:bg-yellow-500/30' : 'text-indigo-100 bg-indigo-600/40 ring-1 ring-indigo-400/50 shadow-lg shadow-indigo-500/20 hover:bg-indigo-500/50'">{{ confirmButtonLabel(platform) }}</button>
-                    <a [href]="getProfileUrl(platform)" target="_blank" rel="noopener noreferrer" (click)="onOpenProfileClick($event)" [class.pointer-events-none]="isProfileUrlDisabled(platform)" [class.opacity-40]="isProfileUrlDisabled(platform)" class="h-9 w-9 flex items-center justify-center rounded-md text-slate-300 bg-slate-700 hover:bg-slate-600 transition-colors" title="Open profile in new tab">
-                      <i class="bi bi-link-45deg text-lg"></i>
+                  <div *ngIf="isImageExtractedFlow() && !isInformational(platform)" class="flex items-center gap-2">
+                    <input type="text" [value]="platform.draftUsername" (click)="onUsernameInputClick($event)" (input)="onUsernameChanged(platform, $event)" placeholder="Search username..." class="social-mapper-input block flex-grow rounded-md border-0 py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 outline-none focus:outline-none focus:ring-0 sm:text-sm sm:leading-6" />
+                    <button type="button" (click)="onSearchUsernameClick($event, platform)" [disabled]="!hasValidDraftUsername(platform)" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60">
+                      Fetch profile
+                    </button>
+                    <a [href]="getProfileUrl(platform)" target="_blank" rel="noopener noreferrer" (click)="onOpenProfileClick($event)" [class.pointer-events-none]="isProfileUrlDisabled(platform)" [class.opacity-40]="isProfileUrlDisabled(platform)" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-slate-300 bg-slate-700 hover:bg-slate-600 transition-colors inline-flex items-center justify-center leading-none" title="Open profile in new tab">
+                      View link
                     </a>
                   </div>
                 </div>
@@ -102,12 +112,11 @@
       </div>
 
       <div class="p-4 bg-slate-900 flex justify-end items-center gap-4 flex-shrink-0 rounded-b-lg border-t border-slate-700">
-        <p class="mr-auto text-xs text-slate-400" *ngIf="isImageExtractedFlow() && !allProfilesConfirmed()">Confirm all profiles to enable update.</p>
-        <button (click)="close.emit()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors">
+        <button (click)="close.emit()" class="flex items-center gap-2 h-7 px-3 text-[11px] font-medium rounded-md text-slate-200 bg-slate-700 hover:bg-slate-600 border border-slate-600/60 transition-colors">
           <i class="bi bi-x-circle"></i>
           <span>Cancel</span>
         </button>
-        <button (click)="onUpdateGraph()" [disabled]="isImageExtractedFlow() && !allProfilesConfirmed()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+        <button *ngIf="!isImageExtractedFlow()" (click)="onUpdateGraph()" class="flex items-center gap-2 h-7 px-3 text-[11px] font-medium rounded-md text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
           <i class="bi bi-check-circle"></i>
           <span>Update Graph</span>
         </button>

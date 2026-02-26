@@ -74,6 +74,7 @@ export class TabBarComponent {
       return;
     }
     const { input, file } = selected;
+    this.closeMenus();
     readFileAsText(file)
       .then((content) => {
         try {

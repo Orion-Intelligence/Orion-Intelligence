@@ -18,21 +18,20 @@
           </button>
         </div>
 
-        <div class="pl-1">
+        <div class="pl-1 self-center">
           <div class="relative">
             <input data-cy="graph-tab-file-input" type="file" class="hidden" id="fileInput" (change)="onFileSelected($event)" accept=".json">
             <button data-cy="graph-tab-add-menu" (click)="toggleAddMenu($event)" [disabled]="tabManager.tabs().length>= 4" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50" title="New Session">
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
 
-            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-48 origin-top-left rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
-                <button (click)="createNewTab()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
-                    <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                    <span>New Session</span>
+            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="ui-result-dropdown-panel absolute left-full top-0 z-20 ml-2 w-[260px] origin-top-left rounded-[7px] border p-[7px_12px] shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
+                <button (click)="createNewTab()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                    New Session
                 </button>
-                <label for="fileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
-                    <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                    <span>Import Session</span>
+                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                <label for="fileInput" class="ui-result-dropdown-item block w-full cursor-pointer rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                    Import Session
                 </label>
             </div>
           </div>
@@ -43,23 +42,21 @@
             <button data-cy="graph-tab-session-menu" (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
                 <i class="bi bi-three-dots-vertical text-lg"></i>
             </button>
-            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 origin-top-right rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
-                <button (click)="tabManager.exportActiveTab(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
-                    <i class="bi bi-download h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                    <span>Export Current Session</span>
+            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="ui-result-dropdown-panel absolute top-full right-0 z-20 mt-2 w-[260px] origin-top-right rounded-[7px] border p-[7px_12px] shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
+                <button (click)="tabManager.exportActiveTab(); closeMenus()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                    Export Current Session
                 </button>
-                <button (click)="openReportExportModal(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
-                    <i class="bi bi-file-earmark-arrow-down h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                    <span>Export Report</span>
+                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                <button (click)="openReportExportModal(); closeMenus()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                    Export Report
                 </button>
-                <label for="fileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
-                    <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                    <span>Import Session</span>
+                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                <label for="fileInput" class="ui-result-dropdown-item block w-full cursor-pointer rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                    Import Session
                 </label>
-                <div class="my-1 h-px bg-[var(--color-blue-710)]"></div>
-                <button (click)="createNewTab()" [disabled]="tabManager.tabs().length >= 4" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[var(--color-text2)]">
-                    <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                    <span>New Session</span>
+                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                <button (click)="createNewTab()" [disabled]="tabManager.tabs().length >= 4" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent">
+                    New Session
                 </button>
             </div>
         </div>

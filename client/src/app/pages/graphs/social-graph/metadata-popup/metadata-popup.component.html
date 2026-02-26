@@ -262,8 +262,8 @@
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Associated Images</span>
-            <button *ngIf="data().images !== undefined" (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Images">
-              <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingImages()"></i>
+            <button *ngIf="data().images !== undefined" (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Fetch Images">
+              Fetch Images
             </button>
           </summary>
           <div class="p-3 border-t border-[var(--color-border)]">

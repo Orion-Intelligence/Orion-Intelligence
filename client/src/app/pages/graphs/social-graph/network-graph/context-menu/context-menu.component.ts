@@ -60,25 +60,17 @@ export class ContextMenuComponent {
     const fallback = {
       left: '50%',
       top: '50%',
-      transform: 'translate(14px, 14px)',
-      originClass: 'origin-top-left'
+      transform: 'translate(0, 0)',
+      originClass: 'origin-top-left',
     };
     if (!data || typeof window === 'undefined') {
       return fallback;
     }
-    const xPercentRaw = (data.x / window.innerWidth) * 100;
-    const yPercentRaw = (data.y / window.innerHeight) * 100;
-    const xPercent = Math.max(2, Math.min(98, Math.round(xPercentRaw)));
-    const yPercent = Math.max(2, Math.min(98, Math.round(yPercentRaw)));
-    const horizontalAnchor = data.x < window.innerWidth / 2 ? 'left' : 'right';
-    const verticalAnchor = data.y < window.innerHeight / 2 ? 'top' : 'bottom';
-    const transform = `${horizontalAnchor === 'left' ? 'translate(14px' : 'translate(calc(-100% - 14px)'}${verticalAnchor === 'top' ? ', 14px)' : ', calc(-100% - 14px))'}`;
-    const originClass = `origin-${verticalAnchor}-${horizontalAnchor}`;
     return {
-      left: `${xPercent}%`,
-      top: `${yPercent}%`,
-      transform,
-      originClass
+      left: `${data.x}px`,
+      top: `${data.y}px`,
+      transform: 'translate(0, 0)',
+      originClass: 'origin-top-left',
     };
   });
 }

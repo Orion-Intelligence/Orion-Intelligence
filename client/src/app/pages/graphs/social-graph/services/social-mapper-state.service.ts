@@ -75,6 +75,10 @@ export class SocialMapperStateService {
         node.groupedPlatforms.forEach(p => nodesOnGraph.add(this.fetchingState.getPlatformUniqueKey(p)));
       }
     });
+    const batchInfo = this.activeTabState()?.graphPlatformBatches()?.get(username);
+    if (batchInfo?.all?.length) {
+      batchInfo.all.forEach(p => nodesOnGraph.add(this.fetchingState.getPlatformUniqueKey(p)));
+    }
     const platformsWithSelection = results.map(p => ({ ...p, isSelected: nodesOnGraph.has(this.fetchingState.getPlatformUniqueKey(p)) }));
     this.manageProfilesModalData.set({ username, platforms: platformsWithSelection });
   }

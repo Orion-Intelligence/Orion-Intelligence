@@ -527,7 +527,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
           const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId as string);
           const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 25;
           const domRadius = baseSize * scale;
-          const overlaySize = Math.max(8, domRadius * 0.9);
+          const overlaySize = domRadius * 1.0;
           const offset = domRadius * 0.707;
           overlays.push({
             nodeId: nodeId as string,
