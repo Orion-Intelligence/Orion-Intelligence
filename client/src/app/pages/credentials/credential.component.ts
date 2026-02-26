@@ -110,7 +110,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(reset = true): void {
-    this.dashboardService.consolidatedParamModel.category = this.type;
     this.firstTrigger = false;
     if (this.isSearchLoading) {
       return;

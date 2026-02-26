@@ -410,7 +410,6 @@ class elastic_request_generator:
 
     def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories):
         if p_query_model.matchtype:
-            p_query_model.matchtype="full"
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
         channel_q = p_query_model.q if p_query_model.q and p_query_model.q != "*" else None

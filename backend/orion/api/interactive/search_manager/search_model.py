@@ -243,6 +243,7 @@ class search_model:
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
         filter_dict = param.entity_filter or {}
+        param.matchtype="full"
 
         SEARCH_TYPES = [
             "leak_model",
