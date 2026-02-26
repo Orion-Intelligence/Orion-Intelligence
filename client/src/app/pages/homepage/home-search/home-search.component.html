@@ -51,20 +51,20 @@
         </div>
 
         <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools;">
-          <details class="relative mt-[8px] w-fit">
+          <details #matchTypeDropdown class="relative mt-[8px] w-fit">
             <summary class="flex items-center gap-[6px] cursor-pointer list-none text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" [ngClass]="{ '[&::-webkit-details-marker]:hidden': true }">
               search by <b>({{ getMatchType() }})</b>
               <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
             </summary>
 
-            <div class="absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[7px_12px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
-              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();">Match any term (OR)</button>
-              <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
-              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();">Match indivisual terms (AND)</button>
-              <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
-              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();">Match full query (AND)</button>
-              <div class="mx-[8px] my-[6px] h-px bg-[rgba(0,0,0,0.08)]"></div>
-              <button type="button" class="block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();">Match semantic query (semantic)</button>
+            <div class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();closeMatchTypeDropdown();">Match any term (OR)</button>
+              <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();closeMatchTypeDropdown();">Match indivisual terms (AND)</button>
+              <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();closeMatchTypeDropdown();">Match full query (AND)</button>
+              <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();closeMatchTypeDropdown();">Match semantic query (semantic)</button>
             </div>
           </details>
         </ng-container>

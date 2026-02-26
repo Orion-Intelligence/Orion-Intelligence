@@ -29,6 +29,7 @@ export class HomeSearchComponent implements OnInit {
 
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  @ViewChild('matchTypeDropdown', { static: false }) matchTypeDropdownRef?: ElementRef<HTMLDetailsElement>;
   searchQuery = '';
   selectedSearchBy = 'Match any term';
   homeInsightExpanded = false;
@@ -120,6 +121,13 @@ export class HomeSearchComponent implements OnInit {
       input.value = '';
       input.focus();
       input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  closeMatchTypeDropdown(): void {
+    const el = this.matchTypeDropdownRef?.nativeElement;
+    if (el?.open) {
+      el.open = false;
     }
   }
 
@@ -254,5 +262,10 @@ export class HomeSearchComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
+    const target = event.target as Node | null;
+    const detailsEl = this.matchTypeDropdownRef?.nativeElement;
+    if (detailsEl && target && !detailsEl.contains(target)) {
+      detailsEl.open = false;
+    }
   }
 }

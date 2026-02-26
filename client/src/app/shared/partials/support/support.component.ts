@@ -15,7 +15,6 @@ import { ensureStylesheet } from '../../utils/stylesheet-loader.util';
 export class SupportComponent implements OnInit, OnDestroy {
   private readonly twId = 'tailwind-support-styles';
   private tailwindLinkEl: HTMLLinkElement | null = null;
-  private ownsTailwindLink = false;
 
   isTailwindReady = false;
   isSubmitting = false;
@@ -36,8 +35,7 @@ export class SupportComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (isPlatformBrowser(this.platformId) && this.ownsTailwindLink) {
-      this.tailwindLinkEl?.remove();
+    if (isPlatformBrowser(this.platformId)) {
       this.tailwindLinkEl = null;
     }
   }
@@ -101,6 +99,5 @@ export class SupportComponent implements OnInit, OnDestroy {
       this.isTailwindReady = true; 
     });
     this.tailwindLinkEl = stylesheet.linkEl;
-    this.ownsTailwindLink = stylesheet.ownsLink;
   }
 }
