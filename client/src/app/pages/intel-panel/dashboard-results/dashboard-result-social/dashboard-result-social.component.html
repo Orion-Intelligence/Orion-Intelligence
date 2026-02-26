@@ -1,15 +1,15 @@
 <div [ngClass]="isConsolidatedView ? 'w-full min-w-0' : 'w-full max-w-[910px] min-w-0 px-2 sm:px-0'">
   <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))" class="mb-[20px]" [@fadeInDashboardItem]>
-    <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]">
+    <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-white ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]">
 
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
         <div class="flex max-w-[80%] flex-wrap gap-[10px]">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_content_type | slice:0:15" [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">{{
+            <span *ngFor="let tag of item.m_content_type | slice:0:15" class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{
               tag }}</span>
           </ng-container>
           <ng-template #unknownTag>
-            <span [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="inline-flex h-[31px] items-center rounded-[25px] bg-[var(--color-tags)] px-[13px] font-[Roboto] text-[12px] font-[400] text-[var(--color-text3)]">unknown</span>
+            <span class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
           </ng-template>
         </div>
 
@@ -44,7 +44,7 @@
         <ng-container *ngIf="hasCodeType(item); else normalContent">
           <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
             Code snippet - content not available</p>
-          <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
+          <div class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
             <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
           </div>
         </ng-container>
@@ -65,9 +65,9 @@
         <ng-container *ngIf="getContentLines(item).length > 0">
           <div class="mb-[12px] mt-[10px] space-y-[10px]">
             <ng-container *ngFor="let section of getContentLines(item).slice(0, 5); let i = index; let isLast = last">
-              <div [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[12px]">
+              <div class="p-0">
                 <h3 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
-                <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
+                <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
               </div>
             </ng-container>
           </div>
@@ -75,8 +75,8 @@
       </ng-template>
 
       <ng-container *ngIf="item.m_weblink?.length">
-        <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
-        <div *ngFor="let link of item.m_weblink | slice:0:3" class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
+        <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
+        <div *ngFor="let link of item.m_weblink | slice:0:3" class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
           {{ link }}
         </div>
       </ng-container>

@@ -106,6 +106,11 @@ export class ExpandedRowComponent implements OnChanges {
     return arr[0] || '-';
   }
 
+  get passwordValue(): string {
+    const arr = this.rowHelper.normalizeToArray(this.item?.['password']);
+    return arr[0] || '-';
+  }
+
   selectTelemetry(key: string, e?: MouseEvent) {
     if (e) {
       e.stopPropagation();
@@ -266,7 +271,7 @@ export class ExpandedRowComponent implements OnChanges {
       const email = this.item?.['email']?.[0] || '-';
       const domain = this.item?.['domain']?.[0] || '-';
       const ip = this.item?.['ip']?.[0] || '-';
-      const password = this.item?.['password']?.[0] || '-';
+      const password = this.passwordValue;
       lines.push('Identity Intelligence');
       lines.push(`Email: ${email}`);
       lines.push(`Domain: ${domain}`);
@@ -324,6 +329,8 @@ export class ExpandedRowComponent implements OnChanges {
       'm_source_channel',
       'ip',
       'password',
+      'hash',
+      'index',
       'mapping',
       'delimiter'
     ]);
@@ -344,6 +351,7 @@ export class ExpandedRowComponent implements OnChanges {
       .filter(k => !exclude.has(k))
       .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(item?.[k]) }))
       .filter(g => g.values.length > 0)
+      .filter(g => !this.isHashOrIndexKey(g.key, g.label))
       .sort((a, b) => a.label.localeCompare(b.label));
     return [...core, ...rest];
   }
@@ -359,12 +367,15 @@ export class ExpandedRowComponent implements OnChanges {
       'm_source',
       'm_root_domain',
       'm_channel',
-      'm_rank_index'
+      'm_rank_index',
+      'm_hash',
+      'm_index'
     ]);
     const groups: TelemetryGroup[] = Object.keys(result)
       .filter(k => k.startsWith('m_') && Array.isArray(result[k]) && result[k].length > 0 && !exclude.has(k))
       .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(result?.[k]) }))
-      .filter(g => g.values.length > 0);
+      .filter(g => g.values.length > 0)
+      .filter(g => !this.isHashOrIndexKey(g.key, g.label));
     const emailK = 'm_email';
     const domainK = 'm_domain';
     const ipK = 'm_ip';
@@ -390,5 +401,11 @@ export class ExpandedRowComponent implements OnChanges {
       .filter(g => ![emailK, domainK, ipK, passK].includes(g.key))
       .sort((a, b) => a.label.localeCompare(b.label));
     return [...core, ...rest];
+  }
+
+  private isHashOrIndexKey(key: string, label?: string): boolean {
+    const k = (key || '').toLowerCase();
+    const l = (label || '').toLowerCase();
+    return k.includes('hash') || k.includes('index') || l.includes('hash') || l.includes('index');
   }
 }

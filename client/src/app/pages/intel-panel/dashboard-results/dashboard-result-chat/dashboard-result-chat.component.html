@@ -4,10 +4,10 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-[10px]">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_content_type" [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
+            <span *ngFor="let tag of item.m_content_type" class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
           </ng-container>
           <ng-template #unknownTag>
-            <span [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
+            <span class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
           </ng-template>
         </div>
 

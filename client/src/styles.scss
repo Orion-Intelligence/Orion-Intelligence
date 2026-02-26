@@ -107,7 +107,13 @@ html:has(body.dark-theme) {
 }
 
 .ui-result-card.ui-consolidated-sub {
-  background-image: none !important;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.014) 0px,
+    rgba(255, 255, 255, 0.014) 1px,
+    transparent 1px,
+    transparent 12px
+  ) !important;
 }
 
 .ui-consolidated-inner {
@@ -579,6 +585,14 @@ html:has(body.dark-theme) {
 
 .dark-theme .ui-ioc-row-odd {
   background: #131e30 !important;
+}
+
+.dark-theme .ui-ioc-table-row.credential_row_expand {
+  background: #1f1928 !important;
+}
+
+.light-theme .ui-ioc-table-row.credential_row_expand {
+  background: #f8fafd !important;
 }
 
 .light-theme .ui-ioc-table-empty {

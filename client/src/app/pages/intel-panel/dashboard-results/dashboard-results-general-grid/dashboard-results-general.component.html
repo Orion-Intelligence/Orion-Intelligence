@@ -4,7 +4,7 @@
 
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
         <div class="flex max-w-[80%] flex-wrap gap-[10px]">
-          <span *ngFor="let tag of item.m_content_type" [ngClass]="isConsolidatedView ? 'ui-consolidated-inner' : ''" class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
+          <span *ngFor="let tag of item.m_content_type" class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
         </div>
 
         <div class="ml-auto flex gap-[20px]" *ngIf="!isMobileMode()">
