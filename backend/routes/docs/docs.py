@@ -2400,7 +2400,7 @@ SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
 SUPPORT_METHOD_DOCS={"subdomain_scan": _doc("support/subdomain_scan.md"), "dns_scan": _doc(
     "support/dns_scan.md"), "wayback_scan": _doc("support/wayback_scan.md")}
 
-SOCIAL_DOCS ={"profile_search": _doc("socail/profile_search.md"),"profile_posts": _doc("socail/profile_posts.md"),"profile_followers": _doc(
-    "socail/profile_followers.md"),"profile_following": _doc("socail/profile_following.md"),"profile_images": _doc("socail/profile_images.md"),
-    "recon_image_search": _doc("socail/recon_image_search.md"),"profile_metadata": _doc("socail/profile_metadata.md"),
-    "profile_global_presence": _doc("socail/profile_global_presence.md")}
+SOCIAL_DOCS ={"profile_search": _doc("social/profile_search.md"),"profile_posts": _doc("social/profile_posts.md"),"profile_followers": _doc(
+    "social/profile_followers.md"),"profile_following": _doc("social/profile_following.md"),"profile_images": _doc("social/profile_images.md"),
+    "recon_image_search": _doc("social/recon_image_search.md"),"profile_metadata": _doc("social/profile_metadata.md"),
+    "profile_global_presence": _doc("social/profile_global_presence.md")}
