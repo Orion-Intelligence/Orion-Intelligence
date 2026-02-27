@@ -9,7 +9,6 @@ import { sidebarItemTooltips } from '../../../constants/shared-enums';
   standalone: true,
   imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective, LowerPipe],
   templateUrl: './dashboard-sidebar-collapsed.component.html',
-  styleUrl: './dashboard-sidebar-collapsed.component.scss'
 })
 export class SidebarSectionComponent {
   protected readonly itemTooltips = sidebarItemTooltips;

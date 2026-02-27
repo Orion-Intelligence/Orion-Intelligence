@@ -12,7 +12,6 @@ import { buildUsernameSuggestions, buildUsernameSuggestionText } from '../../../
   selector: 'app-add-tenant',
   imports: [FormsModule, NgFor, NgIf],
   templateUrl: './add-tenant.component.html',
-  styleUrl: './add-tenant.component.scss',
   animations: [popupAnimation, overlayAnimation]
 })
 export class AddTenantComponent implements OnInit {

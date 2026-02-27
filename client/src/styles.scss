@@ -7,6 +7,13 @@
 @import "bootstrap-icons/font/bootstrap-icons.css";
 @import "./app/pages/homepage/world-heatmap/world-heatmap.component.css";
 @import "./app/pages/welcome/welcome.component.css";
+@use "./app/pages/credentials/expanded-row/expanded-row.component.scss";
+@use "./app/pages/tenant/tenant-management/add-tenant/add-tenant.component.scss";
+@use "./app/pages/tenant/tenant-management/view-profile/manage-profile.component.scss";
+@use "./app/pages/tenant/tenant-management/view-tenant/view-tenant.component.scss";
+@use "./app/shared/partials/dashboard-sidebar/dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component.scss";
+@use "./app/shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component.scss";
+@use "./app/shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.scss";
 
 html,
 body {
