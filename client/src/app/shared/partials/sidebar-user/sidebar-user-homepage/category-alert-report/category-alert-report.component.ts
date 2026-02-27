@@ -26,7 +26,7 @@ import { EmptyResultComponent } from '../../../empty-result/empty-result.compone
   selector: 'app-category-alert-report',
   imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, NgxPrintModule, AlertExportComponentComponent, EmptyResultComponent],
   templateUrl: './category-alert-report.component.html',
-  styleUrls: ['./category-alert-report.component.css']
+  styleUrl: './category-alert-report.component.scss'
 })
 export class CategoryAlertReportComponent implements OnInit {
   filterModel: FilterModel = alert_filters;
