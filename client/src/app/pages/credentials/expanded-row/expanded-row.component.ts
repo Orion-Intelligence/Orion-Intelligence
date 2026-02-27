@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { NgClass, NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
 type TelemetryGroup = {
@@ -10,7 +10,7 @@ type TelemetryGroup = {
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
-  imports: [NgIf, NgForOf, NgClass, TooltipDirective],
+  imports: [NgIf, NgForOf, NgClass, TitleCasePipe, TooltipDirective],
   templateUrl: './expanded-row.component.html',
 })
 export class ExpandedRowComponent implements OnChanges {
@@ -400,6 +400,10 @@ export class ExpandedRowComponent implements OnChanges {
       .filter(g => ![emailK, domainK, ipK, passK].includes(g.key))
       .sort((a, b) => a.label.localeCompare(b.label));
     return [...core, ...rest];
+  }
+
+  _console(value: unknown): void {
+    console.log(value);
   }
 
   private isHashOrIndexKey(key: string, label?: string): boolean {
