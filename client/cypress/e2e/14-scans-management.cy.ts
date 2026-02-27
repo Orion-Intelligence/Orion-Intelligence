@@ -103,11 +103,11 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 
   });
 
-  it('Live APIs → Email Breach, Social Scanner, Playstore Scanner, Software Scanner', () => {
+  it('Entity APIs → Email Breach, Social Scanner, Playstore Scanner, Software Scanner', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('app-dashboard-sidebar-items div', 'Live APIs')
+    cy.contains('app-dashboard-sidebar-items div', 'Entity API')
       .should('be.visible')
       .click();
 

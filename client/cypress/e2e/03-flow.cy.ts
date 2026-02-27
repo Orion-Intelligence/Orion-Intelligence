@@ -123,26 +123,29 @@ describe('Orion Intelligence – Full Stable Flow', () => {
         .click({ force: true });
     });
 
-    cy.contains('app-dashboard-sidebar-items div', 'Live APIs')
+   // Open Entity API dropdown
+    cy.contains('app-dashboard-sidebar-items > li > div', 'Entity API')
+      .scrollIntoView()
       .click({ force: true });
+
 
     [
       'Email Breach',
       'Social Scanner',
-      'Playstore Scanner'
-    ].forEach((s) => {
-      cy.contains('app-dashboard-sidebar-items div', s)
-        .click({ force: true });
-    });
-
-    cy.contains('app-dashboard-sidebar-items div', 'Dump')
+      'Wanted List',
+      'National Identity',
+      'Playstore Scanner',
+      'Software Scanner',
+      'File Scanner',
+      'Crypto Scanner'
+    ].forEach((item) => {
+    cy.contains('app-dashboard-sidebar-items ul li div', item)
+      .scrollIntoView()
       .click({ force: true });
-
-    cy.contains('Links')
-      .click({ force: true });
+});
 
     cy.logout();
-  });
+    });
 });
 
 describe('Orion Intelligence - Heatmap Coverage', () => {

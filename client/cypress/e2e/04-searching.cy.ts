@@ -5,378 +5,539 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     });
   });
 
-  const clickSecondVisibleSearchInner = () => {
-    cy.get('div[apptooltip="Open Report"]')
-      .filter(':visible')
-      .should('have.length.at.least', 2)
-      .eq(1)
-      .click({force: true});
+  // ---------- Selectors based on your HTML ----------
+  const sidebarParentLabel = 'General Intelligence';
+
+  const generalIntelParent = () =>
+    cy.contains('app-dashboard-sidebar-items div', sidebarParentLabel);
+
+  const generalIntelSubMenuRoot = () =>
+    generalIntelParent()
+      .closest('app-dashboard-sidebar-items')
+      .find('ul');
+
+  const subTabClickableItems = () =>
+    generalIntelSubMenuRoot()
+      .find('li div[tabindex="0"]')
+      .filter(':visible');
+
+  const searchInput = () =>
+    cy.get('input[data-cy="dashboard-general-input"][name="q"]').first();
+
+  const openReportButton = () =>
+    cy.get('div[apptooltip="Open Report"]').filter(':visible').first();
+
+  // ---------- Helpers ----------
+  const openGeneralIntelMenu = () => {
+    cy.contains('app-dashboard-sidebar-items', 'General Intelligence')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    generalIntelParent()
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+
+    generalIntelSubMenuRoot().should('exist');
   };
 
-  const clickSecondSearchButtonContainerInner = () => {
-    cy.get('div[apptooltip="Open Report"]')
-      .filter(':visible')
-      .should('have.length.at.least', 2)
-      .eq(1)
-      .within(() => {
-        cy.get('div[apptooltip="Open Report"]')
-          .filter(':visible')
-          .last()
-          .click({force: true});
-      });
-  };
+  const runSearchAndOpenReport = (term: string) => {
+    searchInput()
+      .should('be.visible')
+      .clear({ force: true })
+      .type(`${term}{enter}`, { force: true });
 
-  function clickReportTabs(_: string) {
-    cy.get('app-report-mapping').should('exist');
+    openReportButton()
+      .should('be.visible')
+      .click({ force: true });
 
-    cy.get('app-report-mapping thead th').then($tabs => {
-      const tabNames = [...$tabs].map(tab => tab.innerText.trim());
-
-      tabNames.forEach(tabName => {
-        cy.contains('app-report-mapping thead th', tabName)
-          .scrollIntoView()
-          .should('be.visible')
-          .click({force: true});
-      });
-    });
-  }
-
-  function clickReportMenuButtons(_: string) {
-    cy.get('app-report-header')
+    cy.get('app-json-api-viewer', { timeout: 30000 })
       .should('exist')
-      .within(() => {
-        cy.get('button[apptooltip]:not(:has(img[src*="graph.svg"]))')
-          .each($btn => {
-            const label = $btn.attr('apptooltip') || '';
-            if (['Open Breach Link', 'Print'].includes(label)) return;
+      .and('be.visible');
 
-            cy.wrap($btn)
-              .scrollIntoView()
-              .should('be.visible')
-              .click({force: true});
-          });
-      });
-  }
-
-  const openDefacementSubTab = (tabText: string) => {
-    cy.contains('app-dashboard-sidebar-items div', 'Defacement')
-      .scrollIntoView()
-      .as('defacementMenu')
-      .click({force: true});
-
-    cy.get('@defacementMenu')
-      .parent()
-      .find('div')
-      .contains(tabText)
-      .click({force: true});
+    cy.get('body').type('{esc}', { force: true });
   };
 
-  const openSocialSubTab = (tabText: string) => {
-    cy.contains('app-dashboard-sidebar-items div', 'Social')
-      .scrollIntoView()
-      .as('socialMenu')
-      .click({force: true});
-
-    cy.get('@socialMenu')
-      .parent()
-      .find('div')
-      .contains(tabText)
-      .click({force: true});
-  };
-
-  const openFeedSubTab = (tabText: string) => {
-    cy.contains('app-dashboard-sidebar-items div', 'Feed')
-      .scrollIntoView()
-      .as('feedMenu')
-      .click({force: true});
-
-    cy.get('@feedMenu')
-      .parent()
-      .find('div')
-      .contains(tabText)
-      .click({force: true});
-  };
-
-  const runExploitSearchFlow = (tab: string, term: string, shot: string) => {
-    cy.contains('app-dashboard-sidebar-items div', 'Exploit')
-      .as('exploitMenu')
-      .parent()
-      .within(() => {
-        cy.contains('div', tab)
-          .scrollIntoView()
-          .click({force: true});
-      });
-
-    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type(`${term}{enter}`);
-
-    cy.get('div[apptooltip="Open Report"]').first().should('be.visible');
-
-    cy.get('div[apptooltip="Open Report"]')
-      .first()
-      .within(() => {
-        cy.get('div[apptooltip="Open Report"]')
-          .eq(0)
-          .within(() => {
-            cy.get('div[apptooltip="Open Report"]')
-              .filter(':visible')
-              .last()
-              .click({force: true});
-          });
-      });
-
-    cy.get('body').type('{esc}');
-
-    cy.get('div[apptooltip="Open Report"]')
-      .first()
-      .within(() => {
-        cy.get('div[apptooltip="Open Report"]')
-          .eq(1)
-          .within(() => {
-            cy.get('div[apptooltip="Open Report"]')
-              .filter(':visible')
-              .last()
-              .click({force: true});
-          });
-      });
-
-    cy.get('app-json-api-viewer').should('exist').and('be.visible');
-
-    clickReportTabs(`${shot}-report`);
-
-    if (['All', 'CVE', 'Tools'].includes(tab)) {
-      clickReportMenuButtons(`${shot}-report`);
-    }
-
-    cy.get('@exploitMenu').click({force: true});
-  };
-
-  const jsom_relation_maping = () => {
-    cy.get('app-json-api-viewer img[alt="toggle icon"]')
-      .first()
-      .click({force: true});
-
-    cy.get('app-json-api-viewer img[alt="toggle icon"]').then(($toggles) => {
-      const imgs = [...$toggles].slice(0, 2);
-      imgs.forEach((img) => {
-        cy.get('app-json-api-viewer img[alt="toggle icon"]').eq(imgs.indexOf(img)).click({force: true});
-      });
-      imgs.forEach((img) => {
-        cy.get('app-json-api-viewer img[alt="toggle icon"]').eq(imgs.indexOf(img)).click({force: true});
-      });
-    });
-
-    cy.get('app-report-mapping img[alt="toggle icon"]')
-      .first()
-      .click({force: true});
-
-    cy.get('app-report-mapping table').then(($rows) => {
-      const idx = Math.floor(Math.random() * $rows.length);
-
-      cy.get('app-report-mapping table')
-        .eq(idx)
-        .click({force: true});
-
-      cy.get('app-report-mapping table').should('exist');
-    });
-  };
-
-  it('Search across tabs → Open Report → Click Tabs (Menu Buttons only in ALL)', () => {
+  it('General Intelligence: click allowed subtabs → search bitcoin → open report → back', () => {
     cy.visit('/dashboard/profile/homepage');
 
-    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
+    cy.contains('app-dashboard-sidebar-items', 'General Intelligence')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    // 1) open General Intelligence
+    openGeneralIntelMenu();
+
+    // 2) skip these tabs (DO NOT click / DO NOT search inside them)
+    const skipTabs = new Set(['News', 'Stolen', 'Drugs', 'Hacking']);
+
+    // capture tab names
+    subTabClickableItems()
+      .then($items => {
+        const names = [...$items]
+          .map(el => (el.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+
+        const unique = [...new Set(names)];
+
+        // filter out skip tabs
+        return unique.filter(name => !skipTabs.has(name));
+      })
+      .then((tabNames: string[]) => {
+        // iterate
+        tabNames.forEach((tabName) => {
+          // ensure submenu is open (UI collapses sometimes)
+          openGeneralIntelMenu();
+
+          // click the tab
+          generalIntelSubMenuRoot()
+            .contains('div', tabName)
+            .should('be.visible')
+            .click({ force: true });
+
+          // search + open report
+          runSearchAndOpenReport('bitcoin');
+
+          // go back to tab list page
+          cy.go('back');
+
+          // sanity check we're back
+          searchInput().should('exist');
+        });
+      });
+  });
+
+
+  it('Defacement flow: All(mthcht) → Hacked(ASTAR) → Phishing(mthcht) → Databases(urldna_bot)', () => {
+      // ---------- Selectors based on your HTML ----------
+  const sidebarParentLabel = 'Defacement';
+
+  const defacementParent = () =>
+    cy.contains('app-dashboard-sidebar-items div', sidebarParentLabel);
+
+  const defacementSubMenuRoot = () =>
+    defacementParent()
+      .closest('app-dashboard-sidebar-items')
+      .find('ul');
+
+  const searchInput = () =>
+    cy.get('input[data-cy="dashboard-general-input"][name="q"]').first();
+
+  // row open button (arrow)
+  const openRowButton = () =>
+    cy.get('td.text-right img[alt="click"][src*="arrow-right-click.svg"]')
+      .filter(':visible')
+      .first();
+
+  // ---------- Helpers ----------
+  const openDefacementMenu = () => {
+    // click Defacement header first (as you asked)
+    cy.contains('app-dashboard-sidebar-items', 'Defacement')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    defacementParent()
       .scrollIntoView()
-      .click({force: true});
+      .should('be.visible')
+      .click({ force: true });
 
-    const tabs = [
-      {name: 'All', searchTerm: 'uk'},
-      {name: 'General', searchTerm: 'uk'}
-    ];
+    defacementSubMenuRoot().should('exist');
+  };
 
-    tabs.forEach(tab => {
-      cy.contains('app-dashboard-sidebar-items div', tab.name).click({force: true});
+  const searchAndOpenFirstRow = (term: string) => {
+    searchInput()
+      .should('be.visible')
+      .clear({ force: true })
+      .type(`${term}{enter}`, { force: true });
 
-      const isButtonContainer = tab.name === 'Forums' || tab.name === 'News';
+    openRowButton()
+      .should('be.visible')
+      .click({ force: true });
 
-      if (isButtonContainer) {
-        clickSecondSearchButtonContainerInner();
-      } else {
-        cy.get('.ui-result-card')
-          .first()
-          .find('[apptooltip="Open Report"]')
-          .should('be.visible')
-          .click({force: true});
-      }
+    cy.get('app-json-api-viewer', { timeout: 30000 })
+      .should('exist')
+      .and('be.visible');
 
-      cy.get('app-json-api-viewer').should('exist').and('be.visible');
+    cy.get('body').type('{esc}', { force: true });
+  };
 
-      clickReportTabs(`04-${tab.name.toLowerCase()}-report`);
+  const goToSubTab = (tabName: 'All' | 'Hacked' | 'Phishing' | 'Databases') => {
+    openDefacementMenu();
 
-      if (tab.name === 'All') {
-        clickReportMenuButtons(`04-${tab.name.toLowerCase()}-report`);
-      }
-    });
+    defacementSubMenuRoot()
+      .contains('div', tabName)
+      .should('be.visible')
+      .click({ force: true });
+  };
+    cy.visit('/dashboard/profile/homepage');
 
-    const reportTabs = ['Marketplaces'];
+    cy.contains('app-dashboard-sidebar-items', 'Defacement')
+      .find('li > div')
+      .first()
+      .click({ force: true });
 
-    reportTabs.forEach(tab => {
-      cy.contains('app-dashboard-sidebar-items div', tab).click({force: true});
+    // ----- All -----
+    goToSubTab('All');
+    searchAndOpenFirstRow('mthcht');
 
-      cy.get('div[apptooltip="Open Report"]')
+    cy.go('back');
+    searchInput().should('exist');
+
+    // ----- Hacked -----
+    goToSubTab('Hacked');
+    searchAndOpenFirstRow('ASTAR');
+
+    cy.go('back');
+    searchInput().should('exist');
+
+    // ----- Phishing -----
+    goToSubTab('Phishing');
+    searchAndOpenFirstRow('mthcht');
+
+    cy.go('back');
+    searchInput().should('exist');
+
+    // ----- Databases -----
+    goToSubTab('Databases');
+    searchAndOpenFirstRow('urldna_bot');
+  });
+
+  it('Social: All/Twitter/Mastodon/Pastebin/Forum/Reddit (skip Telegram) → search Linux → open report', () => {
+    // ---------- Selectors ----------
+    const sidebarParentLabel = 'Social';
+
+    const socialParent = () =>
+      cy.contains('app-dashboard-sidebar-items div', sidebarParentLabel);
+
+    const socialSubMenuRoot = () =>
+      socialParent()
+        .closest('app-dashboard-sidebar-items')
+        .find('ul');
+
+    const subTabClickableItems = () =>
+      socialSubMenuRoot()
+        .find('li div[tabindex="0"]')
+        .filter(':visible');
+
+    const searchInput = () =>
+      cy.get('input[data-cy="dashboard-general-input"][name="q"]').first();
+
+    // ✅ UPDATED: Social me arrow button nahi, Open Report button hai
+    const openReportButton = () =>
+      cy.get('div[data-cy="open-report"][apptooltip="Open Report"]')
         .filter(':visible')
-        .should('have.length.at.least', 2);
+        .first();
 
-      clickSecondSearchButtonContainerInner();
+    // ---------- Helpers ----------
+    const openSocialMenu = () => {
+      cy.contains('app-dashboard-sidebar-items', 'Social')
+        .find('li > div')
+        .first()
+        .click({ force: true });
 
-      cy.get('app-json-api-viewer').should('exist').and('be.visible');
+      socialParent()
+        .scrollIntoView()
+        .should('be.visible')
+        .click({ force: true });
 
-      clickReportTabs(`04-${tab.toLowerCase()}-report`);
-    });
-  });
+      socialSubMenuRoot().should('exist');
+    };
 
-  it('Search & open reports + click tabs + menu buttons (Data Breach)', () => {
+    const searchAndOpenReport = (term: string) => {
+      searchInput()
+        .should('be.visible')
+        .clear({ force: true })
+        .type(`${term}{enter}`, { force: true });
+
+      openReportButton()
+        .should('be.visible')
+        .click({ force: true });
+
+      cy.get('app-json-api-viewer', { timeout: 30000 })
+        .should('exist')
+        .and('be.visible');
+
+      cy.get('body').type('{esc}', { force: true });
+    };
+
+    // ---------- Test ----------
     cy.visit('/dashboard/profile/homepage');
 
-    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
-      .scrollIntoView()
-      .click({force: true});
+    // open Social menu once
+    cy.contains('app-dashboard-sidebar-items', 'Social')
+      .find('li > div')
+      .first()
+      .click({ force: true });
 
-    cy.contains('app-dashboard-sidebar-items div', 'Data Breach').click({force: true});
+    openSocialMenu();
 
-    clickSecondVisibleSearchInner();
+    const skipTabs = new Set(['Telegram']);
 
-    cy.get('app-json-api-viewer').should('exist').and('be.visible');
+    subTabClickableItems()
+      .then($items => {
+        const names = [...$items]
+          .map(el => (el.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
 
-    clickReportTabs('04-data-breach-report');
-    clickReportMenuButtons('04-data-breach-report');
-    jsom_relation_maping();
+        const unique = [...new Set(names)];
+        return unique.filter(name => !skipTabs.has(name));
+      })
+      .then((tabNames: string[]) => {
+        tabNames.forEach((tabName) => {
+          openSocialMenu();
 
-    cy.contains('app-dashboard-sidebar-items div', 'Databases').click({force: true});
+          socialSubMenuRoot()
+            .contains('div', tabName)
+            .should('be.visible')
+            .click({ force: true });
 
-    clickSecondVisibleSearchInner();
+          searchAndOpenReport('Linux');
 
-    cy.get('app-json-api-viewer').should('exist').and('be.visible');
-
-    clickReportTabs('04-data-breach-databases-report');
-    clickReportMenuButtons('04-data-breach-databases-report');
-    jsom_relation_maping();
-
-    cy.contains('app-dashboard-sidebar-items div', 'Tracking').click({force: true});
-
-    clickSecondVisibleSearchInner();
-
-    cy.get('app-json-api-viewer').should('exist').and('be.visible');
-
-    clickReportTabs('04-data-breach-tracking-report');
-    clickReportMenuButtons('04-data-breach-tracking-report');
-    jsom_relation_maping();
-  });
-
-  it('Defacement: Hacked → Phishing → Databases', () => {
-    cy.visit('/dashboard/profile/homepage');
-
-    openDefacementSubTab('Hacked');
-
-    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type('102.212.246.99{enter}');
-    cy.get('tr[id^="item-"]').first().click({force: true});
-
-    cy.get('app-json-api-viewer').should('be.visible');
-
-    clickReportTabs('defacement-hacked-report');
-    clickReportMenuButtons('defacement-hacked-report');
-
-    openDefacementSubTab('Phishing');
-
-    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type('phishunt{enter}');
-    cy.get('tr[id^="item-"]').first().click({force: true});
-
-    cy.get('app-json-api-viewer').should('be.visible');
-
-    clickReportTabs('defacement-phishing-report');
-
-    openDefacementSubTab('Databases');
-
-    cy.get('[data-cy="dashboard-general-input"], input[name="q"]').first().clear().type('urldna_bot{enter}');
-    cy.get('tr[id^="item-"]').first().click({force: true});
-
-    cy.get('app-json-api-viewer').should('be.visible');
-
-    clickReportTabs('defacement-databases-report');
-  });
-
-  it('Social: All → Twitter → Forum → Reddit', () => {
-    cy.visit('/dashboard/profile/homepage');
-
-    const socialTabs = [
-      {name: 'All', screenshot: 'social-all'},
-      {name: 'Twitter', screenshot: 'social-twitter'}
-    ];
-
-    socialTabs.forEach(tab => {
-      openSocialSubTab(tab.name);
-
-      clickSecondVisibleSearchInner();
-
-      cy.get('app-json-api-viewer').should('be.visible');
-
-      clickReportTabs(`${tab.screenshot}-report`);
-
-      if (['All', 'Twitter'].includes(tab.name)) {
-        clickReportMenuButtons(`${tab.screenshot}-report`);
-      }
-
-      cy.get('@socialMenu').click({force: true});
-    });
-  });
-
-  it('Exploit: All → CVE → Tools → ZeroDay', () => {
-    cy.visit('/dashboard/profile/homepage');
-
-    cy.contains('app-dashboard-sidebar-items div', 'Exploit')
-      .scrollIntoView()
-      .click({force: true});
-
-    runExploitSearchFlow('All', 'turning', 'exploit-all');
-    runExploitSearchFlow('CVE', 'turning', 'exploit-cve');
-  });
-
-  it('Feed: News → Search UK → Open Report', () => {
-    cy.visit('/dashboard/profile/homepage');
-
-    openFeedSubTab('News');
-
-    cy.get('.input-group.default-input-sub-container').should('exist');
-
-    clickSecondVisibleSearchInner();
-
-    cy.get('app-json-api-viewer').should('be.visible');
-
-    clickReportTabs('feed-news-report');
-    clickReportMenuButtons('feed-news-report');
-
-    cy.get('@feedMenu').click({force: true});
-  });
-
-  it('Dump: Listing → Search leak → View Result (No Timeouts)', () => {
-    cy.visit('/dashboard/profile/homepage');
-
-    cy.contains('app-dashboard-sidebar-items div', 'Dump')
-      .scrollIntoView()
-      .as('dumpMenu')
-      .click({force: true});
-
-    cy.get('@dumpMenu')
-      .parent()
-      .within(() => {
-        cy.contains('div', 'Listing').click({force: true});
+          cy.go('back');
+          searchInput().should('exist');
+        });
       });
+  });
 
-    cy.get('form.directory-listing-search').should('exist');
+  it('Exploit: All → CVE → Tools → ZeroDay (Search + Open Report)', () => {
+    // ---------- Selectors ----------
+    const exploitMenu = () => cy.contains('app-dashboard-sidebar-items', 'Exploit');
+    const exploitHeader = () => exploitMenu().find('li > div').first();
+    const exploitSubMenu = () => exploitMenu().find('ul').first();
 
-    cy.get('input[name="username"]').clear().type('leak');
+    const searchInput = () =>
+      cy.get('input[data-cy="dashboard-general-input"][name="q"]', { timeout: 30000 }).first();
 
-    cy.contains('button', 'Search').click({force: true});
 
-    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .ui-result-card').should('exist');
-    cy.logout();
+
+    // ---------- Helpers ----------
+    const openExploitMenu = () => {
+      exploitHeader().scrollIntoView().click({ force: true });
+      exploitSubMenu().should('exist');
+    };
+
+    const clickExploitTab = (tabName: 'All' | 'CVE' | 'Tools' | 'ZeroDay') => {
+      openExploitMenu();
+      exploitSubMenu()
+        .contains('div', tabName)
+        .should('be.visible')
+        .click({ force: true });
+    };
+
+    const searchAndOpenReport = (term: string) => {
+      // ✅ break chains to avoid "detached from DOM"
+      searchInput().as('q');
+      cy.get('@q').should('be.visible');
+      cy.get('@q').clear({ force: true });
+      cy.get('@q').type(`${term}{enter}`, { force: true });
+
+      // wait results + open report
+      openReportButton().should('be.visible').click({ force: true });
+
+      // go back to listing for next tab
+      cy.go('back');
+      searchInput().should('exist');
+    };
+
+    // ---------- Test ----------
+    cy.visit('/dashboard/profile/homepage');
+
+    cy.contains('app-dashboard-sidebar-items', 'Exploit')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    openExploitMenu();
+
+    // All -> SSLoad
+    clickExploitTab('All');
+    searchAndOpenReport('SSLoad');
+
+    // CVE -> Skyvern
+    clickExploitTab('CVE');
+    searchAndOpenReport('Skyvern');
+
+    // Tools -> Plugx
+    clickExploitTab('Tools');
+    searchAndOpenReport('Plugx');
+
+    // ZeroDay -> Livewire
+    clickExploitTab('ZeroDay');
+    searchAndOpenReport('Livewire');
+  });
+
+  it('Feed: search police → open report', () => {
+    cy.visit('/dashboard/profile/homepage');
+
+    // ✅ Feed pe click
+    cy.contains('app-dashboard-sidebar-items', 'Feed')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    const searchInput = () =>
+      cy.get('input[data-cy="dashboard-general-input"][name="q"]', { timeout: 30000 }).first();
+
+    const openReportButton = () =>
+      cy.get('div[apptooltip="Open Report"]', { timeout: 30000 })
+        .filter(':visible')
+        .first();
+
+    // ✅ Search police
+    searchInput().as('q');
+    cy.get('@q').should('be.visible');
+    cy.get('@q').clear({ force: true });
+    cy.get('@q').type('police{enter}', { force: true });
+
+    // ✅ Open Report click
+    openReportButton()
+      .should('be.visible')
+      .click({ force: true });
+
+    // optional viewer check
+    cy.get('app-json-api-viewer', { timeout: 30000 })
+      .should('exist')
+      .and('be.visible');
+  });
+
+  // -----------------------------
+  // IT: Stealer logs (IOCS) ✅ FIXED
+  // -----------------------------
+  it('Stealer logs: IOCS → search email → press collapse button', () => {
+    cy.visit('/dashboard/profile/homepage');
+
+    // open Stealer logs
+    cy.contains('app-dashboard-sidebar-items', 'Stealer logs')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    // go to IOCS (if already on iocs page, no issue)
+    cy.contains('app-dashboard-sidebar-items ul li div', 'IOCS')
+      .scrollIntoView()
+      .click({ force: true });
+
+    // ✅ correct input for Stealer logs
+    cy.get('input[name="searchQuery"][placeholder="Search..."]', { timeout: 30000 })
+      .first()
+      .as('q');
+
+    cy.get('@q').should('be.visible');
+    cy.get('@q').clear({ force: true });
+    cy.get('@q').type('uwe.dippold@web.de{enter}', { force: true });
+
+    // press the dash "collapse row" button
+    cy.get('button[aria-label="Expand row"]', { timeout: 30000 })
+      .should('exist')
+      .and('be.visible')
+      .click({ force: true });
+  });
+
+  // -----------------------------
+  // IT: Web Scans (skip APK Scan) ✅ FIXED (Repository placeholder)
+  // -----------------------------
+  it('Web Scans: Basic / Port / Repository / SEO (skip APK) → search bbc.com', () => {
+    cy.visit('/dashboard/profile/homepage');
+
+    // open Web Scans
+    cy.contains('app-dashboard-sidebar-items', 'Web Scans')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    const clickScanTab = (tabName: string) => {
+      cy.contains('app-dashboard-sidebar-items ul li div', tabName)
+        .scrollIntoView()
+        .click({ force: true });
+    };
+
+    const runUrlScanSearch = (placeholder: 'Domain' | 'Repository', value: string) => {
+      cy.get(`input[name="username"][placeholder="${placeholder}"]`, { timeout: 30000 })
+        .first()
+        .as('scanInput');
+
+      cy.get('@scanInput').should('be.visible');
+      cy.get('@scanInput').clear({ force: true });
+      cy.get('@scanInput').type(value, { force: true });
+
+      // button is often disabled until input is valid → wait until enabled then click
+      cy.get('button')
+        .contains(/^Search$/)
+        .should('be.visible')
+        .should('not.be.disabled')
+        .click({ force: true });
+    };
+
+    // Basic Scan (Domain)
+    clickScanTab('Basic Scan');
+    runUrlScanSearch('Domain', 'bbc.com');
+
+    // Port Scan (Domain)
+    clickScanTab('Port Scan');
+    runUrlScanSearch('Domain', 'bbc.com');
+
+    // Repository Scan (Repository)
+    clickScanTab('Repository Scan');
+    runUrlScanSearch('Repository', 'bbc.com');
+
+    // SEO Scan (Domain)
+    clickScanTab('SEO Scan');
+    runUrlScanSearch('Domain', 'bbc.com');
+
+    // ✅ APK Scan intentionally skipped
+  });
+
+  // -----------------------------
+  // IT: Entity API → Playstore Scanner ONLY ✅ (NO typing/search)
+  // -----------------------------
+  it('Entity API: Playstore Scanner (open only)', () => {
+    cy.visit('/dashboard/profile/homepage');
+
+    // Open Entity API dropdown
+    cy.contains('app-dashboard-sidebar-items > li > div', 'Entity API')
+      .scrollIntoView()
+      .click({ force: true });
+
+    // Open Playstore Scanner only (no input)
+    cy.contains('app-dashboard-sidebar-items ul li div', 'Playstore Scanner')
+      .scrollIntoView()
+      .click({ force: true });
+
+    // optional: confirm playstore input exists (means page opened)
+  });
+
+  // -----------------------------
+  // IT: Dump → Listing → search leak
+  // -----------------------------
+  it('Dump: Listing → search leak → Search button', () => {
+    cy.visit('/dashboard/profile/homepage');
+
+    // open Dump
+    cy.contains('app-dashboard-sidebar-items', 'Dump')
+      .find('li > div')
+      .first()
+      .click({ force: true });
+
+    // open Listing
+    cy.contains('app-dashboard-sidebar-items ul li div', 'Listing')
+      .scrollIntoView()
+      .click({ force: true });
+
+    // type leak
+    cy.get('input[name="username"][placeholder="Search leak URL"]', { timeout: 30000 })
+      .first()
+      .as('leak');
+
+    cy.get('@leak').should('be.visible');
+    cy.get('@leak').clear({ force: true });
+    cy.get('@leak').type('leak', { force: true });
+
+    // click Search
+    cy.contains('button', 'Search')
+      .should('be.visible')
+      .click({ force: true });
   });
 });
