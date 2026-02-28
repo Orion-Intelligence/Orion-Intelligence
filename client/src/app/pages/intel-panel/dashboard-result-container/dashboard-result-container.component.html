@@ -5,6 +5,7 @@
   (updateQuery)="onUpdateQuery($event)"
   [filterModel]="general_filters"
   [isLoading]="isResponseLoading()"
+  [activeTab]="'default'"
   [result_count]="Math.ceil(currentResultModel?.length ?? 0)"
   [searchQuery]="currentParamModel.q"
   [type]="type">
