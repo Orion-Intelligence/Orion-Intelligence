@@ -1,1 +1,6 @@
 /* Tailwind-only error page: styles intentionally defined in template classes. */
+.error-handler-root {
+  background-image: url('/assets/images/shared/error-page.png');
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}

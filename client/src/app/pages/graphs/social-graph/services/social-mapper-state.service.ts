@@ -143,16 +143,59 @@ export class SocialMapperStateService {
   }
 
   private findPlatformDataByNodeId(nodeId: string): PlatformResult | null {
+    const parsed = this.parsePlatformNodeId(nodeId);
+    if (!parsed) {
+      return null;
+    }
+    const keyUsername = parsed.keyUsername;
+    const platformName = parsed.platformName;
+    const platformUsername = parsed.platformUsername;
+    const directUserResults = this.scanResults().get(keyUsername);
+    const directMatch = directUserResults?.find(p => p.platform === platformName && p.username === platformUsername);
+    if (directMatch) {
+      return directMatch;
+    }
+    const normalizedUserKey = keyUsername.toLowerCase();
+    const normalizedPlatform = platformName.toLowerCase();
+    const normalizedPlatformUser = platformUsername.toLowerCase();
+    for (const [userKey, userResults] of this.scanResults().entries()) {
+      if (userKey.toLowerCase() !== normalizedUserKey) {
+        continue;
+      }
+      const relaxedMatch = userResults.find(p =>
+        (p.platform || '').toLowerCase() === normalizedPlatform &&
+                (p.username || '').toLowerCase() === normalizedPlatformUser);
+      if (relaxedMatch) {
+        return relaxedMatch;
+      }
+    }
+    return null;
+  }
+
+  private parsePlatformNodeId(nodeId: string): {
+        keyUsername: string;
+        platformName: string;
+        platformUsername: string;
+    } | null {
     if (!nodeId.startsWith('platform-')) {
       return null;
     }
-    const key = nodeId.substring('platform-'.length);
-    const [keyUsername, platformName, platformUsername] = key.split('|');
-    const platformData = this.scanResults().get(keyUsername)?.find(p => p.platform === platformName && p.username === platformUsername);
-    if (!platformData) {
+    const raw = nodeId.substring('platform-'.length);
+    const firstSep = raw.indexOf('|');
+    if (firstSep < 0) {
       return null;
     }
-    return platformData;
+    const secondSep = raw.indexOf('|', firstSep + 1);
+    if (secondSep < 0) {
+      return null;
+    }
+    const keyUsername = raw.slice(0, firstSep);
+    const platformName = raw.slice(firstSep + 1, secondSep);
+    const platformUsername = raw.slice(secondSep + 1);
+    if (!keyUsername || !platformName || !platformUsername) {
+      return null;
+    }
+    return { keyUsername, platformName, platformUsername };
   }
 
   closeFollowerScanPopup() {

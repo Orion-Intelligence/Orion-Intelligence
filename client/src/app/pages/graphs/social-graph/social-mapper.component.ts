@@ -496,12 +496,49 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
   }
 
+  private parsePlatformNodeId(nodeId: string): {
+        keyUsername: string;
+        platformName: string;
+        platformUsername: string;
+    } | null {
+    if (!nodeId.startsWith('platform-')) {
+      return null;
+    }
+    const raw = nodeId.substring('platform-'.length);
+    const firstSep = raw.indexOf('|');
+    if (firstSep < 0) {
+      return null;
+    }
+    const secondSep = raw.indexOf('|', firstSep + 1);
+    if (secondSep < 0) {
+      return null;
+    }
+    const keyUsername = raw.slice(0, firstSep);
+    const platformName = raw.slice(firstSep + 1, secondSep);
+    const platformUsername = raw.slice(secondSep + 1);
+    return { keyUsername, platformName, platformUsername };
+  }
+
+  private getScanResultsByUsername(username: string): PlatformResult[] | undefined {
+    const direct = this.scanResults().get(username);
+    if (direct) {
+      return direct;
+    }
+    const normalized = username.toLowerCase();
+    for (const [key, value] of this.scanResults().entries()) {
+      if (key.toLowerCase() === normalized) {
+        return value;
+      }
+    }
+    return undefined;
+  }
+
   onNodeClicked(nodeId: string) {
     if (!nodeId.startsWith('user-')) {
       return;
     }
     const username = nodeId.replace('user-', '');
-    const allUserPlatforms = this.scanResults().get(username);
+    const allUserPlatforms = this.getScanResultsByUsername(username);
     if (!allUserPlatforms) {
       return;
     }
@@ -519,9 +556,17 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
             });
           }
           else if (connectedNode.id.toString().startsWith('platform-')) {
-            const key = connectedNode.id.toString().substring('platform-'.length);
-            const [keyUsername, platformName, platformUsername] = key.split('|');
-            const platform = allUserPlatforms.find(p => p.username === platformUsername && p.platform === platformName && p.keyUsername === keyUsername);
+            const parsed = this.parsePlatformNodeId(connectedNode.id.toString());
+            if (!parsed) {
+              return;
+            }
+            const normalizedUser = parsed.keyUsername.toLowerCase();
+            const normalizedPlatform = parsed.platformName.toLowerCase();
+            const normalizedPlatformUser = parsed.platformUsername.toLowerCase();
+            const platform = allUserPlatforms.find(p =>
+              (p.keyUsername || '').toLowerCase() === normalizedUser &&
+                            (p.platform || '').toLowerCase() === normalizedPlatform &&
+                            (p.username || '').toLowerCase() === normalizedPlatformUser);
             if (platform) {
               platformIdentitiesOnGraph.add(this.getPlatformIdentityKey(platform));
             }
@@ -626,13 +671,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (!relationshipNode) {
       return;
     }
-    const pairKey = nodeId.replace('relationship-node-', '');
-    const users = pairKey.split('--');
-    if (users.length !== 2) {
+    const users = this.resolveRelationshipUsers(nodeId);
+    if (!users) {
       return;
     }
-    const userA = users[0];
-    const userB = users[1];
+    const [userA, userB] = users;
     const connections = this.buildRelationshipConnections(userA, userB);
     const fallbackCount = Number(relationshipNode.label || 0);
     const resolvedCount = connections.length > 0 ? connections.length : fallbackCount;
@@ -646,6 +689,24 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   private buildRelationshipConnections(userA: string, userB: string): RelationshipConnectionItem[] {
     return this.relationshipResolver.buildRelationshipConnections(userA, userB, this.scanResults());
+  }
+
+  private resolveRelationshipUsers(nodeId: string): [string, string] | null {
+    const pairKey = nodeId.replace('relationship-node-', '');
+    const activeUsers = Array.from(this.activeUsernames());
+    for (let i = 0; i < activeUsers.length; i++) {
+      for (let j = i + 1; j < activeUsers.length; j++) {
+        const sortedPair = [activeUsers[i], activeUsers[j]].sort((a, b) => a.localeCompare(b));
+        if (`${sortedPair[0]}--${sortedPair[1]}` === pairKey) {
+          return [sortedPair[0], sortedPair[1]];
+        }
+      }
+    }
+    const fallback = pairKey.split('--');
+    if (fallback.length === 2) {
+      return [fallback[0], fallback[1]];
+    }
+    return null;
   }
 
   async updateGraphFromModal(selectedPlatforms: PlatformResult[]) {

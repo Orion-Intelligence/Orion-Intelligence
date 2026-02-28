@@ -1587,3 +1587,6 @@ html:has(body.dark-theme) {
   background: linear-gradient(90deg, #fb923c 0%, #f97316 100%);
   border-radius: 999px;
 }
+
+@import 'app/shared/partials/error-handler/error-handler.component.css';
+@import 'app/pages/login/login-container/login-container.component.css';

@@ -1,0 +1,7 @@
+.twofa-bg {
+  background-color: #172235;
+  background-image: url('/assets/images/shared/Bg.webp');
+  background-repeat: no-repeat;
+  background-position: center 100px;
+  background-size: cover;
+}

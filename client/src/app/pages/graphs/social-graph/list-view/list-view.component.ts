@@ -74,13 +74,52 @@ export class ListViewComponent {
   }
 
   getPlatformData(platformNodeId: string): PlatformResult | undefined {
-    if (!platformNodeId.startsWith('platform-')) {
+    const parsed = this.parsePlatformNodeId(platformNodeId);
+    if (!parsed) {
       return undefined;
     }
-    const key = platformNodeId.substring('platform-'.length);
-    const [keyUsername, platformName, platformUsername] = key.split('|');
-    const userResults = this.scanResults().get(keyUsername);
-    return userResults?.find(p => p.platform === platformName && p.username === platformUsername);
+    const userResults = this.getScanResultsByUsername(parsed.keyUsername);
+    return userResults?.find(p =>
+      (p.platform || '').toLowerCase() === parsed.platformName.toLowerCase() &&
+            (p.username || '').toLowerCase() === parsed.platformUsername.toLowerCase());
+  }
+
+  private parsePlatformNodeId(nodeId: string): {
+        keyUsername: string;
+        platformName: string;
+        platformUsername: string;
+    } | null {
+    if (!nodeId.startsWith('platform-')) {
+      return null;
+    }
+    const raw = nodeId.substring('platform-'.length);
+    const firstSep = raw.indexOf('|');
+    if (firstSep < 0) {
+      return null;
+    }
+    const secondSep = raw.indexOf('|', firstSep + 1);
+    if (secondSep < 0) {
+      return null;
+    }
+    return {
+      keyUsername: raw.slice(0, firstSep),
+      platformName: raw.slice(firstSep + 1, secondSep),
+      platformUsername: raw.slice(secondSep + 1)
+    };
+  }
+
+  private getScanResultsByUsername(username: string): PlatformResult[] | undefined {
+    const direct = this.scanResults().get(username);
+    if (direct) {
+      return direct;
+    }
+    const normalized = username.toLowerCase();
+    for (const [key, value] of this.scanResults().entries()) {
+      if (key.toLowerCase() === normalized) {
+        return value;
+      }
+    }
+    return undefined;
   }
 
   getEntityData(entityNodeId: string): CustomEntity | undefined {

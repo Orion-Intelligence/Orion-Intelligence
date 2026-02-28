@@ -80,7 +80,7 @@
     <app-header [forceDark]="true"></app-header>
   </div>
 
-  <div class="relative z-[1] flex min-h-[calc(100dvh-60px)] w-full bg-[#172235]" style="background: #172235 url('/assets/images/shared/Bg.webp') no-repeat center 100px; background-size: cover;">
+  <div class="twofa-bg relative z-[1] flex min-h-[calc(100dvh-60px)] w-full bg-[#172235]">
     <div class="flex min-h-[600px] flex-1 items-start justify-center bg-[#0e1626f6] px-4 py-[20px] max-[943px]:p-[20px]">
       <div class="mt-[8vh] w-full rounded-[16px] border border-[rgba(255,255,255,0.12)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.04)_0,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_24px),radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.06)_0%,transparent_40%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.04)_0%,transparent_45%),linear-gradient(90deg,rgba(21,52,84,0.55)_0%,rgba(22,56,88,0.55)_100%)] px-[32px] py-[38px] max-[943px]:mt-0 max-[943px]:px-[20px] max-[943px]:py-[24px]" [ngClass]="otpSecret ? 'max-w-[700px]' : 'max-w-[520px]'">
         <div class="space-y-[14px]">
