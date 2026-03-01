@@ -356,7 +356,7 @@ class elastic_controller:
                     conn = self.__conn_for_index(index)
                     exists = await conn.exists(index=index, id=doc_id, request_timeout=220)
 
-                    if not exists and not bypass_empty_embedding:
+                    if not exists and not bypass_empty_embedding and index != ELASTIC_INDEX.S_CHATS_INDEX:
                         emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
                         if not (isinstance(emb, list) and len(emb) > 0):
                             continue
@@ -378,7 +378,7 @@ class elastic_controller:
                 conn = self.__conn_for_index(index)
                 exists = await conn.exists(index=index, id=doc_id, request_timeout=220)
 
-                if not exists:
+                if not exists and index != ELASTIC_INDEX.S_CHATS_INDEX:
                     emb = p_data[ELASTIC_KEYS.S_VALUE].get("m_embedding")
                     if not (isinstance(emb, list) and len(emb) > 0):
                         return False, "Missing non-empty m_embedding for new document"
