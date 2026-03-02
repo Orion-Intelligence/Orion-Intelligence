@@ -26,6 +26,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   sidebar_default = true;
   min_detected = false;
   mobile_menu_status = false;
+  animationsDisabled = false;
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
@@ -75,11 +76,13 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   checkScreenWidth() {
-    if (window.innerWidth < 600 && !this.min_detected && this.sidebar_default) {
+    const isMobile = window.innerWidth < 600;
+    this.animationsDisabled = isMobile;
+    if (isMobile && !this.min_detected && this.sidebar_default) {
       this.min_detected = true;
       this.onToggleSidebar();
     }
-    else if (window.innerWidth > 600) {
+    else if (!isMobile) {
       this.min_detected = false;
     }
   }

@@ -163,22 +163,27 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private updateLegend(): void {
     const el = this.chartContainer.nativeElement as HTMLElement;
     const width = el.offsetWidth || 800;
+    const isMobile = width <= 768;
     this.ensureLegendDefs();
     const legendColors = this.getLegendColors();
     const values = this.mapData.map(d => d.value).filter(v => v != null);
     const max = Math.max(...values, 1);
     const legend = this.svg.selectAll<SVGGElement, any>('g.legend').data([0]).join('g').attr('class', 'legend');
-    const pad = 14;
-    const barW = 180;
-    const barH = 10;
-    legend.attr('transform', `translate(${width - pad - barW - 25},${pad + 6})`);
+    const pad = isMobile ? 16 : 14;
+    const barW = isMobile ? 128 : 180;
+    const barH = isMobile ? 8 : 10;
+    const legendX = isMobile ? 35 : width - pad - barW - 25;
+    const legendY = isMobile ? 44 : pad + 6;
+    const titleSize = isMobile ? 10 : 11;
+    const tickSize = isMobile ? 10 : 11;
+    legend.attr('transform', `translate(${legendX},${legendY})`);
     const title = legend.selectAll<SVGTextElement, any>('text.legend-title')
       .data([this.activeCategoryKey])
       .join('text')
       .attr('class', 'legend-title')
       .attr('x', 0)
       .attr('y', 0)
-      .attr('font-size', 11)
+      .attr('font-size', titleSize)
       .attr('font-weight', 600)
       .attr('fill', legendColors.title);
     title
@@ -229,7 +234,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .join(enter => enter.append('text')
         .attr('class', 'legend-tick-label')
         .attr('y', 8 + barH + 18)
-        .attr('font-size', 11)
+        .attr('font-size', tickSize)
         .attr('font-weight', 500)
         .attr('text-anchor', 'middle')
         .attr('fill', legendColors.tickLabel)
@@ -244,7 +249,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         .attr('fill', legendColors.tickLabel)
         .style('fill', legendColors.tickLabel)
         .style('opacity', '1')
-        .attr('font-size', 11)
+        .attr('font-size', tickSize)
         .attr('font-weight', 500)
         .transition()
         .duration(600)
@@ -253,8 +258,15 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private updateActiveCategoryLabel(): void {
+    const el = this.chartContainer.nativeElement as HTMLElement;
+    const width = el.offsetWidth || 800;
+    const isMobile = width <= 768;
+    const labelX = isMobile ? 35 : 33;
+    const labelY = isMobile ? 22 : 28;
+    const labelSize = isMobile ? 12 : 14;
+    const labelSpacing = isMobile ? 0.6 : 0.8;
     const labelG = this.svg.selectAll<SVGGElement, any>('g.map-type').data([0]).join('g').attr('class', 'map-type');
-    labelG.attr('transform', `translate(${33},${28})`).attr('pointer-events', 'none');
+    labelG.attr('transform', `translate(${labelX},${labelY})`).attr('pointer-events', 'none');
     labelG.selectAll<SVGTextElement, any>('text.map-type-text')
       .data([this.activeCategoryKey])
       .join('text')
@@ -262,9 +274,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .attr('x', 0)
       .attr('y', 0)
       .attr('dominant-baseline', 'middle')
-      .attr('font-size', 14)
+      .attr('font-size', labelSize)
       .attr('font-weight', 700)
-      .attr('letter-spacing', 0.8)
+      .attr('letter-spacing', labelSpacing)
       .attr('fill', 'var(--color-text1)')
       .text(d => `HEATMAP: ${(d ?? '').toUpperCase()}`);
   }
@@ -276,7 +288,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     }
     const el = this.chartContainer.nativeElement as HTMLElement;
     const width = el.offsetWidth || 800;
-    const height = Math.round(width * 0.52);
+    const height = Math.max(Math.round(width * 0.52), 400);
     d3.select(el).selectAll('*').remove();
     this.tooltip = d3
       .select(el)

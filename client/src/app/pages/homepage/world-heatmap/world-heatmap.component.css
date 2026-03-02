@@ -95,6 +95,34 @@
   );
 }
 
+@media (max-width: 768px) {
+  .map-container {
+    min-height: 400px;
+    max-width: 100vw;
+    width: 100vw;
+  }
+
+  .heatmap-tooltip {
+    font-size: 11px;
+    padding: 6px 8px;
+    border-radius: 6px;
+  }
+
+  svg .legend text,
+  svg .legend-tick-label {
+    font-size: 10px;
+  }
+
+  svg .map-type .map-type-text {
+    font-size: 10px;
+  }
+
+  svg {
+    min-height: 400px;
+    height: 400px;
+  }
+}
+
 .country {
   stroke: rgb(255 255 255 / 14%);
   stroke-width: 0.7px;

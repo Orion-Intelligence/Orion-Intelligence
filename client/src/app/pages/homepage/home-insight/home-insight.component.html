@@ -1,4 +1,4 @@
-<div id="analytics" class="max-[943px]:mt-[60px]" [ngClass]="{ '': appService.getConfig().localSettings.isSidebarOpen, '': !appService.getConfig().localSettings.isSidebarOpen }">
+<div id="analytics" class="max-[943px]:mt-[60px] max-[550px]:max-w-[calc(100vw-90px)]" [ngClass]="{ '': appService.getConfig().localSettings.isSidebarOpen, '': !appService.getConfig().localSettings.isSidebarOpen }">
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
     <div>
       <div class="mt-[16px] grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
