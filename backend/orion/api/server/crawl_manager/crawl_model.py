@@ -185,6 +185,13 @@ class crawl_model:
     @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):
         m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
+
+        print(":::::::::::::::::::::::::::1", flush=True)
+        print(":::::::::::::::::::::::::::1", flush=True)
+        print(len(m_data), flush=True)
+        print(":::::::::::::::::::::::::::1", flush=True)
+        print(":::::::::::::::::::::::::::1", flush=True)
+
         if not m_data:
             return {"parsed": "empty unqiue"}
 
