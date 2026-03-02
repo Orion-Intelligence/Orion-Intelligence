@@ -48,7 +48,7 @@ export class CredentialListComponent {
     }
   }
 
-  sliceText(text: string, maxLength: number = 30): string {
+  sliceText(text: string | null | undefined, maxLength: number = 30): string {
     if (!text) {
       return '';
     }
