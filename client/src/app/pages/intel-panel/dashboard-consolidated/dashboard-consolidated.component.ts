@@ -29,6 +29,7 @@ import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.co
 import { scanAnimation } from '../../../shared/animations/scan.animations';
 import { DefacementCallbackModel } from '../../../shared/model/results/defacement/defacement.callback.model';
 import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manager.utils';
+import { countFilterValues } from '../../../shared/utils/filter-values.util';
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
@@ -117,6 +118,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         }
         this.firstTrigger = false;
       });
+    const categories = this.appService.configData().localSettings.entityfilterCategories;
+    const totalTags = countFilterValues(categories);
+    if (totalTags > 0) {
+      this.isIOC = false;
+      this.isGrouped = true;
+    }
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
       if (tab) {
@@ -340,6 +347,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onToggleMenu(tab: string): void {
     this.dashboardService.consolidatedParamModel.tab = tab;
+    this.query='';
     if (tab == "Deep Search") {
       this.isGrouped = true;
       this.isIOC = false;
