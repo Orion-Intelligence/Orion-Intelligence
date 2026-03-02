@@ -54,4 +54,17 @@ export class CredentialListComponent {
     }
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   }
+
+  getThreatPrimaryUrl(result: any): string {
+    if (!result) {
+      return '-';
+    }
+    const domain = Array.isArray(result.m_domain) ? result.m_domain[0] : '';
+    const weblink = Array.isArray(result.m_weblink) ? result.m_weblink[0] : '';
+    return result.m_url || result.m_base_url || domain || weblink || '-';
+  }
+
+  getThreatPrimaryUrlShort(result: any, maxLength: number = 25): string {
+    return this.sliceText(this.getThreatPrimaryUrl(result), maxLength) || '-';
+  }
 }
