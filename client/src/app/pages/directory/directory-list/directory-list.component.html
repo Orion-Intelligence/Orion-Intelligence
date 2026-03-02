@@ -1,6 +1,6 @@
 <div class="ui-table-shell">
   <ng-container *ngIf="(directoryData$ | async) as data; else loadingTpl">
-    <table class="ui-table">
+    <table class="ui-table" id="main-responsive-table">
       <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
         <tr>
           <th>ID</th>

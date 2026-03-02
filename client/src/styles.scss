@@ -1620,5 +1620,74 @@ html:has(body.dark-theme) {
   border-radius: 999px;
 }
 
+@media (width <= 768px) {
+  #main-responsive-table {
+    min-width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  #main-responsive-table thead {
+    display: none;
+  }
+
+  #main-responsive-table tbody,
+  #main-responsive-table tr,
+  #main-responsive-table td {
+    display: block;
+    width: 100%;
+  }
+
+  #main-responsive-table tbody tr {
+    margin: 0 0 12px;
+    border: 1px solid var(--ui-table-row-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--ui-table-row-odd);
+  }
+
+  #main-responsive-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(110px, 42%) 1fr;
+    gap: 10px;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid var(--ui-table-row-border);
+  }
+
+  #main-responsive-table tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  #main-responsive-table tbody td > * {
+    min-width: 0;
+    max-width: 100%;
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #main-responsive-table tbody td [class*="flex-wrap"] {
+    flex-wrap: nowrap !important;
+  }
+
+  #main-responsive-table tbody td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-text6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 @import 'app/shared/partials/error-handler/error-handler.component.css';
 @import 'app/pages/login/login-container/login-container.component.css';
