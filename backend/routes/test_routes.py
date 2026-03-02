@@ -4,6 +4,8 @@ from pathlib import Path
 from fastapi import APIRouter, Body, Depends, UploadFile, File, Query
 from configs.app_dependency import license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
+from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, )
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
 from orion.helper_manager.env_handler import env_handler
@@ -87,6 +89,11 @@ async def test_search_dynamic_cracked(param: search_dynamic_crack_model = Body(.
     if step:
         return step
     return json.loads((_MOCKS_DIR / "dynamic_cracked.json").read_text(encoding="utf-8"))
+
+
+@test_routes.post("/api/forgot")
+async def forgotPassword(request: ForgotPasswordRequest):
+    return await auth_manager.forgot_password(request.email)
 
 
 @test_routes.post(

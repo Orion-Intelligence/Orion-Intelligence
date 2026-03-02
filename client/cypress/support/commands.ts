@@ -21,8 +21,8 @@ Cypress.Commands.add("loginAsAdmin", () => {
 });
 Cypress.Commands.add("loginAsTest1", () => {
     cy.visit("/login");
-    cy.get('input[name="username"]').type("testing4");
-    cy.get('input[name="password"]').type("1qaz!QAZ", { log: false });
+    cy.get('input[name="username"]').type("test_ibrahim");
+    cy.get('input[name="password"]').type("123123", { log: false });
     cy.get('[data-cy="login-button"], input.login-button').first().click();
     cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
 });
