@@ -39,4 +39,14 @@ export class SidebarSectionComponent {
     }
     return item.replace(/-/g, ' ');
   }
+
+  getItemIcon(item: string): string {
+    const normalized = item.toLowerCase().replace(/\s+/g, '-');
+    const mapped = {
+      iocs: 'ioc',
+      'file-scanner': 'archive',
+      'crypto-scanner': 'cryptocurrency',
+    }[normalized] || normalized;
+    return `/assets/images/sidebar/sub_${mapped}.svg`;
+  }
 }

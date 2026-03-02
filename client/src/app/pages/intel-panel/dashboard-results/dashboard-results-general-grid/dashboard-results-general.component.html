@@ -1,4 +1,4 @@
-<div [ngClass]="isConsolidatedView ? 'mb-6 w-full min-w-0' : 'mb-8 w-full max-w-[910px] min-w-0 px-2 sm:px-0'">
+<div [ngClass]="isConsolidatedView ? 'mb-6 w-full min-w-0' : 'mb-8 w-full max-w-[910px] min-w-0 px-2 sm:px-0 max-[640px]:px-0'">
   <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))">
     <div [id]="'item-' + item.m_hash" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-[20px] w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]" (click)="isMobileMode() && item?.m_url ? window.open(item.m_url, '_blank') : null">
 

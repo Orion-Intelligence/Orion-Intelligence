@@ -1,7 +1,7 @@
 <form (submit)="onSearchSubmit()" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px] max-[550px]:grid">
   <div class="flex w-full flex-wrap items-start justify-between">
     <div class="w-full">
-      <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
+      <div class="fixed inset-0 z-[50] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
 
       <ng-container *ngIf="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise') ||
         app_service.userSessionData().user.role === 'analyst'">
@@ -43,7 +43,7 @@
 
           <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
 
-          <div #filtersWrapper class="absolute z-[1] w-full max-w-[910px]" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+          <div #filtersWrapper class="absolute z-[60] w-full max-w-[910px]" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
             <app-search-filters
               [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
               [homePage]="true"></app-search-filters>

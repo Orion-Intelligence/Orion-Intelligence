@@ -181,9 +181,9 @@
         [editAlertData]="selectedAlert"></app-add-custom-alert>
 </ng-container>
 
-<div *ngIf="filterModel && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[19]" (click)="sidebarService.closeSidebar()"></div>
+<div *ngIf="filterModel && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
 
-<div *ngIf="filterModel" class="ui-filter-sidebar-panel fixed top-0 z-[20] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
+<div *ngIf="filterModel" class="ui-filter-sidebar-panel fixed top-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
     <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel" (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 

@@ -7,7 +7,7 @@
     <ng-container *ngFor="let item of items">
       <div (click)="selectOption(item)" [ngClass]="{ 'border-l-0 text-white font-medium h-[40px]': (selectionStore.selectedOption$ | async | lower) === (item | lower) }" [routerLink]="routePrefix + '/' + item.toLowerCase()" class="mt-[5px] text-[rgba(255,255,255,0.44)] font-[Roboto] cursor-pointer" queryParamsHandling="merge">
         <div [ngClass]="{ 'bg-[var(--color-blue-880)]': (selectionStore.selectedOption$ | async | lower) === (item | lower) }" appTooltip="{{ getItemTooltip(item) }}" class="ml-[5px] flex h-[40px] w-[40px] items-center justify-center rounded-[6px] font-[Inter] hover:bg-[var(--color-blue-880)]">
-          <img [alt]="item" class="h-[17px] w-[17px]" height="20" [ngSrc]="'/assets/images/sidebar/sub_' + item.toLowerCase() + '.svg'" width="20">
+          <img [alt]="item" class="h-[17px] w-[17px]" height="20" [ngSrc]="getItemIcon(item)" width="20">
         </div>
       </div>
     </ng-container>

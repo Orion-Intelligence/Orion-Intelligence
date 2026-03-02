@@ -52,13 +52,13 @@
 
               <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
 
-              <div #filtersWrapper class="absolute left-0 top-full z-[1] w-full" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+              <div #filtersWrapper class="absolute left-0 top-full z-[60] w-full" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
                 <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
               </div>
 
             </div>
 
-            <div *ngIf="!shrinkmenu && filterModel" class="z-[3] flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end">
+            <div *ngIf="!shrinkmenu && filterModel" class="flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end" [ngClass]="homeSearchService.showFiltersOverlay ? 'z-[0]' : 'z-[3]'">
               <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
                 <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
                 <span>Filter</span>
@@ -122,14 +122,14 @@
   </ng-template>
 </ng-container>
 
-<div *ngIf="filterModel && !shrinkmenu && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[19]" (click)="sidebarService.closeSidebar()">
+<div *ngIf="filterModel && !shrinkmenu && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
 </div>
 
-<div *ngIf="filterModel && !shrinkmenu" class="ui-filter-sidebar-panel fixed top-0 z-[20] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
+<div *ngIf="filterModel && !shrinkmenu" class="ui-filter-sidebar-panel fixed top-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
   <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 
-<div *ngIf="isLoading" class="mx-[30px] w-full max-w-[910px] max-[1000px]:mx-[15px]" @fadeInDashboardItem>
+<div *ngIf="isLoading" class="mx-[30px] w-full max-w-[910px] max-[1000px]:mx-[15px] max-[550px]:mx-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:box-border" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
 
