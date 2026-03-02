@@ -347,6 +347,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onToggleMenu(tab: string): void {
     this.dashboardService.consolidatedParamModel.tab = tab;
+    this.query='';
     if (tab == "Deep Search") {
       this.isGrouped = true;
       this.isIOC = false;

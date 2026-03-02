@@ -99,6 +99,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         }
       });
       this.dashboardService.consolidatedParamModel.q='';
+      this.dashboardService.consolidatedParamModel.url='';
   }
 
   ngAfterViewInit(): void { }
