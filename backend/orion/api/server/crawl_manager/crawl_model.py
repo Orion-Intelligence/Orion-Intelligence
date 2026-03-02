@@ -188,7 +188,7 @@ class crawl_model:
 
         print(":::::::::::::::::::::::::::1", flush=True)
         print(":::::::::::::::::::::::::::1", flush=True)
-        print(len(m_data), flush=True)
+        print(len(credential_index.logs), flush=True)
         print(":::::::::::::::::::::::::::1", flush=True)
         print(":::::::::::::::::::::::::::1", flush=True)
 
