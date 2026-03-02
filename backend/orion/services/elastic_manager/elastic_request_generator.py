@@ -865,16 +865,16 @@ class elastic_request_generator:
     @staticmethod
     def index_query_stealerlog(p_index_data):
         bulk_entries = []
-        bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
+        # bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
 
             m_hash = log["m_hash"]
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
-            if bf.isduplicate(m_hash):
-                continue
-
+            # if bf.isduplicate(m_hash):
+            #     continue
+            #
             doc = {}
             for k in log:
                 if log[k] is not None:
