@@ -24,7 +24,7 @@ Minimal example request for a credential (stealer log) search:
   "page": 1,
   "fullsearch": false,
   "daterange": "",
-  "password_scheme":""
+  "password_schema":""
 }
 ```
 Example full wildcard search over a password value:

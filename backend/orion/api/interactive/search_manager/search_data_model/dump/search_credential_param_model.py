@@ -23,4 +23,4 @@ class search_credential_param_model(BaseModel):
     fullsearch: Optional[bool] = False
 
     entity_filter: Optional[Dict[str, List[str]]] = Field(default=None, examples=[{"m_country": ["pakistan"]}])
-    password_scheme: Optional[PasswordFilterModel] = None
+    password_schema: Optional[PasswordFilterModel] = None
