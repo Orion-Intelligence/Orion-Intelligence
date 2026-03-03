@@ -341,6 +341,6 @@ class TenantManager:
                 tenant_allowed), }
 
         except HTTPException as e:
-            raise e
+            raise HTTPException(status_code=400, detail="Username or email already exists")
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e) or "Error creating user")

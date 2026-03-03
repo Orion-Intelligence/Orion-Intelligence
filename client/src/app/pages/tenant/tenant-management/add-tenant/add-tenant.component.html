@@ -28,7 +28,6 @@
                     <select class="ui-popup-select w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none" [(ngModel)]="model.role" name="role">
                         <ng-container *ngIf="isAdmin; else nonAdminRoles">
                             <option [ngValue]="'analyst'">Analyst</option>
-                            <option [ngValue]="'member'">Member</option>
                             <option [ngValue]="'demo'">Demo</option>
                         </ng-container>
                         <ng-template #nonAdminRoles>
