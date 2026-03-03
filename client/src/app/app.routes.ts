@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import { Route, Routes } from '@angular/router';
 import { AuthGuard } from './shared/guards/auth-guard.guard';
 import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { ReportResolver } from './shared/resolvers/report.resolver';
@@ -47,7 +47,12 @@ const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
 };
-const consolidatedChildren = [
+const consolidatedChildren :Route[] = [
+  {
+      path: '',
+      redirectTo: 'all',
+      pathMatch: 'full'
+  },
   {
     path: 'all',
     component: DashboardConsolidatedComponent,

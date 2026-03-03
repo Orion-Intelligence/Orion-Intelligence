@@ -402,10 +402,6 @@ export class ExpandedRowComponent implements OnChanges {
     return [...core, ...rest];
   }
 
-  _console(value: unknown): void {
-    console.log(value);
-  }
-
   private isHashOrIndexKey(key: string, label?: string): boolean {
     const k = (key || '').toLowerCase();
     const l = (label || '').toLowerCase();
