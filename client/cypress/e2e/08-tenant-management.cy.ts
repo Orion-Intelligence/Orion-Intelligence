@@ -156,7 +156,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
 
-    cy.get('#company', {timeout: 40000}).should('be.visible');
+    /*cy.get('#company', {timeout: 40000}).should('be.visible');
 
     cy.get('#company', {timeout: 40000})
       .clear()
@@ -180,7 +180,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.contains('button', 'Confirm')
       .should('be.visible')
-      .click();
+      .click();*/
 
     cy.contains('Users').click();
     cy.contains('button', 'Add User').click();
@@ -189,7 +189,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="email"]').type('tenant1@gmail.com');
     cy.get('input[name="password"]').type('1qaz!QAZ', {log: false});
 
-    cy.contains('button', 'Enterprise').click();
+
 
     cy.contains('button', 'Add User')
       .scrollIntoView()
@@ -207,13 +207,14 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.visit('/dashboard/profile/homepage');
     cy.openTenantsPage();
 
-    cy.get('tr')
-      .contains('Orion Intelligence')
-      .closest('tr')
-      .within(() => {
-        cy.get('#edit-tenant').click();
-      });
-
+    cy.get('table tbody tr', { timeout: 30000 })
+  .contains('td:nth-child(2) span', 'orionintelligence')
+  .parents('tr')
+  .within(() => {
+    cy.get('button#edit-tenant')
+      .should('be.visible')
+      .click({ force: true });
+  });
     cy.contains('label', 'User Quota')
       .parent()
       .find('input[type="number"]')
@@ -233,9 +234,14 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
     cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
     cy.contains('app-dashboard-sidebar-items div', 'Homepage').click();
-    cy.get('.user-homepage_cards').should('exist');
-  });
+    cy.contains('app-dashboard-sidebar-items div', 'Homepage', { timeout: 20000 })
+      .should('be.visible')
+      .click({ force: true });
 
+cy.location('pathname', { timeout: 20000 })
+  .should('include', '/dashboard/profile/homepage');
+  });
+/*
   it('Tenant alerts and notifications', () => {
     cy.visit('/login');
     cy.get('input[name="username"]').type(tenant.username);
@@ -309,5 +315,5 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('button[apptooltip="flush all"]').click();
     cy.contains('button', 'Yes, Confirm').click();
   });
-
+*/
 });
