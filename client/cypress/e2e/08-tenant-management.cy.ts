@@ -1,10 +1,10 @@
 describe('Tenant Complete Flow – Correct Order', () => {
+  const tenant = Cypress.env('TENANT_ACCOUNT');
+  const tenantSubUser = Cypress.env('TENANT_SUB_USER');
 
-  const tenant = {
-    username: 'test_for_tenants',
-    email: 'testing1@orionintelligence.org',
-    password: '1qaz!QAZ'
-  };
+  if (!tenant?.username || !tenant?.email || !tenant?.password || !tenantSubUser?.username || !tenantSubUser?.email || !tenantSubUser?.password) {
+    throw new Error('Missing TENANT_ACCOUNT or TENANT_SUB_USER in cypress.config.ts');
+  }
 
   it('Tenant signs up', () => {
     cy.clearAllEmails()
@@ -156,38 +156,12 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
 
-    /*cy.get('#company', {timeout: 40000}).should('be.visible');
-
-    cy.get('#company', {timeout: 40000})
-      .clear()
-      .type('Orion Intelligence');
-
-    cy.contains('button', 'Next')
-      .should('not.be.disabled')
-      .click();
-
-    cy.contains('div.border-b-2.cursor-pointer', 'Country')
-      .scrollIntoView()
-      .click();
-
-    cy.get('input[placeholder="Type"]')
-      .clear()
-      .type('austria{enter}');
-
-    cy.contains('button', 'Next')
-      .should('not.be.disabled')
-      .click();
-
-    cy.contains('button', 'Confirm')
-      .should('be.visible')
-      .click();*/
-
     cy.contains('Users').click();
     cy.contains('button', 'Add User').click();
 
-    cy.get('input[name="username"]').type('tenant_user_1');
-    cy.get('input[name="email"]').type('tenant1@gmail.com');
-    cy.get('input[name="password"]').type('1qaz!QAZ', {log: false});
+    cy.get('input[name="username"]').type(tenantSubUser.username);
+    cy.get('input[name="email"]').type(tenantSubUser.email);
+    cy.get('input[name="password"]').type(tenantSubUser.password, {log: false});
 
 
 
@@ -238,82 +212,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       .should('be.visible')
       .click({ force: true });
 
-cy.location('pathname', { timeout: 20000 })
-  .should('include', '/dashboard/profile/homepage');
+    cy.location('pathname', { timeout: 20000 })
+      .should('include', '/dashboard/profile/homepage');
   });
-/*
-  it('Tenant alerts and notifications', () => {
-    cy.visit('/login');
-    cy.get('input[name="username"]').type(tenant.username);
-    cy.get('input[name="password"]').type(tenant.password, {log: false});
-    cy.contains('Sign In').click();
-
-    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
-
-    cy.wait(2000)
-    cy.get('button[apptooltip="scan all"]', {timeout: 40000})
-      .should('be.visible')
-      .and('not.be.disabled')
-      .scrollIntoView()
-      .click({ force: true });
-
-    cy.get('app-alert-scan-loading', {timeout: 40000})
-      .should('not.exist');
-
-    cy.get('button[apptooltip="Print Alerts"]')
-      .scrollIntoView()
-      .should('be.visible')
-      .click({ force: true });
-
-    cy.get('app-profile a')
-      .first()
-      .click();
-
-    cy.contains('app-alert-notification button', 'See Details', {timeout: 40000})
-      .click();
-
-    cy.get('app-profile a')
-      .first()
-      .click();
-
-    cy.contains('button', 'Clear All')
-      .should('be.visible')
-      .click();
-
-    cy.contains('.user-homepage_cards-card', 'Breach')
-      .click();
-
-    cy.get('details summary img[alt="menu"]').first().click();
-
-    cy.contains('div', 'See Details').first().click();
-
-    cy.get('button[apptooltip="add alert"]').click();
-
-    cy.get('input[name="title"]').type('Test Alert');
-    cy.get('textarea[name="alert_description"]').type('Test description');
-
-    cy.contains('label', 'Select IOC Type')
-      .next()
-      .find('summary')
-      .click();
-    cy.contains('button', 'Domains').click();
-
-    cy.get('input[name="source"]').type('Automation');
-    cy.get('input[name="url"]').type('https://example.com');
-    cy.get('input[name="ioc_value"]').type('example.com');
-
-    cy.contains('button', 'Add Alert').click();
-
-    cy.get('button[apptooltip="open sidebar"]').click();
-    cy.contains('button', 'Select date range').click();
-
-    cy.contains('button', '1').click();
-    cy.contains('button', '25').click();
-
-    cy.contains('button', 'Apply').click();
-
-    cy.get('button[apptooltip="flush all"]').click();
-    cy.contains('button', 'Yes, Confirm').click();
-  });
-*/
 });

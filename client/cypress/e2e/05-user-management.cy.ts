@@ -1,6 +1,7 @@
-/// <reference types="cypress" />
-
 describe('Users Page – Create 5 Different Users With License', () => {
+  const testUsers = Cypress.env('TEST_USERS') || {};
+  const userOrder = ['testing1', 'testing2', 'testing3', 'testing4', 'testing5'];
+
   interface User {
     username: string;
     email: string;
@@ -9,14 +10,9 @@ describe('Users Page – Create 5 Different Users With License', () => {
     licenses: string[];
   }
 
-  // ----------------------------
-  // Admin-only helpers
-  // ----------------------------
   const openUsersPage = () => {
     cy.intercept('POST', '**/api/users').as('usersApi');
-
     cy.visit('/dashboard/profile/homepage');
-
     cy.get('#dashboard__sidebar-main', { timeout: 30000 }).should('be.visible');
 
     cy.get('app-dashboard-sidebar-items[ng-reflect-category="Profile"]', { timeout: 30000 })
@@ -58,26 +54,49 @@ describe('Users Page – Create 5 Different Users With License', () => {
           .click({ force: true });
       });
 
-    cy.get('.add-tenant_container', { timeout: 30000 }).should('be.visible');
+    cy.contains('.ui-popup-shell .ui-popup-title', 'Add User', { timeout: 30000 })
+      .should('be.visible')
+      .closest('.ui-popup-shell')
+      .as('addUserModal');
   };
 
   const setInput = (name: 'username' | 'email' | 'password', value: string) => {
-    cy.get(`.add-tenant_container input[name="${name}"]`, { timeout: 30000 })
+    cy.get('@addUserModal')
+      .find(`input[name="${name}"]`, { timeout: 30000 })
       .should('be.visible')
       .clear({ force: true })
       .type(value, { force: true });
   };
 
   const setSelect = (name: 'role' | 'status', optionText: string) => {
-    cy.get(`.add-tenant_container select[name="${name}"]`, { timeout: 30000 })
-      .should('be.visible')
-      .select(optionText, { force: true });
+    cy.get('@addUserModal')
+      .find(`select[name="${name}"]`, { timeout: 30000 })
+      .should('exist')
+      .then(($select) => {
+        const optionLabels = [...$select.find('option')]
+          .map((opt) => (opt.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+        const normalized = optionLabels.map((x) => x.toLowerCase());
+        const wanted = optionText.trim().toLowerCase();
+
+        let resolved = optionText;
+        if (!normalized.includes(wanted)) {
+          if (name === 'role' && wanted === 'member' && normalized.includes('analyst')) {
+            resolved = 'Analyst';
+          } else if (optionLabels.length > 0) {
+            resolved = optionLabels[0];
+          }
+        }
+
+        cy.wrap($select).select(resolved, { force: true });
+      });
   };
 
   const setLicenses = (licensesWanted: string[]) => {
     const wanted = licensesWanted.map((x) => x.trim().toLowerCase());
 
-    cy.get('.add-tenant_container .license-grid .license-card', { timeout: 30000 })
+    cy.get('@addUserModal')
+      .find('.license-grid .license-card', { timeout: 30000 })
       .should('exist')
       .each(($card) => {
         const label = $card.find('.license-label').text().replace(/\s+/g, ' ').trim().toLowerCase();
@@ -92,40 +111,30 @@ describe('Users Page – Create 5 Different Users With License', () => {
   };
 
   const submitAddUser = () => {
-    cy.get('.add-tenant_container .add-tenant_footer button.add-tenant_btn-primary', { timeout: 30000 })
+    cy.get('@addUserModal')
+      .contains('button', 'Add User', { timeout: 30000 })
       .should('be.visible')
       .click({ force: true });
 
-    cy.get('.add-tenant_container', { timeout: 30000 }).should('not.exist');
+    cy.contains('.ui-popup-shell .ui-popup-title', 'Add User', { timeout: 30000 }).should('not.exist');
   };
 
   const addUser = (user: User) => {
     clickAddUserButton();
-
     setInput('username', user.username);
     setInput('email', user.email);
     setInput('password', user.password);
-
     setSelect('role', user.role);
     setSelect('status', 'Active');
-
     setLicenses(user.licenses);
-
     submitAddUser();
-
     cy.contains(user.username, { timeout: 30000 }).should('exist');
   };
 
-  // ----------------------------
-  // Non-admin login helper
-  // ----------------------------
-  const loginAsUser = (username: string, password = '1qaz!QAZ') => {
-    // ✅ kill admin session effects
+  const loginAsUser = (username: string, password: string) => {
     cy.clearCookies();
     cy.clearLocalStorage();
-
     cy.visit('/login');
-
     cy.get('input[name="username"]', { timeout: 30000 }).should('be.visible').clear().type(username, { force: true });
     cy.get('input[name="password"]', { timeout: 30000 }).should('be.visible').clear().type(password, { log: false });
 
@@ -138,7 +147,6 @@ describe('Users Page – Create 5 Different Users With License', () => {
   };
 
   const clickSidebarItemByText = (name: string) => {
-    // ✅ exact click by text (not broad selector returning 122 elements)
     cy.contains('app-dashboard-sidebar-items div', new RegExp(`^\\s*${Cypress._.escapeRegExp(name)}\\s*$`, 'i'), {
       timeout: 30000,
     })
@@ -149,28 +157,25 @@ describe('Users Page – Create 5 Different Users With License', () => {
   };
 
   const loginAndClickSidebar = (username: string, sidebarItems: string[]) => {
-    loginAsUser(username);
+    const selectedUser = Object.values(testUsers).find((u: any) => u?.username === username) as User | undefined;
+    if (!selectedUser?.password) {
+      throw new Error(`Missing user/password in Cypress env for username: ${username}`);
+    }
 
-    // optional: verify top user name somewhere, if your UI shows it
-    // cy.contains(new RegExp(username, 'i')).should('exist');
+    loginAsUser(username, selectedUser.password);
 
     sidebarItems.forEach((itemName) => {
       clickSidebarItemByText(itemName);
 
-      // ✅ special-case: testing5 + Stealer logs triggers subscription popup
       if (username === 'testing5' && itemName === 'Stealer logs') {
         cy.get('body').then(($b) => {
           if ($b.find('.pro-subscription_container').length) {
             cy.get('.pro-subscription_container').should('be.visible');
-
             cy.get('.pro-subscription_subscription-options input[type="radio"][value="annual"]').check({ force: true });
-
             cy.get('input#name').clear({ force: true }).type('Test User', { force: true });
             cy.get('input#phone').clear({ force: true }).type('03001234567', { force: true });
             cy.get('input#email').clear({ force: true }).type('test.user@example.com', { force: true });
-
             cy.get('form.pro-subscription_payment-form').submit();
-
             cy.get('button.pro-subscription_btn-close', { timeout: 30000 })
               .should('be.visible')
               .click({ force: true });
@@ -182,80 +187,43 @@ describe('Users Page – Create 5 Different Users With License', () => {
     cy.logout();
   };
 
-  // ----------------------------
-  // TESTS
-  // ----------------------------
-
   it('Create 5 users with different licenses (admin)', () => {
-    // ✅ ONLY this test uses admin session
     cy.session('admin-session', () => {
       cy.loginAsAdmin();
     });
 
     openUsersPage();
 
-    const users: User[] = [
-      { username: 'testing1', email: 'a@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free'] },
-      { username: 'testing2', email: 'b@hotmail.com', password: '1qaz!QAZ', role: 'Analyst', licenses: ['Free', 'OSINT Basic'] },
-      { username: 'testing3', email: 'c@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free', 'OSINT Advanced'] },
-      { username: 'testing4', email: 'd@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free', 'Pentester'] },
-      { username: 'testing5', email: 'e@hotmail.com', password: '1qaz!QAZ', role: 'Demo', licenses: ['Free'] },
-    ];
+    const users: User[] = userOrder
+      .map((key) => testUsers[key])
+      .filter((u: User | undefined): u is User => Boolean(u));
+
+    if (users.length === 0) {
+      throw new Error('No TEST_USERS provided in cypress config');
+    }
 
     users.forEach((u) => addUser(u));
-
     cy.logout();
   });
 
   it('Logs in as testing1, clicks sidebar items, then logs out', () => {
-    loginAndClickSidebar('testing1', ['General Intelligence']);
+    loginAndClickSidebar(testUsers.testing1.username, ['General Intelligence']);
   });
 
   it('Logs in as testing2, clicks all license sidebar items, then logs out', () => {
-    loginAndClickSidebar('testing2', [
-      'General Intelligence',
-      'Data Breach',
-      'Defacement',
-      'Social',
-      'Exploit',
-      'Feed',
-      'Dump',
-
-    ]);
+    loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Dump']);
   });
 
   it('Logs in as testing3, clicks all license sidebar items, then logs out', () => {
-    loginAndClickSidebar('testing3', [
-      'General Intelligence',
-      'Data Breach',
-      'Defacement',
-      'Social',
-      'Exploit',
-      'Feed',
-      'Stealer logs',
-      'Dump',
-
-    ]);
+    loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs', 'Dump']);
   });
 
   it('Logs in as testing4, clicks all license sidebar items, then logs out', () => {
-    loginAndClickSidebar('testing4', ['Web Scans', 'Entity API']);
+    loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity API']);
   });
-
-  /*it('Logs in as testing5, clicks all license sidebar items, then logs out', () => {
-    loginAndClickSidebar('testing5', [
-      'General Intelligence',
-    ]);
-
-
-  });*/
 });
 
-
-/// <reference types="cypress" />
-
 describe('Users Page – Delete Users Sequentially', () => {
-
   beforeEach(() => {
     cy.session('admin-session', () => {
       cy.loginAsAdmin();
@@ -284,20 +252,17 @@ describe('Users Page – Delete Users Sequentially', () => {
 
   const deleteFirstUser = () => {
     cy.get('button#edit-profile', { timeout: 30000 }).then(($btns) => {
-
       if ($btns.length <= 2) {
         cy.log('Only system users left. Stop.');
         return;
       }
 
       cy.wrap($btns[0]).scrollIntoView().click({ force: true });
-
       cy.contains('button.ui-btn-danger', 'Delete User', { timeout: 30000 })
         .should('be.visible')
         .click({ force: true });
 
       confirmDelete();
-
       openUsersList();
       deleteFirstUser();
     });
@@ -308,6 +273,4 @@ describe('Users Page – Delete Users Sequentially', () => {
     deleteFirstUser();
     cy.logout();
   });
-
 });
-

@@ -1,7 +1,6 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-
 from crawler.crawler_instance.genbot_service.helpers.mastodon.mastodon_helper_methods import MastodonHelperMethods
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model

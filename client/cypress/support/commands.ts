@@ -20,9 +20,15 @@ Cypress.Commands.add("loginAsAdmin", () => {
     cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
 });
 Cypress.Commands.add("loginAsTest1", () => {
+    const users = Cypress.env("TEST_USERS") || {};
+    const key = Cypress.env("DEFAULT_TEST_USER_KEY") || "testing5";
+    const user = users[key];
+    if (!user?.username || !user?.password) {
+        throw new Error(`Missing test user credentials for key: ${key}`);
+    }
     cy.visit("/login");
-    cy.get('input[name="username"]').type("test_ibrahim");
-    cy.get('input[name="password"]').type("123123", { log: false });
+    cy.get('input[name="username"]').type(user.username);
+    cy.get('input[name="password"]').type(user.password, { log: false });
     cy.get('[data-cy="login-button"], input.login-button').first().click();
     cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
 });

@@ -49,9 +49,9 @@ const HASH_CONSOLIDATED_ROUTE = {
 };
 const consolidatedChildren :Route[] = [
   {
-      path: '',
-      redirectTo: 'all',
-      pathMatch: 'full'
+    path: '',
+    redirectTo: 'all',
+    pathMatch: 'full'
   },
   {
     path: 'all',

@@ -1,4 +1,14 @@
 describe('Orion Intelligence – Account Settings Basic Flow', () => {
+  const testUsers = Cypress.env('TEST_USERS') || {};
+  const defaultUserKey = Cypress.env('DEFAULT_TEST_USER_KEY');
+  const defaultUser = testUsers[defaultUserKey] || {};
+  const resetEmail = Cypress.env('RESET_PASSWORD_EMAIL') || defaultUser.email;
+  const newPassword = Cypress.env('NEW_PASSWORD');
+
+  if (!defaultUser?.username || !defaultUser?.password || !resetEmail || !newPassword) {
+    throw new Error('Missing required account/password env values in cypress.config.ts');
+  }
+
   const assertLoggedIn = () => {
     cy.location('pathname', { timeout: 20000 }).should('not.include', '/login');
   };
@@ -30,8 +40,6 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
   });
 
   it('Change avatar, toggle theme, enable 2FA, login check + reset password flow', () => {
-
-    // ---------- SETTINGS ----------
     openAccountSettings();
 
     cy.get('h1.ui-page-title', { timeout: 20000 })
@@ -53,33 +61,26 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
       .wait(200)
       .click({ force: true });
 
-    // ---- Enable 2FA (kept commented as requested) ----
     cy.contains('label', /^2 Factor Authentication$/, { timeout: 20000 })
       .closest('div.cursor-pointer')
       .click({ force: true });
 
-    // ---------- LOGIN AGAIN ----------
     cy.logout();
 
     cy.visit('/login');
-    cy.get('input[name="username"]').clear().type('test_ibrahim');
+    cy.get('input[name="username"]').clear().type(defaultUser.username);
     cy.get('input[name="password"]').clear()
-      .type('123123', { log: false });
+      .type(defaultUser.password, { log: false });
 
     cy.get('[data-cy="login-button"], input.login-button')
       .first()
       .click();
 
-    //
     cy.get('[data-cy="twofa-center"], .twofa-center').should('be.visible');
     cy.get('img[alt="2FA QR"]').should('exist');
     cy.get('input[name="otpCode"]').should('exist');
     cy.get('[data-cy="twofa_title"], .twofa_title')
       .should('contain.text', 'Enter 2FA code');
-
-    // =========================================================
-    // 🔐 RESET PASSWORD FLOW
-    // =========================================================
 
     cy.visit('/');
     cy.clearAllEmails();
@@ -87,29 +88,21 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
     cy.contains('[data-cy="reset-password"], span.reset-password', 'Reset password?')
       .click({ force: true });
 
-    // cy.contains('.signup-container__title', 'Reset Password')
-    //   .should('be.visible');
-
     cy.get('input[name="companymail"]')
       .clear()
-      .type('syedibrahim@genesistechnologies.org');
+      .type(resetEmail);
 
     cy.get('input[type="submit"][value="Get reset link"]')
       .click();
 
-    // 🔎 Check if success card appears → stop test early if yes
     cy.get('body', { timeout: 20000 }).then(($body) => {
 
       if ($body.text().includes('Password Reset Email Sent')) {
 
         cy.contains('Password Reset Email Sent').should('be.visible');
-        cy.log('✅ Reset email confirmation shown — test ends here');
-        return; // stops further reset steps
+        return;
 
       } else {
-
-        // ---------- Continue full reset flow ----------
-
         cy.openLastMailAndGetUrl().then((url) => {
           expect(url).to.be.a('string').and.not.be.empty;
           cy.visit(url);
@@ -120,15 +113,14 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
         cy.get('.signup-container__title')
           .should('contain', 'Reset Password');
 
-        // Try reusing old password
         cy.get('input[name="password"]')
           .clear()
-          .type('Zq9M#rX@e7W^B0T+f(ysG!kJc1d2mC&N%hAUEP)6Y4n$R8VbHS', { log: false })
+          .type(defaultUser.password, { log: false })
           .blur();
 
         cy.get('input[name="confirmPassword"]')
           .clear()
-          .type('Zq9M#rX@e7W^B0T+f(ysG!kJc1d2mC&N%hAUEP)6Y4n$R8VbHS', { log: false })
+          .type(defaultUser.password, { log: false })
           .blur();
 
         cy.get('input[type="submit"]').click();
@@ -137,25 +129,20 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
           'New password must be different from the old one.'
         ).should('be.visible');
 
-        // Set new password
-        cy.get('input[name="password"]').clear().type('NewSecurePass@2026', { log: false }).blur();
-        cy.get('input[name="confirmPassword"]').clear().type('NewSecurePass@2026', { log: false }).blur();
+        cy.get('input[name="password"]').clear().type(newPassword, { log: false }).blur();
+        cy.get('input[name="confirmPassword"]').clear().type(newPassword, { log: false }).blur();
 
         cy.get('input[type="submit"]').click();
 
         cy.url().should('include', '/login');
 
-        // Confirm new password works
-        cy.get('input[name="username"]').clear().type('admin_test_username');
-        cy.get('input[name="password"]').clear().type('NewSecurePass@2026', { log: false });
+        cy.get('input[name="username"]').clear().type(defaultUser.username);
+        cy.get('input[name="password"]').clear().type(newPassword, { log: false });
 
         cy.get('[data-cy="login-button"], input.login-button')
           .first()
           .click();
-
-
       }
     });
-
   });
 });

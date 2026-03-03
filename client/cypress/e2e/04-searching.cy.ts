@@ -25,7 +25,12 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
     cy.get('input[data-cy="dashboard-general-input"][name="q"]').first();
 
   const openReportButton = () =>
-    cy.get('div[apptooltip="Open Report"]').filter(':visible').first();
+    cy.get(
+      '[data-cy="open-report"], div[apptooltip="Open Report"], div[appTooltip="Open Report"], p[apptooltip="Open Report"], p[appTooltip="Open Report"]',
+      { timeout: 30000 }
+    )
+      .filter(':visible')
+      .first();
 
   // ---------- Helpers ----------
   const openGeneralIntelMenu = () => {
@@ -382,7 +387,10 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
       cy.get('input[data-cy="dashboard-general-input"][name="q"]', { timeout: 30000 }).first();
 
     const openReportButton = () =>
-      cy.get('div[apptooltip="Open Report"]', { timeout: 30000 })
+      cy.get(
+        '[data-cy="open-report"], div[apptooltip="Open Report"], div[appTooltip="Open Report"], p[apptooltip="Open Report"], p[appTooltip="Open Report"]',
+        { timeout: 30000 }
+      )
         .filter(':visible')
         .first();
 
