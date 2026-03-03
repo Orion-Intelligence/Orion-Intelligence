@@ -80,6 +80,8 @@
 {"file": "_direwolfcdkv5whaz2spehizdg22jsuf5aeje4asmetpbt6ri4jnd4qd", "url": "http://direwolfcdkv5whaz2spehizdg22jsuf5aeje4asmetpbt6ri4jnd4qd.onion"}
 {"file": "_jvkpexgkuaw5toiph7fbgucycvnafaqmfvakymfh5pdxepvahw3xryqd", "url": "http://jvkpexgkuaw5toiph7fbgucycvnafaqmfvakymfh5pdxepvahw3xryqd.onion"}
 {"file": "_peargxn3oki34c4savcbcfqofjjwjnnyrlrbszfv6ujlx36mhrh57did", "url": "http://peargxn3oki34c4savcbcfqofjjwjnnyrlrbszfv6ujlx36mhrh57did.onion"}
+{"file": "_cjfntkj5qeizxowuy3srceg7zo6namc3kfeor7pfn6bpdkl3w265ooid", "url": "http://cjfntkj5qeizxowuy3srceg7zo6namc3kfeor7pfn6bpdkl3w265ooid.onion"}
+{"file": "_ransomfeed", "url": "https://ransomfeed.it"}
 
 {"file": "_toufanleaks", "url": "https://toufanleaks.org"}
 {"file": "_handala_hack", "url": "http://handala-hack.to"}

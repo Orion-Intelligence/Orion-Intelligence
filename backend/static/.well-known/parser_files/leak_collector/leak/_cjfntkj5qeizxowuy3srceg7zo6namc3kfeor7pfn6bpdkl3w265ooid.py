@@ -1,18 +1,18 @@
-from abc import ABC
 from datetime import datetime
+from abc import ABC
 from typing import List
+from playwright.sync_api import Page
 
-from bs4 import BeautifulSoup
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
-from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
-
-class _cfcs_dk(leak_extractor_interface, ABC):
+class _cjfntkj5qeizxowuy3srceg7zo6namc3kfeor7pfn6bpdkl3w265ooid(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
@@ -29,7 +29,7 @@ class _cfcs_dk(leak_extractor_interface, ABC):
 
     def __new__(cls, callback=None):
         if cls._instance is None:
-            cls._instance = super(_cfcs_dk, cls).__new__(cls)
+            cls._instance = super(_cjfntkj5qeizxowuy3srceg7zo6namc3kfeor7pfn6bpdkl3w265ooid, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -39,7 +39,7 @@ class _cfcs_dk(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://samsik.dk/nyheder/"
+        return "http://cjfntkj5qeizxowuy3srceg7zo6namc3kfeor7pfn6bpdkl3w265ooid.onion/"
 
     @property
     def developer_signature(self) -> str:
@@ -47,11 +47,11 @@ class _cfcs_dk(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-        return "https://samsik.dk/"
+        return "http://cjfntkj5qeizxowuy3srceg7zo6namc3kfeor7pfn6bpdkl3w265ooid.onion/"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_threat_type=ThreatType.TRACKING, m_resoource_block=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -65,7 +65,7 @@ class _cfcs_dk(leak_extractor_interface, ABC):
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-        return "https://samsik.dk/kontakt/"
+        return "http://cjfntkj5qeizxowuy3srceg7zo6namc3kfeor7pfn6bpdkl3w265ooid.onion/"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
@@ -75,79 +75,78 @@ class _cfcs_dk(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page):
-        all_urls = []
-
+    def parse_leak_data(self, page: Page):
         while True:
-            soup = BeautifulSoup(page._seed_response.text, "html.parser")
-            links = soup.select('a.uk-card-hover')
+            next_btn = page.locator('ul.pagination li a:has-text("Next")')
+            next_page_url = None
 
-            for link in links:
-                href = link.get("href")
-                if href:
-                    if href.startswith('https'):
-                        full_url = href
-                    else:
-                        full_url = self.base_url + href
-                    all_urls.append(full_url)
+            if next_btn.count() > 0:
+                raw_next_href = next_btn.get_attribute('href')
+                clean_path = raw_next_href.replace('../', '')
+                next_page_url = self.seed_url + clean_path
 
-            if self.is_crawled:
-                break
+            page.locator('div.col-md-6.mb-4').first.wait_for()
+            cards = page.locator('div.col-md-6.mb-4').all()
 
-            next_button = soup.select_one('a[aria-label="Næste side"]')
-            if not next_button:
-                break
+            url_to_scrap = []
+            for card in cards:
+                link_tag = card.locator('a.btn.btn-sm.btn-outline-danger')
+                link = link_tag.get_attribute('href')
+                clean_link = link.replace('../', '')
+                complete_url = self.seed_url + clean_link
+                url_to_scrap.append(complete_url)
 
-            next_href = next_button.get("href")
-            if not next_href:
-                break
-            next_url = next_href if next_href.startswith("http") else self.base_url + next_href
-            page._seed_response = page.get(next_url, timeout=30)
+            for link in url_to_scrap:
+                page.goto(link)
+                website = page.locator('div.company-name.mb-2').inner_text()
 
-        for idx, url in enumerate(all_urls):
-            try:
-                html = page.get(url, timeout=30).text
-                soup = BeautifulSoup(html, "html.parser")
+                _title = page.locator('h1.display-5.fw-bold.mb-3').inner_text()
 
-                title_el = soup.select_one("h1")
-                title = title_el.get_text(strip=True) if title_el else ""
 
-                date_meta = soup.select_one('meta[property="article:published_time"]')
-                date_obj = None
-                if date_meta and date_meta.get("content"):
-                    raw_date = date_meta.get("content")
-                    date_str = raw_date.split("T")[0]
-                    date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                date = page.locator('div.d-flex.align-items-center.text-muted.mb-3 > time').inner_text().strip()
+                dt_object = datetime.strptime(date, "%B %d, %Y")
+                post_date = dt_object.date()
 
-                content_parts = []
-                paragraphs = soup.select('#tm-main p')
-                for p in paragraphs:
-                    text = p.get_text(strip=True)
-                    if text:
-                        content_parts.append(text)
+                description = page.locator('div.post-content.mb-5').inner_text()
+                words = description.split()
 
-                content = "".join(content_parts)
-                important_content = content[:500]
+                if len(words) > 50:
+                    short_description = " ".join(words[:50]) + "..."
+                else:
+                    short_description = description
 
+                dump_link = page.locator('div.hidden-link-revealed > div.container > a.btn.btn-primary.btn-lg')
+                dump_link1 = dump_link.get_attribute('href')
+
+                m_content = description
+
+                ref_html = helper_method.extract_refhtml(_title, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
                 card_data = leak_model(
-                    m_title=title,
-                    m_url=url,
+                    m_ref_html=ref_html,
+                    m_title=_title,
+                    m_screenshot=helper_method.get_screenshot_base64(_title, None, self.base_url),
+                    m_url=link,
                     m_base_url=self.base_url,
-                    m_content=content,
+                    m_content=m_content,
                     m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=important_content,
-                    m_content_type=["news", "tracking"],
-                    m_leak_date=date_obj,
+                    m_important_content=short_description,
+                    m_websites=[website],
+                    m_content_type=["leaks"],
+                    m_leak_date = post_date,
+                    m_dumplink = [dump_link1]
                 )
 
                 entity_data = entity_model(
                     m_scrap_file=self.__class__.__name__,
-                    m_team="cfcs-dk",
-                    m_author=["Centre for Cybersecurity"],
-                    m_country=["Denmark"]
+                    m_team="orion"
                 )
 
                 self.append_leak_data(card_data, entity_data)
 
-            except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            if self.is_crawled:
+                break
+
+            if next_page_url:
+                page.goto(next_page_url)
+            else:
+                break
