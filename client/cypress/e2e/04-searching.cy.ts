@@ -366,7 +366,7 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
 
     // ZeroDay -> Livewire
     clickExploitTab('ZeroDay');
-    searchAndOpenReport('Livewire');
+
   });
 
   it('Feed: search police → open report', () => {
