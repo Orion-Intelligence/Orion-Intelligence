@@ -2,6 +2,7 @@ from abc import ABC
 from typing import List
 
 from playwright.sync_api import Page
+
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -53,10 +54,7 @@ class _ransomed(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.NONE,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -83,7 +81,7 @@ class _ransomed(leak_extractor_interface, ABC):
 
     def parse_leak_data(self, page: Page):
 
-        page.wait_for_load_state('networkidle', timeout=30000)
+        page.wait_for_load_state('networkidle',timeout=30000)
         cards = page.locator('div.victim').all()
 
         for card in cards:
@@ -96,8 +94,7 @@ class _ransomed(leak_extractor_interface, ABC):
             description = card.locator('div.site-desc').inner_text().strip() if card.locator(
                 'div.site-desc').count() > 0 else ""
 
-            ref_html = helper_method.extract_refhtml(
-                company_header, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+            ref_html = helper_method.extract_refhtml(company_header, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
             card_data = leak_model(
                 m_ref_html=ref_html,
@@ -110,9 +107,12 @@ class _ransomed(leak_extractor_interface, ABC):
                 m_important_content=description,
                 m_weblink=[company_header],
                 m_content_type=["leaks"],
-                m_revenue=revenue)
+                m_revenue=revenue
+            )
 
             entity_data = entity_model(
-                m_scrap_file=self.__class__.__name__, m_team="RansomedVC", )
+                m_scrap_file=self.__class__.__name__,
+                m_team="RansomedVC",
+            )
 
             self.append_leak_data(card_data, entity_data)

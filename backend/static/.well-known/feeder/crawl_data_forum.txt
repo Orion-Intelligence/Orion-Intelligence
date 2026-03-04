@@ -6,4 +6,6 @@
 {"file": "_4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd", "url": "http://4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd.onion"}
 {"file": "_hacksnation", "url": "https://hacksnation.com"}
 {"file": "_re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd", "url": "http://re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd.onion"}
+{"file": "_breach5yz2b5lepmq4gaqwcon3jippw3bislhvvdavem5git55sy2nid", "url": "http://breach5yz2b5lepmq4gaqwcon3jippw3bislhvvdavem5git55sy2nid.onion"}
 {"file": "_csrin", "url": "https://cs.rin.ru"}
+{"file": "_leetforums", "url": "http://ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd.onion"}

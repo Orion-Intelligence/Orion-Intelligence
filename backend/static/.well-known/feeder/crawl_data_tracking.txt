@@ -25,3 +25,4 @@
 {"file": "_thaicert", "url": "https://www.thaicert.or.th"}
 {"file": "_certPK", "url": "https://pkcert.gov.pk/"}
 {"file": "_cybernewsksa", "url": "https://nca.gov.sa/ar/news"}
+{"file": "_csidb", "url": "https://www.csidb.net"}

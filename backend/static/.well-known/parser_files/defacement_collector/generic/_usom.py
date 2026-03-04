@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
+
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
@@ -18,7 +19,6 @@ class _usom(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
-
         self.callback = callback
         self._card_data = []
         self._entity_data = []
@@ -28,11 +28,9 @@ class _usom(leak_extractor_interface, ABC):
         self._is_crawled = False
 
     def init_callback(self, callback=None):
-
         self.callback = callback
 
     def __new__(cls, callback=None):
-
         if cls._instance is None:
             cls._instance = super(_usom, cls).__new__(cls)
             cls._instance._initialized = False
@@ -56,11 +54,8 @@ class _usom(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.NONE,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.DEFACEMENT)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False,
+                         m_threat_type=ThreatType.DEFACEMENT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -71,7 +66,6 @@ class _usom(leak_extractor_interface, ABC):
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
@@ -85,12 +79,18 @@ class _usom(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page: Page, m_ioc_type=None):
+        if m_ioc_type is None:
+            m_ioc_type = ["defacement"]
+
         max_pages = 2000 if not self.is_crawled else 2
 
         for page_count in range(max_pages):
-            page.wait_for_load_state('networkidle', timeout=30000)
-            page.wait_for_selector('table.table-striped tbody tr.data1', timeout=30000)
+            try:
+                page.wait_for_load_state('networkidle', timeout=30000)
+                page.wait_for_selector('table.table-striped tbody tr.data1', timeout=30000)
+            except Exception:
+                break
 
             rows = page.query_selector_all('table.table-striped tbody tr.data1')
             for row in rows:
@@ -103,38 +103,46 @@ class _usom(leak_extractor_interface, ABC):
                 try:
                     dt_obj = datetime.strptime(date_str, "%m/%d/%Y, %I:%M %p")
                 except ValueError:
-                    dt_obj = datetime.strptime(date_str, "%m/%d/%Y")
+                    try:
+                        dt_obj = datetime.strptime(date_str, "%m/%d/%Y")
+                    except ValueError:
+                        dt_obj = datetime.now()
 
-                dt_obj = dt_obj.date()
+                if isinstance(dt_obj, datetime):
+                    dt_obj = dt_obj.date()
 
-                description = tds[2].inner_text().strip()
-                desc = (description or "")[:20]
-
-                m_content_type = ["exploits"] + (["phishing"] if "phishing" in desc.lower() else [desc])
-                content = helper_method.extract_refhtml(
-                    address, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                content = helper_method.extract_refhtml(address, self.invoke_db, REDIS_COMMANDS,
+                                                        CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                 card_data = defacement_model(
                     m_url=address,
                     m_content=content,
                     m_base_url=self.base_url,
                     m_network=helper_method.get_network_type(self.base_url),
-                    m_ioc_type=m_content_type,
-                    m_leak_date=dt_obj)
+                    m_ioc_type=m_ioc_type,
+                    m_leak_date=dt_obj
+                )
                 entity_data = entity_model(
                     m_scrap_file=self.__class__.__name__,
                     m_weblink=[address],
                     m_team="National Cyber Incident Response Center",
-                    m_country=["Turkey"], )
+                    m_country=["Turkey"],
+                )
                 self.append_leak_data(card_data, entity_data)
 
             try:
-                next_button = page.query_selector('a.page-link:has(span[aria-hidden="true"]:text(">"))')
+                next_button = page.query_selector('ul.pagination li.page-item a.page-link[aria-label="Next"]')
                 if not next_button:
+                    next_button = page.query_selector('a.page-link:has-text(">")')
+
+                if not next_button:
+                    break
+
+                parent_li = next_button.evaluate("el => el.parentElement.className")
+                if "disabled" in parent_li:
                     break
 
                 next_button.click()
                 page.wait_for_load_state("networkidle", timeout=30000)
-            except Exception as e:
-                print(f"Stopped pagination: {e}")
+            except Exception:
                 break

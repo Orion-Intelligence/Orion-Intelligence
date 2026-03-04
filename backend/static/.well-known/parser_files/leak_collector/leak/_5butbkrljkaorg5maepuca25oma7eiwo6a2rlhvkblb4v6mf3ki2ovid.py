@@ -1,5 +1,4 @@
 import re
-import time
 from abc import ABC
 from datetime import timedelta, datetime, timezone
 from typing import List
@@ -54,10 +53,7 @@ class _5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -83,74 +79,92 @@ class _5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
         try:
-            page.wait_for_selector('.companies-list')
-            for _ in range(50):
+            max_safe_limit = 5 if self.is_crawled else 1000
+
+            for page_num in range(max_safe_limit):
+                log.g().i(f"Parsing Page {page_num + 1}")
+
+                page.wait_for_selector('.companies-list', timeout=15000)
+                page.wait_for_timeout(2000)
+
                 cards = page.query_selector_all('.companies-list__item')
-                if len(cards) >= 20:
+                if not cards:
                     break
-                time.sleep(0.2)
 
-            cards = page.query_selector_all('.companies-list__item')
+                error_count = 0
 
-            error_count = 0
+                for index, card in enumerate(cards):
+                    try:
+                        title_el = card.query_selector('.name a')
 
-            for index, card in enumerate(cards):
-                try:
-                    title_el = card.query_selector('.name a')
+                        url = title_el.get_attribute('href') if title_el else None
+                        description_el = card.query_selector('.text')
+                        weblink_el = description_el.query_selector('a[href^="http"]') if description_el else None
+                        dumplink_el = card.query_selector('a.btn.btn-primary:not([disabled])')
+                        published_el = card.query_selector('.image-block .img + p')
 
-                    url = title_el.get_attribute('href') if title_el else None
-                    description_el = card.query_selector('.text')
-                    weblink_el = description_el.query_selector('a[href^="http"]') if description_el else None
-                    dumplink_el = card.query_selector('a.btn.btn-primary:not([disabled])')
-                    published_el = card.query_selector('.image-block .img + p')
+                        title = title_el.text_content().strip() if title_el else "No Title"
+                        description = description_el.text_content().strip() if description_el else "No Description"
+                        weblink = weblink_el.get_attribute("href") if weblink_el else ""
+                        dumplink = dumplink_el.get_attribute("href") if dumplink_el else ""
 
-                    title = title_el.text_content().strip() if title_el else "No Title"
-                    description = description_el.text_content().strip() if description_el else "No Description"
-                    weblink = weblink_el.get_attribute("href") if weblink_el else ""
-                    dumplink = dumplink_el.get_attribute("href") if dumplink_el else ""
+                        leak_date = None
+                        if published_el:
+                            match = re.search(r'Published\s+(\d+)\s+(day|week|month|year)s?\s+ago',
+                                              published_el.text_content(), re.IGNORECASE)
+                            if match:
+                                value, unit = int(match.group(1)), match.group(2).lower()
+                                delta_map = {
+                                    'day': timedelta(days=value),
+                                    'week': timedelta(weeks=value),
+                                    'month': timedelta(days=30 * value),
+                                    'year': timedelta(days=365 * value)
+                                }
+                                dt = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+                                leak_date = (dt - delta_map[unit]).date()
 
-                    leak_date = None
-                    if published_el:
-                        match = re.search(
-                            r'Published\s+(\d+)\s+(day|week|month|year)s?\s+ago',
-                            published_el.text_content(),
-                            re.IGNORECASE)
-                        if match:
-                            value, unit = int(match.group(1)), match.group(2).lower()
-                            delta_map = {'day': timedelta(days=value), 'week': timedelta(
-                                weeks=value), 'month': timedelta(
-                                days=30 * value), 'year': timedelta(days=365 * value)}
-                            dt = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-                            leak_date = (dt - delta_map[unit]).date()
+                        ref_html = helper_method.extract_refhtml(weblink, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
-                    ref_html = helper_method.extract_refhtml(
-                        weblink, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                        card_data = leak_model(
+                            m_ref_html=ref_html,
+                            m_title=title,
+                            m_url=url,
+                            m_base_url=self.base_url,
+                            m_screenshot=helper_method.get_screenshot_base64(title, None, self.base_url),
+                            m_content=description,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=description,
+                            m_content_type=["leaks"],
+                            m_weblink=[weblink],
+                            m_dumplink=[dumplink],
+                            m_leak_date=leak_date
+                        )
 
-                    card_data = leak_model(
-                        m_ref_html=ref_html,
-                        m_title=title,
-                        m_url=url,
-                        m_base_url=self.base_url,
-                        m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
-                        m_content=description,
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=description,
-                        m_content_type=["leaks"],
-                        m_weblink=[weblink],
-                        m_dumplink=[dumplink],
-                        m_leak_date=leak_date)
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_company_name=title,
+                            m_team="space bears"
+                        )
 
-                    entity_data = entity_model(
-                        m_scrap_file=self.__class__.__name__, m_company_name=title, m_team="space bears")
+                        self.append_leak_data(card_data, entity_data)
+                        error_count = 0
 
-                    self.append_leak_data(card_data, entity_data)
-                    error_count = 0
+                    except Exception as ex:
+                        log.g().e(f"CARD ERROR {ex} " + str(self.__class__.__name__))
+                        error_count += 1
+                        if error_count >= 3:
+                            break
 
-                except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                    error_count += 1
-                    if error_count >= 3:
+                next_btn = page.query_selector('ul.pagination a[rel="next"]')
+
+                if next_btn:
+                    next_url = next_btn.get_attribute('href')
+                    if next_url:
+                        page.goto(next_url, timeout=60000)
+                    else:
                         break
+                else:
+                    break
 
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

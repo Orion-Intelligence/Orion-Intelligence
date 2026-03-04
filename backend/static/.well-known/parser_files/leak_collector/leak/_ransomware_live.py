@@ -2,9 +2,8 @@ import re
 from abc import ABC
 from datetime import datetime
 from typing import List
-from urllib.parse import urljoin
-
 from playwright.sync_api import Page
+from urllib.parse import urljoin
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -66,11 +65,7 @@ class _ransomware_live(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type= ThreatType.LEAK)
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
@@ -119,15 +114,19 @@ class _ransomware_live(leak_extractor_interface, ABC):
                     group = group_elem.inner_text().strip()
 
                 paragraphs = page.query_selector_all("div.container-fluid.px-lg-5.my-3 p")
-                content_lines = [para.inner_text().strip() for para in paragraphs if
-                    para.inner_text().strip() and not any(
-                        kw in para.inner_text().strip().lower() for kw in
-                            ["press", "search", "statistics", "worldmap", "api", "ttp", "ioc", "notifications"])]
+                content_lines = [
+                    para.inner_text().strip()
+                    for para in paragraphs
+                    if para.inner_text().strip() and not any(
+                        kw in para.inner_text().strip().lower()
+                        for kw in ["press", "search", "statistics", "worldmap", "api", "ttp", "ioc", "notifications"]
+                    )
+                ]
                 complete_description = "\n".join(content_lines)
 
                 match = re.search(r'Description:\n(.*?)\nLeak Screenshot:', complete_description, re.DOTALL)
                 if match:
-                    description_text = match.group(1).replace("[AI generated]", "").strip()
+                    description_text = match.group(1).replace("[AI generated]","").strip()
                 else:
                     description_text = complete_description
 
@@ -140,7 +139,8 @@ class _ransomware_live(leak_extractor_interface, ABC):
                             REDIS_COMMANDS,
                             CUSTOM_SCRIPT_REDIS_KEYS,
                             RAW_PATH_CONSTANTS,
-                            page)
+                            page
+                        )
                     except Exception as ex:
                         log.g().e(f"HTMLREF ERROR {ex} - Offending victim: {victim_name}")
 
@@ -157,10 +157,14 @@ class _ransomware_live(leak_extractor_interface, ABC):
                     m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=complete_description,
                     m_content_type=["leaks"],
-                    m_leak_date=posted_on)
+                    m_leak_date=posted_on
+                )
 
                 entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__, m_country=[country], m_team=group)
+                    m_scrap_file=self.__class__.__name__,
+                    m_country=[country],
+                    m_team=group
+                )
 
                 self.append_leak_data(card_data, entity_data)
 

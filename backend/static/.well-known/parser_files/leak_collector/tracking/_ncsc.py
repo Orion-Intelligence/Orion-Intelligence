@@ -2,7 +2,6 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
-
 from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -44,7 +43,7 @@ class _ncsc(leak_extractor_interface, ABC):
     @property
     def seed_url(self) -> str:
 
-        return "https://english.ncsc.nl/latest/news"
+        return "https://www.ncsc.nl/nieuws"
 
     @property
     def developer_signature(self) -> str:
@@ -53,15 +52,11 @@ class _ncsc(leak_extractor_interface, ABC):
     @property
     def base_url(self) -> str:
 
-        return "https://english.ncsc.nl"
+        return "https://www.ncsc.nl"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.NONE,
-            m_fetch_config=FetchConfig.REQUESTS,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -93,49 +88,61 @@ class _ncsc(leak_extractor_interface, ABC):
     def parse_leak_data(self, page):
         try:
             max_pages = 2 if self._is_crawled else 4
-            for page_number in range(1, max_pages + 1):
-                current_url = f"{self.seed_url}?page={page_number}"
-                if page_number == 1:
-                    html = page._seed_response.text
-                else:
-                    resp = page.get(current_url, timeout=60)
+            page_number = 1
+
+            while page_number <= max_pages:
+                api_url = f"https://www.ncsc.nl/api/search?q=&locale=nl&page={page_number}&pageSize=10&sort=date_desc&viewId=view&taxonomy_id%5B%5D=232"
+
+                try:
+                    resp = page.get(api_url, timeout=60)
                     resp.raise_for_status()
-                    html = resp.text
-                soup = BeautifulSoup(html, "html.parser")
-                post_links = []
-                for a in soup.select("li.results__item a.news"):
-                    href = a.get("href")
-                    if href:
-                        post_links.append(href)
-                if not post_links:
+                    data = resp.json()
+                except Exception as e:
                     break
-                for url in post_links:
-                    full_url = url if url.startswith("http") else urljoin(self.base_url, url)
+
+                if page_number == 1 and not self._is_crawled:
+                    real_total_pages = data.get("total_pages")
+                    if real_total_pages:
+                        max_pages = int(real_total_pages)
+
+                items = data.get("items", [])
+
+                if not items:
+                    break
+
+                for item in items:
+                    title = item.get("title", "")
+                    raw_url = item.get("url", "")
+                    raw_date = item.get("created", "")
+                    api_description = item.get("field_description", "")
+
+                    if not raw_url:
+                        continue
+
+                    full_url = raw_url if raw_url.startswith("http") else urljoin(self.base_url, raw_url)
+
+                    parsed_date = None
+                    if raw_date:
+                        try:
+                            parsed_date = datetime.strptime(raw_date, "%Y-%m-%d %H:%M:%S").date()
+                        except Exception:
+                            pass
+
+                    source_links = []
+                    image_urls = []
+                    full_description = api_description
+
                     try:
-                        resp = page.get(full_url, timeout=60)
-                        resp.raise_for_status()
-                        s = BeautifulSoup(resp.text, "html.parser")
-                        title_el = s.select_one("h1.news")
-                        title = title_el.get_text(strip=True) if title_el else ""
-                        if not title:
-                            continue
-                        date_el = s.select_one("p.article-meta")
-                        date_text = ""
-                        parsed_date = None
-                        if date_el:
-                            parts = [p.strip() for p in date_el.get_text(strip=True).split("|")]
-                            if len(parts) >= 2:
-                                date_text = parts[-2]
-                                try:
-                                    parsed_date = datetime.strptime(date_text, "%d-%m-%Y").date()
-                                except Exception:
-                                    parsed_date = None
-                        desc_elements = s.select("div.article.content p")
-                        description = "\n".join(
-                            p.get_text(strip=True) for p in desc_elements if
-                                p.get_text(strip=True)) if desc_elements else "No description found"
-                        source_links = []
-                        content_div = s.select_one("div.article.content")
+                        article_resp = page.get(full_url, timeout=60)
+                        article_resp.raise_for_status()
+                        s = BeautifulSoup(article_resp.text, "html.parser")
+
+                        desc_elements = s.select("div.mb-8 strong, section.layout-section p")
+                        if desc_elements:
+                            full_description = "\n".join(
+                                p.get_text(strip=True) for p in desc_elements if p.get_text(strip=True))
+
+                        content_div = s.select_one("section.layout-section")
                         if content_div:
                             for p in content_div.select("p"):
                                 for a in p.select("a[href]"):
@@ -144,29 +151,39 @@ class _ncsc(leak_extractor_interface, ABC):
                                     if href and (href == text or href.startswith("http")):
                                         source_links.append(href)
                         source_links = list(dict.fromkeys(source_links))
-                        image_urls = []
-                        for img in s.select("div.article.content img"):
+
+                        for img in s.select("section.layout-section img"):
                             src = img.get("src")
                             if src:
                                 image_urls.append(src if src.startswith("http") else urljoin(self.base_url, src))
-                        m_content = f"Title: {title}\n{description}\n\nPublished on: {date_text}\nResources: {source_links}\nImages: {image_urls}"
-                        card_data = leak_model(
-                            m_title=title,
-                            m_url=full_url,
-                            m_base_url=self.base_url,
-                            m_content=m_content,
-                            m_network=helper_method.get_network_type(self.base_url),
-                            m_important_content=description[0:500],
-                            m_content_type=["news", "tracking"],
-                            m_weblink=source_links,
-                            m_leak_date=parsed_date)
-                        entity_data = entity_model(
-                            m_scrap_file=self.__class__.__name__,
-                            m_team="NCSC - National Cyber Security Centre",
-                            m_author=["NCSC"],
-                            m_country=["Netherlands"])
-                        self.append_leak_data(card_data, entity_data)
-                    except Exception as ex:
-                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+
+                    except Exception:
+                        pass
+
+                    m_content = f"Title: {title}\n{full_description}\n\nPublished on: {raw_date}\nResources: {source_links}\nImages: {image_urls}"
+
+                    card_data = leak_model(
+                        m_title=title,
+                        m_url=full_url,
+                        m_base_url=self.base_url,
+                        m_content=m_content,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=full_description[0:500] if full_description else "No description",
+                        m_content_type=["news", "tracking"],
+                        m_weblink=source_links,
+                        m_leak_date=parsed_date
+                    )
+
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="NCSC - National Cyber Security Centre",
+                        m_author=["NCSC"],
+                        m_country=["Netherlands"]
+                    )
+
+                    self.append_leak_data(card_data, entity_data)
+
+                page_number += 1
+
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

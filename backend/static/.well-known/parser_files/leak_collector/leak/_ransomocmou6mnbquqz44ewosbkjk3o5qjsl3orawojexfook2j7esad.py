@@ -57,11 +57,7 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -134,8 +130,7 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
                 match = re.search(r'https?://[^\s\-]+', cleaned_content)
                 first_url = match.group(0) if match else None
 
-                ref_html = helper_method.extract_refhtml(
-                    first_url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                ref_html = helper_method.extract_refhtml(first_url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
                 date_object = datetime.strptime(date.title(), '%d %b %Y').date()
                 card_data = leak_model(
                     m_ref_html=ref_html,
@@ -150,10 +145,14 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
                     m_leak_date=date_object,
                     m_content_type=["leaks"],
                     m_logo_or_images=images,
-                    m_weblink=[])
+                    m_weblink=[]
+                )
 
                 entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__, m_company_name=title, m_team="everest group")
+                    m_scrap_file=self.__class__.__name__,
+                    m_company_name=title,
+                    m_team="everest group"
+                )
 
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0

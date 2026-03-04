@@ -17,21 +17,16 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
     _instance = None
 
     def __init__(self, callback=None):
-
         self.callback = callback
         self._card_data = []
         self._entity_data = []
-        self.soup = None
-        self._initialized = None
         self._redis_instance = redis_controller()
         self._is_crawled = False
 
     def init_callback(self, callback=None):
-
         self.callback = callback
 
     def __new__(cls, callback=None):
-
         if cls._instance is None:
             cls._instance = super(_hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd, cls).__new__(cls)
             cls._instance._initialized = False
@@ -46,7 +41,7 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
 
     @property
     def seed_url(self) -> str:
-        return "http://hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd.onion/list"
+        return "http://hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd.onion"
 
     @property
     def base_url(self) -> str:
@@ -54,11 +49,8 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False,
+                         m_threat_type=ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -75,82 +67,84 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
         return "http://hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd.onion"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
-
         self._card_data.append(leak)
         self._entity_data.append(entity)
-        if self.callback:
-            if self.callback():
-                self._card_data.clear()
-                self._entity_data.clear()
+        if self.callback and self.callback():
+            self._card_data.clear()
+            self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
         error_count = 0
-        max_page = 4
-        if self.is_crawled:
-            max_page = 2
-        page.wait_for_selector("a.break-words")
-        card_links = set()
+        max_page = 4 if not self.is_crawled else 2
 
-        for _ in range(max_page):
-            card_links.update(
-                self.base_url + a.get_attribute("href") for a in page.query_selector_all("a.break-words") if
-                    a and a.get_attribute("href"))
-            btn = page.query_selector('button.bg-blue-600:has(svg use[href="#icon-arrow-right"])')
-            if not btn or btn.is_disabled():
-                break
-            btn.click()
-            page.wait_for_timeout(1000)
+        try:
+            page.wait_for_selector("div.rounded-xl.bg-bunker", timeout=15000)
 
-        card_links = list(card_links)
+            for page_num in range(max_page):
+                cards = page.query_selector_all("div.rounded-xl.bg-bunker")
 
-        for card_link in card_links:
-            try:
-                page.goto(card_link)
-                page.wait_for_selector("div.text-lg.font-bold.break-words")
-
-                company_name = page.query_selector(
-                    "div.text-lg.font-bold.break-words").inner_text() if page.query_selector(
-                    "div.text-lg.font-bold.break-words") else ""
-                weblink = page.query_selector("div.truncate a").get_attribute("href") if page.query_selector(
-                    "div.truncate a") else ""
-                description = page.query_selector(
-                    "div.whitespace-pre-line.break-words").inner_text() if page.query_selector(
-                    "div.whitespace-pre-line.break-words") else ""
-                download_link = page.query_selector("div.flex a.truncate").get_attribute("href") if page.query_selector(
-                    "div.flex a.truncate") else ""
-                leak_size = page.query_selector(
-                    "div:has-text('Leaked size') span.font-bold.whitespace-pre-line").inner_text() if page.query_selector(
-                    "div:has-text('Leaked size') span.font-bold.whitespace-pre-line") else ""
-
-                m_content = page.inner_text("html")
-
-                ref_html = helper_method.extract_refhtml(
-                    weblink, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
-                if not download_link:
-                    download_link = ""
-
-                card_data = leak_model(
-                    m_ref_html=ref_html,
-                    m_title=company_name,
-                    m_url=page.url,
-                    m_base_url=self.base_url,
-                    m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
-                    m_content=m_content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=description,
-                    m_weblink=[weblink],
-                    m_dumplink=[download_link],
-                    m_content_type=["leaks"],
-                    m_data_size=leak_size)
-
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__, m_company_name=company_name, m_team="chaos")
-
-                self.append_leak_data(card_data, entity_data)
-                error_count = 0
-
-            except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                error_count += 1
-                if error_count >= 3:
+                if not cards:
                     break
+
+                for index, card in enumerate(cards):
+                    try:
+                        name_el = card.query_selector(".text-lg.font-bold a.break-words")
+                        company_name = name_el.inner_text().strip() if name_el else "Unknown"
+
+                        weblink_el = card.query_selector("div.truncate a")
+                        weblink = (weblink_el.get_attribute("href") or "").strip() if weblink_el else ""
+
+                        desc_el = card.query_selector("div.whitespace-pre-line.break-words")
+                        description = desc_el.inner_text().strip() if desc_el else ""
+
+                        size_el = card.query_selector("div:has-text('Leaked size') span.font-bold")
+                        leak_size = size_el.inner_text().strip() if size_el else ""
+
+                        post_href = name_el.get_attribute("href") if name_el else ""
+                        full_post_url = self.base_url + post_href if post_href.startswith("/") else self.base_url + "/" + post_href
+
+                        ref_html = helper_method.extract_refhtml(weblink, self.invoke_db, REDIS_COMMANDS,
+                                                                 CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS,
+                                                                 page) if weblink else ""
+
+                        card_data = leak_model(
+                            m_ref_html=ref_html,
+                            m_title=company_name,
+                            m_url=full_post_url,
+                            m_base_url=self.base_url,
+                            m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
+                            m_content=description,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=description,
+                            m_weblink=[weblink] if weblink else [],
+                            m_dumplink=[],
+                            m_content_type=["leaks"],
+                            m_data_size=leak_size
+                        )
+
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_company_name=company_name,
+                            m_team="chaos"
+                        )
+
+                        self.append_leak_data(card_data, entity_data)
+                        error_count = 0
+
+                    except Exception as ex:
+                        log.g().e(f"CARD PARSE ERROR {ex} on card index {index}")
+                        error_count += 1
+                        if error_count >= 3:
+                            break
+
+                btn = page.query_selector('button.bg-blue-600:has(svg use[href="#icon-arrow-right"])')
+                if not btn or btn.is_disabled():
+                    break
+
+                btn.click()
+                page.wait_for_timeout(3000)
+                page.wait_for_selector("div.rounded-xl.bg-bunker", timeout=15000)
+
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

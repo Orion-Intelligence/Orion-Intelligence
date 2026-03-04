@@ -3,7 +3,6 @@ from datetime import datetime
 from time import sleep
 from typing import List
 from urllib.parse import urljoin
-
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -14,7 +13,6 @@ from crawler.crawler_services.redis_manager.redis_controller import redis_contro
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
-
 
 class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_interface, ABC):
     _instance = None
@@ -53,11 +51,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -94,7 +88,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
             all_leak_urls = []
-            sleep(50)
+            sleep(15)
 
             page.goto(self.seed_url)
             page.wait_for_load_state('domcontentloaded')
@@ -147,8 +141,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                             if href:
                                 dump_link = urljoin(self.base_url, href)
 
-                    ref_html = helper_method.extract_refhtml(
-                        title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                    ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
@@ -162,10 +155,14 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_important_content=description,
                         m_content_type=["leaks"],
                         m_data_size=data_size,
-                        m_leak_date=leak_date)
+                        m_leak_date=leak_date
+                    )
 
                     entity_data = entity_model(
-                        m_scrap_file=self.__class__.__name__, m_weblink=[title], m_team="blackout")
+                        m_scrap_file=self.__class__.__name__,
+                        m_weblink=[title],
+                        m_team="blackout"
+                    )
 
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0

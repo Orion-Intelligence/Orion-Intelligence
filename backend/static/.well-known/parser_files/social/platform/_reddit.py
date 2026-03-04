@@ -5,7 +5,6 @@ from typing import List
 from crawler.crawler_instance.genbot_service.helpers.reddit.reddit_helper_method import RedditHelperMethod
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
-from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
@@ -41,11 +40,11 @@ class _reddit(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return self.m_seed_url
+        return "https://www.reddittorjg6rue252oqsxryoxengawnmo46qy4kyii5wtqnwfj4ooad.onion/r/conspiracy/"
 
     @property
     def developer_signature(self) -> str:
-        return "Muhammad Hassan Arshad: owEBeAKH/ZANAwAKAbKjqaChU0IoAcsxYgBoei5jVmVyaWZpZWQgZGV2ZWxvcGVyOiBNdWhhbW1hZCBIYXNzYW4gQXJzaGFkCokCMwQAAQoAHRYhBD5p3c9aqX5fJ9SIZbKjqaChU0IoBQJoei5jAAoJELKjqaChU0Io2i8QAKRGGxAbMJGV97ym5wcir4mn2es2/npd+MFDa/LZFnkcoPOP9/fKtg9pZ1a2PVa0h9s5ewU6wGJ4HIvjP/2gxd1maDIjv6IM+5mtlpJvQJhzoqHdAg//IRwJU5QO2krqxBQrtcvNwfkW1IoNSEaJCr0EmXht3rkGhkJ3J3XqEvrBeH0DtaZLnCLOJ3eTIRleqbBOUdq2Uf9hDZZY9rdqynjjsADo1lhchdyPjwBz1g8M/q1Ud3sTUA+/8gas5l15jR9SGQZxbgnzZRjG19oq5GAhLwUYgKuoH+zANQEB7leF9jBudzYz2Ey/4BglnVE6kszUo7RxPoqtNOFvq6WzCcRKPLO323sLfFYtwXDwvJ0iviVTOwrbXlA80GFANcAbSR76nN0XrsaLM2L/KT6oe0wTVq35j1QZnt4Jq5PWALA8hQNr7w1KtuwnpN5PmE741h+9OfZP2ogd9ERbmGb10DROsd9t4RL4hpxpsCoekHRbLI3XmHFZqFAB/GgF194Tmh3LcoIAcwOYty/PVDuPYMGMmm5Nttg2vvVrMg82P0LeOrIN2Mq03HCiZm/HaOvePniPg+EeaWPMiVmGWvCJUOMI/TJRz4jVLR4BUlvoiUSNBWrJhxMRQZpViam2rVUaojPaZhzoIF4sqS6hYqzZbbXHwtYjJfNOHh00gucABJHw=gmDH"
+        return "Muhammad Hassan Arshad: owEBeAKH/ZANAwAKAbKjqaChU0IoAcsxYgBoei5jVmVyaWZpZWQgZGV2ZWxvcGVyOiBNdWhhbW1hZCBIYXNzYW4gQXJzaGFk..."
 
     @property
     def base_url(self) -> str:
@@ -54,22 +53,26 @@ class _reddit(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.REDDIT)
+            m_fetch_proxy=FetchProxy.TOR,
+            m_fetch_config=FetchConfig.PLAYRIGHT,
+            m_threat_type=ThreatType.REDDIT
+        )
 
     @property
-    def card_data(self) -> List[leak_model]:
+    def card_data(self) -> List[social_model]:
         return self._card_data
 
     @property
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-        return self._redis_instance.invoke_trigger(
-            command, [key + self.__class__.__name__, default_value, expiry])
-
     def contact_page(self) -> str:
         return "https://www.reddit.com/contact"
+
+    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+        return self._redis_instance.invoke_trigger(
+            command, [key + self.__class__.__name__, default_value, expiry]
+        )
 
     def append_leak_data(self, leak: social_model, entity: entity_model):
         self._card_data.append(leak)
@@ -79,74 +82,77 @@ class _reddit(leak_extractor_interface, ABC):
             self._entity_data.clear()
 
     @staticmethod
-    def safe_find(page, selector, attr=None):
+    def data_parsre(s):
         try:
-            element = page.query_selector(selector)
-            if element:
-                return element.get_attribute(attr) if attr else element.inner_text().strip()
+            if not s:
+                return None
+            return datetime.fromisoformat(s.replace("Z", "+00:00")).date()
         except Exception:
             return None
 
-    @staticmethod
-    def data_parsre(s):
-        return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
-
     def parse_leak_data(self, page):
         try:
-            subreddit_name = RedditHelperMethod.extract_subreddit_name(self.seed_url)
-        except Exception as ex:
-            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-            return
+            raw_url = self.seed_url.rstrip('/')
+            subreddit_name = raw_url.split("/r/")[-1].split('/')[0]
+            log.g().i(f"Starting deep extraction for r/{subreddit_name}")
 
-        self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
+            last_height = page.evaluate("document.body.scrollHeight")
 
-        desired_posts = 50
-        max_comments = 5
-        if self.is_crawled:
-            desired_posts = 10
+            for i in range(15):
+                page.mouse.wheel(0, 1500)
+                page.wait_for_timeout(3000)
 
-        one_year_ago = datetime.now(UTC) - timedelta(days=60)
-        posts = RedditHelperMethod.scroll_and_collect_posts(
-            page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago)
-        if len(posts) < 3:
-            raise Exception("response empty")
+                new_height = page.evaluate("document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+                last_height = new_height
 
-        for post in posts:
-            comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
-            locator = page.locator('div[property="schema:articleBody"]').first
-            post['content'] = ""
-            if locator.count():
-                post['content'] = locator.inner_text(timeout=0)
+            desired_posts = 100 if not self.is_crawled else 20
+            filter_date = datetime.now(UTC) - timedelta(days=60)
 
-            post['comments'] = comments
+            posts = RedditHelperMethod.scroll_and_collect_posts(
+                page, subreddit_name, desired_posts, max_scrolls=100, filter_date=filter_date
+            )
 
-            parsed_date = None
-            if post.get('timestamp'):
+            if not posts:
+                return
+
+            for post in posts:
                 try:
-                    parsed_date = datetime.fromisoformat(post['timestamp'].replace('Z', '+00:00')).date()
-                except:
-                    parsed_date = None
+                    content_locator = page.locator('div[slot="text-body"]').first
+                    post_content = ""
+                    if content_locator.count() > 0:
+                        post_content = content_locator.inner_text(timeout=3000)
 
-            full_content = "\n".join(item['content'] for item in post['comments'])
-            if post.get('content'):
-                full_content += f"{post['content']}"
-            full_content = full_content.replace("\n\n", "\n")
+                    comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=3)
+                    comment_text = "\n".join([c.get('content', '') for c in comments])
 
-            card_data = social_model(
-                m_title=post['title'],
-                m_channel_url=self.seed_url,
-                m_sender_name=post.get('username') or "unknown",
-                m_message_sharable_link=post['url'],
-                m_weblink=post.get('weblinks', []),
-                m_content=full_content[:500],
-                m_content_type=["social"],
-                m_network="clearnet",
-                m_message_date=parsed_date,
-                m_message_id=post['id'],
-                m_platform="reddit",
-                m_group_name=subreddit_name, )
+                    full_body = f"{post_content}\n{comment_text}".strip()
 
-            entity_data = entity_model(
-                m_scrap_file=self.__class__.__name__, m_name=post.get('username') or "unknown", )
+                    card_data = social_model(
+                        m_title=post.get('title', 'No Title'),
+                        m_channel_url=self.seed_url,
+                        m_sender_name=post.get('username') or "unknown",
+                        m_message_sharable_link=post.get('url'),
+                        m_content=full_body[:1000],
+                        m_content_type=["social_collector"],
+                        m_network="tor" if ".onion" in self.seed_url else "clearnet",
+                        m_message_date=self.data_parsre(post.get('timestamp')),
+                        m_message_id=post.get('id'),
+                        m_platform="reddit",
+                        m_group_name=subreddit_name,
+                    )
 
-            self.append_leak_data(card_data, entity_data)
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_name=post.get('username') or "unknown",
+                    )
+
+                    self.append_leak_data(card_data, entity_data)
+
+                except Exception as post_ex:
+                    log.g().e(f"Skipping post {post.get('id')}: {post_ex}")
+                    continue
+
+        except Exception as ex:
+            log.g().e(f"CRITICAL SCRIPT ERROR: {ex}")

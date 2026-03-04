@@ -56,11 +56,7 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=True, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -87,27 +83,39 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
         try:
-            page.wait_for_selector("#companies_online", timeout=5000)
-            company_text = page.locator("#companies_online").text_content()
-            company_count = int(re.search(r'\d+', company_text).group()) if company_text else 0
+            page.wait_for_selector("#companies_online", timeout=10000)
+            page.click("#companies_online")
+
+            page.wait_for_selector(".btn.btn-secondary[data-company]", timeout=5000)
 
             error_count = 0
+            buttons = page.query_selector_all(".btn.btn-secondary[data-company]")
 
-            for company_id in range(company_count, 0, -1):
+            for btn in buttons:
                 try:
-                    url = f"{self.base_url}/archive.php?company={company_id}"
-                    page.goto(url, wait_until="domcontentloaded")
+                    company_id = btn.get_attribute("data-company")
+                    if not company_id:
+                        continue
 
-                    title_el = page.query_selector(f"#company_modal_label_{company_id}")
+                    btn.click()
+
+                    modal_selector = f"#company_modal_{company_id}"
+                    title_selector = f"#company_modal_label_{company_id}"
+
+                    page.wait_for_selector(modal_selector, state="visible")
+
+                    title_el = page.query_selector(title_selector)
                     title = title_el.text_content().strip() if title_el else f"Company {company_id}"
 
-                    description_els = page.query_selector_all(f"#company_modal_{company_id} p")
-                    description = "\n".join(p.text_content().strip() for p in description_els if p.text_content())
+                    description_els = page.query_selector_all(f"{modal_selector} p")
+                    description = "\n".join(
+                        p.text_content().strip() for p in description_els if p.text_content()
+                    )
 
-                    href_el = page.query_selector(f"#company_modal_{company_id} a[href^='http']")
+                    href_el = page.query_selector(f"{modal_selector} a[href^='http']")
                     external_link = href_el.get_attribute("href") if href_el else ""
 
-                    image_els = page.query_selector_all(f"#company_modal_{company_id} img")
+                    image_els = page.query_selector_all(f"{modal_selector} img")
                     images = [img.get_attribute("src") for img in image_els if img.get_attribute("src")]
 
                     content = f"{title}\n{description}\n{external_link}"
@@ -118,34 +126,40 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
                         REDIS_COMMANDS,
                         CUSTOM_SCRIPT_REDIS_KEYS,
                         RAW_PATH_CONSTANTS,
-                        page)
+                        page,
+                    )
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
                         m_title=title,
-                        m_url=url,
+                        m_url=self.base_url,
                         m_base_url=self.base_url,
-                        m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
                         m_content=content,
+                        m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=content[:500],
                         m_weblink=[external_link] if external_link else [],
                         m_dumplink=[],
                         m_content_type=["leaks"],
-                        m_logo_or_images=images, )
+                        m_logo_or_images=images,
+                    )
 
                     entity_data = entity_model(
-                        m_scrap_file=self.__class__.__name__, m_company_name=title, m_team="rhysida")
+                        m_scrap_file=self.__class__.__name__,
+                        m_company_name=title,
+                        m_team="rhysida",
+                    )
 
                     self.append_leak_data(card_data, entity_data)
 
-                    error_count = 0
+                    close_btn = page.query_selector(f"{modal_selector} button[data-bs-dismiss='modal']")
+                    if close_btn:
+                        close_btn.click()
 
                 except Exception as ex:
                     log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                    error_count += 1
-                    if error_count >= 3:
-                        break
+                    page.keyboard.press("Escape")
+                    continue
 
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

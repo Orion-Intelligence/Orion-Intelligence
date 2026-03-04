@@ -3,8 +3,8 @@ from datetime import datetime
 from abc import ABC
 from typing import List
 from collections import OrderedDict
-
 from playwright.sync_api import Page
+
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
@@ -56,11 +56,7 @@ class _pastebin(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.NONE,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_resoource_block=False,
-            m_threat_type=ThreatType.PASTEBIN)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type=ThreatType.PASTEBIN)
 
     @property
     def card_data(self) -> List[social_model]:
@@ -86,96 +82,100 @@ class _pastebin(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
+
     def parse_leak_data(self, page: Page):
 
-        try:
-            url_lists = []
+            try:
+                url_lists = []
 
-            links = page.locator("td:has(span) a")
+                links = page.locator("td:has(span) a")
 
-            for i in range(links.count()):
-                href = links.nth(i).get_attribute("href")
-                if href:
-                    full_url = self.base_url + href
-                    url_lists.append(full_url)
+                for i in range(links.count()):
+                    href = links.nth(i).get_attribute("href")
+                    if href:
+                        full_url = self.base_url + href
+                        url_lists.append(full_url)
 
-            # if self._is_crawled:
-            #     url_lists = url_lists[0:2]
+                if self._is_crawled:
+                    url_lists = url_lists[0:2]
 
-            for url in url_lists:
+                for url in url_lists:
 
-                try:
-                    page.goto(url, wait_until="load", timeout=25000)
-                except:
-                    pass
+                        try:
+                            page.goto(url, wait_until="load", timeout=25000)
+                        except:
+                            pass
 
-                title = page.locator("div.info-top").inner_text()
+                        title = page.locator("div.info-top").inner_text()
 
-                username = page.locator("div.username").inner_text()
+                        username = page.locator("div.info-bar div.info-bottom div.username a").first.inner_text()
 
-                raw_date = page.locator("div.date").inner_text()
-                clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw_date, flags=re.IGNORECASE)
-                clean_date = re.sub(r'\(.*?\)', '', clean_date).strip()
-                clean_date = clean_date.title()
-                month = clean_date.split()[0]
-                fmt = "%b %d, %Y" if len(month) <= 3 else "%B %d, %Y"
-                date = datetime.strptime(clean_date, fmt).date()
+                        raw_date = page.locator("div.info-bar div.info-bottom div.date").first.inner_text()
+                        clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw_date, flags=re.IGNORECASE)
+                        clean_date = re.sub(r'\(.*?\)', '', clean_date).strip()
+                        clean_date = clean_date.title()
+                        month = clean_date.split()[0]
+                        fmt = "%b %d, %Y" if len(month) <= 3 else "%B %d, %Y"
+                        date = datetime.strptime(clean_date, fmt).date()
 
-                tags_locator = page.locator("div.tags a")
-                if tags_locator.count():
-                    tags = tags_locator.all_inner_texts()
-                else:
-                    tags = []
+                        tags_locator = page.locator("div.tags a")
+                        if tags_locator.count():
+                            tags = tags_locator.all_inner_texts()
+                        else:
+                            tags = []
 
-                visits_locator = page.locator("div.visits")
-                visits = visits_locator.inner_text().strip()
+                        visits_locator = page.locator("div.visits")
+                        visits = visits_locator.inner_text().strip()
 
-                expire_locator = page.locator("div.expire")
-                expire = expire_locator.inner_text().strip()
+                        expire_locator = page.locator("div.expire")
+                        expire = expire_locator.inner_text().strip()
 
-                try:
-                    source = page.locator(".post-view ol").inner_text(timeout=5000)
-                except:
-                    source = None
+                        try:
+                            source = page.locator("ol.diff , .post-view ol").first.inner_text(timeout=5000)
+                        except:
+                            source = None
 
-                m_content = source.replace("\xa0", " ").strip()
+                        m_content = source.replace("\xa0", " ").strip()
 
-                cleaned = source.replace("\xa0", " ")
-                cleaned = re.sub(r'[ \t]+', ' ', cleaned)
+                        cleaned = source.replace("\xa0", " ")
+                        cleaned = re.sub(r'[ \t]+', ' ', cleaned)
 
-                email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-                ip_pattern = r'\b\d{1,3}(?:\.\d{1,3}){3}\b'
-                domain_pattern = r'\b(?:https?://[^\s@]+|www\.[^\s@]+)'
+                        email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+                        ip_pattern = r'\b\d{1,3}(?:\.\d{1,3}){3}\b'
+                        domain_pattern = r'\b(?:https?://[^\s@]+|www\.[^\s@]+)'
 
-                emails = list(set(re.findall(email_pattern, cleaned)))
-                ips = list(set(re.findall(ip_pattern, cleaned)))
-                domains = list(set(re.findall(domain_pattern, cleaned)))
+                        emails = list(set(re.findall(email_pattern, cleaned)))
+                        ips = list(set(re.findall(ip_pattern, cleaned)))
+                        domains = list(set(re.findall(domain_pattern, cleaned)))
 
-                content_type = ["leak"]
-                if helper_method.is_code(m_content):
-                    content_type.append('code')
+                        content_type = ["leak"]
+                        if helper_method.is_code(m_content):
+                            content_type.append('code')
 
-                card_data = social_model(
-                    m_title=title,
-                    m_channel_url=page.url,
-                    m_message_sharable_link=page.url,
-                    m_content=m_content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_content_type=content_type,
-                    m_platform="pastebin",
-                    m_message_date=date,
-                    m_post_tags=tags,
-                    m_post_views=visits,
-                    m_post_expiry=expire, )
+                        card_data = social_model(
+                            m_title=title,
+                            m_channel_url=page.url,
+                            m_message_sharable_link=page.url,
+                            m_content=m_content,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_content_type=content_type,
+                            m_platform="pastebin",
+                            m_message_date=date,
+                            m_post_tags=tags,
+                            m_post_views=visits,
+                            m_post_expiry=expire,
+                        )
 
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_username=[username],
-                    m_ip=ips,
-                    m_email=emails,
-                    m_weblink=domains, )
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_username=[username],
+                            m_ip=ips,
+                            m_email=emails,
+                            m_weblink=domains,
+                        )
 
-                self.append_leak_data(card_data, entity_data)
+                        self.append_leak_data(card_data, entity_data)
 
-        except Exception as ex:
-            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+

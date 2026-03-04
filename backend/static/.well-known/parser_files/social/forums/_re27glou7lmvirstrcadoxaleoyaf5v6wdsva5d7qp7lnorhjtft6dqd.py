@@ -1,17 +1,15 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from abc import ABC
 import re
 from typing import List
-from urllib.parse import urljoin
-
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
+from urllib.parse import urljoin
 
 
 class _re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd(leak_extractor_interface, ABC):
@@ -45,7 +43,7 @@ class _re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd(leak_extractor_i
 
     @property
     def seed_url(self) -> str:
-        return "http://re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd.onion"
+        return "http://re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd.onion/whats-new/posts/"
 
     @property
     def developer_signature(self) -> str:
@@ -53,8 +51,8 @@ class _re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT,
+                         m_threat_type=ThreatType.SOCIAL)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -79,79 +77,63 @@ class _re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd(leak_extractor_i
                 self._entity_data.clear()
 
     def parse_leak_data(self, page):
-
         base_url = self.base_url
-        max_days = 365
-        one_year_ago = datetime.now() - timedelta(days=max_days)
-
-        last_seen_date_str = self.invoke_db(
-            REDIS_COMMANDS.S_GET_STRING, helper_method.generate_data_hash(self.seed_url) + REDIS_KEYS.S_URL_TIMEOUT, "")
-        if last_seen_date_str:
-            last_seen_date = datetime.fromisoformat(last_seen_date_str.replace("Z", "+00:00"))
-        else:
-            last_seen_date = one_year_ago
-
-        latest_date = None
-        page_number = 1
-        reached_end = False
-        stop_pagination = False
-
         unwanted_text_indicator = "To see this hidden content"
+        current_url = self.seed_url
 
-        while not reached_end and not stop_pagination:
-            current_url = f"{base_url}/page-{page_number}" if page_number > 1 else base_url
-            page.goto(current_url, timeout=30000)
-            page.wait_for_selector("div.structItem.structItem--thread", timeout=10000)
+        for page_number in range(1, 501):
+            page.goto(current_url, timeout=0)
+
+            try:
+                page.wait_for_selector("div.structItem.structItem--thread", timeout=60000)
+            except Exception:
+                break
 
             thread_divs = page.query_selector_all("div.structItem.structItem--thread")
             threads_meta = []
-            thread_dates = []
+
             for idx, thread in enumerate(thread_divs, start=1):
-                date_a = thread.query_selector("li.structItem-startDate time.u-dt")
-                if not date_a:
-                    continue
-                thread_date_str = date_a.get_attribute("datetime")
-                try:
-                    thread_date = datetime.strptime(thread_date_str[:19], "%Y-%m-%dT%H:%M:%S")
-                except Exception:
-                    continue
-
-                thread_dates.append(thread_date)
-
-                if thread_date <= last_seen_date:
-                    continue
-
-                if thread_date < one_year_ago:
-                    continue
-
                 thread_title_a = thread.query_selector("div.structItem-title a")
                 if not thread_title_a:
                     continue
+
                 thread_href = thread_title_a.get_attribute("href")
                 full_thread_url = urljoin(base_url, thread_href)
                 m_title = thread_title_a.text_content().strip()
-                threads_meta.append(
-                    {"idx": idx, "full_thread_url": full_thread_url, "thread_date_str": thread_date_str, "thread_date": thread_date, "m_title": m_title})
-                if latest_date is None or thread_date > latest_date:
-                    latest_date = thread_date
 
-            if thread_dates:
-                min_thread_date = min(thread_dates)
-                if min_thread_date <= last_seen_date:
-                    stop_pagination = True
+                date_a = thread.query_selector("li.structItem-startDate time.u-dt")
+                thread_date_str = datetime.now().isoformat()
+
+                if date_a:
+                    extracted_date = date_a.get_attribute("datetime")
+                    if extracted_date:
+                        thread_date_str = extracted_date
+
+                threads_meta.append({
+                    "full_thread_url": full_thread_url,
+                    "thread_date_str": thread_date_str,
+                    "m_title": m_title
+                })
+
+            next_btn = page.query_selector("a.pageNav-jump--next")
+            next_page_href = next_btn.get_attribute("href") if next_btn else None
 
             for meta in threads_meta:
-                page.goto(meta['full_thread_url'], timeout=30000)
-                page.wait_for_selector("div.bbWrapper", timeout=10000)
+                try:
+                    page.goto(meta['full_thread_url'], timeout=0)
+                except Exception:
+                    continue
 
                 try:
+                    page.wait_for_selector("div.bbWrapper", timeout=60000)
                     bb_divs = page.query_selector_all("div.bbWrapper")
-                except Exception as _:
+                except Exception:
                     continue
 
                 m_content = ""
                 valid_bbwrappers = 0
                 stop_content = False
+
                 for bb in bb_divs:
                     if stop_content:
                         break
@@ -159,47 +141,39 @@ class _re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd(leak_extractor_i
                     if unwanted_text_indicator in bb_text:
                         bb_text = bb_text.split(unwanted_text_indicator)[0].strip()
                         stop_content = True
+
                     bb_text = re.sub(r'[\n\t\r]+', ' ', bb_text)
                     bb_text = re.sub(r'[ ]+', ' ', bb_text).strip()
+
                     if not bb_text:
                         continue
+
                     m_content += bb_text + " "
                     valid_bbwrappers += 1
 
                 if valid_bbwrappers == 0 or not m_content.strip():
                     continue
 
-                m_content_clean = m_content.strip()
-
                 username_span = page.query_selector("div.message-userName h4.message-name span.username")
-                m_username = username_span.text_content().strip() if username_span else ""
+                m_username = username_span.text_content().strip() if username_span else "Anonymous"
 
                 card_data = social_model(
                     m_title=meta['m_title'],
                     m_channel_url=meta['full_thread_url'],
-                    m_content=m_content_clean,
+                    m_content=m_content.strip(),
                     m_network=helper_method.get_network_type(base_url),
                     m_message_date=helper_method.extract_and_convert_date(meta['thread_date_str']),
                     m_content_type=["leak"],
                     m_platform="forum",
                     m_message_sharable_link=meta['full_thread_url'],
-                    m_post_comments_count=str(valid_bbwrappers), )
+                    m_post_comments_count=str(valid_bbwrappers),
+                )
                 entity_data = entity_model(m_name=m_username)
                 self.append_leak_data(card_data, entity_data)
 
-            if not stop_pagination:
-                next_page_a = page.query_selector("a.pageNav-jump--next")
-                if next_page_a:
-                    page_number += 1
-                else:
-                    reached_end = True
+            if next_page_href:
+                current_url = urljoin(base_url, next_page_href)
             else:
-                reached_end = True
-
-        if latest_date:
-            self.invoke_db(
-                REDIS_COMMANDS.S_SET_STRING,
-                helper_method.generate_data_hash(self.seed_url) + REDIS_KEYS.S_URL_TIMEOUT,
-                latest_date.strftime("%Y-%m-%dT%H:%M:%S"))
+                break
 
         return True

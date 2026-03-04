@@ -52,10 +52,7 @@ class _ransom(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_threat_type=ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -149,7 +146,8 @@ class _ransom(leak_extractor_interface, ABC):
                     continue
 
                 ref_html = helper_method.extract_refhtml(
-                    website, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                    website, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page
+                )
 
                 card_data = leak_model(
                     m_ref_html=ref_html,
@@ -163,13 +161,15 @@ class _ransom(leak_extractor_interface, ABC):
                     m_weblink=[website] if website else [],
                     m_leak_date=m_leak_date,
                     m_dumplink=[],
-                    m_content_type=["leaks"], )
+                    m_content_type=["leaks"],
+                )
 
                 entity_data = entity_model(
                     m_scrap_file=self.__class__.__name__,
                     m_location=[country] if country else [],
                     m_company_name=group,
-                    m_team="ransom wiki")
+                    m_team="ransom wiki"
+                )
 
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
