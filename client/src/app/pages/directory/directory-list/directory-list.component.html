@@ -39,12 +39,16 @@
               </div>
             </td>
             <td data-label="General Model Status">
-              <span class="mr-[6px] inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
-              {{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
+              <span class="inline-flex w-full items-center justify-end gap-[6px]">
+                <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
+                <span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}</span>
+              </span>
             </td>
             <td data-label="Leak Model Status">
-              <span class="mr-[6px] inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
-              {{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
+              <span class="inline-flex w-full items-center justify-end gap-[6px]">
+                <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
+                <span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}</span>
+              </span>
             </td>
             <td class="capitalize" data-label="Network Type">
               {{ item.network_type ? item.network_type : 'Unknown' }}

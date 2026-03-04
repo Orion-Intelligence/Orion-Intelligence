@@ -1542,6 +1542,14 @@ html:has(body.dark-theme) {
     border-top-color: var(--ui-table-row-border-hover);
   }
 
+  .ui-table tbody tr:focus-visible,
+  .ui-table tbody tr:focus-within,
+  .ui-table tbody tr:active {
+    background: var(--ui-table-row-hover);
+    border-top-color: var(--ui-table-row-border-hover);
+    outline: none;
+  }
+
   .ui-table tbody td {
     white-space: nowrap;
   }
@@ -1622,6 +1630,7 @@ html:has(body.dark-theme) {
 
 @media (width <= 768px) {
   #main-responsive-table {
+    width: 100% !important;
     min-width: 100% !important;
     border-collapse: separate;
     border-spacing: 0;
@@ -1639,6 +1648,7 @@ html:has(body.dark-theme) {
   }
 
   #main-responsive-table tbody tr {
+    width: 100%;
     margin: 0 0 12px;
     border: 1px solid var(--ui-table-row-border);
     border-radius: 10px;
@@ -1646,11 +1656,24 @@ html:has(body.dark-theme) {
     background: var(--ui-table-row-odd);
   }
 
+  #main-responsive-table tbody tr:hover,
+  #main-responsive-table tbody tr:focus-visible,
+  #main-responsive-table tbody tr:focus-within,
+  #main-responsive-table tbody tr:active {
+    background: var(--ui-table-row-hover);
+    border-color: var(--ui-table-row-border-hover);
+    outline: none;
+  }
+
   #main-responsive-table tbody td {
     display: grid;
     grid-template-columns: minmax(110px, 42%) 1fr;
     gap: 10px;
     align-items: center;
+    justify-items: end;
+    width: 100% !important;
+    max-width: none !important;
+    text-align: right;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1662,8 +1685,9 @@ html:has(body.dark-theme) {
   }
 
   #main-responsive-table tbody td > * {
+    width: 100%;
     min-width: 0;
-    max-width: 100%;
+    max-width: none !important;
     justify-self: end;
     text-align: right;
     white-space: nowrap;
@@ -1673,10 +1697,13 @@ html:has(body.dark-theme) {
 
   #main-responsive-table tbody td [class*="flex-wrap"] {
     flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
   }
 
   #main-responsive-table tbody td::before {
     content: attr(data-label);
+    justify-self: start;
+    text-align: left;
     font-size: 11px;
     font-weight: 600;
     line-height: 1.2;
