@@ -71,8 +71,8 @@ export class LicenseService {
     if (moduleName === 'Strategic') {
       moduleName = 'general';
     }
-    const rule = this.getCombinedRule();
     const key = moduleName.toLowerCase();
+    const rule = this.getCombinedRule();
     const access = rule.modules === 'all' || rule.modules.has(key);
     return !(this.subscriptionService.isDemo() && !access);
   }
