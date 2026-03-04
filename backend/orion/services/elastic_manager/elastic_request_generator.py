@@ -522,7 +522,7 @@ class elastic_request_generator:
         unified_query["from"] = max(0, (m_page_number - 1) * 15)
 
         if channel_q:
-            qb = unified_query["query"]["function_score"]["query"]["bool"]
+            qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
             qb.setdefault("should", []).extend(
                 [{"term": {"m_channel_name.keyword": {"value": channel_q, "boost": 7.0}}},
                     {"match_phrase": {"m_channel_name": {"query": channel_q, "slop": 1, "boost": 7.0}}}])
