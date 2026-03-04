@@ -29,7 +29,7 @@
 
     <div class="flex flex-1 items-end gap-[8px] overflow-hidden border-b border-[#d0d5dd] [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)] [mask-size:100%_100%] [mask-repeat:no-repeat]" #categoryScroll>
       <div *ngIf="filteredCategories.length>0; else noEntity"></div>
-      <div *ngFor="let category of filteredCategories" class="mb-[-1px] flex items-center whitespace-nowrap rounded-t-[7px] border-b-2 border-transparent px-[9px] pb-[7px] pt-[1px] text-[13px] font-medium text-[#475467] cursor-pointer transition hover:text-[#1f2e47] hover:border-[#cbd5e1]" [ngClass]="{ 'border-[#172235] bg-white text-[#172235] shadow-[0_-1px_0_rgba(255,255,255,0.9)]': category.id === selectedCategoryId }" (click)="$event.stopPropagation();onCategoryClick(category.id)">
+      <div *ngFor="let category of filteredCategories" class="mb-[-3px] flex h-[34px] items-center justify-center whitespace-nowrap rounded-t-[7px] border-b-[3px] border-[#8fb1d2] px-[9px] text-center text-[13px] font-medium leading-none text-[#475467] cursor-pointer transition" [ngClass]="category.id === selectedCategoryId ? 'border-[#2b4f79] !bg-[rgb(87_165_235_/_var(--tw-bg-opacity,1))] text-white shadow-[0_-1px_0_rgba(255,255,255,0.14)]' : 'hover:text-[#172235] hover:bg-[rgba(87,165,235,0.14)] hover:border-[#2b4f79]'" (click)="$event.stopPropagation();onCategoryClick(category.id)">
         {{ category.name }}
         <div *ngIf="(app_service.getConfig().localSettings.entityfilterCategories[category.id]?.length ?? 0) > 0" class="ml-[6px] inline-flex h-[17px] w-[17px] items-center justify-center rounded-full bg-[#eaf2ff] text-[10px] font-semibold text-[#172235]">
           {{ app_service.getConfig().localSettings.entityfilterCategories[category.id].length }}
