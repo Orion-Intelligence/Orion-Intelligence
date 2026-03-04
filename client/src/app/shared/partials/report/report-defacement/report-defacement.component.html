@@ -11,43 +11,43 @@
   <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2 xl:grid-cols-3">
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Saved on</p>
-      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
+      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
     </div>
 
     <div *ngIf="!defacementData?.m_ioc_type?.length" class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Defacer</p>
-      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
+      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
     </div>
 
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Team</p>
-      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_team }}</span>
+      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_team }}</span>
     </div>
 
     <div *ngIf="!defacementData?.m_ioc_type?.length; else iocTypeTpl" class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Web Server</p>
-      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
+      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
     </div>
     <ng-template #iocTypeTpl>
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">IOC Type</p>
-        <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
       </div>
     </ng-template>
 
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Breach</p>
-      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ normalizeDisplayUrl(defacementData?.m_source_url) }}</span>
+      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ normalizeDisplayUrl(defacementData?.m_source_url) }}</span>
     </div>
 
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">IP</p>
-      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
+      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
     </div>
 
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Location</p>
-      <span class="min-w-0 max-w-[65%] truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
+      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
     </div>
   </div>
 </div>

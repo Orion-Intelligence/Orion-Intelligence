@@ -76,13 +76,14 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   checkScreenWidth() {
+    const shouldStartCollapsed = window.innerWidth < 800;
     const isMobile = window.innerWidth < 600;
     this.animationsDisabled = isMobile;
-    if (isMobile && !this.min_detected && this.sidebar_default) {
+    if (shouldStartCollapsed && !this.min_detected && this.sidebar_default) {
       this.min_detected = true;
       this.onToggleSidebar();
     }
-    else if (!isMobile) {
+    else if (!shouldStartCollapsed) {
       this.min_detected = false;
     }
   }
