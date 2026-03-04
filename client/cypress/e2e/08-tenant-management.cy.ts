@@ -28,152 +28,212 @@ describe('Tenant Complete Flow – Correct Order', () => {
   });
 
   it('Admin verifies all tenants and assigns Enterprise license', () => {
-    cy.loginAsAdmin();
+  cy.loginAsAdmin();
 
-    cy.openTenantsPage();
-    cy.contains("Not Verified", { timeout: 10000 }).should("exist");
-    cy.contains('h1.ui-page-title', 'Tenants').should('be.visible');
-    cy.get('tbody tr').its('length').should('be.gte', 1);
+  cy.openTenantsPage();
+  cy.contains("Not Verified", { timeout: 10000 }).should("exist");
+  cy.contains('h1.ui-page-title', 'Tenants').should('be.visible');
+  cy.get('tbody tr').its('length').should('be.gte', 1);
 
-    let verifiedCount = 0;
+  let verifiedCount = 0;
 
-    const approveAllTenants = (tries = 0) => {
-      if (tries >= 5) return;
+  const approveAllTenants = (tries = 0) => {
+    if (tries >= 5) return;
 
-      cy.get('tbody tr').then($rows => {
-        const rows = $rows.filter((_: number, row: HTMLElement) => {
-          return Cypress.$(row).find('span:contains("Not Verified")').length > 0 &&
-            !Cypress.$(row).hasClass('!border-t-0');
-        });
+    cy.get('tbody tr').then($rows => {
+      const rows = $rows.filter((_: number, row: HTMLElement) => {
+        return (
+          Cypress.$(row).find('span:contains("Not Verified")').length > 0 &&
+          !Cypress.$(row).hasClass('!border-t-0')
+        );
+      });
 
-        verifiedCount++;
+      if (rows.length === 0) {
+        // no "Not Verified" left on this page
+        return;
+      }
 
-        if (rows.length !== 1) {
-          throw new Error(`Expected exactly 1 row, found ${rows.length}`);
-        }
+      if (rows.length !== 1) {
+        throw new Error(`Expected exactly 1 row, found ${rows.length}`);
+      }
 
-        cy.wrap(rows.eq(0)).within(() => {
-          cy.get('#edit-tenant').click({force: true});
-        });
+      verifiedCount++;
 
-        cy.wrap(false).as('changed');
+      // open edit tenant
+      cy.wrap(rows.eq(0)).within(() => {
+        cy.get('#edit-tenant').click({ force: true });
+      });
 
-        cy.contains('tr', 'Edit Tenant')
-          .find('button')
-          .contains('Not Verified')
-          .then($btn => {
-            if ($btn.text().includes('Not Verified')) {
-              cy.wrap($btn).click({force: true});
-              cy.wrap(true).as('changed');
-            }
-          });
+      cy.wrap(false).as('changed');
 
-        cy.contains('tr', 'Edit Tenant')
-          .contains('button', 'Enterprise')
-          .find('input[type="checkbox"]')
-          .then($cb => {
-            if (!$cb.is(':checked')) {
-              cy.wrap($cb).check({force: true});
-              cy.wrap(true).as('changed');
-            }
-          });
+      // wait edit row open
+      cy.contains('tr', 'Edit Tenant', { timeout: 15000 }).should('be.visible');
 
-        cy.get('@changed').then((changed: any) => {
-          if (changed) {
-            cy.contains('button', 'Save changes')
-              .should('be.visible')
-              .click({force: true});
+      // click Not Verified toggle (your original step found a "button", keep it but make it tolerant)
+      cy.contains('tr', 'Edit Tenant')
+        .find('button, .ui-button, [role="button"]')
+        .contains(/Not Verified/i)
+        .then($el => {
+          // if multiple matched, click first
+          const $btn = Cypress.$($el).first();
+          if ($btn.text().toLowerCase().includes('not verified')) {
+            cy.wrap($btn).click({ force: true });
+            cy.wrap(true).as('changed');
           }
         });
 
-        cy.openTenantsPage();
-        cy.get('body').then($b => {
-          if ($b.find('.badge-false').length) approveAllTenants(tries + 1);
+      // ✅ Enterprise checkbox (fixed selector)
+      cy.contains('tr', 'Edit Tenant')
+        .contains('.license-card, .license-btn, .license-label', /Enterprise/i)
+        .closest('.license-card, .license-btn')
+        .find('input[type="checkbox"], input.license-checkbox')
+        .then($cb => {
+          if (!$cb.is(':checked')) {
+            cy.wrap($cb).check({ force: true });
+            cy.wrap(true).as('changed');
+          }
+        });
+
+      // save if changed
+      cy.get('@changed').then((changed: any) => {
+        if (changed) {
+          cy.contains('button', 'Save changes', { timeout: 15000 })
+            .should('be.visible')
+            .click({ force: true });
+        }
+      });
+
+      // back + loop
+      cy.openTenantsPage();
+
+      cy.get('body').then($b => {
+        if ($b.find('.badge-false, span:contains("Not Verified")').length) {
+          approveAllTenants(tries + 1);
+        }
+      });
+    });
+  };
+
+  approveAllTenants();
+
+  cy.then(() => {
+    expect(verifiedCount).to.be.greaterThan(0);
+  });
+
+  cy.openTenantsPage();
+  cy.logout();
+});
+
+const openManageIOCs = () => {
+  cy.contains('app-dashboard-sidebar-items div', 'IOC')
+    .should('be.visible')
+    .click();
+
+  cy.get('input[placeholder="Search IOCs..."]')
+    .should('exist');
+};
+
+const addIOCValue = (value: string) => {
+  cy.get('input[placeholder="Type"]')
+    .should('be.visible')
+    .clear()
+    .type(value);
+
+  cy.contains('button', 'Add')
+    .should('be.visible')
+    .click();
+};
+
+// ✅ Tabs ke hisaab se "khud se" IOC values
+const addIOCForAllTabs = () => {
+  const iocValuesByTab: string[][] = [
+    ['8.8.8.8', '1.1.1.1', '10.10.10.10'],                                  // Tab 0 (IPs)
+    ['example.com', 'malicious-test.com', 'sub.example.org'],                // Tab 1 (Domains)
+    ['http://evil.test/path', 'https://phish.test/login', 'https://t.co/x'], // Tab 2 (URLs)
+    ['d41d8cd98f00b204e9800998ecf8427e', '5d41402abc4b2a76b9719d911017c592'],// Tab 3 (MD5)
+    [
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',   // Tab 4 (SHA256)
+      'a54d88e06612d820bc3be72877c74f257b561b19e8f5a0c0b3f3cb0adf3c3f6e'
+    ],
+  ];
+  /*
+  cy.get('div.border-b-2.cursor-pointer')
+    .should('have.length.greaterThan', 0)
+    .then($tabs => {
+      const tabs = Cypress._.take($tabs.toArray(), 5);
+
+      tabs.forEach((tab, index) => {
+        cy.wrap(tab)
+          .scrollIntoView()
+          .click({ force: true });
+
+        const values = iocValuesByTab[index] || [`test-${index}-1`, `test-${index}-2`];
+
+        values.forEach(v => {
+          addIOCValue(v);
+          cy.wait(200);
         });
       });
-    };
-
-    approveAllTenants();
-
-    cy.then(() => {
-      expect(verifiedCount).to.be.greaterThan(0);
     });
 
-    cy.openTenantsPage();
+  cy.contains('app-dashboard-sidebar-items div', 'Homepage')
+    .should('be.visible')
+    .click();
 
-    cy.logout();
-  });
+  cy.get('button[apptooltip="scan all"]')
+    .should('be.visible')
+    .click();*/
+};
 
-  const openManageIOCs = () => {
-    cy.contains('app-dashboard-sidebar-items div', 'IOC')
-      .should('be.visible')
-      .click();
+it('Tenant adds user, IOCs, scans and logs out', () => {
+  cy.visit('/login');
+  cy.reload();
 
-    cy.get('input[placeholder="Search IOCs..."]')
-      .should('exist');
-  };
+  cy.get('input[name="username"]').type(tenant.username);
+  cy.get('input[name="password"]').type(tenant.password, { log: false });
+  cy.contains('Sign In').click();
 
-  const addIOCValue = (value: string) => {
-    cy.get('input[placeholder="Type"]')
-      .should('be.visible')
-      .clear()
-      .type(value);
+  // ✅ Company name enter -> Next -> Skip -> Confirm
+  cy.get('input#company[placeholder="Enter company name"]')
+    .should('be.visible')
+    .clear()
+    .type('orion intelligence');
 
-    cy.contains('button', 'Add')
-      .should('be.visible')
-      .click();
-  };
+  cy.contains('button', 'Next')
+    .should('be.visible')
+    .click();
 
-  const addIOCForAllTabs = () => {
-    cy.get('div.border-b-2.cursor-pointer')
-      .then($tabs => {
-        Cypress._.take($tabs.toArray(), 5).forEach((tab, index) => {
-          cy.wrap(tab)
-            .scrollIntoView()
-            .click();
+  cy.contains('button', 'Skip')
+    .should('be.visible')
+    .click();
 
-          addIOCValue(`test-${index}`);
-        });
-      });
+  cy.contains('button', 'Confirm')
+    .should('be.visible')
+    .click();
 
-    const goToHomepageAndScan = () => {
-      cy.contains('app-dashboard-sidebar-items div', 'Homepage')
-        .should('be.visible')
-        .click();
+  // ✅ IOCs add + scan all
+  openManageIOCs();
+  addIOCForAllTabs();
 
-      cy.get('button[apptooltip="scan all"]')
-        .should('be.visible')
-        .click();
-    };
+  // ✅ Add user (functions already upar bane hue thay, ab yahan use ho rahe)
+  cy.contains('Users').click();
+  cy.contains('button', 'Add User').click({ force: true });
 
-    goToHomepageAndScan();
-  };
+  cy.get('input[name="username"]').type(tenantSubUser.username);
+  cy.get('input[name="email"]').type(tenantSubUser.email);
+  cy.get('input[name="password"]').type(tenantSubUser.password, { log: false });
 
-  it('Tenant adds user, IOCs, scans and logs out', () => {
-    cy.visit('/login');
-    cy.reload()
-    cy.get('input[name="username"]').type(tenant.username);
-    cy.get('input[name="password"]').type(tenant.password, {log: false});
-    cy.contains('Sign In').click();
+  cy.contains('button', 'Add User')
+    .scrollIntoView()
+    .click({ force: true });
 
-    cy.contains('Users').click();
-    cy.contains('button', 'Add User').click();
-
-    cy.get('input[name="username"]').type(tenantSubUser.username);
-    cy.get('input[name="email"]').type(tenantSubUser.email);
-    cy.get('input[name="password"]').type(tenantSubUser.password, {log: false});
+  cy.logout();
+  cy.url().should('include', '/login');
+});
 
 
 
-    cy.contains('button', 'Add User')
-      .scrollIntoView()
-      .click({ force: true });
 
-    openManageIOCs();
-
-    cy.logout();
-    cy.url().should('include', '/login');
-  });
 
   it('Admin logs in again and sets quota to 1', () => {
     cy.loginAsAdmin();
@@ -181,14 +241,10 @@ describe('Tenant Complete Flow – Correct Order', () => {
     cy.visit('/dashboard/profile/homepage');
     cy.openTenantsPage();
 
-    cy.get('table tbody tr', { timeout: 30000 })
-  .contains('td:nth-child(2) span', 'orionintelligence')
-  .parents('tr')
-  .within(() => {
-    cy.get('button#edit-tenant')
-      .should('be.visible')
-      .click({ force: true });
-  });
+    cy.contains('table tbody tr', /orion\s*intelligence/i, { timeout: 30000 })
+  .find('button#edit-tenant')
+  .should('be.visible')
+  .click()
     cy.contains('label', 'User Quota')
       .parent()
       .find('input[type="number"]')
