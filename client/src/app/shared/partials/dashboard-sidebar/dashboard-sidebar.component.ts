@@ -131,7 +131,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       }
       if (firstSubcategory) {
         this.selectionStore.setSelectedOption(firstSubcategory);
-        if (this.min_detected && this.sidebar_default && !this.mobile_menu_status) {
+        if (window.innerWidth < 800 && this.sidebar_default && !this.mobile_menu_status) {
           this.onToggleSidebar();
         }
       }
@@ -148,7 +148,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.dashboardService.resetParams();
     this.onResetCallback();
     this.selectionStore.setSelectedOption(option);
-    if (this.min_detected && this.sidebar_default) {
+    if (window.innerWidth < 800 && this.sidebar_default) {
       this.onToggleSidebar();
     }
     this.scrollService.resetOnReload();

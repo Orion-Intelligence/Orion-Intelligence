@@ -129,7 +129,7 @@
   <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 
-<div *ngIf="isLoading" class="mx-[30px] w-full max-w-[910px] max-[1000px]:mx-[15px] max-[550px]:mx-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:box-border" @fadeInDashboardItem>
+<div *ngIf="isLoading" class="mx-[30px] w-full min-w-0 max-w-[910px] max-[1000px]:mx-[15px] max-[800px]:mx-0 max-[800px]:w-full max-[800px]:max-w-full max-[800px]:px-[10px] max-[800px]:box-border" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
 

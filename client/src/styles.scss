@@ -1445,6 +1445,8 @@ html:has(body.dark-theme) {
   .ui-shimmer {
     position: relative;
     overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .ui-shimmer::before {
