@@ -44,9 +44,24 @@ export class ReportChatComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.scrollToTop();
     this.route.data.subscribe(({ reportdata }) => {
       this.resultItem = reportdata;
       this.processResultItem();
+    });
+  }
+
+  private scrollToTop(): void {
+    const dashboardContainer = document.getElementById('dashboard-container');
+    if (dashboardContainer) {
+      dashboardContainer.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    requestAnimationFrame(() => {
+      const container = document.getElementById('dashboard-container');
+      if (container) {
+        container.scrollTop = 0;
+      }
     });
   }
 

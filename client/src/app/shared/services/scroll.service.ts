@@ -35,22 +35,42 @@ export class ScrollService {
     }
   }
 
+  saveCurrentPosition(itemId = ''): void {
+    const container = document.getElementById('dashboard-container');
+    const position = container ? container.scrollTop : window.scrollY;
+    sessionStorage.setItem('scrollPosition', String(position));
+    sessionStorage.setItem('selectedItem', itemId);
+  }
+
   scrollToSavedPosition(): void {
     const savedPosition = sessionStorage.getItem('scrollPosition');
     const savedItemId = sessionStorage.getItem('selectedItem');
-    if (savedPosition !== null && savedItemId) {
-      const position = parseInt(savedPosition, 10);
-      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + savedItemId);
+    if (savedPosition === null) {
+      return;
+    }
+
+    const position = parseInt(savedPosition, 10);
+    const applyScroll = () => {
+      let scrollableContainer: HTMLElement | null = savedItemId ? document.getElementById('item-' + savedItemId) : null;
       while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
         scrollableContainer = scrollableContainer.parentElement;
       }
+
+      const dashboardContainer = document.getElementById('dashboard-container');
       if (scrollableContainer) {
         scrollableContainer.scrollTop = position;
+      }
+      else if (dashboardContainer) {
+        dashboardContainer.scrollTop = position;
       }
       else {
         window.scrollTo({ top: position, behavior: 'auto' });
       }
-    }
+    };
+
+    applyScroll();
+    requestAnimationFrame(applyScroll);
+    setTimeout(applyScroll, 80);
   }
 
   private isScrollable(element: HTMLElement): boolean {

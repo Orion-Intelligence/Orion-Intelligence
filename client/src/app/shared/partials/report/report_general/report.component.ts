@@ -62,6 +62,7 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.scrollToTop();
     this.route.data.subscribe(({ reportdata, type }) => {
       this.resultItem = reportdata;
       this.type = type;
@@ -76,6 +77,20 @@ export class ReportComponent implements OnInit {
       const content = this.resultItem?.m_content;
       if (content) {
         this.lang_detected = this.helperService.detectLanguageName(content);
+      }
+    });
+  }
+
+  private scrollToTop(): void {
+    const dashboardContainer = document.getElementById('dashboard-container');
+    if (dashboardContainer) {
+      dashboardContainer.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    requestAnimationFrame(() => {
+      const container = document.getElementById('dashboard-container');
+      if (container) {
+        container.scrollTop = 0;
       }
     });
   }

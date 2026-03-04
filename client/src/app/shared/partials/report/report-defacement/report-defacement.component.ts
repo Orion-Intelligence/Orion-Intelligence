@@ -39,10 +39,25 @@ export class ReportDefacementComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.scrollToTop();
     this.route.data.subscribe(data => {
       if (data['reportdata']) {
         this.defacementData = data['reportdata'] as DefacementResultItem;
         this.prepareMetadata();
+      }
+    });
+  }
+
+  private scrollToTop(): void {
+    const dashboardContainer = document.getElementById('dashboard-container');
+    if (dashboardContainer) {
+      dashboardContainer.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    requestAnimationFrame(() => {
+      const container = document.getElementById('dashboard-container');
+      if (container) {
+        container.scrollTop = 0;
       }
     });
   }

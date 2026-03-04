@@ -157,7 +157,7 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true;
     }
-    this.onFormSubmit();
+    this.init_domains();
   }
 
   onFormSubmit() {

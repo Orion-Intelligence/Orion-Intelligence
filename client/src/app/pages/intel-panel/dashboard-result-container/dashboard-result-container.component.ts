@@ -42,6 +42,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
 
   public currentResultModel: any = null;
   public isResponseLoading = signal(false);
+  public animateBackResults = false;
   type: Category = Category.STRATEGIC;
   apiEndpoint: string = '';
 
@@ -60,10 +61,6 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
-    const route = this.router.url.split('?')[0];
-    if (String(route) !== this.dashboardService.m_current_route) {
-      this.fetchSearchResults();
-    }
   }
 
   ngOnInit(): void {
@@ -78,8 +75,22 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
         this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        const cacheKey = this.buildCacheKey();
+        const cachedResult = sessionStorage.getItem(cacheKey);
+        if (cachedResult && !this.hasResultData()) {
+          try {
+            this.currentResultModel = JSON.parse(cachedResult);
+            this.animateBackResults = true;
+            setTimeout(() => {
+              this.animateBackResults = false;
+            }, 700);
+          }
+          catch {
+            sessionStorage.removeItem(cacheKey);
+          }
+        }
 
-        if (!this.currentResultModel?.Result?.length) {
+        if (!this.hasResultData()) {
           this.cdr.detectChanges();
           this.fetchSearchResults();
         }
@@ -103,6 +114,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
       .subscribe((response) => {
         if (response.success && response.data) {
           this.currentResultModel = response.data["Result"];
+          sessionStorage.setItem(this.buildCacheKey(), JSON.stringify(this.currentResultModel));
         }
         this.isResponseLoading.set(false);
       });
@@ -148,5 +160,19 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
       this.currentResultModel.Result = this.helperService.sortByKey<any>(results, key, order);
       this.cdr.detectChanges();
     }
+  }
+
+  private hasResultData(): boolean {
+    return Array.isArray(this.currentResultModel) && this.currentResultModel.length > 0;
+  }
+
+  private buildCacheKey(): string {
+    return [
+      'dashboard-results-cache',
+      this.type,
+      this.dashboardService.consolidatedParamModel.category || 'all',
+      this.dashboardService.consolidatedParamModel.page || '1',
+      this.dashboardService.consolidatedParamModel.q || ''
+    ].join('|');
   }
 }
