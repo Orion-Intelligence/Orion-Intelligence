@@ -37,3 +37,8 @@ describe('Admin Flow – System Settings → Update Company Name → Logout', ()
   });
 
 });
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
+});

@@ -188,9 +188,7 @@ describe('Users Page – Create 5 Different Users With License', () => {
   };
 
   it('Create 5 users with different licenses (admin)', () => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
 
     openUsersPage();
 
@@ -225,9 +223,7 @@ describe('Users Page – Create 5 Different Users With License', () => {
 
 describe('Users Page – Delete Users Sequentially', () => {
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   const USERS_URL = '/dashboard/profile/users?page=1';
@@ -273,4 +269,9 @@ describe('Users Page – Delete Users Sequentially', () => {
     deleteFirstUser();
     cy.logout();
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

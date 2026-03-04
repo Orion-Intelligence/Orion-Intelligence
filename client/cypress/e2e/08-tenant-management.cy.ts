@@ -49,7 +49,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       });
 
       if (rows.length === 0) {
-        // no "Not Verified" left on this page
+        
         return;
       }
 
@@ -59,22 +59,22 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
       verifiedCount++;
 
-      // open edit tenant
+      
       cy.wrap(rows.eq(0)).within(() => {
         cy.get('#edit-tenant').click({ force: true });
       });
 
       cy.wrap(false).as('changed');
 
-      // wait edit row open
+      
       cy.contains('tr', 'Edit Tenant', { timeout: 15000 }).should('be.visible');
 
-      // click Not Verified toggle (your original step found a "button", keep it but make it tolerant)
+      
       cy.contains('tr', 'Edit Tenant')
         .find('button, .ui-button, [role="button"]')
         .contains(/Not Verified/i)
         .then($el => {
-          // if multiple matched, click first
+          
           const $btn = Cypress.$($el).first();
           if ($btn.text().toLowerCase().includes('not verified')) {
             cy.wrap($btn).click({ force: true });
@@ -82,7 +82,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
           }
         });
 
-      // ✅ Enterprise checkbox (fixed selector)
+      
       cy.contains('tr', 'Edit Tenant')
         .contains('.license-card, .license-btn, .license-label', /Enterprise/i)
         .closest('.license-card, .license-btn')
@@ -94,7 +94,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
           }
         });
 
-      // save if changed
+      
       cy.get('@changed').then((changed: any) => {
         if (changed) {
           cy.contains('button', 'Save changes', { timeout: 15000 })
@@ -103,7 +103,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
         }
       });
 
-      // back + loop
+      
       cy.openTenantsPage();
 
       cy.get('body').then($b => {
@@ -144,45 +144,19 @@ const addIOCValue = (value: string) => {
     .click();
 };
 
-// ✅ Tabs ke hisaab se "khud se" IOC values
+
 const addIOCForAllTabs = () => {
   const iocValuesByTab: string[][] = [
-    ['8.8.8.8', '1.1.1.1', '10.10.10.10'],                                  // Tab 0 (IPs)
-    ['example.com', 'malicious-test.com', 'sub.example.org'],                // Tab 1 (Domains)
-    ['http://evil.test/path', 'https://phish.test/login', 'https://t.co/x'], // Tab 2 (URLs)
-    ['d41d8cd98f00b204e9800998ecf8427e', '5d41402abc4b2a76b9719d911017c592'],// Tab 3 (MD5)
+    ['8.8.8.8', '1.1.1.1', '10.10.10.10'],                                  
+    ['example.com', 'malicious-test.com', 'sub.example.org'],                
+    ['http://evil.test/path', 'https://phish.test/login', 'https://t.co/x'], 
+    ['d41d8cd98f00b204e9800998ecf8427e', '5d41402abc4b2a76b9719d911017c592'],
     [
-      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',   // Tab 4 (SHA256)
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',   
       'a54d88e06612d820bc3be72877c74f257b561b19e8f5a0c0b3f3cb0adf3c3f6e'
     ],
   ];
-  /*
-  cy.get('div.border-b-2.cursor-pointer')
-    .should('have.length.greaterThan', 0)
-    .then($tabs => {
-      const tabs = Cypress._.take($tabs.toArray(), 5);
-
-      tabs.forEach((tab, index) => {
-        cy.wrap(tab)
-          .scrollIntoView()
-          .click({ force: true });
-
-        const values = iocValuesByTab[index] || [`test-${index}-1`, `test-${index}-2`];
-
-        values.forEach(v => {
-          addIOCValue(v);
-          cy.wait(200);
-        });
-      });
-    });
-
-  cy.contains('app-dashboard-sidebar-items div', 'Homepage')
-    .should('be.visible')
-    .click();
-
-  cy.get('button[apptooltip="scan all"]')
-    .should('be.visible')
-    .click();*/
+  
 };
 
 it('Tenant adds user, IOCs, scans and logs out', () => {
@@ -193,7 +167,7 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
   cy.get('input[name="password"]').type(tenant.password, { log: false });
   cy.contains('Sign In').click();
 
-  // ✅ Company name enter -> Next -> Skip -> Confirm
+  
   cy.get('input#company[placeholder="Enter company name"]')
     .should('be.visible')
     .clear()
@@ -211,11 +185,11 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
     .should('be.visible')
     .click();
 
-  // ✅ IOCs add + scan all
+  
   openManageIOCs();
   addIOCForAllTabs();
 
-  // ✅ Add user (functions already upar bane hue thay, ab yahan use ho rahe)
+  
   cy.contains('Users').click();
   cy.contains('button', 'Add User').click({ force: true });
 
@@ -271,4 +245,9 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
     cy.location('pathname', { timeout: 20000 })
       .should('include', '/dashboard/profile/homepage');
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

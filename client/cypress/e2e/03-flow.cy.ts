@@ -1,8 +1,6 @@
 describe('Orion Intelligence – Full Stable Flow', () => {
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Full Flow', () => {
@@ -123,7 +121,7 @@ describe('Orion Intelligence – Full Stable Flow', () => {
         .click({ force: true });
     });
 
-   // Open Entity API dropdown
+   
     cy.contains('app-dashboard-sidebar-items > li > div', 'Entity API')
       .scrollIntoView()
       .click({ force: true });
@@ -183,9 +181,7 @@ describe('Orion Intelligence - Heatmap Coverage', () => {
   };
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('covers world heatmap render, interactions and popup close paths', () => {
@@ -270,4 +266,9 @@ describe('Orion Intelligence - Heatmap Coverage', () => {
     cy.tick(8100);
     cy.get('app-world-heatmap .map-container svg', { timeout: 15000 }).should('exist');
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

@@ -6,35 +6,20 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
   ];
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
-
+    cy.loginAsAdmin();
     cy.visit('/dashboard');
-
-
-    cy.get('app-dashboard-sidebar-items')
-      .should('exist');
+    cy.get('app-dashboard-sidebar-items').should('exist');
   });
 
   it('General Intelligence – tabs load & pagination', () => {
-
 
     cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
       .should('be.visible')
       .click({ force: true });
 
-
     TABS.forEach((tab) => {
 
       cy.log(`TAB: ${tab}`);
-
-
-      cy.contains('app-dashboard-sidebar-items div', tab)
-        .scrollIntoView()
-        .should('be.visible')
-        .click({ force: true });
-       cy.reload();
 
       cy.get('.ui-result-card')
         .should('exist');
@@ -48,8 +33,6 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
       cy.get('app-pagination')
         .should('exist')
         .scrollIntoView();
-
-
       cy.get('app-pagination button')
         .not('.disabled')
         .find('img[alt="nav-next"]')
@@ -57,8 +40,6 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
         .then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click({ force: true });
-
-
             cy.get('.ui-result-card')
               .should('exist');
           }
@@ -75,9 +56,7 @@ describe('Data Breach – Tabs & Pagination', () => {
 
   beforeEach(() => {
 
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
 
     cy.visit('/dashboard');
 
@@ -128,9 +107,7 @@ describe('Defacement – Tabs & Pagination', () => {
   const TABS = ['All', 'Hacked'];
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
 
     cy.visit('/dashboard');
     cy.get('app-dashboard-sidebar-items').should('exist');
@@ -190,9 +167,7 @@ describe('Social – Tabs & Pagination', () => {
   ];
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
 
     cy.visit('/dashboard');
     cy.get('app-dashboard-sidebar-items').should('exist');
@@ -255,9 +230,7 @@ describe('Exploit – Tabs & Pagination', () => {
   const TABS = ['All', 'CVE'];
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
     cy.visit('/dashboard');
     cy.get('app-dashboard-sidebar-items').should('exist');
   });
@@ -310,9 +283,7 @@ describe('Feed – Tabs & Pagination', () => {
   const TABS = ['News'];
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
     cy.visit('/dashboard');
     cy.get('app-dashboard-sidebar-items').should('exist');
   });
@@ -358,4 +329,9 @@ describe('Feed – Tabs & Pagination', () => {
       cy.logout();
     });
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

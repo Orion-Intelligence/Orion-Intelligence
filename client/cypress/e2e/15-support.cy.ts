@@ -1,8 +1,6 @@
 describe('Help & Support', () => {
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('opens and closes the support popup', () => {
@@ -33,4 +31,9 @@ describe('Help & Support', () => {
     cy.contains('h2', 'Contact Support')
       .should('not.exist');
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

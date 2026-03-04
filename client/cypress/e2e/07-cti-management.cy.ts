@@ -1,22 +1,8 @@
 
-const adminSessionSetup = () => {
-  cy.loginAsAdmin();
-};
-
-const useAdminSession = () => {
-  cy.session("admin-session", adminSessionSetup, {
-    cacheAcrossSpecs: true,
-    validate: () => {
-      cy.getCookie("access_token").should("exist");
-    },
-  });
-};
-
-
 describe("Orion Intelligence - Social Mapper Deep Coverage", () => {
 
   beforeEach(() => {
-    useAdminSession();
+    cy.loginAsAdmin();
   });
 
   const username = "msmannan00";
@@ -145,4 +131,9 @@ describe("Orion Intelligence - Graph Coverage Boost", () => {
     cy.get("app-social-graph").should("exist");
   });
 
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

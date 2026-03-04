@@ -5,6 +5,7 @@ declare global {
             loginAsAdmin(): Chainable<void>;
             loginAsTest1(): Chainable<void>;
             logout(): Chainable<void>;
+            logoutIfLoggedIn(): Chainable<void>;
             openTenantsPage(): Chainable<void>;
             openHomepage(): Chainable<void>;
             openLastMailAndGetUrl(): Chainable<string>;
@@ -13,6 +14,7 @@ declare global {
     }
 }
 Cypress.Commands.add("loginAsAdmin", () => {
+    cy.reload()
     cy.visit("/login");
     cy.get('input[name="username"]').type(Cypress.env("ADMIN_USERNAME"));
     cy.get('input[name="password"]').type(Cypress.env("ADMIN_PASSWORD"), { log: false });
@@ -41,6 +43,20 @@ Cypress.Commands.add("logout", () => {
         .click({ force: true });
     cy.get('input[name="username"]', { timeout: 10000 })
         .should('exist');
+});
+Cypress.Commands.add("logoutIfLoggedIn", () => {
+    cy.get("body").then(($body) => {
+        const logoutIcon = $body.find('img[alt="Logout"]');
+        if (!logoutIcon.length) {
+            return;
+        }
+        cy.wrap(logoutIcon.first()).click();
+        cy.contains("li", "Sign out")
+            .first()
+            .click({ force: true });
+        cy.get('input[name="username"]', { timeout: 10000 })
+            .should("exist");
+    });
 });
 Cypress.Commands.add("openTenantsPage", () => {
     cy.contains('app-dashboard-sidebar-items div', 'Tenant')

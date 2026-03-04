@@ -1,9 +1,7 @@
 describe('Homepage – Consolidated Checker Full Flow', () => {
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Open consolidated checker and validate all categories', () => {
@@ -29,9 +27,7 @@ describe('Homepage – Consolidated Checker Full Flow', () => {
 
 describe('Dashboard Sections Test', () => {
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   const openReportAndCTI = (item: Cypress.Chainable) => {
@@ -103,7 +99,7 @@ describe('Dashboard Sections Test', () => {
 cy.get('div.ui-ioc-table-row', { timeout: 20000 })
   .first()
   .should('be.visible')
-  .find('button[aria-label="Expand row"]')  // ✅ .find() not .parents()
+  .find('button[aria-label="Expand row"]')  
   .click({ force: true });
 
     cy.get('div.ui-ioc-adv-row')
@@ -155,9 +151,7 @@ cy.get('div.ui-ioc-table-row', { timeout: 20000 })
 
 describe('Dashboard Sections Test', () => {
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   const openReportAndCTI = (item: Cypress.Chainable) => {
@@ -268,11 +262,11 @@ describe('Dashboard Sections Test', () => {
       .parent()
       .click({force: true});
 
-    // Wait for modal to open
+    
     cy.contains('div', 'Domain Scanner')
       .should('be.visible');
 
-    // ── Subdomains Tab ──
+    
     cy.get('app-scan-helper')
       .contains('button', 'Subdomains')
       .should('be.visible')
@@ -291,7 +285,7 @@ describe('Dashboard Sections Test', () => {
       .contains('button', 'Search')
       .click({force: true});
 
-    // Search with multiple domains
+    
     ['example.com', 'google.com', 'openai.com'].forEach((d) => {
       cy.get('#domain-input')
         .should('be.visible')
@@ -303,13 +297,13 @@ describe('Dashboard Sections Test', () => {
         .click({force: true});
     });
 
-    // ── IP Lookup Tab ──
+    
     cy.get('app-scan-helper')
       .contains('button', 'IP Lookup')
       .should('be.visible')
       .click({force: true});
 
-    // ── IP Lookup Tab ──
+    
     cy.get('app-scan-helper')
       .contains('button', 'IP Lookup')
       .should('be.visible')
@@ -329,23 +323,23 @@ describe('Dashboard Sections Test', () => {
       .should('be.visible')
       .click({force: true});
 
-// ✅ Wait for the button to stop being disabled/loading before moving on
+
     cy.get('app-scan-helper')
       .contains('span', 'Lookup IP')
       .should('not.be.disabled');
 
-// ✅ Give Angular time to settle the component state after scan completes
+
     cy.wait(1500);
 
-// ── Wayback Tab ──
-// ✅ Scroll into view first — tab might be off screen
+
+
     cy.get('app-scan-helper')
       .contains('button', 'Wayback')
       .scrollIntoView()
       .should('be.visible')
       .click({force: true});
 
-// ✅ Confirm the tab actually became active before interacting
+
     cy.get('app-scan-helper')
       .contains('button', 'Wayback')
       .should('have.css', 'color', 'rgb(87, 165, 235)');
@@ -360,4 +354,9 @@ describe('Dashboard Sections Test', () => {
       .should('be.visible')
       .click({force: true});
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

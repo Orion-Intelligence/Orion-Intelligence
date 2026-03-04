@@ -1,9 +1,7 @@
 describe('Dashboard Sections Test – Stealer Logs', () => {
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Web Scans – Basic, Port, Repository & SEO', () => {
@@ -177,3 +175,8 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
 });
 
 
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
+});

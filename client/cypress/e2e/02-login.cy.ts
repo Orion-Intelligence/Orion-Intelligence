@@ -6,3 +6,8 @@ describe('Orion Intelligence – Login', () => {
     cy.logout();
   });
 });
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
+});

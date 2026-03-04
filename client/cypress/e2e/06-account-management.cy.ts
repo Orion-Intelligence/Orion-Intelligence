@@ -25,18 +25,7 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
   };
 
   beforeEach(() => {
-    cy.session(
-      'admin-session',
-      () => {
-        cy.loginAsTest1();
-      },
-      {
-        validate() {
-          cy.visit('/dashboard', { failOnStatusCode: false });
-          assertLoggedIn();
-        },
-      }
-    );
+    cy.loginAsTest1();
   });
 
   it('Change avatar, toggle theme, enable 2FA, login check + reset password flow', () => {
@@ -145,4 +134,9 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
       }
     });
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });

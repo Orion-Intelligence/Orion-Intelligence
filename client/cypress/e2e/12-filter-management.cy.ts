@@ -1,26 +1,24 @@
 describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () => {
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Apply ALL filters, auto-apply network, safe search, date, content type', () => {
   cy.visit('/dashboard');
 
-  // Go to General Intelligence
+  
   cy.contains('app-dashboard-sidebar-items div', 'General Intelligence', { timeout: 30000 })
-    //.scrollIntoView()
+    
     .should('be.visible')
     .click({ force: true });
 
-  // Focus search input
+  
   cy.get('[data-cy="dashboard-general-input"]', { timeout: 30000 })
     .should('be.visible')
     .click({ force: true });
 
-  // Enable Advance filters
+  
   cy.contains('span', 'Advance', { timeout: 30000 })
     .parent()
     .find('input[type="checkbox"]')
@@ -29,10 +27,10 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
   cy.get('app-search-filters', { timeout: 20000 }).should('be.visible');
 
-  // Helper: apply a single entity filter (left item click -> type -> add)
+  
   const applyEntityFilter = (name: string, value: string) => {
     cy.contains('app-search-filters div', name, { timeout: 20000 })
-      //.scrollIntoView()
+      
       .should('be.visible')
       .click({ force: true });
 
@@ -46,7 +44,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       .click({ force: true });
   };
 
-  // Apply all entity filters
+  
   const entityFilters: [string, string][] = [
     ['Phone Numbers', '+923001234567'],
     ['Emails', 'test@example.com'],
@@ -63,18 +61,18 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
   entityFilters.forEach(([name, value]) => applyEntityFilter(name, value));
 
-  // Clear selection
+  
   cy.contains('app-search-filters button', 'Clear Selection', { timeout: 20000 })
     .should('be.visible')
     .click({ force: true });
 
-  // Tools open
+  
   cy.contains('button', 'Tools', { timeout: 20000 })
 
     .should('be.visible')
     .click({ force: true });
 
-  // Sort by options
+  
   ['Newest first', 'Oldest first'].forEach((option) => {
     cy.contains('button', 'sort by', { timeout: 20000 })
       .should('be.visible')
@@ -87,7 +85,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
     cy.get('[data-cy="dashboard-general-input"]', { timeout: 20000 }).type('{enter}');
   });
 
-  // Search by options
+  
   [
     'Match Semantic',
     'Match any term (OR)',
@@ -108,7 +106,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       .type('test query{enter}');
   });
 
-  // Helpers for right-side Filters panel
+  
   const openFilters = () => {
     cy.contains('label', 'Filter', { timeout: 20000 })
       .should('be.visible')
@@ -123,21 +121,13 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       .click({ force: true });
   };
 
-  // Open Filters panel
+  
   openFilters();
 
-  // ✅ FIX: Network Type select is name="network" in your DOM (most stable)
-  /*const networkOptions = ['All', 'Onion'];
-  networkOptions.forEach((option) => {
-    cy.get('app-filters select[name="network"]', { timeout: 30000 })
-      .should('be.visible')
-      .select(option, { force: true });
+  
+  
 
-    clickFiltersApply();
-    openFilters();
-  });*/
-
-  // Safe Search
+  
   const safeSearchOptions = ['Yes', 'No'];
   safeSearchOptions.forEach((option) => {
     cy.get('app-filters select[name="safe"]', { timeout: 30000 })
@@ -148,7 +138,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
     openFilters();
   });
 
-  // Date Range (Creation Date Range)
+  
   cy.contains('app-filters button', 'Select date range', { timeout: 30000 })
     .should('be.visible')
     .click({ force: true });
@@ -156,14 +146,14 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
   cy.contains('button', '1', { timeout: 20000 }).click({ force: true });
   cy.contains('button', '25', { timeout: 20000 }).click({ force: true });
 
-  // This Apply is inside date picker; keep generic but with timeout
+  
   cy.contains('button', /^Apply$/i, { timeout: 20000 })
     .should('be.visible')
     .click({ force: true });
 
   openFilters();
 
-  // Content Type
+  
   const contentTypes = ['All', 'Breach', 'Credential', 'Ransomware'];
   contentTypes.forEach((option) => {
     cy.get('app-filters select[name="content"]', { timeout: 30000 })
@@ -174,7 +164,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
     openFilters();
   });
 
-  // Submit (if form exists; keeping your original intent)
+  
   cy.get('form button[type="submit"]', { timeout: 20000 })
     .first()
     .should('be.visible')
@@ -185,9 +175,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Apply ALL filters, network, safe search, date, content type in Data Breach tab', () => {
@@ -196,7 +184,7 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
     cy.visit('/dashboard');
 
     cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
-      //.scrollIntoView()
+      
       .click({ force: true });
 
     cy.get('[data-cy="dashboard-general-input"]').should('be.visible');
@@ -277,9 +265,7 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
 describe('Defacement – Full Filters Flow', () => {
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Apply all filters in Defacement with auto-apply', () => {
@@ -288,7 +274,7 @@ describe('Defacement – Full Filters Flow', () => {
     cy.visit('/dashboard');
 
     cy.contains('app-dashboard-sidebar-items div', 'Defacement')
-      //.scrollIntoView()
+      
       .click({ force: true });
 
     cy.get('[data-cy="dashboard-general-input"]')
@@ -343,9 +329,7 @@ describe('Defacement – Full Filters Flow', () => {
 describe('Social – Full Filters Flow', () => {
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Apply all filters in Social with auto-apply', () => {
@@ -354,7 +338,7 @@ describe('Social – Full Filters Flow', () => {
     cy.visit('/dashboard');
 
     cy.contains('app-dashboard-sidebar-items div', 'Social')
-      //.scrollIntoView()
+      
       .click({ force: true });
 
     cy.get('[data-cy="dashboard-general-input"]')
@@ -421,9 +405,7 @@ describe('Social – Full Filters Flow', () => {
 describe('Exploit – Full Filters Flow', () => {
 
   beforeEach(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Apply all filters in Exploit with auto-apply', () => {
@@ -432,7 +414,7 @@ describe('Exploit – Full Filters Flow', () => {
     cy.visit('/dashboard');
 
     cy.contains('app-dashboard-sidebar-items div', 'Exploit')
-      //.scrollIntoView()
+      
       .click({ force: true });
 
     cy.get('[data-cy="dashboard-general-input"]')
@@ -505,3 +487,8 @@ describe('Exploit – Full Filters Flow', () => {
 
 
 
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
+});

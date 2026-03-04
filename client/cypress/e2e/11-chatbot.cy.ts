@@ -1,8 +1,6 @@
 describe('General Intelligence – Open Report & Chatbot', () => {
   before(() => {
-    cy.session('admin-session', () => {
-      cy.loginAsAdmin();
-    });
+    cy.loginAsAdmin();
   });
 
   it('Open first report and send message in chatbot', () => {
@@ -36,4 +34,9 @@ describe('General Intelligence – Open Report & Chatbot', () => {
       });
     cy.logout();
   });
+});
+
+
+after(() => {
+  cy.logoutIfLoggedIn();
 });
