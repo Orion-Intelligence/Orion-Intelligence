@@ -72,6 +72,17 @@ export class LicenseService {
       moduleName = 'general';
     }
     const key = moduleName.toLowerCase();
+    if (this.subscriptionService.isDemo() && [
+      'profile',
+      'homepage',
+      'account',
+      'users',
+      'auditlog',
+      'tenant',
+      'system-settings'
+    ].includes(key)) {
+      return true;
+    }
     const rule = this.getCombinedRule();
     const access = rule.modules === 'all' || rule.modules.has(key);
     return !(this.subscriptionService.isDemo() && !access);
