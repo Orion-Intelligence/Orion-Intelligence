@@ -214,7 +214,7 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
     cy.get('input[name="password"]').type(tenant.password, {log: false});
     cy.contains('Sign In').click();
 
-    cy.get('[data-cy="dashboard-main-container"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
+    cy.get('[data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
     cy.contains('app-dashboard-sidebar-items div', 'Homepage').click();
     cy.contains('app-dashboard-sidebar-items div', 'Homepage', { timeout: 20000 })
       .should('be.visible')
