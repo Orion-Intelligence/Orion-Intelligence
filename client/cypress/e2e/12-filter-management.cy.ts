@@ -235,8 +235,7 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
     };
     selectDateRange();
 
-    cy.contains('button', 'Select date range').click({ force: true });
-    cy.contains('button', 'Clear').click({ force: true });
+    cy.contains('button', 'Reset').click({ force: true });
 
 
 
@@ -245,7 +244,7 @@ describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
     ];
 
     contentTypes.forEach(option => {
-      cy.get('app-filters select[name="content_type"]').select(option, { force: true });
+      cy.get('app-filters select[name="content"]').select(option, { force: true });
       cy.contains('button', 'Apply').click({ force: true });
       openFilters();
     });
@@ -300,8 +299,7 @@ describe('Defacement – Full Filters Flow', () => {
       cy.contains('button', 'Apply').click({ force: true });
 
 
-      cy.contains('button', 'Select date range').click({ force: true });
-      cy.contains('button', 'Clear').click({ force: true });
+      cy.contains('button', 'Reset').click({ force: true });
 
       openFilters();
     };
@@ -364,8 +362,7 @@ describe('Social – Full Filters Flow', () => {
       cy.contains('button', 'Apply').click({ force: true });
 
 
-      cy.contains('button', 'Select date range').click({ force: true });
-      cy.contains('button', 'Clear').click({ force: true });
+      cy.contains('button', 'Reset').click({ force: true });
 
       openFilters();
     };
@@ -440,8 +437,7 @@ describe('Exploit – Full Filters Flow', () => {
       cy.contains('button', 'Apply').click({ force: true });
 
 
-      cy.contains('button', 'Select date range').click({ force: true });
-      cy.contains('button', 'Clear').click({ force: true });
+      cy.contains('button', 'Reset').click({ force: true });
 
       openFilters();
     };

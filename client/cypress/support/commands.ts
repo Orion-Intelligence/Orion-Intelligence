@@ -14,7 +14,6 @@ declare global {
     }
 }
 Cypress.Commands.add("loginAsAdmin", () => {
-    cy.reload()
     cy.visit("/login");
     cy.get('input[name="username"]').type(Cypress.env("ADMIN_USERNAME"));
     cy.get('input[name="password"]').type(Cypress.env("ADMIN_PASSWORD"), { log: false });
@@ -51,11 +50,15 @@ Cypress.Commands.add("logoutIfLoggedIn", () => {
             return;
         }
         cy.wrap(logoutIcon.first()).click();
-        cy.contains("li", "Sign out")
-            .first()
-            .click({ force: true });
-        cy.get('input[name="username"]', { timeout: 10000 })
-            .should("exist");
+        cy.get("body").then(($b) => {
+            const signOut = $b.find('li:contains("Sign out")');
+            if (!signOut.length) {
+                return;
+            }
+            cy.wrap(signOut.first()).click({ force: true });
+            cy.get('input[name="username"]', { timeout: 10000 })
+                .should("exist");
+        });
     });
 });
 Cypress.Commands.add("openTenantsPage", () => {

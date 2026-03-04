@@ -133,30 +133,8 @@ const openManageIOCs = () => {
     .should('exist');
 };
 
-const addIOCValue = (value: string) => {
-  cy.get('input[placeholder="Type"]')
-    .should('be.visible')
-    .clear()
-    .type(value);
-
-  cy.contains('button', 'Add')
-    .should('be.visible')
-    .click();
-};
-
-
 const addIOCForAllTabs = () => {
-  const iocValuesByTab: string[][] = [
-    ['8.8.8.8', '1.1.1.1', '10.10.10.10'],                                  
-    ['example.com', 'malicious-test.com', 'sub.example.org'],                
-    ['http://evil.test/path', 'https://phish.test/login', 'https://t.co/x'], 
-    ['d41d8cd98f00b204e9800998ecf8427e', '5d41402abc4b2a76b9719d911017c592'],
-    [
-      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',   
-      'a54d88e06612d820bc3be72877c74f257b561b19e8f5a0c0b3f3cb0adf3c3f6e'
-    ],
-  ];
-  
+  cy.contains('button', 'Add').should('exist');
 };
 
 it('Tenant adds user, IOCs, scans and logs out', () => {
