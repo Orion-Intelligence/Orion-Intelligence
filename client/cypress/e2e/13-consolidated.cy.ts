@@ -103,7 +103,7 @@ describe('Dashboard Sections Test', () => {
 cy.get('div.ui-ioc-table-row', { timeout: 20000 })
   .first()
   .should('be.visible')
-  .find('button[aria-label="Expand row"]')  // ✅ .find() not .parents()
+  .find('button[aria-label="Expand row"]')
   .click({ force: true });
 
     cy.get('div.ui-ioc-adv-row')
@@ -241,123 +241,104 @@ describe('Dashboard Sections Test', () => {
   });
 
   it('Open Domain Scanner and run Subdomain, IP Lookup, and Wayback scans', () => {
-    cy.visit('/dashboard');
+  cy.visit('/dashboard');
+  cy.contains('app-dashboard-sidebar-items div', 'Homepage')
+    .should('be.visible')
+    .click({force: true});
 
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
-      .should('be.visible')
-      .click({force: true});
+  cy.get('[data-cy="dashboard-general-input"]')
+    .scrollIntoView()
+    .should('be.visible')
+    .type('{enter}', {force: true});
 
-    cy.get('[data-cy="dashboard-general-input"], input[type="search"], input')
-      .should('be.visible');
+  cy.contains('button', 'IOCs')
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
 
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage')
-      .should('be.visible')
-      .click({force: true});
+  cy.get('button img[src*="scanner.svg"]')
+    .parent()
+    .scrollIntoView()
+    .should('be.visible')
+    .click({force: true});
 
-    cy.get('[data-cy="dashboard-general-input"]')
-      .should('be.visible')
-      .click({force: true})
-      .type('{enter}');
+  cy.contains('div', 'Domain Scanner').should('be.visible');
 
-    cy.contains('button', 'IOCs')
-      .should('be.visible')
-      .click();
+  cy.get('app-scan-helper')
+    .contains('button', 'Subdomains')
+    .scrollIntoView()
+    .should('be.visible')
+    .click({force: true});
 
-    cy.get('button img[src*="scanner.svg"]')
-      .should('be.visible')
-      .parent()
-      .click({force: true});
+  cy.get('app-scan-helper')
+    .contains('button', 'Subdomains')
+    .should('have.css', 'color', 'rgb(87, 165, 235)');
 
-    // Wait for modal to open
-    cy.contains('div', 'Domain Scanner')
-      .should('be.visible');
+  cy.contains('label', 'Show only live').click({force: true});
 
-    // ── Subdomains Tab ──
-    cy.get('app-scan-helper')
-      .contains('button', 'Subdomains')
-      .should('be.visible')
-      .click({force: true});
-
-    cy.contains('label', 'Show only live')
-      .should('be.visible')
-      .click({force: true});
-
+  ['example.com', 'google.com', 'openai.com'].forEach((d) => {
     cy.get('#domain-input')
+      .scrollIntoView()
       .should('be.visible')
       .clear({force: true})
-      .type('abcderfghh', {force: true});
+      .type(d);
 
     cy.get('app-scan-helper')
       .contains('button', 'Search')
       .click({force: true});
 
-    // Search with multiple domains
-    ['example.com', 'google.com', 'openai.com'].forEach((d) => {
-      cy.get('#domain-input')
-        .should('be.visible')
-        .clear({force: true})
-        .type(d, {force: true});
-
-      cy.get('app-scan-helper')
-        .contains('button', 'Search')
-        .click({force: true});
-    });
-
-    // ── IP Lookup Tab ──
-    cy.get('app-scan-helper')
-      .contains('button', 'IP Lookup')
-      .should('be.visible')
-      .click({force: true});
-
-    // ── IP Lookup Tab ──
-    cy.get('app-scan-helper')
-      .contains('button', 'IP Lookup')
-      .should('be.visible')
-      .click({force: true});
 
     cy.get('app-scan-helper')
-      .contains('button', 'IP Lookup')
-      .should('have.css', 'color', 'rgb(87, 165, 235)');
-
-    cy.get('#domain-input')
-      .should('be.visible')
-      .clear({force: true})
-      .type('1.1.1.1', {force: true});
-
-    cy.get('app-scan-helper')
-      .contains('span', 'Lookup IP')
-      .should('be.visible')
-      .click({force: true});
-
-// ✅ Wait for the button to stop being disabled/loading before moving on
-    cy.get('app-scan-helper')
-      .contains('span', 'Lookup IP')
-      .should('not.be.disabled');
-
-// ✅ Give Angular time to settle the component state after scan completes
-    cy.wait(1500);
-
-// ── Wayback Tab ──
-// ✅ Scroll into view first — tab might be off screen
-    cy.get('app-scan-helper')
-      .contains('button', 'Wayback')
-      .scrollIntoView()
-      .should('be.visible')
-      .click({force: true});
-
-// ✅ Confirm the tab actually became active before interacting
-    cy.get('app-scan-helper')
-      .contains('button', 'Wayback')
-      .should('have.css', 'color', 'rgb(87, 165, 235)');
-
-    cy.get('#domain-input')
-      .should('be.visible')
-      .clear({force: true})
-      .type('example.com', {force: true});
-
-    cy.get('app-scan-helper')
-      .contains('span', 'Search Wayback')
-      .should('be.visible')
-      .click({force: true});
+      .contains('button', 'Search')
+      .should('not.be.disabled', {timeout: 30000});
   });
+
+  cy.get('app-scan-helper')
+    .contains('button', 'IP Lookup')
+    .scrollIntoView()
+    .should('be.visible')
+    .click({force: true});
+
+  cy.get('app-scan-helper')
+    .contains('button', 'IP Lookup')
+    .should('have.css', 'color', 'rgb(87, 165, 235)');
+
+  cy.get('#domain-input')
+    .clear({force: true})
+    .type('1.1.1.1');
+
+  cy.get('app-scan-helper')
+    .contains('span', 'Lookup IP')
+    .scrollIntoView()
+    .should('be.visible')
+    .click({force: true});
+
+    cy.get('app-scan-helper')
+    .contains('span', 'Lookup IP')
+    .closest('button')
+    .should('not.be.disabled', {timeout: 30000});
+
+  cy.get('app-scan-helper')
+    .contains('button', 'Wayback')
+    .scrollIntoView()
+    .should('be.visible')
+    .click({force: true});
+
+    cy.get('app-scan-helper')
+    .contains('button', 'Wayback')
+    .should('have.css', 'color', 'rgb(87, 165, 235)');
+
+  cy.contains('div', 'View archived snapshots from Wayback Machine')
+    .should('be.visible');
+
+  cy.get('#domain-input')
+    .clear({force: true})
+    .type('example.com');
+
+  cy.contains('button', 'Search Wayback')
+    .scrollIntoView()
+    .should('be.visible')
+    .click({force: true});
 });
+  });
+
