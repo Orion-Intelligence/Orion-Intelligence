@@ -1,11 +1,17 @@
 import { defineConfig } from "cypress";
 import registerCodeCoverageTasks from "@cypress/code-coverage/task";
+
+const isCi =
+    process.env["CI"] === "true" ||
+    process.env["GITHUB_ACTIONS"] === "true" ||
+    process.env["GITLAB_CI"] === "true";
+
 export default defineConfig({
     env: {
-        coverage: true,
+        coverage: isCi,
         language: "en",
         codeCoverage: {
-            enabled: true,
+            enabled: isCi,
         },
         pgp: false,
         ADMIN_USERNAME: "admin_test_username",
@@ -43,13 +49,15 @@ export default defineConfig({
             "Voice",
             "Group of questions",
         ],
-        takeScreenshots: true,
+        takeScreenshots: false,
     },
     e2e: {
         specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
         supportFile: "cypress/support/e2e.ts",
         setupNodeEvents(on, config) {
-            registerCodeCoverageTasks(on, config);
+            if (isCi) {
+                registerCodeCoverageTasks(on, config);
+            }
             on("before:browser:launch", (browser, launchOptions) => {
                 if (browser.family === "chromium") {
                     launchOptions.args.push("--window-size=1920,1080");
@@ -58,19 +66,20 @@ export default defineConfig({
                 return launchOptions;
             });
             on("task", {
-                log(message) {
+                log(_) {
                     return null;
                 },
-                table(message) {
+                table(_) {
                     return null;
                 },
             });
             return config;
         },
         baseUrl: "http://127.0.0.1:4200",
-        viewportWidth: 1780,
-        viewportHeight: 1720,
+        viewportWidth: 1366,
+        viewportHeight: 768,
         defaultCommandTimeout: 15000,
+        screenshotOnRunFailure: false,
     },
     component: {
         devServer: {

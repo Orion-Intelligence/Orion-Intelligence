@@ -1,23 +1,55 @@
 describe('Orion Intelligence – Full Stable Flow', () => {
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
+  function openSidebarGroup(title: string) {
+    cy.contains('app-dashboard-sidebar-items > li > div', title).then(($group) => {
+      cy.wrap($group).scrollIntoView();
+      let li = $group.closest('li');
+      let sub = li.find('> ul');
+      let isClosed =
+        !sub.length || getComputedStyle(sub[0] as HTMLElement).pointerEvents === 'none';
+
+      if (isClosed) {
+        cy.wrap($group).find('img[alt="Drop Down"]').click();
+      }
+    });
+
+    cy.contains('app-dashboard-sidebar-items > li > div', title)
+      .closest('li')
+      .find('> ul', { timeout: 20000 })
+      .should(($ul) => {
+        expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+      });
+  }
+
+  function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
+    cy.contains('app-dashboard-sidebar-items > li > div', groupTitle)
+      .closest('li')
+      .find('> ul')
+      .should(($ul) => {
+        expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+      })
+      .contains('li > div > div', new RegExp(`^\\s*${itemTitle}\\s*$`))
+      .scrollIntoView()
+      .click();
+  }
 
   it('Full Flow', () => {
-    cy.visit('/dashboard');
-
+    cy.loginAsAdmin();
     cy.contains('app-dashboard-sidebar-items div', 'admin')
       .scrollIntoView()
-      .click({ force: true });
+      .click();
 
-    const adminSections = [
+    [
       'Homepage',
       'Account',
       'Users',
       'Auditlog',
       'Tenant',
       'System Settings'
-    ];
+    ].forEach((section) => {
+      cy.contains('app-dashboard-sidebar-items div', section)
+        .scrollIntoView()
+        .click();
+    });
 
     cy.get('img[src*="nav_menu"]')
       .should('be.visible')
@@ -27,16 +59,9 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       .should('be.visible')
       .click();
 
-    adminSections.forEach((section) => {
-      cy.contains('app-dashboard-sidebar-items div', section)
-        .scrollIntoView()
-        .click({ force: true });
-    });
+    openSidebarGroup('General Intelligence');
 
-    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
-      .click({ force: true });
-
-    const sections = [
+    [
       'All',
       'General',
       'Forums',
@@ -47,32 +72,18 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'Marketplaces',
       'Cryptocurrency',
       'Leaks'
-    ];
+    ].forEach((s) => clickSidebarSubItem('General Intelligence', s));
 
-    sections.forEach((s) => {
-      cy.contains('app-dashboard-sidebar-items div', s)
-        .click({ force: true });
-    });
-
-    cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
-      .click({ force: true });
+    openSidebarGroup('Data Breach');
 
     cy.get('img[alt="scroll to top"]').click();
-    ['All', 'Databases', 'Tracking'].forEach((s) => {
-      cy.contains('app-dashboard-sidebar-items div', s)
-        .click({ force: true });
-    });
+    ['All', 'Databases', 'Tracking'].forEach((s) => clickSidebarSubItem('Data Breach', s));
 
-    cy.contains('app-dashboard-sidebar-items div', 'Defacement')
-      .click({ force: true });
+    openSidebarGroup('Defacement');
 
-    ['All', 'Hacked', 'Phishing', 'Databases'].forEach((s) => {
-      cy.contains('app-dashboard-sidebar-items div', s)
-        .click({ force: true });
-    });
+    ['All', 'Hacked', 'Phishing', 'Databases'].forEach((s) => clickSidebarSubItem('Defacement', s));
 
-    cy.contains('app-dashboard-sidebar-items div', 'Social')
-      .click({ force: true });
+    openSidebarGroup('Social');
 
     [
       'All',
@@ -82,49 +93,34 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'Pastebin',
       'Forum',
       'Reddit'
-    ].forEach((s) => {
-      cy.contains('app-dashboard-sidebar-items div', s)
-        .click({ force: true });
-    });
+    ].forEach((s) => clickSidebarSubItem('Social', s));
 
-    cy.contains('app-dashboard-sidebar-items div', 'Exploit')
-      .click({ force: true });
+    openSidebarGroup('Exploit');
 
-    ['All', 'CVE', 'Tools', 'ZeroDay'].forEach((s) => {
-      cy.contains('app-dashboard-sidebar-items div', s)
-        .click({ force: true });
-    });
+    ['All', 'CVE', 'Tools', 'ZeroDay'].forEach((s) => clickSidebarSubItem('Exploit', s));
 
-    cy.contains('app-dashboard-sidebar-items div', 'Feed')
-      .click({ force: true });
+    openSidebarGroup('Feed');
 
-    cy.contains('app-dashboard-sidebar-items div', 'Stealer logs')
-      .click({ force: true });
+    openSidebarGroup('Stealer logs');
 
     cy.get('button[aria-label="Expand row"]')
       .each(($btn, index) => {
         if (index < 5) {
-          cy.wrap($btn).click({ force: true });
+          cy.wrap($btn).scrollIntoView().click();
         }
       });
 
-    cy.contains('app-dashboard-sidebar-items div', 'Web Scans')
-      .click({ force: true });
+    openSidebarGroup('Web Scans');
 
     [
       'Basic Scan',
       'Port Scan',
       'Repository Scan',
       'SEO Scan'
-    ].forEach((s) => {
-      cy.contains('app-dashboard-sidebar-items div', s)
-        .click({ force: true });
-    });
+    ].forEach((s) => clickSidebarSubItem('Web Scans', s));
 
-   
-    cy.contains('app-dashboard-sidebar-items > li > div', 'Entity API')
-      .scrollIntoView()
-      .click({ force: true });
+
+    openSidebarGroup('Entity API');
 
 
     [
@@ -136,84 +132,105 @@ describe('Orion Intelligence – Full Stable Flow', () => {
       'Software Scanner',
       'File Scanner',
       'Crypto Scanner'
-    ].forEach((item) => {
-    cy.contains('app-dashboard-sidebar-items ul li div', item)
-      .scrollIntoView()
-      .click({ force: true });
-});
+    ].forEach((item) => clickSidebarSubItem('Entity API', item));
 
     cy.logout();
     });
 });
 
 describe('Orion Intelligence - Heatmap Coverage', () => {
-  const getHeatmapComponent = () =>
-    cy.window().then((win) => {
-      const host = win.document.querySelector('app-world-heatmap') as any;
+  function getHeatmapComponent() {
+    return cy.window().then((win) => {
+      let host = win.document.querySelector('app-world-heatmap') as any;
       expect(host, 'app-world-heatmap host').to.exist;
-      const ngApi = (win as any).ng;
+      let ngApi = (win as any).ng;
       if (ngApi?.getComponent) {
         return ngApi.getComponent(host) as any;
       }
-      const ctx = host.__ngContext__ as any[] | undefined;
+      let ctx = host.__ngContext__ as any[] | undefined;
       expect(ctx, 'Angular context fallback').to.exist;
-      const comp = (ctx || []).find((x: any) => x && x.constructor?.name === 'WorldHeatmapComponent');
+      let comp = (ctx || []).find((x: any) => x && x.constructor?.name === 'WorldHeatmapComponent');
       expect(comp, 'WorldHeatmapComponent in ngContext').to.exist;
       return comp as any;
     });
-
-  const openHomepage = () => {
-    cy.visit('/dashboard/profile/homepage');
+  }
+  function openHomepage() {
+    cy.get('app-home-insight', { timeout: 30000 }).should('exist');
     cy.get('app-world-heatmap', { timeout: 30000 }).should('be.visible');
     cy.get('app-world-heatmap .map-container svg', { timeout: 30000 }).should('exist');
     cy.get('app-world-heatmap .map-container path.country', { timeout: 30000 }).should('have.length.greaterThan', 0);
-  };
+  }
 
-  const openCountryReportFromMap = () => {
-    cy.get('app-world-heatmap .map-container path.country.has-data').then(($withData) => {
-      if ($withData.length) {
-        cy.wrap($withData[0]).click({ force: true });
-        return;
-      }
-      cy.get('app-world-heatmap .map-container path.country').first().click({ force: true });
+  function openCountryReportFromMap() {
+    cy.get('app-world-heatmap .map-container path.country', { timeout: 30000 })
+      .should('have.length.greaterThan', 0);
+
+    cy.document().then((doc) => {
+      let target =
+        doc.querySelector('app-world-heatmap .map-container path.country.has-data') ||
+        doc.querySelector('app-world-heatmap .map-container path.country');
+
+      expect(target, 'clickable map country').to.exist;
+      (target as Element).dispatchEvent(
+        new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          composed: true
+        })
+      );
     });
     cy.get('app-heatmap-report', { timeout: 15000 }).should('exist');
-  };
-
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
+  }
 
   it('covers world heatmap render, interactions and popup close paths', () => {
+    cy.loginAsAdmin();
     openHomepage();
 
-    cy.viewport(1280, 800);
     cy.get('app-world-heatmap .map-container svg', { timeout: 15000 }).should('exist');
-    cy.viewport(1440, 900);
     cy.get('app-world-heatmap .map-container svg', { timeout: 15000 }).should('exist');
 
-    cy.get('app-world-heatmap .map-container path.country').first().trigger('mousemove', {
-      clientX: 40,
-      clientY: 40,
-      force: true
-    });
+    cy.get('app-world-heatmap .map-container path.country.has-data, app-world-heatmap .map-container path.country')
+      .first()
+      .should('exist')
+      .then(($el) => {
+        let r = ($el[0] as Element).getBoundingClientRect();
+        ($el[0] as Element).dispatchEvent(
+          new MouseEvent('mousemove', {
+            clientX: r.left + Math.max(1, r.width / 2),
+            clientY: r.top + Math.max(1, r.height / 2),
+            bubbles: true
+          })
+        );
+      });
     cy.get('app-world-heatmap .map-container .heatmap-tooltip.heatmap-tooltip-visible', { timeout: 10000 }).should('be.visible');
-    cy.get('app-world-heatmap .map-container path.country').first().trigger('mouseleave', { force: true });
+    cy.get('app-world-heatmap .map-container path.country.has-data, app-world-heatmap .map-container path.country')
+      .first()
+      .should('exist')
+      .then(($el) => {
+        ($el[0] as Element).dispatchEvent(
+          new MouseEvent('mouseleave', {
+            bubbles: true
+          })
+        );
+      });
     cy.get('app-world-heatmap .map-container .heatmap-tooltip').should('exist');
 
     openCountryReportFromMap();
     cy.contains('app-heatmap-report h3', 'Reports', { timeout: 10000 }).should('be.visible');
     cy.get('app-heatmap-report .overflow-y-auto').should('exist');
 
-    cy.get('app-heatmap-report button[aria-label="Close"]').click({ force: true });
+    cy.get('app-heatmap-report button[aria-label="Close"]').scrollIntoView().should('be.visible').click();
     cy.get('app-heatmap-report', { timeout: 15000 }).should('not.exist');
 
     openCountryReportFromMap();
-    cy.get('app-heatmap-report > div.fixed').click('topLeft', { force: true });
+    cy.get('app-heatmap-report > div.fixed').scrollIntoView().click('topLeft');
     cy.get('app-heatmap-report', { timeout: 15000 }).should('not.exist');
+
+    cy.logout();
   });
 
   it('covers branch paths by invoking heatmap component API', () => {
+    cy.loginAsAdmin();
     openHomepage();
     cy.clock();
 
@@ -226,14 +243,14 @@ describe('Orion Intelligence - Heatmap Coverage', () => {
         }
       });
 
-      const appService = comp['appService'];
-      const originalWorld = appService.worldJson();
+      let appService = comp['appService'];
+      let originalWorld = appService.worldJson();
       appService.worldJson.set(null);
       comp['createChart']();
       appService.worldJson.set(originalWorld);
       comp['createChart']();
 
-      const originalAll = comp['allCategoryReports'];
+      let originalAll = comp['allCategoryReports'];
       comp['allCategoryReports'] = {};
       comp['startCategoryRotation']();
       comp['allCategoryReports'] = {
@@ -246,7 +263,7 @@ describe('Orion Intelligence - Heatmap Coverage', () => {
       };
       comp['startCategoryRotation']();
 
-      const reports = comp.getReportsByCountry('Canada');
+      let reports = comp.getReportsByCountry('Canada');
       expect(reports.length).to.be.greaterThan(0);
       comp['openCountryReport']('Canada');
       expect(comp.isOpenCountryReport).to.equal(true);
@@ -265,10 +282,7 @@ describe('Orion Intelligence - Heatmap Coverage', () => {
 
     cy.tick(8100);
     cy.get('app-world-heatmap .map-container svg', { timeout: 15000 }).should('exist');
+
+    cy.logout();
   });
-});
-
-
-after(() => {
-  cy.logoutIfLoggedIn();
 });

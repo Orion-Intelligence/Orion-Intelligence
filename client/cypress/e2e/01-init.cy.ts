@@ -5,8 +5,3 @@ describe('Orion Intelligence – Init', () => {
 
   });
 });
-
-
-after(() => {
-  cy.logoutIfLoggedIn();
-});

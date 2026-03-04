@@ -7,8 +7,6 @@ describe('Orion Intelligence – Login', () => {
 
     cy.get('[data-cy="dashboard-main"]').should('be.visible');
     cy.get('[data-cy="profile-menu"]').click();
-    cy.wait(5999)
-
 
     cy.get('li[data-cy="signout-btn"]').click({ scrollBehavior: false });
     cy.get('[data-cy="login-user"]').should('exist');
