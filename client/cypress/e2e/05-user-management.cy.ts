@@ -10,65 +10,7 @@ describe('Users Page – Create 5 Different Users With License', () => {
     licenses: string[];
   }
 
-  const openUsersPage = () => {
-    cy.intercept('POST', '**/api/users').as('usersApi');
-    cy.visit('/dashboard/profile/homepage');
-    cy.get('#dashboard__sidebar-main', { timeout: 30000 }).should('be.visible');
-
-    cy.get('app-dashboard-sidebar-items[ng-reflect-category="Profile"]', { timeout: 30000 })
-      .should('exist')
-      .as('profileGroup');
-
-    cy.get('@profileGroup')
-      .find('li > div[tabindex="0"]', { timeout: 30000 })
-      .first()
-      .scrollIntoView()
-      .should('be.visible')
-      .click({ force: true });
-
-    cy.get('@profileGroup')
-      .find('ul div[tabindex="0"][ng-reflect-router-link="profile,users"]', { timeout: 30000 })
-      .scrollIntoView()
-      .should('be.visible')
-      .click({ force: true });
-
-    cy.url({ timeout: 30000 }).should('include', '/dashboard/profile/users');
-    cy.wait('@usersApi', { timeout: 30000 });
-  };
-
-  const clickAddUserButton = () => {
-    cy.url({ timeout: 30000 }).should('include', '/dashboard/profile/users');
-
-    cy.get('#dashboard-container app-view-profile', { timeout: 30000 })
-      .should('be.visible')
-      .within(() => {
-        cy.get('button.ui-btn-primary', { timeout: 30000 })
-          .should('exist')
-          .filter((_, el) => {
-            const txt = (el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-            return txt.includes('add user');
-          })
-          .first()
-          .scrollIntoView()
-          .should('be.visible')
-          .click({ force: true });
-      });
-
-    cy.contains('.ui-popup-shell .ui-popup-title', 'Add User', { timeout: 30000 })
-      .should('be.visible')
-      .closest('.ui-popup-shell')
-      .as('addUserModal');
-  };
-
-  const setInput = (name: 'username' | 'email' | 'password', value: string) => {
-    cy.get('@addUserModal')
-      .find(`input[name="${name}"]`, { timeout: 30000 })
-      .should('be.visible')
-      .clear({ force: true })
-      .type(value, { force: true });
-  };
-
-  const setSelect = (name: 'role' | 'status', optionText: string) => {
+  function setSelect(name: 'role' | 'status', optionText: string) {
     cy.get('@addUserModal')
       .find(`select[name="${name}"]`, { timeout: 30000 })
       .should('exist')
@@ -88,13 +30,52 @@ describe('Users Page – Create 5 Different Users With License', () => {
           }
         }
 
-        cy.wrap($select).select(resolved, { force: true });
+        cy.wrap($select).select(resolved);
       });
-  };
+  }
 
-  const setLicenses = (licensesWanted: string[]) => {
-    const wanted = licensesWanted.map((x) => x.trim().toLowerCase());
+  function addUser(user: User) {
+    cy.url({ timeout: 30000 }).should('include', '/dashboard/profile/users');
 
+    cy.get('#dashboard-container app-view-profile', { timeout: 30000 })
+      .should('be.visible')
+      .within(() => {
+        cy.get('button.ui-btn-primary', { timeout: 30000 })
+          .should('exist')
+          .filter((_, el) => {
+            const txt = (el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+            return txt.includes('add user');
+          })
+          .first()
+          .scrollIntoView()
+          .should('be.visible')
+          .click();
+      });
+
+    cy.contains('.ui-popup-shell .ui-popup-title', 'Add User', { timeout: 30000 })
+      .should('be.visible')
+      .closest('.ui-popup-shell')
+      .as('addUserModal');
+
+    cy.get('@addUserModal')
+      .find('input[name="username"]', { timeout: 30000 })
+      .should('be.visible')
+      .clear()
+      .type(user.username);
+    cy.get('@addUserModal')
+      .find('input[name="email"]', { timeout: 30000 })
+      .should('be.visible')
+      .clear()
+      .type(user.email);
+    cy.get('@addUserModal')
+      .find('input[name="password"]', { timeout: 30000 })
+      .should('be.visible')
+      .clear()
+      .type(user.password);
+    setSelect('role', user.role);
+    setSelect('status', 'Active');
+
+    const wanted = user.licenses.map((x) => x.trim().toLowerCase());
     cy.get('@addUserModal')
       .find('.license-grid .license-card', { timeout: 30000 })
       .should('exist')
@@ -105,58 +86,35 @@ describe('Users Page – Create 5 Different Users With License', () => {
         const shouldBeChecked = wanted.includes(label);
         const isChecked = $checkbox.is(':checked');
 
-        if (shouldBeChecked && !isChecked) cy.wrap($card).click({ force: true });
-        if (!shouldBeChecked && isChecked) cy.wrap($card).click({ force: true });
+        if (shouldBeChecked && !isChecked) cy.wrap($card).click();
+        if (!shouldBeChecked && isChecked) cy.wrap($card).click();
       });
-  };
 
-  const submitAddUser = () => {
     cy.get('@addUserModal')
       .contains('button', 'Add User', { timeout: 30000 })
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
     cy.contains('.ui-popup-shell .ui-popup-title', 'Add User', { timeout: 30000 }).should('not.exist');
-  };
-
-  const addUser = (user: User) => {
-    clickAddUserButton();
-    setInput('username', user.username);
-    setInput('email', user.email);
-    setInput('password', user.password);
-    setSelect('role', user.role);
-    setSelect('status', 'Active');
-    setLicenses(user.licenses);
-    submitAddUser();
     cy.contains(user.username, { timeout: 30000 }).should('exist');
-  };
+  }
 
-  const loginAsUser = (username: string, password: string) => {
+  function loginAsUser(username: string, password: string) {
     cy.clearCookies();
     cy.clearLocalStorage();
     cy.visit('/login');
-    cy.get('input[name="username"]', { timeout: 30000 }).should('be.visible').clear().type(username, { force: true });
+    cy.get('input[name="username"]', { timeout: 30000 }).should('be.visible').clear().type(username);
     cy.get('input[name="password"]', { timeout: 30000 }).should('be.visible').clear().type(password, { log: false });
 
     cy.get('[data-cy="login-button"], input.login-button', { timeout: 30000 })
       .first()
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
     cy.url({ timeout: 30000 }).should('include', '/dashboard/profile');
-  };
+  }
 
-  const clickSidebarItemByText = (name: string) => {
-    cy.contains('app-dashboard-sidebar-items div', new RegExp(`^\\s*${Cypress._.escapeRegExp(name)}\\s*$`, 'i'), {
-      timeout: 30000,
-    })
-      .first()
-      .scrollIntoView()
-      .should('be.visible')
-      .click({ force: true });
-  };
-
-  const loginAndClickSidebar = (username: string, sidebarItems: string[]) => {
+  function loginAndClickSidebar(username: string, sidebarItems: string[]) {
     const selectedUser = Object.values(testUsers).find((u: any) => u?.username === username) as User | undefined;
     if (!selectedUser?.password) {
       throw new Error(`Missing user/password in Cypress env for username: ${username}`);
@@ -165,32 +123,60 @@ describe('Users Page – Create 5 Different Users With License', () => {
     loginAsUser(username, selectedUser.password);
 
     sidebarItems.forEach((itemName) => {
-      clickSidebarItemByText(itemName);
+      cy.contains('app-dashboard-sidebar-items div', new RegExp(`^\\s*${Cypress._.escapeRegExp(itemName)}\\s*$`, 'i'), {
+        timeout: 30000,
+      })
+        .first()
+        .scrollIntoView()
+        .should('be.visible')
+        .click();
 
       if (username === 'testing5' && itemName === 'Stealer logs') {
         cy.get('body').then(($b) => {
           if ($b.find('.pro-subscription_container').length) {
             cy.get('.pro-subscription_container').should('be.visible');
-            cy.get('.pro-subscription_subscription-options input[type="radio"][value="annual"]').check({ force: true });
-            cy.get('input#name').clear({ force: true }).type('Test User', { force: true });
-            cy.get('input#phone').clear({ force: true }).type('03001234567', { force: true });
-            cy.get('input#email').clear({ force: true }).type('test.user@example.com', { force: true });
+            cy.get('.pro-subscription_subscription-options input[type="radio"][value="annual"]').check();
+            cy.get('input#name').clear().type('Test User');
+            cy.get('input#phone').clear().type('03001234567');
+            cy.get('input#email').clear().type('test.user@example.com');
             cy.get('form.pro-subscription_payment-form').submit();
             cy.get('button.pro-subscription_btn-close', { timeout: 30000 })
               .should('be.visible')
-              .click({ force: true });
+              .click();
           }
         });
       }
     });
 
     cy.logout();
-  };
+  }
 
   it('Create 5 users with different licenses (admin)', () => {
     cy.loginAsAdmin();
 
-    openUsersPage();
+    cy.intercept('POST', '**/api/users').as('usersApi');
+    cy.visit('/dashboard/profile/homepage');
+    cy.get('#dashboard__sidebar-main', { timeout: 30000 }).should('be.visible');
+
+    cy.get('app-dashboard-sidebar-items[ng-reflect-category="Profile"]', { timeout: 30000 })
+      .should('exist')
+      .as('profileGroup');
+
+    cy.get('@profileGroup')
+      .find('li > div[tabindex="0"]', { timeout: 30000 })
+      .first()
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+
+    cy.get('@profileGroup')
+      .find('ul div[tabindex="0"][ng-reflect-router-link="profile,users"]', { timeout: 30000 })
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+
+    cy.url({ timeout: 30000 }).should('include', '/dashboard/profile/users');
+    cy.wait('@usersApi', { timeout: 30000 });
 
     const users: User[] = userOrder
       .map((key) => testUsers[key])
@@ -228,41 +214,38 @@ describe('Users Page – Delete Users Sequentially', () => {
 
   const USERS_URL = '/dashboard/profile/users?page=1';
 
-  const openUsersList = () => {
+  function openUsersList() {
     cy.intercept('POST', '**/api/users').as('usersApi');
     cy.visit(USERS_URL);
     cy.wait('@usersApi', { timeout: 30000 });
-  };
+  }
 
-  const confirmDelete = () => {
-    cy.get('.ui-graph-popup-panel', { timeout: 30000 })
-      .should('be.visible')
-      .within(() => {
-        cy.get('button.ui-popup-btn-primary')
-          .should('be.visible')
-          .click({ force: true });
-      });
-
-    cy.get('.ui-graph-popup-panel').should('not.exist');
-  };
-
-  const deleteFirstUser = () => {
+  function deleteFirstUser() {
+    cy.get('#dashboard-container', { timeout: 30000 }).scrollTo('bottom', { duration: 300 });
     cy.get('button#edit-profile', { timeout: 30000 }).then(($btns) => {
       if ($btns.length <= 2) {
         cy.log('Only system users left. Stop.');
         return;
       }
 
-      cy.wrap($btns[0]).scrollIntoView().click({ force: true });
+      cy.wrap($btns[0]).scrollIntoView().click();
       cy.contains('button.ui-btn-danger', 'Delete User', { timeout: 30000 })
         .should('be.visible')
-        .click({ force: true });
+        .click();
 
-      confirmDelete();
+      cy.get('.ui-graph-popup-panel', { timeout: 30000 })
+        .should('be.visible')
+        .within(() => {
+          cy.get('button.ui-popup-btn-primary')
+            .should('be.visible')
+            .click();
+        });
+
+      cy.get('.ui-graph-popup-panel').should('not.exist');
       openUsersList();
       deleteFirstUser();
     });
-  };
+  }
 
   it('Deletes users until only 2 remain', () => {
     openUsersList();
