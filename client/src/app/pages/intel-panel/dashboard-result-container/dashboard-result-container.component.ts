@@ -42,7 +42,6 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
 
   public currentResultModel: any = null;
   public isResponseLoading = signal(false);
-  public animateBackResults = false;
   type: Category = Category.STRATEGIC;
   apiEndpoint: string = '';
 
@@ -80,10 +79,6 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
         if (cachedResult && !this.hasResultData()) {
           try {
             this.currentResultModel = JSON.parse(cachedResult);
-            this.animateBackResults = true;
-            setTimeout(() => {
-              this.animateBackResults = false;
-            }, 700);
           }
           catch {
             sessionStorage.removeItem(cacheKey);

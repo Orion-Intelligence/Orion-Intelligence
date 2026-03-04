@@ -21,9 +21,9 @@
   </app-dashboard-result-defacement>
 </div>
 
-<div *ngIf="!isResponseLoading()" @fadeInDashboardItem [class.ui-back-appear]="animateBackResults">
+<div *ngIf="!isResponseLoading()" @fadeInDashboardItem>
   <div class="mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]">
-    <div *ngFor="let item of currentResultModel" class="space-y-6" [class.ui-back-item-fade]="animateBackResults" @fadeInDashboardItem>
+    <div *ngFor="let item of currentResultModel" class="space-y-6">
       <app-dashboard-results-general-grid
         *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'"
         [query]="currentQuery"

@@ -199,23 +199,6 @@ html:has(body.dark-theme) {
   animation: loader_indeterminate 1.5s linear infinite;
 }
 
-@keyframes uiBackResultAppear {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.ui-back-appear .ui-result-card,
-.ui-back-appear .ui-table-shell table tbody tr {
-  animation: uiBackResultAppear 220ms ease-out both;
-}
-
-.ui-back-item-fade {
-  animation: uiBackResultAppear 260ms ease-out both;
-}
 
 @keyframes slideUp {
   from {
