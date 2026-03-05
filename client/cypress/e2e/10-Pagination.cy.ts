@@ -67,14 +67,23 @@ describe('Data Breach – Tabs & Pagination', () => {
   it('Data Breach – tabs load & pagination', () => {
 
     cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
+      .scrollIntoView()
+      .should('be.visible')
       .click();
+    cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
+      .closest('li')
+      .as('dataBreachTabs');
 
 
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
 
 
-      cy.contains('app-dashboard-sidebar-items div', tab)
+      cy.get('@dataBreachTabs')
+        .find('> ul')
+        .should('have.class', 'pointer-events-auto')
+        .contains('div', tab)
+        .should('be.visible')
         .click();
 
 

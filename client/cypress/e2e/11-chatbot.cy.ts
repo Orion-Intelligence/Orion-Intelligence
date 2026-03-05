@@ -6,26 +6,21 @@ describe('General Intelligence – Open Report & Chatbot', () => {
   it('Open first report and send message in chatbot', () => {
     cy.visit('/dashboard');
 
-
     cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
-      .click({ force: true });
-
+      .click();
 
     cy.get('div[apptooltip="Open Report"]')
       .first()
-      .click({ force: true });
-
+      .click();
 
     cy.get('div.fixed.bottom-6.right-6 button')
-      .click({ force: true });
+      .click();
 
     cy.get('form input[name="message"]')
-      .type('hey', { force: true });
-
+      .type('hey');
 
     cy.get('button.ui-chat-send-btn')
-      .click({ force: true });
-
+      .click();
 
     cy.get('div.flex-1.space-y-3')
       .within(() => {
@@ -35,7 +30,6 @@ describe('General Intelligence – Open Report & Chatbot', () => {
     cy.logout();
   });
 });
-
 
 after(() => {
   cy.logoutIfLoggedIn();
