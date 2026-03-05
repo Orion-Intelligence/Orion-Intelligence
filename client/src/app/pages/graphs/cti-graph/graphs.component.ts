@@ -47,9 +47,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly sessionPhysicsKey = 'cti_graph_physics_enabled';
   private readonly clusterNodePrefix = 'cti_vertices/';
   private nodeTypeById: Record<string, string> = {};
-  private readonly twId = 'tw-social';
-  private tailwindLinkEl: HTMLLinkElement | null = null;
-  private ownsTailwindLink = false;
   private readonly graphType = 'graph';
   private hasLoadedSessions = false;
   private lastSavedSessionSignature = '';
@@ -130,7 +127,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   orignalColor: string | Color = '';
   currentCategory = '';
   isSidebarCollapsed = false;
-  isTailwindReady = false;
+  isTailwindReady = true;
   nodeSearchText = '';
   isGraphView = true;
   isListingsCollapsed = true;
@@ -175,7 +172,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       document.addEventListener('pointerdown', this.globalPointerDownListener, true);
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }
-    this.loadTailwindStyles();
+    this.tryApplyPendingFilters();
     this.restoreSessionState();
     this.loadSessions();
     this.route.queryParams.subscribe(params => {
@@ -203,49 +200,10 @@ export class GraphComponent implements OnInit, OnDestroy {
       document.removeEventListener('pointerdown', this.globalPointerDownListener, true);
       document.removeEventListener('keydown', this.globalKeyDownListener, true);
     }
-    if (isPlatformBrowser(this.platformId) && this.ownsTailwindLink) {
-      this.tailwindLinkEl?.remove();
-      this.tailwindLinkEl = null;
-    }
   }
 
   onSidebarCollapsedChange(isCollapsed: boolean): void {
     this.isSidebarCollapsed = isCollapsed;
-  }
-
-  private loadTailwindStyles(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      this.markTailwindReady();
-      return;
-    }
-    const existingLink = document.getElementById(this.twId) as HTMLLinkElement | null;
-    if (existingLink) {
-      this.tailwindLinkEl = existingLink;
-      if (existingLink.dataset['ready'] === 'true' || !!existingLink.sheet) {
-        this.markTailwindReady();
-        return;
-      }
-      existingLink.addEventListener('load', () => this.markTailwindReady(), { once: true });
-      existingLink.addEventListener('error', () => this.markTailwindReady(), { once: true });
-      return;
-    }
-    const link = document.createElement('link');
-    link.id = this.twId;
-    link.rel = 'stylesheet';
-    link.href = 'tailwind-social.css';
-    link.addEventListener('load', () => {
-      link.dataset['ready'] = 'true';
-      this.markTailwindReady();
-    }, { once: true });
-    link.addEventListener('error', () => this.markTailwindReady(), { once: true });
-    document.head.appendChild(link);
-    this.tailwindLinkEl = link;
-    this.ownsTailwindLink = true;
-  }
-
-  private markTailwindReady(): void {
-    this.isTailwindReady = true;
-    this.tryApplyPendingFilters();
   }
 
   private tryApplyPendingFilters(): void {

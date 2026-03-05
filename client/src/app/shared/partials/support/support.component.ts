@@ -1,22 +1,18 @@
-import { isPlatformBrowser, NgClass, NgIf } from '@angular/common';
-import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output, PLATFORM_ID } from '@angular/core';
+import { NgClass, NgIf } from '@angular/common';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { popupAnimation, overlayAnimation } from '../../animations/popup.animations';
 import { finalize } from 'rxjs';
-import { ensureStylesheet } from '../../utils/stylesheet-loader.util';
 @Component({
   selector: 'app-support',
   imports: [NgIf, NgClass, FormsModule],
   templateUrl: './support.component.html',
   animations: [popupAnimation, overlayAnimation],
 })
-export class SupportComponent implements OnInit, OnDestroy {
-  private readonly twId = 'tailwind-support-styles';
-  private tailwindLinkEl: HTMLLinkElement | null = null;
-
-  isTailwindReady = false;
+export class SupportComponent {
+  isTailwindReady = true;
   isSubmitting = false;
   submitAttempted = false;
   errorMessage: string | null = null;
@@ -24,21 +20,7 @@ export class SupportComponent implements OnInit, OnDestroy {
 
   @Output() closePopup = new EventEmitter<void>();
 
-  constructor( @Inject(PLATFORM_ID) private readonly platformId: object, private apiService: ApiService, private messageNotificationService: MessageNotificationService ) { }
-
-  ngOnInit(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      this.isTailwindReady = true;
-      return;
-    }
-    this.loadTailwindStyles();
-  }
-
-  ngOnDestroy(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.tailwindLinkEl = null;
-    }
-  }
+  constructor( private apiService: ApiService, private messageNotificationService: MessageNotificationService ) { }
 
   close() {
     this.resetForm();
@@ -92,12 +74,5 @@ export class SupportComponent implements OnInit, OnDestroy {
           };
       } | null | undefined;
     return error?.error?.detail || error?.error?.message || 'Failed to send message';
-  }
-
-  private loadTailwindStyles(): void {
-    const stylesheet = ensureStylesheet(this.twId, 'tailwind-social.css', () => {
-      this.isTailwindReady = true; 
-    });
-    this.tailwindLinkEl = stylesheet.linkEl;
   }
 }

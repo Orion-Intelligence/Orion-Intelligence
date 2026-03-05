@@ -29,7 +29,6 @@ import { GraphSearchTriggerComponent } from './graph-search-trigger/graph-search
 import { SocialScanJobService } from './services/social-scan-job.service';
 import { PlatformFetchService } from './services/platform-fetch.service';
 import { RelationshipResolverService } from './services/relationship-resolver.service';
-import { ensureStylesheet } from '../../../shared/utils/stylesheet-loader.util';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 @Component({
   selector: 'app-social-graph',
@@ -48,7 +47,6 @@ import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/u
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
-  private readonly twId = 'tw-social';
   private activeTabState = computed(() => this.tabManager.activeTab()?.state);
   private cancelScanSubjects = new Map<string, Subject<void>>();
   private cancelProfileFetchSubjects = new Map<string, Subject<void>>();
@@ -57,12 +55,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   private cancelFollowersFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
   private mediaQueryList: MediaQueryList | null = null;
-  private tailwindLinkEl: HTMLLinkElement | null = null;
-  private ownsTailwindLink = false;
   private readonly mediaQueryListener = (event: MediaQueryListEvent) => this.isSmallScreen.set(event.matches);
 
   public state = inject(SocialMapperStateService);
-  isTailwindReady = signal(false);
+  isTailwindReady = signal(true);
   searchTerm = computed(() => this.activeTabState()?.searchTerm() ?? '');
   homeMenuSearchTerm = computed(() => this.activeTabState()?.homeMenuSearchTerm() ?? '');
   jobs = computed(() => this.activeTabState()?.jobs() ?? []);
@@ -168,9 +164,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         }
       });
     }
-    else {
-      this.isTailwindReady.set(true);
-    }
   }
 
   ngOnInit(): void {
@@ -178,7 +171,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       this.resumeIncompleteScans();
       return;
     }
-    this.loadTailwindSocialStyles();
     if (!this.isSmallScreen()) {
       this.updateState(state => state.isEntityMenuCollapsed.set(false), false);
     }
@@ -189,16 +181,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId) && this.mediaQueryList) {
       this.mediaQueryList.removeEventListener('change', this.mediaQueryListener);
     }
-    if (isPlatformBrowser(this.platformId) && this.ownsTailwindLink) {
-      this.tailwindLinkEl?.remove();
-      this.tailwindLinkEl = null;
-    }
-  }
-
-  private loadTailwindSocialStyles() {
-    const stylesheet = ensureStylesheet(this.twId, 'tailwind-social.css', () => this.isTailwindReady.set(true));
-    this.tailwindLinkEl = stylesheet.linkEl;
-    this.ownsTailwindLink = stylesheet.ownsLink;
   }
 
   private isScanInProgressForUsername(username?: string): boolean {

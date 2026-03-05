@@ -40,6 +40,14 @@ Cypress.Commands.add("loginAsTest1", () => {
 Cypress.Commands.add("logout", () => {
     cy.location('pathname').then((pathname) => {
         if (pathname.includes('/login')) return;
+        cy.get('body').then(($body) => {
+            const $dashboardContainer = $body.find('#dashboard-container, [data-cy="dashboard-sub-container"]').first();
+            if ($dashboardContainer.length) {
+                cy.wrap($dashboardContainer).scrollTo('top', { ensureScrollable: false });
+            } else {
+                cy.scrollTo("top", { ensureScrollable: false });
+            }
+        });
 
         if (Cypress.$('[data-cy="profile-menu"]').length > 0) {
             cy.get('[data-cy="profile-menu"]', { timeout: 10000 }).then(($menus) => {

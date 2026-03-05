@@ -3,37 +3,64 @@ describe('Help & Support', () => {
     cy.loginAsAdmin();
   });
 
-  it('opens and closes the support popup', () => {
+  after(() => {
+    cy.logout();
+  });
+
+  it('opens support popup, fills form, and sends message', () => {
+    cy.intercept('POST', '**/support', {
+      statusCode: 200,
+      body: {success: true}
+    }).as('sendSupport');
+
     cy.visit('/dashboard');
 
-    cy.get('img[alt="Logout"]')
-      .closest('a')
-      .click({ force: true });
-
-    cy.get('ul')
-      .should('exist');
-
-    cy.contains('li span', 'Help & Support')
+    cy.scrollTo('top', {ensureScrollable: false});
+    cy.get('[data-cy="profile-menu"], app-profile img[alt="Logout"]', {timeout: 15000})
+      .filter(':visible')
+      .first()
       .should('be.visible')
-      .closest('li')
-      .click({ force: true });
+      .click({scrollBehavior: false});
 
-    cy.get('app-support')
-      .should('exist');
-
-    cy.contains('h2', 'Contact Support', { timeout: 10000 })
-      .should('be.visible');
-
-    cy.contains('button', 'Cancel')
+    cy.get('app-profile ul:visible', {timeout: 10000})
       .should('be.visible')
-      .click();
+      .as('profileDropdown');
 
-    cy.contains('h2', 'Contact Support')
-      .should('not.exist');
+    cy.get('@profileDropdown')
+      .contains('li', 'Help & Support', {timeout: 10000})
+      .should('be.visible')
+      .click({scrollBehavior: false});
+
+    cy.get('app-support .ui-graph-popup-overlay', {timeout: 10000})
+      .should('be.visible')
+      .and('not.have.class', 'opacity-0');
+
+    cy.get('app-support .ui-popup-shell', {timeout: 10000})
+      .should('be.visible')
+      .within(() => {
+        cy.contains('h2', 'Contact Support', {timeout: 10000}).should('be.visible');
+
+        cy.get('input[name="email"]')
+          .should('be.visible')
+          .clear()
+          .type('qa.support@orion.local');
+
+        cy.get('input[placeholder="Write your subject"]')
+          .should('be.visible')
+          .clear()
+          .type('Support request from Cypress');
+
+        cy.get('textarea[placeholder="Write your message..."]')
+          .should('be.visible')
+          .clear()
+          .type('Please review this test support message submission flow.');
+
+        cy.get('button.ui-popup-btn-primary')
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
+      });
+
+    cy.wait('@sendSupport');
   });
-});
-
-
-after(() => {
-  cy.logoutIfLoggedIn();
 });
