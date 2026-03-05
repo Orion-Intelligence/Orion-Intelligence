@@ -80,6 +80,8 @@ export default defineConfig({
         viewportWidth: 1366,
         viewportHeight: 1200,
         defaultCommandTimeout: 15000,
+        waitForAnimations: false,
+        animationDistanceThreshold: 0,
         screenshotOnRunFailure: false,
     },
     component: {

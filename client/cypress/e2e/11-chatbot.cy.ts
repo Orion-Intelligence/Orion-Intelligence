@@ -3,6 +3,10 @@ describe('General Intelligence – Open Report & Chatbot', () => {
     cy.loginAsAdmin();
   });
 
+  after(() => {
+    cy.logoutIfLoggedIn();
+  });
+
   it('Open first report and send message in chatbot', () => {
     cy.visit('/dashboard');
 
@@ -29,8 +33,4 @@ describe('General Intelligence – Open Report & Chatbot', () => {
       });
     cy.logout();
   });
-});
-
-after(() => {
-  cy.logoutIfLoggedIn();
 });

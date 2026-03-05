@@ -6,6 +6,8 @@ declare global {
             loginAsTest1(): Chainable<void>;
             logout(): Chainable<void>;
             logoutIfLoggedIn(): Chainable<void>;
+            openSideFilter(): Chainable<void>;
+            closeSideFilter(): Chainable<void>;
             openTenantsPage(): Chainable<void>;
             openHomepage(): Chainable<void>;
             openLastMailAndGetUrl(): Chainable<string>;
@@ -110,6 +112,20 @@ Cypress.Commands.add("openTenantsPage", () => {
 Cypress.Commands.add("openHomepage", () => {
     cy.contains('app-dashboard-sidebar-items div', 'Homepage')
         .should('be.visible')
+        .click();
+});
+Cypress.Commands.add("openSideFilter", () => {
+    cy.get('label[apptooltip="Customize Results"]', { timeout: 20000 })
+        .should('be.visible')
+        .scrollIntoView()
+        .click();
+    cy.get('app-filters', { timeout: 20000 }).should('exist');
+});
+Cypress.Commands.add("closeSideFilter", () => {
+    cy.get('app-filters button:has(img[alt="close"])', { timeout: 20000 })
+        .first()
+        .should('be.visible')
+        .scrollIntoView()
         .click();
 });
 Cypress.Commands.add("clearAllEmails", () => {
