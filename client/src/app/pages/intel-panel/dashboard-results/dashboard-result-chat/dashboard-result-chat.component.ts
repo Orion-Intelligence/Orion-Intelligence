@@ -15,7 +15,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
     SlicePipe,
     TooltipDirective, CommonModule, NormalizeUnicodePipe, RouterLink
   ],
-  templateUrl: './dashboard-result-chat.component.html'
+  templateUrl: './dashboard-result-chat.component.html' 
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   currentUrl = '';
