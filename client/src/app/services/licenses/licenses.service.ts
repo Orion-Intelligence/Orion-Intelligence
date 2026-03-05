@@ -58,8 +58,6 @@ export class LicenseService {
   }
 
   demoSubscription(moduleName: string) {
-    if(moduleName=='Profile')
-      return;
     if (!this.canAccess(moduleName)) {
       this.dashboardService.showSubscription.set(true);
       this.router.navigate(['/']).then();

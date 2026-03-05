@@ -34,7 +34,6 @@ async def search_dynamic_email(param: SocialReconRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/phone/recon",
-    include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_phone_recon(param: SocialReconRequest = Body(...)):
     return await search_model.getInstance().social_search(param, "phone")
@@ -133,7 +132,6 @@ async def search_dynamic_posts(param: SocialProfileRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/entity",
-    include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_entity(param: SocialProfileRequest = Body(...)):
     return await graphs_model.getInstance().social_search(param, "entity")
@@ -154,7 +152,6 @@ async def search_social_metadata(param: SocialMetadataRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/session/upsert",
-    include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def upsert_social_session(data: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     gt = (data or {}).get("graph_type") or graph_type or "social"
@@ -163,7 +160,6 @@ async def upsert_social_session(data: dict = Body(...), graph_type: str = Query(
 
 @social_routes.get(
     "/api/social/session/tabs",
-    include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def get_social_tabs(graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     return await graphs_model.getInstance().get_tabs_summary(str(current_user.id), graph_type)
@@ -171,7 +167,6 @@ async def get_social_tabs(graph_type: str = Query("social"), current_user=Depend
 
 @social_routes.post(
     "/api/social/session/tab/add",
-    include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def add_social_tab(tab: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     gt = (tab or {}).get("graph_type") or graph_type or "social"

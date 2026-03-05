@@ -58,7 +58,11 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   private handleProfileRoute(url: string) {
-      if (url.startsWith('/dashboard/profile/consolidated/') ||
+    if (this.appService.userSessionData().user.role == "demo") {
+      this.selectionStore.setSelectedSection('Strategic');
+      this.selectionStore.setSelectedOption('All');
+    }
+    else if (url.startsWith('/dashboard/profile/consolidated/') ||
           url.startsWith('/dashboard/profile/homepage') ||
           url.startsWith('/dashboard/profile/alerts/general') ||
           url.startsWith('/dashboard/profile/alerts')) {
