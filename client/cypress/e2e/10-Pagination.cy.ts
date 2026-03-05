@@ -15,7 +15,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
 
     cy.contains('app-dashboard-sidebar-items div', 'General Intelligence')
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
     TABS.forEach((tab) => {
 
@@ -39,7 +39,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
         .parents('button')
         .then(($btn) => {
           if ($btn.length) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
             cy.get('.ui-result-card')
               .should('exist');
           }
@@ -67,7 +67,7 @@ describe('Data Breach – Tabs & Pagination', () => {
   it('Data Breach – tabs load & pagination', () => {
 
     cy.contains('app-dashboard-sidebar-items div', 'Data Breach')
-      .click({ force: true });
+      .click();
 
 
     TABS.forEach((tab) => {
@@ -75,7 +75,7 @@ describe('Data Breach – Tabs & Pagination', () => {
 
 
       cy.contains('app-dashboard-sidebar-items div', tab)
-        .click({ force: true });
+        .click();
 
 
       cy.get('.ui-result-card')
@@ -91,7 +91,7 @@ describe('Data Breach – Tabs & Pagination', () => {
         .parents('button')
         .then(($btn) => {
           if ($btn.length) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
 
 
             cy.get('.ui-result-card')
@@ -116,7 +116,7 @@ describe('Defacement – Tabs & Pagination', () => {
   it('Defacement – tabs load & pagination with scoped clicks', () => {
 
     cy.contains('app-dashboard-sidebar-items div', 'Defacement')
-      .click({ force: true });
+      .click();
 
 
     cy.get('app-dashboard-sidebar-items')
@@ -130,7 +130,7 @@ describe('Defacement – Tabs & Pagination', () => {
 
       cy.get('@defacementTabs')
         .contains('div', tab)
-        .click({ force: true });
+        .click();
 
 
       cy.get('tr[id^="item-"], .ui-result-card')
@@ -146,7 +146,7 @@ describe('Defacement – Tabs & Pagination', () => {
         .parents('button')
         .then(($btn) => {
           if ($btn.length) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
 
 
             cy.get('tr[id^="item-"], .ui-result-card')
@@ -176,7 +176,7 @@ describe('Social – Tabs & Pagination', () => {
   it('Social – tabs load & pagination with scoped clicks', () => {
 
     cy.contains('app-dashboard-sidebar-items div', 'Social')
-      .click({ force: true });
+      .click();
 
 
     cy.get('app-dashboard-sidebar-items')
@@ -190,7 +190,7 @@ describe('Social – Tabs & Pagination', () => {
 
       cy.get('@socialTabs')
         .contains('div', tab)
-        .click({ force: true });
+        .click();
 
 
       cy.get('.ui-result-card')
@@ -211,7 +211,7 @@ describe('Social – Tabs & Pagination', () => {
         .parents('button')
         .then(($btn) => {
           if ($btn.length) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
 
 
             cy.get('.ui-result-card')
@@ -237,7 +237,7 @@ describe('Exploit – Tabs & Pagination', () => {
 
   it('Exploit – tabs load & pagination with scoped clicks', () => {
     cy.contains('app-dashboard-sidebar-items div', 'Exploit')
-      .click({ force: true });
+      .click();
 
     cy.get('app-dashboard-sidebar-items')
       .contains('Exploit')
@@ -249,7 +249,7 @@ describe('Exploit – Tabs & Pagination', () => {
 
       cy.get('@exploitTabs')
         .contains('div', tab)
-        .click({ force: true });
+        .click();
 
       cy.get('.ui-result-card')
         .should('exist');
@@ -267,7 +267,7 @@ describe('Exploit – Tabs & Pagination', () => {
         .parents('button')
         .then(($btn) => {
           if ($btn.length) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
 
             cy.get('.ui-result-card')
               .should('exist');
@@ -290,7 +290,7 @@ describe('Feed – Tabs & Pagination', () => {
 
   it('Feed – tabs load & pagination with scoped clicks', () => {
     cy.contains('app-dashboard-sidebar-items div', 'Feed')
-      .click({ force: true });
+      .click();
 
     cy.get('app-dashboard-sidebar-items')
       .contains('Feed')
@@ -302,7 +302,7 @@ describe('Feed – Tabs & Pagination', () => {
 
       cy.get('@feedTabs')
         .contains('div', tab)
-        .click({ force: true });
+        .click();
 
       cy.get('.ui-result-card')
         .should('exist');
@@ -320,7 +320,7 @@ describe('Feed – Tabs & Pagination', () => {
         .parents('button')
         .then(($btn) => {
           if ($btn.length) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
             cy.reload();
             cy.get('.ui-result-card')
               .should('exist');

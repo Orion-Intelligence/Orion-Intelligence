@@ -1,4 +1,9 @@
 describe('Tenant Complete Flow – Correct Order', () => {
+
+  after(() => {
+    cy.logout();
+  });
+
   const tenant = Cypress.env('TENANT_ACCOUNT');
   const tenantSubUser = Cypress.env('TENANT_SUB_USER');
 
@@ -49,7 +54,7 @@ describe('Tenant Complete Flow – Correct Order', () => {
       });
 
       if (rows.length === 0) {
-        
+
         return;
       }
 
@@ -59,51 +64,65 @@ describe('Tenant Complete Flow – Correct Order', () => {
 
       verifiedCount++;
 
-      
+
+      cy.wrap(rows.eq(0))
+        .scrollIntoView()
+        .parents('div')
+        .filter((_, el) => el.scrollWidth > el.clientWidth)
+        .first()
+        .scrollTo('right', { ensureScrollable: false });
+
       cy.wrap(rows.eq(0)).within(() => {
-        cy.get('#edit-tenant').click({ force: true });
+        cy.get('#edit-tenant, #edit-profile')
+          .first()
+          .scrollIntoView()
+          .should('be.visible')
+          .click();
       });
 
       cy.wrap(false).as('changed');
 
-      
+
       cy.contains('tr', 'Edit Tenant', { timeout: 15000 }).should('be.visible');
 
-      
+
       cy.contains('tr', 'Edit Tenant')
         .find('button, .ui-button, [role="button"]')
         .contains(/Not Verified/i)
         .then($el => {
-          
+
           const $btn = Cypress.$($el).first();
           if ($btn.text().toLowerCase().includes('not verified')) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).scrollIntoView().should('be.visible').click();
             cy.wrap(true).as('changed');
           }
         });
 
-      
+
       cy.contains('tr', 'Edit Tenant')
         .contains('.license-card, .license-btn, .license-label', /Enterprise/i)
         .closest('.license-card, .license-btn')
-        .find('input[type="checkbox"], input.license-checkbox')
-        .then($cb => {
+        .then($card => {
+          const $cb = $card.find('input[type="checkbox"], input.license-checkbox').first();
           if (!$cb.is(':checked')) {
-            cy.wrap($cb).check({ force: true });
+            cy.wrap($card).scrollIntoView().should('be.visible').click();
             cy.wrap(true).as('changed');
           }
         });
 
-      
+
       cy.get('@changed').then((changed: any) => {
         if (changed) {
           cy.contains('button', 'Save changes', { timeout: 15000 })
+            .filter(':visible')
+            .first()
+            .scrollIntoView()
             .should('be.visible')
-            .click({ force: true });
+            .click();
         }
       });
 
-      
+
       cy.openTenantsPage();
 
       cy.get('body').then($b => {
@@ -137,6 +156,15 @@ const addIOCForAllTabs = () => {
   cy.contains('button', 'Add').should('exist');
 };
 
+const waitForBlockingOverlayToClose = () => {
+  cy.get('body').then(($body) => {
+    const $overlay = $body.find('div.fixed.inset-0.z-\\[9999\\]');
+    if ($overlay.length) {
+      cy.wrap($overlay.first()).should('not.be.visible');
+    }
+  });
+};
+
 it('Tenant adds user, IOCs, scans and logs out', () => {
   cy.visit('/login');
   cy.reload();
@@ -145,7 +173,7 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
   cy.get('input[name="password"]').type(tenant.password, { log: false });
   cy.contains('Sign In').click();
 
-  
+
   cy.get('input#company[placeholder="Enter company name"]')
     .should('be.visible')
     .clear()
@@ -163,21 +191,28 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
     .should('be.visible')
     .click();
 
-  
+
   openManageIOCs();
   addIOCForAllTabs();
 
-  
+
   cy.contains('Users').click();
-  cy.contains('button', 'Add User').click({ force: true });
+  waitForBlockingOverlayToClose();
+  cy.contains('button', 'Add User').scrollIntoView().should('be.visible').click();
 
   cy.get('input[name="username"]').type(tenantSubUser.username);
   cy.get('input[name="email"]').type(tenantSubUser.email);
   cy.get('input[name="password"]').type(tenantSubUser.password, { log: false });
 
-  cy.contains('button', 'Add User')
-    .scrollIntoView()
-    .click({ force: true });
+  cy.get('div.fixed.inset-0.z-\\[9999\\]:visible', { timeout: 15000 })
+    .first()
+    .within(() => {
+      cy.contains('button.ui-popup-btn-primary', 'Add User', { timeout: 15000 })
+        .scrollIntoView()
+        .should('not.be.disabled')
+        .should('be.visible')
+        .click();
+    });
 
   cy.logout();
   cy.url().should('include', '/login');
@@ -192,11 +227,20 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
 
     cy.visit('/dashboard/profile/homepage');
     cy.openTenantsPage();
+    cy.location('pathname', { timeout: 30000 }).should('include', '/dashboard/profile/tenant');
 
-    cy.contains('table tbody tr', /orion\s*intelligence/i, { timeout: 30000 })
-  .find('button#edit-tenant')
-  .should('be.visible')
-  .click()
+    cy.contains('table tbody tr', /orion\s*intelligence/i, { timeout: 30000 }).as('tenantRow');
+    cy.get('@tenantRow')
+      .scrollIntoView()
+      .parents('div')
+      .filter((_, el) => el.scrollWidth > el.clientWidth)
+      .first()
+      .scrollTo('right', { ensureScrollable: false });
+    cy.get('@tenantRow')
+      .find('button#edit-tenant')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
     cy.contains('label', 'User Quota')
       .parent()
       .find('input[type="number"]')
@@ -217,8 +261,9 @@ it('Tenant adds user, IOCs, scans and logs out', () => {
     cy.get('[data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container').should('be.visible');
     cy.contains('app-dashboard-sidebar-items div', 'Homepage').click();
     cy.contains('app-dashboard-sidebar-items div', 'Homepage', { timeout: 20000 })
+      .scrollIntoView()
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
     cy.location('pathname', { timeout: 20000 })
       .should('include', '/dashboard/profile/homepage');

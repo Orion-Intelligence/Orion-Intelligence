@@ -48,6 +48,15 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
       cy.get('app-user-image-picker input[type="file"]', { timeout: 20000 })
         .first()
         .should('exist')
+        .invoke('removeAttr', 'hidden')
+        .invoke('css', 'display', 'block')
+        .invoke('css', 'visibility', 'visible')
+        .invoke('css', 'position', 'fixed')
+        .invoke('css', 'left', '0')
+        .invoke('css', 'top', '0')
+        .invoke('css', 'width', '1px')
+        .invoke('css', 'height', '1px')
+        .invoke('css', 'opacity', '1')
         .selectFile({
           contents: Cypress.Blob.base64StringToBlob(content, 'image/png'),
           fileName: 'avatar.png',

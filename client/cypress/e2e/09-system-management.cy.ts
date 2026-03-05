@@ -3,7 +3,7 @@ describe('Admin Flow – System Settings → Update Company Name → Logout', ()
   const openSystemSettings = () => {
     cy.contains('app-dashboard-sidebar-items div', 'System Settings')
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
     cy.url().should('include', 'system-settings');
   };
@@ -19,7 +19,7 @@ describe('Admin Flow – System Settings → Update Company Name → Logout', ()
 
     cy.get('button[aria-label="Edit settings"]')
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
 
     cy.contains('label', 'App Name')
@@ -31,7 +31,7 @@ describe('Admin Flow – System Settings → Update Company Name → Logout', ()
 
     cy.get('button[aria-label="Save settings"]')
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
     cy.logout();
   });
