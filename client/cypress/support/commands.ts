@@ -73,14 +73,13 @@ Cypress.Commands.add("logout", () => {
 Cypress.Commands.add("logoutIfLoggedIn", () => {
     cy.location('pathname').then((pathname) => {
         if (pathname.includes('/login')) return;
-        if (Cypress.$('[data-cy="profile-menu"]').length === 0) return;
-
+        if (Cypress.$('body').length === 0) return;
         cy.scrollTo("top", { ensureScrollable: false });
-        cy.get('[data-cy="profile-menu"]').then(($menus) => {
-            const $visibleMenu = $menus.filter(':visible').first();
-            if (!$visibleMenu.length) return;
-            cy.wrap($visibleMenu).click({ scrollBehavior: false });
-        });
+        const $menus = Cypress.$('[data-cy="profile-menu"]');
+        if (!$menus.length) return;
+        const $visibleMenu = $menus.filter(':visible').first();
+        if (!$visibleMenu.length) return;
+        cy.wrap($visibleMenu).click({ scrollBehavior: false });
 
         if (Cypress.$('li[data-cy="signout-btn"]').length === 0) return;
 

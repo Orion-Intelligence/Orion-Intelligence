@@ -53,7 +53,7 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
           fileName: 'avatar.png',
           mimeType: 'image/png',
           lastModified: Date.now(),
-        }, { force: true });
+        });
     });
 
     cy.contains('label', /^Theme$/, { timeout: 20000 })

@@ -269,6 +269,7 @@ describe('Orion Intelligence – Shared Session', () => {
 
       cy.tick(8100);
       cy.get('app-world-heatmap .map-container svg', {timeout: 15000}).should('exist');
+      cy.logout()
 
     });
   });
