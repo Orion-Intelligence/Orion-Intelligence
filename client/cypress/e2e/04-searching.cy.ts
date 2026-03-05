@@ -188,12 +188,12 @@ describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
         .first()
         .scrollIntoView()
         .should('be.visible')
-        .click({ force: true });
+        .click();
 
       cy.contains('app-dashboard-sidebar-items div', 'Exploit', { timeout: 30000 })
         .closest('li')
         .within(() => {
-          cy.contains('div', submenu, { timeout: 30000 }).should('be.visible').click();
+          cy.contains('div', submenu, { timeout: 30000 }).should('be.visible').click({ force: true });
         });
     };
 
