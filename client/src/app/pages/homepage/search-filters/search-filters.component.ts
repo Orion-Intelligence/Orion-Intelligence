@@ -200,4 +200,8 @@ export class SearchFiltersComponent implements OnInit {
     event.stopPropagation();
     event.preventDefault();
   }
+
+  toTestId(value: string): string {
+    return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
 }

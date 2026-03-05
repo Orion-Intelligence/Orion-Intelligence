@@ -2,7 +2,7 @@
   <span id="top"></span>
   <div class="w-full max-w-[2400px] rounded-[12px] p-5 max-[1300px]:p-0 max-[550px]:px-[10px] max-[550px]:py-[10px]">
     <div class="ui-page-container max-[1300px]:p-0 md:p-5 max-[550px]:px-[10px]">
-      <div class="mb-4 flex items-center justify-between">
+      <div data-testid="tenant-page-header" class="mb-4 flex items-center justify-between">
         <div>
           <h1 class="ui-page-title">Tenants</h1>
           <p class="ui-page-description">Manage tenant configuration, status, and licenses.</p>
@@ -61,7 +61,7 @@
                       </span>
                     </td>
                     <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                      <button id="edit-tenant" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="tenant._expanded = !tenant._expanded">
+                      <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="tenant._expanded = !tenant._expanded">
                         <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
                       </button>
                     </td>
@@ -70,7 +70,7 @@
                   <tr *ngIf="tenant._expanded" class="!border-t-0 bg-[var(--tenant-row-bg)]">
                     <td colspan="9" class="px-4 py-4">
                       <div class="space-y-4">
-                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
+                        <div data-testid="tenant-edit-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
                           <div class="text-[19px] font-bold text-[var(--color-text1)]">Tenant Information</div>
                           <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                             <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
@@ -146,14 +146,14 @@
                           <div class="mt-2 space-y-3 pt-1">
                             <div>
                               <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</label>
-                              <button type="button" class="mt-2 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)" (click)="tenant.verified = !tenant.verified">
+                              <button data-testid="tenant-verified-toggle" type="button" class="mt-2 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)" (click)="tenant.verified = !tenant.verified">
                                 {{ tenant.verified ? 'Verified' : 'Not Verified' }}
                               </button>
                             </div>
 
                             <div>
                               <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</label>
-                              <input type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
+                              <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                             </div>
 
                             <div>
@@ -168,7 +168,7 @@
                               <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                               <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
+                                  <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [attr.data-testid]="'tenant-license-' + license" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
                                     <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
                                     <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
                                       {{ licenseService.getLicenseLabel(license) }}
@@ -179,7 +179,7 @@
                             </div>
                           </div>
                           <div class="mt-3 flex justify-end gap-2">
-                              <button type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">
+                              <button data-testid="tenant-save-changes" type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">
                                 Save changes
                               </button>
                           </div>

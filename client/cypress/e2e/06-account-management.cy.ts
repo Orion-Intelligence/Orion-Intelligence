@@ -1,41 +1,33 @@
 const testUsers = Cypress.env('TEST_USERS') || {};
 const defaultUserKey = 'testing4';
 const defaultUser = testUsers[defaultUserKey] || {};
-const resetEmail = Cypress.env('RESET_PASSWORD_EMAIL') || defaultUser.email;
+const resetEmail = Cypress.env('RESET_PASSWORD_EMAIL') || 'd@hotmail.com';
 const newPassword = Cypress.env('NEW_PASSWORD');
+
 if (!defaultUser?.username || !defaultUser?.password || !resetEmail || !newPassword) {
     throw new Error('Missing required account/password env values in cypress.config.ts');
 }
 
-describe('Orion Intelligence – Account Settings Basic Flow', () => {
+describe('Orion Intelligence - Account Settings and Password Reset Flow', () => {
     before(() => {
         cy.loginAsTest1();
-    });
-
-    beforeEach(() => {
-        cy.visit('/dashboard/profile/homepage');
-
-        cy.location('pathname').then((pathname) => {
-            if (pathname.includes('/login')) {
-                cy.loginAsTest1();
-                cy.visit('/dashboard/profile/homepage');
-            }
-        });
     });
 
     after(() => {
         cy.logout();
     });
 
-    it('Change avatar, toggle theme, enable 2FA, login check + reset password flow', () => {
-        cy.visit('/dashboard');
-        cy.location('pathname', {timeout: 20000}).should('not.include', '/login');
-        cy.contains(/profile|account|settings/i, {timeout: 20000}).should('be.visible').click();
-        cy.get('h1.ui-page-title', {timeout: 20000}).should('be.visible');
+    it('updates avatar/theme/2FA and validates reset password journey', () => {
+        cy.get('[data-testid="sidebar-group-profile"]', {timeout: 20000}).should('be.visible').click({scrollBehavior: false});
+        cy.get('[data-testid="sidebar-subitem-profile-account"]', {timeout: 20000}).should('be.visible').click({scrollBehavior: false});
+        cy.location('pathname', {timeout: 20000}).should('include', '/dashboard/profile/account');
+        cy.get('[data-testid="account-settings-form"]', {timeout: 20000}).should('be.visible');
+        cy.get('[data-testid="account-settings-title"]', {timeout: 20000}).should('be.visible');
 
-        cy.get('h1.ui-page-title', {timeout: 20000}).invoke('text').then((t) => {
+        cy.get('[data-testid="account-settings-title"]', {timeout: 20000}).invoke('text').then((t) => {
             expect(t.trim()).to.match(/Admin Profile|User Profile Form/);
         });
+
         cy.get('app-user-image-picker', {timeout: 20000}).should('exist');
 
         cy.fixture('avatar.png', 'base64').then((content) => {
@@ -46,48 +38,49 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
                 lastModified: Date.now(),
             });
         });
-        cy.contains('label', /^Theme$/, {timeout: 20000}).closest('div.cursor-pointer').click().wait(200).click();
-        cy.contains('label', /^2 Factor Authentication$/, {timeout: 20000}).closest('div.cursor-pointer').click();
+
+        cy.get('[data-testid="account-settings-theme-toggle"]', {timeout: 20000}).click().wait(200).click();
+        cy.get('[data-testid="account-settings-twofa-toggle"]', {timeout: 20000}).click();
         cy.logout();
-        cy.reload()
+
         cy.visit('/login');
-        cy.get('input[name="username"]').clear().type(defaultUser.username);
-        cy.get('input[name="password"]').clear().type(defaultUser.password, {log: false});
-        cy.get('[data-cy="login-button"], input.login-button').first().click();
+        cy.get('[data-testid="login-user"]').clear().type(defaultUser.username);
+        cy.get('[data-testid="login-pass"]').clear().type(defaultUser.password, {log: false});
+        cy.get('[data-testid="login-button"]').click();
         cy.get('[data-cy="twofa-center"], .twofa-center').should('be.visible');
         cy.get('img[alt="2FA QR"]').should('exist');
         cy.get('input[name="otpCode"]').should('exist');
         cy.get('[data-cy="twofa_title"], .twofa_title').should('contain.text', 'Enter 2FA code');
+
         cy.visit('/');
         cy.clearAllEmails();
         cy.contains('[data-cy="reset-password"], span.reset-password', 'Reset password?').click();
-        cy.get('input[name="companymail"]').clear().type(resetEmail);
-        cy.get('input[type="submit"][value="Get reset link"]').click();
+        cy.get('[data-testid="reset-companymail"]').clear().type(resetEmail);
+        cy.get('[data-testid="reset-submit"]').click();
 
         cy.get('body', {timeout: 20000}).then(($body) => {
             if ($body.text().includes('Password Reset Email Sent')) {
                 cy.contains('Password Reset Email Sent').should('be.visible');
                 return;
-            } else {
-
-                cy.openLastMailAndGetUrl().then((url) => {
-                    expect(url).to.be.a('string').and.not.be.empty;
-                    cy.visit(url);
-                });
-                cy.url().should('include', '/reset');
-                cy.get('.signup-container__title').should('contain', 'Reset Password');
-                cy.get('input[name="password"]').clear().type(defaultUser.password, {log: false}).blur();
-                cy.get('input[name="confirmPassword"]').clear().type(defaultUser.password, {log: false}).blur();
-                cy.get('input[type="submit"]').click();
-                cy.contains('New password must be different from the old one.').should('be.visible');
-                cy.get('input[name="password"]').clear().type(newPassword, {log: false}).blur();
-                cy.get('input[name="confirmPassword"]').clear().type(newPassword, {log: false}).blur();
-                cy.get('input[type="submit"]').click();
-                cy.url().should('include', '/login');
-                cy.get('input[name="username"]').clear().type(defaultUser.username);
-                cy.get('input[name="password"]').clear().type(newPassword, {log: false});
-                cy.get('[data-cy="login-button"], input.login-button').first().click();
             }
+
+            cy.openLastMailAndGetUrl().then((url) => {
+                expect(url).to.be.a('string').and.not.be.empty;
+                cy.visit(url);
+            });
+            cy.url().should('include', '/reset');
+            cy.get('.signup-container__title').should('contain', 'Reset Password');
+            cy.get('input[name="password"]').clear().type(defaultUser.password, {log: false}).blur();
+            cy.get('input[name="confirmPassword"]').clear().type(defaultUser.password, {log: false}).blur();
+            cy.get('[data-testid="reset-submit"]').click();
+            cy.contains('New password must be different from the old one.').should('be.visible');
+            cy.get('input[name="password"]').clear().type(newPassword, {log: false}).blur();
+            cy.get('input[name="confirmPassword"]').clear().type(newPassword, {log: false}).blur();
+            cy.get('[data-testid="reset-submit"]').click();
+            cy.url().should('include', '/login');
+            cy.get('[data-testid="login-user"]').clear().type(defaultUser.username);
+            cy.get('[data-testid="login-pass"]').clear().type(newPassword, {log: false});
+            cy.get('[data-testid="login-button"]').click();
         });
     });
 });

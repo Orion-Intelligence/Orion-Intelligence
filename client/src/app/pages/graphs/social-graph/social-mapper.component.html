@@ -1,4 +1,4 @@
-<div class="flex h-screen w-screen flex-col overflow-hidden bg-[var(--color-blue-850)]">
+<div data-testid="social-graph-root" class="flex h-screen w-screen flex-col overflow-hidden bg-[var(--color-blue-850)]">
   <ng-container *ngIf="isTailwindReady(); else tailwindLoading">
     <app-tab-bar></app-tab-bar>
 
@@ -168,7 +168,7 @@
 
         <app-notification-bar *ngIf="state.notification()" [data]="state.notification()"></app-notification-bar>
 
-        <app-context-menu *ngIf="state.contextMenuData()" [data]="state.contextMenuData()" (action)="handleContextMenuAction($event)"></app-context-menu>
+        <app-context-menu data-testid="social-context-menu" *ngIf="state.contextMenuData()" [data]="state.contextMenuData()" (action)="handleContextMenuAction($event)"></app-context-menu>
 
         <div *ngIf="platformAliasModalData() as aliasData" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="closePlatformAliasModal()">
           <div class="ui-graph-popup-panel w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] shadow-2xl p-4" (click)="$event.stopPropagation()">

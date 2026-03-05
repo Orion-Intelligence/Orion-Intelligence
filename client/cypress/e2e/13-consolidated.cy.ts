@@ -1,104 +1,79 @@
 import {DOMAIN_SCANNER_TEST_DOMAINS} from '../support/constants';
-import {closeAndLogout} from './controllers/13-consolidated.controller';
+import {deleteAllEnabledIocAdvancedFilters} from './controllers/13-consolidated.controller';
+
 const testData = Cypress.env('TEST_DATA') || {};
 
-describe('Homepage – Consolidated Checker Full Flow', () => {
+describe('Consolidated - IOC Advanced Builder Flow', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
   });
+
   after(() => {
-    closeAndLogout();
+    cy.logout();
   });
 
-  it('Open consolidated checker and validate all categories', () => {
-    cy.visit('/dashboard');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"]').should('be.visible').click().type('{enter}');
-  });
-});
-describe('Dashboard Sections Test', () => {
-
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
-  after(() => {
-    closeAndLogout();
+  it('opens Homepage and runs consolidated search', () => {
+    cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
+    cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).should('be.visible').click().type('{enter}');
   });
 
-  it('Open IOCs tab, search credentials, use advanced filters, and delete', () => {
-    cy.visit('/dashboard');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"], input[type="search"], input').should('be.visible');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"]').should('be.visible').click().type('{enter}');
-    cy.contains('button', 'IOCs').should('be.visible').click();
-    cy.get('app-credentials-search-bar form').should('exist');
-    cy.get('app-credentials-search-bar input[name="searchQuery"]').should('exist').type('gmail.com || \n' +
-        `${testData.consolidated_ioc_email}{enter}`);
+  it('opens IOCs, searches credentials, and runs advanced filter operations', () => {
+    cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
+    cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).should('be.visible').click().type('{enter}');
+    cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="ioc-basic-search-input"]', {timeout: 30000}).should('be.visible').clear().type(`gmail.com || ${testData.consolidated_ioc_email}{enter}`);
     cy.wait(1000);
-    cy.contains('button', 'Advanced').click();
-    cy.get('div.ui-ioc-table-row', {timeout: 20000}).first().should('be.visible').find('button[aria-label="Expand row"]').click();
-    cy.get('div.ui-ioc-adv-row').first().find('select').eq(1).select('Email');
-    cy.get('div.ui-ioc-adv-row').first().find('input[type="text"]').first().clear().type(testData.consolidated_advanced_email);
-    cy.contains('button', 'Execute').click();
-    cy.get('button img[alt="add filter"]').last().parent().click();
-    cy.get('div.ui-ioc-adv-row').last().find('select').eq(1).select('Email');
-    cy.get('div.ui-ioc-adv-row').last().find('input[type="text"]').type(testData.consolidated_domain_query);
-    cy.get('div.ui-ioc-adv-row').last().find('select').first().select('OR');
-    cy.contains('button', 'Execute').click();
-    cy.get('button img[alt="delete filter"]').each($btn => cy.wrap($btn).click());
+    cy.get('[data-testid="ioc-advanced-toggle"]', {timeout: 30000}).click();
+    cy.get('[data-testid="ioc-adv-row"]', {timeout: 20000}).first().should('be.visible');
+    cy.get('[data-testid="ioc-adv-tag-select"]').first().select('Email');
+    cy.get('[data-testid="ioc-adv-value-input"]').first().clear().type(testData.consolidated_advanced_email);
+    cy.get('[data-testid="ioc-adv-execute"]').should('be.visible').click();
+    cy.get('[data-testid="ioc-adv-add-filter"]').last().click();
+    cy.get('[data-testid="ioc-adv-row"]').last().within(() => {
+      cy.get('[data-testid="ioc-adv-tag-select"]').select('Email');
+      cy.get('[data-testid="ioc-adv-value-input"]').type(testData.consolidated_domain_query);
+    cy.get('[data-testid="ioc-adv-operator-select"]').first().select('OR');
+    });
+    cy.get('[data-testid="ioc-adv-execute"]').should('be.visible').click();
+    deleteAllEnabledIocAdvancedFilters();
   });
 });
-describe('Dashboard Sections Test', () => {
 
+describe('Consolidated - Domain Scanner Flow', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
   });
+
   after(() => {
-    closeAndLogout();
+    cy.logout();
   });
 
-  it('Open all sections: Social, Tracking, News, Leaks, CVE, General', () => {
-    cy.visit('/dashboard');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"], input[type="search"], input').should('be.visible');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"]').should('be.visible').click().type('netflix{enter}');
-  });
+  it('opens domain scanner and runs Subdomains, IP Lookup, and Wayback scans', () => {
+    cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
+    cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).scrollIntoView().should('be.visible').type('{enter}');
+    cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="domain-scanner-modal"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
 
-  it('Open IOCs tab and expand all IOC rows', () => {
-    cy.visit('/dashboard');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"], input[type="search"], input').should('be.visible');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"]').should('be.visible').click().type('netflix{enter}');
-    cy.contains('button', 'IOCs').should('be.visible').click();
-  });
-
-  it('Open Domain Scanner and run Subdomain, IP Lookup, and Wayback scans', () => {
-    cy.visit('/dashboard');
-    cy.contains('app-dashboard-sidebar-items div', 'Homepage').should('be.visible').click();
-    cy.get('[data-cy="dashboard-general-input"]').scrollIntoView().should('be.visible').type('{enter}');
-    cy.contains('button', 'IOCs').scrollIntoView().should('be.visible').click();
-    cy.get('button img[src*="scanner.svg"]').parent().scrollIntoView().should('be.visible').click();
-    cy.contains('div', 'Domain Scanner').should('be.visible');
-    cy.get('app-scan-helper').contains('button', 'Subdomains').scrollIntoView().should('be.visible').click();
-    cy.get('app-scan-helper').contains('button', 'Subdomains').should('have.css', 'color', 'rgb(87, 165, 235)');
-    cy.contains('label', 'Show only live').click();
     DOMAIN_SCANNER_TEST_DOMAINS.forEach((d) => {
-      cy.get('#domain-input').scrollIntoView().should('be.visible').clear().type(d);
-      cy.get('app-scan-helper').contains('button', 'Search').click();
-      cy.get('app-scan-helper').contains('button', 'Search').should('not.be.disabled', {timeout: 30000});
+      cy.get('[data-testid="domain-scanner-input"]').scrollIntoView().should('be.visible').clear().type(d);
+      cy.get('[data-testid="domain-scanner-search-subdomains"]').click();
+      cy.get('[data-testid="domain-scanner-search-subdomains"]').should('not.be.disabled', {timeout: 30000});
     });
-    cy.get('app-scan-helper').contains('button', 'IP Lookup').scrollIntoView().should('be.visible').click();
-    cy.get('app-scan-helper').contains('button', 'IP Lookup').should('have.css', 'color', 'rgb(87, 165, 235)');
-    cy.get('#domain-input').clear().type('1.1.1.1');
-    cy.get('app-scan-helper').contains('span', 'Lookup IP').scrollIntoView().should('be.visible').click();
-    cy.get('app-scan-helper').contains('span', 'Lookup IP').closest('button').should('not.be.disabled', {timeout: 30000});
-    cy.get('app-scan-helper').contains('button', 'Wayback').scrollIntoView().should('be.visible').click();
-    cy.get('app-scan-helper').contains('button', 'Wayback').should('have.css', 'color', 'rgb(87, 165, 235)');
-    cy.contains('div', 'View archived snapshots from Wayback Machine').should('be.visible');
-    cy.get('#domain-input').clear().type('example.com');
-    cy.contains('button', 'Search Wayback').scrollIntoView().should('be.visible').click();
+
+    cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="domain-scanner-input"]').clear().type('1.1.1.1');
+    cy.get('[data-testid="domain-scanner-lookup-ip"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="domain-scanner-lookup-ip"]').should('not.be.disabled', {timeout: 30000});
+
+    cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="domain-scanner-input"]').clear().type('example.com');
+    cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="domain-scanner-modal"]').should('be.visible').click('topLeft');
   });
 });

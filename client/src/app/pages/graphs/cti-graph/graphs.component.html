@@ -5,30 +5,30 @@
       <nav class="flex h-full items-end gap-1.5">
         <div *ngFor="let tab of tabs" (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center border border-b-2 pl-3 pr-2 pt-2 pb-1.5 text-sm font-medium rounded-t-md transition-colors ' + (activeTabId === tab.id ? 'border-[var(--color-border)] border-b-indigo-400 bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-[0_1px_0_0_var(--color-blue-700)]' : 'border-transparent border-b-transparent text-[var(--color-text4)] hover:border-[var(--color-border)] hover:border-b-[var(--color-border)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
           <div *ngIf="editingTabId === tab.id; else graphTabName">
-            <input #renameInput type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500">
+            <input #renameInput data-testid="cti-tab-rename-input" type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500">
           </div>
           <ng-template #graphTabName>
-            <span (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1">{{ tab.name }}</span>
+            <span data-testid="cti-tab-name" (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1">{{ tab.name }}</span>
           </ng-template>
-          <button *ngIf="tabs.length> 1" (click)="$event.stopPropagation(); closeSession(tab.id)" [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+          <button data-testid="cti-tab-close" *ngIf="tabs.length> 1" (click)="$event.stopPropagation(); closeSession(tab.id)" [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
             <i class="bi bi-x-lg text-xs"></i>
           </button>
         </div>
 
         <div class="pl-1">
           <div #addMenuWrapper class="relative">
-            <input type="file" class="hidden" id="graphSessionFileInput" (change)="importSessionFile($event)" accept=".json">
-            <button data-cy="cti-tab-add-menu" (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="New Session">
+            <input data-testid="cti-tab-file-input" type="file" class="hidden" id="graphSessionFileInput" (change)="importSessionFile($event)" accept=".json">
+            <button data-cy="cti-tab-add-menu" data-testid="cti-tab-add-menu" (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="New Session">
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
             <div *ngIf="isAddMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-52 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/95 p-1.5 shadow-2xl ring-1 ring-white/5 backdrop-blur-md">
-              <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
+              <button data-testid="cti-tab-add-new-session" (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
                 <span class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-blue-700)]/60 text-[var(--color-text3)] transition-colors group-hover:bg-indigo-500 group-hover:text-white">
                   <i class="bi bi-plus-square text-lg"></i>
                 </span>
                 <span>New Session</span>
               </button>
-              <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
+              <label data-testid="cti-tab-import-session-label" for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
                 <span class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-blue-700)]/60 text-[var(--color-text3)] transition-colors group-hover:bg-indigo-500 group-hover:text-white">
                   <i class="bi bi-upload text-lg"></i>
                 </span>
@@ -40,24 +40,24 @@
       </nav>
       <div class="self-center flex items-center gap-1 pr-0">
         <div #headerMenuWrapper class="relative">
-          <button data-cy="cti-tab-session-menu" (click)="toggleHeaderMenu($event)" class="ui-cti-session-menu-btn flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
+          <button data-cy="cti-tab-session-menu" data-testid="cti-tab-session-menu" (click)="toggleHeaderMenu($event)" class="ui-cti-session-menu-btn flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
             <i class="bi bi-three-dots-vertical text-lg"></i>
           </button>
           <div *ngIf="isHeaderMenuVisible" (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
-            <button (click)="exportActiveSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+            <button data-testid="cti-export-current-session" (click)="exportActiveSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
               <i class="bi bi-download h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>Export Current Session</span>
             </button>
-            <button (click)="openReportExportModal(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+            <button data-testid="cti-export-report" (click)="openReportExportModal(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
               <i class="bi bi-file-earmark-arrow-down h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>Export Report</span>
             </button>
-            <label for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+            <label data-testid="cti-import-session-label" for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
               <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>Import Session</span>
             </label>
             <div class="my-1 h-px bg-[var(--color-blue-710)]"></div>
-            <button (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+            <button data-testid="cti-new-session" (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
               <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
               <span>New Session</span>
             </button>
@@ -95,7 +95,7 @@
             (physicsToggled)="togglePhysics()">
           </app-graph-toolbar>
         </div>
-        <div *ngIf="nodeSearchText.trim().length> 0" class="mt-2 text-xs text-[var(--color-text2)]">
+        <div data-testid="cti-highlighted-count" *ngIf="nodeSearchText.trim().length> 0" class="mt-2 text-xs text-[var(--color-text2)]">
           {{ searchMatchedCount }} node(s) highlighted
         </div>
       </div>
@@ -106,7 +106,7 @@
       </div>
     </div>
 
-    <div #networkContainer class="h-full w-full bg-[var(--color-blue-850)] [background-image:radial-gradient(circle,_rgb(100_116_139_/_15%)_1px,_transparent_1px)] [background-size:2rem_2rem] transition-all duration-300" [ngClass]="{ 'lg:pr-[20rem]': isGraphView && !isListingsCollapsed, 'lg:pr-16': isGraphView && isListingsCollapsed, 'lg:pr-0': !isGraphView }" [class.opacity-100]="isGraphView" [class.translate-y-0]="isGraphView" [class.pointer-events-auto]="isGraphView" [class.opacity-0]="!isGraphView" [class.-translate-y-2]="!isGraphView" [class.pointer-events-none]="!isGraphView">
+    <div data-testid="cti-network-container" #networkContainer class="h-full w-full bg-[var(--color-blue-850)] [background-image:radial-gradient(circle,_rgb(100_116_139_/_15%)_1px,_transparent_1px)] [background-size:2rem_2rem] transition-all duration-300" [ngClass]="{ 'lg:pr-[20rem]': isGraphView && !isListingsCollapsed, 'lg:pr-16': isGraphView && isListingsCollapsed, 'lg:pr-0': !isGraphView }" [class.opacity-100]="isGraphView" [class.translate-y-0]="isGraphView" [class.pointer-events-auto]="isGraphView" [class.opacity-0]="!isGraphView" [class.-translate-y-2]="!isGraphView" [class.pointer-events-none]="!isGraphView">
     </div>
 
     <aside *ngIf="isGraphView" class="absolute inset-y-0 right-0 z-40 hidden overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-820-light)] backdrop-blur-sm transition-all duration-300 lg:block" [class.w-[22rem]]="!isListingsCollapsed" [class.w-16]="isListingsCollapsed">
@@ -115,7 +115,7 @@
           <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isListingsCollapsed" [class.w-0]="isListingsCollapsed" [class.opacity-0]="isListingsCollapsed">
             <h2 class="whitespace-nowrap text-md font-semibold text-[var(--color-text2)]">Listings</h2>
           </div>
-          <button data-cy="cti-listings-toggle" type="button" (click)="toggleListingsCollapsed()" class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="isListingsCollapsed ? 'Expand listings' : 'Collapse listings'">
+          <button data-cy="cti-listings-toggle" data-testid="cti-listings-toggle" type="button" (click)="toggleListingsCollapsed()" class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="isListingsCollapsed ? 'Expand listings' : 'Collapse listings'">
             <i class="bi bi-list text-xl leading-none"></i>
           </button>
         </div>

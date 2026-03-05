@@ -1,5 +1,5 @@
 <div class="relative">
-  <input type="file" #fileInput id="fileInput" class="hidden" [attr.accept]="accept" (change)="onFileSelected($event)" />
+  <input data-testid="scan-file-input" type="file" #fileInput id="fileInput" class="hidden" [attr.accept]="accept" (change)="onFileSelected($event)" />
 
   <div class="p-[24px] flex items-center justify-center" *ngIf="!isFetched && !isLoading" @fadeInDashboardItem>
     <div class="box-border w-full rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[24px] text-center shadow-[0_10px_30px_var(--color-shadow-medium)]">
@@ -27,11 +27,11 @@
       </div>
       <div *ngIf="!hasError && !isLoading && (extractionResult || apkResult || groupedIocs.length > 0)">
         <div class="inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
-          <button type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
+          <button data-testid="scan-another-file" type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
             <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="20" height="20" alt="scan" class="ui-action-icon" />
           </button>
           <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-          <button type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
+          <button data-testid="scan-download-report" type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
             <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="20" height="20" alt="download" class="ui-action-icon" />
           </button>
         </div>
@@ -75,7 +75,7 @@
               <span class="font-mono">{{ extractionResult?.original_filename || apkResult?.original_filename || fileName || 'file' }}</span>
             </div>
             <div>
-              <span class="inline-flex items-center gap-[6px] rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
+              <span data-testid="scan-success-badge" class="inline-flex items-center gap-[6px] rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
                 <i class="bi" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
                 {{ (extractionResult?.status || apkResult?.status || 'completed') | lowercase }}
               </span>

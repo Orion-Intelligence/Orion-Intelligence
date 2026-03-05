@@ -1,5 +1,5 @@
-<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="close.emit()">
-    <div class="ui-graph-popup-panel w-full max-w-sm overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
+<div data-testid="add-entity-modal-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="close.emit()">
+    <div data-testid="add-entity-modal" class="ui-graph-popup-panel w-full max-w-sm overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
         <div>
             <div class="flex items-start justify-between border-b border-[var(--color-border)] bg-[var(--color-blue-850)] p-3 rounded-t-lg">
                 <div class="flex items-start gap-3">
@@ -16,21 +16,21 @@
 
             <div class="p-5">
                 <div *ngIf="data()?.mode !== 'edit'" class="mb-4 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] p-1">
-                    <button type="button" (click)="setInputMode('api')" [ngClass]="inputMode() === 'api' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">From API</button>
-                    <button type="button" (click)="setInputMode('manual')" [ngClass]="inputMode() === 'manual' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">Manual</button>
+                    <button data-testid="add-entity-mode-api" type="button" (click)="setInputMode('api')" [ngClass]="inputMode() === 'api' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">From API</button>
+                    <button data-testid="add-entity-mode-manual" type="button" (click)="setInputMode('manual')" [ngClass]="inputMode() === 'manual' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">Manual</button>
                 </div>
 
                 <div *ngIf="inputMode() === 'manual'; else apiModeBlock">
                     <label for="entityValue" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
                     <div class="mt-2">
-                        <input data-cy="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-md border-0 py-1.5 px-3 text-[var(--color-text1)] shadow-sm ring-1 ring-inset placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 ring-red-500/60' : 'bg-[var(--color-blue-700)] ring-[var(--color-border)]')">
+                        <input data-cy="add-entity-value-input" data-testid="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-md border-0 py-1.5 px-3 text-[var(--color-text1)] shadow-sm ring-1 ring-inset placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 ring-red-500/60' : 'bg-[var(--color-blue-700)] ring-[var(--color-border)]')">
                     </div>
                 </div>
 
                 <ng-template #apiModeBlock>
                     <label for="apiQuery" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
                     <div class="mt-2">
-                        <input data-cy="add-entity-api-query-input" type="text" id="apiQuery" name="apiQuery" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="apiQuery()" (input)="onApiQueryChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-md border-0 py-1.5 px-3 text-[var(--color-text1)] shadow-sm ring-1 ring-inset placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 ring-red-500/60' : 'bg-[var(--color-blue-700)] ring-[var(--color-border)]')">
+                        <input data-cy="add-entity-api-query-input" data-testid="add-entity-api-query-input" type="text" id="apiQuery" name="apiQuery" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="apiQuery()" (input)="onApiQueryChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-md border-0 py-1.5 px-3 text-[var(--color-text1)] shadow-sm ring-1 ring-inset placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 ring-red-500/60' : 'bg-[var(--color-blue-700)] ring-[var(--color-border)]')">
                     </div>
                 </ng-template>
 
@@ -46,7 +46,7 @@
                 <button (click)="close.emit()" type="button" class="rounded-md bg-[var(--color-blue-720)] px-4 py-2 text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
                     Cancel
                 </button>
-                <button data-cy="add-entity-submit" type="button" (click)="confirm()" [disabled]="!isValidInput()" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
+                <button data-cy="add-entity-submit" data-testid="add-entity-submit" type="button" (click)="confirm()" [disabled]="!isValidInput()" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
                     {{ getSubmitLabel() }}
                 </button>
             </div>

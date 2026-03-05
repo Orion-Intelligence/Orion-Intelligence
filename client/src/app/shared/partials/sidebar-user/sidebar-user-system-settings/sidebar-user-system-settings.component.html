@@ -20,13 +20,13 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button type="button" *ngIf="!isEditing" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" aria-label="Edit settings" (click)="toggleEdit()">
+        <button data-testid="system-settings-edit" type="button" *ngIf="!isEditing" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" aria-label="Edit settings" (click)="toggleEdit()">
           <img src="assets/images/shared/edit.svg" width="16" alt="edit" />
         </button>
         <button type="button" *ngIf="isEditing" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" aria-label="Cancel edit" (click)="cancelEdit()">
           <i class="bi bi-x-lg text-sm"></i>
         </button>
-        <button type="button" *ngIf="isEditing" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-sky-400/35 bg-sky-500/15 text-sky-200 transition hover:bg-sky-500/25" aria-label="Save settings" (click)="toggleEdit()">
+        <button data-testid="system-settings-save" type="button" *ngIf="isEditing" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-sky-400/35 bg-sky-500/15 text-sky-200 transition hover:bg-sky-500/25" aria-label="Save settings" (click)="toggleEdit()">
           <i class="bi bi-check-lg text-sm"></i>
         </button>
       </div>
@@ -78,7 +78,7 @@
               App Name
               <img *ngIf="isEditing" src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
             </label>
-            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.app_name" [disabled]="!isEditing" />
+            <input data-testid="system-settings-app-name" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.app_name" [disabled]="!isEditing" />
           </div>
 
           <div>

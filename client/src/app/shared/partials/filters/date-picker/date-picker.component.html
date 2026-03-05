@@ -1,5 +1,5 @@
 <form class="relative w-full overflow-visible">
-  <button type="button" (click)="togglePicker()" class="flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition hover:brightness-[0.98] outline-none focus:outline-none focus:ring-0">
+  <button data-testid="side-filter-date-toggle" type="button" (click)="togglePicker()" class="flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition hover:brightness-[0.98] outline-none focus:outline-none focus:ring-0">
     <span class="truncate">{{ displayValue || (filterModel?.filters?.[key]?.placeholder || 'Select date range') }}</span>
     <img alt="Calendar" class="h-4 w-4 shrink-0 opacity-70" src="assets/images/shared/theme/calendar.png" />
   </button>
@@ -23,7 +23,7 @@
     </div>
 
     <div class="grid grid-cols-7 gap-1">
-      <button type="button" *ngFor="let cell of cells" (click)="onSelect(cell)" class="h-8 rounded-md text-xs transition-colors outline-none focus:outline-none focus:ring-0" [ngClass]="{ 'text-slate-400': !cell.inCurrentMonth, 'text-slate-700 hover:bg-slate-100': cell.inCurrentMonth && !isInRange(cell) && !isStart(cell) && !isEnd(cell), 'bg-sky-100 text-sky-900': isInRange(cell), 'bg-sky-500 text-white font-semibold': isStart(cell) || isEnd(cell) }">
+      <button type="button" *ngFor="let cell of cells" [attr.data-testid]="'side-filter-date-day-' + cell.date.getDate()" (click)="onSelect(cell)" class="h-8 rounded-md text-xs transition-colors outline-none focus:outline-none focus:ring-0" [ngClass]="{ 'text-slate-400': !cell.inCurrentMonth, 'text-slate-700 hover:bg-slate-100': cell.inCurrentMonth && !isInRange(cell) && !isStart(cell) && !isEnd(cell), 'bg-sky-100 text-sky-900': isInRange(cell), 'bg-sky-500 text-white font-semibold': isStart(cell) || isEnd(cell) }">
         {{ cell.date.getDate() }}
       </button>
     </div>

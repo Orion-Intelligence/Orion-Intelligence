@@ -17,21 +17,18 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
     state.verifiedCount++;
     cy.wrap(rows.eq(0)).scrollIntoView().parents('div').filter((_, el) => el.scrollWidth > el.clientWidth).first().scrollTo('right', {ensureScrollable: false});
 
-    cy.wrap(rows.eq(0)).within(() => {
-      cy.get('#edit-tenant, #edit-profile').first().scrollIntoView().should('be.visible').click();
-    });
+    cy.wrap(rows.eq(0)).find('[data-testid="tenant-edit-button"], #edit-tenant, #edit-profile').first().scrollIntoView().should('be.visible').click();
     cy.wrap(false).as('changed');
-    cy.contains('tr', 'Edit Tenant', {timeout: 15000}).should('be.visible');
+    cy.get('[data-testid="tenant-edit-panel"]', {timeout: 15000}).should('be.visible');
 
-    cy.contains('tr', 'Edit Tenant').find('button, .ui-button, [role="button"]').contains(/Not Verified/i).then($el => {
-      const $btn = Cypress.$($el).first();
-      if ($btn.text().toLowerCase().includes('not verified')) {
+    cy.get('[data-testid="tenant-edit-panel"]').find('[data-testid="tenant-verified-toggle"]').first().then(($btn) => {
+      if (($btn.text() || '').toLowerCase().includes('not verified')) {
         cy.wrap($btn).scrollIntoView().should('be.visible').click();
         cy.wrap(true).as('changed');
       }
     });
 
-    cy.contains('tr', 'Edit Tenant').contains('.license-card, .license-btn, .license-label', /Enterprise/i).closest('.license-card, .license-btn').then($card => {
+    cy.get('[data-testid="tenant-edit-panel"]').find('[data-testid="tenant-license-enterprise"]').first().then(($card) => {
       const $cb = $card.find('input[type="checkbox"], input.license-checkbox').first();
       if (!$cb.is(':checked')) {
         cy.wrap($card).scrollIntoView().should('be.visible').click();
@@ -41,7 +38,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
     cy.get('@changed').then((changed: any) => {
       if (changed) {
-        cy.contains('button', 'Save changes', {timeout: 15000}).filter(':visible').first().scrollIntoView().should('be.visible').click();
+        cy.get('[data-testid="tenant-save-changes"]', {timeout: 15000}).filter(':visible').first().scrollIntoView().should('be.visible').click();
       }
     });
     openTenantsPage();
@@ -55,13 +52,13 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 }
 
 export function openTenantsPage() {
-  cy.contains('app-dashboard-sidebar-items div', 'Tenant').should('be.visible').click();
+  cy.get('[data-testid="sidebar-subitem-profile-tenant"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   cy.url().should('include', '/dashboard/profile/tenant');
 }
 
 export function openManageIOCs() {
-  cy.contains('app-dashboard-sidebar-items div', 'IOC').should('be.visible').click();
-  cy.get('input[placeholder="Search IOCs..."]').should('exist');
+  cy.get('[data-testid="sidebar-subitem-profile-ioc"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/ioc');
 }
 
 export function addIOCForAllTabs() {

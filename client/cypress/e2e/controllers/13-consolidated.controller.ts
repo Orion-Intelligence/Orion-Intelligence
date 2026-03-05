@@ -1,10 +1,12 @@
-export function closeAndLogout() {
-  cy.get('body').then(($body) => {
-    const $close = $body.find('button[aria-label="Close"]').filter(':visible').first();
-    if ($close.length) {
-      cy.wrap($close).click();
+export function deleteAllEnabledIocAdvancedFilters() {
+  cy.get('[data-testid="ioc-adv-delete-filter"]').then(($allButtons) => {
+    const $enabledButtons = $allButtons.filter(':enabled');
+
+    if ($enabledButtons.length === 0) {
+      return;
     }
+
+    cy.wrap($enabledButtons[0]).scrollIntoView().should('be.visible').click();
+    deleteAllEnabledIocAdvancedFilters();
   });
-  cy.scrollTo('top', {ensureScrollable: false});
-  cy.logout();
 }

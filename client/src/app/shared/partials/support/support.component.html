@@ -1,8 +1,8 @@
-<div class="ui-graph-popup-overlay fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-opacity duration-150" [class.opacity-0]="!isTailwindReady" [class.pointer-events-none]="!isTailwindReady" [@.disabled]="!isTailwindReady" @overlayAnimation>
-  <div class="ui-graph-popup-panel ui-popup-shell w-full max-w-lg rounded-2xl" @popupAnimation>
+<div data-testid="support-overlay" class="ui-graph-popup-overlay fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-opacity duration-150" [class.opacity-0]="!isTailwindReady" [class.pointer-events-none]="!isTailwindReady" [@.disabled]="!isTailwindReady" @overlayAnimation>
+  <div data-testid="support-modal" class="ui-graph-popup-panel ui-popup-shell w-full max-w-lg rounded-2xl" @popupAnimation>
     <div class="ui-popup-header flex items-center justify-between px-5 py-4">
-      <h2 class="ui-popup-title text-lg font-semibold">Contact Support</h2>
-      <button type="button" (click)="close()" class="ui-popup-close inline-flex items-center justify-center" title="Close">
+      <h2 data-testid="support-modal-title" class="ui-popup-title text-lg font-semibold">Contact Support</h2>
+      <button data-testid="support-close" type="button" (click)="close()" class="ui-popup-close inline-flex items-center justify-center" title="Close">
         ×
       </button>
     </div>
@@ -10,7 +10,7 @@
     <div class="space-y-4 px-5 py-4">
       <div>
         <label class="ui-popup-label mb-1.5 block text-sm font-medium">Email</label>
-        <input type="email" name="email" [(ngModel)]="supportModel.email" #emailInput="ngModel" required email placeholder="your@email.com" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': emailInput.invalid && submitAttempted }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" />
+        <input data-testid="support-email-input" type="email" name="email" [(ngModel)]="supportModel.email" #emailInput="ngModel" required email placeholder="your@email.com" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': emailInput.invalid && submitAttempted }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" />
         <div *ngIf="emailInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-500">
           <span *ngIf="emailInput.errors?.['required']">Email cannot be empty</span>
           <span *ngIf="emailInput.errors?.['email']">Enter a valid email address</span>
@@ -19,7 +19,7 @@
 
       <div>
         <label class="ui-popup-label mb-1.5 block text-sm font-medium">Subject</label>
-        <input type="text" [(ngModel)]="supportModel.subject" #subjectInput="ngModel" required placeholder="Write your subject" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': subjectInput.invalid && submitAttempted }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" />
+        <input data-testid="support-subject-input" type="text" [(ngModel)]="supportModel.subject" #subjectInput="ngModel" required placeholder="Write your subject" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': subjectInput.invalid && submitAttempted }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" />
         <div *ngIf="subjectInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-500">
           Subject cannot be empty
         </div>
@@ -27,7 +27,7 @@
 
       <div>
         <label class="ui-popup-label mb-1.5 block text-sm font-medium">Message</label>
-        <textarea rows="5" [(ngModel)]="supportModel.message" #messageInput="ngModel" required placeholder="Write your message..." [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': messageInput.invalid && submitAttempted }" class="ui-popup-textarea block w-full rounded-lg px-3 py-2.5 text-sm"></textarea>
+        <textarea data-testid="support-message-input" rows="5" [(ngModel)]="supportModel.message" #messageInput="ngModel" required placeholder="Write your message..." [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': messageInput.invalid && submitAttempted }" class="ui-popup-textarea block w-full rounded-lg px-3 py-2.5 text-sm"></textarea>
         <div *ngIf="messageInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-500">
           Message cannot be empty
         </div>
@@ -38,10 +38,10 @@
       <div *ngIf="errorMessage" class="mr-auto text-xs text-rose-500">
         {{ errorMessage }}
       </div>
-      <button type="button" (click)="close()" class="ui-popup-btn-secondary px-[24px] text-[14px]">
+      <button data-testid="support-cancel" type="button" (click)="close()" class="ui-popup-btn-secondary px-[24px] text-[14px]">
         Cancel
       </button>
-      <button type="button" (click)="submit()" [disabled]="isSubmitting" class="ui-popup-btn-primary px-[24px] text-[14px] font-medium disabled:cursor-not-allowed disabled:bg-[var(--color-blue-810)] disabled:text-[var(--color-text4)]">
+      <button data-testid="support-send" type="button" (click)="submit()" [disabled]="isSubmitting" class="ui-popup-btn-primary px-[24px] text-[14px] font-medium disabled:cursor-not-allowed disabled:bg-[var(--color-blue-810)] disabled:text-[var(--color-text4)]">
         {{ isSubmitting ? 'Sending...' : 'Send Message' }}
       </button>
     </div>

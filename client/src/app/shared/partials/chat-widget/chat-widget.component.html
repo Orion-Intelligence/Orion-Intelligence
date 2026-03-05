@@ -1,5 +1,5 @@
 <div class="fixed bottom-6 right-6 z-40">
-  <button *ngIf="!chatOpen" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button">
+  <button *ngIf="!chatOpen" data-testid="chat-widget-open" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button">
     <span><img src="assets/images/shared/theme/chat.svg" alt="chat" class="h-5 w-5 [filter:brightness(0)_invert(1)]" /></span>
   </button>
 </div>
@@ -19,7 +19,7 @@
       </button>
     </div>
 
-    <div #messagesContainer class="flex-1 space-y-3 overflow-y-auto px-4 py-4" (scroll)="onMessagesScroll()">
+    <div #messagesContainer data-testid="chat-widget-messages" class="flex-1 space-y-3 overflow-y-auto px-4 py-4" (scroll)="onMessagesScroll()">
       <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
         <ng-container [ngSwitch]="msg.sender">
           <div *ngSwitchCase="'user'" class="flex items-center gap-3">
@@ -59,8 +59,8 @@
 
     <form class="border-t border-[var(--color-border)] p-3" (submit)="sendMessage($event)">
       <div class="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
-        <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" [disabled]="isBotTyping" required />
-        <button #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] hover:bg-[#4b98dc]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
+        <input data-testid="chat-widget-input" type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" [disabled]="isBotTyping" required />
+        <button data-testid="chat-widget-send" #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] hover:bg-[#4b98dc]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
           <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
         </button>
       </div>

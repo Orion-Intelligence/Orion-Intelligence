@@ -24,7 +24,7 @@ export default defineConfig({
             testing5: { username: "testing5", email: "e@hotmail.com", password: "1qaz!QAZ", role: "Demo", licenses: ["Free"] },
         },
         DEFAULT_TEST_USER_KEY: "testing5",
-        RESET_PASSWORD_EMAIL: "d@gmail.com",
+        RESET_PASSWORD_EMAIL: "d@hotmail.com",
         NEW_PASSWORD: "NewSecurePass@2026",
         TENANT_ACCOUNT: {
             username: "test_for_tenants",

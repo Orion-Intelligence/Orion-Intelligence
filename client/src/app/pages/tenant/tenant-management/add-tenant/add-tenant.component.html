@@ -8,7 +8,7 @@
         <form>
 
             <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Username</label>
-            <input type="text" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
+            <input data-testid="tenant-add-user-username" type="text" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
             <div class="mt-[6px] rounded-[6px] border border-[#ffcc80] bg-[#fff4e5] px-[12px] py-[10px] text-[13px] text-[#a66300]" *ngIf="usernameSuggestion">
                 <div class="mb-[4px] font-semibold">Username already taken, suggested usernames below</div>
                 <div class="text-[12px] opacity-90">
@@ -17,10 +17,10 @@
             </div>
 
             <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Email</label>
-            <input type="email" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
+            <input data-testid="tenant-add-user-email" type="email" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
 
             <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Password</label>
-            <input type="password" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter password" [(ngModel)]="model.password" name="password" />
+            <input data-testid="tenant-add-user-password" type="password" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter password" [(ngModel)]="model.password" name="password" />
 
             <div class="grid grid-cols-2 gap-5">
                 <div>

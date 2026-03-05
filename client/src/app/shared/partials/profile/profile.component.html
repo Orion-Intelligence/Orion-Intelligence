@@ -61,7 +61,7 @@
         <span class="h-[14px] w-[14px] rounded-full bg-white transition" [ngClass]="isDarkTheme ? 'translate-x-[12px]' : 'translate-x-0'"></span>
       </span>
     </li>
-    <li (click)="openSupportPopup();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
+    <li data-testid="profile-help-support" (click)="openSupportPopup();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
       <img alt="Support" src="assets/images/shared/support.svg" class="h-[18px] w-[18px]">
       <span class="text-[14px] font-medium text-[#172235]">Help & Support</span>
     </li>

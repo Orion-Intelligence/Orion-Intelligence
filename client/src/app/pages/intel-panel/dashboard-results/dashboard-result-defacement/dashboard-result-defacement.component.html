@@ -57,7 +57,7 @@
 <ng-template #cardView>
   <div class="space-y-4">
     <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0,2) : searchResults).slice(0,30)">
-      <div [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
+      <div data-testid="result-card" [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap gap-2">
             <ng-container *ngIf="item.m_ioc_type?.length; else unknownTag">

@@ -10,60 +10,62 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
 
   beforeEach(() => {
     cy.loginAsAdmin();
-    cy.visit('/dashboard');
-    cy.get('app-dashboard-sidebar-items').should('exist');
+    cy.get('[data-testid="sidebar-group-strategic"]').should('exist');
   });
 
   it('General Intelligence – tabs load & pagination', () => {
-    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence').should('be.visible').click();
+    cy.get('[data-testid="sidebar-group-strategic"]').should('be.visible').click();
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
-      cy.get('.ui-result-card').should('exist');
+      cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
       cy.get('body').scrollTo('bottom', {
         ensureScrollable: false
       });
-      cy.get('app-pagination').should('exist').scrollIntoView();
+      cy.get('[data-testid="pagination-root"]').should('exist').scrollIntoView();
 
-      cy.get('app-pagination button').not('.disabled').find('img[alt="nav-next"]').parents('button').then(($btn) => {
+      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();
-            cy.get('.ui-result-card').should('exist');
+            cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
           }
         });
     });
   });
 });
+
 describe('Data Breach – Tabs & Pagination', () => {
   after(() => {
     cy.logout();
   });
 
-  const TABS = ['All','Tracking'];
+  const TABS = ['All', 'Tracking'];
 
   beforeEach(() => {
     cy.loginAsAdmin();
-    cy.visit('/dashboard');
-    cy.get('app-dashboard-sidebar-items').should('exist');
+    cy.get('[data-testid="sidebar-group-breach"]').should('exist');
   });
 
   it('Data Breach – tabs load & pagination', () => {
-    cy.contains('app-dashboard-sidebar-items div', 'Data Breach').scrollIntoView().should('be.visible').click();
-    cy.contains('app-dashboard-sidebar-items div', 'Data Breach').closest('li').as('dataBreachTabs');
+    cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="sidebar-group-breach"]').as('dataBreachTabs');
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
-      cy.get('@dataBreachTabs').find('> ul').should('have.class', 'pointer-events-auto').contains('div', tab).should('be.visible').click();
-      cy.get('.ui-result-card').should('exist');
-      cy.get('app-pagination').should('exist');
+      cy.get(`[data-testid="sidebar-subitem-breach-${tab.toLowerCase()}"]`).should('be.visible').click();
+      cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('app-pagination button').not('.disabled').find('img[alt="nav-next"]').parents('button').then(($btn) => {
+      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();
-            cy.get('.ui-result-card').should('exist');
+            cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
           }
         });
     });
   });
 });
+
 describe('Defacement – Tabs & Pagination', () => {
   after(() => {
     cy.logout();
@@ -73,28 +75,29 @@ describe('Defacement – Tabs & Pagination', () => {
 
   beforeEach(() => {
     cy.loginAsAdmin();
-    cy.visit('/dashboard');
-    cy.get('app-dashboard-sidebar-items').should('exist');
+    cy.get('[data-testid="sidebar-group-defacement"]').should('exist');
   });
 
   it('Defacement – tabs load & pagination with scoped clicks', () => {
-    cy.contains('app-dashboard-sidebar-items div', 'Defacement').click();
-    cy.get('app-dashboard-sidebar-items').contains('Defacement').parent().as('defacementTabs');
+    cy.get('[data-testid="sidebar-group-defacement"]').click();
+    cy.get('[data-testid="sidebar-group-defacement"]').as('defacementTabs');
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
-      cy.get('@defacementTabs').contains('div', tab).click();
-      cy.get('tr[id^="item-"], .ui-result-card').should('exist');
-      cy.get('app-pagination').should('exist');
+      cy.get(`[data-testid="sidebar-subitem-defacement-${tab.toLowerCase()}"]`).click();
+      cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('app-pagination button').not('.disabled').find('img[alt="nav-next"]').parents('button').then(($btn) => {
+      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();
-            cy.get('tr[id^="item-"], .ui-result-card').should('exist');
+            cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
           }
         });
     });
   });
 });
+
 describe('Social – Tabs & Pagination', () => {
   after(() => {
     cy.logout();
@@ -107,30 +110,31 @@ describe('Social – Tabs & Pagination', () => {
 
   beforeEach(() => {
     cy.loginAsAdmin();
-    cy.visit('/dashboard');
-    cy.get('app-dashboard-sidebar-items').should('exist');
+    cy.get('[data-testid="sidebar-group-social"]').should('exist');
   });
 
   it('Social – tabs load & pagination with scoped clicks', () => {
-    cy.contains('app-dashboard-sidebar-items div', 'Social').click();
-    cy.get('app-dashboard-sidebar-items').contains('Social').parent().as('socialTabs');
+    cy.get('[data-testid="sidebar-group-social"]').click();
+    cy.get('[data-testid="sidebar-group-social"]').as('socialTabs');
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
-      cy.get('@socialTabs').contains('div', tab).click();
-      cy.get('.ui-result-card').should('exist');
-      cy.get('.ui-result-card').should('exist');
-      cy.get('app-pagination').should('exist');
+      cy.get(`[data-testid="sidebar-subitem-social-${tab.toLowerCase()}"]`).click();
+      cy.get('[data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('app-pagination button').not('.disabled').find('img[alt="nav-next"]').parents('button').then(($btn) => {
+      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();
-            cy.get('.ui-result-card').should('exist');
-            cy.get('.ui-result-card').should('exist');
+            cy.get('[data-testid="result-card"]').should('exist');
+            cy.get('[data-testid="result-card"]').should('exist');
           }
         });
     });
   });
 });
+
 describe('Exploit – Tabs & Pagination', () => {
   after(() => {
     cy.logout();
@@ -140,30 +144,31 @@ describe('Exploit – Tabs & Pagination', () => {
 
   beforeEach(() => {
     cy.loginAsAdmin();
-    cy.visit('/dashboard');
-    cy.get('app-dashboard-sidebar-items').should('exist');
+    cy.get('[data-testid="sidebar-group-exploit"]').should('exist');
   });
 
   it('Exploit – tabs load & pagination with scoped clicks', () => {
-    cy.contains('app-dashboard-sidebar-items div', 'Exploit').click();
-    cy.get('app-dashboard-sidebar-items').contains('Exploit').parent().as('exploitTabs');
+    cy.get('[data-testid="sidebar-group-exploit"]').click();
+    cy.get('[data-testid="sidebar-group-exploit"]').as('exploitTabs');
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
-      cy.get('@exploitTabs').contains('div', tab).click();
-      cy.get('.ui-result-card').should('exist');
-      cy.get('.ui-result-card').should('exist');
-      cy.get('app-pagination').should('exist');
+      cy.get(`[data-testid="sidebar-subitem-exploit-${tab.toLowerCase()}"]`).click();
+      cy.get('[data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('app-pagination button').not('.disabled').find('img[alt="nav-next"]').parents('button').then(($btn) => {
+      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();
-            cy.get('.ui-result-card').should('exist');
-            cy.get('.ui-result-card').should('exist');
+            cy.get('[data-testid="result-card"]').should('exist');
+            cy.get('[data-testid="result-card"]').should('exist');
           }
         });
     });
   });
 });
+
 describe('Feed – Tabs & Pagination', () => {
   after(() => {
     cy.logout();
@@ -173,25 +178,25 @@ describe('Feed – Tabs & Pagination', () => {
 
   beforeEach(() => {
     cy.loginAsAdmin();
-    cy.visit('/dashboard');
-    cy.get('app-dashboard-sidebar-items').should('exist');
+    cy.get('[data-testid="sidebar-group-feed"]').should('exist');
   });
 
   it('Feed – tabs load & pagination with scoped clicks', () => {
-    cy.contains('app-dashboard-sidebar-items div', 'Feed').click();
-    cy.get('app-dashboard-sidebar-items').contains('Feed').parent().as('feedTabs');
+    cy.get('[data-testid="sidebar-group-feed"]').click();
+    cy.get('[data-testid="sidebar-group-feed"]').as('feedTabs');
     TABS.forEach((tab) => {
       cy.log(`TAB: ${tab}`);
-      cy.get('@feedTabs').contains('div', tab).click();
-      cy.get('.ui-result-card').should('exist');
-      cy.get('.ui-result-card').should('exist');
-      cy.get('app-pagination').should('exist');
+      cy.get(`[data-testid="sidebar-subitem-feed-${tab.toLowerCase()}"]`).click();
+      cy.get('[data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="result-card"]').should('exist');
+      cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('app-pagination button').not('.disabled').find('img[alt="nav-next"]').parents('button').then(($btn) => {
+      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();
             cy.reload();
-            cy.get('.ui-result-card').should('exist');
+            cy.get('[data-testid="result-card"]').should('exist');
           }
         });
       cy.logout();

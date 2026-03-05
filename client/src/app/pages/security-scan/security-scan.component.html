@@ -6,9 +6,9 @@
         <div class="flex w-[45px] items-center justify-center bg-white">
           <img alt="Search" height="20" ngSrc="/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
         </div>
-        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
+        <input data-testid="scan-primary-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
         <input type="hidden" value="1">
-        <button class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 disabled:cursor-not-allowed" [disabled]="!searchForm.valid">Search</button>
+        <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 disabled:cursor-not-allowed" [disabled]="!searchForm.valid">Search</button>
       </div>
     </div>
   </div>
@@ -26,12 +26,12 @@
 
   <div class="mt-[12px] flex justify-end" *ngIf="!hasError && !isLoading">
     <div class="security-scan-action-menu inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
-      <button (click)="exportReport()" appTooltip="Download" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <button data-testid="scan-download-report" (click)="exportReport()" appTooltip="Download" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Download" height="25" ngSrc="../../../assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
       </button>
       <div class="security-scan-action-divider my-[10px] w-px bg-[var(--color-border)]"></div>
 
-      <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <button data-testid="scan-print-report" ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Print" height="25" ngSrc="../../../assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
       </button>
     </div>
@@ -58,7 +58,7 @@
         <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton">
           <div class="flex flex-col gap-[14px] lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">Security Posture</div>
+              <div data-testid="scan-security-posture" class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">Security Posture</div>
               <h3 class="mt-[10px] text-[22px] font-semibold leading-tight sm:text-[24px]">
                 Report for
                 <a class="ml-1 underline decoration-dotted underline-offset-4" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ displayHost }}</a>
@@ -118,7 +118,7 @@
     <ng-container *ngIf="!isLoading && !hasError; else categoriesSkeleton">
       <ng-container *ngIf="categories.length">
         <div class="security-scan-findings-section mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngFor="let cat of categories; trackBy: trackByCategory" @fadeInDashboardItem>
-          <h3 class="text-[18px] font-medium text-[var(--color-blue-640)]">{{ cat.name }} Findings ({{ cat.total }})</h3>
+          <h3 data-testid="scan-findings-title" class="text-[18px] font-medium text-[var(--color-blue-640)]">{{ cat.name }} Findings ({{ cat.total }})</h3>
           <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
           <div class="flex flex-col gap-[15px]">
             <div class="security-scan-finding-card rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>

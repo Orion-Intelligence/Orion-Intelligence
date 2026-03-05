@@ -4,9 +4,9 @@
 
 <div class="relative z-[1] flex min-h-[calc(100dvh-60px)] w-full items-center justify-center p-4 max-[600px]:items-start max-[600px]:justify-center max-[600px]:p-[15px]">
     <div class="box-border mt-[-200px] max-h-[502px] w-[90%] max-w-[1000px] rounded-2xl border border-[#FCFCFC12] bg-[rgb(23_34_53_/_55%)] p-[60px] text-center max-[600px]:mt-0 max-[600px]:w-full max-[600px]:max-w-none max-[600px]:p-[30px_20px]">
-        <img src="/assets/images/shared/welcom_icon.svg" alt="Tick" class="mx-auto mb-6 block max-[600px]:h-[72px] max-[600px]:w-[72px]">
+        <img src="/assets/images/shared/welcom_icon.svg" data-testid="welcome-tick" alt="Tick" class="mx-auto mb-6 block max-[600px]:h-[72px] max-[600px]:w-[72px]">
         <div class="mb-5 text-2xl font-semibold text-white max-[600px]:text-lg">{{ heading }}</div>
         <div class="mb-8 text-lg font-normal leading-[1.6] text-[#A0B8D1] max-[600px]:text-base">{{ message }}</div>
-        <button class="mx-auto block h-11 w-[124px] cursor-pointer rounded-lg border-0 bg-[#57A5EB] text-sm font-medium text-[#373637] shadow-[0_1px_2px_#1018280D] transition-all duration-200 ease-in-out hover:bg-[#4591d4]" (click)="goToLogin()">Go to login</button>
+        <button data-testid="welcome-goto-login" class="mx-auto block h-11 w-[124px] cursor-pointer rounded-lg border-0 bg-[#57A5EB] text-sm font-medium text-[#373637] shadow-[0_1px_2px_#1018280D] transition-all duration-200 ease-in-out hover:bg-[#4591d4]" (click)="goToLogin()">Go to login</button>
     </div>
 </div>

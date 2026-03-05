@@ -5,7 +5,7 @@
     <form sidebar-expanded class="h-full p-3 flex flex-col gap-3 overflow-y-auto">
       <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
         <label class="text-xs uppercase tracking-wider text-slate-500">Type</label>
-        <select [(ngModel)]="selectedType" (ngModelChange)="onTypeChange($event)" name="selectedType" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <select data-testid="cti-filter-type-select" [(ngModel)]="selectedType" (ngModelChange)="onTypeChange($event)" name="selectedType" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
           <option *ngFor="let type of graphTypeOptions" [ngValue]="type">{{ type | titlecase }}</option>
         </select>
       </div>
@@ -42,8 +42,8 @@
       </div>
 
       <div class="mt-auto flex gap-2">
-        <button (click)="applyFilters()" type="button" class="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500">Apply</button>
-        <button (click)="resetFilters()" type="button" class="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700">Reset</button>
+        <button data-testid="cti-filter-apply" (click)="applyFilters()" type="button" class="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500">Apply</button>
+        <button data-testid="cti-filter-reset" (click)="resetFilters()" type="button" class="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700">Reset</button>
       </div>
     </form>
 

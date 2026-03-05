@@ -1,5 +1,5 @@
 <div class="w-full p-3 md:p-4">
-  <form class="ui-page-container w-full max-w-[2400px]" (ngSubmit)="updateUser()" @fadeInDashboardItem>
+  <form data-testid="account-settings-form" class="ui-page-container w-full max-w-[2400px]" (ngSubmit)="updateUser()" @fadeInDashboardItem>
     <div class="mb-4 flex items-start gap-3">
       <div class="h-[88px] w-[88px] shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[0.2rem]">
         <app-user-image-picker class="block h-full w-full" [imageUrl]="userSessionData.user.image || ''"
@@ -8,7 +8,7 @@
         </app-user-image-picker>
       </div>
       <div class="pt-1">
-        <h1 class="ui-page-title">{{ isAdmin() ? 'Admin Profile' : 'User Profile Form' }}</h1>
+        <h1 data-testid="account-settings-title" class="ui-page-title">{{ isAdmin() ? 'Admin Profile' : 'User Profile Form' }}</h1>
         <p class="ui-page-description">Account details and preferences.</p>
         <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
           Version <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
@@ -48,7 +48,7 @@
       <div class="ui-section-title">Preferences</div>
       <div class="ui-section-description">Security and appearance settings.</div>
       <div class="mt-3 space-y-3">
-        <div class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="twoFactorEnabled = !twoFactorEnabled; toggleTwoFa()">
+        <div data-testid="account-settings-twofa-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="twoFactorEnabled = !twoFactorEnabled; toggleTwoFa()">
           <div class="flex items-center justify-between gap-3">
             <div>
               <label class="block text-sm font-semibold text-[var(--color-text1)]">2 Factor Authentication</label>
@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <div class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isDarkMode = !isDarkMode; toggleTheme()">
+        <div data-testid="account-settings-theme-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isDarkMode = !isDarkMode; toggleTheme()">
           <div class="flex items-center justify-between gap-3">
             <div>
               <label class="block text-sm font-semibold text-[var(--color-text1)]">Theme</label>

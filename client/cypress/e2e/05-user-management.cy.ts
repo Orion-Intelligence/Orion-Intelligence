@@ -15,50 +15,50 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.logout();
   });
 
-  // it('creates five users with configured licenses as admin', () => {
-  //   cy.loginAsAdmin();
-  //   cy.intercept('POST', '**/api/users').as('usersApi');
-  //   cy.visit('/dashboard/profile/homepage');
-  //   cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-  //   cy.get('[data-testid="sidebar-subitem-profile-users"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-  //   cy.url({timeout: 30000}).should('include', '/dashboard/profile/users');
-  //   cy.wait('@usersApi', {timeout: 30000});
-  //
-  //   CREATE_USERS.forEach((u) => addUser(u));
-  //   cy.logout();
-  // });
+  it('creates five users with configured licenses as admin', () => {
+    cy.loginAsAdmin();
+    cy.intercept('POST', '**/api/users').as('usersApi');
+    cy.visit('/dashboard/profile/homepage');
+    cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="sidebar-subitem-profile-users"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
+    cy.url({timeout: 30000}).should('include', '/dashboard/profile/users');
+    cy.wait('@usersApi', {timeout: 30000});
+
+    CREATE_USERS.forEach((u) => addUser(u));
+    cy.logout();
+  });
 
   it('logs in as testing1 and verifies allowed sidebar group access', () => {
     loginAndClickSidebar(testUsers.testing1.username, ['General Intelligence'], testUsers, testData);
   });
 
-  // it('logs in as testing2 and verifies assigned license sidebar groups', () => {
-  //   loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Dump'], testUsers, testData);
-  // });
-  //
-  // it('logs in as testing3 and verifies assigned license sidebar groups', () => {
-  //   loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs', 'Dump'], testUsers, testData);
-  // });
-  //
-  // it('logs in as testing4 and verifies scanner and api sidebar groups', () => {
-  //   loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity API'], testUsers, testData);
-  // });
+  it('logs in as testing2 and verifies assigned license sidebar groups', () => {
+    loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Dump'], testUsers, testData);
+  });
+
+  it('logs in as testing3 and verifies assigned license sidebar groups', () => {
+    loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs', 'Dump'], testUsers, testData);
+  });
+
+  it('logs in as testing4 and verifies scanner and api sidebar groups', () => {
+    loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity API'], testUsers, testData);
+  });
 });
 
-// describe('Orion Intelligence - User Management Deletion Flow', () => {
-//   const USERS_URL = '/dashboard/profile/users?page=1';
-//
-//   beforeEach(() => {
-//     cy.loginAsAdmin();
-//   });
-//
-//   after(() => {
-//     cy.logout();
-//   });
-//
-//   it('deletes users sequentially until only system users remain', () => {
-//     openUsersList(USERS_URL);
-//     deleteFirstUser(USERS_URL);
-//     cy.logout();
-//   });
-// });
+describe('Orion Intelligence - User Management Deletion Flow', () => {
+  const USERS_URL = '/dashboard/profile/users?page=1';
+
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('deletes users sequentially until only system users remain', () => {
+    openUsersList(USERS_URL);
+    deleteFirstUser(USERS_URL);
+    cy.logout();
+  });
+});

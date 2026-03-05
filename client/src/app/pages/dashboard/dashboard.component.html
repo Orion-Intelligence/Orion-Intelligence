@@ -14,11 +14,11 @@
         data-cy="dashboard-sidebar-component">
       </app-dashboard-sidebar>
     </div>
-    <div [ngClass]="{ 'max-[800px]:hidden': isMenuOpen }" class="relative m-0 h-auto max-h-full min-w-0 flex-1 overflow-hidden bg-[var(--color-blue-850)] z-[1]" data-cy="dashboard-container">
+    <div [ngClass]="{ 'max-[800px]:hidden': isMenuOpen }" class="relative m-0 h-auto max-h-full min-w-0 flex-1 overflow-hidden overflow-x-hidden bg-[var(--color-blue-850)] z-[1]" data-cy="dashboard-container">
       <div class="pointer-events-none absolute inset-x-0 top-0 h-[220px] bg-[var(--color-mono)]"></div>
-      <div class="relative z-[1] flex h-[1vh] min-h-full min-w-0 flex-col overflow-y-auto" id="dashboard-container" data-cy="dashboard-sub-container">
+      <div class="relative z-[1] flex h-[1vh] min-h-full min-w-0 flex-col overflow-y-auto overflow-x-hidden" id="dashboard-container" data-cy="dashboard-sub-container">
         <app-dashboard-header data-cy="dashboard-header"></app-dashboard-header>
-        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="ui-dashboard-grid-bg m-0 block flex-1" data-cy="dashboard-body">
+        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="ui-dashboard-grid-bg m-0 block flex-1 overflow-x-hidden" data-cy="dashboard-body">
           <router-outlet #routerOutlet="outlet" data-cy="router-outlet"></router-outlet>
         </span>
       </div>
