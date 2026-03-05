@@ -1,0 +1,32 @@
+{
+  "result": {
+    "input_name": "John Doe",
+    "match_found": true,
+    "person_details": {
+      "name": "Johnathan Andrew Doe",
+      "aliases": [
+        "Jon Doe",
+        "J.A. Doe"
+      ],
+      "dob": "1984-03-12",
+      "nationality": "Unknown"
+    },
+    "issuing_authority": {
+      "agency": "International Criminal Police Organization",
+      "country": "France",
+      "notice_type": "red_notice"
+    },
+    "offense_information": {
+      "primary_offense": "Money Laundering",
+      "description": "Suspected involvement in cross-border financial fraud and laundering activities.",
+      "date_issued": "2022-11-05"
+    },
+    "sources": [
+      "Interpol Notices Database",
+      "Global Sanctions Watchlist",
+      "Financial Crime Intelligence Unit"
+    ],
+    "status": "success",
+    "query_type": "person_identity"
+  }
+}

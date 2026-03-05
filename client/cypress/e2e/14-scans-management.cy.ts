@@ -1,26 +1,44 @@
 describe('Dashboard Sections Test – Stealer Logs', () => {
+  const fillVisibleInputByPlaceholder = (placeholder: string, value: string) => {
+    cy.get(`form:visible input[placeholder="${placeholder}"]`, {timeout: 20000})
+      .should('be.visible')
+      .clear()
+      .type(value);
+  };
+
+  const clickSearch = () => {
+    cy.contains('button', /Search/i, {timeout: 20000})
+      .filter(':visible')
+      .first()
+      .should('be.enabled')
+      .click();
+  };
+
+  const makeFileInputInteractable = () => {
+    cy.get('input#fileInput[type="file"]', {timeout: 20000})
+      .should('exist')
+      .invoke('removeClass', 'hidden')
+      .invoke('attr', 'style', 'display:block;position:fixed;left:8px;top:8px;opacity:1;z-index:9999;');
+  };
 
   beforeEach(() => {
     cy.loginAsAdmin();
   });
 
+  after(() => {
+    cy.logout();
+  });
+
+
   it('Web Scans – Basic, Port, Repository & SEO', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('app-dashboard-sidebar-items div', 'Web Scans')
-      .should('be.visible')
-      .click();
+    cy.visit('/dashboard/scanner/basic-scan');
 
-    cy.contains('app-dashboard-sidebar-items div', 'Basic Scan')
-      .click();
+    fillVisibleInputByPlaceholder('Domain', 'https://ucp.edu.pk/');
 
-    cy.get('input[placeholder="Domain"]')
-      .clear()
-      .type('https://ucp.edu.pk/');
-
-    cy.contains('button', 'Search')
-      .click();
+    clickSearch();
 
     cy.contains('div', 'Security Posture')
       .should('exist');
@@ -29,154 +47,191 @@ describe('Dashboard Sections Test – Stealer Logs', () => {
       .first()
       .click();
 
-    cy.contains('app-dashboard-sidebar-items div', 'Port Scan')
-      .click();
+    cy.visit('/dashboard/scanner/port-scan');
 
-    cy.get('input[placeholder="Domain"]')
-      .clear()
-      .type('https://ucp.edu.pk/');
+    fillVisibleInputByPlaceholder('Domain', 'https://ucp.edu.pk/');
 
-    cy.contains('button', 'Search')
-      .click();
+    clickSearch();
 
     cy.contains('div', 'Security Posture')
       .should('exist');
 
-    cy.contains('app-dashboard-sidebar-items div', 'Repository Scan')
-      .click();
+    cy.visit('/dashboard/scanner/repository-scan');
 
-    cy.get('input[placeholder="Repository"]')
-      .clear()
-      .type('https://github.com/juice-shop/juice-shop');
+    fillVisibleInputByPlaceholder('Repository', 'https://github.com/juice-shop/juice-shop');
 
-    cy.contains('button', 'Search')
-      .click();
+    clickSearch();
 
     cy.get('app-code-block')
       .should('exist');
 
-    cy.get('button[apptooltip="Download"]')
+    cy.get('button[apptooltip="Download"]:visible')
+      .should('be.enabled')
       .click();
 
-    cy.get('button[apptooltip="Print"]')
+    cy.get('button[apptooltip="Print"]:visible')
+      .should('be.enabled')
       .click();
 
-    cy.contains('app-dashboard-sidebar-items div', 'SEO Scan')
-      .click();
+    cy.visit('/dashboard/scanner/seo-scan');
 
-    cy.get('input[placeholder="Domain"]')
-      .clear()
-      .type('https://ucp.edu.pk/');
+    fillVisibleInputByPlaceholder('Domain', 'https://ucp.edu.pk/');
 
-    cy.contains('button', 'Search')
-      .click();
+    clickSearch();
 
-    cy.contains('app-dashboard-sidebar-items div', 'APK Scan')
-      .should('be.visible')
-      .click();
+    cy.visit('/dashboard/scanner/apk-scan');
 
-    cy.get('input[type="file"]')
-      .should('exist')
-      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
+    makeFileInputInteractable();
+    cy.get('input#fileInput[type="file"]')
+      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk');
 
-    cy.contains('span', 'success', { timeout: 300000 })
+    cy.contains('span', 'success', {timeout: 300000})
       .should('be.visible');
 
-    cy.get('button[aria-label="Download report"]', { timeout: 60000 })
+    cy.get('button[aria-label="Download report"]', {timeout: 60000})
       .should('be.visible')
+      .and('be.enabled')
       .scrollIntoView()
-      .click({ force: true });
+      .click();
 
-    cy.get('button[aria-label="Scan another file"]', { timeout: 60000 })
+    cy.get('button[aria-label="Scan another file"]', {timeout: 60000})
       .should('be.visible')
+      .and('be.enabled')
       .scrollIntoView()
-      .click({ force: true });
+      .click();
 
-    cy.get('input[type="file"]')
-      .should('exist')
-      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk', { force: true });
+    makeFileInputInteractable();
+    cy.get('input#fileInput[type="file"]')
+      .selectFile('cypress/fixtures/1MB_1.0_APKPure.apk');
 
-    cy.contains('span', 'success', { timeout: 300000 })
+    cy.contains('span', 'success', {timeout: 300000})
       .should('be.visible');
 
   });
 
-  it('Entity APIs → Email Breach, Social Scanner, Playstore Scanner, Software Scanner', () => {
+  it('Entity APIs → Email, Social, Wanted, National, Playstore, Software, File, Crypto', () => {
 
     cy.visit('/dashboard');
 
-    cy.contains('app-dashboard-sidebar-items div', 'Entity API')
-      .should('be.visible')
-      .click();
+    cy.visit('/dashboard/api/email-breach');
 
-        cy.contains('app-dashboard-sidebar-items div', 'File Scanner')
-      .should('be.visible')
-      .click();
-
-    cy.get('input[type="file"]')
-      .should('exist')
-      .selectFile({
-        contents: 'cypress/fixtures/resume-sample.pdf',
-        fileName: 'resume-sample.pdf',
-        mimeType: 'application/pdf'
-      }, { force: true });
-
-    cy.contains('span', 'success', { timeout: 300000 })
-      .should('be.visible');
-
-    cy.get('button[aria-label="Download report"]', { timeout: 60000 })
-      .should('be.visible')
-      .scrollIntoView()
-      .click({ force: true });
-
-    cy.get('button[aria-label="Scan another file"]', { timeout: 60000 })
-      .should('be.visible')
-      .scrollIntoView()
-      .click({ force: true });
-
-    cy.get('input[type="file"]')
-      .should('exist')
-      .selectFile({
-        contents: 'cypress/fixtures/resume-sample.pdf',
-        fileName: 'resume-sample.pdf',
-        mimeType: 'application/pdf'
-      }, { force: true });
-
-    cy.contains('span', 'success', { timeout: 300000 })
-      .should('be.visible');
-
-    cy.contains('app-dashboard-sidebar-items div', 'Email Breach')
-      .click();
-
-    cy.get('input[name="q2"]')
+    cy.get('input[name="q2"]:visible', {timeout: 20000})
       .clear()
       .type('msmannan00@gmail.com');
 
-    cy.contains('button', 'Search')
-      .click();
+    clickSearch();
 
-    cy.contains('app-dashboard-sidebar-items div', 'Social Scanner')
-      .click();
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
 
-    cy.get('input[placeholder="Username"]')
+    cy.visit('/dashboard/api/social-scanner');
+
+    cy.get('input[placeholder="Username"]:visible', {timeout: 20000})
       .should('be.visible')
-      .clear({ force: true })
-      .type('Usama', { force: true });
+      .clear()
+      .type('Usama');
 
-    cy.contains('button', 'Search')
+    clickSearch();
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
+
+    cy.visit('/dashboard/api/wanted-list');
+
+    cy.get('input[placeholder="Person Name / Alias"]:visible', {timeout: 20000})
+      .should('be.visible')
+      .clear()
+      .type('John Doe');
+
+    clickSearch();
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
+
+    cy.visit('/dashboard/api/national-identity');
+
+    cy.get('input[placeholder="CNIC / Mobile Number"]:visible', {timeout: 20000})
+      .should('be.visible')
+      .clear()
+      .type('92301234567');
+
+    clickSearch();
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
+
+    cy.visit('/dashboard/api/playstore-scanner');
+
+    cy.get('input[placeholder="Package / Playstore URL"]:visible', {timeout: 20000})
+      .should('be.visible')
+      .clear()
+      .type('https://play.google.com/store/apps/details?id=com.jrzheng.supervpnfree');
+
+    clickSearch();
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
+
+    cy.visit('/dashboard/api/software-scanner');
+
+    cy.get('input[placeholder="Software Name"]:visible', {timeout: 20000})
+      .should('be.visible')
+      .clear()
+      .type('gta');
+
+    clickSearch();
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
+
+    cy.visit('/dashboard/api/file-scanner');
+
+    makeFileInputInteractable();
+    cy.get('input#fileInput[type="file"]')
+      .selectFile({
+        contents: 'cypress/fixtures/resume-sample.pdf',
+        fileName: 'resume-sample.pdf',
+        mimeType: 'application/pdf'
+      });
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
+
+    cy.get('button[aria-label="Download report"]', {timeout: 60000})
+      .should('be.visible')
+      .and('be.enabled')
+      .scrollIntoView()
       .click();
 
+    cy.get('button[aria-label="Scan another file"]', {timeout: 60000})
+      .should('be.visible')
+      .and('be.enabled')
+      .scrollIntoView()
+      .click();
+
+    makeFileInputInteractable();
+    cy.get('input#fileInput[type="file"]')
+      .selectFile({
+        contents: 'cypress/fixtures/resume-sample.pdf',
+        fileName: 'resume-sample.pdf',
+        mimeType: 'application/pdf'
+      });
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
+
+    cy.visit('/dashboard/api/crypto-scanner');
+
+    cy.get('input[placeholder="Wallet Address / Transaction Hash"]:visible', {timeout: 20000})
+      .should('be.visible')
+      .clear()
+      .type('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh');
+
+    clickSearch();
+
+    cy.contains('span', 'success', {timeout: 300000})
+      .should('be.visible');
 
   });
 
-
-
-
-});
-
-
-
-
-after(() => {
-  cy.logoutIfLoggedIn();
 });

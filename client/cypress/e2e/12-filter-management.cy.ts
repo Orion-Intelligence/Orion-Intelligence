@@ -1,12 +1,3 @@
-const closeFiltersPanelIfOpen = () => {
-  cy.get('body').then(($body) => {
-    const closeImg = $body.find('app-filters img[alt="close"]');
-    if (closeImg.length) {
-      cy.wrap(closeImg.first()).scrollIntoView().click();
-    }
-  });
-};
-
 describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () => {
 
   it('Apply ALL filters, auto-apply network, safe search, date, content type', () => {
@@ -43,8 +34,8 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
       cy.get('app-search-filters input[placeholder="Enter entity"]', {timeout: 20000})
         .scrollIntoView()
-        .scrollIntoView().clear()
-        .scrollIntoView().type();
+        .clear()
+        .type(value);
 
       cy.get('app-search-filters input[placeholder="Enter entity"] + span', {timeout: 20000})
         .should('be.visible')
@@ -140,7 +131,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.contains('app-filters label', 'Safe Search', {timeout: 30000})
         .parent()
         .find('select')
-        .scrollIntoView().select();
+        .scrollIntoView().select(option);
 
       clickFiltersApply();
       openFilters();
@@ -168,7 +159,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.contains('app-filters label', 'Content Type', {timeout: 30000})
         .parent()
         .find('select')
-        .scrollIntoView().select();
+        .scrollIntoView().select(option);
 
       clickFiltersApply();
       openFilters();
@@ -179,17 +170,15 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       .first()
       .should('be.visible')
       .scrollIntoView().click();
-  closeFiltersPanelIfOpen();
-  cy.logoutIfLoggedIn();
-});
+    cy.logoutIfLoggedIn();
+  });
 
 
   describe('Data Breach – Full Filters + Auto-Apply Flow', () => {
 
     it('Apply ALL filters, network, safe search, date, content type in Data Breach tab', () => {
 
-    closeFiltersPanelIfOpen();
-    cy.logoutIfLoggedIn();
+      cy.logoutIfLoggedIn();
       cy.loginAsAdmin();
 
       cy.visit('/dashboard');
@@ -209,7 +198,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
 
       const openFilters = () => {
-        cy.contains('label', 'Filter').scrollIntoView().scrollIntoView().click();
+        cy.contains('label', 'Filter').scrollIntoView().click();
         cy.get('app-filters').should('exist');
       };
 
@@ -221,7 +210,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.contains('app-filters label', 'Network Type')
         .parent()
         .find('select')
-        .scrollIntoView().select();
+        .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
         openFilters();
       });
@@ -232,7 +221,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
         cy.contains('app-filters label', 'Safe Search')
           .parent()
           .find('select')
-          .scrollIntoView().select();
+          .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
         openFilters();
       });
@@ -262,15 +251,14 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
         cy.contains('app-filters label', 'Content Type')
           .parent()
           .find('select')
-          .scrollIntoView().select();
+          .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
         openFilters();
       });
 
 
       cy.get('form button[type="submit"]').first().scrollIntoView().click();
-    closeFiltersPanelIfOpen();
-    cy.logoutIfLoggedIn();
+      cy.logoutIfLoggedIn();
 
     });
 
@@ -281,8 +269,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
     it('Apply all filters in Defacement with auto-apply', () => {
 
-    closeFiltersPanelIfOpen();
-    cy.logoutIfLoggedIn();
+      cy.logoutIfLoggedIn();
       cy.loginAsAdmin();
 
       cy.visit('/dashboard');
@@ -327,7 +314,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.contains('app-filters label', 'Network Type')
         .parent()
         .find('select')
-        .scrollIntoView().select();
+        .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
 
         openFilters();
@@ -335,8 +322,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
 
       cy.get('form button[type="submit"]').first().scrollIntoView().click();
-    closeFiltersPanelIfOpen();
-    cy.logoutIfLoggedIn();
+      cy.logoutIfLoggedIn();
 
     });
 
@@ -392,7 +378,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.contains('app-filters label', 'Network Type')
         .parent()
         .find('select')
-        .scrollIntoView().select();
+        .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
 
         openFilters();
@@ -407,7 +393,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
         cy.contains('app-filters label', 'Content Type')
           .parent()
           .find('select')
-          .scrollIntoView().select();
+          .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
 
         openFilters();
@@ -473,7 +459,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
         cy.contains('app-filters label', 'Content Type')
           .parent()
           .find('select')
-          .scrollIntoView().select();
+          .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
 
         openFilters();
@@ -485,7 +471,7 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
       cy.contains('app-filters label', 'Network Type')
         .parent()
         .find('select')
-        .scrollIntoView().select();
+        .scrollIntoView().select(option);
         cy.contains('button', 'Apply').scrollIntoView().click();
 
         openFilters();
@@ -493,8 +479,6 @@ describe('General Intelligence – Full Filters + Tools + Auto-Apply Flow', () =
 
 
       cy.get('form button[type="submit"]').first().scrollIntoView().click();
-      cy.logoutIfLoggedIn();
-
     });
 
   });
