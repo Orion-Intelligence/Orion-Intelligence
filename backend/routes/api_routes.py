@@ -87,7 +87,6 @@ async def search_social(param: search_consolidated_param_model = Body(...)):
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
     else:
         param.platform = param.category
-        param.category = ""
         if param.platform == "telegram":
             base_index = [ELASTIC_INDEX.S_CHATS_INDEX]
             return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])

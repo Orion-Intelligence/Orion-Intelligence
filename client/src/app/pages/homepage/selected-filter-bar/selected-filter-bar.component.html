@@ -5,7 +5,7 @@
       <div class="flex text-[18px] font-medium text-[var(--color-text1)] max-[640px]:text-[16px]">Filters</div>
       <div class="flex items-center gap-[20px] mr-[-10px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
         <ng-container *ngIf="isConsolidatedRoute()">
-          <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB] max-[640px]:h-[28px] max-[640px]:text-[11px]" *ngIf="entityFiltersCount()>0">
+          <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB] max-[640px]:h-[28px] max-[640px]:text-[11px]">
             Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
           </div>
           <div class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[#57A5EB] max-[640px]:h-[28px] max-[640px]:text-[11px]" *ngIf="entityFiltersCount()>0">
