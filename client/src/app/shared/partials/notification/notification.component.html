@@ -1,12 +1,14 @@
-<div class="dark-theme min-h-[100dvh] bg-[#172235]">
-  <app-header [forceDark]="true"></app-header>
-  <img alt="background" class="fixed inset-0 h-full w-full object-cover" src="/assets/images/shared/Bg.webp">
-  <div class="relative z-[1] flex min-h-[calc(100dvh-60px)] items-center justify-center px-[20px]">
-    <div class="w-full max-w-[420px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[24px] text-center shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
-      <img src="/assets/images/shared/welcom_icon.svg" alt="Tick" class="mx-auto h-[64px] w-[64px]">
-      <div class="mt-[12px] text-[20px] font-semibold text-[var(--color-text1)]">{{ title }}</div>
-      <div class="mt-[6px] text-[14px] text-[var(--color-text4)]">{{ description }}</div>
-      <button (click)="goHome()" class="mt-[16px] rounded-[8px] bg-[var(--color-blue-640)] px-[16px] py-[10px] text-[14px] font-medium text-white">Homepage</button>
+<app-header [forceDark]="true"></app-header>
+
+<img alt="background" src="/assets/images/shared/Bg.webp" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover opacity-[0.25]">
+
+<div class="reset-page-wrapper relative z-[1] min-h-[calc(100dvh-60px)] w-screen">
+  <div class="reset-page-overlay flex min-h-[calc(100dvh-60px)] w-full items-start justify-center bg-[#0e1626d9] px-4 pt-[20vh] max-[640px]:p-[10px]">
+    <div class="reset-page__card mt-0 flex w-full max-w-[500px] flex-col items-center rounded-[16px] border border-[#fcfcfc14] bg-[rgba(23,34,53,0.5)] px-9 py-[42px] font-[Inter] text-white shadow-[0_16px_40px_rgba(0,0,0,0.28)] max-[1300px]:mx-[15px]">
+      <img src="/assets/images/shared/welcom_icon.svg" alt="Tick" class="h-[64px] w-[64px]">
+      <div class="mb-2 mt-[14px] text-center text-[34px] font-semibold leading-[1.05] tracking-[-0.02em]">{{ title }}</div>
+      <p class="mb-6 text-center text-[14px] font-normal leading-[1.55] text-[#9ab2cd]">{{ description }}</p>
+      <button (click)="goHome()" class="h-[44px] rounded-[8px] bg-[#57a5eb] px-5 text-[14px] font-medium text-white shadow-[0_1px_2px_rgb(16_24_40/5%)]">Homepage</button>
     </div>
   </div>
 </div>

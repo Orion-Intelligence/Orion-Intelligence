@@ -74,6 +74,9 @@ class AccountManager:
         try:
             engine = mongo_controller.get_instance().get_engine()
 
+            if LicenseName.MAINTAINER in (data.licenses or []):
+                raise HTTPException(status_code=403, detail="Role denied")
+
             if current_user.role == user_role.ADMIN:
                 if data.role != user_role.ANALYST:
                     raise HTTPException(status_code=403, detail="Not allowed")

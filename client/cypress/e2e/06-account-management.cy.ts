@@ -1,6 +1,6 @@
 describe('Orion Intelligence – Account Settings Basic Flow', () => {
   const testUsers = Cypress.env('TEST_USERS') || {};
-  const defaultUserKey = Cypress.env('DEFAULT_TEST_USER_KEY');
+  const defaultUserKey = 'testing4';
   const defaultUser = testUsers[defaultUserKey] || {};
   const resetEmail = Cypress.env('RESET_PASSWORD_EMAIL') || defaultUser.email;
   const newPassword = Cypress.env('NEW_PASSWORD');

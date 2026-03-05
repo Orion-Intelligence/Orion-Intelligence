@@ -14,7 +14,7 @@ from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName
 from orion.services.encryption_manager.key_manager import KeyManager
 
 
@@ -276,6 +276,9 @@ class TenantManager:
         from orion.services.mongo_manager.mongo_controller import mongo_controller
         try:
             engine = mongo_controller.get_instance().get_engine()
+
+            if LicenseName.MAINTAINER in (data.licenses or []):
+                raise HTTPException(status_code=403, detail="Role denied")
 
             username, email, password = helper_controller.extract_user_mail_fields(data)
 

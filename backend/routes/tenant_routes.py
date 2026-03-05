@@ -108,7 +108,7 @@ async def update_user(current_user=Depends(get_current_user)):
 @tenant_routes.put(
     "/api/tenant/image",
     summary="Upload profile image",
-    dependencies=[Depends(role_required([user_role.ANALYST, user_role.DEMO, user_role.ADMIN, user_role.MEMBER]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ResourceManager.get_instance().uploadTenantImage(file, current_user)
 

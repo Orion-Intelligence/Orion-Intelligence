@@ -24,7 +24,7 @@ Cypress.Commands.add("loginAsAdmin", () => {
 });
 Cypress.Commands.add("loginAsTest1", () => {
     const users = Cypress.env("TEST_USERS") || {};
-    const key = Cypress.env("DEFAULT_TEST_USER_KEY") || "testing5";
+    const key = "testing4";
     const user = users[key];
     if (!user?.username || !user?.password) {
         throw new Error(`Missing test user credentials for key: ${key}`);
