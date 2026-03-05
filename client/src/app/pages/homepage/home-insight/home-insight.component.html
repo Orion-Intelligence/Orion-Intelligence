@@ -61,7 +61,7 @@
           <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')" class="border-t border-[rgba(148,163,184,0.20)]"></div>
 
           <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')" class="text-center">
-            <p appTooltip="Open Report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
+            <p appTooltip="Open Report" data-testid="open-report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
               View Details
             </p>
           </div>

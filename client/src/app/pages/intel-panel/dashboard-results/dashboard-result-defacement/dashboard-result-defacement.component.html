@@ -73,7 +73,7 @@
               <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" class="ui-action-icon" />
             </div>
 
-            <div (click)="scrollService.saveCurrentPosition(item.m_hash)" appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
+            <div (click)="scrollService.saveCurrentPosition(item.m_hash)" appTooltip="Open Report" data-testid="open-report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
               <img height="18" src="/assets/images/shared/theme/redirect.svg" width="18" alt="redirect" class="ui-action-icon" />
             </div>
           </div>

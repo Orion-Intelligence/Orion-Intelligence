@@ -1,5 +1,5 @@
 import "./commands";
-import { mount } from "cypress/angular";
+import {mount} from "cypress/angular";
 declare global {
     namespace Cypress {
         interface Chainable {

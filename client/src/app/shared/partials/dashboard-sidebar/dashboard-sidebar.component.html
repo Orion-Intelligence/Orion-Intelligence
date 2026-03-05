@@ -3,7 +3,7 @@
     <a href="">
       <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
     </a>
-    <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
+    <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" data-testid="sidebar-collapse-button" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
       <img alt="Menu" height="28" src="/assets/images/sidebar/nav_menu.svg" width="24" />
     </button>
   </div>
@@ -204,7 +204,7 @@
 </nav>
 
 <nav *ngIf="!this.sidebar_default" @sidebarMode [@.disabled]="animationsDisabled" class="w-full pt-0 h-full min-h-0 flex flex-col">
-  <button (click)="onToggleSidebar(true)" appTooltip="Expand sidebar" aria-label="Expand sidebar" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+  <button (click)="onToggleSidebar(true)" appTooltip="Expand sidebar" aria-label="Expand sidebar" data-testid="sidebar-expand-button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
     <img alt="Menu" height="20" ngSrc="/assets/images/sidebar/menu-mini.svg" width="20" />
   </button>
   <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">

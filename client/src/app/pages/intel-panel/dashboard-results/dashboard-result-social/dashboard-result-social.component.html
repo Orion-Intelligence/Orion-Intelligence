@@ -19,7 +19,7 @@
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
             </div>
           </div>
-          <div (click)="scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
+          <div (click)="scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report" data-testid="open-report">
             <div class="p-[0_0_10px_10px]">
               <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
             </div>

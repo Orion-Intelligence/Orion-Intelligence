@@ -1,5 +1,5 @@
 <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55" @overlayAnimation (click)="onClose()">
-    <div class="ui-popup-shell relative max-h-[800px] w-full max-w-[1000px] overflow-y-auto rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[35px] text-[var(--color-text1)] shadow-[0_0_30px_rgba(0,0,0,0.3)]" @popupAnimation (click)="$event.stopPropagation()">
+    <div data-testid="tenant-add-user-modal" class="ui-popup-shell relative max-h-[800px] w-full max-w-[1000px] overflow-y-auto rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[35px] text-[var(--color-text1)] shadow-[0_0_30px_rgba(0,0,0,0.3)]" @popupAnimation (click)="$event.stopPropagation()">
         <div class="ui-popup-header border-b border-[var(--color-border)] pb-4">
             <div class="ui-popup-title m-0 text-[24px] font-semibold">Add User</div>
             <button class="ui-popup-close absolute right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="onClose()">×</button>
@@ -68,7 +68,7 @@
 
         <div class="ui-popup-footer mt-[30px] flex justify-end gap-[15px] border-t border-[var(--color-border)] pt-4">
             <button class="ui-popup-btn-secondary inline-flex h-[42px] min-w-[132px] items-center justify-center rounded-[8px] border border-[#A0B8D1] bg-transparent px-6 text-[14px] font-medium text-[var(--color-text1)] transition-[background-color,border-color] duration-200 hover:border-[#c3d4e6] hover:bg-[rgba(160,184,209,0.14)]" (click)="onClose()">Cancel</button>
-            <button class="ui-popup-btn-primary inline-flex h-[42px] min-w-[132px] items-center justify-center rounded-[8px] border-none bg-[#57A5EB] px-6 text-[14px] font-medium text-[#0e1626] transition-colors duration-200 hover:bg-[#4b98dc]" (click)="onSubmit()">Add User</button>
+            <button data-testid="tenant-add-user-submit" class="ui-popup-btn-primary inline-flex h-[42px] min-w-[132px] items-center justify-center rounded-[8px] border-none bg-[#57A5EB] px-6 text-[14px] font-medium text-[#0e1626] transition-colors duration-200 hover:bg-[#4b98dc]" (click)="onSubmit()">Add User</button>
         </div>
 
     </div>

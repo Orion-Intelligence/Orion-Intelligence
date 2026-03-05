@@ -1,7 +1,7 @@
 <div class="dark-theme min-h-[100dvh] bg-[#0E1626]">
 
 <div id="content" *ngIf="!twofaRequired">
-  <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-cy="login-page">
+  <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-cy="login-page" data-testid="login-page">
     <div class="min-w-[500px] bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:flex-[0_0_100vw] max-[943px]:min-w-[350px]">
       <div class="w-full flex justify-center gap-6">
         <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Privacy Policy</a>
@@ -29,13 +29,13 @@
             <label for="username" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">Email</label>
             <div class="relative w-full">
               <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
-              <input [(ngModel)]="user.mail" placeholder="Enter email" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" data-cy="login-user" required type="text" />
+              <input [(ngModel)]="user.mail" placeholder="Enter email" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" data-cy="login-user" data-testid="login-user" required type="text" />
             </div>
 
             <label for=" word" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">Password</label>
             <div class="relative w-full">
               <img src="/assets/images/shared/lock.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
-              <input [(ngModel)]="user.password" placeholder="Enter password" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" data-cy="login-pass" required type="password" />
+              <input [(ngModel)]="user.password" placeholder="Enter password" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" data-cy="login-pass" data-testid="login-pass" required type="password" />
             </div>
 
             <span (click)="goToForgot()" class="text-[#a0b8d1] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-cy="reset-password">Reset password?</span>
@@ -53,7 +53,7 @@
             </div>
 
             <div>
-              <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-cy="login-button" type="submit" value="Sign In" />
+              <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-cy="login-button" data-testid="login-button" type="submit" value="Sign In" />
             </div>
           </form>
 

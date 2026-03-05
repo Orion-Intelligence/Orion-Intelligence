@@ -1,307 +1,252 @@
-describe('General Intelligence – Multi-Tab Search & Open Report Flow', () => {
-  function waitForSearchReady() {
-    cy.get('app-loading-form', { timeout: 30000 }).should('not.exist');
-    cy.get('body').then(($body) => {
-      if ($body.find('app-filters:visible, app-search-filters:visible').length) {
-        cy.scrollTo('top', { ensureScrollable: false });
+import {clickOpenReport, clickSidebarSubItem, openExploitSubmenu, openSidebarGroup, typeDashboardSearch, typeExploitSearch, waitForSearchReady} from './controllers/04-searching.controller';
+
+function openFirstReportAndValidateNavigationOrModal() {
+  cy.location('pathname').then((pathBefore) => {
+    clickOpenReport();
+
+    cy.get('body', {timeout: 10000}).then(($body) => {
+      if ($body.find('app-json-api-viewer').length) {
+        cy.get('app-json-api-viewer').should('be.visible');
+        cy.get('body').type('{esc}');
+        return;
       }
+
+      cy.location('pathname', {timeout: 10000}).should('not.eq', pathBefore);
     });
-  }
+  });
+}
 
-  function typeDashboardSearch(value: string) {
-    waitForSearchReady();
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]', { timeout: 30000 })
-      .first()
-      .scrollIntoView()
-      .should('be.visible')
-      .and('be.enabled')
-      .then(($input) => {
-        const currentValue = String($input.val() ?? '').trim();
-        if (currentValue.length > 0) {
-          cy.wrap($input).clear();
-        }
-      })
-      .type(`${value}{enter}`);
-  }
-
+describe('Orion Intelligence - Search Navigation and Report Access', () => {
   before(() => {
     cy.loginAsAdmin();
-  });
-
-  beforeEach(() => {
-    cy.visit('/dashboard/profile/homepage');
-    cy.location('pathname').then((pathname) => {
-      if (pathname.includes('/login')) {
-        cy.loginAsAdmin();
-        cy.visit('/dashboard/profile/homepage');
-      }
-    });
-
-    cy.get('body').then(($body) => {
-      if ($body.find('[data-cy="profile-menu"]').length) {
-        cy.get('[data-cy="profile-menu"]').first().click();
-        cy.get('body').click(0, 0);
-      }
-      if ($body.find('app-filters:visible, app-search-filters:visible').length) {
-        cy.scrollTo('top', { ensureScrollable: false });
-      }
-    });
   });
 
   after(() => {
     cy.logout();
   });
 
-  it('General Intelligence: All/General/Forums → search bitcoin → open report', () => {
-    cy.contains('app-dashboard-sidebar-items', 'General Intelligence').find('li > div').first().click();
-    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence').closest('li').find('> ul.pointer-events-auto').first().contains('div', 'All').should('be.visible').click();
+  it('runs General Intelligence search flow for All, General, and Forums', () => {
+    openSidebarGroup('General Intelligence');
+    clickSidebarSubItem('General Intelligence', 'All');
     typeDashboardSearch('bitcoin');
-    cy.location('pathname').then((pathBefore) => {
-      cy.get('div[apptooltip="Open Report"]', {timeout: 30000}).filter(':visible').first().should('be.visible').scrollIntoView().click();
-      cy.get('body', {timeout: 10000}).then(($body) => {
-        if ($body.find('app-json-api-viewer').length) {
-          cy.get('app-json-api-viewer').should('be.visible');
-          cy.get('body').type('{esc}');
-          return;
-        }
-        cy.location('pathname', {timeout: 10000}).should('not.eq', pathBefore);
-      });
-    });
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    openFirstReportAndValidateNavigationOrModal();
 
-    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence').closest('li').find('> ul.pointer-events-auto').first().contains('div', 'General').should('be.visible').click();
-    typeDashboardSearch('bitcoin');
-    cy.location('pathname').then((pathBefore) => {
-      cy.get('div[apptooltip="Open Report"]', {timeout: 30000}).filter(':visible').first().should('be.visible').scrollIntoView().click();
-      cy.get('body', {timeout: 10000}).then(($body) => {
-        if ($body.find('app-json-api-viewer').length) {
-          cy.get('app-json-api-viewer').should('be.visible');
-          cy.get('body').type('{esc}');
-          return;
-        }
-        cy.location('pathname', {timeout: 10000}).should('not.eq', pathBefore);
-      });
-    });
     cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'General Intelligence').closest('li').find('> ul.pointer-events-auto').first().contains('div', 'Forums').should('be.visible').click();
+    clickSidebarSubItem('General Intelligence', 'General');
     typeDashboardSearch('bitcoin');
-    cy.location('pathname').then((pathBefore) => {
-      cy.get('div[apptooltip="Open Report"]', {timeout: 30000}).filter(':visible').first().should('be.visible').scrollIntoView().click();
-      cy.get('body', {timeout: 10000}).then(($body) => {
-        if ($body.find('app-json-api-viewer').length) {
-          cy.get('app-json-api-viewer').should('be.visible');
-          cy.get('body').type('{esc}');
-          return;
-        }
-        cy.location('pathname', {timeout: 10000}).should('not.eq', pathBefore);
-      });
-    });
+    openFirstReportAndValidateNavigationOrModal();
+
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('General Intelligence', 'Forums');
+    typeDashboardSearch('bitcoin');
+    openFirstReportAndValidateNavigationOrModal();
   });
 
-  it('Defacement flow: All/Hacked/Phishing/Databases', () => {
-    cy.contains('app-dashboard-sidebar-items', 'Defacement').find('li > div').first().click();
-    cy.contains('app-dashboard-sidebar-items div', 'Defacement').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'All').should('be.visible').click();
+  it('runs Defacement search flow for All, Hacked, Phishing, and Databases', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Defacement');
+    clickSidebarSubItem('Defacement', 'All');
     typeDashboardSearch('mthcht');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Defacement').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Hacked').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Defacement', 'Hacked');
     typeDashboardSearch('ASTAR');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Defacement').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Phishing').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Defacement', 'Phishing');
     typeDashboardSearch('mthcht');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Defacement').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Databases').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Defacement', 'Databases');
     typeDashboardSearch('urldna_bot');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
   });
 
-  it('Social: All/Twitter/Mastodon/Pastebin/Forum/Reddit', () => {
-    cy.contains('app-dashboard-sidebar-items', 'Social').find('li > div').first().click();
-    cy.contains('app-dashboard-sidebar-items div', 'Social').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'All').should('be.visible').click();
+  it('runs Social search flow for All, Twitter, Mastodon, Pastebin, Forum, and Reddit', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Social');
+    clickSidebarSubItem('Social', 'All');
     typeDashboardSearch('Linux');
-    cy.get('div[apptooltip="Open Report"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Social').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Twitter').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Social', 'Twitter');
     typeDashboardSearch('Linux');
-    cy.get('div[apptooltip="Open Report"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Social').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Mastodon').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Social', 'Mastodon');
     typeDashboardSearch('Linux');
-    cy.get('div[apptooltip="Open Report"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Social').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Pastebin').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Social', 'Pastebin');
     typeDashboardSearch('Linux');
-    cy.get('div[apptooltip="Open Report"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Social').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Forum').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Social', 'Forum');
     typeDashboardSearch('Linux');
-    cy.get('div[apptooltip="Open Report"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
-    cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    cy.contains('app-dashboard-sidebar-items div', 'Social').closest('app-dashboard-sidebar-items').find('ul').contains('div', 'Reddit').should('be.visible').click();
+    cy.go('back');
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    clickSidebarSubItem('Social', 'Reddit');
     typeDashboardSearch('Linux');
-    cy.get('div[apptooltip="Open Report"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
   });
-  it('Exploit: All → CVE → Tools → ZeroDay (Search + Open Report)', () => {
-    const openExploitSubmenu = (submenu: string) => {
-      cy.get('@exploitItem')
-        .within(() => {
-          cy.contains('div', submenu, { timeout: 30000 }).should('be.visible').click();
-        });
-    };
 
-    const typeExploitSearch = (value: string) => {
-      typeDashboardSearch(value);
-    };
-    const clickOpenReport = () => {
-      cy.get('div[apptooltip="Open Report"][tabindex="0"]', { timeout: 30000 })
-        .filter(':visible')
-        .first()
-        .scrollIntoView()
-        .should('be.visible')
-        .click();
-    };
-    cy.contains('app-dashboard-sidebar-items div', 'Exploit', { timeout: 30000 })
-      .first()
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
-    cy.contains('app-dashboard-sidebar-items div', 'Exploit', { timeout: 30000 })
-      .first()
-      .closest('li')
-      .as('exploitItem');
+  it('runs Exploit search flow for All, CVE, Tools, and ZeroDay', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Exploit');
     openExploitSubmenu('All');
     typeExploitSearch('exploit');
     clickOpenReport();
+
     cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('CVE');
     typeExploitSearch('cve');
-    clickOpenReport();
+    cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
+
     cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('Tools');
     typeExploitSearch('tool');
     clickOpenReport();
+
     cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('ZeroDay');
     typeExploitSearch('exploit');
     clickOpenReport();
+
     cy.go('back');
-    cy.location('pathname', { timeout: 30000 }).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
     waitForSearchReady();
     cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().should('exist');
   });
 
-  it('Feed: search police → open report', () => {
-    cy.contains('app-dashboard-sidebar-items', 'Feed').find('li > div').first().click();
+  it('runs Feed search flow and opens a report', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Feed');
     waitForSearchReady();
     cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
     cy.get('@q').clear();
+
     waitForSearchReady();
     cy.get('@q').type('police{enter}');
-    cy.get('div[apptooltip="Open Report"]', {timeout: 30000}).filter(':visible').first().should('be.visible').scrollIntoView().click();
+    clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
   });
 
-  it('Stealer logs: IOCS → search email → press collapse button', () => {
-    cy.contains('app-dashboard-sidebar-items', 'Stealer logs').find('li > div').first().click();
-    cy.contains('app-dashboard-sidebar-items ul li div', 'IOCS').scrollIntoView().click();
+  it('runs Stealer logs IOCS search flow and expands a row', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Stealer logs');
+    clickSidebarSubItem('Stealer logs', 'IOCS');
     cy.get('input[name="searchQuery"][placeholder="Search..."]', {timeout: 30000}).first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
+
     waitForSearchReady();
     cy.get('@q').type('uwe.dippold@web.de{enter}');
     cy.get('button[aria-label="Expand row"]', {timeout: 30000}).should('have.length.greaterThan', 0).first().scrollIntoView().click();
   });
 
-  it('Web Scans: Basic / Port / Repository / SEO (skip APK) → search bbc.com', () => {
-    cy.contains('app-dashboard-sidebar-items', 'Web Scans').find('li > div').first().click();
-    cy.contains('app-dashboard-sidebar-items ul li div', 'Basic Scan').scrollIntoView().click();
+  it('runs Web Scans flow for Basic, Port, Repository, and SEO', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Web Scans');
+    clickSidebarSubItem('Web Scans', 'Basic Scan');
     cy.get('input[name="username"][placeholder="Domain"]', {timeout: 30000}).first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
     cy.get('@scanInput').type('bbc.com');
-    cy.get('button').contains(/^Search$/).should('be.visible').should('not.be.disabled').click();
-    cy.contains('app-dashboard-sidebar-items ul li div', 'Port Scan').scrollIntoView().click();
+    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+
+    clickSidebarSubItem('Web Scans', 'Port Scan');
     cy.get('input[name="username"][placeholder="Domain"]', {timeout: 30000}).first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
     cy.get('@scanInput').type('bbc.com');
-    cy.get('button').contains(/^Search$/).should('be.visible').should('not.be.disabled').click();
-    cy.contains('app-dashboard-sidebar-items ul li div', 'Repository Scan').scrollIntoView().click();
+    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+
+    clickSidebarSubItem('Web Scans', 'Repository Scan');
     cy.get('input[name="username"][placeholder="Repository"]', {timeout: 30000}).first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
     cy.get('@scanInput').type('bbc.com');
-    cy.get('button').contains(/^Search$/).should('be.visible').should('not.be.disabled').click();
-    cy.contains('app-dashboard-sidebar-items ul li div', 'SEO Scan').scrollIntoView().click();
+    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+
+    clickSidebarSubItem('Web Scans', 'SEO Scan');
     cy.get('input[name="username"][placeholder="Domain"]', {timeout: 30000}).first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
     cy.get('@scanInput').type('bbc.com');
-    cy.get('button').contains(/^Search$/).should('be.visible').should('not.be.disabled').click();
+    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
   });
 
-  it('Entity API: Playstore Scanner (open only)', () => {
-    cy.contains('app-dashboard-sidebar-items > li > div', 'Entity API').scrollIntoView().click();
-    cy.contains('app-dashboard-sidebar-items ul li div', 'Playstore Scanner').scrollIntoView().click();
+  it('opens Playstore Scanner under Entity API', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Entity API');
+    clickSidebarSubItem('Entity API', 'Playstore Scanner');
   });
 
-  it('Dump: Listing → search leak → Search button', () => {
-    cy.contains('app-dashboard-sidebar-items', 'Dump').find('li > div').first().click();
-    cy.contains('app-dashboard-sidebar-items ul li div', 'Listing').scrollIntoView().click();
+  it('runs Dump Listing search flow', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Dump');
+    clickSidebarSubItem('Dump', 'Listing');
     cy.get('input[name="username"][placeholder="Search leak URL"]', {timeout: 30000}).first().as('leak');
     cy.get('@leak').should('be.visible');
-    cy.get('@leak');
     waitForSearchReady();
     cy.get('@leak').type('leak');
     cy.contains('button', 'Search').should('be.visible').click();

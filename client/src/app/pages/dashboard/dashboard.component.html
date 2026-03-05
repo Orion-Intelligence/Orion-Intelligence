@@ -4,7 +4,7 @@
   data-cy="pro-subscription">
 </app-pro-subscription>
 
-<div *ngIf="!isCtiGraph()" data-cy="dashboard-main">
+<div *ngIf="!isCtiGraph()" data-cy="dashboard-main" data-testid="dashboard-main">
   <div id="top" data-cy="top"></div>
   <div class="flex h-screen min-h-[800px] overflow-x-hidden overflow-y-visible bg-[var(--color-blue-900)]" id="dashboard__sidebar-main" data-cy="dashboard-sidebar-main">
     <input class="hidden" id="dashboard__menu-toggle" name="menu-input" type="radio" data-cy="menu-toggle">

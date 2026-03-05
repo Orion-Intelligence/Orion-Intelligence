@@ -8,7 +8,7 @@
           <p class="ui-page-description">Manage user access, status, and licenses.</p>
         </div>
         <span [appTooltip]="appService.userSessionData().tenant.quotaExceeded ? 'Access blocked' : ''">
-          <button type="button" class="ui-btn" [ngClass]="appService.userSessionData().tenant.quotaExceeded ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'" [disabled]="appService.userSessionData().tenant.quotaExceeded" (click)="addtenant()">
+          <button type="button" data-testid="tenant-add-user-button" class="ui-btn" [ngClass]="appService.userSessionData().tenant.quotaExceeded ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'" [disabled]="appService.userSessionData().tenant.quotaExceeded" (click)="addtenant()">
             Add User
           </button>
         </span>
@@ -73,7 +73,7 @@
                         <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon cursor-pointer" />
                       </button>
                       <ng-template #editAction>
-                        <button id="edit-profile" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'Edit user'" (click)="toggleExpandedUser(i)">
+                        <button id="edit-profile" data-testid="tenant-edit-user-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'Edit user'" (click)="toggleExpandedUser(i)">
                           <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
                         </button>
                       </ng-template>
@@ -153,7 +153,7 @@
                           </div>
 
                           <div class="mt-3 flex flex-wrap justify-end gap-2">
-                            <button type="button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">
+                            <button type="button" data-testid="tenant-delete-user-button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">
                               Delete User
                             </button>
                             <button type="button" class="ui-btn ui-btn-primary" (click)="updateUser(user)">
@@ -244,7 +244,7 @@
                         </ng-container>
                       </div>
                       <div class="mt-3 flex flex-wrap justify-end gap-2">
-                        <button type="button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">Delete User</button>
+                        <button type="button" data-testid="tenant-delete-user-button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">Delete User</button>
                         <button type="button" class="ui-btn ui-btn-primary" (click)="updateUser(user)">Save changes</button>
                       </div>
                     </div>

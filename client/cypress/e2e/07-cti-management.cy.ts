@@ -1,3 +1,6 @@
+import {openAndAssertReportModal, visitCtiGraph, visitSocialGraph} from './controllers/07-cti-management.controller';
+const testData = Cypress.env('TEST_DATA') || {};
+
 describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
   before(() => {
     cy.loginAsAdmin();
@@ -7,51 +10,25 @@ describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
     cy.clearCookies();
     cy.clearLocalStorage();
     cy.visit('/login');
-    cy.get('input[name="username"]', { timeout: 20000 }).clear().type(Cypress.env('ADMIN_USERNAME'));
-    cy.get('input[name="password"]', { timeout: 20000 }).clear().type(Cypress.env('ADMIN_PASSWORD'), { log: false });
+    cy.get('input[name="username"]', {timeout: 20000}).clear().type(Cypress.env('ADMIN_USERNAME'));
+    cy.get('input[name="password"]', {timeout: 20000}).clear().type(Cypress.env('ADMIN_PASSWORD'), {log: false});
     cy.get('[data-cy="login-button"], input.login-button').first().click();
-    cy.location('pathname', { timeout: 30000 }).should('include', '/dashboard');
+    cy.location('pathname', {timeout: 30000}).should('include', '/dashboard');
   });
 
   after(() => {
-    cy.logoutIfLoggedIn();
+    cy.logout();
   });
-
-  function openAndAssertReportModal(title: string) {
-    cy.get('[data-cy="cti-tab-session-menu"], [data-cy="graph-tab-session-menu"]', { timeout: 15000 }).first().click();
-    cy.contains('button', 'Export Report').click();
-    cy.contains(title, { timeout: 10000 }).should('be.visible');
-    cy.contains('1. JSON (Raw Graph Data)').should('exist');
-    cy.contains('2. PDF Graph Report').should('exist');
-    cy.contains('3. PDF Document Report').should('exist');
-  }
-
-  function visitCtiGraph() {
-    cy.viewport(1440, 900);
-    cy.visit('/dashboard/ctigraph');
-    cy.location('pathname', { timeout: 30000 }).should('include', '/dashboard/ctigraph');
-    cy.get('[data-cy="graph-toolbar-root"]', { timeout: 30000 }).should('be.visible');
-  }
-
-  function visitSocialGraph() {
-    cy.viewport(1440, 900);
-    cy.visit('/dashboard/social-mapper');
-    cy.location('pathname', { timeout: 30000 }).should('include', '/dashboard/social-mapper');
-    cy.get('app-social-graph', { timeout: 30000 }).should('be.visible');
-  }
 
   it('runs CTI graph deep flow with filters, search, views and export/report actions', () => {
     cy.intercept('GET', '**/api/graph*').as('graphQuery');
     visitCtiGraph();
-
     cy.get('select[name="selectedType"]').select('Cluster');
     cy.contains('button', 'Apply').click();
     cy.wait('@graphQuery');
-
     cy.get('[data-cy="graph-toolbar-search-input"]').clear().type('leak');
     cy.get('[data-cy="graph-toolbar-search-button"]').click();
     cy.contains('highlighted').should('exist');
-
     openAndAssertReportModal('Export CTI Report');
   });
 
@@ -74,22 +51,18 @@ describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
       cy.stub(win.URL, 'revokeObjectURL').as('revokeObjectURL');
       cy.stub(win.HTMLAnchorElement.prototype, 'click').as('anchorClick');
     });
-
-    cy.get('[data-cy="cti-tab-session-menu"]', { timeout: 15000 }).should('be.visible');
+    cy.get('[data-cy="cti-tab-session-menu"]', {timeout: 15000}).should('be.visible');
     cy.get('[data-cy="cti-tab-add-menu"]').click();
     cy.contains('New Session').click();
-
     const newName = `CTI Session ${Date.now()}`;
     cy.get('span').contains(/^Session\s+\d+/).first().dblclick();
     cy.get('header input[type="text"]').first().clear().type(`${newName}{enter}`);
     cy.contains(newName).should('exist');
-
     cy.get('[data-cy="cti-tab-session-menu"]').first().click();
     cy.contains('button', 'Export Current Session').click();
     cy.get('@createObjectURL').should('have.been.called');
     cy.get('@anchorClick').should('have.been.called');
     cy.get('@revokeObjectURL').should('have.been.called');
-
     const importPayload = {
       name: `Imported Session ${Date.now()}`,
       state: {
@@ -106,17 +79,16 @@ describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
         expandEnabled: false
       }
     };
-
     cy.get('#graphSessionFileInput').selectFile(
       {
         contents: Cypress.Buffer.from(JSON.stringify(importPayload)),
         fileName: 'cti-import-session.json',
         mimeType: 'application/json'
       },
-      { force: true }
+      {force: true}
     );
     cy.contains(importPayload.name).should('exist');
-    cy.get('header button').filter(':has(i.bi-x-lg)').first().click({ force: true });
+    cy.get('header button').filter(':has(i.bi-x-lg)').first().click({force: true});
   });
 
   it('covers CTI report export option selection', () => {
@@ -135,21 +107,20 @@ describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
   it('attempts CTI graph context menu actions (data-dependent)', () => {
     cy.intercept('GET', '**/api/graph*').as('graphQuery');
     visitCtiGraph();
-
     cy.get('select[name="selectedType"]').select('Cluster');
     cy.contains('button', 'Apply').click();
-    cy.wait('@graphQuery', { timeout: 30000 });
+    cy.wait('@graphQuery', {timeout: 30000});
 
-    cy.get('.vis-network canvas', { timeout: 30000 }).first().then(($canvas) => {
+    cy.get('.vis-network canvas', {timeout: 30000}).first().then(($canvas) => {
       const rect = $canvas[0].getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       const points = [
-        { x: centerX, y: centerY },
-        { x: centerX + 120, y: centerY },
-        { x: centerX - 120, y: centerY },
-        { x: centerX, y: centerY + 120 },
-        { x: centerX, y: centerY - 120 }
+        {x: centerX, y: centerY},
+        {x: centerX + 120, y: centerY},
+        {x: centerX - 120, y: centerY},
+        {x: centerX, y: centerY + 120},
+        {x: centerX, y: centerY - 120}
       ];
       points.forEach((p) => {
         cy.wrap($canvas).trigger('contextmenu', {
@@ -160,12 +131,12 @@ describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
         });
       });
     });
-    cy.get('#customContextMenu', { timeout: 15000 }).should('exist');
+    cy.get('#customContextMenu', {timeout: 15000}).should('exist');
   });
 
   it('covers social scan to graph/list and profile popups', () => {
     visitSocialGraph();
-    cy.get('[data-cy="graph-toolbar-search-input"]').clear().type('msmannan00');
+    cy.get('[data-cy="graph-toolbar-search-input"]').clear().type(testData.cti_social_username);
     cy.get('[data-cy="graph-toolbar-search-button"]').click();
     cy.get('[data-cy="graph-toolbar-view-list"]').click();
     cy.get('[data-cy="graph-toolbar-view-graph"]').click();
@@ -173,7 +144,7 @@ describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
 
   it('covers social graph search trigger expand and clear', () => {
     visitSocialGraph();
-    cy.get('[data-cy="graph-toolbar-search-input"]').clear().type('msmannan00');
+    cy.get('[data-cy="graph-toolbar-search-input"]').clear().type(testData.cti_social_username);
     cy.get('[data-cy="graph-toolbar-search-button"]').click();
     cy.get('[data-cy="graph-toolbar-search-input"]').clear().should('have.value', '');
   });
@@ -205,7 +176,7 @@ describe('Orion Intelligence - CTI & Social Graph Deep Coverage', () => {
 
   it('covers social graph canvas contextmenu trigger path', () => {
     visitSocialGraph();
-    cy.get('.vis-network canvas', { timeout: 30000 }).trigger('contextmenu', {
+    cy.get('.vis-network canvas', {timeout: 30000}).trigger('contextmenu', {
       button: 2,
       clientX: 200,
       clientY: 200,
