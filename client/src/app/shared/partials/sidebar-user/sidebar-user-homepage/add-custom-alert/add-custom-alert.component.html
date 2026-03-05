@@ -9,19 +9,19 @@
       <div class="mt-1 text-[12px] font-normal text-[var(--color-text2)]">{{ description }}</div>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Selected Type</label>
-      <button class="alert-input-field flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-left text-[14px] text-[var(--color-text1)] opacity-80" type="button" disabled>
+      <button class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-left text-[14px] text-[var(--color-text1)] opacity-80 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" type="button" disabled>
         {{ decodeURIComponent(router.url.split('/').pop() || '') }}
       </button>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Title</label>
-      <input [(ngModel)]="alert.title" class="alert-input-field w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter title" name="title" />
+      <input [(ngModel)]="alert.title" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter title" name="title" />
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Description</label>
-      <textarea [(ngModel)]="alert.description" class="alert-input-field min-h-[110px] w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D]" placeholder="Enter description" name="alert_description" rows="4"></textarea>
+      <textarea [(ngModel)]="alert.description" class="min-h-[110px] w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" placeholder="Enter description" name="alert_description" rows="4"></textarea>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Select IOC Type</label>
       <div class="relative">
-        <button type="button" class="alert-input-field flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)]" (click)="toggleIocDropdown($event)">
+        <button type="button" class="flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" (click)="toggleIocDropdown($event)">
           <span>{{ getIOCTypeLabel(alert.ioc_type!) }}</span>
           <i class="bi text-[12px] text-[#57718D]" [ngClass]="iocDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
         </button>
@@ -41,13 +41,13 @@
       </div>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Source</label>
-      <input [(ngModel)]="alert.source" class="alert-input-field w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter source" name="source" />
+      <input [(ngModel)]="alert.source" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter source" name="source" />
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">URL</label>
-      <input [(ngModel)]="alert.url" class="alert-input-field w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter url" name="url" />
+      <input [(ngModel)]="alert.url" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter url" name="url" />
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">IOC Value</label>
-      <input [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="alert-input-field w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D]" type="text" placeholder="Enter IOC value" name="ioc_value" />
+      <input [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter IOC value" name="ioc_value" />
     </form>
     <div *ngIf="formError" class="mt-[8px] text-center">
       <div class="inline-block w-full rounded-lg bg-[#dc3545] bg-opacity-75 px-3 py-2 text-center text-white shadow-sm">

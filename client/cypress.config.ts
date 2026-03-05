@@ -54,6 +54,7 @@ export default defineConfig({
     e2e: {
         specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
         supportFile: "cypress/support/e2e.ts",
+        testIsolation: true,
         setupNodeEvents(on, config) {
             if (isCi) {
                 registerCodeCoverageTasks(on, config);
@@ -77,7 +78,7 @@ export default defineConfig({
         },
         baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1366,
-        viewportHeight: 768,
+        viewportHeight: 1200,
         defaultCommandTimeout: 15000,
         screenshotOnRunFailure: false,
     },

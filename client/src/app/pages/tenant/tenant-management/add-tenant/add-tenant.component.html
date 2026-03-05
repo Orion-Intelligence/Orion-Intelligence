@@ -9,9 +9,9 @@
 
             <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Username</label>
             <input type="text" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
-            <div class="username-suggestion" *ngIf="usernameSuggestion">
-                <div class="suggestion-title">Username already taken, suggested usernames below</div>
-                <div class="suggestion-list">
+            <div class="mt-[6px] rounded-[6px] border border-[#ffcc80] bg-[#fff4e5] px-[12px] py-[10px] text-[13px] text-[#a66300]" *ngIf="usernameSuggestion">
+                <div class="mb-[4px] font-semibold">Username already taken, suggested usernames below</div>
+                <div class="text-[12px] opacity-90">
                     {{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}
                 </div>
             </div>
@@ -47,18 +47,16 @@
             </div>
 
             <div class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">Licenses</div>
-            <div class="license-grid" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
+            <div class="license-grid mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
                 <ng-container *ngFor="let license of licenseList">
-                    <div class="license-card" *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" (click)="toggleTenantLicense(model, license)">
-                        <input type="checkbox" class="license-checkbox" [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
-                        <span class="license-label">
+                    <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'bg-[var(--color-blue-640)] border-[var(--color-blue-630)] text-white border' : 'bg-[var(--color-blue-820)] border-[var(--color-border)] border'" *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && licenseService.getLicenseLabel(license) !== 'maintainer'" (click)="toggleTenantLicense(model, license)">
+                        <input type="checkbox" class="hidden" [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
+                        <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'text-white' : ''">
                             {{ licenseService.getLicenseLabel(license) }}
                         </span>
                     </div>
                 </ng-container>
             </div>
-
-            <hr class="tenant-divider">
 
             <div *ngIf="errorText" class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm d-block">
 

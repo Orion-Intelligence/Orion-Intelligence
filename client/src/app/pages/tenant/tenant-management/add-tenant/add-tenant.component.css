@@ -163,25 +163,6 @@
     color: var(--color-blue-640);
 }
 
-.username-suggestion {
-    background: #fff4e5;
-    border: 1px solid #ffcc80;
-    color: #a66300;
-    padding: 10px 12px;
-    border-radius: 6px;
-    margin-top: 6px;
-    font-size: 13px;
-}
-
-.username-suggestion .suggestion-title {
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.username-suggestion .suggestion-list {
-    font-size: 12px;
-    opacity: 0.9;
-}
 
 .light-theme .add-tenant_container {
     box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);

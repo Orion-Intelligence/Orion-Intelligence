@@ -30,7 +30,7 @@
         <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3">
           <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
           <div class="flex items-center gap-2 text-xs text-[var(--color-text4)]">
-            <span *ngIf="item.color" class="h-2.5 w-2.5 rounded-full" [ngStyle]="{ backgroundColor: item.color }"></span>
+            <span *ngIf="item.color" class="h-2.5 w-2.5 rounded-full" [ngClass]="coverageDotClass(item)"></span>
             {{ item.label }}
           </div>
         </div>
@@ -82,7 +82,7 @@
     <div class="mt-4 max-h-56 space-y-2 overflow-y-auto" *ngIf="isSectionExpanded('isUrlsExpanded')">
       <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text3)]" *ngFor="let url of uniqueUrls">
         <div class="flex items-center gap-2 text-sm text-[var(--color-text1)]">
-          <span class="h-2.5 w-2.5 rounded-full" [ngStyle]="{ backgroundColor: url.status ? '#1ec773' : '#e6534b' }"></span>
+          <span class="h-2.5 w-2.5 rounded-full" [ngClass]="statusDotClass(url.status)"></span>
           {{ url.title.length > 50 ? (url.title | slice: 0:50) + '…' : url.title }}
         </div>
         <div class="mt-1 truncate text-xs text-[var(--color-text4)]">{{ url.url.length > 130 ? (url.url | slice: 0:1130) + '…' : url.url }}</div>

@@ -77,7 +77,7 @@ describe('Users Page – Create 5 Different Users With License', () => {
 
     const wanted = user.licenses.map((x) => x.trim().toLowerCase());
     cy.get('@addUserModal')
-      .find('.license-grid .license-card', { timeout: 30000 })
+      .find('.license-grid .license-card, .license-card, .license-btn', { timeout: 30000 })
       .should('exist')
       .each(($card) => {
         const label = $card.find('.license-label').text().replace(/\s+/g, ' ').trim().toLowerCase();
@@ -221,7 +221,7 @@ describe('Users Page – Delete Users Sequentially', () => {
   }
 
   function deleteFirstUser() {
-    cy.get('#dashboard-container', { timeout: 30000 }).scrollTo('bottom', { duration: 300 });
+    cy.get('#dashboard-container', { timeout: 30000 }).scrollTo('bottom', { duration: 300, ensureScrollable: false });
     cy.get('button#edit-profile', { timeout: 30000 }).then(($btns) => {
       if ($btns.length <= 2) {
         cy.log('Only system users left. Stop.');

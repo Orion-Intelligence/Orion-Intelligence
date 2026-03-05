@@ -166,11 +166,11 @@
 
                             <div>
                               <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                              <div class="license-grid">
+                              <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <div class="license-card license-btn" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
-                                    <input type="checkbox" class="license-checkbox" [checked]="tenant.licenses?.includes(license)" />
-                                    <span class="license-label">
+                                  <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
+                                    <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
+                                    <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
                                       {{ licenseService.getLicenseLabel(license) }}
                                     </span>
                                   </div>
@@ -264,11 +264,11 @@
                         <option [ngValue]="TenantStatus.DISABLE">Disable</option>
                       </select>
                       <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                      <div class="license-grid">
+                      <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                         <ng-container *ngFor="let license of licenseList">
-                          <div class="license-card license-btn" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
-                            <input type="checkbox" class="license-checkbox" [checked]="tenant.licenses?.includes(license)" />
-                            <span class="license-label">
+                          <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
+                            <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
+                            <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
                               {{ licenseService.getLicenseLabel(license) }}
                             </span>
                           </div>

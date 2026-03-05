@@ -1,10 +1,10 @@
-describe('Orion Intelligence – Shared Session', {testIsolation: false}, () => {
+describe('Orion Intelligence – Shared Session', () => {
   before(() => {
     cy.loginAsAdmin();
   });
 
   after(() => {
-    cy.logout();
+    cy.logoutIfLoggedIn();
   });
 
   describe('Orion Intelligence – Full Stable Flow', () => {
@@ -146,7 +146,13 @@ describe('Orion Intelligence – Shared Session', {testIsolation: false}, () => 
 
     function openHomepage() {
       cy.visit('/dashboard/profile/homepage');
-      cy.get('app-home-insight', {timeout: 30000}).should('exist');
+      cy.location('pathname', { timeout: 30000 }).then((pathname) => {
+        if (pathname.includes('/login')) {
+          cy.loginAsAdmin();
+        }
+      });
+      cy.visit('/dashboard/profile/homepage');
+      cy.location('pathname', { timeout: 30000 }).should('include', '/dashboard/profile/homepage');
       cy.get('app-world-heatmap', {timeout: 30000}).should('be.visible');
       cy.get('app-world-heatmap .map-container svg', {timeout: 30000}).should('exist');
       cy.get('app-world-heatmap .map-container path.country', {timeout: 30000}).should('have.length.greaterThan', 0);

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
@@ -10,7 +10,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { buildUsernameSuggestions, buildUsernameSuggestionText } from '../../../../shared/utils/auth-form.util';
 @Component({
   selector: 'app-add-tenant',
-  imports: [FormsModule, NgFor, NgIf],
+  imports: [FormsModule, NgFor, NgIf, NgClass],
   templateUrl: './add-tenant.component.html',
   animations: [popupAnimation, overlayAnimation]
 })

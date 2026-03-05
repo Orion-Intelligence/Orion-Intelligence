@@ -11,37 +11,6 @@ import { countFilterValues } from '../../../shared/utils/filter-values.util';
   imports: [NgIf, NgFor, CommonModule],
   templateUrl: './selected-filter-bar.component.html',
   animations: [fadeInDashboardItem],
-  styles: [`
-    :host-context(.light-theme) .selected-filter-shell {
-      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
-      border-color: #d7dee8 !important;
-    }
-
-    :host-context(.light-theme) .selected-filter-chip {
-      background: #eef4fb !important;
-      border-color: #c7d5e6 !important;
-      color: #1d4ed8 !important;
-      box-shadow: inset 0 1px 0 rgb(255 255 255 / 70%);
-    }
-
-    :host-context(.light-theme) .selected-filter-clear-btn {
-      border-color: #93c5fd !important;
-      color: #1d4ed8 !important;
-    }
-
-    :host-context(.light-theme) .selected-filter-clear-btn:hover {
-      background: #eff6ff !important;
-    }
-
-    :host-context(.light-theme) .selected-filter-chevron {
-      filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    }
-
-    :host-context(.light-theme) .selected-filter-close-icon {
-      filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-      opacity: .92;
-    }
-  `],
 })
 export class SelectedFilterBarComponent implements OnInit {
   protected readonly filter_mapping = filter_mapping;

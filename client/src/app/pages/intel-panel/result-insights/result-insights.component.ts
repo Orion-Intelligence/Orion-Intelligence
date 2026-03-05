@@ -85,6 +85,23 @@ export class ResultInsightsComponent implements OnInit {
     return this.sectionStates[section];
   }
 
+  coverageDotClass(item: { label: string; color: string }): string {
+    if (item.label === 'Active' || item.color === '#1ec773') {
+      return 'bg-[#1ec773]';
+    }
+    if (item.label === 'Inactive' || item.color === '#e6534b') {
+      return 'bg-[#e6534b]';
+    }
+    if (item.label === 'Seldom' || item.color === '#f08b36') {
+      return 'bg-[#f08b36]';
+    }
+    return 'bg-transparent';
+  }
+
+  statusDotClass(isActive: boolean): string {
+    return isActive ? 'bg-[#1ec773]' : 'bg-[#e6534b]';
+  }
+
   threatResults(): string[] {
     const query = this.searchQuery.trim().toLowerCase();
     let source: string[];

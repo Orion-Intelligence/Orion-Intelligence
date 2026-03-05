@@ -18,7 +18,9 @@ Cypress.Commands.add("loginAsAdmin", () => {
     cy.get('input[name="username"]').type(Cypress.env("ADMIN_USERNAME"));
     cy.get('input[name="password"]').type(Cypress.env("ADMIN_PASSWORD"), { log: false });
     cy.get('[data-cy="login-button"], input.login-button').first().click();
-    cy.get('[data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
+    cy.get('[data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 })
+        .filter(':visible')
+        .should('have.length.greaterThan', 0);
 });
 Cypress.Commands.add("loginAsTest1", () => {
     const users = Cypress.env("TEST_USERS") || {};
@@ -31,35 +33,65 @@ Cypress.Commands.add("loginAsTest1", () => {
     cy.get('input[name="username"]').type(user.username);
     cy.get('input[name="password"]').type(user.password, { log: false });
     cy.get('[data-cy="login-button"], input.login-button').first().click();
-    cy.get('[data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 }).should("be.visible");
+    cy.get('[data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 15000 })
+        .filter(':visible')
+        .should('have.length.greaterThan', 0);
 });
 Cypress.Commands.add("logout", () => {
-    cy.get('img[alt="Logout"]', { timeout: 10000 })
-        .first()
-        .click();
-    cy.contains('li', 'Sign out')
-        .first()
-        .click({ force: true });
-    cy.get('input[name="username"]', { timeout: 10000 })
-        .should('exist');
+    cy.location('pathname').then((pathname) => {
+        if (pathname.includes('/login')) return;
+
+        if (Cypress.$('[data-cy="profile-menu"]').length > 0) {
+            cy.get('[data-cy="profile-menu"]', { timeout: 10000 }).then(($menus) => {
+                const $visibleMenu = $menus.filter(':visible').first();
+                if (!$visibleMenu.length) return;
+                cy.wrap($visibleMenu).should('be.visible').click({ scrollBehavior: false });
+            });
+        } else {
+            cy.get('img[alt="Logout"]', { timeout: 10000 }).then(($icons) => {
+                const $visibleIcon = $icons.filter(':visible').first();
+                if (!$visibleIcon.length) return;
+                cy.wrap($visibleIcon).should('be.visible').click({ scrollBehavior: false });
+            });
+        }
+
+        if (Cypress.$('li[data-cy="signout-btn"]').length > 0) {
+            cy.get('li[data-cy="signout-btn"]', { timeout: 10000 }).then(($signouts) => {
+                const $visibleSignout = $signouts.filter(':visible').first();
+                if (!$visibleSignout.length) return;
+                cy.wrap($visibleSignout).should('be.visible').click({ scrollBehavior: false });
+            });
+        } else {
+            cy.contains('li', 'Sign out', { timeout: 10000 })
+                .should('be.visible')
+                .click({ scrollBehavior: false });
+        }
+
+        cy.get('input[name="username"], [data-cy="login-user"]', { timeout: 10000 }).should('exist');
+    });
 });
 Cypress.Commands.add("logoutIfLoggedIn", () => {
-    cy.get("body").then(($body) => {
-        const profileMenu = $body.find('[data-cy="profile-menu"]');
-        if (!profileMenu.length) {
-            return;
-        }
-        cy.scrollTo("top");
-        cy.wrap(profileMenu.first()).click();
-        cy.get("body").then(($b) => {
-            const signOut = $b.find('li[data-cy="signout-btn"]');
-            if (!signOut.length) {
-                return;
-            }
-            cy.wrap(signOut.first()).click({ scrollBehavior: false });
-            cy.get('[data-cy="login-user"]', { timeout: 10000 })
-                .should("exist");
+    cy.location('pathname').then((pathname) => {
+        if (pathname.includes('/login')) return;
+        if (Cypress.$('[data-cy="profile-menu"]').length === 0) return;
+
+        cy.scrollTo("top", { ensureScrollable: false });
+        cy.get('[data-cy="profile-menu"]').then(($menus) => {
+            const $visibleMenu = $menus.filter(':visible').first();
+            if (!$visibleMenu.length) return;
+            cy.wrap($visibleMenu).click({ scrollBehavior: false });
         });
+
+        if (Cypress.$('li[data-cy="signout-btn"]').length === 0) return;
+
+        cy.get('li[data-cy="signout-btn"]').then(($signouts) => {
+            const $visibleSignout = $signouts.filter(':visible').first();
+            if (!$visibleSignout.length) return;
+            cy.wrap($visibleSignout).click({ scrollBehavior: false });
+        });
+
+        cy.get('[data-cy="login-user"]', { timeout: 10000 })
+            .should("exist");
     });
 });
 Cypress.Commands.add("openTenantsPage", () => {

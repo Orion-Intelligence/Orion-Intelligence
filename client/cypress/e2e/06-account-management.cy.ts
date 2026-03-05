@@ -9,27 +9,33 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
     throw new Error('Missing required account/password env values in cypress.config.ts');
   }
 
-  const assertLoggedIn = () => {
-    cy.location('pathname', { timeout: 20000 }).should('not.include', '/login');
-  };
-
-  const openAccountSettings = () => {
-    cy.visit('/dashboard');
-    assertLoggedIn();
-
-    cy.contains(/profile|account|settings/i, { timeout: 20000 })
-      .should('be.visible')
-      .click({ force: true });
-
-    cy.get('h1.ui-page-title', { timeout: 20000 }).should('be.visible');
-  };
-
-  beforeEach(() => {
+  before(() => {
     cy.loginAsTest1();
   });
 
+  beforeEach(() => {
+    cy.visit('/dashboard/profile/homepage');
+    cy.location('pathname').then((pathname) => {
+      if (pathname.includes('/login')) {
+        cy.loginAsTest1();
+        cy.visit('/dashboard/profile/homepage');
+      }
+    });
+  });
+
+  after(() => {
+    cy.logoutIfLoggedIn();
+  });
+
   it('Change avatar, toggle theme, enable 2FA, login check + reset password flow', () => {
-    openAccountSettings();
+    cy.visit('/dashboard');
+    cy.location('pathname', { timeout: 20000 }).should('not.include', '/login');
+
+    cy.contains(/profile|account|settings/i, { timeout: 20000 })
+      .should('be.visible')
+      .click();
+
+    cy.get('h1.ui-page-title', { timeout: 20000 }).should('be.visible');
 
     cy.get('h1.ui-page-title', { timeout: 20000 })
       .invoke('text')
@@ -37,24 +43,31 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
         expect(t.trim()).to.match(/Admin Profile|User Profile Form/);
       });
 
-    cy.get('app-user-image-picker', { timeout: 20000 })
-      .should('exist')
-      .within(() => {
-        cy.get('input[type="file"]')
-          .selectFile('cypress/fixtures/avatar.png', { force: true });
-      });
+    cy.get('app-user-image-picker', { timeout: 20000 }).should('exist');
+    cy.fixture('avatar.png', 'base64').then((content) => {
+      cy.get('app-user-image-picker input[type="file"]', { timeout: 20000 })
+        .first()
+        .should('exist')
+        .selectFile({
+          contents: Cypress.Blob.base64StringToBlob(content, 'image/png'),
+          fileName: 'avatar.png',
+          mimeType: 'image/png',
+          lastModified: Date.now(),
+        }, { force: true });
+    });
 
     cy.contains('label', /^Theme$/, { timeout: 20000 })
       .closest('div.cursor-pointer')
-      .click({ force: true })
+      .click()
       .wait(200)
-      .click({ force: true });
+      .click();
 
     cy.contains('label', /^2 Factor Authentication$/, { timeout: 20000 })
       .closest('div.cursor-pointer')
-      .click({ force: true });
+      .click();
 
     cy.logout();
+    cy.reload()
 
     cy.visit('/login');
     cy.get('input[name="username"]').clear().type(defaultUser.username);
@@ -75,7 +88,7 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
     cy.clearAllEmails();
 
     cy.contains('[data-cy="reset-password"], span.reset-password', 'Reset password?')
-      .click({ force: true });
+      .click();
 
     cy.get('input[name="companymail"]')
       .clear()
@@ -134,9 +147,4 @@ describe('Orion Intelligence – Account Settings Basic Flow', () => {
       }
     });
   });
-});
-
-
-after(() => {
-  cy.logoutIfLoggedIn();
 });

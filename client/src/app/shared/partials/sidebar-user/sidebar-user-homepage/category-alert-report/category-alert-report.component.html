@@ -1,28 +1,28 @@
-<div class="category_report">
+<div class="category_report rounded-none border-0 bg-transparent px-[28px] pb-[28px] pt-[24px] font-[Inter] text-[#cfdeef]">
 
-    <div class="category_report_searchbar">
+    <div class="category_report_searchbar mb-[14px] flex w-full items-center justify-between gap-3">
         <div class="category_report_searchbar-input">
             <img src="assets/images/shared/theme/magnifyingglassblack.svg" alt="search" class="category_report_search-icon" />
             <input type="text" placeholder="Search..." [(ngModel)]="searchText" />
             <button *ngIf="searchText" class="category_report_searchbar-clear" (click)="searchText = ''">
                 <img src="/assets/images/shared/cross-dark.svg" alt="close"></button>
         </div>
-        <div class="category_report_flex">
-            <div class="btn-group report-menu-option-container mr-0" [style.background-color]="isLightTheme() ? '#f7fbff' : null" [style.border-color]="isLightTheme() ? '#d3deeb' : null">
-                <button *ngIf="licenseService.isMaintainer()" (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('add')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='add' ? '#cfe0f4' : null">
+        <div class="category_report_flex flex gap-[10px]">
+            <div class="btn-group report-menu-option-container mr-0" [ngClass]="isLightTheme() ? 'bg-[#f7fbff] border-[#d3deeb]' : ''">
+                <button *ngIf="licenseService.isMaintainer()" (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('add')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='add' ? 'bg-[#cfe0f4]' : ''">
                     <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" class="category_report_tool-icon" />
                 </button>
-                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider" [style.background-color]="isLightTheme() ? '#a9bbd0' : null" [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null" [style.color]="isLightTheme() ? '#a9bbd0' : null" [style.opacity]="isLightTheme() ? '1' : null"></div>
-                <button *ngIf="canExportstix()&& licenseService.isMaintainer()" type="button" (click)="fileInput.click()" appTooltip="import alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('import')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='import' ? '#cfe0f4' : null">
+                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
+                <button *ngIf="canExportstix()&& licenseService.isMaintainer()" type="button" (click)="fileInput.click()" appTooltip="import alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('import')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='import' ? 'bg-[#cfe0f4]' : ''">
                     <img alt="add" height="30" width="30" src="/assets/images/shared/theme/print.svg" class="rotate-180 category_report_tool-icon" />
                 </button>
                 <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
-                <div *ngIf="canExportstix() && licenseService.isMaintainer()" class="vr report-menu-divider" [style.background-color]="isLightTheme() ? '#a9bbd0' : null" [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null" [style.color]="isLightTheme() ? '#a9bbd0' : null" [style.opacity]="isLightTheme() ? '1' : null"></div>
-                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="this.alerts.length>0 &&licenseService.isMaintainer()" (mouseenter)="setReportToolHover('flush')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='flush' ? '#cfe0f4' : null">
+                <div *ngIf="canExportstix() && licenseService.isMaintainer()" class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
+                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" *ngIf="this.alerts.length>0 &&licenseService.isMaintainer()" (mouseenter)="setReportToolHover('flush')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='flush' ? 'bg-[#cfe0f4]' : ''">
                     <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" class="category_report_tool-icon" />
                 </button>
-                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider" [style.background-color]="isLightTheme() ? '#a9bbd0' : null" [style.border-left-color]="isLightTheme() ? '#a9bbd0' : null" [style.color]="isLightTheme() ? '#a9bbd0' : null" [style.opacity]="isLightTheme() ? '1' : null"></div>
-                <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('sidebar')" (mouseleave)="setReportToolHover(null)" [style.background-color]="isLightTheme() && hoveredReportTool==='sidebar' ? '#cfe0f4' : null">
+                <div *ngIf="licenseService.isMaintainer()" class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
+                <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('sidebar')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='sidebar' ? 'bg-[#cfe0f4]' : ''">
                     <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" class="category_report_tool-icon" />
                 </button>
             </div>
@@ -33,7 +33,7 @@
         <span class="category_report_summary-title">Summary</span>
     </div>
 
-    <div class="category_report_summary-row" *ngIf="filteredAlerts.length>0">
+    <div class="category_report_summary-row mb-4 grid grid-cols-4 gap-3" *ngIf="filteredAlerts.length>0">
         <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#e9f2ff_0%,#ffffff_100%)] !border-[#bfd2ea]' : ''">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Total IOC</span>
@@ -71,7 +71,7 @@
         <app-empty-result class="p-0 m-0"></app-empty-result>
     </ng-container>
 
-    <div class="category_report_alerts">
+    <div class="category_report_alerts mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
         <div class="category_report_alert-card" *ngFor="let item of filteredAlerts">
             <div class="category_report_alert-header">
                 <div class="category_report_alert-card-top">

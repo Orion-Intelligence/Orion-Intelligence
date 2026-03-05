@@ -1,6 +1,6 @@
 <div *ngIf="isList; else cardView" class="mt-4 mx-[30px] w-[calc(100%-60px)] max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]" @fadeInDashboardItem>
   <div class="ui-table-shell">
-    <table id="main-responsive-table" class="ui-table table-fixed" style="min-width: 0;" *ngIf="isLoading || (!isLoading && searchResults.length > 0)">
+    <table id="main-responsive-table" class="ui-table table-fixed min-w-0" *ngIf="isLoading || (!isLoading && searchResults.length > 0)">
       <thead>
         <tr>
           <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="w-[30px] min-w-[30px] cursor-pointer whitespace-nowrap pl-2 pr-1" scope="col">#</th>

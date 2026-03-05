@@ -41,7 +41,7 @@
 
             <div *ngIf="showPasswordMeter" class="mt-2 space-y-2">
               <div class="h-2 w-full overflow-hidden rounded-full bg-[#d6deea]">
-                <div class="h-full transition-all" [ngClass]="{ 'bg-[#dc3545]': passwordStrength === 'weak', 'bg-[#f59e0b]': passwordStrength === 'medium', 'bg-[#2b90ee]': passwordStrength === 'strong' }" [style.width.%]="passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100"></div>
+                <div class="h-full transition-all" [ngClass]="{ 'bg-[#dc3545] w-1/3': passwordStrength === 'weak', 'bg-[#f59e0b] w-2/3': passwordStrength === 'medium', 'bg-[#2b90ee] w-full': passwordStrength === 'strong' }"></div>
               </div>
               <ul class="text-xs text-[#5b6780]">
                 <li *ngIf="currentUnmetCheck">{{ currentUnmetCheck }}</li>

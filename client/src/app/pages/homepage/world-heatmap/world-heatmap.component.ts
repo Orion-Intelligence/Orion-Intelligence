@@ -14,6 +14,7 @@ type CountryData = {
   selector: 'app-world-heatmap',
   imports: [NgIf, HeatmapReportComponent],
   standalone: true,
+  host: { class: 'block w-full' },
   templateUrl: './world-heatmap.component.html'
 })
 export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, OnDestroy {
@@ -30,6 +31,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private valueByName = new Map<string, number>();
   private selectedName: string | null = null;
   private neutralFill = 'rgba(23,34,53,0.45)';
+  private readonly tooltipBaseClass = 'heatmap-tooltip pointer-events-none absolute z-[5] max-w-[240px] rounded-[8px] border border-[rgb(239_68_68_/18%)] bg-[#0b1a2e] px-[10px] py-[6px] text-[12px] leading-[1.25] text-[#fecaca] shadow-[0_18px_46px_rgb(0_0_0_/45%)] [backdrop-filter:blur(6px)] [body.light-theme_&]:border-[#d7e2ee] [body.light-theme_&]:bg-[rgb(255_255_255_/95%)] [body.light-theme_&]:text-[#172235] [body.light-theme_&]:shadow-[0_8px_20px_rgb(16_24_40_/12%)] [body.light-theme_&]:[backdrop-filter:none]';
+  private readonly tooltipHiddenClass = `${this.tooltipBaseClass} opacity-0`;
+  private readonly tooltipVisibleClass = `${this.tooltipBaseClass} heatmap-tooltip-visible opacity-100`;
+  private readonly countryClass = 'country cursor-pointer [stroke:rgb(255_255_255_/14%)] [stroke-width:0.7px] transition-[opacity] duration-200 ease-in-out hover:opacity-90 hover:[stroke:rgb(255_255_255_/50%)] [&.hovered]:opacity-90 [&.hovered]:[stroke:rgb(255_255_255_/50%)] [body.light-theme_&]:[stroke:rgb(23_34_53_/18%)] [body.light-theme_&:hover]:[stroke:rgb(23_34_53_/38%)] [body.light-theme_&.hovered]:[stroke:rgb(23_34_53_/38%)]';
+  private readonly pixelGridLineClass = 'pointer-events-none [stroke:rgb(255_255_255_/4%)] [stroke-width:0.5px] [body.light-theme_&]:[stroke:rgb(23_34_53_/7%)]';
 
   public activeCountryReports: any;
   public activeCategoryKey: string | null = null;
@@ -293,7 +299,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.tooltip = d3
       .select(el)
       .append<HTMLDivElement>('div')
-      .attr('class', 'heatmap-tooltip');
+      .attr('class', this.tooltipHiddenClass);
     this.svg = d3
       .select(el)
       .append('svg')
@@ -311,7 +317,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .enter()
       .append('path')
       .attr('d', this.path as any)
-      .attr('class', 'country')
+      .attr('class', this.countryClass)
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
       .on('mousemove', (event: MouseEvent, d: any) => this.onHoverMove(event, d))
       .on('mouseleave', (event: MouseEvent) => this.onHoverOut(event))
@@ -325,6 +331,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const gridG = this.mapG.append('g').attr('class', 'pixel-grid');
     for (let x = 0; x <= width; x += gridSize) {
       gridG.append('line')
+        .attr('class', this.pixelGridLineClass)
         .attr('x1', x)
         .attr('y1', 0)
         .attr('x2', x)
@@ -332,6 +339,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     }
     for (let y = 0; y <= height; y += gridSize) {
       gridG.append('line')
+        .attr('class', this.pixelGridLineClass)
         .attr('x1', 0)
         .attr('y1', y)
         .attr('x2', width)
@@ -366,7 +374,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .attr('fill', (d: any) => {
         const v = this.getValueForFeature(d);
         return v == null ? this.neutralFill : color(v);
-      });
+      })
+      .style('cursor', (d: any) => this.getValueForFeature(d) == null ? 'default' : 'pointer');
   }
 
   private onHoverMove(event: MouseEvent, d: any): void {
@@ -397,7 +406,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       y = 8;
     }
     this.tooltip
-      .attr('class', 'heatmap-tooltip heatmap-tooltip-visible')
+      .attr('class', this.tooltipVisibleClass)
       .style('left', `${x}px`)
       .style('top', `${y}px`);
   }
@@ -405,7 +414,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private onHoverOut(event: MouseEvent): void {
     d3.select(event.currentTarget as SVGPathElement).classed('hovered', false);
     this.tooltip
-      .attr('class', 'heatmap-tooltip')
+      .attr('class', this.tooltipHiddenClass)
       .style('left', null)
       .style('top', null);
   }
@@ -460,6 +469,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
     countries
       .classed('has-data', (d: any) => getValueForFeature(d) != null)
+      .style('cursor', (d: any) => getValueForFeature(d) == null ? 'default' : 'pointer')
       .transition()
       .duration(1100)
       .ease(d3.easeCubicInOut)
