@@ -4,21 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { chatBotAnimation } from '../../animations/chat.bot.animation';
+import { overlayFadeAnimation } from '../../animations/chat.overlay.animation';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { AppService } from '../../../services/core/app/app.service';
-type ChatApiResponse = {
-    result?: string;
-    reply?: string;
-    message?: string;
-    text?: string;
-    [k: string]: unknown;
-};
+import { ChatApiResponse } from '../../model/chat/chat-api-response.model';
+
 @Component({
   selector: 'app-chat-widget',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './chat-widget.component.html',
-  animations: [chatBotAnimation]
+  animations: [chatBotAnimation, overlayFadeAnimation]
 })
 export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   private sessionId = '';
@@ -35,7 +31,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() reportText: string | undefined;
 
-  constructor(private api: ApiService, private appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService) { }
+  constructor(private api: ApiService, public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService) { }
 
   ngOnInit(): void {
     const username = this.appService.userSessionData()?.user.username || '';

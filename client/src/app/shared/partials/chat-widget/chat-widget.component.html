@@ -1,16 +1,16 @@
 <div class="fixed bottom-6 right-6 z-40">
   <button *ngIf="!chatOpen" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button">
-    <span><img src="assets/images/shared/theme/chat.svg" alt="chat" class="h-5 w-5" /></span>
+    <span><img src="assets/images/shared/theme/chat.svg" alt="chat" class="h-5 w-5 [filter:brightness(0)_invert(1)]" /></span>
   </button>
 </div>
 
-<div *ngIf="chatOpen" class="fixed inset-0 z-50 flex items-end justify-end bg-black/40 p-4">
-  <div class="flex h-[640px] w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]" @chatBotAnimation>
+<div *ngIf="chatOpen" class="fixed inset-0 z-50 flex items-end justify-end bg-black/40 p-4" @overlayFade (click)="closeChat()">
+  <div class="chat-support__window flex h-[640px] w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]" @chatBotAnimation (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
       <div class="flex items-center gap-3">
-        <div class="relative h-9 w-9 rounded-full bg-[var(--color-blue-720)] p-1">
-          <img alt="chat" src="assets/images/shared/chat-icon.svg" class="h-full w-full" />
-          <span class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-[var(--color-blue-700)]"></span>
+        <div class="relative inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 border-white box-border">
+          <img alt="chat" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover" />
+          <span class="chat-support__status-indicator absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-[var(--color-blue-700)]"></span>
         </div>
         <div class="text-sm font-semibold text-[var(--color-text1)]">Orion Analyst</div>
       </div>
@@ -22,17 +22,17 @@
     <div #messagesContainer class="flex-1 space-y-3 overflow-y-auto px-4 py-4" (scroll)="onMessagesScroll()">
       <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
         <ng-container [ngSwitch]="msg.sender">
-          <div *ngSwitchCase="'user'" class="flex items-start gap-3">
-            <div class="h-8 w-8 rounded-full bg-[var(--color-blue-720)] p-1">
-              <img alt="profile icon" src="assets/images/shared/user-icon.svg" class="h-full w-full" />
+          <div *ngSwitchCase="'user'" class="flex items-center gap-3">
+            <div class="inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 bg-[var(--color-blue-720)] box-border" [ngClass]="this.appService.userSessionData().user.theme === 'light-theme' ? 'border-[#57A5EB]' : 'border-white'">
+              <img alt="profile icon" [src]="this.appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover" />
             </div>
             <div class="rounded-2xl bg-[var(--color-blue-640)] px-3 py-2 text-sm text-white">
               <p>{{ msg.text }}</p>
             </div>
           </div>
-          <div *ngSwitchCase="'bot'" class="flex items-start gap-3">
-            <div class="h-8 w-8 rounded-full bg-[var(--color-blue-720)] p-1">
-              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="h-full w-full" />
+          <div *ngSwitchCase="'bot'" class="flex items-center gap-3">
+            <div class="inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#EBF0F4] bg-[var(--color-blue-720)] box-border">
+              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover" />
             </div>
             <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)]">
               <p>{{ msg.text }}</p>
@@ -60,8 +60,8 @@
     <form class="border-t border-[var(--color-border)] p-3" (submit)="sendMessage($event)">
       <div class="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
         <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" [disabled]="isBotTyping" required />
-        <button #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-blue-640)]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
-          <img src="assets/images/shared/chat_small.svg" alt="chat" class="ui-chat-send-icon h-4 w-4" />
+        <button #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] hover:bg-[#4b98dc]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
+          <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
         </button>
       </div>
     </form>
