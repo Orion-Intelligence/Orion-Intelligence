@@ -21,15 +21,15 @@
       </div>
     </div>
 
-    <form (submit)="onSearchSubmit()" action="" enctype="multipart/form-data" method="GET" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3">
+    <form #searchForm="ngForm" (submit)="onSearchSubmit()" action="" enctype="multipart/form-data" method="GET" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3">
       <div class="w-full">
         <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
           <div class="flex w-[45px] items-center justify-center bg-white">
             <img alt="Search" height="20" ngSrc="/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
           </div>
-          <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white px-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[rgba(23,34,53,0.52)]" maxlength="150" name="username" placeholder="Search leak URL" type="text">
+          <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white px-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[rgba(23,34,53,0.52)]" maxlength="150" name="username" placeholder="Search leak URL" type="text" required>
           <input type="hidden" value="1">
-          <button class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5">Search</button>
+          <button class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">Search</button>
         </div>
       </div>
     </form>
