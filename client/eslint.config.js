@@ -19,7 +19,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
         function normalizeSingleLine(text) {
           return text
             .replace(/\s+/g, ' ')
@@ -75,7 +75,7 @@ const localRules = {
         fixable: 'code',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
         function normalizeAssetPath(value) {
           const assetsIndex = value.indexOf('assets/');
           if (assetsIndex === -1) {
@@ -145,7 +145,7 @@ const localRules = {
         fixable: 'code',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
         function normalizeAssetPath(value) {
           const assetsIndex = value.indexOf('assets/');
           if (assetsIndex === -1) {
@@ -216,7 +216,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
         function normalizeSingleLine(text) {
           return text.replace(/\s+/g, ' ').trim();
         }
@@ -271,7 +271,7 @@ const localRules = {
         fixable: 'code',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
         function isTargetDecorator(dec) {
           const expr = dec.expression;
           if (!expr) {
@@ -380,7 +380,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
 
         function getDecoratorName(dec) {
           const expr = dec && dec.expression;
@@ -532,7 +532,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
 
         function isMethod(node) {
           return node.type === 'MethodDefinition';
@@ -635,7 +635,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
 
         function normalizeSingleLine(text) {
           return text.replace(/\s+/g, ' ').trim();
@@ -681,7 +681,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
 
         function normalizeImport(text) {
           let fixed = text.replace(/\s+/g, ' ').trim();
@@ -738,7 +738,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
 
         function check(node) {
           if (!node || !node.range) return;
@@ -816,7 +816,7 @@ const localRules = {
           ImportDeclaration(node) {
             if (!node.specifiers || node.specifiers.length === 0) return;
 
-            const sourceCode = context.getSourceCode();
+            const sourceCode = (context.sourceCode || context.getSourceCode());
             const variables = sourceCode.getDeclaredVariables(node);
             const usedNames = new Set();
 
@@ -900,7 +900,7 @@ const localRules = {
         fixable: 'whitespace',
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = (context.sourceCode || context.getSourceCode());
 
         function normalizeSingleLine(text) {
           let fixed = text.replace(/\s+/g, ' ').trim();

@@ -21,7 +21,7 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
     }
   }
 
-  @HostListener('window:scroll', ['$event'])
+  @HostListener('window:scroll')
   onWindowScroll(): void {
     this.scheduleHide();
   }

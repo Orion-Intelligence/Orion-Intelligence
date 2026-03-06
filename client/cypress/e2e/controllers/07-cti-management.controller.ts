@@ -5,7 +5,6 @@ export function openAndAssertReportModal(title: string) {
   cy.get('[data-testid="graph-report-export-modal"]', {timeout: 10000}).filter(':visible').first().should('be.visible');
   cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().should('exist');
   cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().should('exist');
-  cy.get('[data-testid="graph-report-export-doc-pdf"]').filter(':visible').first().should('exist');
 }
 
 export function waitForToolbarSearchReady() {

@@ -103,7 +103,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
   it('covers branch paths by invoking heatmap component API', () => {
     cy.loginAsAdmin();
-    cy.clock();
 
     getHeatmapComponent().then((comp: any) => {
       comp.ngOnChanges({
@@ -149,8 +148,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       comp.ngOnDestroy();
     });
 
-    cy.tick(8100);
     cy.get('[data-testid="world-heatmap-map"] svg', {timeout: 15000}).should('exist');
-    cy.logout();
   });
 });

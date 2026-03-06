@@ -10,7 +10,9 @@ export class HeatmapReportComponent {
 
   @Output() close = new EventEmitter<void>();
 
-  closePopup() {
+  closePopup(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
     this.close.emit();
   }
 }

@@ -39,6 +39,14 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
   scrollTenantTableToBottomLeft();
 
+  cy.get('tbody:visible tr', {timeout: 30000}).should(($rows) => {
+    expect($rows.length, 'tenant rows rendered').to.be.greaterThan(0);
+    const hasNotVerified = $rows.toArray().some((row) =>
+      Cypress.$(row).find('span:contains("Not Verified")').length > 0
+    );
+    expect(hasNotVerified, 'at least one "Not Verified" tenant row present').to.equal(true);
+  });
+
   cy.get('tbody tr').then($rows => {
     const rows = $rows.filter((_: number, row: HTMLElement) => {
       return (

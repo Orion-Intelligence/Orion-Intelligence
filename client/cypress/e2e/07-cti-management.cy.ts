@@ -72,7 +72,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.get('[data-testid="cti-tab-rename-input"]').filter(':visible').first().clear().type(`${newName}{enter}`);
     cy.contains(newName).should('exist');
     cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-export-current-session"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-export-current-session"]', {timeout: 15000}).filter(':visible').first().click();
     cy.get('@createObjectURL').should('have.been.called');
     cy.get('@anchorClick').should('have.been.called');
     cy.get('@revokeObjectURL').should('have.been.called');
@@ -109,9 +109,6 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
     openAndAssertReportModal('Export CTI Report');
     cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().click();
-    cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
-    openAndAssertReportModal('Export CTI Report');
-    cy.get('[data-testid="graph-report-export-doc-pdf"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
   });
 

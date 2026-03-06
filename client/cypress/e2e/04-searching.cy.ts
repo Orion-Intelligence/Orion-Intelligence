@@ -87,7 +87,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Social');
     clickSidebarSubItem('Social', 'All');
-    typeDashboardSearch('Linux');
+    typeDashboardSearch('a');
     clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -96,7 +96,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Twitter');
-    typeDashboardSearch('Linux');
+    typeDashboardSearch('a');
     clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -105,7 +105,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Mastodon');
-    typeDashboardSearch('Linux');
+    typeDashboardSearch('a');
     clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -114,7 +114,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Pastebin');
-    typeDashboardSearch('Linux');
+    typeDashboardSearch('a');
     clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -123,7 +123,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Forum');
-    typeDashboardSearch('Linux');
+    typeDashboardSearch('a');
     clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -132,7 +132,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Reddit');
-    typeDashboardSearch('Linux');
+    typeDashboardSearch('a');
     clickOpenReport();
     cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');

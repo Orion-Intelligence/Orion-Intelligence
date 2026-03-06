@@ -46,18 +46,30 @@ Cypress.Commands.add("logout", () => {
     });
 });
 Cypress.Commands.add("openSideFilter", () => {
-    cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
-        .should('be.visible')
-        .scrollIntoView()
-        .click();
-    cy.get('app-filters', { timeout: 20000 }).should('exist');
+    cy.get('body').then(($body) => {
+        const isOpen = $body.find('[data-testid="side-filter-close"]:visible').length > 0;
+        if (!isOpen) {
+            cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
+                .should('be.visible')
+                .scrollIntoView()
+                .click();
+        }
+    });
+    cy.get('[data-testid="side-filter-close"]', { timeout: 20000 })
+        .filter(':visible')
+        .first()
+        .should('be.visible');
 });
 Cypress.Commands.add("closeSideFilter", () => {
-    cy.get('[data-testid="side-filter-close"]', { timeout: 20000 })
-        .first()
-        .should('be.visible')
-        .scrollIntoView()
-        .click();
+    cy.get('body').then(($body) => {
+        const closeBtn = $body.find('[data-testid="side-filter-close"]:visible').first();
+        if (closeBtn.length) {
+            cy.wrap(closeBtn)
+                .scrollIntoView()
+                .click();
+        }
+    });
+    cy.get('[data-testid="side-filter-close"]', {timeout: 20000}).should('not.be.visible');
 });
 Cypress.Commands.add("clearAllEmails", () => {
     cy.request("DELETE", "http://localhost:8025/api/v1/messages");

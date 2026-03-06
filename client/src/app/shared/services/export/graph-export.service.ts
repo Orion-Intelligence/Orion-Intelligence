@@ -1013,7 +1013,8 @@ export class GraphExportService {
   }
 
   private downloadBinary(content: Uint8Array, mimeType: string, filename: string): void {
-    this.downloadBlobFromParts([content], mimeType, filename);
+    const binary = new Uint8Array(content);
+    this.downloadBlobFromParts([binary], mimeType, filename);
   }
 
   private downloadBlobFromParts(content: BlobPart[], mimeType: string, filename: string): void {
