@@ -3,6 +3,20 @@ import {deleteAllEnabledIocAdvancedFilters} from './controllers/13-consolidated.
 
 const testData = Cypress.env('TEST_DATA') || {};
 const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
+const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
+
+const ensureDomainScannerModalOpen = () => {
+  cy.get('body', {timeout: 30000}).then(($body) => {
+    if ($body.find(DOMAIN_SCANNER_SELECTOR).length > 0) {
+      return;
+    }
+    cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000})
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+  });
+  cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');
+};
 
 describe('Consolidated - IOC Advanced Builder Flow', () => {
   beforeEach(() => {
@@ -57,26 +71,27 @@ describe('Consolidated - Domain Scanner Flow', () => {
     cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).scrollIntoView().should('be.visible').type('{enter}');
     cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-modal"]', {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');
+    ensureDomainScannerModalOpen();
     cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
 
     DOMAIN_SCANNER_TEST_DOMAINS.forEach((d) => {
       cy.get('[data-testid="domain-scanner-input"]').scrollIntoView().should('be.visible').clear().type(d);
       cy.get('[data-testid="domain-scanner-search-subdomains"]').click();
-      cy.get('[data-testid="domain-scanner-search-subdomains"]').should('not.be.disabled', {timeout: 30000});
+      cy.get('[data-testid="domain-scanner-search-subdomains"]', {timeout: 30000}).should('not.be.disabled');
     });
 
     cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="domain-scanner-input"]').clear().type('1.1.1.1');
     cy.get('[data-testid="domain-scanner-lookup-ip"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-lookup-ip"]').should('not.be.disabled', {timeout: 30000});
+    cy.get('[data-testid="domain-scanner-lookup-ip"]', {timeout: 30000}).should('not.be.disabled');
 
+    ensureDomainScannerModalOpen();
     cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-modal"]', {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').within(() => {
+    cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').within(() => {
       cy.get('[data-testid="domain-scanner-input"]', {timeout: 30000}).should('be.visible').clear().type('example.com');
     });
     cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-modal"]', {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').click('topLeft');
+    cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').click('topLeft');
   });
 });
