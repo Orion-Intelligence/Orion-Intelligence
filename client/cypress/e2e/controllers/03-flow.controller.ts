@@ -68,18 +68,30 @@ export function openHomepage() {
 export function openCountryReportFromMap() {
   cy.get('[data-testid="world-heatmap-map"] path.country', {timeout: 30000}).should('have.length.greaterThan', 0);
 
-  cy.document().then((doc) => {
-    let target =
-      doc.querySelector('[data-testid="world-heatmap-map"] path.country.has-data') ||
-      doc.querySelector('[data-testid="world-heatmap-map"] path.country');
-    expect(target, 'clickable map country').to.exist;
-    (target as Element).dispatchEvent(
-      new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        composed: true
-      })
-    );
+  cy.get('[data-testid="world-heatmap-map"] path.country.has-data', {timeout: 30000})
+    .should('have.length.greaterThan', 0)
+    .first()
+    .scrollIntoView()
+    .as('heatmapCountryWithData')
+    .click({force: true});
+
+  cy.get('body').then(($body) => {
+    if (!$body.find('[data-testid="heatmap-report"]').length) {
+      cy.get('@heatmapCountryWithData').then(($el) => {
+        const target = $el[0] as SVGPathElement;
+        const rect = target.getBoundingClientRect();
+        target.dispatchEvent(
+          new MouseEvent('click', {
+            clientX: rect.left + Math.max(1, rect.width / 2),
+            clientY: rect.top + Math.max(1, rect.height / 2),
+            bubbles: true,
+            cancelable: true,
+            composed: true
+          })
+        );
+      });
+    }
   });
-  cy.get('[data-testid="heatmap-report"]', {timeout: 15000}).should('exist');
+
+  cy.get('[data-testid="heatmap-report"]', {timeout: 15000}).should('be.visible');
 }
