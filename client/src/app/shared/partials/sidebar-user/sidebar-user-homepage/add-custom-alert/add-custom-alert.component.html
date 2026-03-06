@@ -1,5 +1,5 @@
-<div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
-  <div class="relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[30px] font-[Inter] text-[var(--color-text1)] shadow-[0_0_30px_rgba(0,0,0,0.3)] max-[900px]:p-[18px]" @popupAnimation>
+<div class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
+  <div class="ui-popup-shell relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] p-[30px] font-[Inter] max-[900px]:p-[18px]" @popupAnimation>
     <div>
       <div class="text-[24px] font-semibold leading-none">{{ heading }}</div>
       <button class="absolute right-[20px] top-[20px] text-[28px] text-[#ccc] hover:text-white" (click)="cancleAlert(false)">×</button>

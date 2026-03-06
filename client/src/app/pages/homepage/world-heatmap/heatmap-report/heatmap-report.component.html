@@ -1,5 +1,5 @@
-<div data-testid="heatmap-report-overlay" class="fixed inset-0 z-[1000] flex items-center justify-center bg-[rgba(2,6,23,0.72)] backdrop-blur-[4px] max-[768px]:items-start max-[768px]:p-4" (click)="closePopup()">
-  <div class="flex max-h-[82vh] w-[760px] flex-col overflow-hidden rounded-[12px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] max-[768px]:mt-2 max-[768px]:w-full max-[768px]:max-w-full" (click)="$event.stopPropagation()">
+<div data-testid="heatmap-report-overlay" class="ui-graph-popup-overlay fixed inset-0 z-[1000] flex items-center justify-center max-[768px]:items-start max-[768px]:p-4" (click)="closePopup()">
+  <div class="ui-popup-shell flex max-h-[82vh] w-[760px] flex-col overflow-hidden rounded-[12px] max-[768px]:mt-2 max-[768px]:w-full max-[768px]:max-w-full" (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between border-b border-[var(--tenant-line)] px-4 py-3.5">
       <div class="flex items-center gap-2">
         <h3 class="m-0 text-[18px] font-semibold text-[var(--color-text1)]">Reports</h3>
