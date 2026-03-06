@@ -58,14 +58,7 @@ export function getHeatmapComponent() {
 }
 
 export function openHomepage() {
-  cy.visit('/dashboard/profile/homepage');
-
-  cy.location('pathname', {timeout: 30000}).then((pathname) => {
-    if (pathname.includes('/login')) {
-      cy.loginAsAdmin();
-    }
-  });
-  cy.visit('/dashboard/profile/homepage');
+  cy.loginAsAdmin();
   cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/homepage');
   cy.get('app-world-heatmap', {timeout: 30000}).should('be.visible');
   cy.get('[data-testid="world-heatmap-map"] svg', {timeout: 30000}).should('exist');

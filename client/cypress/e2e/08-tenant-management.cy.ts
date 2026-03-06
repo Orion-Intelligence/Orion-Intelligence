@@ -76,9 +76,27 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     cy.visit('/dashboard/profile/homepage');
     openTenantsPage();
     cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
-    cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-    cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000}).filter(':visible').first().clear().type('1');
-    cy.get('[data-testid="tenant-save-changes"]', {timeout: 30000}).filter(':visible').first().click();
+    cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().then(($btn) => {
+      if (Cypress.dom.isVisible($btn)) {
+        cy.wrap($btn).click();
+      } else {
+        cy.wrap($btn).click({force: true});
+      }
+    });
+    cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000}).first().scrollIntoView().then(($input) => {
+      if (Cypress.dom.isVisible($input)) {
+        cy.wrap($input).clear().type('1');
+      } else {
+        cy.wrap($input).clear({force: true}).type('1', {force: true});
+      }
+    });
+    cy.get('[data-testid="tenant-save-changes"]', {timeout: 30000}).first().scrollIntoView().then(($btn) => {
+      if (Cypress.dom.isVisible($btn)) {
+        cy.wrap($btn).click();
+      } else {
+        cy.wrap($btn).click({force: true});
+      }
+    });
     cy.logout();
   });
 

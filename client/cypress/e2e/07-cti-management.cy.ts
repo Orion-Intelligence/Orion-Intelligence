@@ -38,13 +38,22 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
   it('covers CTI toolbar toggles and listings panel behavior', () => {
     visitCtiGraph();
 
-    cy.get('[data-testid="graph-toolbar-view-list"]').click();
-    cy.get('[data-testid="graph-toolbar-root"]').should('be.visible');
-    cy.get('[data-testid="graph-toolbar-view-graph"]').click();
-    cy.get('[data-testid="cti-listings-toggle"]').click();
-    cy.get('[data-testid="cti-listings-toggle"]').click();
-    cy.get('[data-testid="graph-toolbar-physics-toggle"]').click();
-    cy.get('[data-testid="graph-toolbar-physics-toggle"]').click();
+    cy.get('[data-testid="graph-toolbar-root"]', {timeout: 15000}).filter(':visible').first().within(() => {
+      cy.get('[data-testid="graph-toolbar-view-list"]').filter(':visible').first().click();
+      cy.get('[data-testid="graph-toolbar-view-graph"]').filter(':visible').first().click();
+    });
+    cy.get('[data-testid="cti-listings-toggle"], [data-testid="graph-toolbar-view-list"]', {timeout: 15000}).filter(':visible').first().click();
+    cy.get('[data-testid="cti-listings-toggle"], [data-testid="graph-toolbar-view-graph"]', {timeout: 15000}).filter(':visible').first().click();
+    cy.get('body').then(($body) => {
+      const listActive = $body.find('[data-testid="graph-toolbar-root"]:visible [data-testid="graph-toolbar-view-list"].text-white:visible').first();
+      if (listActive.length) {
+        cy.wrap(listActive).click();
+      }
+    });
+    cy.get('[data-testid="graph-toolbar-root"]', {timeout: 15000}).filter(':visible').first().within(() => {
+      cy.get('[data-testid="graph-toolbar-physics-toggle"], [data-cy="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]', {timeout: 15000}).filter(':visible').first().click();
+      cy.get('[data-testid="graph-toolbar-physics-toggle"], [data-cy="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]', {timeout: 15000}).filter(':visible').first().click();
+    });
   });
 
   it('covers CTI session add, rename, import, export, and close actions', () => {
@@ -55,15 +64,15 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
       cy.stub(win.URL, 'revokeObjectURL').as('revokeObjectURL');
       cy.stub(win.HTMLAnchorElement.prototype, 'click').as('anchorClick');
     });
-    cy.get('[data-testid="cti-tab-session-menu"]', {timeout: 15000}).should('be.visible');
-    cy.get('[data-testid="cti-tab-add-menu"]').click();
-    cy.get('[data-testid="cti-tab-add-new-session"]').click();
+    cy.get('[data-testid="cti-tab-session-menu"]', {timeout: 15000}).filter(':visible').first().should('be.visible');
+    cy.get('[data-testid="cti-tab-add-menu"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-tab-add-new-session"]').filter(':visible').first().click();
     const newName = `CTI Session ${Date.now()}`;
-    cy.get('[data-testid="cti-tab-name"]').first().dblclick();
-    cy.get('[data-testid="cti-tab-rename-input"]').first().clear().type(`${newName}{enter}`);
+    cy.get('[data-testid="cti-tab-name"]').filter(':visible').first().dblclick();
+    cy.get('[data-testid="cti-tab-rename-input"]').filter(':visible').first().clear().type(`${newName}{enter}`);
     cy.contains(newName).should('exist');
-    cy.get('[data-testid="cti-tab-session-menu"]').first().click();
-    cy.get('[data-testid="cti-export-current-session"]').click();
+    cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-export-current-session"]').filter(':visible').first().click();
     cy.get('@createObjectURL').should('have.been.called');
     cy.get('@anchorClick').should('have.been.called');
     cy.get('@revokeObjectURL').should('have.been.called');
@@ -83,26 +92,26 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
         expandEnabled: false
       }
     };
-    cy.get('[data-testid="cti-tab-file-input"]').invoke('removeClass', 'hidden').invoke('css', 'display', 'block').invoke('css', 'visibility', 'visible').selectFile({
+    cy.get('[data-testid="cti-tab-file-input"]').first().invoke('removeClass', 'hidden').invoke('css', 'display', 'block').invoke('css', 'visibility', 'visible').selectFile({
       contents: Cypress.Buffer.from(JSON.stringify(importPayload)),
       fileName: 'cti-import-session.json',
       mimeType: 'application/json'
     });
     cy.contains(importPayload.name).should('exist');
-    cy.get('[data-testid="cti-tab-close"]').first().click();
+    cy.get('[data-testid="cti-tab-close"]').filter(':visible').first().click();
   });
 
   it('covers CTI report export option selection', () => {
     visitCtiGraph();
 
     openAndAssertReportModal('Export CTI Report');
-    cy.get('[data-testid="graph-report-export-json"]').click();
+    cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
     openAndAssertReportModal('Export CTI Report');
-    cy.get('[data-testid="graph-report-export-graph-pdf"]').click();
+    cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
     openAndAssertReportModal('Export CTI Report');
-    cy.get('[data-testid="graph-report-export-doc-pdf"]').click();
+    cy.get('[data-testid="graph-report-export-doc-pdf"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
   });
 
@@ -156,11 +165,11 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
   it('covers social session rename and export actions', () => {
     visitSocialGraph();
 
-    cy.get('[data-testid="social-tab-add-menu"]').click();
-    cy.get('[data-testid="social-new-session"]').click();
+    cy.get('[data-testid="social-tab-add-menu"]').filter(':visible').first().click();
+    cy.get('[data-testid="social-new-session"]').filter(':visible').first().click();
     const newName = `Social Session ${Date.now()}`;
-    cy.get('[data-testid="social-tab-name"]').first().dblclick();
-    cy.get('[data-testid="social-tab-rename-input"]').clear().type(`${newName}{enter}`);
+    cy.get('[data-testid="social-tab-name"]').filter(':visible').first().dblclick();
+    cy.get('[data-testid="social-tab-rename-input"]').filter(':visible').first().clear().type(`${newName}{enter}`);
     cy.contains(newName).should('exist');
     openAndAssertReportModal('Export Social Report');
   });

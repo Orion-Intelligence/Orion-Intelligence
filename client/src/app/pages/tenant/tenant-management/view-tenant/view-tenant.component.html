@@ -11,7 +11,7 @@
 
       <div class="my-5 h-px w-full bg-[var(--color-divider)]"></div>
 
-      <div class="m-0 overflow-hidden rounded-[8px] border !border-[var(--tenant-line)] bg-[var(--color-blue-830)] shadow-[0_8px_24px_-18px_rgba(0,0,0,0.55)]">
+      <div class="m-0 overflow-visible md:overflow-hidden rounded-[8px] border !border-[var(--tenant-line)] bg-[var(--color-blue-830)] shadow-[0_8px_24px_-18px_rgba(0,0,0,0.55)]">
         <ng-container *ngIf="!isLoading; else loadingTpl">
           <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
             <table class="w-full min-w-[1220px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
@@ -200,7 +200,7 @@
 
           <div class="space-y-3 p-3 md:hidden" @fadeInDashboardItem>
             <ng-container *ngIf="(tenants?.length || 0) > 0; else noTenantsMobile">
-              <div *ngFor="let tenant of tenants; let i = index" class="overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
+              <div *ngFor="let tenant of tenants; let i = index" class="overflow-visible md:overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
                 <div class="flex items-center justify-between border-b border-[var(--tenant-line)] px-3 py-2.5">
                   <div class="min-w-0">
                     <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ tenant.companyName || tenant.name || '-' }}</div>

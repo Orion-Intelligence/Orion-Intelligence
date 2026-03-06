@@ -13,23 +13,27 @@ html,
 body {
   min-height: 100%;
   width: 100%;
-  overflow-x: clip !important;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  overscroll-behavior-x: none;
 }
 
 app-root {
   display: block;
   width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
 }
 
 [data-cy="dashboard-main"],
 [data-cy="dashboard-sidebar-main"],
-[data-cy="dashboard-container"],
 [data-cy="dashboard-sub-container"],
+[data-cy="dashboard-container"],
 [data-cy="dashboard-body"],
 #dashboard__sidebar-main,
 #dashboard-container {
-  max-width: 100%;
+  width: 100%;
+  max-width: 100vw !important;
   overflow-x: hidden !important;
 }
 
@@ -40,7 +44,7 @@ html {
 body {
   margin: 0;
   background: var(--color-blue-830);
-  overflow-x: clip !important;
+  overflow-x: hidden !important;
 }
 
 html.light-theme,

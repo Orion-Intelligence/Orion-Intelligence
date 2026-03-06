@@ -1,11 +1,11 @@
 export function openAndAssertReportModal(title: string) {
-  cy.get('[data-testid="cti-tab-session-menu"], [data-testid="social-tab-session-menu"]', {timeout: 15000}).first().click();
-  cy.get('[data-testid="cti-export-report"], [data-testid="social-export-report"]', {timeout: 15000}).first().click();
+  cy.get('[data-testid="cti-tab-session-menu"], [data-testid="social-tab-session-menu"]', {timeout: 15000}).filter(':visible').first().click();
+  cy.get('[data-testid="cti-export-report"], [data-testid="social-export-report"]', {timeout: 15000}).filter(':visible').first().click();
   cy.contains(title, {timeout: 10000}).should('be.visible');
-  cy.get('[data-testid="graph-report-export-modal"]', {timeout: 10000}).should('be.visible');
-  cy.get('[data-testid="graph-report-export-json"]').should('exist');
-  cy.get('[data-testid="graph-report-export-graph-pdf"]').should('exist');
-  cy.get('[data-testid="graph-report-export-doc-pdf"]').should('exist');
+  cy.get('[data-testid="graph-report-export-modal"]', {timeout: 10000}).filter(':visible').first().should('be.visible');
+  cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().should('exist');
+  cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().should('exist');
+  cy.get('[data-testid="graph-report-export-doc-pdf"]').filter(':visible').first().should('exist');
 }
 
 export function waitForToolbarSearchReady() {

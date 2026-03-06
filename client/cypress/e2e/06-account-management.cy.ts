@@ -14,7 +14,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
     });
 
     after(() => {
-        cy.logout();
+        cy.visit("/");
     });
 
     it('updates avatar/theme/2FA and validates reset password journey', () => {
