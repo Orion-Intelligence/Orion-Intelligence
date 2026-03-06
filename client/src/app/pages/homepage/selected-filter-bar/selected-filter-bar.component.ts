@@ -63,7 +63,9 @@ export class SelectedFilterBarComponent implements OnInit {
         this.app_service.set('entityfilterCategories', {});
       }
     }
-    this.app_service.set('matchType', "or");
+    if (scope=='all'){
+      this.app_service.set('matchType', "or");
+    }
     this.clearAll.emit();
   }
 

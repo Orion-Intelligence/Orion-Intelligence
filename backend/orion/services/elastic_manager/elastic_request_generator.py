@@ -84,7 +84,15 @@ class elastic_request_generator:
                 values = [values]
 
             if ioc_key == "m_search_all":
-                es_fields = allowed_keys
+                es_fields = []
+                for key in allowed_keys:
+                    mapped = ELASTIC_ENUMS.ioc_field_mapping.get(key)
+                    if not mapped:
+                        continue
+                    if isinstance(mapped, list):
+                        es_fields.extend(mapped)
+                    else:
+                        es_fields.append(mapped)
             else:
                 if ioc_key not in ELASTIC_ENUMS.ioc_field_mapping:
                     continue
