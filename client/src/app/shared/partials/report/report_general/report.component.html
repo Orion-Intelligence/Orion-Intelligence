@@ -1,6 +1,7 @@
 <app-report-header [csv_object]="resultItem" [lang_detected]="lang_detected" [url]="resultItem?.m_url"
   [content]="resultItem?.m_content" [lang]="lang" (languageUpdated)="langUpdate($event)"></app-report-header>
 
+<div class="pb-[100px]">
 <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
   <div class="pb-3">
     <p class="text-[20px] font-semibold leading-tight text-[var(--color-text1)]">
@@ -139,3 +140,4 @@
 <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 <app-report-mapping></app-report-mapping>
 <app-chat-widget [reportText]="resultItem?.m_content" *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>
+</div>

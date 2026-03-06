@@ -8,7 +8,6 @@ export class GraphExportService {
   private readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
   private readonly TABLE_ROW_BG_RGB: [number, number, number] = [236, 242, 250];
   private readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [224, 233, 245];
-  // jsPDF-AutoTable does not support alpha in lineColor directly; tuned to a soft blue border tone.
   private readonly TABLE_BORDER_RGB: [number, number, number] = [194, 212, 238];
   private readonly TABLE_BORDER_WIDTH = 0.2;
 
@@ -828,17 +827,7 @@ export class GraphExportService {
     doc.text(text, badgeX + 8, badgeTopY + 11);
   }
 
-  private drawClippedText(
-    doc: jsPDF,
-    text: string,
-    x: number,
-    y: number,
-    clipX: number,
-    clipY: number,
-    clipWidth: number,
-    clipHeight: number,
-    align: 'left' | 'center' | 'right' = 'left'
-  ): void {
+  private drawClippedText( doc: jsPDF, text: string, x: number, y: number, clipX: number, clipY: number, clipWidth: number, clipHeight: number, align: 'left' | 'center' | 'right' = 'left' ): void {
     doc.saveGraphicsState();
     doc.rect(clipX, clipY, clipWidth, clipHeight, null).clip().discardPath();
     doc.text(text, x, y, { align });

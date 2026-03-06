@@ -70,6 +70,13 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   }), catchError((error: unknown) => {
     const authService = injector.get(AuthService, null);
     if (authService?.isAuthenticated()) {
+      if (error instanceof HttpErrorResponse && authReq.url.includes('api/search')) {
+        const detail = typeof error.error === 'object' ? String((error.error as any)?.detail || '') : '';
+        if (error.status === 404 && /document not found/i.test(detail)) {
+          msg.show('Document not found', 'fail', 3000, true);
+          return throwError(() => error);
+        }
+      }
       if (error instanceof HttpErrorResponse && error.status === 0) {
         msg.show('Cannot connect to server');
         return throwError(() => error);
