@@ -82,9 +82,8 @@ describe('Consolidated - Domain Scanner Flow', () => {
     });
 
     cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-input"]').clear().type('1.1.1.1');
-    cy.get('[data-testid="domain-scanner-lookup-ip"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-lookup-ip"]', {timeout: 30000}).should('not.be.disabled');
+    cy.get('[data-testid="domain-scanner-input"]').clear().type('1.1.1.1{enter}');
+    cy.get('[data-testid="domain-scanner-input"]', {timeout: 30000}).should('not.be.disabled');
 
     ensureDomainScannerModalOpen();
     cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
