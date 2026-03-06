@@ -8,6 +8,9 @@ export class GraphExportService {
   private readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
   private readonly TABLE_ROW_BG_RGB: [number, number, number] = [236, 242, 250];
   private readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [224, 233, 245];
+  // jsPDF-AutoTable does not support alpha in lineColor directly; tuned to a soft blue border tone.
+  private readonly TABLE_BORDER_RGB: [number, number, number] = [194, 212, 238];
+  private readonly TABLE_BORDER_WIDTH = 0.2;
 
   exportByType(payload: GraphReportPayload, type: GraphReportExportType): void {
     if (type === 'json') {
@@ -54,7 +57,7 @@ export class GraphExportService {
       { label: 'Nodes', value: String(payload.nodes.length) },
       { label: 'Edges', value: String(payload.edges.length) },
       { label: 'Node Types', value: String(composition.length) },
-      { label: 'Session', value: payload.sessionName || '-' }
+      { label: 'Session', value: this.truncateWithEllipsis(payload.sessionName || '-', 15) }
     ];
     kpis.forEach((kpi, idx) => this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value));
     const analysisDidDrawPage = (data: any) => {
@@ -69,14 +72,15 @@ export class GraphExportService {
         overflow: 'linebreak' as const,
         valign: 'middle' as const,
         textColor: [30, 41, 59] as [number, number, number],
-        lineWidth: 0
+        lineWidth: this.TABLE_BORDER_WIDTH,
+        lineColor: this.TABLE_BORDER_RGB
       },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
+      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB as [
                     number,
                     number,
                     number
-                ] },
+                ], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       didDrawPage: analysisDidDrawPage,
       theme: 'plain' as const
     };
@@ -115,9 +119,9 @@ export class GraphExportService {
         margin: { top: 126, left: 40, right: 40, bottom: 58 },
         tableWidth: contentW,
         body: [['#', 'Platform', 'Node Count'], ...socialPlatformCounts.map((item, i) => [String(i + 1), item.name, String(item.count)])] as RowInput[],
-        styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'top', lineWidth: 0 },
-        bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, textColor: [30, 41, 59], lineWidth: 0 },
-        alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+        styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'top', lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+        bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+        alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
         didParseCell: (data: any) => {
           if (data.row.index === 0) {
             data.cell.styles.fontStyle = 'bold';
@@ -136,29 +140,40 @@ export class GraphExportService {
       sectionsByPage[reportsPageNo] = 'Report Sections';
       this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
       payload.tables.forEach((t, idx) => {
+        const sectionTitle = this.getReportSectionTitle(t, idx);
+        const tableRows = this.buildReportSectionRows(t.values ?? {});
         let markerY = idx === 0 ? 126 : ((doc as any).lastAutoTable?.finalY ?? 126) + 18;
         markerY = this.resolveMarkerY(doc, markerY, 126, () => {
           const pageNo = doc.getCurrentPageInfo().pageNumber;
           sectionsByPage[pageNo] = 'Report Sections';
           this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
         });
-        this.drawInfoSectionMarker(doc, markerY, contentW, t.title);
+        this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
+        const reportSectionDidDrawPage = (data: any) => {
+          this.makeSectionHeaderCallback(sectionsByPage, 'Report Sections', 'Metadata, screenshot, and related reports')(data);
+          this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info');
+        };
         autoTable(doc, {
           startY: markerY + 12,
-          margin: { top: 126, left: 40, right: 40, bottom: 58 },
+          margin: { top: 139, left: 40, right: 40, bottom: 58 },
           tableWidth: contentW,
-          body: Object.entries(t.values ?? {}).map(([k, v]) => [k, v]) as RowInput[],
-          styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: 0 },
+          body: tableRows as RowInput[],
+          styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
           columnStyles: { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
-          bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-          alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+          bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+          alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
           didParseCell: (data: any) => {
+            if (data.row.index === 0) {
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.fillColor = [207, 220, 236];
+              return;
+            }
             if (data.column.index === 0) {
               data.cell.styles.fontStyle = 'bold';
               data.cell.styles.fillColor = [214, 226, 240];
             }
           },
-          didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Report Sections', 'Metadata, screenshot, and related reports'),
+          didDrawPage: reportSectionDidDrawPage,
           theme: 'plain'
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
@@ -168,7 +183,7 @@ export class GraphExportService {
             const pageNo = doc.getCurrentPageInfo().pageNumber;
             sectionsByPage[pageNo] = 'Report Sections';
             this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
-            this.drawInfoSectionMarker(doc, 126, contentW, t.title);
+            this.drawInfoSectionMarker(doc, 126, contentW, sectionTitle);
           });
           this.drawScreenshotPreview(doc, screenshotDataUrl, 40, imageY, contentW, 190);
         }
@@ -184,9 +199,9 @@ export class GraphExportService {
       margin: { top: 126, left: 40, right: 40, bottom: 58 },
       tableWidth: contentW,
       body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 240).map((e, i) => [String(i + 1), e.from, e.to, e.label ?? ''])] as RowInput[],
-      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: 0 },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       didParseCell: (data: any) => {
         if (data.row.index === 0) {
           data.cell.styles.fontStyle = 'bold';
@@ -266,60 +281,51 @@ export class GraphExportService {
       sectionItems.push({ label: 'Report Sections', page: pages.reportsPage });
     }
     sectionItems.push({ label: 'Connection Matrix', page: pages.edgesPage });
-    const cardX = 40;
-    const cardY = 232;
-    const cardW = W - 80;
-    const rowH = 22;
-    const rowGap = 7;
-    const innerPad = 14;
-    const topPad = 12;
-    const bottomPad = 12;
-    const cardH = topPad + bottomPad + (sectionItems.length * rowH) + (Math.max(0, sectionItems.length - 1) * rowGap);
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(cardX, cardY, cardW, cardH, this.SECTION_RADIUS, this.SECTION_RADIUS, 'F');
+
+    const tocX = 40;
+    const tocY = 252;
+    const tocW = W - 80;
+    const rowH = 20;
+    const pageColW = 72;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Section', tocX, tocY - 6);
+    doc.text('Page', tocX + tocW - pageColW, tocY - 6);
     doc.setDrawColor(226, 232, 240);
-    doc.roundedRect(cardX, cardY, cardW, cardH, this.SECTION_RADIUS, this.SECTION_RADIUS, 'S');
-    doc.setFillColor(30, 41, 59);
-    doc.roundedRect(cardX, cardY, 5, cardH, this.SECTION_RADIUS, this.SECTION_RADIUS, 'F');
-
+    doc.setLineWidth(0.45);
     sectionItems.forEach((item, index) => {
-      const rowY = cardY + topPad + (index * (rowH + rowGap));
-      const rowX = cardX + 10;
-      const rowW = cardW - 20;
-      doc.setFillColor(index % 2 === 0 ? 238 : 232, index % 2 === 0 ? 244 : 239, index % 2 === 0 ? 251 : 247);
-      doc.roundedRect(rowX, rowY, rowW, rowH, 3, 3, 'F');
-      doc.setDrawColor(203, 213, 225);
-      doc.setLineWidth(0.35);
-      doc.roundedRect(rowX, rowY, rowW, rowH, 3, 3, 'S');
-      doc.setFillColor(51, 65, 85);
-      doc.circle(rowX + 8, rowY + 11, 2.2, 'F');
-
-      const rowLabel = `${index + 1}. ${item.label}`;
+      const rowTop = tocY + (index * rowH);
+      const baselineY = rowTop + 13;
+      const rowLabel = item.label;
+      const labelX = tocX;
+      const pageX = tocX + tocW - pageColW;
+      doc.setDrawColor(226, 232, 240);
+      doc.line(tocX, rowTop + rowH, tocX + tocW, rowTop + rowH);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
+      doc.setFontSize(10);
       doc.setTextColor(30, 41, 59);
-      doc.textWithLink(this.fitSingleLine(doc, rowLabel, cardW - 154), rowX + innerPad, rowY + 14, { pageNumber: item.page });
+      const labelText = this.fitSingleLine(doc, rowLabel, tocW - pageColW - 12);
+      doc.text(labelText, labelX, baselineY);
+      doc.link(labelX, rowTop + 2, tocW - pageColW - 4, rowH - 4, { pageNumber: item.page });
 
-      const pillText = `Page ${item.page}`;
-      const pillW = Math.max(44, doc.getTextWidth(pillText) + 14);
-      const pillX = rowX + rowW - innerPad - pillW;
-      doc.setFillColor(51, 64, 84);
-      doc.roundedRect(pillX, rowY + 4, pillW, 14, 3, 3, 'F');
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(255, 255, 255);
-      doc.text(pillText, pillX + 7, rowY + 13);
+      doc.setTextColor(37, 99, 235);
+      const pageText = `Page ${String(item.page).padStart(2, '0')}`;
+      doc.text(pageText, pageX, baselineY);
+      doc.link(pageX, rowTop + 2, pageColW, rowH - 4, { pageNumber: item.page });
     });
     const composition = this.buildTypeComposition(payload.nodes).slice(0, 7);
-    this.drawInfoSectionMarker(doc, 370, W - 80, 'Top Node Types');
+    const compositionStartY = tocY + (sectionItems.length * rowH) + 24;
+    this.drawInfoSectionMarker(doc, compositionStartY, W - 80, 'Top Node Types');
     autoTable(doc, {
-      startY: 382,
+      startY: compositionStartY + 12,
       margin: { left: 40, right: 40 },
       tableWidth: W - 80,
       body: [['Type', 'Count'], ...composition.map(item => [item.type, String(item.count)])] as RowInput[],
-      styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, lineWidth: 0 },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+      styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       didParseCell: (data: any) => {
         if (data.row.index === 0) {
           data.cell.styles.fontStyle = 'bold';
@@ -328,7 +334,7 @@ export class GraphExportService {
       },
       theme: 'plain'
     });
-    this.drawRoundedTableContainer(doc, 40, W - 80, 370, (doc as any).lastAutoTable?.finalY ?? 370);
+    this.drawRoundedTableContainer(doc, 40, W - 80, compositionStartY, (doc as any).lastAutoTable?.finalY ?? compositionStartY);
     if (payload.graphKind === 'social') {
       const platformCounts = this.extractSocialPlatformCounts(payload);
       const platformMarkerY = (doc as any).lastAutoTable.finalY + 10;
@@ -338,9 +344,9 @@ export class GraphExportService {
         margin: { left: 40, right: 40 },
         tableWidth: W - 80,
         body: [['Platform', 'Count'], ...platformCounts.slice(0, 12).map(item => [item.name, String(item.count)])] as RowInput[],
-        styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, lineWidth: 0 },
-        bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-        alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+        styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+        bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+        alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
         didParseCell: (data: any) => {
           if (data.row.index === 0) {
             data.cell.styles.fontStyle = 'bold';
@@ -396,8 +402,9 @@ export class GraphExportService {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(219, 234, 254);
-    const compactSession = this.compactSession(payload.sessionName || '-');
-    doc.text(this.fitSingleLine(doc, `${meta.kindLabel} | Session: ${compactSession}`, 290), W - 56, 104, { align: 'right' });
+    const compactSession = this.truncateWithEllipsis(this.compactSession(payload.sessionName || '-'), 15);
+    const subtitle = this.fitSingleLineStrict(doc, `${meta.kindLabel} | Session: ${compactSession}`, 250, 48, 0.84);
+    this.drawClippedText(doc, subtitle, W - 56, 104, 56, 84, W - 112, 30, 'right');
   }
 
   private drawConnectionMatrixHeader(doc: jsPDF, title: string, subtitle: string): void {
@@ -411,7 +418,7 @@ export class GraphExportService {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(219, 234, 254);
-    doc.text(this.fitSingleLine(doc, subtitle, 300), W - 56, 104, { align: 'right' });
+    this.drawClippedText(doc, this.fitSingleLineStrict(doc, subtitle, 260, 58, 0.86), W - 56, 104, 56, 84, W - 112, 30, 'right');
   }
 
   private drawGraphChrome(doc: jsPDF, payload: GraphReportPayload, _meta: GraphReportMeta, section: string): void {
@@ -463,10 +470,10 @@ export class GraphExportService {
       margin: { left: 40, right: 40 },
       tableWidth: contentW,
       body: Object.entries(payload.summary ?? {}).map(([k, v]) => [k, String(v)]) as RowInput[],
-      styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: 0 },
+      styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       didParseCell: (data: any) => {
         if (data.column.index === 0) {
           data.cell.styles.fontStyle = 'bold';
@@ -485,8 +492,8 @@ export class GraphExportService {
         margin: { left: 40, right: 40 },
         tableWidth: contentW,
         body: [['', '']] as RowInput[],
-        styles: { fontSize: 9, cellPadding: 6, textColor: [30, 41, 59], lineWidth: 0 },
-        bodyStyles: { lineWidth: 0 },
+        styles: { fontSize: 9, cellPadding: 6, textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+        bodyStyles: { lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
         theme: 'plain',
         didDrawPage: hooks.didDrawPage
       });
@@ -502,10 +509,10 @@ export class GraphExportService {
       margin: { left: 40, right: 40 },
       tableWidth: contentW,
       body: [['Node', 'Type', 'ID'], ...payload.nodes.slice(0, 150).map(n => [n.label || n.id, n.type, n.id])] as RowInput[],
-      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: 0 },
+      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       columnStyles: { 0: { cellWidth: 260 }, 1: { cellWidth: 110 }, 2: { cellWidth: 150 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       didParseCell: (data: any) => {
         if (data.row.index === 0) {
           data.cell.styles.fontStyle = 'bold';
@@ -517,27 +524,38 @@ export class GraphExportService {
     });
     this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
     if (payload.tables?.length) {
-      payload.tables.forEach(t => {
+      payload.tables.forEach((t, idx) => {
+        const sectionTitle = this.getReportSectionTitle(t, idx);
+        const tableRows = this.buildReportSectionRows(t.values ?? {});
         let markerY = ((doc as any).lastAutoTable.finalY ?? 160) + 18;
         markerY = this.resolveMarkerY(doc, markerY, 86);
-        this.drawInfoSectionMarker(doc, markerY, contentW, t.title);
+        this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
+        const reportSectionDidDrawPage = (data: any) => {
+          hooks.didDrawPage(data);
+          this.drawInfoSectionMarker(data.doc as jsPDF, 86, contentW, sectionTitle || 'Info');
+        };
         autoTable(doc, {
           startY: markerY + 12,
-          margin: { left: 40, right: 40 },
+          margin: { top: 99, left: 40, right: 40, bottom: 58 },
           tableWidth: contentW,
-          body: Object.entries(t.values ?? {}).map(([k, v]) => [k, v]) as RowInput[],
-          styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: 0 },
+          body: tableRows as RowInput[],
+          styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
           columnStyles: { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
-          bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-          alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+          bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+          alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
           didParseCell: (data: any) => {
+            if (data.row.index === 0) {
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.fillColor = [207, 220, 236];
+              return;
+            }
             if (data.column.index === 0) {
               data.cell.styles.fontStyle = 'bold';
               data.cell.styles.fillColor = [214, 226, 240];
             }
           },
           theme: 'plain',
-          didDrawPage: hooks.didDrawPage
+          didDrawPage: reportSectionDidDrawPage
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
         if (screenshotDataUrl) {
@@ -555,10 +573,10 @@ export class GraphExportService {
       margin: { left: 40, right: 40 },
       tableWidth: contentW,
       body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 200).map((e, i) => [String(i + 1), e.from, e.to, e.label ?? ''])] as RowInput[],
-      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: 0 },
+      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: 150 }, 2: { cellWidth: 150 }, 3: { cellWidth: 177 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: 0 },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB },
+      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       didParseCell: (data: any) => {
         if (data.row.index === 0) {
           data.cell.styles.fontStyle = 'bold';
@@ -759,6 +777,19 @@ export class GraphExportService {
     return out + ellipsis;
   }
 
+  private fitSingleLineStrict(doc: jsPDF, text: string, maxWidth: number, maxChars: number, safetyFactor: number = 0.86): string {
+    const limited = String(text || '').slice(0, Math.max(0, maxChars));
+    return this.fitSingleLine(doc, limited, maxWidth * safetyFactor);
+  }
+
+  private truncateWithEllipsis(value: string, maxChars: number): string {
+    const input = String(value || '');
+    if (input.length <= maxChars) {
+      return input;
+    }
+    return `${input.slice(0, Math.max(0, maxChars))}...`;
+  }
+
   private drawReportBackgroundPattern(doc: jsPDF): void {
     const W = this.getPageW(doc);
     const H = this.getPageH(doc);
@@ -781,15 +812,12 @@ export class GraphExportService {
 
   private drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string): void {
     const x = 40;
-    const text = this.fitSingleLine(doc, label || 'Information', Math.max(110, width - 24));
+    const normalizedLabel = String(label || '').trim();
+    const text = this.fitSingleLine(doc, normalizedLabel || 'Info', Math.max(110, width - 24));
     const badgeWidth = width;
     const badgeX = x;
-    const badgeTopY = y - 7; // 8px up from previous y+1 placement
-    const lineY = badgeTopY + 18;
-
-    doc.setDrawColor(148, 163, 184);
-    doc.setLineWidth(0.6);
-    doc.line(x, lineY, x + width, lineY);
+    // Keep the section badge close to table content with no separator rule below.
+    const badgeTopY = y - 4;
     doc.setFillColor(...this.INTERNAL_HEADER_RGB);
     doc.roundedRect(badgeX, badgeTopY, badgeWidth, 16, 4, 4, 'F');
     doc.setFillColor(...this.INTERNAL_HEADER_RGB);
@@ -798,6 +826,85 @@ export class GraphExportService {
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
     doc.text(text, badgeX + 8, badgeTopY + 11);
+  }
+
+  private drawClippedText(
+    doc: jsPDF,
+    text: string,
+    x: number,
+    y: number,
+    clipX: number,
+    clipY: number,
+    clipWidth: number,
+    clipHeight: number,
+    align: 'left' | 'center' | 'right' = 'left'
+  ): void {
+    doc.saveGraphicsState();
+    doc.rect(clipX, clipY, clipWidth, clipHeight, null).clip().discardPath();
+    doc.text(text, x, y, { align });
+    doc.restoreGraphicsState();
+  }
+
+  private getReportSectionTitle(table: GraphReportTableRow, index: number): string {
+    const fromTitle = this.cleanReportFieldLabel(table?.title ?? '');
+    if (fromTitle) {
+      return fromTitle;
+    }
+    const keys = Object.keys(table?.values ?? {});
+    const hasMetadataPrefix = keys.some(key => /^\s*m\s+/i.test(String(key)));
+    const cleanedKeys = keys.map(k => this.cleanReportFieldLabel(k).toLowerCase());
+    const hasMetadataLikeKeys = cleanedKeys.some(k => /(scrap file|organization|domain|language|hash|update date|creation date|company|leak date|data size|revenue|location)/i.test(k));
+    if (hasMetadataPrefix || hasMetadataLikeKeys) {
+      return 'Metadata';
+    }
+    return `Section ${index + 1}`;
+  }
+
+  private buildReportSectionRows(values: Record<string, string>): Array<[string, string]> {
+    const rows: Array<[string, string]> = [['Field', 'Value']];
+    Object.entries(values ?? {}).forEach(([rawKey, rawValue]) => {
+      const key = this.cleanReportFieldLabel(rawKey);
+      const value = this.cleanReportFieldValue(rawValue, key);
+      if (!key && !value) {
+        return;
+      }
+      rows.push([key || 'Field', value || '-']);
+    });
+    return rows;
+  }
+
+  private cleanReportFieldLabel(input: string): string {
+    const compact = String(input || '')
+      .replace(/^\s*m\s+/i, '')
+      .replace(/[:\s]+$/g, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!compact) {
+      return '';
+    }
+    if (/^[a-z0-9\s]+$/i.test(compact)) {
+      return compact.replace(/\b\w/g, c => c.toUpperCase());
+    }
+    return compact;
+  }
+
+  private cleanReportFieldValue(input: string, key: string): string {
+    const raw = String(input ?? '').trim();
+    if (!raw) {
+      return '';
+    }
+    const normalizedKey = key.toLowerCase();
+    if (normalizedKey.includes('date')) {
+      const asDate = new Date(raw);
+      if (!Number.isNaN(asDate.getTime())) {
+        return asDate.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC');
+      }
+    }
+    if (normalizedKey.includes('url') || normalizedKey.includes('link')) {
+      return raw.replace(/\s+/g, '');
+    }
+    return raw.replace(/\s*,\s*/g, ', ').replace(/\s+/g, ' ').trim();
   }
 
   private resolveMarkerY(doc: jsPDF, requestedY: number, resetY: number, onNewPage?: () => void): number {

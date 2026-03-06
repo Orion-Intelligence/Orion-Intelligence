@@ -53,11 +53,11 @@ export class ReportExportService extends ExportSharedService {
       detailValues['Details'] = '-';
     }
 
-    const tables = [{ title: 'Report Details', values: detailValues }];
+    const tables = [{ title: 'Metadata', values: this.buildMetadataValues(source) }];
     if (contentText) {
-      tables.push({ title: 'Report Content', values: { Content: contentText.slice(0, 3000) } });
+      tables.push({ title: 'Content Preview', values: { Content: contentText.slice(0, 3000) } });
     }
-    tables.push({ title: 'Metadata', values: this.buildMetadataValues(source, contentText) });
+    tables.push({ title: 'Report Details', values: detailValues });
     tables.push({ title: 'Leak Screenshot', values: this.buildScreenshotValues(source) });
     tables.push({ title: 'Related Reports', values: this.buildRelatedReportsValues(source) });
 
@@ -79,20 +79,25 @@ export class ReportExportService extends ExportSharedService {
     };
   }
 
-  private buildMetadataValues(source: Record<string, string>, contentText: string): Record<string, string> {
-    const keys = Object.keys(source);
-    const sectionRaw = source['m_section'] || '';
-    const firstSection = sectionRaw
-      .split(',')
-      .map(v => this.cleanText(v))
-      .filter(Boolean)[0] || '-';
-    const entityKeys = keys.filter(k => k.startsWith('m_') && !['m_section', 'm_content', 'm_screenshot'].includes(k));
+  private buildMetadataValues(source: Record<string, string>): Record<string, string> {
+    const pick = (...keys: string[]): string => {
+      for (const key of keys) {
+        const value = this.cleanText(source[key] || '');
+        if (value) {
+          return value;
+        }
+      }
+      return '-';
+    };
     return {
-      Summary: 'Detected entities, extracted sections, and structured attributes.',
-      'Section 1': firstSection.slice(0, 700),
-      'Detected Entity Groups': String(entityKeys.length),
-      'Structured Attributes': String(keys.length),
-      'Content Preview': contentText ? contentText.slice(0, 500) : '-'
+      Country: pick('m_location', 'm_country', 'location', 'country'),
+      'Scrap File': pick('m_scrap_file', 'scrap_file'),
+      Domain: pick('m_domain', 'domain'),
+      Language: pick('m_language', 'language'),
+      Currencies: pick('m_currencies', 'currencies'),
+      Hash: pick('m_hash', 'hash'),
+      'Update Date': pick('m_update_date', 'update_date'),
+      'Creation Date': pick('m_creation_date', 'creation_date')
     };
   }
 
