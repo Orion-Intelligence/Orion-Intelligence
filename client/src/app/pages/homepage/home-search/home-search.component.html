@@ -12,7 +12,8 @@
               <img alt="Search" height="16" class="ml-[6px] mb-[1px] opacity-80" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
             </button>
 
-            <input #searchInput data-testid="homepage-search-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 border-y border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" maxlength="350" name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)">
+            <input #searchInput data-testid="homepage-search-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 border-y border-[var(--color-border)] bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" maxlength="350" name="q" placeholder="Search ..." type="text" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)">
+
             <input type="hidden" value="1">
 
             <button type="button" class="ui-search-clear-btn group flex h-[42px] w-[38px] items-center justify-center border-y border-[var(--color-border)] bg-white px-0 transition-colors hover:bg-[#f3f4f6] max-[550px]:rounded-r-[8px] max-[550px]:border-r" aria-label="Clear input" title="Clear input" (click)="clearSearchInput()" [disabled]="!searchQuery">

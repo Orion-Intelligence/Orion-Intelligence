@@ -8,7 +8,7 @@ export class SubscriptionService {
   }
 
   public accountExpirable(): boolean {
-    return this.appService.userSessionData().user.role != "member" || this.checkSubscription();
+    return this.appService.userSessionData().user.role == "admin" || this.checkSubscription();
   }
 
   public checkSubscription(): boolean {
