@@ -11,6 +11,7 @@ import { HttpParams } from '@angular/common/http';
 import { AppService } from '../../../services/core/app/app.service';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { Router } from '@angular/router';
+import { LicenseService } from '../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-report-header',
   standalone: true,
@@ -30,7 +31,7 @@ export class ReportHeaderComponent {
 
   @Output() languageUpdated = new EventEmitter<LeakResultItem | GeneralResultItem>();
 
-  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router) {
+  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router, protected licenseServise: LicenseService) {
   }
 
   downloadCSV() {
@@ -67,6 +68,10 @@ export class ReportHeaderComponent {
   }
 
   open_graph() {
+    if (!this.licenseServise.canUseCtiGraph()) {
+      this.dashboardService.showSubscription.set(true);
+      return;
+    }
     const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
     const parts = window.location.pathname.split('/');
     const singleInput = parts[parts.length - 1];

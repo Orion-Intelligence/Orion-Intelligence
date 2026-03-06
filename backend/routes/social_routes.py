@@ -152,7 +152,7 @@ async def search_social_metadata(param: SocialMetadataRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/session/upsert",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced"]))])
 async def upsert_social_session(data: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     gt = (data or {}).get("graph_type") or graph_type or "social"
     return await graphs_model.getInstance().upsert_data(str(current_user.id), gt, data)
@@ -160,14 +160,14 @@ async def upsert_social_session(data: dict = Body(...), graph_type: str = Query(
 
 @social_routes.get(
     "/api/social/session/tabs",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced"]))])
 async def get_social_tabs(graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     return await graphs_model.getInstance().get_tabs_summary(str(current_user.id), graph_type)
 
 
 @social_routes.post(
     "/api/social/session/tab/add",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced"]))])
 async def add_social_tab(tab: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     gt = (tab or {}).get("graph_type") or graph_type or "social"
     return await graphs_model.getInstance().add_tab(str(current_user.id), gt, tab)

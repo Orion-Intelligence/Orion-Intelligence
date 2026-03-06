@@ -300,7 +300,7 @@ async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     operation_id="getStrategicReport",
     response_description=REPORT_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:strategic", bypass_licenses=["maintainer"]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general", bypass_licenses=["maintainer"]))], )
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_general_doc(doc_id, lang)

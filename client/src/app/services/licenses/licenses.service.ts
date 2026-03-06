@@ -99,21 +99,11 @@ export class LicenseService {
   }
 
   canUseCtiGraph(): boolean {
-    if (this.subscriptionService.isDemo()) {
-      return true;
-    }
-    else {
-      return this.getCombinedRule().cti_graph;
-    }
+    return this.getCombinedRule().cti_graph;
   }
 
   canUseMapping(): boolean {
-    if (this.subscriptionService.isDemo()) {
-      return true;
-    }
-    else {
-      return this.getCombinedRule().mapping;
-    }
+    return this.getCombinedRule().mapping;
   }
 
   canUseScanning(): boolean {
