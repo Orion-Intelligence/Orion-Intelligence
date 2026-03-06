@@ -73,7 +73,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       if (error instanceof HttpErrorResponse && authReq.url.includes('api/search')) {
         const detail = typeof error.error === 'object' ? String((error.error as any)?.detail || '') : '';
         if (error.status === 404 && /document not found/i.test(detail)) {
-          msg.show('Document not found', 'fail', 3000, true);
+          msg.show('Report Expired');
           return throwError(() => error);
         }
       }
@@ -96,9 +96,9 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       if (error instanceof HttpErrorResponse && error.status !== 400) {
         localStorage.clear();
         sessionStorage.clear();
-        router.navigate(['/login']);
+        router.navigate(['/login']).then();
       }
-      if (!isSilentLogout) {
+      if (isSilentLogout) {
         msg.show(message);
       }
     }

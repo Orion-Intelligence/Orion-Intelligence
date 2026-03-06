@@ -8,12 +8,13 @@ export class MessageNotificationService {
   message = computed(() => this.messageSignal());
   type = computed(() => this.typeSignal());
 
-  show(message: string, type: MessageType = 'fail', duration: number = 3000, delayed: boolean = false) {
-    const delayMs = delayed ? 5000 : 0;
-    setTimeout(() => {
-      this.messageSignal.set(message);
-      this.typeSignal.set(type);
-      setTimeout(() => this.messageSignal.set(null), duration);
-    }, delayMs);
+  show(message: string, type: MessageType = 'fail', duration: number = 3000) {
+    this.messageSignal.set(message);
+    this.typeSignal.set(type);
+    setTimeout(() => this.messageSignal.set(null), duration);
+  }
+
+  clear() {
+    this.messageSignal.set(null);
   }
 }
