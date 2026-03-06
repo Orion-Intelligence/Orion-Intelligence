@@ -1,5 +1,5 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_DATA_BREACH_SECTIONS, FLOW_DEFACEMENT_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_EXPLOIT_SECTIONS, FLOW_GENERAL_INTELLIGENCE_SECTIONS, FLOW_SOCIAL_SECTIONS, FLOW_WEB_SCANS_SECTIONS} from '../support/constants';
-import {clickSidebarSubItem, getHeatmapComponent, openCountryReportFromMap, openHomepage, openSidebarGroup} from './controllers/03-flow.controller';
+import {clickSidebarSubItem, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
   before(() => {
