@@ -41,6 +41,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
   protected readonly alert = alert;
 
   public currentResultModel: any = null;
+  public maxPages = 1;
   public isResponseLoading = signal(false);
   type: Category = Category.STRATEGIC;
   apiEndpoint: string = '';
@@ -109,6 +110,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
       .subscribe((response) => {
         if (response.success && response.data) {
           this.currentResultModel = response.data["Result"];
+          this.maxPages = Number(response.data["Page_Count"] ?? 1) || 1;
           sessionStorage.setItem(this.buildCacheKey(), JSON.stringify(this.currentResultModel));
         }
         this.isResponseLoading.set(false);

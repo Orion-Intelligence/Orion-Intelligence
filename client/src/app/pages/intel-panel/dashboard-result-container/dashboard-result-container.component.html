@@ -58,6 +58,6 @@
     (pageChange)="onPageChange($event)"
     [align]="'left'"
     [currentPage]="currentParamModel.page"
-    [maxPages]="Math.ceil(currentResultModel?.length ?? 0)">
+    [maxPages]="maxPages">
   </app-pagination>
 </div>

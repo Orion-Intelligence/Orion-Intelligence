@@ -44,7 +44,7 @@
 
   <div [ngClass]="isLightTheme() ? 'mb-[16px] mt-[10px] h-px w-full bg-[#dbe3ef]' : 'mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]'"></div>
 
-  <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">Enter IOCs</label>
+  <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white [body.light-theme_&]:text-[#172235]">Enter IOCs</label>
   <div class="relative w-full">
     <input type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
     <button type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>

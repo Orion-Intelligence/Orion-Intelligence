@@ -95,7 +95,7 @@
 
           <div class="mb-4 mt-4 h-[2px] w-full bg-[var(--color-border)]"></div>
 
-          <label class="mb-2 block text-[14px] font-normal text-white">Enter IOCs</label>
+          <label class="mb-2 block text-[14px] font-normal text-white [body.light-theme_&]:text-[#172235]">Enter IOCs</label>
           <div class="relative w-full">
             <input type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 pr-[96px] text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
             <button type="button" class="absolute right-2 top-1/2 h-[35px] w-[80px] -translate-y-1/2 rounded-[6px] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-[13px] text-white" (click)="addIoc(inputEl.value); inputEl.value=''">
