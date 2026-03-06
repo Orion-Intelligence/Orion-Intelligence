@@ -2,7 +2,7 @@
   <table class="ui-table" id="main-responsive-table">
     <thead>
       <tr>
-        <th>ID</th>
+        <th class="w-[88px] min-w-[88px]">ID</th>
         <th>Leak URL</th>
         <th>Source</th>
         <th>Group</th>
@@ -12,23 +12,23 @@
     </thead>
     <tbody *ngIf="!isLoading && (dumpData$ | async) as dumpData" @fadeInDashboardItem>
       <tr *ngFor="let item of dumpData.mDumpCallbackLinks; let i = index" [hidden]="(item.leak_url.length || 0) <= 5">
-        <td data-label="ID"><span class="block text-right">{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</span></td>
+        <td data-label="ID" class="w-[88px] min-w-[88px]"><span class="block text-left tabular-nums">{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</span></td>
         <td data-label="Leak URL" [attr.title]="item.leak_url" (click)="copyRowData(item.leak_url)" class="max-w-[480px] cursor-pointer text-[var(--color-text1)] hover:underline">
-          <span class="block w-full truncate text-right">{{ item.leak_url }}</span>
+          <span class="block w-full truncate text-left">{{ item.leak_url }}</span>
         </td>
         <td data-label="Source" [attr.title]="item.source">
-          <span class="block w-full truncate text-right">{{ item.source }}</span>
+          <span class="block w-full truncate text-left">{{ item.source }}</span>
         </td>
         <td data-label="Group" [attr.title]="item.group">
-          <span class="block w-full truncate text-right">{{ item.group }}</span>
+          <span class="block w-full truncate text-left">{{ item.group }}</span>
         </td>
         <td data-label="Parsed">
-          <span class="inline-flex w-full items-center justify-end gap-[6px]">
+          <span class="inline-flex w-full items-center justify-start gap-[6px]">
             <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="item.parsed_status ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
             <span class="truncate">{{ item.parsed_status ? 'parsed' : 'unparsed' }}</span>
           </span>
         </td>
-        <td data-label="Created"><span class="block w-full truncate text-right">{{ item.created_at | date: 'MMM yyyy' }}</span></td>
+        <td data-label="Created"><span class="block w-full truncate text-left">{{ item.created_at | date: 'MMM yyyy' }}</span></td>
       </tr>
 
       <tr *ngIf="dumpData.mDumpCallbackLinks?.length === 0">
@@ -43,7 +43,7 @@
 
     <tbody *ngIf="isLoading" @fadeInDashboardItem>
       <tr *ngFor="let _ of [1,2,3,4,5]">
-        <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
+        <td class="w-[88px] min-w-[88px]"><div class="h-[12px] w-[48px] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
         <td><div class="h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
         <td><div class="h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
         <td><div class="h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)] animate-pulse"></div></td>
