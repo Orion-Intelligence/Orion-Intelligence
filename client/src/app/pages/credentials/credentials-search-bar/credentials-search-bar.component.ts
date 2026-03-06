@@ -14,10 +14,10 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
   animations: [fadeInDashboardItem, advancedRowMotionAnimation],
 })
 export class CredentialsSearchBarComponent implements OnInit{
-  readonly MAX_ADVANCED_FILTERS = 8;
   private VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^(?:\d{6}|\d{13,19})$/ ];
   private TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
 
+  readonly MAX_ADVANCED_FILTERS = 8;
   SearchTag = StealerlogsSearchFilters;
   FILTER_LABELS = StealerlogsSearchFilterLabels;
   isAdvanced = false;

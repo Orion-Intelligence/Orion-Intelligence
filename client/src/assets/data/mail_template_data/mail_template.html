@@ -8,40 +8,51 @@
     <title>Thank You</title>
 </head>
 
-<body style="margin:0;padding:0;background:#f5f7fa">
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f5f7fa">
+<body style="margin:0;padding:0;background:#f1f5f9">
+    <div style="display:none;font-size:1px;color:#f1f5f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden">
+        Your message was received. We will get back to you within 24–48 business hours.
+    </div>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f1f5f9">
         <tr>
             <td align="center" style="padding:24px 12px">
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:820px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(17,24,39,.06)">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:700px;background:#fff;border:1px solid #dbe2ea;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.08)">
                     <tr>
-                        <td style="background:linear-gradient(90deg,#0ea5e9,#6366f1);color:#fff;padding:22px 26px;font:600 20px/1.3 Arial,Helvetica,sans-serif">
+                        <td style="background:linear-gradient(90deg,#0284c7,#2563eb);color:#fff;padding:24px 28px;font:700 22px/1.3 Arial,Helvetica,sans-serif">
                             We’ve Received Your Message</td>
                     </tr>
                     <tr>
-                        <td style="padding:28px 26px 12px 26px;font:16px/1.65 Arial,Helvetica,sans-serif;color:#0f172a">
+                        <td style="padding:24px 28px 10px 28px;font:16px/1.65 Arial,Helvetica,sans-serif;color:#0f172a">
                             Thank you for contacting appname. Your request has been successfully submitted
                             and added to our support queue. Our team reviews messages throughout the day, and you can
                             expect a reply within 24–48 business hours. For urgent issues, simply reply to this email to
                             escalate.</td>
                     </tr>
                     <tr>
-                        <td style="padding:0 26px 8px 26px">
-                            <div style="display:inline-block;background:#ecfeff;color:#0e7490;font:700 11px/1 Arial,Helvetica,sans-serif;border:1px solid #a5f3fc;border-radius:9999px;padding:6px 10px;margin:12px 0 0 0">
+                        <td style="padding:0 28px 8px 28px">
+                            <div style="display:inline-block;background:#e0f2fe;color:#075985;font:700 11px/1 Arial,Helvetica,sans-serif;border:1px solid #bae6fd;border-radius:9999px;padding:6px 10px;margin:10px 0 0 0">
                                 Submission Details</div>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:12px 26px 16px 26px">
-                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e5e7eb;border-radius:12px;background:#fafafa">
+                        <td style="padding:12px 28px 18px 28px">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc">
                                 <tr>
-                                    <td style="padding:16px 18px;font:14px/1.7 Arial,Helvetica,sans-serif;color:#111827">
-                                        <div style="margin:0 0 10px 0"><span style="display:inline-block;min-width:110px;color:#6b7280">Name</span><strong>{{username}}</strong>
+                                    <td style="padding:16px 18px 6px 18px;font:14px/1.7 Arial,Helvetica,sans-serif;color:#111827">
+                                        <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:110px;color:#64748b">Name</span><strong style="word-break:break-word">{{username}}</strong>
                                         </div>
-                                        <div style="margin:0 0 10px 0"><span style="display:inline-block;min-width:110px;color:#6b7280">Email</span><strong>{{email}}</strong>
+                                        <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:110px;color:#64748b">Email</span><strong style="word-break:break-word">{{email}}</strong>
                                         </div>
-                                        <div style="margin:0 0 10px 0"><span style="display:inline-block;min-width:110px;color:#6b7280">Subject</span><strong>{{subject}}</strong>
+                                        <div style="margin:0 0 14px 0"><span style="display:inline-block;min-width:110px;color:#64748b">Subject</span><strong style="word-break:break-word">{{subject}}</strong>
                                         </div>
-                                        <div style="margin:0 0 10px 0"><span style="display:inline-block;min-width:110px;color:#6b7280">{{lurlHeading}}</span><strong>{{url}}</strong>
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 2px 0">
+                                            <tr>
+                                                <td style="border-radius:6px;background:#1d4ed8;box-shadow:0 2px 6px rgba(37,99,235,.18)">
+                                                    <a href="{{url}}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 16px;font:700 13px/1 Arial,Helvetica,sans-serif;color:#ffffff;text-decoration:none;border-radius:6px;letter-spacing:.2px">Open Detail</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <div style="margin:8px 0 8px 0;color:#64748b;font:12px/1.6 Arial,Helvetica,sans-serif">
+                                            Use this button to review the page you shared.
                                         </div>
                                     </td>
                                 </tr>
@@ -49,16 +60,16 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:6px 26px 22px 26px;font:13px/1.7 Arial,Helvetica,sans-serif;color:#334155;background:linear-gradient(0deg,#fff,#fff)">
+                        <td style="padding:4px 28px 24px 28px;font:13px/1.7 Arial,Helvetica,sans-serif;color:#334155;background:#ffffff">
                             <span>Please keep this confirmation email for your records. If you attached files or
                                 additional context, we may reference them during our response.</span>
                         </td>
                     </tr>
                     <tr>
-                        <td style="background:#0f172a;color:#cbd5e1;padding:26px;text-align:center">
+                        <td style="background:#0f172a;color:#cbd5e1;padding:24px 28px;text-align:center">
                             <div style="font:700 14px/1 Arial,Helvetica,sans-serif;letter-spacing:.3px;margin-bottom:10px">
                                 appname</div>
-                            <div style="font:12px/1.7 Arial,Helvetica,sans-serif;margin-bottom:10px">Sydney, NSW ·<a href="https://orionintelligence.org/" style="color:#93c5fd;text-decoration:none">orionintelligence.org</a>·<a href="https://www.linkedin.com/showcase/orion-by-genesis-technologies" style="color:#93c5fd;text-decoration:none">LinkedIn</a></div>
+                            <div style="font:12px/1.7 Arial,Helvetica,sans-serif;margin-bottom:10px">Sydney, NSW · <a href="https://orionintelligence.org/" style="color:#93c5fd;text-decoration:none">orionintelligence.org</a> · <a href="https://www.linkedin.com/showcase/orion-by-genesis-technologies" style="color:#93c5fd;text-decoration:none">LinkedIn</a></div>
                             <div style="font:11px/1.6 Arial,Helvetica,sans-serif;color:#94a3b8">You’re receiving this
                                 message because you contacted us through our website. If this wasn’t you, please ignore
                                 this email.</div>
