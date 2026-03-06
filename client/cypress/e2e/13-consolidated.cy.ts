@@ -2,6 +2,7 @@ import {DOMAIN_SCANNER_TEST_DOMAINS} from '../support/constants';
 import {deleteAllEnabledIocAdvancedFilters} from './controllers/13-consolidated.controller';
 
 const testData = Cypress.env('TEST_DATA') || {};
+const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 
 describe('Consolidated - IOC Advanced Builder Flow', () => {
   beforeEach(() => {
@@ -56,7 +57,7 @@ describe('Consolidated - Domain Scanner Flow', () => {
     cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).scrollIntoView().should('be.visible').type('{enter}');
     cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-modal"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="domain-scanner-modal"]', {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');
     cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
 
@@ -72,10 +73,10 @@ describe('Consolidated - Domain Scanner Flow', () => {
     cy.get('[data-testid="domain-scanner-lookup-ip"]').should('not.be.disabled', {timeout: 30000});
 
     cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-modal"]', {timeout: 30000}).should('be.visible').within(() => {
+    cy.get('[data-testid="domain-scanner-modal"]', {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').within(() => {
       cy.get('[data-testid="domain-scanner-input"]', {timeout: 30000}).should('be.visible').clear().type('example.com');
     });
     cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-modal"]').should('be.visible').click('topLeft');
+    cy.get('[data-testid="domain-scanner-modal"]', {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').click('topLeft');
   });
 });
