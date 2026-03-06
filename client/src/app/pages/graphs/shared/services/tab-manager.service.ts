@@ -1,7 +1,8 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, NetworkNode, GraphPlatformBatch } from '../../../../shared/model/social/social-scan.models';
 import { ApiService } from '../../../../shared/services/api.service';
-import { GraphReportExportService, GraphReportExportType, GraphReportPayload } from './graph-report-export.service';
+import { ReportExportService } from '../../../../shared/services/report-export.service';
+import { GraphReportExportType, GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 @Injectable({
   providedIn: 'root',
 })
@@ -19,7 +20,7 @@ export class TabManagerService {
   editingTabId = signal<string | null>(null);
   activeTab = computed(() => this.tabs().find(t => t.id === this.activeTabId()));
 
-  constructor(private api: ApiService, private graphReportExport: GraphReportExportService) {
+  constructor(private api: ApiService, private graphReportExport: ReportExportService) {
     this.startPeriodicSave();
     this.loadState();
   }

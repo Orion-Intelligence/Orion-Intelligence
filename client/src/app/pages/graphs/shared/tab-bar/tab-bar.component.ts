@@ -3,15 +3,16 @@ import { CommonModule } from '@angular/common';
 import { TabManagerService } from '../services/tab-manager.service';
 import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
 import { ProfileComponent } from '../../../../shared/partials/profile/profile.component';
-import { ReportExportModalComponent } from '../report-export-modal/report-export-modal.component';
-import { GraphReportExportType } from '../services/graph-report-export.service';
+import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { GraphReportExportType } from '../../../../shared/model/report/report-export.model';
+import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
 import { getFirstFileFromInputEvent, readFileAsText } from '../../../../shared/utils/file-input.util';
 @Component({
   selector: 'app-tab-bar',
   templateUrl: './tab-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, AutofocusDirective, ProfileComponent, ReportExportModalComponent],
+  imports: [CommonModule, AutofocusDirective, ProfileComponent, ExportChoiceModalComponent],
 })
 export class TabBarComponent {
   private hostRef = inject(ElementRef<HTMLElement>);
@@ -19,6 +20,7 @@ export class TabBarComponent {
   isAddMenuVisible = signal(false);
   isHeaderMenuVisible = signal(false);
   isReportExportModalOpen = signal(false);
+  readonly graphExportOptions = GRAPH_REPORT_EXPORT_OPTIONS;
 
   constructor(public tabManager: TabManagerService) { }
 
@@ -63,8 +65,8 @@ export class TabBarComponent {
     this.isReportExportModalOpen.set(false);
   }
 
-  exportByType(type: GraphReportExportType) {
-    this.tabManager.exportActiveTabReport(type);
+  exportByType(type: string) {
+    this.tabManager.exportActiveTabReport(type as GraphReportExportType);
     this.closeReportExportModal();
   }
 

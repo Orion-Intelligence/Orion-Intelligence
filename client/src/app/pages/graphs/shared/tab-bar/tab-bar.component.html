@@ -66,9 +66,11 @@
   </header>
 </div>
 
-<app-report-export-modal
+<app-export-choice-modal
   [visible]="isReportExportModalOpen()"
   [title]="'Export Social Report'"
+  [subtitle]="'Choose report format:'"
+  [options]="graphExportOptions"
   (closed)="closeReportExportModal()"
-  (exportSelected)="exportByType($event)">
-</app-report-export-modal>
+  (optionSelected)="exportByType($event)">
+</app-export-choice-modal>

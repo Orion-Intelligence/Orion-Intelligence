@@ -230,12 +230,14 @@
 </div>
 </ng-container>
 
-<app-report-export-modal
+<app-export-choice-modal
   [visible]="isReportExportModalOpen"
   [title]="'Export CTI Report'"
+  [subtitle]="'Choose report format:'"
+  [options]="graphExportOptions"
   (closed)="closeReportExportModal()"
-  (exportSelected)="exportByType($event)">
-</app-report-export-modal>
+  (optionSelected)="exportByType($event)">
+</app-export-choice-modal>
 
 <ng-template #tailwindLoading>
   <div class="fixed inset-0 flex items-center justify-center bg-[var(--color-blue-850)] text-[var(--color-text4)]">

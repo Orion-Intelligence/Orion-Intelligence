@@ -12,15 +12,17 @@ import { ActivatedRoute } from '@angular/router';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
-import { ReportExportModalComponent } from '../shared/report-export-modal/report-export-modal.component';
+import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { ExtendedNode, GraphResultItem, GraphSessionState, GraphSessionTab, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
-import { GraphReportExportService, GraphReportExportType, GraphReportPayload } from '../shared/services/graph-report-export.service';
+import { ReportExportService } from '../../../shared/services/report-export.service';
+import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 @Component({
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ReportExportModalComponent, NgIf, NgClass, NgFor]
+  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgIf, NgClass, NgFor]
 })
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly maxNodeLabelLength = 28;
@@ -140,6 +142,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   isAddMenuVisible = false;
   isHeaderMenuVisible = false;
   isReportExportModalOpen = false;
+  readonly graphExportOptions = GRAPH_REPORT_EXPORT_OPTIONS;
   @ViewChild('addMenuWrapper', { static: false }) addMenuWrapper?: ElementRef<HTMLElement>;
   @ViewChild('headerMenuWrapper', { static: false }) headerMenuWrapper?: ElementRef<HTMLElement>;
 
@@ -165,7 +168,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: GraphReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
+  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -382,12 +385,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.isReportExportModalOpen = false;
   }
 
-  exportByType(type: GraphReportExportType): void {
+  exportByType(type: string): void {
+    const exportType = type as GraphReportExportType;
     const payload = this.buildGraphReportPayload();
-    if (type === 'graph_pdf') {
+    if (exportType === 'graph_pdf') {
       payload.graphImageDataUrl = this.captureExpandedGraphSnapshot();
     }
-    this.graphReportExport.exportByType(payload, type);
+    this.graphReportExport.exportByType(payload, exportType);
     this.closeReportExportModal();
   }
 

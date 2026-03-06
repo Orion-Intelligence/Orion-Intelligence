@@ -193,6 +193,8 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onToolToggle(event: Event): void {
+    this.closeMenus();
+    this.homeSearchService.closeOverlay();
     this.homeSearchService.toggleAdvancedTools(event);
   }
 

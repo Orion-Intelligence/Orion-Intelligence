@@ -5,7 +5,7 @@
     </button>
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-    <button (click)="printPage()" appTooltip="Print" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+    <button (click)="openExportChoice()" appTooltip="Export Report" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
       <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
     </button>
 
@@ -37,6 +37,15 @@
     </button>
   </div>
 </div>
+
+<app-export-choice-modal
+  [visible]="isExportChoiceOpen"
+  [title]="'Export Report'"
+  [subtitle]="'Choose the export format.'"
+  [options]="reportExportOptions"
+  (closed)="closeExportChoice()"
+  (optionSelected)="selectExport($event)">
+</app-export-choice-modal>
 
 <div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="m-[15px] mx-[32px] max-h-[40vh] overflow-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-730)] px-[19px] py-[15px] shadow-[0_4px_8px_rgba(0,0,0,0.1)] [scrollbar-width:auto] [scrollbar-color:var(--color-blue-880)_transparent] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-880)] [&::-webkit-scrollbar-thumb]:rounded-[10px]">
   <div class="flex items-start">

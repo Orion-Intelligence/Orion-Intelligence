@@ -11,16 +11,21 @@ import { HttpParams } from '@angular/common/http';
 import { AppService } from '../../../services/core/app/app.service';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { Router } from '@angular/router';
+import { ReportExportService } from '../../services/report-export.service';
+import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
+import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 @Component({
   selector: 'app-report-header',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, TooltipDirective],
+  imports: [CommonModule, NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent],
   templateUrl: './report-header.component.html',
   animations: [fadeInDashboardItem]
 })
 export class ReportHeaderComponent {
   aiSuggestStatus = false;
   aiSuggestSummary = '';
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
 
   @Input() csv_object: string | object | null | undefined = null;
   @Input() url: string | null | undefined = null;
@@ -30,7 +35,7 @@ export class ReportHeaderComponent {
 
   @Output() languageUpdated = new EventEmitter<LeakResultItem | GeneralResultItem>();
 
-  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router) {
+  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router, private reportExportService: ReportExportService) {
   }
 
   downloadCSV() {
@@ -48,8 +53,39 @@ export class ReportHeaderComponent {
     });
   }
 
+  openExportChoice() {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice() {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string) {
+    if (type === 'csv') {
+      this.downloadCSV();
+    }
+    else {
+      this.printPage();
+    }
+    this.closeExportChoice();
+  }
+
   printPage() {
-    this.helperService.printPage();
+    try {
+      const payload = this.reportExportService.buildUnifiedGraphPayload({
+        currentRouteUrl: this.route.url,
+        csvObject: this.csv_object,
+        url: this.url,
+        content: this.content,
+        lang: this.lang,
+        langDetected: this.lang_detected
+      });
+      this.reportExportService.exportByType(payload, 'graph_pdf');
+    }
+    catch {
+      this.helperService.printPage();
+    }
   }
 
   shareResult() {

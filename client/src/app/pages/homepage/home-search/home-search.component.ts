@@ -107,6 +107,8 @@ export class HomeSearchComponent implements OnInit {
   }
 
   onToolToggle(event: Event) {
+    this.closeMatchTypeDropdown();
+    this.homeSearchService.closeOverlay();
     this.homeSearchService.toggleAdvancedTools(event);
   }
 

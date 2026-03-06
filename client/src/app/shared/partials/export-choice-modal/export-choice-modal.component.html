@@ -1,0 +1,24 @@
+<div *ngIf="visible" [attr.data-testid]="overlayTestId" class="ui-graph-popup-overlay report-export-overlay export-choice-overlay fixed inset-0 z-[1200] flex items-center justify-center p-4" (click)="onOverlayClick($event)">
+  <div [attr.data-testid]="modalTestId" class="ui-graph-popup-panel ui-popup-shell w-full max-w-lg rounded-xl p-4">
+    <div class="mb-3 flex items-center justify-between">
+      <h3 class="ui-popup-title text-base font-semibold">{{ title }}</h3>
+      <button [attr.data-testid]="closeTestId" type="button" class="ui-popup-close inline-flex items-center justify-center text-[20px]" (click)="closed.emit()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <p class="mb-4 text-sm text-slate-300">{{ subtitle }}</p>
+
+    <div class="grid gap-2">
+      <button
+        *ngFor="let option of options"
+        [attr.data-testid]="option.testId || null"
+        type="button"
+        class="w-full rounded-lg border border-slate-600 bg-slate-700/60 px-3 py-3 text-left hover:border-indigo-400 hover:bg-slate-700"
+        (click)="select(option.value)">
+        <div class="text-sm font-semibold text-white">{{ option.title }}</div>
+        <div *ngIf="option.description" class="text-xs text-slate-300">{{ option.description }}</div>
+      </button>
+    </div>
+  </div>
+</div>

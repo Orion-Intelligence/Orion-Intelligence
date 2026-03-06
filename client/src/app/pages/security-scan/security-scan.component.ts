@@ -11,7 +11,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { UrlScanMeta, UrlScanThreatItem, } from '../../shared/model/security-scan/security.scan.results.model';
 import { ScannerService } from './scanner-service.service';
-import { GraphReportExportService, GraphReportPayload } from '../graphs/shared/services/graph-report-export.service';
+import { ReportExportService } from '../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../shared/model/report/report-export.model';
 @Component({
   selector: 'app-security-scan',
   standalone: true,
@@ -50,7 +51,7 @@ export class SecurityScanComponent implements OnInit {
   trackByCategory = ( _: number, c: { name: string; } ) => c.name;
   trackByItem = (i: number) => i;
 
-  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: GraphReportExportService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: ReportExportService) { }
 
   ngOnInit(): void {
     this.scanType = this.route.snapshot.data['type'];

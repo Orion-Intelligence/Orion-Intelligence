@@ -8,7 +8,8 @@ import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operato
 import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { GraphReportExportService, GraphReportPayload } from '../../graphs/shared/services/graph-report-export.service';
+import { ReportExportService } from '../../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 @Component({
   selector: 'app-dashboard-api',
   imports: [FormsModule, NgForOf, NgOptimizedImage, NgIf, EmptyResultComponent, EmptyQueryComponent, NgClass],
@@ -37,7 +38,7 @@ export class DashboardApiComponent implements OnInit {
   expandedResultIndex: number | null = null;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: GraphReportExportService) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService) { }
 
   get cardsData(): any[] {
     const r = this.responseData;
