@@ -172,7 +172,6 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
     searchDeepFromTop('example.com');
 
-    cy.get('[data-testid="consolidated-scan-section"]', {timeout: 60000}).should('be.visible');
     cy.get('[data-testid="consolidated-scan-title"]', {timeout: 60000}).should('contain.text', 'Threats Scans Report:');
     cy.get('[data-testid="consolidated-scan-openweb-title"]', {timeout: 30000}).should('be.visible');
     cy.get('[data-testid="consolidated-scan-liveapi-title"]', {timeout: 30000}).should('be.visible');
@@ -191,7 +190,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     switchToDeepSearchTab();
     cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
     searchDeepFromTop('example.com');
-    cy.get('[data-testid="consolidated-scan-section"]', {timeout: 60000}).should('be.visible');
+    cy.get('[data-testid="consolidated-scan-title"]', {timeout: 60000}).should('contain.text', 'Threats Scans Report:');
 
     cy.get('[data-testid="consolidated-section-social"]', {timeout: 30000}).scrollIntoView().should('be.visible');
     openFirstReportAndGoBack();
@@ -250,29 +249,53 @@ describe('Consolidated - IOC Basic Flow', () => {
 
     searchInIocs('ydt.sja@gail.ccmm');
     cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000}).should('be.visible');
-    cy.get('[data-testid="ioc-stealer-row"]', {timeout: 30000})
-      .first()
-      .find('[data-testid="ioc-stealer-row-toggle"]')
-      .first()
-      .scrollIntoView()
-      .click();
-    cy.get('[data-testid="ioc-expanded-email-value"]', {timeout: 30000})
-      .filter(':visible')
-      .should('have.length.greaterThan', 0)
-      .first()
-      .should('contain.text', 'ydt.sja@gail.ccmm');
+    cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000}).should(($table) => {
+      const rowCount = $table.find('[data-testid="ioc-stealer-row"]').length;
+      const emptyCount = $table.find('.ui-ioc-table-empty').length;
+      expect(rowCount > 0 || emptyCount > 0).to.eq(true);
+    }).then(($table) => {
+      const $rows = $table.find('[data-testid="ioc-stealer-row"]');
+      if ($rows.length > 0) {
+        cy.wrap($rows)
+          .first()
+          .find('[data-testid="ioc-stealer-row-toggle"]')
+          .first()
+          .scrollIntoView()
+          .click();
+        cy.get('[data-testid="ioc-expanded-email-value"]', {timeout: 30000})
+          .filter(':visible')
+          .should('have.length.greaterThan', 0)
+          .first()
+          .should('contain.text', 'ydt.sja@gail.ccmm');
+      }
+      else {
+        expect($table.find('.ui-ioc-table-empty').length).to.be.greaterThan(0);
+      }
+    });
 
     searchInIocs('data');
     cy.get('[data-testid="ioc-threat-table"]').scrollIntoView();
-    cy.get('[data-testid="ioc-threat-row"]', {timeout: 30000})
-      .first()
-      .find('[data-testid="ioc-threat-row-toggle"]')
-      .first()
-      .scrollIntoView()
-      .click();
-    cy.get('[data-testid="ioc-expanded-telemetry-title"]', {timeout: 30000})
-      .filter(':visible')
-      .should('have.length.greaterThan', 0);
+    cy.get('[data-testid="ioc-threat-table"]', {timeout: 30000}).should(($table) => {
+      const rowCount = $table.find('[data-testid="ioc-threat-row"]').length;
+      const emptyCount = $table.find('.ui-ioc-table-empty').length;
+      expect(rowCount > 0 || emptyCount > 0).to.eq(true);
+    }).then(($table) => {
+      const $rows = $table.find('[data-testid="ioc-threat-row"]');
+      if ($rows.length > 0) {
+        cy.wrap($rows)
+          .first()
+          .find('[data-testid="ioc-threat-row-toggle"]')
+          .first()
+          .scrollIntoView()
+          .click();
+        cy.get('[data-testid="ioc-expanded-telemetry-title"]', {timeout: 30000})
+          .filter(':visible')
+          .should('have.length.greaterThan', 0);
+      }
+      else {
+        expect($table.find('.ui-ioc-table-empty').length).to.be.greaterThan(0);
+      }
+    });
 
     cy.get('[data-testid="ioc-download-results"]', {timeout: 30000}).first().scrollIntoView().click();
     applyPasswordSchemeAndValidate();

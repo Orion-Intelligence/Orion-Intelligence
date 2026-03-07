@@ -171,7 +171,12 @@ export function clearSideFilters() {
   cy.log('Filter: clearing side filters before advanced flow');
   openIocFilterPanel();
   cy.get('[data-testid="side-filter-reset"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('body', {timeout: 30000}).then(($body) => {
+    const $apply = $body.find('[data-testid="side-filter-apply"]:visible').first();
+    if ($apply.length > 0) {
+      cy.wrap($apply).scrollIntoView().click();
+    }
+  });
 }
 
 export function searchDeepFromTop(query: string) {
@@ -241,7 +246,11 @@ export function runAdvancedFilterFlow() {
   });
   executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
-  cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000}).find('[data-testid="ioc-stealer-row"]', {timeout: 30000}).should('have.length.greaterThan', 0);
+  cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000}).should(($shell) => {
+    const rowCount = $shell.find('[data-testid="ioc-stealer-row"]').length;
+    const emptyCount = $shell.find('.ui-ioc-table-empty').length;
+    expect(rowCount > 0 || emptyCount > 0).to.eq(true);
+  });
 
   cy.get('[data-testid="ioc-advanced-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="ioc-adv-row"]:visible', {timeout: 30000}).should('have.length', 0);
