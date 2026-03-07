@@ -45,10 +45,12 @@ export class DashboardHeaderComponent implements OnInit {
       return;
     }
     if (this.router.url.includes('/profile/consolidated') || this.router.url.includes('/profile/alerts')) {
+      sessionStorage.setItem('skipConsolidatedBackFetchOnce', '1');
       this.router.navigate(['/dashboard/profile/consolidated/all'], { queryParams }).then();
       return;
     }
     if (this.router.url.includes('/consolidated')) {
+      sessionStorage.setItem('skipConsolidatedBackFetchOnce', '1');
       this.router.navigate(['/dashboard/consolidated/all'], { queryParams }).then();
       return;
     }
@@ -73,6 +75,9 @@ export class DashboardHeaderComponent implements OnInit {
       const currentUrlTree: UrlTree = this.router.parseUrl(this.router.url);
       const queryParams = currentUrlTree.queryParams;
       const basePath = '/dashboard/' + this.breadcrumb.slice(0, index + 1).map((crumb) => crumb.path).join('/');
+      if (basePath.includes('/consolidated/all')) {
+        sessionStorage.setItem('skipConsolidatedBackFetchOnce', '1');
+      }
       const fullPathTree: UrlTree = this.router.createUrlTree([basePath], { queryParams });
       const fullPath = this.router.serializeUrl(fullPathTree);
       this.router.navigateByUrl(fullPath).then();

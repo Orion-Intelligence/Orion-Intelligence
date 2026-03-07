@@ -348,9 +348,14 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   onToggleMenu(tab: string): void {
     this.dashboardService.consolidatedParamModel.tab = tab;
     this.query='';
+    const skipConsolidatedBackFetchOnce = sessionStorage.getItem('skipConsolidatedBackFetchOnce') === '1';
     if (tab == "Deep Search") {
       this.isGrouped = true;
       this.isIOC = false;
+      if (skipConsolidatedBackFetchOnce) {
+        sessionStorage.removeItem('skipConsolidatedBackFetchOnce');
+        return;
+      }
       this.fetchSearchResults();
     }
     else if (tab == "Ranked") {
