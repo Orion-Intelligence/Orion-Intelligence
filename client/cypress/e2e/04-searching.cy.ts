@@ -1,20 +1,4 @@
-import {clickOpenReport, clickSidebarSubItem, openExploitSubmenu, openSidebarGroup, typeDashboardSearch, typeExploitSearch, waitForSearchReady} from './controllers/04-searching.controller';
-
-function openFirstReportAndValidateNavigationOrModal() {
-  cy.location('pathname').then((pathBefore) => {
-    clickOpenReport();
-
-    cy.get('body', {timeout: 10000}).then(($body) => {
-      if ($body.find('app-json-api-viewer').length) {
-        cy.get('app-json-api-viewer').should('be.visible');
-        cy.get('body').type('{esc}');
-        return;
-      }
-
-      cy.location('pathname', {timeout: 10000}).should('not.eq', pathBefore);
-    });
-  });
-}
+import {clickOpenReport, clickSidebarSubItem, openExploitSubmenu, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearch, typeExploitSearch, waitForSearchReady} from './controllers/04-searching.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
   before(() => {

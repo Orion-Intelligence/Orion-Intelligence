@@ -9,7 +9,7 @@
 </ng-container>
 
 <ng-container *ngIf="activeTab !== 'IOCs'">
-  <form (submit)="onFormSubmit()" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }" *ngIf="!domain">
+  <form (submit)="onFormSubmit($event)" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }" *ngIf="!domain">
     <div class="flex w-full flex-wrap items-start justify-between">
       <div class="w-full">
         <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>

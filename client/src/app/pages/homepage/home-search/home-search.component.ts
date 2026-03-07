@@ -71,7 +71,9 @@ export class HomeSearchComponent implements OnInit {
     this.homeSearchService.setMatchType(type);
   }
 
-  onSearchSubmit(): void {
+  onSearchSubmit(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
     this.searchInputRef?.nativeElement.blur();
     this.dashboardService.consolidatedCallbackModel = new ConsolidatedCallbackModel();
     const queryParams = {

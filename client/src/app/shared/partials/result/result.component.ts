@@ -160,7 +160,8 @@ export class ResultComponent implements OnInit, OnChanges {
     this.init_domains();
   }
 
-  onFormSubmit() {
+  onFormSubmit(event?: Event) {
+    event?.preventDefault();
     this.scrollService.resetOnReload();
     this.dashboardService.consolidatedParamModel.page = 1;
     this.dashboardService.consolidatedParamModel.tab = "";

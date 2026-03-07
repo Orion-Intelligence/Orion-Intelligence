@@ -64,3 +64,19 @@ export function typeExploitSearch(value: string) {
 export function clickOpenReport() {
   cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
 }
+
+export function openFirstReportAndValidateNavigationOrModal() {
+  cy.location('pathname').then((pathBefore) => {
+    clickOpenReport();
+
+    cy.get('body', {timeout: 10000}).then(($body) => {
+      if ($body.find('app-json-api-viewer').length) {
+        cy.get('app-json-api-viewer').should('be.visible');
+        cy.get('body').type('{esc}');
+        return;
+      }
+
+      cy.location('pathname', {timeout: 10000}).should('not.eq', pathBefore);
+    });
+  });
+}
