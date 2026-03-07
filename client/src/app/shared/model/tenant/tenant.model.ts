@@ -25,10 +25,6 @@ export interface TenantModel {
     quotaExceeded?: boolean;
     email?: string;
 }
-export interface TenantRequest {
-    companyName: string;
-    iocs: IocCategory[];
-}
 export interface User {
     username: string;
     email: string;
@@ -37,13 +33,6 @@ export interface User {
     subscription?: boolean;
     verificationDate: string;
     licenses?: string[] | null;
-}
-export interface UserMeta {
-    username: string;
-    email: string;
-    preferences?: {
-        [key: string]: any;
-    };
 }
 export interface TenantTeamModel {
     username: string;

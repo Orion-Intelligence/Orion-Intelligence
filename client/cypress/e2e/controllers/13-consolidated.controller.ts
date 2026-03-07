@@ -64,7 +64,7 @@ export function ensureDomainScannerModalOpen() {
       cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000})
         .scrollIntoView()
         .should('be.visible')
-        .click();
+        .click({force: true});
     }
   });
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');

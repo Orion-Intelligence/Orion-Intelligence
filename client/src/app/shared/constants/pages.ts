@@ -32,28 +32,6 @@ export enum BreachSubCategory {
     DATABASES = 'Databases',
     TRACKING = 'Tracking'
 }
-export enum DiscussionSubCategory {
-    ALL = 'All',
-    war = 'Warfare',
-    CLOUD = 'Cloud',
-    ddos = 'DDoS',
-    exploit = 'Exploit',
-    hack = 'Hack',
-    credentials_common = 'Credentials Common',
-    text = 'Text',
-    phishing = 'Phishing',
-    cve = 'CVE',
-    credential = 'Credential',
-    ransomware = 'Ransomware',
-    data = 'Data',
-    malware = 'Malware',
-    xss = 'XSS',
-    c2 = 'C2',
-    leak = 'Leak',
-    rce = 'RCE',
-    fraud = 'Fraud',
-    infostealer = 'Infostealer'
-}
 export enum DefacementSubCategory {
     ALL = 'All',
     HACKED = 'Hacked',
@@ -116,7 +94,4 @@ export enum ProfileSubCategory {
     AUDITLOG = 'Auditlog',
     TENANT = 'Tenant',
     SYSTEM_SETTINGS = 'System-Settings'
-}
-export enum ExtractorSubCategory {
-    IOC_EXTRACTOR = 'IOC-Extractor'
 }

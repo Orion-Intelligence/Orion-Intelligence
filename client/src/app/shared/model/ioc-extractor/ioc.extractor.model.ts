@@ -11,12 +11,6 @@ export interface IocExtractionResult {
     progress?: number;
     step?: string;
 }
-export interface IocExtractResponse {
-    result: IocExtractionResult;
-    status?: string;
-    progress?: number;
-    step?: string;
-}
 export interface GroupedIoc {
     name: string;
     total: number;
@@ -63,10 +57,4 @@ export interface ApkScanResult {
 export type SummaryItem = {
     label: string;
     value: string;
-};
-export type UiStat = {
-    icon: string;
-    label: string;
-    value: string;
-    accent: string;
 };

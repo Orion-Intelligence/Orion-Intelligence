@@ -74,11 +74,6 @@ const DATERANGE_CREATION = {
   title: "Creation Date Range",
   tooltip: "Creation Date Range"
 };
-const DATERANGE_MESSAGE = {
-  ...BASE_DATERANGE,
-  title: "Message Date",
-  tooltip: "Message Date"
-};
 function createThreatContent() {
   return {
     title: "Content Type",
@@ -204,32 +199,6 @@ export const general_filters: FilterModel = {
     safe: SAFE_FILTER,
     daterange: DATERANGE_CREATION,
     content: createThreatContent()
-  }
-};
-export const social_filters: FilterModel = {
-  filters: {
-    network: COMMON_NETWORK,
-    content: createThreatContent(),
-    daterange: DATERANGE_CREATION,
-  }
-};
-export const chat_filters: FilterModel = {
-  filters: {
-    daterange: DATERANGE_MESSAGE,
-    content: createThreatContent()
-  }
-};
-export const exploit_filters: FilterModel = {
-  filters: {
-    daterange: DATERANGE_MESSAGE,
-    content: createThreatContent(),
-    network: COMMON_NETWORK,
-  }
-};
-export const defacement_filters: FilterModel = {
-  filters: {
-    daterange: DATERANGE_DEFAULT,
-    network: COMMON_NETWORK,
   }
 };
 export const consolidated_filters: FilterModel = {

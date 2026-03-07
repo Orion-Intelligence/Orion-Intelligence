@@ -21,17 +21,6 @@ export const LANGUAGE_MAP: Record<string, {
   pol: { iso1: 'pl', name: 'Polish' },
   ces: { iso1: 'cs', name: 'Czech' }
 };
-export const ChannelTypeKeys = [
-  'BREACH',
-  'CVE',
-  'ZERODAY',
-  'TOOLS',
-  'WARFARE',
-  'EMAIL',
-  'LOGS',
-  'CLOUD',
-  'NEWS'
-];
 export enum SortType {
     DEFAULT = 'Default',
     NEWEST_FIRST = 'Newest first',
@@ -96,12 +85,6 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Crypto-Scanner': 'Crypto Scanner',
   'IOCS': 'IOCs',
 };
-export const dashboardTooltips: Record<string, string> = {
-  'Top Teams (Leak)': 'Displays the teams most frequently involved in leak incidents.',
-  'Top Teams (Defacement)': 'Highlights teams most affected by website defacements.',
-  'Top Locations (Defacement)': 'Shows geographic regions with the highest number of defacement incidents.',
-  'Top Hashtags (Social)': 'Lists the most used hashtags related to social media activity or incidents.',
-};
 export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set([
   "tools",
   "zeroday"
@@ -112,4 +95,3 @@ export const search_filter_labels: {
 export const license_rules: {
     [key: string]: any;
 } = {};
-export const trialTime: number = 7;
