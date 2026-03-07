@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
@@ -10,7 +10,7 @@ import { HeaderComponent } from '../../../shared/partials/header/login-header/he
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, NgIf, CommonModule, HeaderComponent],
+  imports: [FormsModule, CommonModule, HeaderComponent],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {

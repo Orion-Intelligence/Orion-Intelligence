@@ -1,4 +1,4 @@
-import { NgIf, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
@@ -8,7 +8,7 @@ import { PasswordChecks, PasswordStrength, areAllPasswordRequirementsMet, create
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './reset-password.component.html',
-  imports: [FormsModule, NgIf, HeaderComponent, CommonModule]
+  imports: [FormsModule, HeaderComponent, CommonModule]
 })
 export class ResetPasswordComponent implements OnInit {
   email = '';

@@ -1,6 +1,8 @@
 <div class="w-full">
   <div #mapContainer data-testid="world-heatmap-map" class="map-container relative max-h-[80vh] min-h-[340px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:min-h-[400px] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]"></div>
 
-  <app-heatmap-report data-testid="heatmap-report" *ngIf="isOpenCountryReport" [reports]="selectedCountryReports"
+  @if (isOpenCountryReport) {
+    <app-heatmap-report data-testid="heatmap-report" [reports]="selectedCountryReports"
     (close)="closeCountryReport()"></app-heatmap-report>
+  }
 </div>

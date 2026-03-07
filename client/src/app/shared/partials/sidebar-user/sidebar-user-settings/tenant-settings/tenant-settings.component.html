@@ -20,14 +20,18 @@
           </p>
         </div>
       </div>
-      <div class="flex shrink-0 items-center gap-2 pt-1" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-        <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-700)]" *ngIf="isEditing" (click)="cancelEdit($event)">
-          Cancel
-        </button>
-        <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110" (click)="toggleEdit($event)">
-          {{ isEditing ? 'Save' : 'Edit' }}
-        </button>
-      </div>
+      @if (isMember() && !licenseService.getLicenses().includes('free')) {
+        <div class="flex shrink-0 items-center gap-2 pt-1">
+          @if (isEditing) {
+            <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-700)]" (click)="cancelEdit($event)">
+              Cancel
+            </button>
+          }
+          <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110" (click)="toggleEdit($event)">
+            {{ isEditing ? 'Save' : 'Edit' }}
+          </button>
+        </div>
+      }
     </div>
 
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
@@ -80,72 +84,89 @@
         <div class="mt-4">
           <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text6)]">Assigned Licenses</div>
           <div class="flex flex-wrap gap-2">
-            <ng-container *ngIf="userSessionData.tenant.licenses.length; else noTenantLicenses">
-              <span *ngFor="let license of userSessionData.tenant.licenses" class="inline-flex items-center rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-3 py-1 text-[11px] font-semibold text-[#b9ddff]">
-                {{ license }}
-              </span>
-            </ng-container>
-            <ng-template #noTenantLicenses>
+            @if (userSessionData.tenant.licenses.length) {
+              @for (license of userSessionData.tenant.licenses; track license) {
+                <span class="inline-flex items-center rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-3 py-1 text-[11px] font-semibold text-[#b9ddff]">
+                  {{ license }}
+                </span>
+              }
+            } @else {
               <span class="text-sm text-[var(--color-text4)]">No licenses assigned</span>
-            </ng-template>
+            }
           </div>
         </div>
       </div>
 
     </div>
 
-    <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-      <div class="ui-section-title">Contacts</div>
-      <div class="ui-section-description">Tenant communication details.</div>
-      <div class="mt-3 grid gap-3 sm:grid-cols-2">
-        <div>
-          <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-            <span>Email Address</span>
-            <img *ngIf="isEditing" src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
-          </label>
-          <input type="email" [(ngModel)]="userSessionData.user.email" name="tenant_email" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
-        </div>
-        <div>
-          <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-            <span>Phone</span>
-            <img *ngIf="isEditing" src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
-          </label>
-          <input type="text" [(ngModel)]="userSessionData.tenant.phone" name="tenant_phone" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter phone..." />
+    @if (isMember() && !licenseService.getLicenses().includes('free')) {
+      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Contacts</div>
+        <div class="ui-section-description">Tenant communication details.</div>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              <span>Email Address</span>
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
+              }
+            </label>
+            <input type="email" [(ngModel)]="userSessionData.user.email" name="tenant_email" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              <span>Phone</span>
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
+              }
+            </label>
+            <input type="text" [(ngModel)]="userSessionData.tenant.phone" name="tenant_phone" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter phone..." />
+          </div>
         </div>
       </div>
-    </div>
+    }
 
-    <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-      <div class="ui-section-title">Users</div>
-      <div class="ui-section-description">Assigned quota for tenant members.</div>
-      <div class="mt-3">
-        <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-          <span>Assigned User Quota</span>
-          <img *ngIf="isEditing" src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
-        </label>
-        <input type="text" [value]="userSessionData.tenant.assignedQuota || '0'" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
+    @if (isMember() && !licenseService.getLicenses().includes('free')) {
+      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Users</div>
+        <div class="ui-section-description">Assigned quota for tenant members.</div>
+        <div class="mt-3">
+          <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+            <span>Assigned User Quota</span>
+            @if (isEditing) {
+              <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
+            }
+          </label>
+          <input type="text" [value]="userSessionData.tenant.assignedQuota || '0'" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
+        </div>
       </div>
-    </div>
+    }
 
-    <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-      <div class="ui-section-title">Address</div>
-      <div class="ui-section-description">Country and city/state details for the tenant.</div>
-      <div class="mt-3 grid gap-3 sm:grid-cols-2">
-        <div>
-          <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-            <span>Country</span>
-            <img *ngIf="isEditing" src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
-          </label>
-          <input type="text" [(ngModel)]="userSessionData.tenant.country" name="tenant_country" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter country..." />
-        </div>
-        <div>
-          <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-            <span>City/State</span>
-            <img *ngIf="isEditing" src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
-          </label>
-          <input type="text" [(ngModel)]="userSessionData.tenant .city" name="tenant_city" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter city/state..." />
+    @if (isMember() && !licenseService.getLicenses().includes('free')) {
+      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Address</div>
+        <div class="ui-section-description">Country and city/state details for the tenant.</div>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              <span>Country</span>
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
+              }
+            </label>
+            <input type="text" [(ngModel)]="userSessionData.tenant.country" name="tenant_country" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter country..." />
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              <span>City/State</span>
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
+              }
+            </label>
+            <input type="text" [(ngModel)]="userSessionData.tenant .city" name="tenant_city" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter city/state..." />
+          </div>
         </div>
       </div>
-    </div>
+    }
   </form>
 </div>

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, WritableSignal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
@@ -8,7 +8,7 @@ import { buildSocialProfileUrl } from '../utils/profile-url.util';
   selector: 'app-follower-scan-popup',
   templateUrl: './follower-scan-popup.component.html',
   standalone: true,
-  imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective],
+  imports: [SocialIconComponent, PlatformIconBgDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowerScanPopupComponent {

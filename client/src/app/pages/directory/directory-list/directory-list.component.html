@@ -1,79 +1,87 @@
 <div class="ui-table-shell">
-  <ng-container *ngIf="(directoryData$ | async) as data; else loadingTpl">
+  @if ((directoryData$ | async); as data) {
     <table class="ui-table" id="main-responsive-table">
-      <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
-        <tr>
-          <th>ID</th>
-          <th>Service URL</th>
-          <th>Category</th>
-          <th>General</th>
-          <th>Leak</th>
-          <th>Network</th>
-          <th>Last Updated</th>
-        </tr>
-      </thead>
-      <tbody *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0" @fadeInDashboardItem>
-        <ng-container *ngFor="let item of data.mDirectoryCallbackLinks | slice:0:visibleCount; let i = index">
-          <tr *ngIf="item.url?.trim()">
-            <td data-label="ID">
-              {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
-            </td>
-            <td class="max-w-[460px] truncate" data-label="Service URL">
-              <ng-container *ngIf="item.network_type === 'telegram'; else nonTg">
-                <span class="text-[var(--color-text1)]">{{ item.name?.toLowerCase() }}</span>
-              </ng-container>
-              <ng-template #nonTg>
-                <span class="text-[var(--color-text1)]">{{ item.url }}</span>
-              </ng-template>
-            </td>
-            <td data-label="Category">
-              <div class="flex flex-wrap gap-[6px]">
-                <ng-container *ngIf="item.content_type?.length; else noCategory">
-                  <div *ngFor="let category of item.content_type | slice:0:2" class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text2)]">
-                    {{ category | titlecase }}
-                  </div>
-                </ng-container>
-                <ng-template #noCategory>
-                  <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text4)]">No categories</div>
-                </ng-template>
-              </div>
-            </td>
-            <td data-label="General Model Status">
-              <span class="inline-flex w-full items-center justify-end gap-[6px]">
-                <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
-                <span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}</span>
-              </span>
-            </td>
-            <td data-label="Leak Model Status">
-              <span class="inline-flex w-full items-center justify-end gap-[6px]">
-                <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
-                <span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}</span>
-              </span>
-            </td>
-            <td class="capitalize" data-label="Network Type">
-              {{ item.network_type ? item.network_type : 'Unknown' }}
-            </td>
-            <td data-label="Last Updated">
-              {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}
-            </td>
+      @if ((data?.mDirectoryCallbackLinks?.length || 0) > 0) {
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Service URL</th>
+            <th>Category</th>
+            <th>General</th>
+            <th>Leak</th>
+            <th>Network</th>
+            <th>Last Updated</th>
           </tr>
-        </ng-container>
-
-        <tr *ngIf="loadingMore">
-          <td colspan="7" class="py-[16px] text-center">
-            <div class="mx-auto h-[20px] w-[20px] animate-spin rounded-full border-2 border-[var(--color-border)] border-t-transparent"></div>
-          </td>
-        </tr>
-      </tbody>
+        </thead>
+      }
+      @if ((data?.mDirectoryCallbackLinks?.length || 0) > 0) {
+        <tbody @fadeInDashboardItem>
+          @for (item of data.mDirectoryCallbackLinks | slice:0:visibleCount; track item; let i = $index) {
+            @if (item.url?.trim()) {
+              <tr>
+                <td data-label="ID">
+                  {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
+                </td>
+                <td class="max-w-[460px] truncate" data-label="Service URL">
+                  @if (item.network_type === 'telegram') {
+                    <span class="text-[var(--color-text1)]">{{ item.name?.toLowerCase() }}</span>
+                  } @else {
+                    <span class="text-[var(--color-text1)]">{{ item.url }}</span>
+                  }
+                </td>
+                <td data-label="Category">
+                  <div class="flex flex-wrap gap-[6px]">
+                    @if (item.content_type?.length) {
+                      @for (category of item.content_type | slice:0:2; track category) {
+                        <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text2)]">
+                          {{ category | titlecase }}
+                        </div>
+                      }
+                    } @else {
+                      <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text4)]">No categories</div>
+                    }
+                  </div>
+                </td>
+                <td data-label="General Model Status">
+                  <span class="inline-flex w-full items-center justify-end gap-[6px]">
+                    <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
+                    <span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}</span>
+                  </span>
+                </td>
+                <td data-label="Leak Model Status">
+                  <span class="inline-flex w-full items-center justify-end gap-[6px]">
+                    <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
+                    <span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}</span>
+                  </span>
+                </td>
+                <td class="capitalize" data-label="Network Type">
+                  {{ item.network_type ? item.network_type : 'Unknown' }}
+                </td>
+                <td data-label="Last Updated">
+                  {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}
+                </td>
+              </tr>
+            }
+          }
+          @if (loadingMore) {
+            <tr>
+              <td colspan="7" class="py-[16px] text-center">
+                <div class="mx-auto h-[20px] w-[20px] animate-spin rounded-full border-2 border-[var(--color-border)] border-t-transparent"></div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      }
     </table>
-    <div *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) === 0" class="px-[20px] py-[24px]">
-      <div class="text-[16px] font-semibold text-[var(--color-text1)]">No links found!</div>
-      <div class="mt-[6px] text-[13px] text-[var(--color-text4)]">
-        We’re watching this source — new links will appear here once detected.
+    @if ((data?.mDirectoryCallbackLinks?.length || 0) === 0) {
+      <div class="px-[20px] py-[24px]">
+        <div class="text-[16px] font-semibold text-[var(--color-text1)]">No links found!</div>
+        <div class="mt-[6px] text-[13px] text-[var(--color-text4)]">
+          We’re watching this source — new links will appear here once detected.
+        </div>
       </div>
-    </div>
-  </ng-container>
-  <ng-template #loadingTpl>
+    }
+  } @else {
     <table class="ui-table">
       <thead>
         <tr>
@@ -107,7 +115,7 @@
         </tr>
       </tbody>
     </table>
-  </ng-template>
+  }
 
   <div #infiniteAnchor></div>
 </div>

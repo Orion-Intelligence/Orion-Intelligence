@@ -1,131 +1,134 @@
-<section data-testid="consolidated-scan-section" class="ui-consolidated-main mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] max-[640px]:gap-[12px] max-[640px]:p-[12px]" *ngIf="showUi && !isLoading">
-  <header class="w-full">
-    <div class="flex w-full items-center justify-between gap-[12px]">
-      <div class="min-w-0">
-        <h1 data-testid="consolidated-scan-title" class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">Threats Scans Report: {{ targetLabel }}</h1>
-
-        <div class="mt-[6px] inline-flex items-center gap-[7px] font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap max-[640px]:whitespace-normal" *ngIf="isProcessing || runningTypes.length">
-          <span class="ui-scan-pulse-dot h-[7px] w-[7px] rounded-full bg-[#26B961]"></span>
-          Collecting intelligence… {{ completedCount }}/{{ totalCount }} scans completed
+@if (showUi && !isLoading) {
+  <section data-testid="consolidated-scan-section" class="ui-consolidated-main mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] max-[640px]:gap-[12px] max-[640px]:p-[12px]">
+    <header class="w-full">
+      <div class="flex w-full items-center justify-between gap-[12px]">
+        <div class="min-w-0">
+          <h1 data-testid="consolidated-scan-title" class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">Threats Scans Report: {{ targetLabel }}</h1>
+          @if (isProcessing || runningTypes.length) {
+            <div class="mt-[6px] inline-flex items-center gap-[7px] font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap max-[640px]:whitespace-normal">
+              <span class="ui-scan-pulse-dot h-[7px] w-[7px] rounded-full bg-[#26B961]"></span>
+              Collecting intelligence… {{ completedCount }}/{{ totalCount }} scans completed
+            </div>
+          }
+          @if (!isProcessing && !runningTypes.length) {
+            <div class="mt-[6px] flex flex-wrap items-center gap-[10px]">
+              <span class="inline-flex items-center gap-[6px] rounded-[999px] border border-[var(--color-border)] px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] text-[var(--color-text1)] whitespace-nowrap">
+                <span class="h-[8px] w-[8px] rounded-full bg-current opacity-85"></span>
+                Completed
+              </span>
+              <span class="font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] opacity-90 whitespace-nowrap">
+                {{ domainResults.length }} web scans
+              </span>
+              <span class="font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] opacity-90 whitespace-nowrap">
+                {{ liveApiRows.length }} live findings
+              </span>
+            </div>
+          }
         </div>
-
-        <div class="mt-[6px] flex flex-wrap items-center gap-[10px]" *ngIf="!isProcessing && !runningTypes.length">
-          <span class="inline-flex items-center gap-[6px] rounded-[999px] border border-[var(--color-border)] px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] text-[var(--color-text1)] whitespace-nowrap">
-            <span class="h-[8px] w-[8px] rounded-full bg-current opacity-85"></span>
-            Completed
+        <button type="button" (click)="toggleCollapse()" class="inline-flex items-center gap-[6px] border-0 bg-transparent p-0 font-[Inter] text-[12px] font-medium text-[var(--color-text4)] transition-colors duration-150 hover:text-[var(--color-text5)] active:opacity-85 focus-visible:underline" [attr.aria-expanded]="!isCollapsed">
+          <span class="whitespace-nowrap leading-none">
+            {{ isCollapsed ? 'Show details' : 'Hide details' }}
           </span>
-
-          <span class="font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] opacity-90 whitespace-nowrap">
-            {{ domainResults.length }} web scans
-          </span>
-
-          <span class="font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] opacity-90 whitespace-nowrap">
-            {{ liveApiRows.length }} live findings
-          </span>
-        </div>
+          <svg class="h-[24px] w-[24px] shrink-0 text-[var(--color-text5)] transition-transform duration-150" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [ngClass]="{ 'rotate-180': !isCollapsed }">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
       </div>
-
-      <button type="button" (click)="toggleCollapse()" class="inline-flex items-center gap-[6px] border-0 bg-transparent p-0 font-[Inter] text-[12px] font-medium text-[var(--color-text4)] transition-colors duration-150 hover:text-[var(--color-text5)] active:opacity-85 focus-visible:underline" [attr.aria-expanded]="!isCollapsed">
-        <span class="whitespace-nowrap leading-none">
-          {{ isCollapsed ? 'Show details' : 'Hide details' }}
-        </span>
-
-        <svg class="h-[24px] w-[24px] shrink-0 text-[var(--color-text5)] transition-transform duration-150" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [ngClass]="{ 'rotate-180': !isCollapsed }">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-    </div>
-
-    <div *ngIf="isCollapsed">
-      <div class="mt-[12px] h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-        <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [style.width.%]="(isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100"></div>
-      </div>
-    </div>
-  </header>
-
-  <div class="flex w-full items-stretch gap-[24px] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1200px]:flex-col" *ngIf="!isCollapsed">
-    <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" *ngIf="domainResults.length" @scanAnimation>
-      <div class="flex flex-col gap-[9px] p-[12px]">
-        <h2 data-testid="consolidated-scan-openweb-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Open Web Presence Scan</h2>
-
-        <div class="flex w-full flex-col gap-[8px]">
-          <div class="flex w-full items-start justify-between rounded-[8px] max-[640px]:hidden">
-            <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Scan</div>
-            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Scanned on</div>
-            <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Risk</div>
-            <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
-          </div>
-
-          <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-2 max-[640px]:gap-x-[10px] max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]" *ngFor="let r of domainResults">
-            <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">{{ r.scanType | titlecase }} Scan</div>
-            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-auto">{{ today | date:'MMMM dd, yyyy' }}</div>
-            <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] max-[640px]:w-auto">
-              <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
-            </div>
-            <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">
-              <a data-testid="consolidated-scan-openweb-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/seo-scan', basic: '/dashboard/scanner/basic-scan', repo: '/dashboard/scanner/repository-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: '', page: 1, matchtype: 'or', domain: r.domain, scanType: r.scanType }" target="_blank" rel="noopener">
-                Details
-              </a>
-            </div>
+      @if (isCollapsed) {
+        <div>
+          <div class="mt-[12px] h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
+            <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [style.width.%]="(isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100"></div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" *ngIf="liveApiRows.length" @scanAnimation>
-      <div class="flex flex-col gap-[9px] p-[12px]">
-        <h2 data-testid="consolidated-scan-liveapi-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Active Threat Discovery/Live Api</h2>
-
-        <div class="flex w-full flex-col gap-[8px]">
-          <div class="flex w-full items-start justify-between rounded-[8px] max-[640px]:hidden">
-            <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Platform</div>
-            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Profile</div>
-            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
-          </div>
-
-          <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]" *ngFor="let row of liveApiRows.slice(0,3)">
-            <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
-              {{ (row.url || 'Details').replace('https://', '').replace('http://', '').replace('www.', '') }}
-            </div>
-            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-full">{{ row.profile }}</div>
-            <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
-              <a data-testid="consolidated-scan-liveapi-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [href]="row.url || '#'" target="_blank">
-                Detail
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <ng-container *ngIf="isProcessing || runningTypes.length">
-      <div class="ui-consolidated-sub flex-none min-w-[350px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:min-w-0" @scanAnimation>
-        <div class="flex flex-col gap-[16px] p-[20px_24px]">
-          <div class="flex w-full items-center justify-between">
-            <h2 class="font-[Inter] text-[16px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap">Threats scans</h2>
-            <div class="inline-flex items-center gap-[6px]">
-              <div class="ui-scan-pulse-dot h-[8px] w-[8px] rounded-full bg-[var(--color-text5)]"></div>
-              <div class="font-[Inter] text-[13px] font-normal leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap">Collecting intelligence…</div>
-            </div>
-          </div>
-
-          <div class="mt-[10px] flex flex-wrap gap-[8px]">
-        <span class="inline-flex items-center justify-center rounded-[999px] border border-[var(--color-border)] px-[10px] py-[4px] font-[Inter] text-[12px] font-medium leading-[12px] text-[var(--color-text4)]" *ngFor="let t of runningTypes">
-          {{ t | uppercase }}
-        </span>
-          </div>
-
-          <div class="inline-flex items-center gap-[50px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-[12px]">
-            <div class="w-[226px] max-[768px]:w-full">
-              <div class="h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-                <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [style.width.%]="mergedProgress || 6"></div>
+      }
+    </header>
+    @if (!isCollapsed) {
+      <div class="flex w-full items-stretch gap-[24px] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1200px]:flex-col">
+        @if (domainResults.length) {
+          <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" @scanAnimation>
+            <div class="flex flex-col gap-[9px] p-[12px]">
+              <h2 data-testid="consolidated-scan-openweb-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Open Web Presence Scan</h2>
+              <div class="flex w-full flex-col gap-[8px]">
+                <div class="flex w-full items-start justify-between rounded-[8px] max-[640px]:hidden">
+                  <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Scan</div>
+                  <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Scanned on</div>
+                  <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Risk</div>
+                  <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
+                </div>
+                @for (r of domainResults; track r) {
+                  <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-2 max-[640px]:gap-x-[10px] max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
+                    <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">{{ r.scanType | titlecase }} Scan</div>
+                    <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-auto">{{ today | date:'MMMM dd, yyyy' }}</div>
+                    <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] max-[640px]:w-auto">
+                      <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
+                    </div>
+                    <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">
+                      <a data-testid="consolidated-scan-openweb-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/seo-scan', basic: '/dashboard/scanner/basic-scan', repo: '/dashboard/scanner/repository-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: '', page: 1, matchtype: 'or', domain: r.domain, scanType: r.scanType }" target="_blank" rel="noopener">
+                        Details
+                      </a>
+                    </div>
+                  </div>
+                }
               </div>
             </div>
-            <div class="font-[Inter] text-[14px] font-normal leading-[18.2px] text-[var(--color-text4)] whitespace-nowrap">{{ completedCount }}/{{ totalCount }} scans completed</div>
           </div>
-        </div>
+        }
+        @if (liveApiRows.length) {
+          <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" @scanAnimation>
+            <div class="flex flex-col gap-[9px] p-[12px]">
+              <h2 data-testid="consolidated-scan-liveapi-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Active Threat Discovery/Live Api</h2>
+              <div class="flex w-full flex-col gap-[8px]">
+                <div class="flex w-full items-start justify-between rounded-[8px] max-[640px]:hidden">
+                  <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Platform</div>
+                  <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Profile</div>
+                  <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
+                </div>
+                @for (row of liveApiRows.slice(0,3); track row) {
+                  <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
+                    <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
+                      {{ (row.url || 'Details').replace('https://', '').replace('http://', '').replace('www.', '') }}
+                    </div>
+                    <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-full">{{ row.profile }}</div>
+                    <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
+                      <a data-testid="consolidated-scan-liveapi-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [href]="row.url || '#'" target="_blank">
+                        Detail
+                      </a>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+        @if (isProcessing || runningTypes.length) {
+          <div class="ui-consolidated-sub flex-none min-w-[350px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:min-w-0" @scanAnimation>
+            <div class="flex flex-col gap-[16px] p-[20px_24px]">
+              <div class="flex w-full items-center justify-between">
+                <h2 class="font-[Inter] text-[16px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap">Threats scans</h2>
+                <div class="inline-flex items-center gap-[6px]">
+                  <div class="ui-scan-pulse-dot h-[8px] w-[8px] rounded-full bg-[var(--color-text5)]"></div>
+                  <div class="font-[Inter] text-[13px] font-normal leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap">Collecting intelligence…</div>
+                </div>
+              </div>
+              <div class="mt-[10px] flex flex-wrap gap-[8px]">
+                @for (t of runningTypes; track t) {
+                  <span class="inline-flex items-center justify-center rounded-[999px] border border-[var(--color-border)] px-[10px] py-[4px] font-[Inter] text-[12px] font-medium leading-[12px] text-[var(--color-text4)]">
+                    {{ t | uppercase }}
+                  </span>
+                }
+              </div>
+              <div class="inline-flex items-center gap-[50px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-[12px]">
+                <div class="w-[226px] max-[768px]:w-full">
+                  <div class="h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
+                    <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [style.width.%]="mergedProgress || 6"></div>
+                  </div>
+                </div>
+                <div class="font-[Inter] text-[14px] font-normal leading-[18.2px] text-[var(--color-text4)] whitespace-nowrap">{{ completedCount }}/{{ totalCount }} scans completed</div>
+              </div>
+            </div>
+          </div>
+        }
       </div>
-    </ng-container>
-
-  </div>
-</section>
+    }
+  </section>
+}

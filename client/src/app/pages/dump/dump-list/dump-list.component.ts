@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AsyncPipe, DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { map, Observable, tap } from 'rxjs';
 import { DumpService } from '../../../services/dump/dump.service';
 import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
@@ -10,7 +10,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   standalone: true,
   templateUrl: './dump-list.component.html',
   animations: [fadeInDashboardItem],
-  imports: [NgForOf, AsyncPipe, DatePipe, NgIf, NgClass]
+  imports: [AsyncPipe, DatePipe, NgClass]
 })
 export class DumpListComponent implements OnInit {
   dumpData$: Observable<DumpCallbackModel | null>;

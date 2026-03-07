@@ -13,56 +13,65 @@
       </div>
     </div>
 
-    <div *ngIf="isExpanded" class="mt-4">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead *ngIf="loading || filteredItems.length>0" class="text-[var(--color-text3)]">
-            <tr>
-              <th class="px-3 py-2 font-semibold">ID</th>
-              <th class="px-3 py-2 font-semibold">Mapping To</th>
-              <th class="px-3 py-2 font-semibold">Mapping On</th>
-              <th class="px-3 py-2 font-semibold">Mapping Value</th>
-            </tr>
-          </thead>
-          <tbody *ngIf="filteredItems.length>0" @fadeInDashboardItem>
-            <ng-container *ngFor="let item of filteredItems; let i = index">
-              <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer border-t border-[var(--color-divider)] hover:bg-[var(--color-blue-720)]">
-                <td class="px-3 py-2 text-[var(--color-text1)]">{{ (i + 1) }}</td>
-                <td class="px-3 py-2 text-[var(--color-text1)]">{{ extractId(item.edge._id) }}</td>
-                <td class="px-3 py-2">
-                  <div class="inline-flex max-w-[240px] truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs text-[var(--color-text3)]">
-                    {{ extractProperty(item.edge._id, "key") }}
-                  </div>
-                </td>
-                <td class="px-3 py-2">
-                  <div class="inline-flex max-w-[240px] truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs text-[var(--color-text3)]">
-                    {{ extractProperty(item.edge._id, "value") }}
-                  </div>
-                </td>
-              </tr>
-            </ng-container>
-          </tbody>
-          <tbody *ngIf="loading" @fadeInDashboardItem>
-            <tr class="border-t border-[var(--color-divider)]">
-              <td class="px-3 py-2"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-              <td class="px-3 py-2"><div class="h-3 w-40 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-            </tr>
-            <tr class="border-t border-[var(--color-divider)]">
-              <td class="px-3 py-2"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-              <td class="px-3 py-2"><div class="h-3 w-40 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-              <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
-            </tr>
-          </tbody>
-        </table>
+    @if (isExpanded) {
+      <div class="mt-4">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            @if (loading || filteredItems.length>0) {
+              <thead class="text-[var(--color-text3)]">
+                <tr>
+                  <th class="px-3 py-2 font-semibold">ID</th>
+                  <th class="px-3 py-2 font-semibold">Mapping To</th>
+                  <th class="px-3 py-2 font-semibold">Mapping On</th>
+                  <th class="px-3 py-2 font-semibold">Mapping Value</th>
+                </tr>
+              </thead>
+            }
+            @if (filteredItems.length>0) {
+              <tbody @fadeInDashboardItem>
+                @for (item of filteredItems; track item; let i = $index) {
+                  <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer border-t border-[var(--color-divider)] hover:bg-[var(--color-blue-720)]">
+                    <td class="px-3 py-2 text-[var(--color-text1)]">{{ (i + 1) }}</td>
+                    <td class="px-3 py-2 text-[var(--color-text1)]">{{ extractId(item.edge._id) }}</td>
+                    <td class="px-3 py-2">
+                      <div class="inline-flex max-w-[240px] truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs text-[var(--color-text3)]">
+                        {{ extractProperty(item.edge._id, "key") }}
+                      </div>
+                    </td>
+                    <td class="px-3 py-2">
+                      <div class="inline-flex max-w-[240px] truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs text-[var(--color-text3)]">
+                        {{ extractProperty(item.edge._id, "value") }}
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            }
+            @if (loading) {
+              <tbody @fadeInDashboardItem>
+                <tr class="border-t border-[var(--color-divider)]">
+                  <td class="px-3 py-2"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-3 py-2"><div class="h-3 w-40 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                </tr>
+                <tr class="border-t border-[var(--color-divider)]">
+                  <td class="px-3 py-2"><div class="h-3 w-16 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-3 py-2"><div class="h-3 w-40 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-3 py-2"><div class="h-3 w-24 animate-pulse rounded bg-[var(--color-blue-760)]"></div></td>
+                </tr>
+              </tbody>
+            }
+          </table>
+        </div>
+        @if (!loading && filteredItems.length==0) {
+          <div class="mt-4">
+            <div class="text-sm font-semibold text-[var(--color-text1)]">No structured records found!</div>
+            <div class="mt-1 text-xs text-[var(--color-text4)]">We’re watching this source — new breach or tracking data will appear here once detected.</div>
+          </div>
+        }
       </div>
-
-      <div *ngIf="!loading && filteredItems.length==0" class="mt-4">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">No structured records found!</div>
-        <div class="mt-1 text-xs text-[var(--color-text4)]">We’re watching this source — new breach or tracking data will appear here once detected.</div>
-      </div>
-    </div>
+    }
   </div>
 </ng-container>

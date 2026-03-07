@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 @Component({
   selector: 'app-result-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './result-list.component.html',
   animations: [fadeInDashboardItem]
 })

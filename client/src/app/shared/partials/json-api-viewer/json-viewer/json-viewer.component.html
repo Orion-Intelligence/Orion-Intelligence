@@ -1,60 +1,73 @@
-<div *ngIf="showRootBraces" class="font-mono text-[13px] text-[var(--color-text4)]">{{ '{' }}</div>
+@if (showRootBraces) {
+  <div class="font-mono text-[13px] text-[var(--color-text4)]">{{ '{' }}</div>
+}
 
 <div class="relative" [class.pl-4]="level > 0" [style.marginLeft.px]="depthMargin(level)">
   <span class="pointer-events-none absolute bottom-0 left-[3px] top-0 border-l-[1.5px] border-[var(--color-divider)]"></span>
-<ul class="list-none pl-0 font-mono text-[13px] leading-[1.55]">
-  <ng-container *ngFor="let key of keys(json); let last = last">
-    <li class="relative py-[1px]" [class.mb-[3px]]="!last">
-      <ng-container *ngIf="isCollapsible(json[key]); else primitiveRow">
-        <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
-          <span *ngIf="level > 0" class="pointer-events-none absolute left-[-11px] top-1/2 w-[20px] -translate-y-1/2 border-t-[1.5px] border-[var(--color-divider)]"></span>
-          <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
-            <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-[14px] w-[14px] transition ui-action-icon" [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
-          </span>
-          <span class="min-w-0 truncate text-[14px] text-[var(--color-blue-640)]">"{{ key }}"</span>
-          <span class="mx-[2px] text-[var(--color-text4)]">:</span>
-          <ng-container *ngIf="!isExpanded(pathKey(parentPath, key)); else expandedToken">
-            <span class="text-[var(--color-text4)]">{{ openToken(json[key]) }}</span>
-            <span class="mx-1 text-[12px] text-[var(--color-text4)] opacity-80">{{ collapsedSummary(json[key]) }}</span>
-            <span class="text-[var(--color-text4)]">{{ closeToken(json[key]) }}<span *ngIf="!last">,</span></span>
-          </ng-container>
-          <ng-template #expandedToken>
-            <span class="text-[var(--color-text4)]">{{ openToken(json[key]) }}</span>
-          </ng-template>
-        </div>
-
-        <div *ngIf="isExpanded(pathKey(parentPath, key))" class="ml-5 mt-[2px] border-l-[1.5px] border-[var(--color-divider)] pl-3 pt-[1px]">
-          <app-json-viewer
-            [json]="json[key]"
-            [level]="level + 1"
-            [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
-          <div class="px-2 py-[2px] text-[var(--color-text4)]">
-            {{ closeToken(json[key]) }}<span *ngIf="!last">,</span>
+  <ul class="list-none pl-0 font-mono text-[13px] leading-[1.55]">
+    @for (key of keys(json); track key; let last = $last) {
+      <li class="relative py-[1px]" [class.mb-[3px]]="!last">
+        @if (isCollapsible(json[key])) {
+          <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
+            @if (level > 0) {
+              <span class="pointer-events-none absolute left-[-11px] top-1/2 w-[20px] -translate-y-1/2 border-t-[1.5px] border-[var(--color-divider)]"></span>
+            }
+            <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+              <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-[14px] w-[14px] transition ui-action-icon" [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
+            </span>
+            <span class="min-w-0 truncate text-[14px] text-[var(--color-blue-640)]">"{{ key }}"</span>
+            <span class="mx-[2px] text-[var(--color-text4)]">:</span>
+            @if (!isExpanded(pathKey(parentPath, key))) {
+              <span class="text-[var(--color-text4)]">{{ openToken(json[key]) }}</span>
+              <span class="mx-1 text-[12px] text-[var(--color-text4)] opacity-80">{{ collapsedSummary(json[key]) }}</span>
+              <span class="text-[var(--color-text4)]">{{ closeToken(json[key]) }}@if (!last) {
+                <span>,</span>
+              }</span>
+            } @else {
+              <span class="text-[var(--color-text4)]">{{ openToken(json[key]) }}</span>
+            }
           </div>
-        </div>
-      </ng-container>
-
-      <ng-template #primitiveRow>
+          @if (isExpanded(pathKey(parentPath, key))) {
+            <div class="ml-5 mt-[2px] border-l-[1.5px] border-[var(--color-divider)] pl-3 pt-[1px]">
+              <app-json-viewer
+                [json]="json[key]"
+                [level]="level + 1"
+              [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
+              <div class="px-2 py-[2px] text-[var(--color-text4)]">
+                {{ closeToken(json[key]) }}@if (!last) {
+                <span>,</span>
+              }
+            </div>
+          </div>
+        }
+      } @else {
         <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-start gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
-          <span *ngIf="level > 0" class="pointer-events-none absolute left-[-11px] top-[14px] w-[20px] border-t-[1.5px] border-[var(--color-divider)]"></span>
+          @if (level > 0) {
+            <span class="pointer-events-none absolute left-[-11px] top-[14px] w-[20px] border-t-[1.5px] border-[var(--color-divider)]"></span>
+          }
           <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
             <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-[14px] w-[14px] transition ui-action-icon" [class.-rotate-90]="!isExpanded(pathKey(parentPath, key))" />
           </span>
           <span class="min-w-0 truncate text-[14px] text-[var(--color-blue-640)]">"{{ key }}"</span>
           <span class="mx-[2px] text-[var(--color-text4)]">:</span>
-          <ng-container *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedPrimitive">
+          @if (isExpanded(pathKey(parentPath, key))) {
             <span class="break-all" [ngClass]="primitiveClass(json[key])">{{ formatPrimitive(json[key]) }}</span>
-            <span *ngIf="!last" class="text-[var(--color-text4)]">,</span>
-          </ng-container>
-          <ng-template #collapsedPrimitive>
+            @if (!last) {
+              <span class="text-[var(--color-text4)]">,</span>
+            }
+          } @else {
             <span class="text-[12px] text-[var(--color-text4)] opacity-85">{{ primitiveSummary(json[key]) }}</span>
-            <span *ngIf="!last" class="text-[var(--color-text4)]">,</span>
-          </ng-template>
+            @if (!last) {
+              <span class="text-[var(--color-text4)]">,</span>
+            }
+          }
         </div>
-      </ng-template>
+      }
     </li>
-  </ng-container>
+  }
 </ul>
 </div>
 
-<div *ngIf="showRootBraces" class="font-mono text-[13px] text-[var(--color-text4)]">{{ '}' }}</div>
+@if (showRootBraces) {
+  <div class="font-mono text-[13px] text-[var(--color-text4)]">{{ '}' }}</div>
+}

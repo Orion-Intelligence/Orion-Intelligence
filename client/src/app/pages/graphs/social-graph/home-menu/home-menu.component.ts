@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, signal, inject, effect, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Job, CustomEntity } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
@@ -8,7 +8,7 @@ import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.
   selector: 'app-home-menu',
   templateUrl: './home-menu.component.html',
   standalone: true,
-  imports: [CommonModule, SidebarShellComponent],
+  imports: [SidebarShellComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent implements OnDestroy {

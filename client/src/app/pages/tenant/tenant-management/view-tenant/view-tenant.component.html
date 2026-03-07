@@ -12,7 +12,7 @@
       <div class="my-5 h-px w-full bg-[var(--color-divider)]"></div>
 
       <div class="m-0 overflow-visible md:overflow-hidden rounded-[8px] border !border-[var(--tenant-line)] bg-[var(--color-blue-830)] shadow-[0_8px_24px_-18px_rgba(0,0,0,0.55)]">
-        <ng-container *ngIf="!isLoading; else loadingTpl">
+        @if (!isLoading) {
           <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
             <table class="w-full min-w-[1220px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
               <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
@@ -28,269 +28,272 @@
                   <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
                 </tr>
               </thead>
-
-              <tbody *ngIf="(tenants?.length || 0) > 0" @fadeInDashboardItem>
-                <ng-container *ngFor="let tenant of tenants; let i = index">
-                  <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="tenant._expanded ? '!border-t-0' : ''">
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span class="inline-block max-w-full truncate font-medium text-[var(--color-text1)]">
-                        {{ tenant.companyName || tenant.name || '-' }}
-                      </span>
-                    </td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.country || '-' }}</td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
-                        {{ tenant.subscription ? 'Paid' : 'Free' }}
-                      </span>
-                    </td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
-                        {{ tenant.verified ? 'Verified' : 'Not Verified' }}
-                      </span>
-                    </td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.user_quota || 0 }}</td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
-                        {{ getStatusLabel(tenant.status) }}
-                      </span>
-                    </td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                      <span class="mr-0 block max-w-[290px] truncate rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]" [attr.title]="getTenantLicensesLabel(tenant)">
-                        {{ getTenantLicensesLabel(tenant) }}
-                      </span>
-                    </td>
-                    <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                      <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="tenant._expanded = !tenant._expanded">
-                        <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr *ngIf="tenant._expanded" class="!border-t-0 bg-[var(--tenant-row-bg)]">
-                    <td colspan="9" class="px-4 py-4">
-                      <div class="space-y-4">
-                        <div data-testid="tenant-edit-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
-                          <div class="text-[19px] font-bold text-[var(--color-text1)]">Tenant Information</div>
-                          <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Company Name</div>
-                              <div class="text-sm font-medium text-[var(--color-text1)]">{{ tenant.companyName || tenant.company || '-' }}</div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Mail</div>
-                              <div class="break-all text-sm text-[var(--color-text1)]">{{ tenant.email || '-' }}</div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Phone</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ tenant.phone || '-' }}</div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Country</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ tenant.country || '-' }}</div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">City</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ tenant.city || '-' }}</div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Postal Code</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ tenant.postal_code || '-' }}</div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</div>
-                              <div>
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
-                                  {{ tenant.subscription ? 'Paid' : 'Free' }}
-                                </span>
-                              </div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</div>
-                              <div>
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
-                                  {{ tenant.verified ? 'Verified' : 'Not Verified' }}
-                                </span>
-                              </div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ tenant.user_quota || 0 }}</div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</div>
-                              <div>
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
-                                  {{ getStatusLabel(tenant.status) }}
-                                </span>
-                              </div>
-                            </div>
-                            <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                              <div *ngIf="tenant.licenses?.length; else noLicenses" class="flex flex-wrap gap-1.5">
-                                <ng-container *ngFor="let license of tenant.licenses">
-                                  <span *ngIf="licenseService.getLicenseLabel(license) !== 'Maintainer'" class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]">
-                                    {{ licenseService.getLicenseLabel(license) }}
-                                  </span>
-                                </ng-container>
-                              </div>
-                              <ng-template #noLicenses>
-                                <div class="text-xs text-[var(--color-text4)]">No licenses assigned.</div>
-                              </ng-template>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
-                          <div class="text-[19px] font-bold text-[var(--color-text1)]">Edit Tenant</div>
-                          <div class="mt-2 space-y-3 pt-1">
-                            <div>
-                              <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</label>
-                              <button data-testid="tenant-verified-toggle" type="button" class="mt-2 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)" (click)="tenant.verified = !tenant.verified">
-                                {{ tenant.verified ? 'Verified' : 'Not Verified' }}
-                              </button>
-                            </div>
-
-                            <div>
-                              <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</label>
-                              <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
-                            </div>
-
-                            <div>
-                              <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                              <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.status">
-                                <option [ngValue]="TenantStatus.ACTIVE">Active</option>
-                                <option [ngValue]="TenantStatus.DISABLE">Disable</option>
-                              </select>
-                            </div>
-
-                            <div>
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                              <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
-                                <ng-container *ngFor="let license of licenseList">
-                                  <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [attr.data-testid]="'tenant-license-' + license" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
-                                    <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
-                                    <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
-                                      {{ licenseService.getLicenseLabel(license) }}
+              @if ((tenants?.length || 0) > 0) {
+                <tbody @fadeInDashboardItem>
+                  @for (tenant of tenants; track tenant; let i = $index) {
+                    <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="tenant._expanded ? '!border-t-0' : ''">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                        <span class="inline-block max-w-full truncate font-medium text-[var(--color-text1)]">
+                          {{ tenant.companyName || tenant.name || '-' }}
+                        </span>
+                      </td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.country || '-' }}</td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                        <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
+                          {{ tenant.subscription ? 'Paid' : 'Free' }}
+                        </span>
+                      </td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                        <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
+                          {{ tenant.verified ? 'Verified' : 'Not Verified' }}
+                        </span>
+                      </td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.user_quota || 0 }}</td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                        <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
+                          {{ getStatusLabel(tenant.status) }}
+                        </span>
+                      </td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                        <span class="mr-0 block max-w-[290px] truncate rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]" [attr.title]="getTenantLicensesLabel(tenant)">
+                          {{ getTenantLicensesLabel(tenant) }}
+                        </span>
+                      </td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                        <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="tenant._expanded = !tenant._expanded">
+                          <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
+                        </button>
+                      </td>
+                    </tr>
+                    @if (tenant._expanded) {
+                      <tr class="!border-t-0 bg-[var(--tenant-row-bg)]">
+                        <td colspan="9" class="px-4 py-4">
+                          <div class="space-y-4">
+                            <div data-testid="tenant-edit-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
+                              <div class="text-[19px] font-bold text-[var(--color-text1)]">Tenant Information</div>
+                              <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Company Name</div>
+                                  <div class="text-sm font-medium text-[var(--color-text1)]">{{ tenant.companyName || tenant.company || '-' }}</div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Mail</div>
+                                  <div class="break-all text-sm text-[var(--color-text1)]">{{ tenant.email || '-' }}</div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Phone</div>
+                                  <div class="text-sm text-[var(--color-text1)]">{{ tenant.phone || '-' }}</div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Country</div>
+                                  <div class="text-sm text-[var(--color-text1)]">{{ tenant.country || '-' }}</div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">City</div>
+                                  <div class="text-sm text-[var(--color-text1)]">{{ tenant.city || '-' }}</div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Postal Code</div>
+                                  <div class="text-sm text-[var(--color-text1)]">{{ tenant.postal_code || '-' }}</div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</div>
+                                  <div>
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
+                                      {{ tenant.subscription ? 'Paid' : 'Free' }}
                                     </span>
                                   </div>
-                                </ng-container>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</div>
+                                  <div>
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
+                                      {{ tenant.verified ? 'Verified' : 'Not Verified' }}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</div>
+                                  <div class="text-sm text-[var(--color-text1)]">{{ tenant.user_quota || 0 }}</div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</div>
+                                  <div>
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
+                                      {{ getStatusLabel(tenant.status) }}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                                  @if (tenant.licenses?.length) {
+                                    <div class="flex flex-wrap gap-1.5">
+                                      @for (license of tenant.licenses; track license) {
+                                        @if (licenseService.getLicenseLabel(license) !== 'Maintainer') {
+                                          <span class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]">
+                                            {{ licenseService.getLicenseLabel(license) }}
+                                          </span>
+                                        }
+                                      }
+                                    </div>
+                                  } @else {
+                                    <div class="text-xs text-[var(--color-text4)]">No licenses assigned.</div>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
+                              <div class="text-[19px] font-bold text-[var(--color-text1)]">Edit Tenant</div>
+                              <div class="mt-2 space-y-3 pt-1">
+                                <div>
+                                  <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</label>
+                                  <button data-testid="tenant-verified-toggle" type="button" class="mt-2 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)" (click)="tenant.verified = !tenant.verified">
+                                    {{ tenant.verified ? 'Verified' : 'Not Verified' }}
+                                  </button>
+                                </div>
+                                <div>
+                                  <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</label>
+                                  <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
+                                </div>
+                                <div>
+                                  <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
+                                  <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.status">
+                                    <option [ngValue]="TenantStatus.ACTIVE">Active</option>
+                                    <option [ngValue]="TenantStatus.DISABLE">Disable</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                                  <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
+                                    @for (license of licenseList; track license) {
+                                      @if (licenseService.getLicenseLabel(license) !== 'maintainer') {
+                                        <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [attr.data-testid]="'tenant-license-' + license" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
+                                          <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
+                                          <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
+                                            {{ licenseService.getLicenseLabel(license) }}
+                                          </span>
+                                        </div>
+                                      }
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="mt-3 flex justify-end gap-2">
+                                <button data-testid="tenant-save-changes" type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">
+                                  Save changes
+                                </button>
                               </div>
                             </div>
                           </div>
-                          <div class="mt-3 flex justify-end gap-2">
-                              <button data-testid="tenant-save-changes" type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">
-                                Save changes
-                              </button>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              }
+              @if ((tenants?.length || 0) === 0) {
+                <tbody>
+                  <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
+                    <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="9">No tenants available.</td>
                   </tr>
-                </ng-container>
-              </tbody>
-
-              <tbody *ngIf="(tenants?.length || 0) === 0">
-                <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
-                  <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="9">No tenants available.</td>
-                </tr>
-              </tbody>
+                </tbody>
+              }
             </table>
           </div>
-
           <div class="space-y-3 p-3 md:hidden" @fadeInDashboardItem>
-            <ng-container *ngIf="(tenants?.length || 0) > 0; else noTenantsMobile">
-              <div *ngFor="let tenant of tenants; let i = index" class="overflow-visible md:overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
-                <div class="flex items-center justify-between border-b border-[var(--tenant-line)] px-3 py-2.5">
-                  <div class="min-w-0">
-                    <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ tenant.companyName || tenant.name || '-' }}</div>
-                    <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ tenant.country || '-' }}</div>
-                  </div>
-                  <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" (click)="tenant._expanded = !tenant._expanded">
-                    <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
-                  </button>
-                </div>
-
-                <div class="space-y-2 px-3 py-2.5 text-sm text-[var(--color-text2)]">
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</span>
-                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">{{ tenant.subscription ? 'Paid' : 'Free' }}</span>
-                  </div>
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</span>
-                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">{{ tenant.verified ? 'Verified' : 'Not Verified' }}</span>
-                  </div>
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</span>
-                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">{{ getStatusLabel(tenant.status) }}</span>
-                  </div>
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</span>
-                    <span>{{ tenant.user_quota || 0 }}</span>
-                  </div>
-                  <div class="pt-1">
-                    <div class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                    <div class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1.5 text-xs">{{ getTenantLicensesLabel(tenant) }}</div>
-                  </div>
-                </div>
-
-                <div *ngIf="tenant._expanded" class="border-t border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] px-3 py-3">
-                  <div class="space-y-3">
-                    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
-                      <div class="text-base font-bold text-[var(--color-text1)]">Tenant Information</div>
-                      <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
-                        <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
-                          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Company</div>
-                          <div class="text-sm text-[var(--color-text1)]">{{ tenant.companyName || tenant.company || '-' }}</div>
-                        </div>
-                        <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
-                          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</div>
-                          <div class="break-all text-sm text-[var(--color-text1)]">{{ tenant.email || '-' }}</div>
-                        </div>
-                        <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
-                          <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Phone</div>
-                          <div class="text-sm text-[var(--color-text1)]">{{ tenant.phone || '-' }}</div>
-                        </div>
-                      </div>
+            @if ((tenants?.length || 0) > 0) {
+              @for (tenant of tenants; track tenant; let i = $index) {
+                <div class="overflow-visible md:overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
+                  <div class="flex items-center justify-between border-b border-[var(--tenant-line)] px-3 py-2.5">
+                    <div class="min-w-0">
+                      <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ tenant.companyName || tenant.name || '-' }}</div>
+                      <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ tenant.country || '-' }}</div>
                     </div>
-
-                    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
-                      <div class="text-base font-bold text-[var(--color-text1)]">Edit Tenant</div>
-                      <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</label>
-                      <input type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
-                      <label class="mt-3 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                      <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.status">
-                        <option [ngValue]="TenantStatus.ACTIVE">Active</option>
-                        <option [ngValue]="TenantStatus.DISABLE">Disable</option>
-                      </select>
-                      <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                      <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
-                        <ng-container *ngFor="let license of licenseList">
-                          <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" *ngIf="licenseService.getLicenseLabel(license) !== 'maintainer'" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
-                            <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
-                            <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
-                              {{ licenseService.getLicenseLabel(license) }}
-                            </span>
+                    <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" (click)="tenant._expanded = !tenant._expanded">
+                      <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
+                    </button>
+                  </div>
+                  <div class="space-y-2 px-3 py-2.5 text-sm text-[var(--color-text2)]">
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</span>
+                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">{{ tenant.subscription ? 'Paid' : 'Free' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Verified</span>
+                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">{{ tenant.verified ? 'Verified' : 'Not Verified' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</span>
+                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">{{ getStatusLabel(tenant.status) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</span>
+                      <span>{{ tenant.user_quota || 0 }}</span>
+                    </div>
+                    <div class="pt-1">
+                      <div class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                      <div class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1.5 text-xs">{{ getTenantLicensesLabel(tenant) }}</div>
+                    </div>
+                  </div>
+                  @if (tenant._expanded) {
+                    <div class="border-t border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] px-3 py-3">
+                      <div class="space-y-3">
+                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
+                          <div class="text-base font-bold text-[var(--color-text1)]">Tenant Information</div>
+                          <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
+                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Company</div>
+                              <div class="text-sm text-[var(--color-text1)]">{{ tenant.companyName || tenant.company || '-' }}</div>
+                            </div>
+                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</div>
+                              <div class="break-all text-sm text-[var(--color-text1)]">{{ tenant.email || '-' }}</div>
+                            </div>
+                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Phone</div>
+                              <div class="text-sm text-[var(--color-text1)]">{{ tenant.phone || '-' }}</div>
+                            </div>
                           </div>
-                        </ng-container>
-                      </div>
-                      <div class="mt-3 flex justify-end">
-                        <button type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">Save changes</button>
+                        </div>
+                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
+                          <div class="text-base font-bold text-[var(--color-text1)]">Edit Tenant</div>
+                          <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</label>
+                          <input type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
+                          <label class="mt-3 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
+                          <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.status">
+                            <option [ngValue]="TenantStatus.ACTIVE">Active</option>
+                            <option [ngValue]="TenantStatus.DISABLE">Disable</option>
+                          </select>
+                          <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                          <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
+                            @for (license of licenseList; track license) {
+                              @if (licenseService.getLicenseLabel(license) !== 'maintainer') {
+                                <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
+                                  <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
+                                  <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
+                                    {{ licenseService.getLicenseLabel(license) }}
+                                  </span>
+                                </div>
+                              }
+                            }
+                          </div>
+                          <div class="mt-3 flex justify-end">
+                            <button type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">Save changes</button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  }
                 </div>
-              </div>
-            </ng-container>
-            <ng-template #noTenantsMobile>
+              }
+            } @else {
               <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-4 py-10 text-center text-sm text-[var(--color-text4)]">
                 No tenants available.
               </div>
-            </ng-template>
+            }
           </div>
-        </ng-container>
-
-        <ng-template #loadingTpl>
+        } @else {
           <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
             <table class="w-full min-w-[1220px] text-left text-sm">
               <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
@@ -322,16 +325,19 @@
             </table>
           </div>
           <div class="space-y-3 p-3 md:hidden">
-            <div *ngFor="let _ of [1,2,3]" class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-3">
-              <div class="h-4 w-1/2 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
-              <div class="mt-3 space-y-2">
-                <div class="h-3 w-full animate-pulse rounded bg-[var(--color-blue-760)]"></div>
-                <div class="h-3 w-4/5 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
-                <div class="h-3 w-3/5 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+            @for (_ of [1,2,3]; track _) {
+              <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-3">
+                <div class="h-4 w-1/2 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+                <div class="mt-3 space-y-2">
+                  <div class="h-3 w-full animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+                  <div class="h-3 w-4/5 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+                  <div class="h-3 w-3/5 animate-pulse rounded bg-[var(--color-blue-760)]"></div>
+                </div>
               </div>
-            </div>
+            }
           </div>
-        </ng-template>
+        }
+
       </div>
     </div>
   </div>

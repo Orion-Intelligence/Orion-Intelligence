@@ -1,4 +1,4 @@
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -7,7 +7,7 @@ import { popupAnimation, overlayAnimation } from '../../animations/popup.animati
 import { finalize } from 'rxjs';
 @Component({
   selector: 'app-support',
-  imports: [NgIf, NgClass, FormsModule],
+  imports: [NgClass, FormsModule],
   templateUrl: './support.component.html',
   animations: [popupAnimation, overlayAnimation],
 })

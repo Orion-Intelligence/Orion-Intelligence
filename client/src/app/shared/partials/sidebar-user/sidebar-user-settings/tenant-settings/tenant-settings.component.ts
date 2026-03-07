@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../services/api.service';
 import { AppService } from '../../../../../services/core/app/app.service';
@@ -12,7 +12,7 @@ import { fadeInDashboardItem } from '../../../../animations/dashboard.item.anima
 import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
 @Component({
   selector: 'app-tenant-settings',
-  imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './tenant-settings.component.html'
 })

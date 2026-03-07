@@ -22,14 +22,14 @@
     </header>
 
     <div [class.hidden]="!detailsOpen" class="mt-3 space-y-3">
-      <ng-container *ngIf="selectedType === 'all'">
+      @if (selectedType === 'all') {
         <div>
           <div class="text-[11px] uppercase tracking-wider text-slate-400">{{ "Data Point Type" | titlecase }}</div>
           <div class="mt-1 text-sm font-semibold text-slate-200">{{ 'no filter' | titlecase }}</div>
         </div>
-      </ng-container>
+      }
 
-      <ng-container *ngIf="selectedType === 'cluster' || selectedType === 'document'">
+      @if (selectedType === 'cluster' || selectedType === 'document') {
         <div>
           <div class="text-[11px] uppercase tracking-wider text-slate-400">{{ "Data Point Type" | titlecase }}</div>
           <div class="mt-1 text-sm font-semibold text-slate-200">{{ selectedType | titlecase }}</div>
@@ -38,9 +38,9 @@
           <div class="text-[11px] uppercase tracking-wider text-slate-400">{{ "Cluster Type" | titlecase }}</div>
           <div class="mt-1 text-sm font-semibold text-slate-200">{{ singleInput | titlecase }}</div>
         </div>
-      </ng-container>
+      }
 
-      <ng-container *ngIf="selectedType === 'property'">
+      @if (selectedType === 'property') {
         <div>
           <div class="text-[11px] uppercase tracking-wider text-slate-400">{{ "Data Point Type" | titlecase }}</div>
           <div class="mt-1 text-sm font-semibold text-slate-200">{{ selectedType | titlecase }}</div>
@@ -53,7 +53,7 @@
           <div class="text-[11px] uppercase tracking-wider text-slate-400">{{ "Property Value" | titlecase }}</div>
           <div class="mt-1 text-sm font-semibold text-slate-200">{{ (propertyValue || 'empty') | titlecase }}</div>
         </div>
-      </ng-container>
+      }
     </div>
   </section>
 

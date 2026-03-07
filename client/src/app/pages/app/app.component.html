@@ -1,15 +1,18 @@
-<div *ngIf="appService.userSessionData().tenant.quotaExceeded" class="w-full bg-[#fef3c7] px-[16px] py-[10px] text-center text-[13px] text-[#92400e]" role="alert">
-  <strong>User quota exceeded.</strong>
-  Access is restricted until existing users are removed or the quota is increased.
-</div>
-
-<main *ngIf="isVisible" id="main-content" class="relative">
-  <app-loader></app-loader>
-
-  <div [@appAnimation]="shouldAnimate()">
-    <router-outlet></router-outlet>
+@if (appService.userSessionData().tenant.quotaExceeded) {
+  <div class="w-full bg-[#fef3c7] px-[16px] py-[10px] text-center text-[13px] text-[#92400e]" role="alert">
+    <strong>User quota exceeded.</strong>
+    Access is restricted until existing users are removed or the quota is increased.
   </div>
-</main>
+}
+
+@if (isVisible) {
+  <main id="main-content" class="relative">
+    <app-loader></app-loader>
+    <div [@appAnimation]="shouldAnimate()">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+}
 <app-message-notification></app-message-notification>
 
 

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
-import { DatePipe, NgForOf, NgIf, SlicePipe, CommonModule } from '@angular/common';
+import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
@@ -9,11 +9,12 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
-    NgForOf,
     DatePipe,
-    NgIf,
     SlicePipe,
-    TooltipDirective, CommonModule, NormalizeUnicodePipe, RouterLink
+    TooltipDirective,
+    CommonModule,
+    NormalizeUnicodePipe,
+    RouterLink
   ],
   templateUrl: './dashboard-result-chat.component.html'
 })

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, inject, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { CustomEntity, TabState } from '../../../../shared/model/social/social-scan.models';
 import { GraphOrchestratorService } from '../services/graph-orchestrator.service';
 import { TabManagerService } from '../../shared/services/tab-manager.service';
@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-entity-manager',
   standalone: true,
-  imports: [CommonModule, EntityMenuComponent],
+  imports: [EntityMenuComponent],
   templateUrl: './entity-manager.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

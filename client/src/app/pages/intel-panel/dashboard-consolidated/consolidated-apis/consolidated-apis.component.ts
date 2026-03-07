@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../shared/model/results/consolidated/consolidated.callback.model';
 import { ConsolidatedApiService } from '../../../../shared/services/consolidated.api.service';
 import { finalize } from 'rxjs';
 @Component({
   selector: 'app-consolidated-apis',
-  imports: [NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass],
+  imports: [NgClass],
   templateUrl: './consolidated-apis.component.html'
 })
 export class ConsolidatedApisComponent {

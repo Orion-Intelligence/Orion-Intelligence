@@ -1,144 +1,183 @@
-<div data-testid="domain-scanner-modal" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-[18px]" *ngIf="isOpen" (click)="onClose()">
-  <div class="ui-popup-shell relative w-full max-w-[650px] rounded-[14px] p-[26px] mt-[-124px] max-[640px]:mt-0 max-[640px]:max-w-full max-[640px]:p-[20px]" (click)="$event.stopPropagation()">
-    <div class="flex items-start justify-between gap-[16px] pb-[14px]">
-      <div class="text-[20px] font-semibold max-[640px]:text-[18px]" [ngClass]="isLightTheme ? 'text-[#172235]' : 'text-[#e1e8f0]'">Domain Scanner</div>
-      <button class="absolute right-[18px] top-[14px] px-[8px] py-[4px] text-[28px] leading-none transition-colors" [ngClass]="isLightTheme ? 'text-[#667085] hover:text-[#1f2e47]' : 'text-[#cfcfcf] hover:text-white'" type="button" (click)="onClose()" aria-label="Close">×</button>
-    </div>
-
-    <div class="mb-[16px] flex gap-[4px] border-b max-[640px]:gap-[2px]" [ngClass]="isLightTheme ? 'border-[#d4deeb]' : 'border-[rgba(160,184,209,0.18)]'">
-      <button data-testid="domain-scanner-tab-subdomains" class="relative -mb-px border-b-2 px-[20px] py-[12px] text-[14px] font-medium transition-colors max-[640px]:px-[14px] max-[640px]:py-[10px] max-[640px]:text-[13px]" [ngClass]="(activeTab === 'subdomains' ? 'border-[#57a5eb] text-[#57a5eb]' : (isLightTheme ? 'border-transparent text-[#667085] hover:text-[#172235] hover:bg-[rgba(87,165,235,0.08)]' : 'border-transparent text-[#9bb4d1] hover:text-[#e1e8f0] hover:bg-[rgba(87,165,235,0.05)]')) + ((activeTab !== 'subdomains' && isLoading) ? ' opacity-50' : '')" (click)="!isLoading && switchTab('subdomains'); !isLoading && (domain = ''); !isLoading && validateDomain()" type="button">Subdomains</button>
-      <button data-testid="domain-scanner-tab-ip-lookup" class="relative -mb-px border-b-2 px-[20px] py-[12px] text-[14px] font-medium transition-colors max-[640px]:px-[14px] max-[640px]:py-[10px] max-[640px]:text-[13px]" [ngClass]="(activeTab === 'dns' ? 'border-[#57a5eb] text-[#57a5eb]' : (isLightTheme ? 'border-transparent text-[#667085] hover:text-[#172235] hover:bg-[rgba(87,165,235,0.08)]' : 'border-transparent text-[#9bb4d1] hover:text-[#e1e8f0] hover:bg-[rgba(87,165,235,0.05)]')) + ((activeTab !== 'dns' && isLoading) ? ' opacity-50' : '')" (click)="!isLoading && switchTab('dns'); !isLoading && (domain = ''); !isLoading && validateDomain()" type="button">IP Lookup</button>
-      <button data-testid="domain-scanner-tab-wayback" class="relative -mb-px border-b-2 px-[20px] py-[12px] text-[14px] font-medium transition-colors max-[640px]:px-[14px] max-[640px]:py-[10px] max-[640px]:text-[13px]" [ngClass]="(activeTab === 'wayback' ? 'border-[#57a5eb] text-[#57a5eb]' : (isLightTheme ? 'border-transparent text-[#667085] hover:text-[#172235] hover:bg-[rgba(87,165,235,0.08)]' : 'border-transparent text-[#9bb4d1] hover:text-[#e1e8f0] hover:bg-[rgba(87,165,235,0.05)]')) + ((activeTab !== 'wayback' && isLoading) ? ' opacity-50' : '')" (click)="!isLoading && switchTab('wayback'); !isLoading && (domain = ''); !isLoading && validateDomain()" type="button">Wayback</button>
-    </div>
-
-    <div class="flex flex-col gap-[16px]">
-      <div *ngIf="activeTab === 'subdomains'" class="text-[13px]" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">Discover all subdomains of a domain</div>
-      <div *ngIf="activeTab === 'dns'" class="text-[13px]" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">Reverse lookup IP to hostname</div>
-      <div *ngIf="activeTab === 'wayback'" class="text-[13px]" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">View archived snapshots from Wayback Machine</div>
-
-      <div class="flex flex-col gap-[6px]">
-        <div class="flex items-center justify-between gap-[12px] max-[640px]:flex-col max-[640px]:items-start max-[640px]:gap-[8px]">
-          <label class="text-[13px] font-medium" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'" for="domain-input">{{ activeTab === 'dns' ? 'IP Address' : 'Domain' }}</label>
-          <div class="flex items-center" *ngIf="activeTab === 'subdomains'">
-            <label class="inline-flex items-center gap-[8px] cursor-pointer select-none">
-              <input data-testid="domain-scanner-live-toggle" type="checkbox" class="sr-only peer" [(ngModel)]="checkLive" [disabled]="isLoading"/>
-              <span class="relative h-[20px] w-[36px] rounded-full transition peer-checked:bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] peer-disabled:opacity-50" [ngClass]="isLightTheme ? 'bg-[#c9d8ea]' : 'bg-[#2c3a4a]'">
-                <span class="absolute left-[2px] top-[2px] h-[16px] w-[16px] rounded-full transition peer-checked:translate-x-[16px]" [ngClass]="isLightTheme ? 'bg-white' : 'bg-[#e1e8f0]'"></span>
-              </span>
-              <span class="text-[12px] font-medium peer-disabled:opacity-50" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">Show only live</span>
-            </label>
-          </div>
-        </div>
-
-        <input data-testid="domain-scanner-input" id="domain-input" class="w-full rounded-[8px] border px-[14px] py-[12px] text-[14px] outline-none transition focus:border-[#57a5eb] focus:shadow-[0_0_0_3px_rgba(87,165,235,0.22)] disabled:opacity-60 disabled:cursor-not-allowed" [ngClass]="(isLightTheme ? 'border-[#c7d5e6] bg-white text-[#172235] placeholder:text-[#94a3b8] focus:bg-white' : 'border-[#2c3a4a] bg-[#152230] text-[#e1e8f0] placeholder:text-[#5a6e84] focus:bg-[#1a2835]') + (showInvalid && !isValidDomain && domain.trim().length > 0 ? ' border-[#ef4444] focus:border-[#ef4444] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.22)]' : '')" type="text" [placeholder]="activeTab === 'dns' ? 'e.g. 8.8.8.8 or 2001:4860:4860::8888' : 'e.g. example.com'" [(ngModel)]="domain" (ngModelChange)="validateDomain(); showInvalid = false" (keyup.enter)="onEnterKey()" [disabled]="isLoading"/>
+@if (isOpen) {
+  <div data-testid="domain-scanner-modal" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-[18px]" (click)="onClose()">
+    <div class="ui-popup-shell relative w-full max-w-[650px] rounded-[14px] p-[26px] mt-[-124px] max-[640px]:mt-0 max-[640px]:max-w-full max-[640px]:p-[20px]" (click)="$event.stopPropagation()">
+      <div class="flex items-start justify-between gap-[16px] pb-[14px]">
+        <div class="text-[20px] font-semibold max-[640px]:text-[18px]" [ngClass]="isLightTheme ? 'text-[#172235]' : 'text-[#e1e8f0]'">Domain Scanner</div>
+        <button class="absolute right-[18px] top-[14px] px-[8px] py-[4px] text-[28px] leading-none transition-colors" [ngClass]="isLightTheme ? 'text-[#667085] hover:text-[#1f2e47]' : 'text-[#cfcfcf] hover:text-white'" type="button" (click)="onClose()" aria-label="Close">×</button>
       </div>
-
-      <div class="animate-[fadeIn_0.2s_ease]">
-        <div *ngIf="isLoading" class="flex flex-col gap-[10px]">
-          <div class="relative h-[28px] overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#0f1821]">
-            <div class="h-full bg-[linear-gradient(90deg,#0ea5e9_0%,#06b6d4_100%)] shadow-[0_0_10px_rgba(14,165,233,0.3)] transition-[width] duration-300" [style.width.%]="progress"></div>
-            <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[12px] font-bold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.3)]">{{ progress }}%</span>
+      <div class="mb-[16px] flex gap-[4px] border-b max-[640px]:gap-[2px]" [ngClass]="isLightTheme ? 'border-[#d4deeb]' : 'border-[rgba(160,184,209,0.18)]'">
+        <button data-testid="domain-scanner-tab-subdomains" class="relative -mb-px border-b-2 px-[20px] py-[12px] text-[14px] font-medium transition-colors max-[640px]:px-[14px] max-[640px]:py-[10px] max-[640px]:text-[13px]" [ngClass]="(activeTab === 'subdomains' ? 'border-[#57a5eb] text-[#57a5eb]' : (isLightTheme ? 'border-transparent text-[#667085] hover:text-[#172235] hover:bg-[rgba(87,165,235,0.08)]' : 'border-transparent text-[#9bb4d1] hover:text-[#e1e8f0] hover:bg-[rgba(87,165,235,0.05)]')) + ((activeTab !== 'subdomains' && isLoading) ? ' opacity-50' : '')" (click)="!isLoading && switchTab('subdomains'); !isLoading && (domain = ''); !isLoading && validateDomain()" type="button">Subdomains</button>
+        <button data-testid="domain-scanner-tab-ip-lookup" class="relative -mb-px border-b-2 px-[20px] py-[12px] text-[14px] font-medium transition-colors max-[640px]:px-[14px] max-[640px]:py-[10px] max-[640px]:text-[13px]" [ngClass]="(activeTab === 'dns' ? 'border-[#57a5eb] text-[#57a5eb]' : (isLightTheme ? 'border-transparent text-[#667085] hover:text-[#172235] hover:bg-[rgba(87,165,235,0.08)]' : 'border-transparent text-[#9bb4d1] hover:text-[#e1e8f0] hover:bg-[rgba(87,165,235,0.05)]')) + ((activeTab !== 'dns' && isLoading) ? ' opacity-50' : '')" (click)="!isLoading && switchTab('dns'); !isLoading && (domain = ''); !isLoading && validateDomain()" type="button">IP Lookup</button>
+        <button data-testid="domain-scanner-tab-wayback" class="relative -mb-px border-b-2 px-[20px] py-[12px] text-[14px] font-medium transition-colors max-[640px]:px-[14px] max-[640px]:py-[10px] max-[640px]:text-[13px]" [ngClass]="(activeTab === 'wayback' ? 'border-[#57a5eb] text-[#57a5eb]' : (isLightTheme ? 'border-transparent text-[#667085] hover:text-[#172235] hover:bg-[rgba(87,165,235,0.08)]' : 'border-transparent text-[#9bb4d1] hover:text-[#e1e8f0] hover:bg-[rgba(87,165,235,0.05)]')) + ((activeTab !== 'wayback' && isLoading) ? ' opacity-50' : '')" (click)="!isLoading && switchTab('wayback'); !isLoading && (domain = ''); !isLoading && validateDomain()" type="button">Wayback</button>
+      </div>
+      <div class="flex flex-col gap-[16px]">
+        @if (activeTab === 'subdomains') {
+          <div class="text-[13px]" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">Discover all subdomains of a domain</div>
+        }
+        @if (activeTab === 'dns') {
+          <div class="text-[13px]" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">Reverse lookup IP to hostname</div>
+        }
+        @if (activeTab === 'wayback') {
+          <div class="text-[13px]" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">View archived snapshots from Wayback Machine</div>
+        }
+        <div class="flex flex-col gap-[6px]">
+          <div class="flex items-center justify-between gap-[12px] max-[640px]:flex-col max-[640px]:items-start max-[640px]:gap-[8px]">
+            <label class="text-[13px] font-medium" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'" for="domain-input">{{ activeTab === 'dns' ? 'IP Address' : 'Domain' }}</label>
+            @if (activeTab === 'subdomains') {
+              <div class="flex items-center">
+                <label class="inline-flex items-center gap-[8px] cursor-pointer select-none">
+                  <input data-testid="domain-scanner-live-toggle" type="checkbox" class="sr-only peer" [(ngModel)]="checkLive" [disabled]="isLoading"/>
+                  <span class="relative h-[20px] w-[36px] rounded-full transition peer-checked:bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] peer-disabled:opacity-50" [ngClass]="isLightTheme ? 'bg-[#c9d8ea]' : 'bg-[#2c3a4a]'">
+                    <span class="absolute left-[2px] top-[2px] h-[16px] w-[16px] rounded-full transition peer-checked:translate-x-[16px]" [ngClass]="isLightTheme ? 'bg-white' : 'bg-[#e1e8f0]'"></span>
+                  </span>
+                  <span class="text-[12px] font-medium peer-disabled:opacity-50" [ngClass]="isLightTheme ? 'text-[#667085]' : 'text-[#9bb4d1]'">Show only live</span>
+                </label>
+              </div>
+            }
           </div>
-          <div class="flex items-center gap-[8px] rounded-[6px] border border-[rgba(87,165,235,0.2)] bg-[rgba(87,165,235,0.1)] px-[12px] py-[8px] text-[13px] text-[#9bb4d1]">{{ statusMessage }}</div>
+          <input data-testid="domain-scanner-input" id="domain-input" class="w-full rounded-[8px] border px-[14px] py-[12px] text-[14px] outline-none transition focus:border-[#57a5eb] focus:shadow-[0_0_0_3px_rgba(87,165,235,0.22)] disabled:opacity-60 disabled:cursor-not-allowed" [ngClass]="(isLightTheme ? 'border-[#c7d5e6] bg-white text-[#172235] placeholder:text-[#94a3b8] focus:bg-white' : 'border-[#2c3a4a] bg-[#152230] text-[#e1e8f0] placeholder:text-[#5a6e84] focus:bg-[#1a2835]') + (showInvalid && !isValidDomain && domain.trim().length > 0 ? ' border-[#ef4444] focus:border-[#ef4444] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.22)]' : '')" type="text" [placeholder]="activeTab === 'dns' ? 'e.g. 8.8.8.8 or 2001:4860:4860::8888' : 'e.g. example.com'" [(ngModel)]="domain" (ngModelChange)="validateDomain(); showInvalid = false" (keyup.enter)="onEnterKey()" [disabled]="isLoading"/>
         </div>
-
-        <div *ngIf="!isLoading && statusMessage === 'Cancelled by user'" class="flex items-center gap-[8px] rounded-[6px] border border-[rgba(87,165,235,0.2)] bg-[rgba(87,165,235,0.1)] px-[12px] py-[8px] text-[13px] text-[#9bb4d1]">
-          {{ statusMessage }}
-        </div>
-
-        <div *ngIf="errorMessage && !isLoading" class="flex items-start gap-[8px] rounded-[6px] border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.1)] p-[12px] text-[13px] leading-[1.5] text-[#ff6b6b]" role="alert">{{ errorMessage }}</div>
-
-        <div *ngIf="activeTab === 'subdomains' && subdomains.length > 0 && !isLoading" class="flex flex-col gap-[12px]">
-          <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
-            <span class="text-[18px] font-bold text-[#22c55e]">✓</span>
-            <span class="flex items-center gap-[8px] text-[14px] text-[#9bb4d1]">Found <strong class="font-bold text-[#22c55e]">{{ subdomainCount }}</strong> {{ checkLive ? 'live' : '' }} subdomain{{ subdomainCount !== 1 ? 's' : '' }}</span>
-            <button class="ml-auto rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0" type="button" (click)="copy(subdomains.join(', '), 'All copied')">Copy all</button>
-          </div>
-          <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#152230] p-[4px] max-[640px]:max-h-[180px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
-            <ul class="m-0 list-none p-0">
-              <li *ngFor="let s of subdomains" class="flex cursor-pointer items-center gap-[8px] rounded-[4px] px-[8px] py-[6px] text-[12px] text-[#e1e8f0] transition hover:bg-[rgba(87,165,235,0.08)] active:bg-[rgba(87,165,235,0.15)]" (click)="copy(getSubdomainUrl(s))" tabindex="0" (keyup.enter)="copy(getSubdomainUrl(s))">
-                <span class="text-[10px] text-[#57a5eb]">▪</span><span class="flex-1 break-all font-mono text-[12px] text-[#60a5fa]">{{ s }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div *ngIf="activeTab === 'subdomains' && subdomains.length === 0 && !isLoading && statusMessage === 'No records found'" class="flex flex-col gap-[12px]">
-          <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
-            <span class="text-[18px] font-bold text-[#22c55e]">✗</span>
-            <span class="text-[14px] text-[#9bb4d1]">No records found</span>
-          </div>
-        </div>
-
-        <div *ngIf="activeTab === 'dns' && dnsRecords.length > 0 && !isLoading" class="flex flex-col gap-[12px]">
-          <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
-            <span class="text-[18px] font-bold text-[#22c55e]">✓</span>
-            <span class="text-[14px] text-[#9bb4d1]">IP Lookup Complete</span>
-          </div>
-          <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#1a2835] p-[4px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
-            <div *ngFor="let record of dnsRecords" class="mb-[10px] overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#152230]">
-              <div class="flex items-center gap-[10px] p-[11px] transition" [ngClass]="record.hostname ? 'cursor-pointer hover:bg-[#1f303f]' : 'opacity-60'" (click)="copy(record.ip + ': ' + (record.hostname || 'No PTR record'), 'DNS record copied')" role="button" tabindex="0">
-                <span class="text-[14px] font-bold" [ngClass]="record.hostname ? 'text-[#22c55e]' : 'text-[#ef4444]'">{{ record.hostname ? '✓' : '✗' }}</span>
-                <span class="flex-1 break-all font-mono text-[12px] text-[#e1e8f0]">{{ record.ip }}</span>
-                <span class="text-[12px] text-[#9bb4d1]">{{ record.hostname || 'not found' }}</span>
+        <div class="animate-[fadeIn_0.2s_ease]">
+          @if (isLoading) {
+            <div class="flex flex-col gap-[10px]">
+              <div class="relative h-[28px] overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#0f1821]">
+                <div class="h-full bg-[linear-gradient(90deg,#0ea5e9_0%,#06b6d4_100%)] shadow-[0_0_10px_rgba(14,165,233,0.3)] transition-[width] duration-300" [style.width.%]="progress"></div>
+                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[12px] font-bold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.3)]">{{ progress }}%</span>
+              </div>
+              <div class="flex items-center gap-[8px] rounded-[6px] border border-[rgba(87,165,235,0.2)] bg-[rgba(87,165,235,0.1)] px-[12px] py-[8px] text-[13px] text-[#9bb4d1]">{{ statusMessage }}</div>
+            </div>
+          }
+          @if (!isLoading && statusMessage === 'Cancelled by user') {
+            <div class="flex items-center gap-[8px] rounded-[6px] border border-[rgba(87,165,235,0.2)] bg-[rgba(87,165,235,0.1)] px-[12px] py-[8px] text-[13px] text-[#9bb4d1]">
+              {{ statusMessage }}
+            </div>
+          }
+          @if (errorMessage && !isLoading) {
+            <div class="flex items-start gap-[8px] rounded-[6px] border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.1)] p-[12px] text-[13px] leading-[1.5] text-[#ff6b6b]" role="alert">{{ errorMessage }}</div>
+          }
+          @if (activeTab === 'subdomains' && subdomains.length > 0 && !isLoading) {
+            <div class="flex flex-col gap-[12px]">
+              <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
+                <span class="text-[18px] font-bold text-[#22c55e]">✓</span>
+                <span class="flex items-center gap-[8px] text-[14px] text-[#9bb4d1]">Found <strong class="font-bold text-[#22c55e]">{{ subdomainCount }}</strong> {{ checkLive ? 'live' : '' }} subdomain{{ subdomainCount !== 1 ? 's' : '' }}</span>
+                <button class="ml-auto rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0" type="button" (click)="copy(subdomains.join(', '), 'All copied')">Copy all</button>
+              </div>
+              <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#152230] p-[4px] max-[640px]:max-h-[180px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
+                <ul class="m-0 list-none p-0">
+                  @for (s of subdomains; track s) {
+                    <li class="flex cursor-pointer items-center gap-[8px] rounded-[4px] px-[8px] py-[6px] text-[12px] text-[#e1e8f0] transition hover:bg-[rgba(87,165,235,0.08)] active:bg-[rgba(87,165,235,0.15)]" (click)="copy(getSubdomainUrl(s))" tabindex="0" (keyup.enter)="copy(getSubdomainUrl(s))">
+                      <span class="text-[10px] text-[#57a5eb]">▪</span><span class="flex-1 break-all font-mono text-[12px] text-[#60a5fa]">{{ s }}</span>
+                    </li>
+                  }
+                </ul>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div *ngIf="activeTab === 'dns' && dnsRecords.length === 0 && !isLoading && statusMessage === 'No records found'" class="flex flex-col gap-[12px]">
-          <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
-            <span class="text-[18px] font-bold text-[#22c55e]">✗</span>
-            <span class="text-[14px] text-[#9bb4d1]">No records found</span>
-          </div>
-        </div>
-
-        <div *ngIf="activeTab === 'wayback' && waybackSnapshots.length > 0 && !isLoading" class="flex flex-col gap-[12px]">
-          <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
-            <span class="text-[18px] font-bold text-[#22c55e]">✓</span>
-            <span class="flex items-center gap-[8px] text-[14px] text-[#9bb4d1]">Found <strong class="font-bold text-[#22c55e]">{{ waybackSnapshots.length }}</strong> snapshot{{ waybackSnapshots.length !== 1 ? 's' : '' }}</span>
-            <button class="ml-auto rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0" type="button" (click)="copy(getAllWaybackUrls(), 'All URLs copied')">Copy all</button>
-          </div>
-          <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#152230] p-[8px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
-            <div *ngFor="let snapshot of waybackSnapshots" class="mb-[10px] cursor-pointer overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#152230]" (click)="copy(snapshot.url, 'URL copied')">
-              <div class="flex items-center gap-[10px] bg-[#1a2835] p-[10px_12px]">
-                <span class="flex-1 break-all font-mono text-[12px] text-[#e1e8f0]">{{ snapshot.timestamp }}</span>
-              </div>
-              <div class="flex flex-col gap-[8px] bg-[#0f1821] p-[12px_16px]">
-                <div class="flex items-start gap-[8px] text-[12px]">
-                  <span class="min-w-[50px] flex-shrink-0 font-medium text-[#9bb4d1]">URL:</span>
-                  <span class="flex-1 break-all font-mono text-[11px] text-[#60a5fa] hover:underline">{{ snapshot.url }}</span>
-                </div>
-                <div class="flex items-start gap-[8px] text-[12px]" *ngIf="snapshot.mimetype">
-                  <span class="min-w-[50px] flex-shrink-0 font-medium text-[#9bb4d1]">Type:</span>
-                  <span class="flex-1 break-all text-[#e1e8f0]">{{ snapshot.mimetype }}</span>
-                </div>
+          }
+          @if (activeTab === 'subdomains' && subdomains.length === 0 && !isLoading && statusMessage === 'No records found') {
+            <div class="flex flex-col gap-[12px]">
+              <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
+                <span class="text-[18px] font-bold text-[#22c55e]">✗</span>
+                <span class="text-[14px] text-[#9bb4d1]">No records found</span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div *ngIf="activeTab === 'wayback' && waybackSnapshots.length === 0 && !isLoading && statusMessage === 'No records found'" class="flex flex-col gap-[12px]">
-          <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
-            <span class="text-[18px] font-bold text-[#22c55e]">✗</span>
-            <span class="text-[14px] text-[#9bb4d1]">No records found</span>
-          </div>
+          }
+          @if (activeTab === 'dns' && dnsRecords.length > 0 && !isLoading) {
+            <div class="flex flex-col gap-[12px]">
+              <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
+                <span class="text-[18px] font-bold text-[#22c55e]">✓</span>
+                <span class="text-[14px] text-[#9bb4d1]">IP Lookup Complete</span>
+              </div>
+              <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#1a2835] p-[4px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
+                @for (record of dnsRecords; track record) {
+                  <div class="mb-[10px] overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#152230]">
+                    <div class="flex items-center gap-[10px] p-[11px] transition" [ngClass]="record.hostname ? 'cursor-pointer hover:bg-[#1f303f]' : 'opacity-60'" (click)="copy(record.ip + ': ' + (record.hostname || 'No PTR record'), 'DNS record copied')" role="button" tabindex="0">
+                      <span class="text-[14px] font-bold" [ngClass]="record.hostname ? 'text-[#22c55e]' : 'text-[#ef4444]'">{{ record.hostname ? '✓' : '✗' }}</span>
+                      <span class="flex-1 break-all font-mono text-[12px] text-[#e1e8f0]">{{ record.ip }}</span>
+                      <span class="text-[12px] text-[#9bb4d1]">{{ record.hostname || 'not found' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          @if (activeTab === 'dns' && dnsRecords.length === 0 && !isLoading && statusMessage === 'No records found') {
+            <div class="flex flex-col gap-[12px]">
+              <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
+                <span class="text-[18px] font-bold text-[#22c55e]">✗</span>
+                <span class="text-[14px] text-[#9bb4d1]">No records found</span>
+              </div>
+            </div>
+          }
+          @if (activeTab === 'wayback' && waybackSnapshots.length > 0 && !isLoading) {
+            <div class="flex flex-col gap-[12px]">
+              <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
+                <span class="text-[18px] font-bold text-[#22c55e]">✓</span>
+                <span class="flex items-center gap-[8px] text-[14px] text-[#9bb4d1]">Found <strong class="font-bold text-[#22c55e]">{{ waybackSnapshots.length }}</strong> snapshot{{ waybackSnapshots.length !== 1 ? 's' : '' }}</span>
+                <button class="ml-auto rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0" type="button" (click)="copy(getAllWaybackUrls(), 'All URLs copied')">Copy all</button>
+              </div>
+              <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#152230] p-[8px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
+                @for (snapshot of waybackSnapshots; track snapshot) {
+                  <div class="mb-[10px] cursor-pointer overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#152230]" (click)="copy(snapshot.url, 'URL copied')">
+                    <div class="flex items-center gap-[10px] bg-[#1a2835] p-[10px_12px]">
+                      <span class="flex-1 break-all font-mono text-[12px] text-[#e1e8f0]">{{ snapshot.timestamp }}</span>
+                    </div>
+                    <div class="flex flex-col gap-[8px] bg-[#0f1821] p-[12px_16px]">
+                      <div class="flex items-start gap-[8px] text-[12px]">
+                        <span class="min-w-[50px] flex-shrink-0 font-medium text-[#9bb4d1]">URL:</span>
+                        <span class="flex-1 break-all font-mono text-[11px] text-[#60a5fa] hover:underline">{{ snapshot.url }}</span>
+                      </div>
+                      @if (snapshot.mimetype) {
+                        <div class="flex items-start gap-[8px] text-[12px]">
+                          <span class="min-w-[50px] flex-shrink-0 font-medium text-[#9bb4d1]">Type:</span>
+                          <span class="flex-1 break-all text-[#e1e8f0]">{{ snapshot.mimetype }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          @if (activeTab === 'wayback' && waybackSnapshots.length === 0 && !isLoading && statusMessage === 'No records found') {
+            <div class="flex flex-col gap-[12px]">
+              <div class="flex flex-wrap items-center gap-[8px] rounded-[6px] border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] p-[10px_12px]">
+                <span class="text-[18px] font-bold text-[#22c55e]">✗</span>
+                <span class="text-[14px] text-[#9bb4d1]">No records found</span>
+              </div>
+            </div>
+          }
         </div>
       </div>
-    </div>
-
-    <div class="mt-[18px] flex items-center justify-end gap-[12px] border-t pt-[16px]" [ngClass]="isLightTheme ? 'border-[#d4deeb]' : 'border-[rgba(160,184,209,0.18)]'">
-      <div class="mr-auto inline-flex items-center gap-[6px] rounded-[6px] border border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.15)] px-[10px] py-[4px] text-[12px] font-semibold text-[#22c55e]" *ngIf="toast"><span class="text-[12px]">✔</span><span>{{ toast }}</span></div>
-
-      <button *ngIf="isLoading" class="rounded-[6px] bg-[#dc3545] px-[14px] py-[6px] text-[13px] font-medium text-white transition hover:bg-[#c82333] disabled:cursor-not-allowed disabled:opacity-70" type="button" (click)="cancelScan()" [disabled]="cancelRequested">{{ cancelRequested ? 'Cancelling...' : 'Cancel Scan' }}</button>
-
-      <button class="rounded-[6px] border bg-transparent px-[14px] py-[6px] text-[13px] font-medium transition disabled:cursor-not-allowed disabled:opacity-50" [ngClass]="isLightTheme ? 'border-[#c7d5e6] text-[#1f2e47] hover:border-[#aac0da] hover:bg-[#eef5ff]' : 'border-[#4a5f77] text-[#e1e8f0] hover:border-[#5a7594] hover:bg-[rgba(74,95,119,0.1)]'" type="button" (click)="onClose()" [disabled]="isLoading">Close</button>
-
-      <button data-testid="domain-scanner-search-subdomains" *ngIf="activeTab === 'subdomains'" class="rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" type="button" (click)="startScan()" [disabled]="isLoading"><span *ngIf="!isLoading">Search</span><span *ngIf="isLoading">Scanning...</span></button>
-
-      <button data-testid="domain-scanner-lookup-ip" *ngIf="activeTab === 'dns'" class="rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" type="button" (click)="startScan()" [disabled]="isLoading"><span *ngIf="!isLoading">Lookup IP</span><span *ngIf="isLoading">Looking up...</span></button>
-
-      <button data-testid="domain-scanner-search-wayback" *ngIf="activeTab === 'wayback'" class="rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" type="button" (click)="startScan()" [disabled]="isLoading"><span *ngIf="!isLoading">Search Wayback</span><span *ngIf="isLoading">Searching...</span></button>
+      <div class="mt-[18px] flex items-center justify-end gap-[12px] border-t pt-[16px]" [ngClass]="isLightTheme ? 'border-[#d4deeb]' : 'border-[rgba(160,184,209,0.18)]'">
+        @if (toast) {
+          <div class="mr-auto inline-flex items-center gap-[6px] rounded-[6px] border border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.15)] px-[10px] py-[4px] text-[12px] font-semibold text-[#22c55e]"><span class="text-[12px]">✔</span><span>{{ toast }}</span></div>
+        }
+        @if (isLoading) {
+          <button class="rounded-[6px] bg-[#dc3545] px-[14px] py-[6px] text-[13px] font-medium text-white transition hover:bg-[#c82333] disabled:cursor-not-allowed disabled:opacity-70" type="button" (click)="cancelScan()" [disabled]="cancelRequested">{{ cancelRequested ? 'Cancelling...' : 'Cancel Scan' }}</button>
+        }
+        <button class="rounded-[6px] border bg-transparent px-[14px] py-[6px] text-[13px] font-medium transition disabled:cursor-not-allowed disabled:opacity-50" [ngClass]="isLightTheme ? 'border-[#c7d5e6] text-[#1f2e47] hover:border-[#aac0da] hover:bg-[#eef5ff]' : 'border-[#4a5f77] text-[#e1e8f0] hover:border-[#5a7594] hover:bg-[rgba(74,95,119,0.1)]'" type="button" (click)="onClose()" [disabled]="isLoading">Close</button>
+        @if (activeTab === 'subdomains') {
+          <button data-testid="domain-scanner-search-subdomains" class="rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" type="button" (click)="startScan()" [disabled]="isLoading">@if (!isLoading) {
+            <span>Search</span>
+            }@if (isLoading) {
+            <span>Scanning...</span>
+          }</button>
+        }
+        @if (activeTab === 'dns') {
+          <button data-testid="domain-scanner-lookup-ip" class="rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" type="button" (click)="startScan()" [disabled]="isLoading">@if (!isLoading) {
+            <span>Lookup IP</span>
+            }@if (isLoading) {
+            <span>Looking up...</span>
+          }</button>
+        }
+        @if (activeTab === 'wayback') {
+          <button data-testid="domain-scanner-search-wayback" class="rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" type="button" (click)="startScan()" [disabled]="isLoading">@if (!isLoading) {
+            <span>Search Wayback</span>
+            }@if (isLoading) {
+            <span>Searching...</span>
+          }</button>
+        }
+      </div>
     </div>
   </div>
-</div>
+}

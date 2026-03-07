@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, ElementRef, HostListener, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TabManagerService } from '../services/tab-manager.service';
 import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
 import { ProfileComponent } from '../../../../shared/partials/profile/profile.component';
@@ -12,7 +12,7 @@ import { getFirstFileFromInputEvent, readFileAsText } from '../../../../shared/u
   templateUrl: './tab-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, AutofocusDirective, ProfileComponent, ExportChoiceModalComponent],
+  imports: [AutofocusDirective, ProfileComponent, ExportChoiceModalComponent],
 })
 export class TabBarComponent {
   private hostRef = inject(ElementRef<HTMLElement>);

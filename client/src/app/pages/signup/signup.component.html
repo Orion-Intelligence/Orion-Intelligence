@@ -22,10 +22,12 @@
               <input [(ngModel)]="user.username" data-testid="signup-username" placeholder="Enter your username" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" required type="text" />
             </div>
 
-            <div *ngIf="usernameSuggestion" class="mt-1 rounded-lg border border-[#dc3545]/40 bg-[#dc3545]/10 px-3 py-2 text-[#373637] text-[13px]">
-              <div class="font-semibold">Username already taken, suggested usernames below</div>
-              <div class="mt-1">{{ usernameSuggestion.replace('Username already taken. Suggested usernames: ', '') }}</div>
-            </div>
+            @if (usernameSuggestion) {
+              <div class="mt-1 rounded-lg border border-[#dc3545]/40 bg-[#dc3545]/10 px-3 py-2 text-[#373637] text-[13px]">
+                <div class="font-semibold">Username already taken, suggested usernames below</div>
+                <div class="mt-1">{{ usernameSuggestion.replace('Username already taken. Suggested usernames: ', '') }}</div>
+              </div>
+            }
 
             <label class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">Company Mail</label>
             <div class="relative w-full">
@@ -39,19 +41,25 @@
               <input [(ngModel)]="user.password" data-testid="signup-password" (input)="onPasswordInput(user.password)" id="id_password" placeholder="Enter your password" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" required type="password" />
             </div>
 
-            <div *ngIf="showPasswordMeter" class="mt-2 space-y-2">
-              <div class="h-2 w-full overflow-hidden rounded-full bg-[#d6deea]">
-                <div class="h-full transition-all" [ngClass]="{ 'bg-[#dc3545] w-1/3': passwordStrength === 'weak', 'bg-[#f59e0b] w-2/3': passwordStrength === 'medium', 'bg-[#2b90ee] w-full': passwordStrength === 'strong' }"></div>
+            @if (showPasswordMeter) {
+              <div class="mt-2 space-y-2">
+                <div class="h-2 w-full overflow-hidden rounded-full bg-[#d6deea]">
+                  <div class="h-full transition-all" [ngClass]="{ 'bg-[#dc3545] w-1/3': passwordStrength === 'weak', 'bg-[#f59e0b] w-2/3': passwordStrength === 'medium', 'bg-[#2b90ee] w-full': passwordStrength === 'strong' }"></div>
+                </div>
+                <ul class="text-xs text-[#5b6780]">
+                  @if (currentUnmetCheck) {
+                    <li>{{ currentUnmetCheck }}</li>
+                  }
+                </ul>
               </div>
-              <ul class="text-xs text-[#5b6780]">
-                <li *ngIf="currentUnmetCheck">{{ currentUnmetCheck }}</li>
-              </ul>
-            </div>
+            }
 
-            <div *ngIf="errorMessage" class="inline-block mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center">
-              <i class="bi bi-exclamation-diamond-fill mr-2"></i>
-              {{ errorMessage }}
-            </div>
+            @if (errorMessage) {
+              <div class="inline-block mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center">
+                <i class="bi bi-exclamation-diamond-fill mr-2"></i>
+                {{ errorMessage }}
+              </div>
+            }
 
             <div>
               <input data-testid="signup-submit" [disabled]="!signUpForm.valid || !allPasswordRequirementsMet" [class.cursor-not-allowed]="!signUpForm.valid || !allPasswordRequirementsMet" class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" type="submit" value="Sign Up" />

@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 @Component({
   selector: 'app-user-image-picker',
-  imports: [NgIf, NgClass],
+  imports: [NgClass],
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent implements OnInit, OnChanges {

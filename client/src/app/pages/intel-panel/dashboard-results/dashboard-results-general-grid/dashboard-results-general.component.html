@@ -1,61 +1,68 @@
 <div [ngClass]="isConsolidatedView ? 'mb-6 w-full min-w-0' : 'mb-8 w-full max-w-[910px] min-w-0 px-2 sm:px-0 max-[640px]:px-0'">
-  <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30))">
+  @for (item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30)); track item) {
     <div data-testid="result-card" [id]="'item-' + item.m_hash" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-[20px] w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]" (click)="isMobileMode() && item?.m_url ? window.open(item.m_url, '_blank') : null">
-
       <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
         <div class="flex max-w-[80%] flex-wrap gap-[10px]">
-          <span *ngFor="let tag of item.m_content_type" class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
+          @for (tag of item.m_content_type; track tag) {
+            <span class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
+          }
         </div>
-
-        <div class="ml-auto flex gap-[20px]" *ngIf="!isMobileMode()">
-          <div *ngIf="!licenseService.isMaintainer() && (type === 'strategic' || type === 'general') && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/')); else elseBlock" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
-            <div class="p-[0_0_10px_10px]">
-              <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
-            </div>
-          </div>
-
-          <ng-template #elseBlock>
-            <div *ngIf="type !== 'Strategic' && type !== 'general'" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
+        @if (!isMobileMode()) {
+          <div class="ml-auto flex gap-[20px]">
+            @if (!licenseService.isMaintainer() && (type === 'strategic' || type === 'general') && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/'))) {
+              <div (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
+                <div class="p-[0_0_10px_10px]">
+                  <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+                </div>
+              </div>
+            } @else {
+              @if (type !== 'Strategic' && type !== 'general') {
+                <div (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
+                  <div class="p-[0_0_10px_10px]">
+                    <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+                  </div>
+                </div>
+              }
+            }
+            <div (click)="scrollService.saveCurrentPosition(item.m_hash)" [queryParams]="queryParams" appTooltip="Open Report" data-testid="open-report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center">
               <div class="p-[0_0_10px_10px]">
-                <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+                <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>
             </div>
-          </ng-template>
-
-          <div (click)="scrollService.saveCurrentPosition(item.m_hash)" [queryParams]="queryParams" appTooltip="Open Report" data-testid="open-report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center">
-            <div class="p-[0_0_10px_10px]">
-              <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
-            </div>
           </div>
-        </div>
+        }
       </div>
-
-      <ng-container *ngIf="item?.m_title as title; else noTitle">
-        <h2 *ngIf="title.trim().length > 1; else noTitle" class="mb-[12px] mt-0 block max-w-[700px] overflow-hidden text-ellipsis whitespace-nowrap text-[24px] font-medium text-[var(--color-text1)] max-[640px]:text-[18px]">{{ title }}</h2>
-      </ng-container>
-      <ng-template #noTitle>
+      @if (item?.m_title; as title) {
+        @if (title.trim().length > 1) {
+          <h2 class="mb-[12px] mt-0 block max-w-[700px] overflow-hidden text-ellipsis whitespace-nowrap text-[24px] font-medium text-[var(--color-text1)] max-[640px]:text-[18px]">{{ title }}</h2>
+        } @else {
+          <h2 class="mb-[12px] mt-0 block max-w-[700px] overflow-hidden text-ellipsis whitespace-nowrap text-[24px] font-medium text-[var(--color-text1)] max-[640px]:text-[18px]">Title not available</h2>
+        }
+      } @else {
         <h2 class="mb-[12px] mt-0 block max-w-[700px] overflow-hidden text-ellipsis whitespace-nowrap text-[24px] font-medium text-[var(--color-text1)] max-[640px]:text-[18px]">Title not available</h2>
-      </ng-template>
-
-      <ng-container *ngIf="item?.m_important_content as content; else noDescription">
-        <p *ngIf="content.trim().length > 1; else noDescription" [innerHTML]="content.slice(0, 600)" class="mb-[12px] mt-[10px] select-text break-all text-[14px] font-normal text-[var(--color-text8)]"></p>
-      </ng-container>
-      <ng-template #noDescription>
+      }
+      @if (item?.m_important_content; as content) {
+        @if (content.trim().length > 1) {
+          <p [innerHTML]="content.slice(0, 600)" class="mb-[12px] mt-[10px] select-text break-all text-[14px] font-normal text-[var(--color-text8)]"></p>
+        } @else {
+          <p class="mb-[12px] mt-[10px] select-text break-all text-[14px] font-normal text-[var(--color-text8)]">Description not available</p>
+        }
+      } @else {
         <p class="mb-[12px] mt-[10px] select-text break-all text-[14px] font-normal text-[var(--color-text8)]">Description not available</p>
-      </ng-template>
-
-      <ng-container *ngIf="item.m_ref_html && item.m_ref_html.length>0">
+      }
+      @if (item.m_ref_html && item.m_ref_html.length>0) {
         <span class="mb-[10px] block font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">Webpage Content</span>
         <div [innerHTML]="highlightWords(item.m_ref_html)" class="mb-[12px] mt-[10px] select-text break-all text-[14px] font-normal text-[var(--color-text8)] opacity-60"></div>
-      </ng-container>
-
-      <ng-container *ngIf="item?.m_url as url; else noUrl">
-        <a *ngIf="url.trim().length > 1; else noUrl" [href]="url" target="_blank" rel="noopener noreferrer" class="mb-[20px] mt-[5px] block overflow-hidden text-ellipsis text-[12px] font-medium text-[var(--color-text8)] no-underline hover:text-[var(--color-text1)]">{{ url }}</a>
-      </ng-container>
-      <ng-template #noUrl>
+      }
+      @if (item?.m_url; as url) {
+        @if (url.trim().length > 1) {
+          <a [href]="url" target="_blank" rel="noopener noreferrer" class="mb-[20px] mt-[5px] block overflow-hidden text-ellipsis text-[12px] font-medium text-[var(--color-text8)] no-underline hover:text-[var(--color-text1)]">{{ url }}</a>
+        } @else {
+          <div class="mb-[20px] mt-[5px] block overflow-hidden text-ellipsis text-[12px] font-medium text-[var(--color-text8)]">URL not available</div>
+        }
+      } @else {
         <div class="mb-[20px] mt-[5px] block overflow-hidden text-ellipsis text-[12px] font-medium text-[var(--color-text8)]">URL not available</div>
-      </ng-template>
-
+      }
       <div class="mt-[20px] flex flex-wrap items-center justify-between gap-[15px] rounded-[5px] pt-[10px] pr-[10px] text-[12px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:text-start">
         <div class="flex flex-col gap-[2px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
           <span class="text-[var(--color-text4)]">Published on:</span>
@@ -78,9 +85,11 @@
         </div>
       </div>
     </div>
-  </ng-container>
+  }
 
-  <div class="flex justify-center pt-[4px]" *ngIf="isExpandAble && searchResults.length > 2">
-    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
-  </div>
+  @if (isExpandAble && searchResults.length > 2) {
+    <div class="flex justify-center pt-[4px]">
+      <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    </div>
+  }
 </div>

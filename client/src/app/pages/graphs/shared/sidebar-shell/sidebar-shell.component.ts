@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-graph-sidebar-shell',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './sidebar-shell.component.html',
   host: {
     class: 'block h-[calc(100vh-3rem)] w-full min-h-0',

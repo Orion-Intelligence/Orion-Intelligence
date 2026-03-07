@@ -4,7 +4,7 @@ import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs
 import { ResultComponent } from '../../shared/partials/result/result.component';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { CredentialListComponent } from './credential-list/credential-list.component';
 import { StealerLogCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
 import { SortType } from '../../shared/constants/shared-enums';
@@ -27,12 +27,11 @@ import { ScanHelperMethods } from '../../shared/partials/scan-helper-methods/sca
     CredentialListComponent,
     FormsModule,
     EmptyQueryComponent,
-    NgIf,
     NgClass,
     PaginationComponent,
     CredentialsSearchBarComponent,
     PasswordSchemaComponent,
-    ScanHelperMethods,
+    ScanHelperMethods
   ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],

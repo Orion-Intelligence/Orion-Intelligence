@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 @Component({
   selector: 'app-code-block',
@@ -7,7 +7,6 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
   templateUrl: './code-block.component.html',
   imports: [
     NgClass,
-    NgIf,
     TooltipDirective
   ]
 })

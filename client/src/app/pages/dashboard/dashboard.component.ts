@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
@@ -18,8 +18,7 @@ import { AuthService } from '../../services/authetication/auth.service';
     NgClass,
     RouterOutlet,
     ScrollingModule,
-    NgIf,
-    ProSubscriptionComponent,
+    ProSubscriptionComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]

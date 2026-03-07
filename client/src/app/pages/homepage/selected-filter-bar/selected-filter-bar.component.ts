@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgFor, NgIf, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { filter_mapping } from '../../../shared/constants/filters';
@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 @Component({
   selector: 'app-selected-filter-bar',
-  imports: [NgIf, NgFor, CommonModule],
+  imports: [CommonModule],
   templateUrl: './selected-filter-bar.component.html',
   animations: [fadeInDashboardItem],
 })

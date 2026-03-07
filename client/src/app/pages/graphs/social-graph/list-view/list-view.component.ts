@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { NetworkData, PlatformResult, CustomEntity, NetworkNode } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
@@ -10,7 +10,7 @@ import { buildSocialProfileUrl } from '../utils/profile-url.util';
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
   standalone: true,
-  imports: [CommonModule, SocialIconComponent],
+  imports: [SocialIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListViewComponent {

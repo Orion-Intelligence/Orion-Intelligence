@@ -1,11 +1,11 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { AppService } from '../../../services/core/app/app.service';
 @Component({
   selector: 'app-password-schema',
-  imports: [FormsModule, NgIf, NgClass],
+  imports: [FormsModule, NgClass],
   templateUrl: './password-schema.component.html'
 })
 export class PasswordSchemaComponent {

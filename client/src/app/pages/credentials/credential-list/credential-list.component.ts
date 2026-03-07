@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { DatePipe, NgForOf, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../shared/animations/row.animations';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -10,7 +10,7 @@ import { ExpandedRowComponent } from '../expanded-row/expanded-row.component';
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem, expandFadeRow],
-  imports: [NgForOf, NgIf, ExpandedRowComponent, DatePipe]
+  imports: [ExpandedRowComponent, DatePipe]
 })
 export class CredentialListComponent {
   pageSize: number = 500;

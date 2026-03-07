@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { NgIf, NgFor, CommonModule, NgClass } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
@@ -10,7 +10,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 @Component({
   selector: 'app-alert-notification',
-  imports: [NgIf, NgFor, CommonModule, NgClass],
+  imports: [CommonModule, NgClass],
   templateUrl: './alert-notification.component.html',
   animations: [sidebarAnimation, overlayAnimation],
 })

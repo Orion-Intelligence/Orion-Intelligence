@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgIf, NgFor, NgSwitch, NgSwitchCase, CommonModule, NgClass } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { TenantModel, TenantStatusValues } from '../../shared/model/tenant/tenant.model';
 import { search_filter_labels } from '../../shared/constants/shared-enums';
 import { Router } from '@angular/router';
@@ -11,7 +11,7 @@ import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-p
 import { HeaderComponent } from '../../shared/partials/header/login-header/header.component';
 @Component({
   selector: 'app-tenant',
-  imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, FormsModule, CommonModule, TooltipDirective, ConfirmationPopupComponent, NgClass, HeaderComponent],
+  imports: [FormsModule, CommonModule, TooltipDirective, ConfirmationPopupComponent, NgClass, HeaderComponent],
   templateUrl: './tenant.component.html'
 })
 export class TenantComponent implements OnInit {

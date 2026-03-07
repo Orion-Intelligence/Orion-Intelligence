@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, NgClass, NgIf, NgOptimizedImage } from '@angular/common';
+import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
 import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
 import { BehaviorSubject } from 'rxjs';
@@ -13,7 +13,7 @@ import { HelperService } from '../../../shared/services/helper.service';
 import { take } from 'rxjs/operators';
 @Component({
   selector: 'app-auditlog',
-  imports: [FormsModule, PaginationComponent, AsyncPipe, AuditlogListComponent, FiltersComponent, NgOptimizedImage, NgClass, NgIf],
+  imports: [FormsModule, PaginationComponent, AsyncPipe, AuditlogListComponent, FiltersComponent, NgOptimizedImage, NgClass],
   templateUrl: './auditlog.component.html'
 })
 export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackModel> {

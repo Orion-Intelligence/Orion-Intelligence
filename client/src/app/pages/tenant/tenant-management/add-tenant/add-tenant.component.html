@@ -1,75 +1,83 @@
 <div class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-4" @overlayAnimation (click)="onClose()">
-    <div data-testid="tenant-add-user-modal" class="ui-popup-shell relative max-h-[800px] w-full max-w-[1000px] overflow-y-auto rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[35px] text-[var(--color-text1)] shadow-[0_0_30px_rgba(0,0,0,0.3)]" @popupAnimation (click)="$event.stopPropagation()">
-        <div class="ui-popup-header border-b border-[var(--color-border)] pb-4">
-            <div class="ui-popup-title m-0 text-[24px] font-semibold">Add User</div>
-            <button class="ui-popup-close absolute right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="onClose()">×</button>
-        </div>
-
-        <form>
-
-            <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Username</label>
-            <input data-testid="tenant-add-user-username" type="text" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
-            <div class="mt-[6px] rounded-[6px] border border-[#ffcc80] bg-[#fff4e5] px-[12px] py-[10px] text-[13px] text-[#a66300]" *ngIf="usernameSuggestion">
-                <div class="mb-[4px] font-semibold">Username already taken, suggested usernames below</div>
-                <div class="text-[12px] opacity-90">
-                    {{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}
-                </div>
-            </div>
-
-            <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Email</label>
-            <input data-testid="tenant-add-user-email" type="email" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
-
-            <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Password</label>
-            <input data-testid="tenant-add-user-password" type="password" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter password" [(ngModel)]="model.password" name="password" />
-
-            <div class="grid grid-cols-2 gap-5">
-                <div>
-                    <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Role</label>
-                    <select class="ui-popup-select w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none" [(ngModel)]="model.role" name="role">
-                        <ng-container *ngIf="isAdmin; else nonAdminRoles">
-                            <option [ngValue]="'analyst'">Analyst</option>
-                            <option [ngValue]="'demo'">Demo</option>
-                        </ng-container>
-                        <ng-template #nonAdminRoles>
-                            <option [ngValue]="'analyst'">Analyst</option>
-                            <option [ngValue]="'member'">Member</option>
-                        </ng-template>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Status</label>
-                    <select class="ui-popup-select w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none" [(ngModel)]="model.status" name="status">
-                        <option [ngValue]="'active'">Active</option>
-                        <option [ngValue]="'disable'">Disable</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">Licenses</div>
-            <div class="license-grid mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]" *ngIf="hasFullLicenseAccess || visibleTenantLicensesCount > 1">
-                <ng-container *ngFor="let license of licenseList">
-                    <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'bg-[var(--color-blue-640)] border-[var(--color-blue-630)] text-white border' : 'bg-[var(--color-blue-820)] border-[var(--color-border)] border'" *ngIf="(hasFullLicenseAccess || tenantLicenses.includes(license)) && license !== 'maintainer'" (click)="toggleTenantLicense(model, license)">
-                        <input type="checkbox" class="hidden" [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
-                        <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'text-white' : ''">
-                            {{ licenseService.getLicenseLabel(license) }}
-                        </span>
-                    </div>
-                </ng-container>
-            </div>
-
-            <div *ngIf="errorText" class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-[var(--color-text1)] shadow-sm d-block">
-
-                <i class="bi bi-exclamation-diamond-fill me-2"></i>
-                {{ errorText }}
-            </div>
-
-        </form>
-
-        <div class="ui-popup-footer mt-[30px] flex justify-end gap-[15px] border-t border-[var(--color-border)] pt-4">
-            <button class="ui-popup-btn-secondary inline-flex h-[42px] min-w-[132px] items-center justify-center rounded-[8px] border border-[#A0B8D1] bg-transparent px-6 text-[14px] font-medium text-[var(--color-text1)] transition-[background-color,border-color] duration-200 hover:border-[#c3d4e6] hover:bg-[rgba(160,184,209,0.14)]" (click)="onClose()">Cancel</button>
-            <button data-testid="tenant-add-user-submit" class="ui-popup-btn-primary inline-flex h-[42px] min-w-[132px] items-center justify-center rounded-[8px] border-none bg-[#57A5EB] px-6 text-[14px] font-medium text-[#0e1626] transition-colors duration-200 hover:bg-[#4b98dc]" (click)="onSubmit()">Add User</button>
-        </div>
-
+  <div data-testid="tenant-add-user-modal" class="ui-popup-shell relative max-h-[800px] w-full max-w-[1000px] overflow-y-auto rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-830)] p-[35px] text-[var(--color-text1)] shadow-[0_0_30px_rgba(0,0,0,0.3)]" @popupAnimation (click)="$event.stopPropagation()">
+    <div class="ui-popup-header border-b border-[var(--color-border)] pb-4">
+      <div class="ui-popup-title m-0 text-[24px] font-semibold">Add User</div>
+      <button class="ui-popup-close absolute right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="onClose()">×</button>
     </div>
+
+    <form>
+
+      <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Username</label>
+      <input data-testid="tenant-add-user-username" type="text" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter username" [(ngModel)]="model.username" name="username" />
+      @if (usernameSuggestion) {
+        <div class="mt-[6px] rounded-[6px] border border-[#ffcc80] bg-[#fff4e5] px-[12px] py-[10px] text-[13px] text-[#a66300]">
+          <div class="mb-[4px] font-semibold">Username already taken, suggested usernames below</div>
+          <div class="text-[12px] opacity-90">
+            {{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}
+          </div>
+        </div>
+      }
+
+      <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Email</label>
+      <input data-testid="tenant-add-user-email" type="email" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
+
+      <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Password</label>
+      <input data-testid="tenant-add-user-password" type="password" class="ui-popup-input w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" placeholder="Enter password" [(ngModel)]="model.password" name="password" />
+
+      <div class="grid grid-cols-2 gap-5">
+        <div>
+          <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Role</label>
+          <select class="ui-popup-select w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none" [(ngModel)]="model.role" name="role">
+            @if (isAdmin) {
+              <option [ngValue]="'analyst'">Analyst</option>
+              <option [ngValue]="'demo'">Demo</option>
+            } @else {
+              <option [ngValue]="'analyst'">Analyst</option>
+              <option [ngValue]="'member'">Member</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Status</label>
+          <select class="ui-popup-select w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none" [(ngModel)]="model.status" name="status">
+            <option [ngValue]="'active'">Active</option>
+            <option [ngValue]="'disable'">Disable</option>
+          </select>
+        </div>
+      </div>
+
+      @if (hasFullLicenseAccess || visibleTenantLicensesCount > 1) {
+        <div class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">Licenses</div>
+      }
+      @if (hasFullLicenseAccess || visibleTenantLicensesCount > 1) {
+        <div class="license-grid mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
+          @for (license of licenseList; track license) {
+            @if ((hasFullLicenseAccess || tenantLicenses.includes(license)) && license !== 'maintainer') {
+              <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'bg-[var(--color-blue-640)] border-[var(--color-blue-630)] text-white border' : 'bg-[var(--color-blue-820)] border-[var(--color-border)] border'" (click)="toggleTenantLicense(model, license)">
+                <input type="checkbox" class="hidden" [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
+                <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'text-white' : ''">
+                  {{ licenseService.getLicenseLabel(license) }}
+                </span>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      @if (errorText) {
+        <div class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-[var(--color-text1)] shadow-sm d-block">
+          <i class="bi bi-exclamation-diamond-fill me-2"></i>
+          {{ errorText }}
+        </div>
+      }
+
+    </form>
+
+    <div class="ui-popup-footer mt-[30px] flex justify-end gap-[15px] border-t border-[var(--color-border)] pt-4">
+      <button class="ui-popup-btn-secondary inline-flex h-[42px] min-w-[132px] items-center justify-center rounded-[8px] border border-[#A0B8D1] bg-transparent px-6 text-[14px] font-medium text-[var(--color-text1)] transition-[background-color,border-color] duration-200 hover:border-[#c3d4e6] hover:bg-[rgba(160,184,209,0.14)]" (click)="onClose()">Cancel</button>
+      <button data-testid="tenant-add-user-submit" class="ui-popup-btn-primary inline-flex h-[42px] min-w-[132px] items-center justify-center rounded-[8px] border-none bg-[#57A5EB] px-6 text-[14px] font-medium text-[#0e1626] transition-colors duration-200 hover:bg-[#4b98dc]" (click)="onSubmit()">Add User</button>
+    </div>
+
+  </div>
 </div>

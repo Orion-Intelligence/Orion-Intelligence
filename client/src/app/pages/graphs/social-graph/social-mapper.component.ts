@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, PLATFORM_ID, effect, OnInit, viewChild, ElementRef, Inject, inject, ViewEncapsulation } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { NetworkGraphComponent } from './network-graph/network-graph.component';
 import { MetadataPopupComponent } from './metadata-popup/metadata-popup.component';
 import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-summary-popup.component';
@@ -37,13 +37,23 @@ import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/u
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
-    CommonModule, NetworkGraphComponent, MetadataPopupComponent,
-    ProfileSummaryPopupComponent, HomeMenuComponent,
-    ListViewComponent, TabBarComponent,
-    FollowerScanPopupComponent, ManageProfilesModalComponent, ConfirmationPopupComponent,
-    MessagePopupComponent, ContextMenuComponent, NotificationBarComponent,
-    EntityManagerComponent, AddEntityModalComponent, RelationshipDetailsPopupComponent,
-    GraphToolbarComponent, GraphSearchTriggerComponent
+    NetworkGraphComponent,
+    MetadataPopupComponent,
+    ProfileSummaryPopupComponent,
+    HomeMenuComponent,
+    ListViewComponent,
+    TabBarComponent,
+    FollowerScanPopupComponent,
+    ManageProfilesModalComponent,
+    ConfirmationPopupComponent,
+    MessagePopupComponent,
+    ContextMenuComponent,
+    NotificationBarComponent,
+    EntityManagerComponent,
+    AddEntityModalComponent,
+    RelationshipDetailsPopupComponent,
+    GraphToolbarComponent,
+    GraphSearchTriggerComponent
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {

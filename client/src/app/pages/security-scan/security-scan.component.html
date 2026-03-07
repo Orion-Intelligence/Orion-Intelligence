@@ -1,225 +1,223 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 py-4 lg:px-8">
-<form #searchForm="ngForm" (submit)="onSearchSubmit()" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">
-  <div class="flex w-full flex-wrap items-start gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3">
-    <div class="w-full">
-      <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
-        <div class="flex w-[45px] items-center justify-center bg-white">
-          <img alt="Search" height="20" ngSrc="/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
+  <form #searchForm="ngForm" (submit)="onSearchSubmit()" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">
+    <div class="flex w-full flex-wrap items-start gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3">
+      <div class="w-full">
+        <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+          <div class="flex w-[45px] items-center justify-center bg-white">
+            <img alt="Search" height="20" ngSrc="/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
+          </div>
+          <input data-testid="scan-primary-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
+          <input type="hidden" value="1">
+          <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">Search</button>
         </div>
-        <input data-testid="scan-primary-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
-        <input type="hidden" value="1">
-        <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">Search</button>
       </div>
     </div>
-  </div>
-</form>
+  </form>
 
-<app-empty-query *ngIf="!isFetched && !isLoading"></app-empty-query>
+  @if (!isFetched && !isLoading) {
+    <app-empty-query></app-empty-query>
+  }
 
-<ng-container *ngIf="isFetched || isLoading">
-  <div class="mt-[12px] ml-0 max-w-[720px]" *ngIf="!hasError && isLoading">
-    <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</div>
-    <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-      <div class="ui-progress-indeterminate-bar"></div>
-    </div>
-  </div>
-
-  <div class="mt-[12px] flex justify-end" *ngIf="!hasError && !isLoading">
-    <div class="security-scan-action-menu inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
-      <button data-testid="scan-download-report" (click)="exportReport()" appTooltip="Download" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="Download" height="25" ngSrc="../../../assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
-      </button>
-      <div class="security-scan-action-divider my-[10px] w-px bg-[var(--color-border)]"></div>
-
-      <button data-testid="scan-print-report" ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="Print" height="25" ngSrc="../../../assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
-      </button>
-    </div>
-  </div>
-
-  <div class="mt-[12px] rounded-[10px] bg-[var(--color-blue-720)] p-0 text-[var(--color-text1)]">
-    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
-      <div class="text-[18px] font-semibold text-[var(--color-text7)]">Scan Failed</div>
-      <div class="mt-[6px] text-[14px] text-[var(--color-text7)]">{{ errorMessage }}</div>
-      <ul class="mt-[10px] list-disc pl-[18px] text-[13px] text-[var(--color-text7)]">
-        <li>The server may be temporarily unavailable</li>
-        <li>The target website may not be reachable</li>
-        <li>An unexpected error occurred during scanning</li>
-      </ul>
-      <div class="mt-[16px]">
-        <button class="ui-btn ui-btn-danger rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="retry()">Scan Again</button>
+  @if (isFetched || isLoading) {
+    @if (!hasError && isLoading) {
+      <div class="mt-[12px] ml-0 max-w-[720px]">
+        <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</div>
+        <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+          <div class="ui-progress-indeterminate-bar"></div>
+        </div>
       </div>
-    </div>
-
-    <div class="relative overflow-hidden rounded-[14px] border p-[18px] sm:p-[22px]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-100)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-100)]': grade === 'C', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }" *ngIf="!hasError">
-      <div class="pointer-events-none absolute inset-x-0 top-0 h-[235px] opacity-70 md:h-[135px]" [ngClass]="{ 'bg-[radial-gradient(circle_at_top_left,rgba(220,53,69,0.30),transparent_65%)]': !isLoading && (grade === 'D' || grade === 'F'), 'bg-[radial-gradient(circle_at_top_left,rgba(255,193,7,0.35),transparent_65%)]': !isLoading && grade === 'C', 'bg-[radial-gradient(circle_at_top_left,rgba(78,162,241,0.30),transparent_65%)]': !isLoading && !(grade === 'D' || grade === 'F' || grade === 'C') }"></div>
-
-      <div class="relative">
-        <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton">
-          <div class="flex flex-col gap-[14px] lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div data-testid="scan-security-posture" class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">Security Posture</div>
-              <h3 class="mt-[10px] text-[22px] font-semibold leading-tight sm:text-[24px]">
-                Report for
-                <a class="ml-1 underline decoration-dotted underline-offset-4" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ displayHost }}</a>
-              </h3>
-              <p class="mt-[4px] text-[13px] text-[var(--color-text4)]">Snapshot of core endpoint metadata and scan context.</p>
-            </div>
-
-            <div class="min-w-[140px] rounded-[12px] border px-[14px] py-[12px] text-center" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15': !(grade === 'D' || grade === 'F' || grade === 'C') }">
-              <div class="text-[46px] font-bold leading-none text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{{ grade || '—' }}</div>
-              <div class="mt-[6px] text-[12px] text-[var(--color-text4)]">
-                {{ (grade === 'D' || grade === 'F') ? 'High Risk' : (grade === 'C' ? 'Needs Attention' : 'Good Posture') }}
-              </div>
-            </div>
+    }
+    @if (!hasError && !isLoading) {
+      <div class="mt-[12px] flex justify-end">
+        <div class="security-scan-action-menu inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
+          <button data-testid="scan-download-report" (click)="exportReport()" appTooltip="Download" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+            <img alt="Download" height="25" ngSrc="../../../assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
+          </button>
+          <div class="security-scan-action-divider my-[10px] w-px bg-[var(--color-border)]"></div>
+          <button data-testid="scan-print-report" ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+            <img alt="Print" height="25" ngSrc="../../../assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
+          </button>
+        </div>
+      </div>
+    }
+    <div class="mt-[12px] rounded-[10px] bg-[var(--color-blue-720)] p-0 text-[var(--color-text1)]">
+      @if (hasError && !isLoading) {
+        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" @fadeInDashboardItem>
+          <div class="text-[18px] font-semibold text-[var(--color-text7)]">Scan Failed</div>
+          <div class="mt-[6px] text-[14px] text-[var(--color-text7)]">{{ errorMessage }}</div>
+          <ul class="mt-[10px] list-disc pl-[18px] text-[13px] text-[var(--color-text7)]">
+            <li>The server may be temporarily unavailable</li>
+            <li>The target website may not be reachable</li>
+            <li>An unexpected error occurred during scanning</li>
+          </ul>
+          <div class="mt-[16px]">
+            <button class="ui-btn ui-btn-danger rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="retry()">Scan Again</button>
           </div>
-        </ng-container>
-
-        <div class="my-[16px] h-px w-full" [ngClass]="{ 'bg-[var(--color-border-red)]': grade === 'D' || grade === 'F', 'bg-[var(--color-border-orange)]': grade === 'C', 'bg-[var(--color-divider)]': !(grade === 'D' || grade === 'F' || grade === 'C') }"></div>
-
-        <ng-container *ngIf="!isLoading && meta; else metaGridSkeleton">
-          <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-12" @fadeInDashboardItem>
-            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] sm:col-span-2 xl:col-span-8">
-              <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Target URL</p>
-              <a class="block break-all text-[14px] font-medium text-[var(--color-text1)] underline decoration-[var(--color-border)] underline-offset-4 hover:text-[var(--color-text1)]" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ meta.URL }}</a>
-            </div>
-
-            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-4">
-              <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Host</p>
-              <p class="text-[16px] font-semibold text-[var(--color-text1)]">{{ displayHost }}</p>
-            </div>
-
-            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-              <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Port</p>
-              <p class="text-[16px] font-semibold text-[var(--color-text1)]">{{ displayPort }}</p>
-            </div>
-
-            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-              <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">TLS Status</p>
-              <span class="security-scan-tls-pill mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="hasSSL ? 'bg-emerald-500/10 text-emerald-300 security-scan-tls-pill--ok' : 'bg-rose-500/10 text-rose-300 security-scan-tls-pill--bad'">
-                {{ hasSSL ? 'ssl enabled' : 'no ssl detected' }}
-              </span>
-            </div>
-
-            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-              <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Scanned On</p>
-              <p class="text-[14px] font-medium text-[var(--color-text1)]">{{ meta.Scanned_on_date }}</p>
-            </div>
-
-            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-              <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Scanned By</p>
-              <p class="text-[14px] font-medium text-[var(--color-text1)]">{{ meta.Scanned_by }}</p>
-            </div>
+        </div>
+      }
+      @if (!hasError) {
+        <div class="relative overflow-hidden rounded-[14px] border p-[18px] sm:p-[22px]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-100)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-100)]': grade === 'C', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-[235px] opacity-70 md:h-[135px]" [ngClass]="{ 'bg-[radial-gradient(circle_at_top_left,rgba(220,53,69,0.30),transparent_65%)]': !isLoading && (grade === 'D' || grade === 'F'), 'bg-[radial-gradient(circle_at_top_left,rgba(255,193,7,0.35),transparent_65%)]': !isLoading && grade === 'C', 'bg-[radial-gradient(circle_at_top_left,rgba(78,162,241,0.30),transparent_65%)]': !isLoading && !(grade === 'D' || grade === 'F' || grade === 'C') }"></div>
+          <div class="relative">
+            @if (!isLoading && meta) {
+              <div class="flex flex-col gap-[14px] lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <div data-testid="scan-security-posture" class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">Security Posture</div>
+                  <h3 class="mt-[10px] text-[22px] font-semibold leading-tight sm:text-[24px]">
+                    Report for
+                    <a class="ml-1 underline decoration-dotted underline-offset-4" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ displayHost }}</a>
+                  </h3>
+                  <p class="mt-[4px] text-[13px] text-[var(--color-text4)]">Snapshot of core endpoint metadata and scan context.</p>
+                </div>
+                <div class="min-w-[140px] rounded-[12px] border px-[14px] py-[12px] text-center" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15': !(grade === 'D' || grade === 'F' || grade === 'C') }">
+                  <div class="text-[46px] font-bold leading-none text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{{ grade || '—' }}</div>
+                  <div class="mt-[6px] text-[12px] text-[var(--color-text4)]">
+                    {{ (grade === 'D' || grade === 'F') ? 'High Risk' : (grade === 'C' ? 'Needs Attention' : 'Good Posture') }}
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="flex flex-col gap-[14px] lg:flex-row lg:items-center lg:justify-between">
+                <div class="space-y-[8px]">
+                  <div class="ui-shimmer h-[22px] w-[140px] rounded-full bg-[var(--color-divider)]"></div>
+                  <div class="ui-shimmer h-[26px] w-[280px] max-w-[75vw] rounded-[6px] bg-[var(--color-divider)]"></div>
+                  <div class="ui-shimmer h-[14px] w-[340px] max-w-[82vw] rounded-[6px] bg-[var(--color-divider)]"></div>
+                </div>
+                <div class="rounded-[12px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] px-[14px] py-[12px]">
+                  <div class="ui-shimmer h-[44px] w-[58px] rounded-[8px] bg-[var(--color-divider)]"></div>
+                  <div class="ui-shimmer mt-[8px] h-[12px] w-[86px] rounded-[6px] bg-[var(--color-divider)]"></div>
+                </div>
+              </div>
+            }
+            <div class="my-[16px] h-px w-full" [ngClass]="{ 'bg-[var(--color-border-red)]': grade === 'D' || grade === 'F', 'bg-[var(--color-border-orange)]': grade === 'C', 'bg-[var(--color-divider)]': !(grade === 'D' || grade === 'F' || grade === 'C') }"></div>
+            @if (!isLoading && meta) {
+              <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-12" @fadeInDashboardItem>
+                <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] sm:col-span-2 xl:col-span-8">
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Target URL</p>
+                  <a class="block break-all text-[14px] font-medium text-[var(--color-text1)] underline decoration-[var(--color-border)] underline-offset-4 hover:text-[var(--color-text1)]" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ meta.URL }}</a>
+                </div>
+                <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-4">
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Host</p>
+                  <p class="text-[16px] font-semibold text-[var(--color-text1)]">{{ displayHost }}</p>
+                </div>
+                <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Port</p>
+                  <p class="text-[16px] font-semibold text-[var(--color-text1)]">{{ displayPort }}</p>
+                </div>
+                <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">TLS Status</p>
+                  <span class="security-scan-tls-pill mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="hasSSL ? 'bg-emerald-500/10 text-emerald-300 security-scan-tls-pill--ok' : 'bg-rose-500/10 text-rose-300 security-scan-tls-pill--bad'">
+                    {{ hasSSL ? 'ssl enabled' : 'no ssl detected' }}
+                  </span>
+                </div>
+                <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Scanned On</p>
+                  <p class="text-[14px] font-medium text-[var(--color-text1)]">{{ meta.Scanned_on_date }}</p>
+                </div>
+                <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Scanned By</p>
+                  <p class="text-[14px] font-medium text-[var(--color-text1)]">{{ meta.Scanned_by }}</p>
+                </div>
+              </div>
+            } @else {
+              @if (isLoading) {
+                <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-12">
+                  <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] sm:col-span-2 xl:col-span-8">
+                    <div class="ui-shimmer h-[11px] w-[96px] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[9px] h-[15px] w-full rounded-[5px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[7px] h-[15px] w-[72%] rounded-[5px] bg-[var(--color-divider)]"></div>
+                  </div>
+                  <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-4">
+                    <div class="ui-shimmer h-[11px] w-[70px] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[9px] h-[16px] w-[85%] rounded-[5px] bg-[var(--color-divider)]"></div>
+                  </div>
+                  <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
+                    <div class="ui-shimmer h-[11px] w-[64px] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[9px] h-[16px] w-[52px] rounded-[5px] bg-[var(--color-divider)]"></div>
+                  </div>
+                  <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
+                    <div class="ui-shimmer h-[11px] w-[84px] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[9px] h-[20px] w-[120px] rounded-full bg-[var(--color-divider)]"></div>
+                  </div>
+                  <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
+                    <div class="ui-shimmer h-[11px] w-[86px] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[9px] h-[15px] w-[130px] rounded-[5px] bg-[var(--color-divider)]"></div>
+                  </div>
+                  <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
+                    <div class="ui-shimmer h-[11px] w-[84px] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[9px] h-[15px] w-[150px] rounded-[5px] bg-[var(--color-divider)]"></div>
+                  </div>
+                </div>
+              }
+            }
           </div>
-        </ng-container>
-      </div>
-    </div>
-
-    <ng-container *ngIf="!isLoading && !hasError; else categoriesSkeleton">
-      <ng-container *ngIf="categories.length">
-        <div class="security-scan-findings-section mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngFor="let cat of categories; trackBy: trackByCategory" @fadeInDashboardItem>
-          <h3 data-testid="scan-findings-title" class="text-[18px] font-medium text-[var(--color-blue-640)]">{{ cat.name }} Findings ({{ cat.total }})</h3>
-          <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
-          <div class="flex flex-col gap-[15px]">
-            <div class="security-scan-finding-card rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
-              <div class="flex items-center gap-[8px]">
-                <span class="h-[10px] w-[10px] rounded-full" [ngClass]="{ 'bg-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'bg-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'bg-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'bg-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }"></span>
-                <h4 class="text-[16px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
-              </div>
-
-              <p class="mt-[10px] text-[14px] text-[var(--color-text4)]">{{ item.description }}</p>
-              <div class="mt-[10px]">
-                <span class="security-scan-risk-pill inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium" [ngClass]="{ 'text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
-                  {{ item.risk }} Risk ({{ item.confidence }} Confidence)
-                </span>
-              </div>
-              <app-code-block [code]="item.proof" *ngIf="item.proof"></app-code-block>
+        </div>
+      }
+      @if (!isLoading && !hasError) {
+        @if (categories.length) {
+          @for (cat of categories; track trackByCategory($index, cat)) {
+            <div class="security-scan-findings-section mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" @fadeInDashboardItem>
+              <h3 data-testid="scan-findings-title" class="text-[18px] font-medium text-[var(--color-blue-640)]">{{ cat.name }} Findings ({{ cat.total }})</h3>
               <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-
-      <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngIf="!categories.length && meta" @fadeInDashboardItem>
-        <div class="text-[16px] font-semibold text-[var(--color-text1)]">No Findings</div>
-        <div class="mt-[6px] text-[14px] text-[var(--color-text4)]">No issues were detected for this target.</div>
-        <button class="mt-[12px] rounded-[8px] border border-[var(--color-border)] bg-transparent px-[12px] py-[6px] text-[14px] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)]" (click)="retry()">Rescan</button>
-      </div>
-    </ng-container>
-
-    <ng-template #metaTitleSkeleton>
-      <div class="flex flex-col gap-[14px] lg:flex-row lg:items-center lg:justify-between">
-        <div class="space-y-[8px]">
-          <div class="ui-shimmer h-[22px] w-[140px] rounded-full bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer h-[26px] w-[280px] max-w-[75vw] rounded-[6px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer h-[14px] w-[340px] max-w-[82vw] rounded-[6px] bg-[var(--color-divider)]"></div>
-        </div>
-        <div class="rounded-[12px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] px-[14px] py-[12px]">
-          <div class="ui-shimmer h-[44px] w-[58px] rounded-[8px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[8px] h-[12px] w-[86px] rounded-[6px] bg-[var(--color-divider)]"></div>
-        </div>
-      </div>
-    </ng-template>
-
-    <ng-template #metaGridSkeleton>
-      <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-12" *ngIf="isLoading">
-        <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] sm:col-span-2 xl:col-span-8">
-          <div class="ui-shimmer h-[11px] w-[96px] rounded-[4px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[9px] h-[15px] w-full rounded-[5px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[7px] h-[15px] w-[72%] rounded-[5px] bg-[var(--color-divider)]"></div>
-        </div>
-
-        <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-4">
-          <div class="ui-shimmer h-[11px] w-[70px] rounded-[4px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[9px] h-[16px] w-[85%] rounded-[5px] bg-[var(--color-divider)]"></div>
-        </div>
-
-        <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
-          <div class="ui-shimmer h-[11px] w-[64px] rounded-[4px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[9px] h-[16px] w-[52px] rounded-[5px] bg-[var(--color-divider)]"></div>
-        </div>
-
-        <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
-          <div class="ui-shimmer h-[11px] w-[84px] rounded-[4px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[9px] h-[20px] w-[120px] rounded-full bg-[var(--color-divider)]"></div>
-        </div>
-
-        <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
-          <div class="ui-shimmer h-[11px] w-[86px] rounded-[4px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[9px] h-[15px] w-[130px] rounded-[5px] bg-[var(--color-divider)]"></div>
-        </div>
-
-        <div class="rounded-[10px] border border-[var(--color-border)] !bg-[var(--color-blue-700)] p-[14px] xl:col-span-3">
-          <div class="ui-shimmer h-[11px] w-[84px] rounded-[4px] bg-[var(--color-divider)]"></div>
-          <div class="ui-shimmer mt-[9px] h-[15px] w-[150px] rounded-[5px] bg-[var(--color-divider)]"></div>
-        </div>
-      </div>
-    </ng-template>
-
-    <ng-template #categoriesSkeleton>
-      <ng-container *ngIf="isLoading">
-        <div class="security-scan-findings-section security-scan-findings-skeleton mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" *ngFor="let i of skeletonCards; index as idx" @fadeInDashboardItem>
-          <div class="ui-shimmer h-[18px] w-[220px] rounded-[6px] bg-[var(--color-divider)]"></div>
-          <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
-          <div class="flex flex-col gap-[12px]">
-            <div class="security-scan-finding-card security-scan-finding-skeleton rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" *ngFor="let j of skeletonCards; index as jdx">
-              <div class="flex items-center gap-[8px]">
-                <div class="ui-shimmer h-[10px] w-[10px] rounded-full bg-[var(--color-divider)]"></div>
-                <div class="ui-shimmer h-[14px] w-[200px] rounded-[4px] bg-[var(--color-divider)]"></div>
+              <div class="flex flex-col gap-[15px]">
+                @for (item of cat.items; track trackByItem($index)) {
+                  <div class="security-scan-finding-card rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" @fadeInDashboardItem>
+                    <div class="flex items-center gap-[8px]">
+                      <span class="h-[10px] w-[10px] rounded-full" [ngClass]="{ 'bg-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'bg-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'bg-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'bg-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }"></span>
+                      <h4 class="text-[16px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
+                    </div>
+                    <p class="mt-[10px] text-[14px] text-[var(--color-text4)]">{{ item.description }}</p>
+                    <div class="mt-[10px]">
+                      <span class="security-scan-risk-pill inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium" [ngClass]="{ 'text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
+                        {{ item.risk }} Risk ({{ item.confidence }} Confidence)
+                      </span>
+                    </div>
+                    @if (item.proof) {
+                      <app-code-block [code]="item.proof"></app-code-block>
+                    }
+                    <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
+                  </div>
+                }
               </div>
-              <div class="ui-shimmer mt-[10px] h-[12px] w-full rounded-[4px] bg-[var(--color-divider)]"></div>
-              <div class="ui-shimmer mt-[7px] h-[12px] w-[75%] rounded-[4px] bg-[var(--color-divider)]"></div>
-              <div class="ui-shimmer mt-[10px] h-[20px] w-[150px] rounded-full bg-[var(--color-divider)]"></div>
-              <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
             </div>
+          }
+        }
+        @if (!categories.length && meta) {
+          <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" @fadeInDashboardItem>
+            <div class="text-[16px] font-semibold text-[var(--color-text1)]">No Findings</div>
+            <div class="mt-[6px] text-[14px] text-[var(--color-text4)]">No issues were detected for this target.</div>
+            <button class="mt-[12px] rounded-[8px] border border-[var(--color-border)] bg-transparent px-[12px] py-[6px] text-[14px] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)]" (click)="retry()">Rescan</button>
           </div>
-        </div>
-      </ng-container>
-    </ng-template>
-  </div>
-
-  <div id="scanReport" class="hidden">
-    <app-security-scan-export-component *ngIf="meta" [meta]="meta" [categories]="categories"></app-security-scan-export-component>
-  </div>
-</ng-container>
+        }
+      } @else {
+        @if (isLoading) {
+          @for (i of skeletonCards; track i; let idx = $index) {
+            <div class="security-scan-findings-section security-scan-findings-skeleton mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" @fadeInDashboardItem>
+              <div class="ui-shimmer h-[18px] w-[220px] rounded-[6px] bg-[var(--color-divider)]"></div>
+              <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
+              <div class="flex flex-col gap-[12px]">
+                @for (j of skeletonCards; track j; let jdx = $index) {
+                  <div class="security-scan-finding-card security-scan-finding-skeleton rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]">
+                    <div class="flex items-center gap-[8px]">
+                      <div class="ui-shimmer h-[10px] w-[10px] rounded-full bg-[var(--color-divider)]"></div>
+                      <div class="ui-shimmer h-[14px] w-[200px] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    </div>
+                    <div class="ui-shimmer mt-[10px] h-[12px] w-full rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[7px] h-[12px] w-[75%] rounded-[4px] bg-[var(--color-divider)]"></div>
+                    <div class="ui-shimmer mt-[10px] h-[20px] w-[150px] rounded-full bg-[var(--color-divider)]"></div>
+                    <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
+    <div id="scanReport" class="hidden">
+      @if (meta) {
+        <app-security-scan-export-component [meta]="meta" [categories]="categories"></app-security-scan-export-component>
+      }
+    </div>
+  }
 </div>

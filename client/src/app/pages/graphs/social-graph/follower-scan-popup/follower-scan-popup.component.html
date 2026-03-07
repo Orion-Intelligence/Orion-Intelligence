@@ -26,92 +26,119 @@
         <nav class="-mb-px flex space-x-4" aria-label="Tabs">
           <button type="button" (click)="activeTab.set('followers')" [class]="'flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'followers' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-[var(--color-text4)] hover:text-[var(--color-text2)] hover:border-[var(--color-border)]')">
             <span>Followers</span>
-            <span *ngIf="platform().followers_list" class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'followers' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-[var(--color-blue-720)] text-[var(--color-text2)]'">{{ followers().length }}</span>
+            @if (platform().followers_list) {
+              <span class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'followers' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-[var(--color-blue-720)] text-[var(--color-text2)]'">{{ followers().length }}</span>
+            }
           </button>
           <button type="button" (click)="activeTab.set('following')" [class]="'flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'following' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-[var(--color-text4)] hover:text-[var(--color-text2)] hover:border-[var(--color-border)]')">
             <span>Following</span>
-            <span *ngIf="platform().following_list" class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'following' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-[var(--color-blue-720)] text-[var(--color-text2)]'">{{ following().length }}</span>
+            @if (platform().following_list) {
+              <span class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'following' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-[var(--color-blue-720)] text-[var(--color-text2)]'">{{ following().length }}</span>
+            }
           </button>
           <button type="button" (click)="activeTab.set('connections')" [class]="'flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'connections' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-[var(--color-text4)] hover:text-[var(--color-text2)] hover:border-[var(--color-border)]')">
             <span>Connections</span>
-            <span *ngIf="platform().post_connections" class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'connections' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-[var(--color-blue-720)] text-[var(--color-text2)]'">{{ connections().length }}</span>
+            @if (platform().post_connections) {
+              <span class="px-2 py-0.5 text-xs rounded-full" [class]="activeTab() === 'connections' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-[var(--color-blue-720)] text-[var(--color-text2)]'">{{ connections().length }}</span>
+            }
           </button>
         </nav>
       </div>
 
       <div class="flex-grow mt-3 min-h-0 relative overflow-hidden">
         <div class="absolute inset-0 transition-all duration-300 ease-out" [class.opacity-100]="activeTab() === 'followers'" [class.opacity-0]="activeTab() !== 'followers'" [class.translate-x-0]="activeTab() === 'followers'" [class.-translate-x-4]="activeTab() !== 'followers'" [class.pointer-events-auto]="activeTab() === 'followers'" [class.pointer-events-none]="activeTab() !== 'followers'">
-          <div *ngIf="followers().length > 0; else fetchFollowersState" class="h-full flex flex-col">
-            <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-              <div *ngFor="let username of displayFollowers(); trackBy: trackByUsername" class="bg-[var(--color-blue-720)]/70 border border-[var(--color-border)] rounded-md transition-colors hover:bg-[var(--color-blue-720)]">
-                <div class="flex items-center gap-2 px-2 py-1.5">
-                  <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-[var(--color-text2)]'">
-                    <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
-                    <i *ngIf="isSelected(username)" class="bi bi-check-circle-fill text-indigo-400"></i>
-                  </button>
-                  <button data-cy="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
-                  <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
-                </div>
+          @if (followers().length > 0) {
+            <div class="h-full flex flex-col">
+              <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                @for (username of displayFollowers(); track trackByUsername($index, username)) {
+                  <div class="bg-[var(--color-blue-720)]/70 border border-[var(--color-border)] rounded-md transition-colors hover:bg-[var(--color-blue-720)]">
+                    <div class="flex items-center gap-2 px-2 py-1.5">
+                      <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-[var(--color-text2)]'">
+                        <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
+                        @if (isSelected(username)) {
+                          <i class="bi bi-check-circle-fill text-indigo-400"></i>
+                        }
+                      </button>
+                      <button data-cy="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
+                      <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
+                    </div>
+                  </div>
+                }
               </div>
+              @if (displayFollowers().length < filteredFollowers().length) {
+                <button type="button" (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="mt-3 w-full rounded-md bg-[var(--color-blue-720)] hover:bg-[var(--color-blue-710)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-text2)] py-2 text-sm">{{ isLoadingMoreFollowers() ? 'Loading...' : 'Load More' }}</button>
+              }
             </div>
-            <button type="button" *ngIf="displayFollowers().length < filteredFollowers().length" (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="mt-3 w-full rounded-md bg-[var(--color-blue-720)] hover:bg-[var(--color-blue-710)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-text2)] py-2 text-sm">{{ isLoadingMoreFollowers() ? 'Loading...' : 'Load More' }}</button>
-          </div>
+          } @else {
+            <div class="h-full flex items-center justify-center">
+              <button type="button" (click)="fetchFollowers.emit()" [disabled]="isFetchingFollowers()" class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 text-sm">{{ isFetchingFollowers() ? 'Fetching followers...' : 'Fetch Followers' }}</button>
+            </div>
+          }
         </div>
 
         <div class="absolute inset-0 transition-all duration-300 ease-out" [class.opacity-100]="activeTab() === 'following'" [class.opacity-0]="activeTab() !== 'following'" [class.translate-x-0]="activeTab() === 'following'" [class.translate-x-4]="activeTab() !== 'following'" [class.pointer-events-auto]="activeTab() === 'following'" [class.pointer-events-none]="activeTab() !== 'following'">
-          <div *ngIf="following().length > 0; else fetchFollowingState" class="h-full flex flex-col">
-            <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-              <div *ngFor="let username of displayFollowing(); trackBy: trackByUsername" class="bg-[var(--color-blue-720)]/70 border border-[var(--color-border)] rounded-md transition-colors hover:bg-[var(--color-blue-720)]">
-                <div class="flex items-center gap-2 px-2 py-1.5">
-                  <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-[var(--color-text2)]'">
-                    <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
-                    <i *ngIf="isSelected(username)" class="bi bi-check-circle-fill text-indigo-400"></i>
-                  </button>
-                  <button data-cy="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
-                  <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
-                </div>
+          @if (following().length > 0) {
+            <div class="h-full flex flex-col">
+              <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                @for (username of displayFollowing(); track trackByUsername($index, username)) {
+                  <div class="bg-[var(--color-blue-720)]/70 border border-[var(--color-border)] rounded-md transition-colors hover:bg-[var(--color-blue-720)]">
+                    <div class="flex items-center gap-2 px-2 py-1.5">
+                      <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-[var(--color-text2)]'">
+                        <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
+                        @if (isSelected(username)) {
+                          <i class="bi bi-check-circle-fill text-indigo-400"></i>
+                        }
+                      </button>
+                      <button data-cy="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
+                      <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
+                    </div>
+                  </div>
+                }
               </div>
+              @if (displayFollowing().length < filteredFollowing().length) {
+                <button type="button" (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="mt-3 w-full rounded-md bg-[var(--color-blue-720)] hover:bg-[var(--color-blue-710)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-text2)] py-2 text-sm">{{ isLoadingMoreFollowing() ? 'Loading...' : 'Load More' }}</button>
+              }
             </div>
-            <button type="button" *ngIf="displayFollowing().length < filteredFollowing().length" (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="mt-3 w-full rounded-md bg-[var(--color-blue-720)] hover:bg-[var(--color-blue-710)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-text2)] py-2 text-sm">{{ isLoadingMoreFollowing() ? 'Loading...' : 'Load More' }}</button>
-          </div>
+          } @else {
+            <div class="h-full flex items-center justify-center">
+              <button type="button" (click)="fetchFollowing.emit()" [disabled]="isFetchingFollowing()" class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 text-sm">{{ isFetchingFollowing() ? 'Fetching following...' : 'Fetch Following' }}</button>
+            </div>
+          }
         </div>
 
         <div class="absolute inset-0 transition-all duration-300 ease-out" [class.opacity-100]="activeTab() === 'connections'" [class.opacity-0]="activeTab() !== 'connections'" [class.translate-x-0]="activeTab() === 'connections'" [class.-translate-x-4]="activeTab() !== 'connections'" [class.pointer-events-auto]="activeTab() === 'connections'" [class.pointer-events-none]="activeTab() !== 'connections'">
-          <div *ngIf="connections().length > 0; else noConnectionsState" class="h-full flex flex-col">
-            <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-              <div *ngFor="let username of displayConnections(); trackBy: trackByUsername" class="bg-[var(--color-blue-720)]/70 border border-[var(--color-border)] rounded-md transition-colors hover:bg-[var(--color-blue-720)]">
-                <div class="flex items-center gap-2 px-2 py-1.5">
-                  <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-[var(--color-text2)]'">
-                    <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
-                    <i *ngIf="isSelected(username)" class="bi bi-check-circle-fill text-indigo-400"></i>
-                  </button>
-                  <button type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
-                  <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
-                </div>
+          @if (connections().length > 0) {
+            <div class="h-full flex flex-col">
+              <div class="flex-grow overflow-y-auto pr-1 space-y-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                @for (username of displayConnections(); track trackByUsername($index, username)) {
+                  <div class="bg-[var(--color-blue-720)]/70 border border-[var(--color-border)] rounded-md transition-colors hover:bg-[var(--color-blue-720)]">
+                    <div class="flex items-center gap-2 px-2 py-1.5">
+                      <button type="button" (click)="toggleSelection(username)" class="flex-grow min-w-0 flex items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors" [class]="isSelected(username) ? 'bg-indigo-600/30 border border-indigo-500/60 text-indigo-200' : 'border border-transparent text-[var(--color-text2)]'">
+                        <span class="font-mono text-sm truncate pr-2">{{ '@' + username }}</span>
+                        @if (isSelected(username)) {
+                          <i class="bi bi-check-circle-fill text-indigo-400"></i>
+                        }
+                      </button>
+                      <button type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
+                      <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
+                    </div>
+                  </div>
+                }
               </div>
+              @if (displayConnections().length < filteredConnections().length) {
+                <button type="button" (click)="loadMoreConnections()" [disabled]="isLoadingMoreConnections()" class="mt-3 w-full rounded-md bg-[var(--color-blue-720)] hover:bg-[var(--color-blue-710)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-text2)] py-2 text-sm">{{ isLoadingMoreConnections() ? 'Loading...' : 'Load More' }}</button>
+              }
             </div>
-            <button type="button" *ngIf="displayConnections().length < filteredConnections().length" (click)="loadMoreConnections()" [disabled]="isLoadingMoreConnections()" class="mt-3 w-full rounded-md bg-[var(--color-blue-720)] hover:bg-[var(--color-blue-710)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-text2)] py-2 text-sm">{{ isLoadingMoreConnections() ? 'Loading...' : 'Load More' }}</button>
-          </div>
+          } @else {
+            <div class="h-full flex items-center justify-center text-sm text-[var(--color-text4)]">
+              No post connections available.
+            </div>
+          }
         </div>
 
 
-        <ng-template #fetchFollowersState>
-          <div class="h-full flex items-center justify-center">
-            <button type="button" (click)="fetchFollowers.emit()" [disabled]="isFetchingFollowers()" class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 text-sm">{{ isFetchingFollowers() ? 'Fetching followers...' : 'Fetch Followers' }}</button>
-          </div>
-        </ng-template>
 
-        <ng-template #fetchFollowingState>
-          <div class="h-full flex items-center justify-center">
-            <button type="button" (click)="fetchFollowing.emit()" [disabled]="isFetchingFollowing()" class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 text-sm">{{ isFetchingFollowing() ? 'Fetching following...' : 'Fetch Following' }}</button>
-          </div>
-        </ng-template>
 
-        <ng-template #noConnectionsState>
-          <div class="h-full flex items-center justify-center text-sm text-[var(--color-text4)]">
-            No post connections available.
-          </div>
-        </ng-template>
 
       </div>
     </div>

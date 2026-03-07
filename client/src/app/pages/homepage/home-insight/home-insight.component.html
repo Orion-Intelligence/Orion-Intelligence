@@ -1,114 +1,117 @@
 <div id="analytics" class="max-[943px]:mt-[60px] max-[550px]:max-w-[calc(100vw-90px)]" [ngClass]="{ '': appService.getConfig().localSettings.isSidebarOpen, '': !appService.getConfig().localSettings.isSidebarOpen }">
-  <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
+  @for (modelKey of latestDocumentModelKeys; track modelKey; let i = $index; let last = $last) {
     <div>
-      <div class="mt-[16px] grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
-        <div *ngFor="let item of getResultItems(modelKey);" class="ui-home-insight-card group flex h-[205px] w-full flex-col justify-between overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] text-[var(--color-text2)] shadow-[0_6px_18px_var(--color-shadow-light)] transition-all duration-200 hover:border-[var(--color-text4)]/30 hover:bg-[var(--color-blue-720)]">
-          <div class="mb-[10px] grid grid-cols-2 gap-x-4">
-            <div class="min-w-0">
-              <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Title</div>
-              <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.title || '-'">
-                {{ item.title || '-' }}
-              </div>
-            </div>
-            <div class="min-w-0 text-right">
-              <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Source</div>
-              <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.source || '-'">
-                {{ item.source || '-' }}
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-[10px] min-w-0">
-            <ng-container *ngIf="item.location; else checkURL">
-              <div class="flex flex-col">
-                <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Location</div>
-                <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.location">
-                  {{ item.location }}
-                </div>
-              </div>
-            </ng-container>
-
-            <ng-template #checkURL>
-              <ng-container *ngIf="item.url; else checkPhone">
-                <div class="flex min-w-0 flex-col">
-                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">URL</div>
-                  <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" *ngIf="item.url[0]" [title]="item.url[0]">
-                    {{ item.url[0] }}
+      <div>
+        <div class="mt-[16px] grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
+          @for (item of getResultItems(modelKey); track item) {
+            <div class="ui-home-insight-card group flex h-[205px] w-full flex-col justify-between overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] text-[var(--color-text2)] shadow-[0_6px_18px_var(--color-shadow-light)] transition-all duration-200 hover:border-[var(--color-text4)]/30 hover:bg-[var(--color-blue-720)]">
+              <div class="mb-[10px] grid grid-cols-2 gap-x-4">
+                <div class="min-w-0">
+                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Title</div>
+                  <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.title || '-'">
+                    {{ item.title || '-' }}
                   </div>
                 </div>
-              </ng-container>
-            </ng-template>
-
-            <ng-template #checkPhone>
-              <div class="flex min-w-0 flex-col">
-                <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Phone Number</div>
-                <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.phoneNumber || '-'">
-                  {{ item.phoneNumber || '-' }}
+                <div class="min-w-0 text-right">
+                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Source</div>
+                  <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.source || '-'">
+                    {{ item.source || '-' }}
+                  </div>
                 </div>
               </div>
-            </ng-template>
-          </div>
+              <div class="mb-[10px] min-w-0">
+                @if (item.location) {
+                  <div class="flex flex-col">
+                    <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Location</div>
+                    <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.location">
+                      {{ item.location }}
+                    </div>
+                  </div>
+                } @else {
+                  @if (item.url) {
+                    <div class="flex min-w-0 flex-col">
+                      <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">URL</div>
+                      @if (item.url[0]) {
+                        <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.url[0]">
+                          {{ item.url[0] }}
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="flex min-w-0 flex-col">
+                      <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Phone Number</div>
+                      <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.phoneNumber || '-'">
+                        {{ item.phoneNumber || '-' }}
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+              <div class="mb-[8px] min-w-0">
+                <div class="flex min-w-0 flex-col">
+                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Date</div>
+                  <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.date || '-'">
+                    {{ item.date || '-' }}
+                  </div>
+                </div>
+              </div>
+              @if (licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')) {
+                <div class="border-t border-[rgba(148,163,184,0.20)]"></div>
+              }
+              @if (licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')) {
+                <div class="text-center">
+                  <p appTooltip="Open Report" data-testid="open-report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
+                    View Details
+                  </p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+  <br><br>
 
-          <div class="mb-[8px] min-w-0">
-            <div class="flex min-w-0 flex-col">
-              <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Date</div>
-              <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.date || '-'">
-                {{ item.date || '-' }}
+  @for (model of models; track model) {
+    <div>
+      <div [appTooltip]=" model === 'general' ? 'Track Data States/Crawl Insights Panel' : model === 'leak' ? 'This is the Leaked Data' : 'This is the Defacement' " class="ui-home-insight-index-chip mb-[10px] inline-flex rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text1)] shadow-[0_4px_10px_var(--color-shadow-light)]">
+        {{
+        model === 'general'
+        ? 'Generic Index'
+        : model === 'leak'
+        ? 'Leaked Index'
+        : 'Defacement Index'
+        }}
+      </div>
+      <div class="grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
+        @for (key of getKeys(insights[model]); track key; let first = $first) {
+          <div class="ui-home-insight-metric-card flex min-h-[132px] w-full items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[18px] text-[var(--color-text1)] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_3px_rgba(0,0,0,0.1)] transition-shadow hover:shadow-[0_3px_6px_rgba(0,0,0,0.11),_0_3px_6px_rgba(0,0,0,0.16)]">
+            <div class="grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-[10px]">
+              <div class="w-[40px] flex-shrink-0">
+                <img alt="{{ key }}" class="ui-home-insight-stat-icon" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
+              </div>
+              <div class="min-w-0">
+                <div class="truncate text-[28px] font-bold leading-[1.1] text-[var(--color-text1)] max-[460px]:text-[22px]">
+                  {{ insights[model][key].value || '-' }}
+                </div>
+                <div class="mt-[4px] truncate text-[15px] font-[Roboto] font-normal text-[var(--color-text1)] max-[500px]:text-[11px]">
+                  {{ insights[model][key].key || key }}
+                </div>
+              </div>
+              <div class="ml-auto flex max-w-[86px] min-w-0 flex-col items-end justify-center text-right text-[13px] font-medium">
+                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_daily).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_daily).startsWith('-'), 'text-[var(--color-text1)] opacity-50': !insights[model][key].change_daily }" appTooltip="stat changes daily">
+                  {{ insights[model][key].change_daily || '-' }}
+                </div>
+                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_weekly).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_weekly).startsWith('-'), 'text-[var(--color-text1)] opacity-50': !insights[model][key].change_weekly }" appTooltip="stat changes weekly">
+                  {{ insights[model][key].change_weekly || '-' }}
+                </div>
               </div>
             </div>
           </div>
-
-          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')" class="border-t border-[rgba(148,163,184,0.20)]"></div>
-
-          <div *ngIf="licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')" class="text-center">
-            <p appTooltip="Open Report" data-testid="open-report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
-              View Details
-            </p>
-          </div>
-        </div>
-
+        }
       </div>
+      <br><br>
     </div>
-  </div>
-  <br><br>
-
-  <div *ngFor="let model of models">
-    <div [appTooltip]=" model === 'general' ? 'Track Data States/Crawl Insights Panel' : model === 'leak' ? 'This is the Leaked Data' : 'This is the Defacement' " class="ui-home-insight-index-chip mb-[10px] inline-flex rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text1)] shadow-[0_4px_10px_var(--color-shadow-light)]">
-      {{
-        model === 'general'
-          ? 'Generic Index'
-          : model === 'leak'
-          ? 'Leaked Index'
-          : 'Defacement Index'
-      }}
-    </div>
-    <div class="grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
-      <div *ngFor="let key of getKeys(insights[model]); let first = first" class="ui-home-insight-metric-card flex min-h-[132px] w-full items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[18px] text-[var(--color-text1)] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_3px_rgba(0,0,0,0.1)] transition-shadow hover:shadow-[0_3px_6px_rgba(0,0,0,0.11),_0_3px_6px_rgba(0,0,0,0.16)]">
-        <div class="grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-[10px]">
-          <div class="w-[40px] flex-shrink-0">
-            <img alt="{{ key }}" class="ui-home-insight-stat-icon" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
-          </div>
-
-          <div class="min-w-0">
-            <div class="truncate text-[28px] font-bold leading-[1.1] text-[var(--color-text1)] max-[460px]:text-[22px]">
-              {{ insights[model][key].value || '-' }}
-            </div>
-            <div class="mt-[4px] truncate text-[15px] font-[Roboto] font-normal text-[var(--color-text1)] max-[500px]:text-[11px]">
-              {{ insights[model][key].key || key }}
-            </div>
-          </div>
-
-          <div class="ml-auto flex max-w-[86px] min-w-0 flex-col items-end justify-center text-right text-[13px] font-medium">
-            <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_daily).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_daily).startsWith('-'), 'text-[var(--color-text1)] opacity-50': !insights[model][key].change_daily }" appTooltip="stat changes daily">
-              {{ insights[model][key].change_daily || '-' }}
-            </div>
-            <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_weekly).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_weekly).startsWith('-'), 'text-[var(--color-text1)] opacity-50': !insights[model][key].change_weekly }" appTooltip="stat changes weekly">
-              {{ insights[model][key].change_weekly || '-' }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <br><br>
-  </div>
+  }
 </div>

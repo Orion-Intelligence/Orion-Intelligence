@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { NgIf } from '@angular/common';
+
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { ActivatedRoute } from '@angular/router';
@@ -12,7 +12,7 @@ type CountryData = {
 };
 @Component({
   selector: 'app-world-heatmap',
-  imports: [NgIf, HeatmapReportComponent],
+  imports: [HeatmapReportComponent],
   standalone: true,
   host: { class: 'block w-full' },
   templateUrl: './world-heatmap.component.html'

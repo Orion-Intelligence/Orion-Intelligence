@@ -25,19 +25,23 @@
           <span>{{ getIOCTypeLabel(alert.ioc_type!) }}</span>
           <i class="bi text-[12px] text-[#57718D]" [ngClass]="iocDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
         </button>
-        <ul class="absolute left-0 right-0 z-20 mt-2 max-h-[250px] overflow-y-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1 shadow-[0_6px_16px_rgba(0,0,0,0.15)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#888] [&::-webkit-scrollbar-thumb:hover]:bg-[#555]" *ngIf="iocDropdownOpen" (click)="$event.stopPropagation()">
-          <ng-container *ngFor="let item of allowedIocTypes; let last = last">
-            <li>
-              <button type="button" class="flex w-full items-center justify-between rounded-[6px] px-[10px] py-[8px] text-[14px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onIOCTypeChange(item.key)" [class]="alert.ioc_type === item.key ? 'bg-[var(--color-blue-820)] text-[var(--color-text1)]' : ''">
-                <span>{{ item.title }}</span>
-                <span *ngIf="alert.ioc_type === item.key">✓</span>
-              </button>
-            </li>
-            <ng-container *ngIf="!last">
-              <li><div class="mx-3 h-px bg-[var(--color-border)]"></div></li>
-            </ng-container>
-          </ng-container>
-        </ul>
+        @if (iocDropdownOpen) {
+          <ul class="absolute left-0 right-0 z-20 mt-2 max-h-[250px] overflow-y-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1 shadow-[0_6px_16px_rgba(0,0,0,0.15)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#888] [&::-webkit-scrollbar-thumb:hover]:bg-[#555]" (click)="$event.stopPropagation()">
+            @for (item of allowedIocTypes; track item; let last = $last) {
+              <li>
+                <button type="button" class="flex w-full items-center justify-between rounded-[6px] px-[10px] py-[8px] text-[14px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onIOCTypeChange(item.key)" [class]="alert.ioc_type === item.key ? 'bg-[var(--color-blue-820)] text-[var(--color-text1)]' : ''">
+                  <span>{{ item.title }}</span>
+                  @if (alert.ioc_type === item.key) {
+                    <span>✓</span>
+                  }
+                </button>
+              </li>
+              @if (!last) {
+                <li><div class="mx-3 h-px bg-[var(--color-border)]"></div></li>
+              }
+            }
+          </ul>
+        }
       </div>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Source</label>
@@ -49,12 +53,14 @@
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">IOC Value</label>
       <input [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter IOC value" name="ioc_value" />
     </form>
-    <div *ngIf="formError" class="mt-[8px] text-center">
-      <div class="inline-block w-full rounded-lg bg-[#dc3545] bg-opacity-75 px-3 py-2 text-center text-white shadow-sm">
-        <i class="bi bi-exclamation-diamond-fill mr-2"></i>
-        {{ formError }}
+    @if (formError) {
+      <div class="mt-[8px] text-center">
+        <div class="inline-block w-full rounded-lg bg-[#dc3545] bg-opacity-75 px-3 py-2 text-center text-white shadow-sm">
+          <i class="bi bi-exclamation-diamond-fill mr-2"></i>
+          {{ formError }}
+        </div>
       </div>
-    </div>
+    }
 
     <div class="mt-[26px] flex items-center justify-between gap-[15px]">
       <button class="ui-alert-cancel-btn px-[24px] text-[14px]" (click)="cancleAlert(false)">Cancel</button>

@@ -5,7 +5,7 @@ import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
 import { CtiSidebarComponent } from './cti-sidebar/cti-sidebar.component';
 import { GraphContextMenuComponent } from './context-menu/context-menu.component';
-import { NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
+import { NgClass, isPlatformBrowser } from '@angular/common';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { ActivatedRoute } from '@angular/router';
@@ -22,7 +22,7 @@ import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgIf, NgClass, NgFor]
+  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass]
 })
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly maxNodeLabelLength = 28;

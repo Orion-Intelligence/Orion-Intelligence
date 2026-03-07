@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, signal, effect, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { IconService } from '../../services/icon.service';
 @Component({
   selector: 'app-social-icon',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `@if (iconDataUrl()) { <img [src]="iconDataUrl()" [alt]="platformName()" class="w-full h-full object-contain"> }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

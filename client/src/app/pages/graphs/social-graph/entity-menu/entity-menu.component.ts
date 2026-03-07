@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { CustomEntity } from '../../../../shared/model/social/social-scan.models';
 const ENTITY_ADD_OPTIONS: Array<{ type: CustomEntity['type']; label: string; iconClass: string; }> = [
   { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' },
@@ -15,7 +15,7 @@ const ENTITY_ADD_OPTIONS: Array<{ type: CustomEntity['type']; label: string; ico
   selector: 'app-entity-menu',
   templateUrl: './entity-menu.component.html',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EntityMenuComponent {

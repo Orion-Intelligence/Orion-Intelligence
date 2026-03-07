@@ -4,12 +4,12 @@
   </div>
 
   <ul [ngClass]="{ 'opacity-100 max-h-[500px] translate-y-0 mt-[15px] overflow-y-auto pointer-events-auto': (selectionStore.selectedSection$ | async) === category, 'transition-none': items.length <4 && (selectionStore.selectedSection$ | async) !== category }" class="list-none ml-0 pl-0 border-l-0 opacity-0 max-h-0 -translate-y-2 transition-[opacity,max-height,transform,margin-top] duration-200 ease-out pointer-events-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-    <ng-container *ngFor="let item of items">
+    @for (item of items; track item) {
       <div (click)="selectOption(item)" [ngClass]="{ 'border-l-0 text-white font-medium h-[40px]': (selectionStore.selectedOption$ | async | lower) === (item | lower) }" [routerLink]="routePrefix + '/' + item.toLowerCase()" class="mt-[5px] text-[rgba(255,255,255,0.44)] font-[Roboto] cursor-pointer" queryParamsHandling="merge">
         <div [ngClass]="{ 'bg-[var(--color-blue-880)]': (selectionStore.selectedOption$ | async | lower) === (item | lower) }" appTooltip="{{ getItemTooltip(item) }}" class="ml-[5px] flex h-[40px] w-[40px] items-center justify-center rounded-[6px] font-[Inter] hover:bg-[var(--color-blue-880)]">
           <img [alt]="item" class="h-[17px] w-[17px]" height="20" [ngSrc]="getItemIcon(item)" width="20">
         </div>
       </div>
-    </ng-container>
+    }
   </ul>
 </li>

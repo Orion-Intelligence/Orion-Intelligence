@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { DefacementResultItem } from '../../../../shared/model/results/defacement/defacement.callback.model';
@@ -9,7 +9,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-dashboard-result-defacement',
-  standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
+  standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
   templateUrl: './dashboard-result-defacement.component.html',
   animations: [fadeInDashboardItem],
 })

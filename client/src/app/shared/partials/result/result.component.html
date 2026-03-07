@@ -1,160 +1,182 @@
-<ng-container *ngIf="consolidated">
+@if (consolidated) {
   <div class="ui-result-tabs-strip mx-[30px] mt-[14px] flex items-end border-b pb-0 max-[1000px]:mx-[15px]" (click)="onTabClick($event)">
     <div class="inline-flex items-center gap-[2px] bg-transparent p-0">
       <button data-testid="consolidated-tab-iocs" type="button" data-tab="IOCs" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'IOCs', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'IOCs' }">IOCs</button>
       <button data-testid="consolidated-tab-deep-search" type="button" data-tab="Deep Search" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Deep Search', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Deep Search' }">Deep Search</button>
     </div>
   </div>
-  <br *ngIf="activeTab !== 'IOCs'">
-</ng-container>
+  @if (activeTab !== 'IOCs') {
+    <br>
+    }
+  }
 
-<ng-container *ngIf="activeTab !== 'IOCs'">
-  <form (submit)="onFormSubmit($event)" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }" *ngIf="!domain">
-    <div class="flex w-full flex-wrap items-start justify-between">
-      <div class="w-full">
-        <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]" *ngIf="homeSearchService.showFiltersOverlay"></div>
-
-        <div class="relative">
-          <div class="flex w-full items-center justify-between gap-[8px] max-[900px]:flex-col max-[900px]:items-stretch">
-            <div class="relative min-w-0 max-w-[910px] flex-1 max-[900px]:max-w-full">
-              <div class="flex h-[40px] min-w-0 w-full flex-nowrap" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
-
-                <button data-testid="dashboard-search-submit" class="flex h-[40px] w-[42px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" type="submit">
-                  <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
-                </button>
-
-                <input #searchInput data-testid="dashboard-general-input" class="h-[40px] flex-1 border-y border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
-
-                <button type="button" class="ui-search-clear-btn group flex h-[40px] w-[38px] items-center justify-center border-y border-[var(--color-border)] bg-white px-0 transition-colors hover:bg-[#f3f4f6] max-[700px]:rounded-r-[8px] max-[700px]:border-r" aria-label="Clear input" title="Clear input" (click)="clearSearchInput()" [disabled]="!searchQuery">
-                  <i class="bi bi-x-circle-fill text-[14px] text-[#374151] transition-colors group-hover:text-[#111827]" [ngClass]="{ 'invisible': !searchQuery }"></i>
-                </button>
-
-                <div class="flex h-[40px] shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[14px] font-normal text-[#292828] max-[700px]:w-0 max-[700px]:border-y-0 max-[700px]:border-r-0 max-[700px]:px-0 max-[700px]:overflow-hidden">
-                  <ng-container>
-                    <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
-                    <span>Advance&nbsp;&nbsp;</span>
-                    <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
-                      <input data-testid="dashboard-advance-toggle" type="checkbox" class="sr-only peer" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
-                      <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-[#e5e7eb] transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
-                        <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="app_service.configData().localSettings.advance_setting_toggle ? 'translate-x-[14px]' : 'translate-x-0'">
-                        </span>
-                      </span>
-                    </label>
-                  </ng-container>
-                  <ng-container>
-                    <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
-                    <button data-testid="dashboard-tools-toggle" type="button" class="inline-flex items-center cursor-pointer" (click)="onToolToggle($event)">
-                      Tools
-                      <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="mt-[-1px] px-[10px] transition-transform duration-300" />
+  @if (activeTab !== 'IOCs') {
+    @if (!domain) {
+      <form (submit)="onFormSubmit($event)" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }">
+        <div class="flex w-full flex-wrap items-start justify-between">
+          <div class="w-full">
+            @if (homeSearchService.showFiltersOverlay) {
+              <div class="fixed inset-0 z-[1] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]"></div>
+            }
+            <div class="relative">
+              <div class="flex w-full items-center justify-between gap-[8px] max-[900px]:flex-col max-[900px]:items-stretch">
+                <div class="relative min-w-0 max-w-[910px] flex-1 max-[900px]:max-w-full">
+                  <div class="flex h-[40px] min-w-0 w-full flex-nowrap" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
+                    <button data-testid="dashboard-search-submit" class="flex h-[40px] w-[42px] items-center justify-center rounded-l-[8px] border border-r-0 border-[var(--color-border)] bg-white transition-colors hover:bg-white" type="submit">
+                      <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
                     </button>
-                  </ng-container>
+                    <input #searchInput data-testid="dashboard-general-input" class="h-[40px] flex-1 border-y border-[var(--color-border)] bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" data-cy="dashboard-general-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
+                    <button type="button" class="ui-search-clear-btn group flex h-[40px] w-[38px] items-center justify-center border-y border-[var(--color-border)] bg-white px-0 transition-colors hover:bg-[#f3f4f6] max-[700px]:rounded-r-[8px] max-[700px]:border-r" aria-label="Clear input" title="Clear input" (click)="clearSearchInput()" [disabled]="!searchQuery">
+                      <i class="bi bi-x-circle-fill text-[14px] text-[#374151] transition-colors group-hover:text-[#111827]" [ngClass]="{ 'invisible': !searchQuery }"></i>
+                    </button>
+                    <div class="flex h-[40px] shrink-0 items-center whitespace-nowrap rounded-r-[8px] border-y border-r border-[var(--color-border)] bg-white font-[Roboto] text-[14px] font-normal text-[#292828] max-[700px]:w-0 max-[700px]:border-y-0 max-[700px]:border-r-0 max-[700px]:px-0 max-[700px]:overflow-hidden">
+                      <ng-container>
+                        <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
+                        <span>Advance&nbsp;&nbsp;</span>
+                        <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
+                          <input data-testid="dashboard-advance-toggle" type="checkbox" class="sr-only peer" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
+                          <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-[#e5e7eb] transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
+                            <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="app_service.configData().localSettings.advance_setting_toggle ? 'translate-x-[14px]' : 'translate-x-0'">
+                            </span>
+                          </span>
+                        </label>
+                      </ng-container>
+                      <ng-container>
+                        <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
+                        <button data-testid="dashboard-tools-toggle" type="button" class="inline-flex items-center cursor-pointer" (click)="onToolToggle($event)">
+                          Tools
+                          <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="mt-[-1px] px-[10px] transition-transform duration-300" />
+                        </button>
+                      </ng-container>
+                    </div>
+                  </div>
+                  @if (homeSearchService.showFiltersOverlay) {
+                    <div class="hidden max-[550px]:block h-[43px]"></div>
+                  }
+                  @if (homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle) {
+                    <div #filtersWrapper class="absolute left-0 top-full z-[60] w-full">
+                      <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
+                    </div>
+                  }
+                </div>
+                @if (!shrinkmenu && filterModel) {
+                  <div class="flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end" [ngClass]="homeSearchService.showFiltersOverlay ? 'z-[0]' : 'z-[3]'">
+                    <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
+                      <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
+                      <span>Filter</span>
+                    </label>
+                  </div>
+                }
+              </div>
+            </div>
+            @if (app_service.configData().localSettings.enable_advanced_tools) {
+              <div class="mt-[8px] flex gap-[12px]" @fadeInDashboardItem>
+                @if (showSorting) {
+                  <div #sortMenuRef class="relative">
+                    <button data-testid="result-tools-sort" type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSortMenu($event)">
+                      sort by <b>({{ selectedSortBy }})</b>
+                      <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': sortMenuOpen }">
+                    </button>
+                    @if (sortMenuOpen) {
+                      <div class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
+                        <button data-testid="result-tools-sort-newest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.NEWEST_FIRST); closeMenus()">Newest first</button>
+                        <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                        <button data-testid="result-tools-sort-oldest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.OLDEST_FIRST); closeMenus()">Oldest first</button>
+                      </div>
+                    }
+                  </div>
+                }
+                <div #searchMenuRef class="relative">
+                  <button data-testid="result-tools-searchby" type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSearchMenu($event)">
+                    search by <b>({{ matchTypeLabel() }})</b>
+                    <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': searchMenuOpen }">
+                  </button>
+                  @if (searchMenuOpen) {
+                    <div class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
+                      <button data-testid="result-tools-searchby-semantic" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('semantic'); onFormSubmit(); closeMenus()">Match Semantic</button>
+                      <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                      <button data-testid="result-tools-searchby-or" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('or'); onFormSubmit(); closeMenus()">Match any term (OR)</button>
+                      <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                      <button data-testid="result-tools-searchby-and" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('and'); onFormSubmit(); closeMenus()">Match indivisual terms (AND)</button>
+                      <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+                      <button data-testid="result-tools-searchby-full" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('full'); onFormSubmit(); closeMenus()">Match full query (AND)</button>
+                    </div>
+                  }
                 </div>
               </div>
-
-              <div *ngIf="homeSearchService.showFiltersOverlay" class="hidden max-[550px]:block h-[43px]"></div>
-
-              <div #filtersWrapper class="absolute left-0 top-full z-[60] w-full" *ngIf="homeSearchService.showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
-                <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
-              </div>
-
-            </div>
-
-            <div *ngIf="!shrinkmenu && filterModel" class="flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end" [ngClass]="homeSearchService.showFiltersOverlay ? 'z-[0]' : 'z-[3]'">
-              <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
-                <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
-                <span>Filter</span>
-              </label>
-            </div>
+            }
+            @if ((entityFiltersCount() || sidebarFilterCount() || app_service.getConfig().localSettings.matchType && app_service.getConfig().localSettings.matchType !== 'or') && showSelectedFilters) {
+              <app-selected-filter-bar
+                (clearAll)="reloadFilter()"
+                [showSorting]="app_service.configData().localSettings.enable_advanced_tools">
+              </app-selected-filter-bar>
+            }
           </div>
         </div>
+      </form>
+    }
+  }
 
-        <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools">
-          <div class="mt-[8px] flex gap-[12px]" @fadeInDashboardItem>
-            <div #sortMenuRef class="relative" *ngIf="showSorting">
-              <button data-testid="result-tools-sort" type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSortMenu($event)">
-                sort by <b>({{ selectedSortBy }})</b>
-                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': sortMenuOpen }">
-              </button>
-              <div *ngIf="sortMenuOpen" class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
-                <button data-testid="result-tools-sort-newest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.NEWEST_FIRST); closeMenus()">Newest first</button>
-                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                <button data-testid="result-tools-sort-oldest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.OLDEST_FIRST); closeMenus()">Oldest first</button>
-              </div>
-            </div>
-
-            <div #searchMenuRef class="relative">
-              <button data-testid="result-tools-searchby" type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSearchMenu($event)">
-                search by <b>({{ matchTypeLabel() }})</b>
-                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': searchMenuOpen }">
-              </button>
-              <div *ngIf="searchMenuOpen" class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
-                <button data-testid="result-tools-searchby-semantic" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('semantic'); onFormSubmit(); closeMenus()">Match Semantic</button>
-                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                <button data-testid="result-tools-searchby-or" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('or'); onFormSubmit(); closeMenus()">Match any term (OR)</button>
-                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                <button data-testid="result-tools-searchby-and" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('and'); onFormSubmit(); closeMenus()">Match indivisual terms (AND)</button>
-                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                <button data-testid="result-tools-searchby-full" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('full'); onFormSubmit(); closeMenus()">Match full query (AND)</button>
-              </div>
-            </div>
-          </div>
-        </ng-container>
-
-        <app-selected-filter-bar
-          *ngIf="(entityFiltersCount() || sidebarFilterCount() || app_service.getConfig().localSettings.matchType && app_service.getConfig().localSettings.matchType !== 'or') && showSelectedFilters"
-          (clearAll)="reloadFilter()"
-          [showSorting]="app_service.configData().localSettings.enable_advanced_tools">
-        </app-selected-filter-bar>
+  @if (!consolidated) {
+    @if (result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs())) {
+      <div @fadeInDashboardItem>
+        <div class="mt-[26px] mb-[8px] mx-[30px] flex w-full max-w-[910px] items-center text-[14px] leading-[1.35] font-[Roboto] font-medium tracking-[0.01em] text-[var(--color-text3)] max-[1000px]:mx-[15px]">
+          <span class="text-[var(--color-text2)]">{{ result_count }} Results Found</span>
+        </div>
       </div>
+    } @else {
+      @if ((!checkMember() || hasIOCs()) && isLoading) {
+        <div class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] text-[14px] font-[Roboto] font-medium text-[var(--color-text2)] max-[1000px]:ml-[15px]">
+          <span>Searching for results ...</span><br><br>
+        </div>
+      }
+    }
+  }
+
+  @if (filterModel && !shrinkmenu && (isFilterOpen$ | async)) {
+    <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
     </div>
-  </form>
-</ng-container>
+  }
 
-<ng-container *ngIf="!consolidated">
-  <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs()); else noResults" @fadeInDashboardItem>
-    <div class="mt-[26px] mb-[8px] mx-[30px] flex w-full max-w-[910px] items-center text-[14px] leading-[1.35] font-[Roboto] font-medium tracking-[0.01em] text-[var(--color-text3)] max-[1000px]:mx-[15px]">
-      <span class="text-[var(--color-text2)]">{{ result_count }} Results Found</span>
+  @if (filterModel && !shrinkmenu) {
+    <div class="ui-filter-sidebar-panel fixed top-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
+      <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
-  </div>
-  <ng-template #noResults>
-    <div *ngIf="(!checkMember() || hasIOCs()) && isLoading" class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] text-[14px] font-[Roboto] font-medium text-[var(--color-text2)] max-[1000px]:ml-[15px]">
-      <span>Searching for results ...</span><br><br>
+  }
+
+  @if (isLoading) {
+    <div class="mx-[30px] w-full min-w-0 max-w-[910px] max-[1000px]:mx-[15px] max-[800px]:mx-0 max-[800px]:w-full max-[800px]:max-w-full max-[800px]:px-[10px] max-[800px]:box-border" @fadeInDashboardItem>
+      <app-loading-form></app-loading-form>
     </div>
-  </ng-template>
-</ng-container>
+  }
 
-<div *ngIf="filterModel && !shrinkmenu && (isFilterOpen$ | async)" class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
-</div>
+  @if (!entityFiltersCount() && !sidebarFilterCount() && showEmptyQuery && !isLoading && !result_count) {
+    <div class="ml-[30px] w-full max-w-[910px] max-[1000px]:ml-[15px]" @fadeInDashboardItem>
+      <app-empty-query></app-empty-query>
+    </div>
+  }
 
-<div *ngIf="filterModel && !shrinkmenu" class="ui-filter-sidebar-panel fixed top-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
-  <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
-</div>
+  @if (showNoResult && !isLoading && result_count === 0) {
+    <div class="ml-[30px] w-full max-w-[910px] max-[1000px]:ml-[15px]" @fadeInDashboardItem>
+      <app-empty-result [searchQuery]="searchQuery"></app-empty-result>
+    </div>
+  }
 
-<div *ngIf="isLoading" class="mx-[30px] w-full min-w-0 max-w-[910px] max-[1000px]:mx-[15px] max-[800px]:mx-0 max-[800px]:w-full max-[800px]:max-w-full max-[800px]:px-[10px] max-[800px]:box-border" @fadeInDashboardItem>
-  <app-loading-form></app-loading-form>
-</div>
+  @if (result_count && !isLoading && result_count > 0 && type === Category.STRATEGIC) {
+    <div class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[20px] py-[12px] text-[14px] text-[var(--color-text1)] max-[1000px]:ml-[15px]">
+      <span class="inline-flex items-center">
+        <img alt="Info Icon" width="16" height="16" class="mr-[8px] h-[16px] w-[16px] shrink-0" src="assets/images/shared/hint.svg">
+      </span>
+      <span>
+        Current results are general and may lack accuracy. For precise insights, open the
+        <u><b><a appTooltip="Go to Breach Details" class="cursor-pointer text-[inherit] no-underline" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">Data Breaches</a></b></u>
+        section in sidebar.
+      </span>
+    </div>
+  }
 
-<div *ngIf="!entityFiltersCount() && !sidebarFilterCount() && showEmptyQuery && !isLoading && !result_count" class="ml-[30px] w-full max-w-[910px] max-[1000px]:ml-[15px]" @fadeInDashboardItem>
-  <app-empty-query></app-empty-query>
-</div>
-
-<div *ngIf="showNoResult && !isLoading && result_count === 0" class="ml-[30px] w-full max-w-[910px] max-[1000px]:ml-[15px]" @fadeInDashboardItem>
-  <app-empty-result [searchQuery]="searchQuery"></app-empty-result>
-</div>
-
-<ng-container *ngIf="result_count && !isLoading && result_count > 0 && type === Category.STRATEGIC">
-  <div class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[20px] py-[12px] text-[14px] text-[var(--color-text1)] max-[1000px]:ml-[15px]">
-    <span class="inline-flex items-center">
-      <img alt="Info Icon" width="16" height="16" class="mr-[8px] h-[16px] w-[16px] shrink-0" src="assets/images/shared/hint.svg">
-    </span>
-    <span>
-      Current results are general and may lack accuracy. For precise insights, open the
-      <u><b><a appTooltip="Go to Breach Details" class="cursor-pointer text-[inherit] no-underline" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">Data Breaches</a></b></u>
-      section in sidebar.
-    </span>
-  </div>
-</ng-container>
-
-<div *ngIf="!isLoading && result_count > 0 && !disableScroll && (!checkMember() || hasIOCs())">
-  <app-scroll-top></app-scroll-top>
-</div>
+  @if (!isLoading && result_count > 0 && !disableScroll && (!checkMember() || hasIOCs())) {
+    <div>
+      <app-scroll-top></app-scroll-top>
+    </div>
+  }

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { HelperService } from '../../services/helper.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ApiService } from '../../services/api.service';
@@ -18,7 +18,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-report-header',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent],
+  imports: [NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent],
   templateUrl: './report-header.component.html',
   animations: [fadeInDashboardItem]
 })

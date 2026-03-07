@@ -2,21 +2,24 @@
   <header class="h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
     <div class="h-full flex items-end justify-between pl-4">
       <nav class="flex h-full items-end gap-1.5">
-        <div *ngFor="let tab of tabManager.tabs(); trackBy: trackById" (click)="tabManager.editingTabId() !== tab.id && tabManager.selectTab(tab.id)" [class]="'group relative flex items-center cursor-pointer pr-2 pl-3 text-sm font-medium border border-b-2 pt-2 pb-1.5 rounded-t-md transition-colors ' + (tabManager.activeTabId() === tab.id ? 'border-[var(--color-border)] border-b-indigo-400 bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-[0_1px_0_0_var(--color-blue-700)]' : 'border-transparent border-b-transparent bg-transparent text-[var(--color-text4)] hover:border-[var(--color-border)] hover:border-b-[var(--color-border)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
-
-          <div *ngIf="tabManager.editingTabId() === tab.id; else tabNameBlock">
-            <div>
-              <input #renameInput data-testid="social-tab-rename-input" appAutofocus type="text" [value]="tab.name" [attr.data-tab-id]="tab.id" (blur)="handleRename(tab.id, renameInput)" (keydown.enter)="handleRename(tab.id, renameInput)" (keydown.escape)="cancelRename()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500" />
-            </div>
+        @for (tab of tabManager.tabs(); track trackById($index, tab)) {
+          <div (click)="tabManager.editingTabId() !== tab.id && tabManager.selectTab(tab.id)" [class]="'group relative flex items-center cursor-pointer pr-2 pl-3 text-sm font-medium border border-b-2 pt-2 pb-1.5 rounded-t-md transition-colors ' + (tabManager.activeTabId() === tab.id ? 'border-[var(--color-border)] border-b-indigo-400 bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-[0_1px_0_0_var(--color-blue-700)]' : 'border-transparent border-b-transparent bg-transparent text-[var(--color-text4)] hover:border-[var(--color-border)] hover:border-b-[var(--color-border)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
+            @if (tabManager.editingTabId() === tab.id) {
+              <div>
+                <div>
+                  <input #renameInput data-testid="social-tab-rename-input" appAutofocus type="text" [value]="tab.name" [attr.data-tab-id]="tab.id" (blur)="handleRename(tab.id, renameInput)" (keydown.enter)="handleRename(tab.id, renameInput)" (keydown.escape)="cancelRename()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500" />
+                </div>
+              </div>
+            } @else {
+              <span data-testid="social-tab-name" (dblclick)="$event.stopPropagation(); tabManager.startEditing(tab.id)" class="py-1 pr-1" title="Double-click to rename">{{ tab.name }}</span>
+            }
+            @if (tabManager.tabs().length > 1) {
+              <button (click)="$event.stopPropagation(); tabManager.closeTab(tab.id)" [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (tabManager.activeTabId() === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+                <i class="bi bi-x-lg text-xs"></i>
+              </button>
+            }
           </div>
-          <ng-template #tabNameBlock>
-            <span data-testid="social-tab-name" (dblclick)="$event.stopPropagation(); tabManager.startEditing(tab.id)" class="py-1 pr-1" title="Double-click to rename">{{ tab.name }}</span>
-          </ng-template>
-          
-          <button *ngIf="tabManager.tabs().length > 1" (click)="$event.stopPropagation(); tabManager.closeTab(tab.id)" [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (tabManager.activeTabId() === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
-            <i class="bi bi-x-lg text-xs"></i>
-          </button>
-        </div>
+        }
 
         <div class="pl-1 self-center">
           <div class="relative">
@@ -25,40 +28,44 @@
               <i class="bi bi-plus-lg text-lg"></i>
             </button>
 
-            <div *ngIf="isAddMenuVisible()" (click)="$event.stopPropagation()" class="ui-result-dropdown-panel absolute left-full top-0 z-20 ml-2 w-[260px] origin-top-left rounded-[7px] border p-[7px_12px] shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
+            @if (isAddMenuVisible()) {
+              <div (click)="$event.stopPropagation()" class="ui-result-dropdown-panel absolute left-full top-0 z-20 ml-2 w-[260px] origin-top-left rounded-[7px] border p-[7px_12px] shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
                 <button data-testid="social-new-session" (click)="createNewTab()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
-                    New Session
+                  New Session
                 </button>
                 <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
                 <label data-testid="social-import-session-label" for="fileInput" class="ui-result-dropdown-item block w-full cursor-pointer rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
-                    Import Session
+                  Import Session
                 </label>
-            </div>
+              </div>
+            }
           </div>
         </div>
       </nav>
       <div class="self-center flex items-center gap-1 pr-2">
         <div class="relative">
-            <button data-cy="graph-tab-session-menu" data-testid="social-tab-session-menu" (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
-                <i class="bi bi-three-dots-vertical text-lg"></i>
-            </button>
-            <div *ngIf="isHeaderMenuVisible()" (click)="$event.stopPropagation()" class="ui-result-dropdown-panel absolute top-full right-0 z-20 mt-2 w-[260px] origin-top-right rounded-[7px] border p-[7px_12px] shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
-                <button data-testid="social-export-current-session" (click)="tabManager.exportActiveTab(); closeMenus()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
-                    Export Current Session
-                </button>
-                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                <button data-testid="social-export-report" (click)="openReportExportModal(); closeMenus()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
-                    Export Report
-                </button>
-                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                <label data-testid="social-import-session-menu-label" for="fileInput" class="ui-result-dropdown-item block w-full cursor-pointer rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
-                    Import Session
-                </label>
-                <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                <button data-testid="social-new-session-menu" (click)="createNewTab()" [disabled]="tabManager.tabs().length >= 4" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent">
-                    New Session
-                </button>
+          <button data-cy="graph-tab-session-menu" data-testid="social-tab-session-menu" (click)="toggleHeaderMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
+            <i class="bi bi-three-dots-vertical text-lg"></i>
+          </button>
+          @if (isHeaderMenuVisible()) {
+            <div (click)="$event.stopPropagation()" class="ui-result-dropdown-panel absolute top-full right-0 z-20 mt-2 w-[260px] origin-top-right rounded-[7px] border p-[7px_12px] shadow-lg animate-[social-mapper-slide-down_0.1s_ease-out_forwards]">
+              <button data-testid="social-export-current-session" (click)="tabManager.exportActiveTab(); closeMenus()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                Export Current Session
+              </button>
+              <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+              <button data-testid="social-export-report" (click)="openReportExportModal(); closeMenus()" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                Export Report
+              </button>
+              <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+              <label data-testid="social-import-session-menu-label" for="fileInput" class="ui-result-dropdown-item block w-full cursor-pointer rounded-[6px] px-[8px] py-[6px] text-left text-[13px]">
+                Import Session
+              </label>
+              <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
+              <button data-testid="social-new-session-menu" (click)="createNewTab()" [disabled]="tabManager.tabs().length >= 4" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent">
+                New Session
+              </button>
             </div>
+          }
         </div>
         <app-profile></app-profile>
       </div>

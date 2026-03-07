@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgIf, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { UserImagePickerComponent } from "../sidebar-user-settings/user-image-picker/user-image-picker.component";
@@ -9,7 +9,7 @@ import { ConfigSettings } from '../../../model/app/config';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 @Component({
   selector: 'app-sidebar-user-system-settings',
-  imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './sidebar-user-system-settings.component.html'
 })

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { NgFor, KeyValuePipe, NgIf, NgClass } from '@angular/common';
+import { KeyValuePipe, NgClass } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -9,7 +9,7 @@ import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 @Component({
   selector: 'app-credentials-search-bar',
-  imports: [NgFor, NgIf, KeyValuePipe, FormsModule, TooltipDirective, NgClass],
+  imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass],
   templateUrl: './credentials-search-bar.component.html',
   animations: [fadeInDashboardItem, advancedRowMotionAnimation],
 })

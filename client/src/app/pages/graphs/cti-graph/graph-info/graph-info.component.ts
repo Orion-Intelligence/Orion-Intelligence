@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgIf, TitleCasePipe } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { GraphListingsComponent } from "../listings/graph-listings.component";
 import { loadRuleSetFromStorage, RuleSet, saveRuleSetToStorage } from '../../../../shared/model/graph/ruleset_model';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { DashboardHeaderComponent } from '../../../../shared/partials/header/dashboard-header/dashboard-header.component';
 @Component({
   selector: 'app-graph-info',
-  imports: [TitleCasePipe, NgIf, GraphListingsComponent, TooltipDirective, DashboardHeaderComponent],
+  imports: [TitleCasePipe, GraphListingsComponent, TooltipDirective, DashboardHeaderComponent],
   templateUrl: './graph-info.component.html'
 })
 export class GraphInfoComponent implements OnInit {

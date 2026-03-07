@@ -11,33 +11,45 @@
       <div>
         <label class="ui-popup-label mb-1.5 block text-sm font-medium">Email</label>
         <input data-testid="support-email-input" type="email" name="email" [(ngModel)]="supportModel.email" #emailInput="ngModel" required email placeholder="your@email.com" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': emailInput.invalid && submitAttempted }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" />
-        <div *ngIf="emailInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-500">
-          <span *ngIf="emailInput.errors?.['required']">Email cannot be empty</span>
-          <span *ngIf="emailInput.errors?.['email']">Enter a valid email address</span>
-        </div>
+        @if (emailInput.invalid && submitAttempted) {
+          <div class="mt-1 text-xs text-rose-500">
+            @if (emailInput.errors?.['required']) {
+              <span>Email cannot be empty</span>
+            }
+            @if (emailInput.errors?.['email']) {
+              <span>Enter a valid email address</span>
+            }
+          </div>
+        }
       </div>
 
       <div>
         <label class="ui-popup-label mb-1.5 block text-sm font-medium">Subject</label>
         <input data-testid="support-subject-input" type="text" [(ngModel)]="supportModel.subject" #subjectInput="ngModel" required placeholder="Write your subject" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': subjectInput.invalid && submitAttempted }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" />
-        <div *ngIf="subjectInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-500">
-          Subject cannot be empty
-        </div>
+        @if (subjectInput.invalid && submitAttempted) {
+          <div class="mt-1 text-xs text-rose-500">
+            Subject cannot be empty
+          </div>
+        }
       </div>
 
       <div>
         <label class="ui-popup-label mb-1.5 block text-sm font-medium">Message</label>
         <textarea data-testid="support-message-input" rows="5" [(ngModel)]="supportModel.message" #messageInput="ngModel" required placeholder="Write your message..." [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': messageInput.invalid && submitAttempted }" class="ui-popup-textarea block w-full rounded-lg px-3 py-2.5 text-sm"></textarea>
-        <div *ngIf="messageInput.invalid && submitAttempted" class="mt-1 text-xs text-rose-500">
-          Message cannot be empty
-        </div>
+        @if (messageInput.invalid && submitAttempted) {
+          <div class="mt-1 text-xs text-rose-500">
+            Message cannot be empty
+          </div>
+        }
       </div>
     </div>
 
     <div class="ui-popup-footer flex items-center justify-end gap-2 px-5 py-4">
-      <div *ngIf="errorMessage" class="mr-auto text-xs text-rose-500">
-        {{ errorMessage }}
-      </div>
+      @if (errorMessage) {
+        <div class="mr-auto text-xs text-rose-500">
+          {{ errorMessage }}
+        </div>
+      }
       <button data-testid="support-cancel" type="button" (click)="close()" class="ui-popup-btn-secondary px-[24px] text-[14px]">
         Cancel
       </button>

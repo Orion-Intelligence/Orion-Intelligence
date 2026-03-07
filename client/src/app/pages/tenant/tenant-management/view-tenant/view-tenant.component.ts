@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { NgFor } from '@angular/common';
+
 import { ApiService } from '../../../../shared/services/api.service';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
@@ -11,7 +11,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [NgFor, FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })

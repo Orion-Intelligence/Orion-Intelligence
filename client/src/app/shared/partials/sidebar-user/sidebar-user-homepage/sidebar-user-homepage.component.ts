@@ -1,5 +1,5 @@
 import { Component, effect, OnDestroy, OnInit, signal } from '@angular/core';
-import { NgFor, CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
@@ -24,7 +24,7 @@ import { NgxPrintModule } from 'ngx-print';
 import { countFilterValues } from '../../../utils/filter-values.util';
 @Component({
   selector: 'app-sidebar-user-homepage',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
+  imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
   templateUrl: './sidebar-user-homepage.component.html',
   animations: [overlayAnimation],
 })

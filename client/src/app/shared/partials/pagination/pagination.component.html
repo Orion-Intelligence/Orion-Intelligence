@@ -1,19 +1,20 @@
-<div *ngIf="maxPages>1" data-testid="pagination-root" class="mt-4 mb-[150px]">
-  <div data-testid="pagination-shell" class="ui-pagination-shell flex items-center gap-2" [ngClass]="align === 'left' ? 'justify-start' : 'justify-center'">
-    <button data-testid="pagination-first" (click)="currentPage !== 1 && onPageChange(1)" [disabled]="currentPage === 1" class="ui-pagination-btn inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-[background-color,border-color,color,box-shadow] duration-300 ease-out hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)] disabled:cursor-not-allowed disabled:opacity-50">
-      <img alt="nav-first" height="16" ngSrc="../../../../assets/images/shared/theme/nav-first.svg" width="16" class="ui-action-icon">
-    </button>
-
-    <button data-testid="pagination-prev" (click)="currentPage !== 1 && onPageChange(currentPage - 1)" [disabled]="currentPage === 1" class="ui-pagination-btn inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-[background-color,border-color,color,box-shadow] duration-300 ease-out hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)] disabled:cursor-not-allowed disabled:opacity-50">
-      <img alt="nav-prev" height="16" ngSrc="../../../../assets/images/shared/theme/nav-prev.svg" width="16" class="ui-action-icon">
-    </button>
-
-    <button [attr.data-testid]="'pagination-page-' + page" (click)="onPageChange(page)" *ngFor="let page of getPageRange()" [ngClass]="page === currentPage ? 'ui-pagination-btn-active border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_4px_12px_rgba(87,165,235,0.28)]' : 'ui-pagination-btn bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)]'" class="h-9 min-w-[36px] rounded-md border border-[var(--color-border)] px-3 text-sm font-semibold transition-[background-color,border-color,color,box-shadow] duration-300 ease-out">
-      {{ page }}
-    </button>
-
-    <button data-testid="pagination-next" (click)="currentPage < maxPages && onPageChange(currentPage + 1)" [disabled]="currentPage >= maxPages" class="ui-pagination-btn inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-[background-color,border-color,color,box-shadow] duration-300 ease-out hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)] disabled:cursor-not-allowed disabled:opacity-50">
-      <img alt="nav-next" height="16" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="16" class="ui-action-icon">
-    </button>
+@if (maxPages>1) {
+  <div data-testid="pagination-root" class="mt-4 mb-[150px]">
+    <div data-testid="pagination-shell" class="ui-pagination-shell flex items-center gap-2" [ngClass]="align === 'left' ? 'justify-start' : 'justify-center'">
+      <button data-testid="pagination-first" (click)="currentPage !== 1 && onPageChange(1)" [disabled]="currentPage === 1" class="ui-pagination-btn inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-[background-color,border-color,color,box-shadow] duration-300 ease-out hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)] disabled:cursor-not-allowed disabled:opacity-50">
+        <img alt="nav-first" height="16" ngSrc="../../../../assets/images/shared/theme/nav-first.svg" width="16" class="ui-action-icon">
+      </button>
+      <button data-testid="pagination-prev" (click)="currentPage !== 1 && onPageChange(currentPage - 1)" [disabled]="currentPage === 1" class="ui-pagination-btn inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-[background-color,border-color,color,box-shadow] duration-300 ease-out hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)] disabled:cursor-not-allowed disabled:opacity-50">
+        <img alt="nav-prev" height="16" ngSrc="../../../../assets/images/shared/theme/nav-prev.svg" width="16" class="ui-action-icon">
+      </button>
+      @for (page of getPageRange(); track page) {
+        <button [attr.data-testid]="'pagination-page-' + page" (click)="onPageChange(page)" [ngClass]="page === currentPage ? 'ui-pagination-btn-active border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_4px_12px_rgba(87,165,235,0.28)]' : 'ui-pagination-btn bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)]'" class="h-9 min-w-[36px] rounded-md border border-[var(--color-border)] px-3 text-sm font-semibold transition-[background-color,border-color,color,box-shadow] duration-300 ease-out">
+          {{ page }}
+        </button>
+      }
+      <button data-testid="pagination-next" (click)="currentPage < maxPages && onPageChange(currentPage + 1)" [disabled]="currentPage >= maxPages" class="ui-pagination-btn inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-[background-color,border-color,color,box-shadow] duration-300 ease-out hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)] disabled:cursor-not-allowed disabled:opacity-50">
+        <img alt="nav-next" height="16" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="16" class="ui-action-icon">
+      </button>
+    </div>
   </div>
-</div>
+}

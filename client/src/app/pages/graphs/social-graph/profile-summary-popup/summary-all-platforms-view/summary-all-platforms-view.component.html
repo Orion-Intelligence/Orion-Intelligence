@@ -19,48 +19,71 @@
         <i class="bi" [ngClass]="profileLeaksLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-shield-exclamation'"></i>
         <span>{{ profileLeaksLoading() ? 'Fetching...' : 'Fetch Profile Leaks' }}</span>
       </button>
-      <p *ngIf="profileLeaksError()" class="text-sm text-red-400">{{ profileLeaksError() }}</p>
-      <ng-container *ngIf="profileLeaksLoaded()">
+      @if (profileLeaksError()) {
+        <p class="text-sm text-red-400">{{ profileLeaksError() }}</p>
+      }
+      @if (profileLeaksLoaded()) {
         <div class="rounded-lg bg-slate-800/50 p-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
             <h4 class="font-semibold text-slate-200">Email Breach Results</h4>
             <span class="text-xs text-slate-400">{{ profileBreachCards().length }}</span>
           </div>
-          <div *ngIf="profileBreachCards().length > 0; else noBreachData" class="space-y-2 mt-2">
-            <div *ngFor="let card of profileBreachCards().slice(0, 5)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-              <div *ngFor="let entry of getObjectEntries(card).slice(0, 8)" class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
-                <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
-                <span class="text-slate-200 ml-1 break-words" *ngIf="!isArrayValue(entry.value) && !isObjectValue(entry.value)">{{ stringifyPrimitive(entry.value) }}</span>
-                <span class="text-slate-200 ml-1 break-words" *ngIf="isArrayValue(entry.value)">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
-                <span class="text-slate-200 ml-1 break-words" *ngIf="isObjectValue(entry.value)">[object]</span>
-              </div>
+          @if (profileBreachCards().length > 0) {
+            <div class="space-y-2 mt-2">
+              @for (card of profileBreachCards().slice(0, 5); track card) {
+                <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
+                  @for (entry of getObjectEntries(card).slice(0, 8); track entry) {
+                    <div class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
+                      <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
+                      @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
+                        <span class="text-slate-200 ml-1 break-words">{{ stringifyPrimitive(entry.value) }}</span>
+                      }
+                      @if (isArrayValue(entry.value)) {
+                        <span class="text-slate-200 ml-1 break-words">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                      }
+                      @if (isObjectValue(entry.value)) {
+                        <span class="text-slate-200 ml-1 break-words">[object]</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
             </div>
-          </div>
-          <ng-template #noBreachData>
+          } @else {
             <p class="text-sm text-slate-500 mt-2">No response was found.</p>
-          </ng-template>
+          }
         </div>
-
         <div class="rounded-lg bg-slate-800/50 p-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
             <h4 class="font-semibold text-slate-200">Stealer Log Results</h4>
             <span class="text-xs text-slate-400">{{ profileStealerRows().length }}</span>
           </div>
-          <div *ngIf="profileStealerRows().length > 0; else noStealerData" class="space-y-2 mt-2">
-            <div *ngFor="let row of profileStealerRows().slice(0, 10)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-              <div *ngFor="let entry of getObjectEntries(row).slice(0, 8)" class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
-                <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
-                <span class="text-slate-200 ml-1 break-words" *ngIf="!isArrayValue(entry.value) && !isObjectValue(entry.value)">{{ stringifyPrimitive(entry.value) }}</span>
-                <span class="text-slate-200 ml-1 break-words" *ngIf="isArrayValue(entry.value)">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
-                <span class="text-slate-200 ml-1 break-words" *ngIf="isObjectValue(entry.value)">[object]</span>
-              </div>
+          @if (profileStealerRows().length > 0) {
+            <div class="space-y-2 mt-2">
+              @for (row of profileStealerRows().slice(0, 10); track row) {
+                <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
+                  @for (entry of getObjectEntries(row).slice(0, 8); track entry) {
+                    <div class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
+                      <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
+                      @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
+                        <span class="text-slate-200 ml-1 break-words">{{ stringifyPrimitive(entry.value) }}</span>
+                      }
+                      @if (isArrayValue(entry.value)) {
+                        <span class="text-slate-200 ml-1 break-words">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                      }
+                      @if (isObjectValue(entry.value)) {
+                        <span class="text-slate-200 ml-1 break-words">[object]</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
             </div>
-          </div>
-          <ng-template #noStealerData>
+          } @else {
             <p class="text-sm text-slate-500 mt-2">No response was found.</p>
-          </ng-template>
+          }
         </div>
-      </ng-container>
+      }
     </div>
   </details>
 
@@ -72,12 +95,14 @@
     <div class="p-3 border-t border-slate-700 space-y-3">
       <div class="flex flex-col gap-2">
         <div class="flex flex-wrap items-center gap-2 rounded-md border border-slate-700 bg-slate-900/60 px-2 py-2">
-          <span *ngFor="let token of profileMetadataTokens()" class="inline-flex items-center gap-1 rounded-full bg-slate-700/70 px-2 py-1 text-[11px] text-slate-200">
-            <span>{{ token }}</span>
-            <button type="button" (click)="removeMetadataToken(token)" class="text-slate-400 hover:text-slate-100">
-              <i class="bi bi-x-lg text-[10px]"></i>
-            </button>
-          </span>
+          @for (token of profileMetadataTokens(); track token) {
+            <span class="inline-flex items-center gap-1 rounded-full bg-slate-700/70 px-2 py-1 text-[11px] text-slate-200">
+              <span>{{ token }}</span>
+              <button type="button" (click)="removeMetadataToken(token)" class="text-slate-400 hover:text-slate-100">
+                <i class="bi bi-x-lg text-[10px]"></i>
+              </button>
+            </span>
+          }
           <input type="text" [value]="profileMetadataTokenInput()" (input)="profileMetadataTokenInput.set($any($event.target).value)" (keydown)="onMetadataTokenKeydown($event)" (blur)="addTokensFromInput()" placeholder="Type a token and press Enter" class="min-w-[180px] flex-1 rounded-md bg-transparent px-2 py-1 text-xs text-white placeholder:text-slate-500 focus:outline-none">
         </div>
         <div class="flex items-center gap-2">
@@ -85,29 +110,46 @@
             <i class="bi" [ngClass]="profileMetadataLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-search'"></i>
             <span>{{ profileMetadataLoading() ? 'Fetching...' : 'Search Metadata' }}</span>
           </button>
-          <button *ngIf="profileMetadataTokens().length" type="button" (click)="profileMetadataTokens.set([])" class="text-xs text-slate-400 hover:text-slate-200">Clear</button>
+          @if (profileMetadataTokens().length) {
+            <button type="button" (click)="profileMetadataTokens.set([])" class="text-xs text-slate-400 hover:text-slate-200">Clear</button>
+          }
         </div>
       </div>
-      <p *ngIf="profileMetadataError()" class="text-sm text-red-400">{{ profileMetadataError() }}</p>
-      <ng-container *ngIf="profileMetadataLoaded() && !profileMetadataError()">
-        <div *ngIf="profileMetadataResult() as meta">
-          <div class="flex items-center justify-between">
-            <p *ngIf="meta.query" class="text-xs text-slate-400">Query: {{ meta.query }}</p>
-            <span class="text-xs text-slate-400">{{ meta.total_found || 0 }}</span>
-          </div>
-          <p *ngIf="meta.timestamp" class="text-xs text-slate-500">Timestamp: {{ meta.timestamp }}</p>
-          <div *ngIf="(meta?.results?.length || 0) > 0; else noMetadataResults" class="space-y-2 mt-2">
-            <div *ngFor="let row of (meta?.results || []).slice(0, 10)" class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-              <div class="text-xs text-slate-300 font-semibold">{{ row.title || 'Untitled' }}</div>
-              <a *ngIf="row.url" [href]="row.url" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 break-words hover:underline">{{ row.url }}</a>
-              <p *ngIf="row.snippet" class="text-xs text-slate-400 mt-1">{{ row.snippet }}</p>
+      @if (profileMetadataError()) {
+        <p class="text-sm text-red-400">{{ profileMetadataError() }}</p>
+      }
+      @if (profileMetadataLoaded() && !profileMetadataError()) {
+        @if (profileMetadataResult(); as meta) {
+          <div>
+            <div class="flex items-center justify-between">
+              @if (meta.query) {
+                <p class="text-xs text-slate-400">Query: {{ meta.query }}</p>
+              }
+              <span class="text-xs text-slate-400">{{ meta.total_found || 0 }}</span>
             </div>
+            @if (meta.timestamp) {
+              <p class="text-xs text-slate-500">Timestamp: {{ meta.timestamp }}</p>
+            }
+            @if ((meta?.results?.length || 0) > 0) {
+              <div class="space-y-2 mt-2">
+                @for (row of (meta?.results || []).slice(0, 10); track row) {
+                  <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
+                    <div class="text-xs text-slate-300 font-semibold">{{ row.title || 'Untitled' }}</div>
+                    @if (row.url) {
+                      <a [href]="row.url" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 break-words hover:underline">{{ row.url }}</a>
+                    }
+                    @if (row.snippet) {
+                      <p class="text-xs text-slate-400 mt-1">{{ row.snippet }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-sm text-slate-500 mt-2">No response was found.</p>
+            }
           </div>
-          <ng-template #noMetadataResults>
-            <p class="text-sm text-slate-500 mt-2">No response was found.</p>
-          </ng-template>
-        </div>
-      </ng-container>
+        }
+      }
     </div>
   </details>
 
@@ -120,51 +162,64 @@
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
         <input type="text" placeholder="Filter platforms..." [value]="detailsSearchTerm()" (input)="onDetailsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-        <button *ngIf="detailsSearchTerm()" (click)="clearDetailsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        @if (detailsSearchTerm()) {
+          <button (click)="clearDetailsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        }
       </div>
 
       <div class="space-y-2">
-        <div *ngFor="let platform of displayPlatformsForDetails(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-          <ng-container *ngIf="platform.profileDetails !== undefined; else detailFetchBlock">
-            <div class="bg-slate-800/50 rounded-lg p-3">
-              <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
-                <div *ngIf="fetchingState.profile()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-              </div>
-              <dl *ngIf="platform.profileDetails && getProfileDetailEntries(platform).length > 0; else noDetailData" class="text-sm">
-                <div *ngFor="let item of getProfileDetailEntries(platform)" class="py-2 border-b border-slate-700/30 last:border-b-0">
-                  <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
-                  <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+        @for (platform of displayPlatformsForDetails(); track platform; let i = $index) {
+          <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+            @if (platform.profileDetails !== undefined) {
+              <div class="bg-slate-800/50 rounded-lg p-3">
+                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                  @if (fetchingState.profile()[getPlatformUniqueKey(platform)]) {
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                  }
                 </div>
-              </dl>
-              <ng-template #noDetailData>
-                <p class="text-center text-sm text-slate-500 py-2">No additional profile data found.</p>
-              </ng-template>
-            </div>
-          </ng-container>
-          <ng-template #detailFetchBlock>
-            <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
-              <div class="flex items-center gap-2 min-w-0">
-                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+                @if (platform.profileDetails && getProfileDetailEntries(platform).length > 0) {
+                  <dl class="text-sm">
+                    @for (item of getProfileDetailEntries(platform); track item) {
+                      <div class="py-2 border-b border-slate-700/30 last:border-b-0">
+                        <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
+                        <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+                      </div>
+                    }
+                  </dl>
+                } @else {
+                  <p class="text-center text-sm text-slate-500 py-2">No additional profile data found.</p>
+                }
               </div>
-              <div *ngIf="fetchingState.profile()[getPlatformUniqueKey(platform)]; else detailFetchBtn" class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
-                <span>Fetching...</span>
+            } @else {
+              <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+                </div>
+                @if (fetchingState.profile()[getPlatformUniqueKey(platform)]) {
+                  <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                    <span>Fetching...</span>
+                  </div>
+                } @else {
+                  <button (click)="fetchProfile.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                    <i class="bi bi-person-lines-fill"></i><span>Fetch</span>
+                  </button>
+                }
               </div>
-              <ng-template #detailFetchBtn>
-                <button (click)="fetchProfile.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                  <i class="bi bi-person-lines-fill"></i><span>Fetch</span>
-                </button>
-              </ng-template>
-            </div>
-          </ng-template>
-        </div>
-        <p *ngIf="filteredPlatformsForDetails().length === 0" class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+            }
+          </div>
+        }
+        @if (filteredPlatformsForDetails().length === 0) {
+          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+        }
       </div>
 
-      <button *ngIf="displayPlatformsForDetails().length < filteredPlatformsForDetails().length" (click)="loadMoreDetailsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      @if (displayPlatformsForDetails().length < filteredPlatformsForDetails().length) {
+        <button (click)="loadMoreDetailsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      }
     </div>
   </details>
 
@@ -177,55 +232,70 @@
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
         <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-        <button *ngIf="postsSearchTerm()" (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        @if (postsSearchTerm()) {
+          <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        }
       </div>
 
       <div class="space-y-2">
-        <div *ngFor="let platform of displayPlatformsForPosts(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-          <ng-container *ngIf="platform.posts !== undefined; else postFetchBlock">
-            <div class="bg-slate-800/50 rounded-lg p-3">
-              <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
-                <div *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-              </div>
-              <div *ngIf="platform.posts?.length; else noPostData" class="space-y-3">
-                <div *ngFor="let post of platform.posts!.slice(0, 3)" class="bg-slate-700/50 p-3 rounded-lg text-sm">
-                  <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
-                  <div class="flex items-center justify-between text-slate-400">
-                    <div class="flex items-center gap-4">
-                      <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
-                      <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
-                    </div>
-                    <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">View Post <i class="bi bi-link-45deg text-xs"></i></a>
-                  </div>
+        @for (platform of displayPlatformsForPosts(); track platform; let i = $index) {
+          <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+            @if (platform.posts !== undefined) {
+              <div class="bg-slate-800/50 rounded-lg p-3">
+                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                  @if (fetchingState.posts()[getPlatformUniqueKey(platform)]) {
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                  }
                 </div>
+                @if (platform.posts?.length) {
+                  <div class="space-y-3">
+                    @for (post of platform.posts!.slice(0, 3); track post) {
+                      <div class="bg-slate-700/50 p-3 rounded-lg text-sm">
+                        <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
+                        <div class="flex items-center justify-between text-slate-400">
+                          <div class="flex items-center gap-4">
+                            <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
+                            <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
+                          </div>
+                          <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">View Post <i class="bi bi-link-45deg text-xs"></i></a>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-center text-sm text-slate-500 py-2">No posts found for this account.</p>
+                }
               </div>
-              <ng-template #noPostData><p class="text-center text-sm text-slate-500 py-2">No posts found for this account.</p></ng-template>
-            </div>
-          </ng-container>
-          <ng-template #postFetchBlock>
-            <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
-              <div class="flex items-center gap-2 min-w-0">
-                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+            } @else {
+              <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+                </div>
+                @if (fetchingState.posts()[getPlatformUniqueKey(platform)]) {
+                  <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                    <span>Fetching...</span>
+                  </div>
+                } @else {
+                  <button (click)="fetchPosts.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                    <i class="bi bi-file-post"></i><span>Fetch</span>
+                  </button>
+                }
               </div>
-              <div *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]; else postFetchBtn" class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
-                <span>Fetching...</span>
-              </div>
-              <ng-template #postFetchBtn>
-                <button (click)="fetchPosts.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                  <i class="bi bi-file-post"></i><span>Fetch</span>
-                </button>
-              </ng-template>
-            </div>
-          </ng-template>
-        </div>
-        <p *ngIf="filteredPlatformsForPosts().length === 0" class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+            }
+          </div>
+        }
+        @if (filteredPlatformsForPosts().length === 0) {
+          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+        }
       </div>
 
-      <button *ngIf="displayPlatformsForPosts().length < filteredPlatformsForPosts().length" (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      @if (displayPlatformsForPosts().length < filteredPlatformsForPosts().length) {
+        <button (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      }
     </div>
   </details>
 
@@ -238,39 +308,54 @@
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
         <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-        <button *ngIf="postsSearchTerm()" (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        @if (postsSearchTerm()) {
+          <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        }
       </div>
 
       <div class="space-y-2">
-        <div *ngFor="let platform of displayPlatformsForPosts(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-          <div class="bg-slate-800/50 rounded-lg p-3">
-            <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-              <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-              <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
-              <div *ngIf="fetchingState.posts()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-            </div>
-            <div *ngIf="platform.post_connections?.length; else noConnectionData">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ platform.post_connections?.length || 0 }} connections</span>
+        @for (platform of displayPlatformsForPosts(); track platform; let i = $index) {
+          <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+            <div class="bg-slate-800/50 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                @if (fetchingState.posts()[getPlatformUniqueKey(platform)]) {
+                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                }
               </div>
-              <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-                <button *ngFor="let connection of getVisiblePostConnections(platform)" type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
-                  {{ '@' + connection }}
-                </button>
-              </div>
-              <button *ngIf="canLoadMorePostConnections(platform)" (click)="loadMorePostConnections(platform)" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">
-                Load More
-              </button>
+              @if (platform.post_connections?.length) {
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ platform.post_connections?.length || 0 }} connections</span>
+                  </div>
+                  <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
+                    @for (connection of getVisiblePostConnections(platform); track connection) {
+                      <button type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
+                        {{ '@' + connection }}
+                      </button>
+                    }
+                  </div>
+                  @if (canLoadMorePostConnections(platform)) {
+                    <button (click)="loadMorePostConnections(platform)" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">
+                      Load More
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p class="text-center text-sm text-slate-500 py-2">No connections detected in posts.</p>
+              }
             </div>
-            <ng-template #noConnectionData>
-              <p class="text-center text-sm text-slate-500 py-2">No connections detected in posts.</p>
-            </ng-template>
           </div>
-        </div>
-        <p *ngIf="filteredPlatformsForPosts().length === 0" class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+        }
+        @if (filteredPlatformsForPosts().length === 0) {
+          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+        }
       </div>
 
-      <button *ngIf="displayPlatformsForPosts().length < filteredPlatformsForPosts().length" (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      @if (displayPlatformsForPosts().length < filteredPlatformsForPosts().length) {
+        <button (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      }
     </div>
   </details>
 
@@ -283,51 +368,66 @@
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
         <input type="text" placeholder="Filter platforms..." [value]="imagesSearchTerm()" (input)="onImagesSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-        <button *ngIf="imagesSearchTerm()" (click)="clearImagesSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        @if (imagesSearchTerm()) {
+          <button (click)="clearImagesSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+        }
       </div>
 
       <div class="space-y-2">
-        <div *ngFor="let platform of displayPlatformsForImages(); let i = index" class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-          <ng-container *ngIf="platform.images !== undefined; else imagesFetchBlock">
-            <div class="bg-slate-800/50 rounded-lg p-3">
-              <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
-                <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress() || fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                  Fetch Images
-                </button>
-                <div *ngIf="fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-              </div>
-              <div *ngIf="platform.images?.length; else noImagesData" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-                <div *ngFor="let image of platform.images" class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors">
-                  <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title"><img [src]="image.thumbnail" [alt]="image.title" class="w-full h-20 object-cover transition-transform duration-300 group-hover:scale-105"></a>
+        @for (platform of displayPlatformsForImages(); track platform; let i = $index) {
+          <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+            @if (platform.images !== undefined) {
+              <div class="bg-slate-800/50 rounded-lg p-3">
+                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+                  <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress() || fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                    Fetch Images
+                  </button>
+                  @if (fetchingState.platformImages()[getPlatformUniqueKey(platform)]) {
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                  }
                 </div>
+                @if (platform.images?.length) {
+                  <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                    @for (image of platform.images; track image) {
+                      <div class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors">
+                        <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title"><img [src]="image.thumbnail" [alt]="image.title" class="w-full h-20 object-cover transition-transform duration-300 group-hover:scale-105"></a>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-center text-sm text-slate-500 py-2">No images found for this platform.</p>
+                }
               </div>
-              <ng-template #noImagesData><p class="text-center text-sm text-slate-500 py-2">No images found for this platform.</p></ng-template>
-            </div>
-          </ng-container>
-          <ng-template #imagesFetchBlock>
-            <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
-              <div class="flex items-center gap-2 min-w-0">
-                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+            } @else {
+              <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+                </div>
+                @if (fetchingState.platformImages()[getPlatformUniqueKey(platform)]) {
+                  <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                    <span>Fetching...</span>
+                  </div>
+                } @else {
+                  <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                    Fetch Images
+                  </button>
+                }
               </div>
-              <div *ngIf="fetchingState.platformImages()[getPlatformUniqueKey(platform)]; else imagesFetchBtn" class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
-                <span>Fetching...</span>
-              </div>
-              <ng-template #imagesFetchBtn>
-                <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                  Fetch Images
-                </button>
-              </ng-template>
-            </div>
-          </ng-template>
-        </div>
-        <p *ngIf="filteredPlatformsForImages().length === 0" class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+            }
+          </div>
+        }
+        @if (filteredPlatformsForImages().length === 0) {
+          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+        }
       </div>
 
-      <button *ngIf="displayPlatformsForImages().length < filteredPlatformsForImages().length" (click)="loadMoreImagesPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      @if (displayPlatformsForImages().length < filteredPlatformsForImages().length) {
+        <button (click)="loadMoreImagesPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+      }
     </div>
   </details>
 </div>

@@ -1,7 +1,7 @@
 <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="onClose()">
   <div class="ui-graph-popup-panel flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
 
-    
+
     <div class="p-3 flex items-start justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-850)] flex-shrink-0 rounded-t-lg">
       <div class="flex items-center gap-3 min-w-0">
         <div [socialMapperPlatformBg]="data().platform" class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-3xl font-bold text-[var(--color-text1)] shadow-[inset_0_0_0_1px_var(--color-border)]">
@@ -22,118 +22,157 @@
       </div>
     </div>
 
-    
+
     <div class="flex-grow overflow-y-auto p-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-      
+
       <div class="mb-4">
-        <p *ngIf="data().description" class="text-[var(--color-text4)] text-sm mb-4">{{ data().description }}</p>
+        @if (data().description) {
+          <p class="text-[var(--color-text4)] text-sm mb-4">{{ data().description }}</p>
+        }
         <div class="flex items-center gap-4 text-[var(--color-text4)] text-sm">
-          <div *ngIf="data().joiningDate" class="flex items-center gap-2">
-            <i class="bi bi-calendar3"></i>
-            <span>Joined {{ data().joiningDate }}</span>
-          </div>
-          <div *ngIf="data().followers !== undefined" class="flex items-center gap-2">
-            <i class="bi bi-people"></i>
-            <strong class="text-[var(--color-text2)]">{{ formatFollowers(data().followers) }}</strong> followers
-          </div>
+          @if (data().joiningDate) {
+            <div class="flex items-center gap-2">
+              <i class="bi bi-calendar3"></i>
+              <span>Joined {{ data().joiningDate }}</span>
+            </div>
+          }
+          @if (data().followers !== undefined) {
+            <div class="flex items-center gap-2">
+              <i class="bi bi-people"></i>
+              <strong class="text-[var(--color-text2)]">{{ formatFollowers(data().followers) }}</strong> followers
+            </div>
+          }
         </div>
       </div>
 
-      
+
       <div class="space-y-3">
-        
+
         <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Profile Details</span>
-            <button *ngIf="data().profileDetails !== undefined" (click)="$event.preventDefault(); fetchProfile.emit(data())" [disabled]="isScanInProgress() || isFetching()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh profile details">
-              <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetching()"></i>
-            </button>
+            @if (data().profileDetails !== undefined) {
+              <button (click)="$event.preventDefault(); fetchProfile.emit(data())" [disabled]="isScanInProgress() || isFetching()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh profile details">
+                <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetching()"></i>
+              </button>
+            }
           </summary>
           <div class="p-3 border-t border-[var(--color-border)]">
-            <div *ngIf="data().profileDetails === undefined && !isFetching()">
+            @if (data().profileDetails === undefined && !isFetching()) {
               <div>
-                <button (click)="fetchProfile.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                <div>
+                  <button (click)="fetchProfile.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-person-lines-fill"></i>
                     <span>Fetch Profile Info</span>
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (isFetching()) {
+              <div class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                <p class="text-sm">Fetching...</p>
+                <button (click)="cancelFetchProfile.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                  Cancel
                 </button>
               </div>
-            </div>
+            }
 
-            <div *ngIf="isFetching()" class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
-              <p class="text-sm">Fetching...</p>
-              <button (click)="cancelFetchProfile.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
-                Cancel
-              </button>
-            </div>
-            
-            <div *ngIf="!isFetching() && data().profileDetails !== undefined">
-              <div *ngIf="data().profileDetails === null || getProfileDetailEntries().length === 0" class="text-center py-4 text-[var(--color-text4)]">
-                <i class="bi bi-x-circle text-2xl"></i>
-                <p class="mt-1 text-sm">No additional profile data found.</p>
+            @if (!isFetching() && data().profileDetails !== undefined) {
+              <div>
+                @if (data().profileDetails === null || getProfileDetailEntries().length === 0) {
+                  <div class="text-center py-4 text-[var(--color-text4)]">
+                    <i class="bi bi-x-circle text-2xl"></i>
+                    <p class="mt-1 text-sm">No additional profile data found.</p>
+                  </div>
+                }
+                @if (data().profileDetails && getProfileDetailEntries().length > 0) {
+                  <dl class="text-sm">
+                    @for (item of getProfileDetailEntries(); track trackByKey($index, item)) {
+                      <div class="py-3 border-b border-[var(--color-border)] last:border-b-0">
+                        <dt class="font-medium text-[var(--color-text4)] truncate">{{ formatKey(item.key) }}</dt>
+                        <dd class="text-[var(--color-text2)] break-words mt-1">{{ item.value }}</dd>
+                      </div>
+                    }
+                  </dl>
+                }
               </div>
-              <dl *ngIf="data().profileDetails && getProfileDetailEntries().length > 0" class="text-sm">
-                <div *ngFor="let item of getProfileDetailEntries(); trackBy: trackByKey" class="py-3 border-b border-[var(--color-border)] last:border-b-0">
-                  <dt class="font-medium text-[var(--color-text4)] truncate">{{ formatKey(item.key) }}</dt>
-                  <dd class="text-[var(--color-text2)] break-words mt-1">{{ item.value }}</dd>
-                </div>
-              </dl>
-            </div>
+            }
           </div>
         </details>
 
-        
+
         <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Recent Posts</span>
-            <button *ngIf="data().posts !== undefined" (click)="$event.preventDefault(); fetchPosts.emit(data())" [disabled]="isScanInProgress() || isFetchingPosts()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh posts">
-              <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingPosts()"></i>
-            </button>
+            @if (data().posts !== undefined) {
+              <button (click)="$event.preventDefault(); fetchPosts.emit(data())" [disabled]="isScanInProgress() || isFetchingPosts()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh posts">
+                <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingPosts()"></i>
+              </button>
+            }
           </summary>
           <div class="p-3 border-t border-[var(--color-border)]">
-            <div *ngIf="data().posts === undefined && !isFetchingPosts()">
+            @if (data().posts === undefined && !isFetchingPosts()) {
               <div>
-                <button (click)="fetchPosts.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                <div>
+                  <button (click)="fetchPosts.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-file-post"></i>
                     <span>Fetch Posts</span>
-                </button>
-              </div>
-            </div>
-
-            <div *ngIf="isFetchingPosts()" class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
-              <p class="text-sm">Fetching...</p>
-              <button (click)="cancelFetchPosts.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
-                Cancel
-              </button>
-            </div>
-
-            <div *ngIf="!isFetchingPosts() && data().posts !== undefined">
-                <div *ngIf="!data().posts?.length" class="text-center py-4 text-[var(--color-text4)]">
-                  <i class="bi bi-x-circle text-2xl"></i>
-                  <p class="mt-1 text-sm">No posts found for this account.</p>
-                </div>
-                <div *ngIf="data().posts?.length" class="space-y-3">
-                <div *ngFor="let post of displayPosts(); trackBy: trackByPostUrl" class="bg-slate-700/50 p-3 rounded-lg text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                    <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
-                    <div class="flex items-center justify-between text-slate-400">
-                      <div class="flex items-center gap-4">
-                        <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
-                        <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
-                      </div>
-                      <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">
-                        View Post <i class="bi bi-link-45deg text-xs"></i>
-                      </a>
-                    </div>
-                  </div>
-                  <button *ngIf="displayPosts().length < (data().posts || []).length" (click)="loadMorePosts()" [disabled]="isLoadingMorePosts()" class="w-full text-center px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
-                    <span *ngIf="isLoadingMorePosts(); else loadMorePostsText">Loading...</span>
-                    <ng-template #loadMorePostsText><span>Load More Posts</span></ng-template>
                   </button>
                 </div>
-            </div>
+              </div>
+            }
+
+            @if (isFetchingPosts()) {
+              <div class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                <p class="text-sm">Fetching...</p>
+                <button (click)="cancelFetchPosts.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                  Cancel
+                </button>
+              </div>
+            }
+
+            @if (!isFetchingPosts() && data().posts !== undefined) {
+              <div>
+                @if (!data().posts?.length) {
+                  <div class="text-center py-4 text-[var(--color-text4)]">
+                    <i class="bi bi-x-circle text-2xl"></i>
+                    <p class="mt-1 text-sm">No posts found for this account.</p>
+                  </div>
+                }
+                @if (data().posts?.length) {
+                  <div class="space-y-3">
+                    @for (post of displayPosts(); track trackByPostUrl($index, post)) {
+                      <div class="bg-slate-700/50 p-3 rounded-lg text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                        <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
+                        <div class="flex items-center justify-between text-slate-400">
+                          <div class="flex items-center gap-4">
+                            <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
+                            <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
+                          </div>
+                          <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">
+                            View Post <i class="bi bi-link-45deg text-xs"></i>
+                          </a>
+                        </div>
+                      </div>
+                    }
+                    @if (displayPosts().length < (data().posts || []).length) {
+                      <button (click)="loadMorePosts()" [disabled]="isLoadingMorePosts()" class="w-full text-center px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
+                        @if (isLoadingMorePosts()) {
+                          <span>Loading...</span>
+                        } @else {
+                          <span>Load More Posts</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
           </div>
         </details>
 
@@ -143,37 +182,46 @@
             <span>Post Connections</span>
           </summary>
           <div class="p-3 border-t border-[var(--color-border)]">
-            <div *ngIf="!data().post_connections?.length" class="text-center py-4 text-[var(--color-text4)]">
-              <i class="bi bi-x-circle text-2xl"></i>
-              <p class="mt-1 text-sm">No connections detected in posts.</p>
-            </div>
-            <ng-container *ngIf="data().post_connections?.length">
+            @if (!data().post_connections?.length) {
+              <div class="text-center py-4 text-[var(--color-text4)]">
+                <i class="bi bi-x-circle text-2xl"></i>
+                <p class="mt-1 text-sm">No connections detected in posts.</p>
+              </div>
+            }
+            @if (data().post_connections?.length) {
               <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">{{ data().post_connections?.length || 0 }} connections</span>
               </div>
               <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-                <button *ngFor="let connection of displayPostConnections(); trackBy: trackByIndex" type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
-                  {{ '@' + connection }}
-                </button>
+                @for (connection of displayPostConnections(); track trackByIndex($index)) {
+                  <button type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
+                    {{ '@' + connection }}
+                  </button>
+                }
               </div>
-              <button *ngIf="displayPostConnections().length < (data().post_connections || []).length" (click)="loadMorePostConnections()" [disabled]="isLoadingMorePostConnections()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
-                {{ isLoadingMorePostConnections() ? 'Loading...' : 'Load More' }}
-              </button>
-            </ng-container>
+              @if (displayPostConnections().length < (data().post_connections || []).length) {
+                <button (click)="loadMorePostConnections()" [disabled]="isLoadingMorePostConnections()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
+                  {{ isLoadingMorePostConnections() ? 'Loading...' : 'Load More' }}
+                </button>
+              }
+            }
           </div>
         </details>
-        
-        
+
+
         <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-            <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
-              <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
-              <span>Followers</span>
-              <button *ngIf="data().followers_list !== undefined" (click)="$event.preventDefault(); fetchFollowers.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowers()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Followers">
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+            <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
+            <span>Followers</span>
+            @if (data().followers_list !== undefined) {
+              <button (click)="$event.preventDefault(); fetchFollowers.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowers()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Followers">
                 <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingFollowers()"></i>
               </button>
-            </summary>
-            <div class="p-3 border-t border-[var(--color-border)]">
-              <div *ngIf="data().followers_list === undefined && !isFetchingFollowers()">
+            }
+          </summary>
+          <div class="p-3 border-t border-[var(--color-border)]">
+            @if (data().followers_list === undefined && !isFetchingFollowers()) {
+              <div>
                 <div>
                   <button (click)="fetchFollowers.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-person-plus"></i>
@@ -181,46 +229,63 @@
                   </button>
                 </div>
               </div>
+            }
 
-              <div *ngIf="isFetchingFollowers()" class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
+            @if (isFetchingFollowers()) {
+              <div class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
                 <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
                 <p class="text-sm">Fetching...</p>
                 <button (click)="cancelFetchFollowers.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
                   Cancel
                 </button>
               </div>
+            }
 
-              <div *ngIf="!isFetchingFollowers() && data().followers_list !== undefined">
-                <div *ngIf="!data().followers_list?.length" class="text-center py-4 text-[var(--color-text4)]">
-                  <i class="bi bi-x-circle text-2xl"></i>
-                  <p class="mt-1 text-sm">No followers found or data is private.</p>
-                </div>
-                <ng-container *ngIf="data().followers_list?.length">
-                  <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-                  <button *ngFor="let follower of displayFollowers(); trackBy: trackByUsername" type="button" (click)="scanConnections([follower])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                    {{ '@' + follower }}
-                  </button>
+            @if (!isFetchingFollowers() && data().followers_list !== undefined) {
+              <div>
+                @if (!data().followers_list?.length) {
+                  <div class="text-center py-4 text-[var(--color-text4)]">
+                    <i class="bi bi-x-circle text-2xl"></i>
+                    <p class="mt-1 text-sm">No followers found or data is private.</p>
                   </div>
-                  <button *ngIf="displayFollowers().length < (data().followers_list || []).length" (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
-                    <span *ngIf="isLoadingMoreFollowers(); else loadMoreFollowersText">Loading...</span>
-                    <ng-template #loadMoreFollowersText><span>Load More Followers</span></ng-template>
-                  </button>
-                </ng-container>
+                }
+                @if (data().followers_list?.length) {
+                  <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                    @for (follower of displayFollowers(); track trackByUsername($index, follower)) {
+                      <button type="button" (click)="scanConnections([follower])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                        {{ '@' + follower }}
+                      </button>
+                    }
+                  </div>
+                  @if (displayFollowers().length < (data().followers_list || []).length) {
+                    <button (click)="loadMoreFollowers()" [disabled]="isLoadingMoreFollowers()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
+                      @if (isLoadingMoreFollowers()) {
+                        <span>Loading...</span>
+                      } @else {
+                        <span>Load More Followers</span>
+                      }
+                    </button>
+                  }
+                }
               </div>
-            </div>
+            }
+          </div>
         </details>
 
-        
+
         <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-            <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
-              <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
-              <span>Following</span>
-              <button *ngIf="data().following_list !== undefined" (click)="$event.preventDefault(); fetchFollowing.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowing()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Following">
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+            <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
+            <span>Following</span>
+            @if (data().following_list !== undefined) {
+              <button (click)="$event.preventDefault(); fetchFollowing.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowing()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Following">
                 <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingFollowing()"></i>
               </button>
-            </summary>
-            <div class="p-3 border-t border-[var(--color-border)]">
-              <div *ngIf="data().following_list === undefined && !isFetchingFollowing()">
+            }
+          </summary>
+          <div class="p-3 border-t border-[var(--color-border)]">
+            @if (data().following_list === undefined && !isFetchingFollowing()) {
+              <div>
                 <div>
                   <button (click)="fetchFollowing.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-person-check"></i>
@@ -228,111 +293,153 @@
                   </button>
                 </div>
               </div>
+            }
 
-              <div *ngIf="isFetchingFollowing()" class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
+            @if (isFetchingFollowing()) {
+              <div class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
                 <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
                 <p class="text-sm">Fetching...</p>
                 <button (click)="cancelFetchFollowing.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
                   Cancel
                 </button>
               </div>
+            }
 
-              <div *ngIf="!isFetchingFollowing() && data().following_list !== undefined">
-                <div *ngIf="!data().following_list?.length" class="text-center py-4 text-[var(--color-text4)]">
-                  <i class="bi bi-x-circle text-2xl"></i>
-                  <p class="mt-1 text-sm">Not following anyone or data is private.</p>
-                </div>
-                <ng-container *ngIf="data().following_list?.length">
-                  <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-                  <button *ngFor="let user of displayFollowing(); trackBy: trackByUsername" type="button" (click)="scanConnections([user])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                    {{ '@' + user }}
-                  </button>
+            @if (!isFetchingFollowing() && data().following_list !== undefined) {
+              <div>
+                @if (!data().following_list?.length) {
+                  <div class="text-center py-4 text-[var(--color-text4)]">
+                    <i class="bi bi-x-circle text-2xl"></i>
+                    <p class="mt-1 text-sm">Not following anyone or data is private.</p>
                   </div>
-                   <button *ngIf="displayFollowing().length < (data().following_list || []).length" (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
-                    <span *ngIf="isLoadingMoreFollowing(); else loadMoreFollowingText">Loading...</span>
-                    <ng-template #loadMoreFollowingText><span>Load More</span></ng-template>
-                  </button>
-                </ng-container>
+                }
+                @if (data().following_list?.length) {
+                  <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                    @for (user of displayFollowing(); track trackByUsername($index, user)) {
+                      <button type="button" (click)="scanConnections([user])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                        {{ '@' + user }}
+                      </button>
+                    }
+                  </div>
+                  @if (displayFollowing().length < (data().following_list || []).length) {
+                    <button (click)="loadMoreFollowing()" [disabled]="isLoadingMoreFollowing()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
+                      @if (isLoadingMoreFollowing()) {
+                        <span>Loading...</span>
+                      } @else {
+                        <span>Load More</span>
+                      }
+                    </button>
+                  }
+                }
               </div>
-            </div>
+            }
+          </div>
         </details>
 
-        
+
         <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Associated Images</span>
-            <button *ngIf="data().images !== undefined" (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Fetch Images">
-              Fetch Images
-            </button>
+            @if (data().images !== undefined) {
+              <button (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Fetch Images">
+                Fetch Images
+              </button>
+            }
           </summary>
           <div class="p-3 border-t border-[var(--color-border)]">
-            <div *ngIf="data().images === undefined && !isFetchingImages()">
+            @if (data().images === undefined && !isFetchingImages()) {
               <div>
-                <button (click)="fetchImages.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
-                  <i class="bi bi-images"></i>
-                  <span>Fetch Images</span>
-                </button>
-              </div>
-            </div>
-
-            <div *ngIf="isFetchingImages()" class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
-              <p class="text-sm">Fetching...</p>
-              <button (click)="cancelFetchImages.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
-                Cancel
-              </button>
-            </div>
-
-            <div *ngIf="!isFetchingImages() && data().images !== undefined">
-              <div *ngIf="!data().images?.length" class="text-center py-4 text-[var(--color-text4)]">
-                <i class="bi bi-image-alt text-2xl"></i>
-                <p class="mt-1 text-sm">No associated images were found.</p>
-              </div>
-              <div *ngIf="data().images?.length" class="max-h-80 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  <div *ngFor="let image of displayImages(); trackBy: trackByImageUrl" class="group relative overflow-hidden rounded-md border border-[var(--color-border)] transition-colors hover:border-indigo-500 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                    <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
-                      <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
-                    </a>
-                  </div>
+                <div>
+                  <button (click)="fetchImages.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                    <i class="bi bi-images"></i>
+                    <span>Fetch Images</span>
+                  </button>
                 </div>
-                 <button *ngIf="displayImages().length < (data().images || []).length" (click)="loadMoreImages()" [disabled]="isLoadingMoreImages()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
-                  <span *ngIf="isLoadingMoreImages(); else loadMoreImagesText">Loading...</span>
-                  <ng-template #loadMoreImagesText><span>Load More Images</span></ng-template>
+              </div>
+            }
+
+            @if (isFetchingImages()) {
+              <div class="flex items-center justify-center py-4 text-[var(--color-text4)] gap-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" role="status"></div>
+                <p class="text-sm">Fetching...</p>
+                <button (click)="cancelFetchImages.emit(data())" class="px-3 py-1 text-xs font-semibold text-red-400 bg-red-500/10 rounded-md hover:bg-red-500/20 transition-colors">
+                  Cancel
                 </button>
               </div>
-            </div>
+            }
+
+            @if (!isFetchingImages() && data().images !== undefined) {
+              <div>
+                @if (!data().images?.length) {
+                  <div class="text-center py-4 text-[var(--color-text4)]">
+                    <i class="bi bi-image-alt text-2xl"></i>
+                    <p class="mt-1 text-sm">No associated images were found.</p>
+                  </div>
+                }
+                @if (data().images?.length) {
+                  <div class="max-h-80 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                      @for (image of displayImages(); track trackByImageUrl($index, image)) {
+                        <div class="group relative overflow-hidden rounded-md border border-[var(--color-border)] transition-colors hover:border-indigo-500 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                          <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
+                            <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
+                          </a>
+                        </div>
+                      }
+                    </div>
+                    @if (displayImages().length < (data().images || []).length) {
+                      <button (click)="loadMoreImages()" [disabled]="isLoadingMoreImages()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-[var(--color-blue-800)]/80 rounded-md hover:bg-[var(--color-blue-720)] transition-colors disabled:opacity-50 disabled:cursor-wait">
+                        @if (isLoadingMoreImages()) {
+                          <span>Loading...</span>
+                        } @else {
+                          <span>Load More Images</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
           </div>
         </details>
 
-        
+
         <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Raw Metadata</span>
           </summary>
           <div class="p-3 border-t border-[var(--color-border)]">
-            <dl *ngIf="getMetadataEntries().length > 0; else noMetadata" class="text-sm">
-              <div *ngFor="let item of getMetadataEntries(); trackBy: trackByKey" class="py-3 border-b border-[var(--color-border)] last:border-b-0">
-                <dt class="font-medium text-[var(--color-text4)] truncate">{{ formatKey(item.key) }}</dt>
-                <dd class="text-[var(--color-text2)] break-words mt-1">
-                  <img *ngIf="isImageUrl(item.value)" [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40 mt-1" [alt]="item.key"/>
-                  <a *ngIf="!isImageUrl(item.value) && isUrl(item.value)" [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">{{ item.value }}</a>
-                  <ng-container *ngIf="!isImageUrl(item.value) && !isUrl(item.value)">{{ item.value }}</ng-container>
-                </dd>
-              </div>
-            </dl>
-            <ng-template #noMetadata>
+            @if (getMetadataEntries().length > 0) {
+              <dl class="text-sm">
+                @for (item of getMetadataEntries(); track trackByKey($index, item)) {
+                  <div class="py-3 border-b border-[var(--color-border)] last:border-b-0">
+                    <dt class="font-medium text-[var(--color-text4)] truncate">{{ formatKey(item.key) }}</dt>
+                    <dd class="text-[var(--color-text2)] break-words mt-1">
+                      @if (isImageUrl(item.value)) {
+                        <img [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40 mt-1" [alt]="item.key"/>
+                      }
+                      @if (!isImageUrl(item.value) && isUrl(item.value)) {
+                        <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">{{ item.value }}</a>
+                      }
+                      @if (!isImageUrl(item.value) && !isUrl(item.value)) {
+                        {{ item.value }}
+                      }
+                    </dd>
+                  </div>
+                }
+              </dl>
+            } @else {
               <p class="text-[var(--color-text4)] text-center py-2">No raw metadata available.</p>
-            </ng-template>
+            }
           </div>
         </details>
 
       </div>
     </div>
 
-    
+
     <div class="p-3 bg-[var(--color-blue-850)] flex justify-end items-center gap-4 flex-shrink-0 mt-auto rounded-b-lg border-t border-[var(--color-border)]">
       <button (click)="onClose()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
         Done

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { AsyncPipe, NgClass, NgForOf, NgOptimizedImage } from '@angular/common';
+import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { LowerPipe } from '../../../pipes/lower.pipe';
@@ -9,7 +9,7 @@ import { SubscriptionService } from '../../../../services/dashboard/subscription
 @Component({
   selector: 'app-dashboard-sidebar-items',
   standalone: true,
-  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective, LowerPipe],
+  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, TooltipDirective, LowerPipe],
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {

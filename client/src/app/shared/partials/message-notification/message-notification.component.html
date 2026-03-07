@@ -1,11 +1,13 @@
-<div class="fixed right-4 top-4 z-[2100] w-[min(92vw,440px)]" *ngIf="notificationService.message() as message" @messageNotificationAnimation>
-  <div class="pointer-events-auto flex items-center gap-3 rounded-lg border px-4 py-3 text-sm shadow-[0_16px_38px_rgba(0,0,0,0.36)] backdrop-blur-md" [ngClass]="notificationService.type() === 'success' ? 'border-emerald-300/40 bg-emerald-900/40 text-emerald-100 [body.light-theme_&]:border-emerald-400 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-950' : 'border-rose-300/45 bg-rose-900/50 text-rose-100 [body.light-theme_&]:border-red-400 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-950'" role="alert" aria-live="assertive">
-    <i class="bi text-[15px] leading-5" [ngClass]="notificationService.type() === 'success' ? 'bi-check-circle-fill text-emerald-200 [body.light-theme_&]:text-emerald-800' : 'bi-exclamation-triangle-fill text-rose-200 [body.light-theme_&]:text-red-800'" aria-hidden="true"></i>
-    <div class="min-w-0 flex-1 break-words pr-1 text-[13px] font-medium leading-[1.45] tracking-[0.005em]">
-      {{ message }}
+@if (notificationService.message(); as message) {
+  <div class="fixed right-4 top-4 z-[2100] w-[min(92vw,440px)]" @messageNotificationAnimation>
+    <div class="pointer-events-auto flex items-center gap-3 rounded-lg border px-4 py-3 text-sm shadow-[0_16px_38px_rgba(0,0,0,0.36)] backdrop-blur-md" [ngClass]="notificationService.type() === 'success' ? 'border-emerald-300/40 bg-emerald-900/40 text-emerald-100 [body.light-theme_&]:border-emerald-400 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-950' : 'border-rose-300/45 bg-rose-900/50 text-rose-100 [body.light-theme_&]:border-red-400 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-950'" role="alert" aria-live="assertive">
+      <i class="bi text-[15px] leading-5" [ngClass]="notificationService.type() === 'success' ? 'bi-check-circle-fill text-emerald-200 [body.light-theme_&]:text-emerald-800' : 'bi-exclamation-triangle-fill text-rose-200 [body.light-theme_&]:text-red-800'" aria-hidden="true"></i>
+      <div class="min-w-0 flex-1 break-words pr-1 text-[13px] font-medium leading-[1.45] tracking-[0.005em]">
+        {{ message }}
+      </div>
+      <button type="button" aria-label="Dismiss notification" class="pointer-events-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/15 text-current/80 transition hover:bg-black/25 hover:text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 [body.light-theme_&]:border-slate-300 [body.light-theme_&]:text-current [body.light-theme_&]:hover:bg-slate-200 [body.light-theme_&]:focus-visible:ring-slate-400" (click)="dismiss()">
+        <i class="bi bi-x-lg text-[11px]" aria-hidden="true"></i>
+      </button>
     </div>
-    <button type="button" aria-label="Dismiss notification" class="pointer-events-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/15 text-current/80 transition hover:bg-black/25 hover:text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 [body.light-theme_&]:border-slate-300 [body.light-theme_&]:text-current [body.light-theme_&]:hover:bg-slate-200 [body.light-theme_&]:focus-visible:ring-slate-400" (click)="dismiss()">
-      <i class="bi bi-x-lg text-[11px]" aria-hidden="true"></i>
-    </button>
   </div>
-</div>
+}

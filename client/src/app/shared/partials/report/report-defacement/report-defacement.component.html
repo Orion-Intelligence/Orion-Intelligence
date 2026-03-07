@@ -14,26 +14,29 @@
       <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
     </div>
 
-    <div *ngIf="!defacementData?.m_ioc_type?.length" class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
-      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Defacer</p>
-      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
-    </div>
+    @if (!defacementData?.m_ioc_type?.length) {
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Defacer</p>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
+      </div>
+    }
 
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Team</p>
       <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_team }}</span>
     </div>
 
-    <div *ngIf="!defacementData?.m_ioc_type?.length; else iocTypeTpl" class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
-      <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Web Server</p>
-      <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
-    </div>
-    <ng-template #iocTypeTpl>
+    @if (!defacementData?.m_ioc_type?.length) {
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Web Server</p>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
+      </div>
+    } @else {
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">IOC Type</p>
         <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
       </div>
-    </ng-template>
+    }
 
     <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
       <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Breach</p>
@@ -52,42 +55,51 @@
   </div>
 </div>
 
-<div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4" *ngIf="filteredArrayKeys.length">
-  <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
-    <div class="min-w-0">
-      <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
-        <span class="truncate">Metadata</span>
-        <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
+@if (filteredArrayKeys.length) {
+  <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+    <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
+          <span class="truncate">Metadata</span>
+          <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
+        </div>
+        <p class="mt-1 text-[12px] text-[var(--color-text4)]">Detected entities, extracted sections, and structured attributes.</p>
       </div>
-      <p class="mt-1 text-[12px] text-[var(--color-text4)]">Detected entities, extracted sections, and structured attributes.</p>
+      <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+        <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      </div>
     </div>
-    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
-      <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
-    </div>
+    @if (isExpandedMetadata) {
+      <div class="mt-4">
+        <div class="flex flex-wrap items-center gap-2.5">
+          @for (key of filteredArrayKeys; track key; let last = $last) {
+            <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
+              {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
+            </button>
+            @if (!last) {
+              <div class="h-4 w-px bg-[var(--color-divider)]/70"></div>
+            }
+          }
+        </div>
+        <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
+        @if (activeTab === 'm_content') {
+          <app-result-section [listItems]="[content]"></app-result-section>
+        }
+        @if (activeTab === 'm_section') {
+          <app-result-section [listItems]="listItems"></app-result-section>
+        }
+        @if (activeTab === 'm_org' || activeTab === 'm_person') {
+          <div class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft p-3 text-xs text-[var(--color-text4)]">
+            Names of people, organizations, and entities are handled separately, but may overlap in the results.
+          </div>
+        }
+        @if (activeTab !== 'm_section' && activeTab !== 'm_content') {
+          <app-result-list [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+        }
+      </div>
+    }
   </div>
-
-  <div *ngIf="isExpandedMetadata" class="mt-4">
-    <div class="flex flex-wrap items-center gap-2.5">
-      <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
-          {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
-        </button>
-        <div *ngIf="!last" class="h-4 w-px bg-[var(--color-divider)]/70"></div>
-      </ng-container>
-    </div>
-
-    <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
-
-    <app-result-section *ngIf="activeTab === 'm_content'" [listItems]="[content]"></app-result-section>
-    <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems"></app-result-section>
-
-    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft p-3 text-xs text-[var(--color-text4)]">
-      Names of people, organizations, and entities are handled separately, but may overlap in the results.
-    </div>
-
-    <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
-  </div>
-</div>
+}
 
 <app-json-api-viewer [jsonData]="defacementData"></app-json-api-viewer>
 <app-report-mapping></app-report-mapping>

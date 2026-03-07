@@ -1,6 +1,6 @@
 import { Component, effect, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
 import { last } from 'rxjs';
 import { filterAnimation } from '../../animations/filter.animation';
@@ -11,7 +11,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
-  imports: [FormsModule, CommonModule, NgOptimizedImage, TooltipDirective, DatePickerComponent],
+  imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent],
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {

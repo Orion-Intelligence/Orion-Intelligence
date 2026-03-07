@@ -1,14 +1,14 @@
 import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { GraphClusterType, GraphType, search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
 @Component({
   selector: 'graph-sidebar',
   standalone: true,
   templateUrl: './sidebar.component.html',
-  imports: [FormsModule, ReactiveFormsModule, NgForOf, NgIf, TitleCasePipe, SidebarShellComponent],
+  imports: [FormsModule, ReactiveFormsModule, TitleCasePipe, SidebarShellComponent],
 })
 export class SidebarComponent implements OnInit {
   isCollapsed = false;

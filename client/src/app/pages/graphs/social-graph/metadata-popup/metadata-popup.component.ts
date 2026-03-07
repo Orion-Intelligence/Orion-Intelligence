@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { PlatformResult, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
@@ -13,7 +13,7 @@ import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
   templateUrl: './metadata-popup.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective],
+  imports: [SocialIconComponent, PlatformIconBgDirective],
 })
 export class MetadataPopupComponent extends PlatformFeedViewBase {
   data = input.required<PlatformResult>();

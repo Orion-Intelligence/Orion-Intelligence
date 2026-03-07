@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NgClass, NgForOf, NgIf, NgOptimizedImage } from '@angular/common';
+import { NgClass, NgOptimizedImage } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, EMPTY, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
@@ -12,7 +12,7 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgForOf, NgOptimizedImage, NgIf, EmptyResultComponent, EmptyQueryComponent, NgClass],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })

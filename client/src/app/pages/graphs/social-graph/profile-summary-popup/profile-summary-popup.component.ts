@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../services/fetching-state.service';
@@ -11,7 +11,7 @@ import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directiv
   templateUrl: './profile-summary-popup.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective],
+  imports: [SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective],
 })
 export class ProfileSummaryPopupComponent {
   private fetchingState: FetchingStateService;

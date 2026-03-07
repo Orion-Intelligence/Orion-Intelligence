@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../shared/services/api.service';
 import { HttpHeaders } from '@angular/common/http';
-import { NgFor } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
@@ -16,7 +16,7 @@ import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-view-profile',
-  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective],
+  imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective],
   animations: [fadeInDashboardItem],
   templateUrl: './manage-profile.component.html',
 })

@@ -9,29 +9,30 @@
 
 <form class="flex h-[calc(100vh-61px)] flex-col overflow-hidden bg-[var(--color-blue-830)] px-5 overflow-x-hidden">
   <div class="flex-1 overflow-y-auto overflow-x-hidden pb-4">
-    <div *ngFor="let key of Object.keys(filterModel.filters)">
-      <label appTooltip="{{filterModel.filters[key].tooltip}}" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
-        {{ filterModel.filters[key].title }}
-      </label>
-
-      <ng-container *ngIf="filterModel.filters[key].type === 'daterange'">
-        <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)"
+    @for (key of Object.keys(filterModel.filters); track key) {
+      <div>
+        <label appTooltip="{{filterModel.filters[key].tooltip}}" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
+          {{ filterModel.filters[key].title }}
+        </label>
+        @if (filterModel.filters[key].type === 'daterange') {
+          <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)"
           [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
-      </ng-container>
-
-      <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
-        <select [attr.data-testid]="'side-filter-select-' + key" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" name="{{ key }}">
-          <option [ngValue]="''">Select</option>
-          <option *ngFor="let option of filterModel.filters[key].options" [ngValue]="option.key">{{ option.label }}</option>
-        </select>
-      </ng-container>
-
-      <ng-container *ngIf="filterModel.filters[key].type === 'text'">
-        <div class="mb-2">
-          <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text" />
-        </div>
-      </ng-container>
-    </div>
+        }
+        @if (filterModel.filters[key].type === 'dropdown') {
+          <select [attr.data-testid]="'side-filter-select-' + key" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" name="{{ key }}">
+            <option [ngValue]="''">Select</option>
+            @for (option of filterModel.filters[key].options; track option) {
+              <option [ngValue]="option.key">{{ option.label }}</option>
+            }
+          </select>
+        }
+        @if (filterModel.filters[key].type === 'text') {
+          <div class="mb-2">
+            <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text" />
+          </div>
+        }
+      </div>
+    }
   </div>
 
   <div class="mb-6 mt-auto flex flex-col pt-5">

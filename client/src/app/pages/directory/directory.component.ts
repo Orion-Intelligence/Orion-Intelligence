@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FiltersComponent } from '../../shared/partials/filters/filters.component';
 import { DirectoryListComponent } from './directory-list/directory-list.component';
 import { PaginationComponent } from '../../shared/partials/pagination/pagination.component';
-import { AsyncPipe, NgClass, NgIf, NgOptimizedImage } from '@angular/common';
+import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../shared/model/filter/filter.model';
 import { directory_filters } from '../../shared/constants/filters';
 import { SidebarService } from '../../shared/services/sidebar.service';
@@ -19,8 +19,7 @@ import { DirectoryCallbackModel } from '../../shared/model/directory/directory.m
     PaginationComponent,
     NgOptimizedImage,
     AsyncPipe,
-    NgClass,
-    NgIf
+    NgClass
   ],
 })
 export class DirectoryComponent implements OnInit {

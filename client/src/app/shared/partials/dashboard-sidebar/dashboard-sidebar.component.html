@@ -1,397 +1,361 @@
-<nav *ngIf="this.sidebar_default" @sidebarMode [@.disabled]="animationsDisabled" class="w-full">
-  <div class="flex w-full items-start justify-between px-[20px] py-[10px] mt-[10px] text-[24px] font-medium">
-    <a href="">
-      <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
-    </a>
-    <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" data-testid="sidebar-collapse-button" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
-      <img alt="Menu" height="28" src="/assets/images/sidebar/nav_menu.svg" width="24" />
-    </button>
-  </div>
-
-  <ul class="list-none overflow-y-auto min-h-[500px] ml-[-5px] p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-    <app-dashboard-sidebar-items
-      (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)"
-      [category]="category.PROFILE"
-      [icon]="'assets/images/sidebar/dump.svg'"
-      [items]="getProfileCategories()"
-      [routePrefix]="'profile'"
-      [title]="this.appService.userSessionData().user.username">
-    </app-dashboard-sidebar-items>
-
-    <ng-container
-      *ngIf="licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise')">
-      <div class="mt-[20px] text-[13px] font-bold text-white">Search API's</div>
-      <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('general')">
+@if (this.sidebar_default) {
+  <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full">
+    <div class="flex w-full items-start justify-between px-[20px] py-[10px] mt-[10px] text-[24px] font-medium">
+      <a href="">
+        <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
+      </a>
+      <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" data-testid="sidebar-collapse-button" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
+        <img alt="Menu" height="28" src="/assets/images/sidebar/nav_menu.svg" width="24" />
+      </button>
+    </div>
+    <ul class="list-none overflow-y-auto min-h-[500px] ml-[-5px] p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-items
         (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)"
-        [category]="category.STRATEGIC"
-        [icon]="'assets/images/sidebar/strategic.svg'"
-        [items]="generalCategories"
-        [routePrefix]="'strategic'"
+        [category]="category.PROFILE"
+        [icon]="'assets/images/sidebar/dump.svg'"
+        [items]="getProfileCategories()"
+        [routePrefix]="'profile'"
+        [title]="this.appService.userSessionData().user.username">
+      </app-dashboard-sidebar-items>
+      @if (licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise')) {
+        <div class="mt-[20px] text-[13px] font-bold text-white">Search API's</div>
+        <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
+      }
+      @if (isAdmin() || licenseService.canUseModule('general')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.STRATEGIC"
+          [icon]="'assets/images/sidebar/strategic.svg'"
+          [items]="generalCategories"
+          [routePrefix]="'strategic'"
         [title]="'General Intelligence'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('breach')">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.BREACH"
-        [icon]="'assets/images/sidebar/data_breach.svg'"
-        [items]="leakCategories"
-        [routePrefix]="'breach'"
+      }
+      @if (isAdmin() || licenseService.canUseModule('breach')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.BREACH"
+          [icon]="'assets/images/sidebar/data_breach.svg'"
+          [items]="leakCategories"
+          [routePrefix]="'breach'"
         [title]="'Data Breach'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('defacement')">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.DEFACEMENT"
-        [icon]="'assets/images/sidebar/defacement.svg'"
-        [items]="defacementCategories"
-        [routePrefix]="'defacement'"
+      }
+      @if (isAdmin() || licenseService.canUseModule('defacement')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.DEFACEMENT"
+          [icon]="'assets/images/sidebar/defacement.svg'"
+          [items]="defacementCategories"
+          [routePrefix]="'defacement'"
         [title]="'Defacement'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social')">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.SOCIAL"
-        [icon]="'assets/images/sidebar/social.svg'"
-        [items]="socialCategories"
-        [routePrefix]="'social'"
+      }
+      @if (isAdmin() || licenseService.canUseModule('social')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.SOCIAL"
+          [icon]="'assets/images/sidebar/social.svg'"
+          [items]="socialCategories"
+          [routePrefix]="'social'"
         [title]="'Social'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('exploit')">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.EXPLOIT"
-        [icon]="'assets/images/sidebar/exploits.svg'"
-        [items]="exploitCategories"
-        [routePrefix]="'exploit'"
+      }
+      @if (isAdmin() || licenseService.canUseModule('exploit')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.EXPLOIT"
+          [icon]="'assets/images/sidebar/exploits.svg'"
+          [items]="exploitCategories"
+          [routePrefix]="'exploit'"
         [title]="'Exploit'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('feed')">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.FEED"
-        [icon]="'assets/images/sidebar/news.svg'"
-        [items]="newsCategories"
-        [routePrefix]="'feed'"
+      }
+      @if (isAdmin() || licenseService.canUseModule('feed')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.FEED"
+          [icon]="'assets/images/sidebar/news.svg'"
+          [items]="newsCategories"
+          [routePrefix]="'feed'"
         [title]="'Feed'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')">
-      <div class="mt-[20px] text-[13px] font-bold text-white">Webscans</div>
-      <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('stealer_logs')">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.STEALERLOGS"
-        [icon]="'assets/images/sidebar/stealerlog.svg'"
-        [items]="stealerlogsCategories"
-        [routePrefix]="'stealerlogs'"
+      }
+      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')) {
+        <div class="mt-[20px] text-[13px] font-bold text-white">Webscans</div>
+        <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
+      }
+      @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.STEALERLOGS"
+          [icon]="'assets/images/sidebar/stealerlog.svg'"
+          [items]="stealerlogsCategories"
+          [routePrefix]="'stealerlogs'"
         [title]="'Stealer logs'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.SCANNER"
-        [icon]="'assets/images/sidebar/theme/scanner.svg'"
-        [items]="scannerCategories"
-        [routePrefix]="'scanner'"
+      }
+      @if (isAdmin() || licenseService.canUseScanning()) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.SCANNER"
+          [icon]="'assets/images/sidebar/theme/scanner.svg'"
+          [items]="scannerCategories"
+          [routePrefix]="'scanner'"
         [title]="'Web Scans'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.API"
-        [icon]="'assets/images/sidebar/live_api.svg'"
-        [items]="apiCategories"
-        [routePrefix]="'api'"
+      }
+      @if (isAdmin() || licenseService.canUseScanning()) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.API"
+          [icon]="'assets/images/sidebar/live_api.svg'"
+          [items]="apiCategories"
+          [routePrefix]="'api'"
         [title]="'Entity API'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')">
-      <div class="mt-[20px] text-[13px] font-bold text-white">Data Collection</div>
-      <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">
-      <app-dashboard-sidebar-items
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.DUMP"
-        [icon]="'assets/images/sidebar/dump.svg'"
-        [items]="dumpCategories"
-        [routePrefix]="'dump'"
+      }
+      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')) {
+        <div class="mt-[20px] text-[13px] font-bold text-white">Data Collection</div>
+        <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
+      }
+      @if (isAdmin() || licenseService.canUseModule('dumps')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.DUMP"
+          [icon]="'assets/images/sidebar/dump.svg'"
+          [items]="dumpCategories"
+          [routePrefix]="'dump'"
         [title]="'Dump'"></app-dashboard-sidebar-items>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
-      <div class="my-[6px] rounded-[8px] select-none">
-        <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/ctigraph" target="_blank">
-          <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
-          CTI Graph
-        </a>
+      }
+      @if (isAdmin() || licenseService.canUseCtiGraph()) {
+        <div class="my-[6px] rounded-[8px] select-none">
+          <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/ctigraph" target="_blank">
+            <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
+            CTI Graph
+          </a>
+        </div>
+      }
+      @if (isAdmin() || licenseService.canUseModule('social_mapper')) {
+        <div class="my-[6px] rounded-[8px] select-none">
+          <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/social-mapper" target="_blank">
+            <img alt="Social Mapper" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
+            Social Mapper
+          </a>
+        </div>
+      }
+      <ng-container>
+        <div class="my-[6px] rounded-[8px] select-none">
+          <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
+            <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
+            Whistle Blowing
+          </a>
+        </div>
+      </ng-container>
+      <div class="mt-[20px] flex items-center gap-[6px] text-[13px] font-bold text-white max-[943px]:hidden">
+        <img alt="Help & Support" class="h-[14px] w-[14px] opacity-80" ngSrc="/assets/images/sidebar/documentation.svg" width="14" height="14">
+        <span>Help &amp; Support</span>
       </div>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
+      <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
+      <a class="select-none p-0" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
+        <div class="my-[6px] rounded-[8px] select-none">
+          <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
+            <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
+          </div>
+        </div>
+      </a>
       <div class="my-[6px] rounded-[8px] select-none">
-        <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="/dashboard/social-mapper" target="_blank">
-          <img alt="Social Mapper" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
-          Social Mapper
-        </a>
-      </div>
-    </ng-container>
-
-    <ng-container>
-      <div class="my-[6px] rounded-[8px] select-none">
-        <a class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
-          <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
-          Whistle Blowing
-        </a>
-      </div>
-    </ng-container>
-
-    <div class="mt-[20px] flex items-center gap-[6px] text-[13px] font-bold text-white max-[943px]:hidden">
-      <img alt="Help & Support" class="h-[14px] w-[14px] opacity-80" ngSrc="/assets/images/sidebar/documentation.svg" width="14" height="14">
-      <span>Help &amp; Support</span>
-    </div>
-    <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
-
-    <a class="select-none p-0" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
-      <div class="my-[6px] rounded-[8px] select-none">
-        <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-          <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
+        <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+          <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
+          Links
         </div>
       </div>
-    </a>
-
-    <div class="my-[6px] rounded-[8px] select-none">
-      <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
-        <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
-        Links
-      </div>
-    </div>
-
-    <a class="select-none p-0" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
-      <div class="my-[6px] rounded-[8px] select-none">
-        <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-          <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
+      <a class="select-none p-0" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+        <div class="my-[6px] rounded-[8px] select-none">
+          <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
+            <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
+          </div>
         </div>
-      </div>
-    </a>
-  </ul>
-</nav>
+      </a>
+    </ul>
+  </nav>
+}
 
-<nav *ngIf="!this.sidebar_default" @sidebarMode [@.disabled]="animationsDisabled" class="w-full pt-0 h-full min-h-0 flex flex-col">
-  <button (click)="onToggleSidebar(true)" appTooltip="Expand sidebar" aria-label="Expand sidebar" data-testid="sidebar-expand-button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
-    <img alt="Menu" height="20" ngSrc="/assets/images/sidebar/menu-mini.svg" width="20" />
-  </button>
-  <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">
-    <a href="">
-      <img alt="Logo" height="30" ngSrc="/assets/images/shared/logo-min.svg" priority width="30" />
-    </a>
-  </div>
-
-  <ul class="flex-1 min-h-0 w-full list-none flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-    <app-dashboard-sidebar-collapsed
-      (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)"
-      [category]="category.PROFILE"
-      [icon]="'assets/images/sidebar/dump.svg'"
-      [items]="getProfileCategories()"
-      [routePrefix]="'profile'"
-      [selectionStore]="selectionStore"
-      [title]="appService.userSessionData().user.username"></app-dashboard-sidebar-collapsed>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('general')">
+@if (!this.sidebar_default) {
+  <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full pt-0 h-full min-h-0 flex flex-col">
+    <button (click)="onToggleSidebar(true)" appTooltip="Expand sidebar" aria-label="Expand sidebar" data-testid="sidebar-expand-button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+      <img alt="Menu" height="20" ngSrc="/assets/images/sidebar/menu-mini.svg" width="20" />
+    </button>
+    <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">
+      <a href="">
+        <img alt="Logo" height="30" ngSrc="/assets/images/shared/logo-min.svg" priority width="30" />
+      </a>
+    </div>
+    <ul class="flex-1 min-h-0 w-full list-none flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-collapsed
         (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)"
-        [category]="category.STRATEGIC"
-        [icon]="'assets/images/sidebar/strategic.svg'"
-        [items]="generalCategories"
-        [routePrefix]="'strategic'"
-        [selectionStore]="selectionStore"
-        [title]="'General Intelligence'">
-      </app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('breach')">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.BREACH"
-        [icon]="'assets/images/sidebar/data_breach.svg'"
-        [items]="leakCategories"
-        [routePrefix]="'breach'"
-        [selectionStore]="selectionStore"
-        [title]="'Data Breach'">
-      </app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('defacement')">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.DEFACEMENT"
-        [icon]="'assets/images/sidebar/defacement.svg'"
-        [items]="defacementCategories"
-        [routePrefix]="'defacement'"
-        [selectionStore]="selectionStore"
-        [title]="'Defacement'">
-      </app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social')">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.SOCIAL"
-        [icon]="'assets/images/sidebar/social.svg'"
-        [items]="socialCategories"
-        [routePrefix]="'social'"
-        [selectionStore]="selectionStore"
-        [title]="'Social'">
-      </app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('exploit')">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.EXPLOIT"
-        [icon]="'assets/images/sidebar/exploits.svg'"
-        [items]="exploitCategories"
-        [routePrefix]="'exploit'"
-        [selectionStore]="selectionStore"
-        [title]="'Exploit'">
-      </app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('feed')">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.FEED"
-        [icon]="'assets/images/sidebar/news.svg'"
-        [items]="newsCategories"
-        [routePrefix]="'feed'"
-        [selectionStore]="selectionStore"
-        [title]="'Feed'">
-      </app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('stealer_logs')">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.STEALERLOGS"
-        [icon]="'assets/images/sidebar/stealerlog.svg'"
-        [items]="stealerlogsCategories"
-        [routePrefix]="'stealerlogs'"
-        [selectionStore]="selectionStore"
-        [title]="'Stealer logs'"></app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.SCANNER"
-        [icon]="'assets/images/sidebar/theme/scanner.svg'"
-        [items]="scannerCategories"
-        [routePrefix]="'scanner'"
-        [selectionStore]="selectionStore"
-        [title]="'Web Scans'"></app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseScanning()">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.API"
-        [icon]="'assets/images/sidebar/live_api.svg'"
-        [items]="apiCategories"
-        [routePrefix]="'api'"
-        [selectionStore]="selectionStore"
-        [title]="'Entity API'"></app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('dumps')">
-      <app-dashboard-sidebar-collapsed
-        (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.DUMP"
+        [category]="category.PROFILE"
         [icon]="'assets/images/sidebar/dump.svg'"
-        [items]="dumpCategories"
-        [routePrefix]="'dump'"
+        [items]="getProfileCategories()"
+        [routePrefix]="'profile'"
         [selectionStore]="selectionStore"
+      [title]="appService.userSessionData().user.username"></app-dashboard-sidebar-collapsed>
+      @if (isAdmin() || licenseService.canUseModule('general')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.STRATEGIC"
+          [icon]="'assets/images/sidebar/strategic.svg'"
+          [items]="generalCategories"
+          [routePrefix]="'strategic'"
+          [selectionStore]="selectionStore"
+          [title]="'General Intelligence'">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('breach')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.BREACH"
+          [icon]="'assets/images/sidebar/data_breach.svg'"
+          [items]="leakCategories"
+          [routePrefix]="'breach'"
+          [selectionStore]="selectionStore"
+          [title]="'Data Breach'">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('defacement')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.DEFACEMENT"
+          [icon]="'assets/images/sidebar/defacement.svg'"
+          [items]="defacementCategories"
+          [routePrefix]="'defacement'"
+          [selectionStore]="selectionStore"
+          [title]="'Defacement'">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('social')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.SOCIAL"
+          [icon]="'assets/images/sidebar/social.svg'"
+          [items]="socialCategories"
+          [routePrefix]="'social'"
+          [selectionStore]="selectionStore"
+          [title]="'Social'">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('exploit')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.EXPLOIT"
+          [icon]="'assets/images/sidebar/exploits.svg'"
+          [items]="exploitCategories"
+          [routePrefix]="'exploit'"
+          [selectionStore]="selectionStore"
+          [title]="'Exploit'">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('feed')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.FEED"
+          [icon]="'assets/images/sidebar/news.svg'"
+          [items]="newsCategories"
+          [routePrefix]="'feed'"
+          [selectionStore]="selectionStore"
+          [title]="'Feed'">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.STEALERLOGS"
+          [icon]="'assets/images/sidebar/stealerlog.svg'"
+          [items]="stealerlogsCategories"
+          [routePrefix]="'stealerlogs'"
+          [selectionStore]="selectionStore"
+        [title]="'Stealer logs'"></app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseScanning()) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.SCANNER"
+          [icon]="'assets/images/sidebar/theme/scanner.svg'"
+          [items]="scannerCategories"
+          [routePrefix]="'scanner'"
+          [selectionStore]="selectionStore"
+        [title]="'Web Scans'"></app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseScanning()) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.API"
+          [icon]="'assets/images/sidebar/live_api.svg'"
+          [items]="apiCategories"
+          [routePrefix]="'api'"
+          [selectionStore]="selectionStore"
+        [title]="'Entity API'"></app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('dumps')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.DUMP"
+          [icon]="'assets/images/sidebar/dump.svg'"
+          [items]="dumpCategories"
+          [routePrefix]="'dump'"
+          [selectionStore]="selectionStore"
         [title]="'Dump'"></app-dashboard-sidebar-collapsed>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseCtiGraph()">
+      }
+      @if (isAdmin() || licenseService.canUseCtiGraph()) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <a appTooltip="CTI Graph" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="/dashboard/ctigraph" target="_blank">
+            <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
+          </a>
+        </li>
+      }
+      @if (isAdmin() || licenseService.canUseModule('social_mapper')) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <a appTooltip="Social Mapper" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="/dashboard/social-mapper" target="_blank">
+            <img alt="Social Mapper" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
+          </a>
+        </li>
+      }
+      <ng-container>
+        <li class="my-[6px] rounded-[8px] select-none">
+          <a appTooltip="Whistle Blowing" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
+            <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
+          </a>
+        </li>
+      </ng-container>
+      <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)] w-[50px]"></div>
       <li class="my-[6px] rounded-[8px] select-none">
-        <a appTooltip="CTI Graph" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="/dashboard/ctigraph" target="_blank">
-          <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
+        <a appTooltip="Onion Link" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
+          <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
         </a>
       </li>
-    </ng-container>
-
-    <ng-container *ngIf="isAdmin() || licenseService.canUseModule('social_mapper')">
       <li class="my-[6px] rounded-[8px] select-none">
-        <a appTooltip="Social Mapper" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="/dashboard/social-mapper" target="_blank">
-          <img alt="Social Mapper" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
+        <div (click)="onSectionSelected(category.DIRECTORY)" appTooltip="Links" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" queryParamsHandling="merge">
+          <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
+        </div>
+      </li>
+      <li class="my-[6px] rounded-[8px] select-none">
+        <a appTooltip="Documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+          <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
         </a>
       </li>
-    </ng-container>
-
-    <ng-container>
-      <li class="my-[6px] rounded-[8px] select-none">
-        <a appTooltip="Whistle Blowing" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" href="https://orionleaks.com/#/" target="_blank">
-          <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
-        </a>
-      </li>
-    </ng-container>
-
-    <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)] w-[50px]"></div>
-
-    <li class="my-[6px] rounded-[8px] select-none">
-      <a appTooltip="Onion Link" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
-        <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
-      </a>
-    </li>
-
-    <li class="my-[6px] rounded-[8px] select-none">
-      <div (click)="onSectionSelected(category.DIRECTORY)" appTooltip="Links" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" queryParamsHandling="merge">
-        <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
-      </div>
-    </li>
-
-    <li class="my-[6px] rounded-[8px] select-none">
-      <a appTooltip="Documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
-        <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
-      </a>
-    </li>
-  </ul>
-</nav>
+    </ul>
+  </nav>
+}

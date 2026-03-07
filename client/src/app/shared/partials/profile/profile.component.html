@@ -1,80 +1,92 @@
-<div *ngIf="this.username()" class="relative z-[30] flex items-center gap-[2px]">
-  <ng-container *ngIf="licenseService.isMaintainer()">
-    <a *ngIf="isMember()" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
-      <div *ngIf="!this.appService.userSessionData().tenant.hasOnboarding" class="relative p-0">
-        <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24" class="h-6 w-6">
-        <span class="absolute right-[-7px] top-[-6px] mt-[2px] inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold leading-none text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
-          {{ getUnseenAlertCount() }}
-        </span>
-      </div>
-    </a>
-  </ng-container>
-
-  <a *ngIf="router.url !== '/login'" (click)="toggleDropdown($event)" appTooltip="" data-cy="profile-menu" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
-    <img alt="Logout" height="24" [ngSrc]="isDarkTheme ? 'assets/images/shared/theme/profile-icon.svg' : 'assets/images/shared/profile-icon-dark.svg'" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
-  </a>
-
-  <ul *ngIf="dropdownOpen()" class="absolute right-[10px] top-[calc(100%+8px)] z-[40] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
-    <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
-
-    <li class="mb-[6px] flex min-w-full items-center rounded-[10px] border border-[#eef2f6] bg-[#f8fafc] p-[8px]">
-      <div class="h-[46px] w-[46px] shrink-0 overflow-hidden rounded-full bg-[#e0e6ed]">
-        <img [src]="this.appService.userSessionData().user.image" alt="" class="h-full w-full object-cover" />
-      </div>
-      <div class="flex min-w-0 flex-col px-[10px]">
-        <div class="max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-medium text-[#344054]">{{ username() }}</div>
-        <div class="max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-normal text-[#a0b8d1]" appTooltip="Active License">{{ licences }}</div>
-      </div>
-    </li>
-
-    <li *ngIf="!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() || isAdmin())" class="mt-[2px] flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="auditlog();closeDropdown($event)">
-      <img src="assets/images/shared/profile.svg" alt="Auditlog" class="h-[18px] w-[18px]" />
-      <span class="text-[14px] font-medium text-[#172235]">Auditlog</span>
-    </li>
-
-    <li *ngIf="!isAdmin() &&licenseService.isMaintainer() && !this.appService.userSessionData().tenant.hasOnboarding" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="manageIocs();closeDropdown($event)">
-      <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" class="h-[18px] w-[18px]" />
-      <span class="text-[14px] font-medium text-[#172235]">Manage IOC’s</span>
-    </li>
-
-    <li *ngIf="!isAdmin() && !isDemo()" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="changePassword()">
-      <img src="assets/images/shared/forgot.svg" alt="Change Password" class="h-[18px] w-[18px]" />
-      <span class="text-[14px] font-medium text-[#172235]">Change Password</span>
-    </li>
-
-    <li *ngIf="!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() ||isAdmin())" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="openAccountSettings();closeDropdown($event)">
-      <img src="assets/images/shared/settings.svg" alt="Account settings" class="h-[18px] w-[18px]" />
-      <span class="text-[14px] font-medium text-[#172235]">Account settings</span>
-    </li>
-    <li *ngIf="isAdmin()" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="openAccountSettings();closeDropdown($event)">
-      <div class="flex items-center gap-[10px]">
-        <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15" class="h-[18px] w-[18px]">
-        <span class="text-[14px] font-medium text-[#172235]">Settings</span>
-      </div>
-    </li>
-    <li *ngIf="appService.userSessionData().tenant.hasOnboarding" (click)="toggleThemeByClick();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
-      <div class="flex items-center gap-[10px]">
-        <img alt="Settings" src="assets/images/shared/theme.svg" class="h-[18px] w-[18px]">
-        <span class="text-[14px] font-medium text-[#172235]">Theme</span>
-      </div>
-      <span class="ml-auto inline-flex h-[18px] w-[30px] items-center rounded-full bg-[#101a2b]">
-        <span class="h-[14px] w-[14px] rounded-full bg-white transition" [ngClass]="isDarkTheme ? 'translate-x-[12px]' : 'translate-x-0'"></span>
-      </span>
-    </li>
-    <li data-testid="profile-help-support" (click)="openSupportPopup();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
-      <img alt="Support" src="assets/images/shared/support.svg" class="h-[18px] w-[18px]">
-      <span class="text-[14px] font-medium text-[#172235]">Help & Support</span>
-    </li>
-
-    <li class="my-[6px] h-[1px] bg-[#e5e7eb]"></li>
-
-    <li data-cy="signout-btn" data-testid="signout-btn" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#fff1f2]" (click)="logout();closeDropdown($event)">
-      <img src="assets/images/shared/logout.svg" alt="Sign out" class="h-[18px] w-[18px]" />
-      <span class="text-[14px] font-medium text-[#172235]">Sign out</span>
-    </li>
-  </ul>
-
-  <div class="relative">
-    <app-alert-notification [isNotificationOpen]="isNotificationOpen()" (closeNotification)="closeNotifications()"></app-alert-notification>
+@if (this.username()) {
+  <div class="relative z-[30] flex items-center gap-[2px]">
+    @if (licenseService.isMaintainer()) {
+      @if (isMember()) {
+        <a (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+          @if (!this.appService.userSessionData().tenant.hasOnboarding) {
+            <div class="relative p-0">
+              <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24" class="h-6 w-6">
+              <span class="absolute right-[-7px] top-[-6px] mt-[2px] inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold leading-none text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
+                {{ getUnseenAlertCount() }}
+              </span>
+            </div>
+          }
+        </a>
+      }
+    }
+    @if (router.url !== '/login') {
+      <a (click)="toggleDropdown($event)" appTooltip="" data-cy="profile-menu" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+        <img alt="Logout" height="24" [ngSrc]="isDarkTheme ? 'assets/images/shared/theme/profile-icon.svg' : 'assets/images/shared/profile-icon-dark.svg'" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
+      </a>
+    }
+    @if (dropdownOpen()) {
+      <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[40] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
+        <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
+        <li class="mb-[6px] flex min-w-full items-center rounded-[10px] border border-[#eef2f6] bg-[#f8fafc] p-[8px]">
+          <div class="h-[46px] w-[46px] shrink-0 overflow-hidden rounded-full bg-[#e0e6ed]">
+            <img [src]="this.appService.userSessionData().user.image" alt="" class="h-full w-full object-cover" />
+          </div>
+          <div class="flex min-w-0 flex-col px-[10px]">
+            <div class="max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-medium text-[#344054]">{{ username() }}</div>
+            <div class="max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-normal text-[#a0b8d1]" appTooltip="Active License">{{ licences }}</div>
+          </div>
+        </li>
+        @if (!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() || isAdmin())) {
+          <li class="mt-[2px] flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="auditlog();closeDropdown($event)">
+            <img src="assets/images/shared/profile.svg" alt="Auditlog" class="h-[18px] w-[18px]" />
+            <span class="text-[14px] font-medium text-[#172235]">Auditlog</span>
+          </li>
+        }
+        @if (!isAdmin() &&licenseService.isMaintainer() && !this.appService.userSessionData().tenant.hasOnboarding) {
+          <li class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="manageIocs();closeDropdown($event)">
+            <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" class="h-[18px] w-[18px]" />
+            <span class="text-[14px] font-medium text-[#172235]">Manage IOC’s</span>
+          </li>
+        }
+        @if (!isAdmin() && !isDemo()) {
+          <li class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="changePassword()">
+            <img src="assets/images/shared/forgot.svg" alt="Change Password" class="h-[18px] w-[18px]" />
+            <span class="text-[14px] font-medium text-[#172235]">Change Password</span>
+          </li>
+        }
+        @if (!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() ||isAdmin())) {
+          <li class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="openAccountSettings();closeDropdown($event)">
+            <img src="assets/images/shared/settings.svg" alt="Account settings" class="h-[18px] w-[18px]" />
+            <span class="text-[14px] font-medium text-[#172235]">Account settings</span>
+          </li>
+        }
+        @if (isAdmin()) {
+          <li class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="openAccountSettings();closeDropdown($event)">
+            <div class="flex items-center gap-[10px]">
+              <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15" class="h-[18px] w-[18px]">
+              <span class="text-[14px] font-medium text-[#172235]">Settings</span>
+            </div>
+          </li>
+        }
+        @if (appService.userSessionData().tenant.hasOnboarding) {
+          <li (click)="toggleThemeByClick();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
+            <div class="flex items-center gap-[10px]">
+              <img alt="Settings" src="assets/images/shared/theme.svg" class="h-[18px] w-[18px]">
+              <span class="text-[14px] font-medium text-[#172235]">Theme</span>
+            </div>
+            <span class="ml-auto inline-flex h-[18px] w-[30px] items-center rounded-full bg-[#101a2b]">
+              <span class="h-[14px] w-[14px] rounded-full bg-white transition" [ngClass]="isDarkTheme ? 'translate-x-[12px]' : 'translate-x-0'"></span>
+            </span>
+          </li>
+        }
+        <li data-testid="profile-help-support" (click)="openSupportPopup();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
+          <img alt="Support" src="assets/images/shared/support.svg" class="h-[18px] w-[18px]">
+          <span class="text-[14px] font-medium text-[#172235]">Help & Support</span>
+        </li>
+        <li class="my-[6px] h-[1px] bg-[#e5e7eb]"></li>
+        <li data-cy="signout-btn" data-testid="signout-btn" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#fff1f2]" (click)="logout();closeDropdown($event)">
+          <img src="assets/images/shared/logout.svg" alt="Sign out" class="h-[18px] w-[18px]" />
+          <span class="text-[14px] font-medium text-[#172235]">Sign out</span>
+        </li>
+      </ul>
+    }
+    <div class="relative">
+      <app-alert-notification [isNotificationOpen]="isNotificationOpen()" (closeNotification)="closeNotifications()"></app-alert-notification>
+    </div>
   </div>
-</div>
+}

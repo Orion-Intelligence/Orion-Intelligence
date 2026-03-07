@@ -5,19 +5,21 @@
     </div>
 
     <div class="mr-[-10px] flex items-center gap-[20px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
-      <ng-container *ngIf="results_defacement?.Result?.length && (threatTypeCounts | keyvalue).length > 0">
-        <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" *ngFor="let type of threatTypeCounts | keyvalue" (click)="onFilterTypeClick(type.key, $event)">
-          {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
-          <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
-        </div>
-      </ng-container>
+      @if (results_defacement?.Result?.length && (threatTypeCounts | keyvalue).length > 0) {
+        @for (type of threatTypeCounts | keyvalue; track type) {
+          <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick(type.key, $event)">
+            {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
+            <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
+          </div>
+        }
+      }
 
-      <ng-container *ngIf="results_stealerlog?.Result?.length as slCount">
+      @if (results_stealerlog?.Result?.length; as slCount) {
         <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick('stealerlog', $event)">
           stealerlog ({{ slCount >= 100 ? '100+' : slCount }})
           <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
         </div>
-      </ng-container>
+      }
 
       <div data-testid="defacement-report-toggle" class="relative inline-block cursor-pointer before:absolute before:inset-[-10px_-15px] before:content-['']">
         <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="p-[3px_8px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
@@ -25,8 +27,8 @@
     </div>
   </div>
 
-  <ng-container *ngIf="isExpandable && results_defacement?.Result as defResults">
-    <ng-container *ngFor="let item of defResults.slice(0, showLimitDefacement); let i = index; let last = last">
+  @if (isExpandable && results_defacement?.Result; as defResults) {
+    @for (item of defResults.slice(0, showLimitDefacement); track item; let i = $index; let last = $last) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
         <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
@@ -42,7 +44,6 @@
               </span>
             </div>
           </div>
-
           <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
             <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Web Server</div>
@@ -50,78 +51,85 @@
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="webServerValue(item)">
                   {{ webServerValue(item) }}
                 </div>
-                <button *ngIf="webServerValue(item) && webServerValue(item) !== '-'" type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(webServerValue(item), 'copy-webserver-' + i, $event)" [appTooltip]="isCopied('copy-webserver-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-webserver-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (webServerValue(item) && webServerValue(item) !== '-') {
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(webServerValue(item), 'copy-webserver-' + i, $event)" [appTooltip]="isCopied('copy-webserver-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-webserver-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
-
             <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Attacker</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="attackerValue(item)">
                   {{ attackerValue(item) }}
                 </div>
-                <button *ngIf="attackerValue(item) && attackerValue(item) !== '-'" type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(attackerValue(item), 'copy-attacker-' + i, $event)" [appTooltip]="isCopied('copy-attacker-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-attacker-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (attackerValue(item) && attackerValue(item) !== '-') {
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(attackerValue(item), 'copy-attacker-' + i, $event)" [appTooltip]="isCopied('copy-attacker-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-attacker-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
-
             <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Team</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="teamValue(item)">
                   {{ teamValue(item) }}
                 </div>
-                <button *ngIf="teamValue(item) && teamValue(item) !== '-'" type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(teamValue(item), 'copy-team-' + i, $event)" [appTooltip]="isCopied('copy-team-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-team-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (teamValue(item) && teamValue(item) !== '-') {
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(teamValue(item), 'copy-team-' + i, $event)" [appTooltip]="isCopied('copy-team-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-team-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
-
             <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">IP(s)</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="ipValue(item)">
                   {{ truncate(ipValue(item), 30) }}
                 </div>
-                <button *ngIf="ipValue(item) && ipValue(item) !== '-'" type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(ipValue(item), 'copy-ips-' + i, $event)" [appTooltip]="isCopied('copy-ips-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-ips-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (ipValue(item) && ipValue(item) !== '-') {
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(ipValue(item), 'copy-ips-' + i, $event)" [appTooltip]="isCopied('copy-ips-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-ips-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
-
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] md:col-span-2 last:border-b-0" *ngIf="item.m_url">
-              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">URL</div>
-              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
-                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)]" [appTooltip]="urlValue(item)">
-                  {{ truncate(urlValue(item), 30) }}
+            @if (item.m_url) {
+              <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] md:col-span-2 last:border-b-0">
+                <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">URL</div>
+                <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)]" [appTooltip]="urlValue(item)">
+                    {{ truncate(urlValue(item), 30) }}
+                  </div>
+                  @if (urlValue(item) && urlValue(item) !== '-') {
+                    <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(urlValue(item), 'copy-url-' + i, $event)" [appTooltip]="isCopied('copy-url-' + i) ? 'Copied' : 'Copy'">
+                      <i class="bi" [ngClass]="isCopied('copy-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                    </button>
+                  }
                 </div>
-                <button *ngIf="urlValue(item) && urlValue(item) !== '-'" type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(urlValue(item), 'copy-url-' + i, $event)" [appTooltip]="isCopied('copy-url-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
               </div>
-            </div>
-
+            }
           </div>
         </div>
       </div>
-    </ng-container>
-
-    <ng-container *ngIf="defResults.length > showLimitDefacement">
+    }
+    @if (defResults.length > showLimitDefacement) {
       <div class="mt-[16px] text-center pb-[12px]" appTooltip="list more results" (click)="onShowMore('defacement', $event)">
         <span class="ui-see-more-btn cursor-pointer">
           See More
         </span>
       </div>
-    </ng-container>
-  </ng-container>
+    }
+  }
 
-  <ng-container *ngIf="isExpandable && results_stealerlog?.Result as stResults">
-    <hr class="mt-[16px] h-px border-0 bg-[var(--color-divider)]" *ngIf="results_defacement?.Result?.length" />
-
-    <ng-container *ngFor="let item of stResults.slice(0, showLimitStealer); let i = index">
+  @if (isExpandable && results_stealerlog?.Result; as stResults) {
+    @if (results_defacement?.Result?.length) {
+      <hr class="mt-[16px] h-px border-0 bg-[var(--color-divider)]" />
+    }
+    @for (item of stResults.slice(0, showLimitStealer); track item; let i = $index) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
         <div class="ui-consolidated-sub flex min-h-[190px] w-full flex-col justify-between rounded-[10px] border p-[14px] text-[var(--color-text1)] shadow-[0_8px_20px_rgba(0,0,0,0.14)] transition-[background,border-color,box-shadow,transform,filter] duration-150 hover:border-[var(--color-blue-640)] hover:shadow-[0_14px_34px_rgba(0,0,0,0.22)] hover:translate-y-[-1px] hover:brightness-[1.01] max-[640px]:p-[10px]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--color-divider)] pb-[12px] mb-[12px]">
@@ -134,7 +142,6 @@
               </span>
             </div>
           </div>
-
           <div class="grid grid-cols-2 gap-x-[12px] gap-y-[10px] mb-[10px] max-[560px]:grid-cols-1">
             <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
               <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Username</div>
@@ -142,25 +149,27 @@
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="usernameValue(item)">
                   {{ usernameValue(item) }}
                 </div>
-                <button *ngIf="usernameValue(item) && usernameValue(item) !== '-'" type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(usernameValue(item), 'copy-username-' + i, $event)" [appTooltip]="isCopied('copy-username-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-username-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (usernameValue(item) && usernameValue(item) !== '-') {
+                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(usernameValue(item), 'copy-username-' + i, $event)" [appTooltip]="isCopied('copy-username-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-username-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
-
             <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
               <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Password</div>
               <div class="flex min-w-0 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="passwordValue(item)">
                   {{ passwordValue(item) }}
                 </div>
-                <button *ngIf="passwordValue(item) && passwordValue(item) !== '-'" type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(passwordValue(item), 'copy-password-' + i, $event)" [appTooltip]="isCopied('copy-password-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-password-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (passwordValue(item) && passwordValue(item) !== '-') {
+                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(passwordValue(item), 'copy-password-' + i, $event)" [appTooltip]="isCopied('copy-password-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-password-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
           </div>
-
           <div class="grid grid-cols-2 gap-x-[12px] gap-y-[10px] mb-[10px] max-[560px]:grid-cols-1">
             <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
               <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Domain</div>
@@ -168,48 +177,53 @@
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="domainValue(item)">
                   {{ domainValue(item) }}
                 </div>
-                <button *ngIf="domainValue(item) && domainValue(item) !== '-'" type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(domainValue(item), 'copy-domain-' + i, $event)" [appTooltip]="isCopied('copy-domain-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-domain-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (domainValue(item) && domainValue(item) !== '-') {
+                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(domainValue(item), 'copy-domain-' + i, $event)" [appTooltip]="isCopied('copy-domain-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-domain-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
-
             <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
               <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Hash</div>
               <div class="flex min-w-0 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="hashValue(item)">
                   {{ hashValue(item) }}
                 </div>
-                <button *ngIf="hashValue(item) && hashValue(item) !== '-'" type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(hashValue(item), 'copy-hash-' + i, $event)" [appTooltip]="isCopied('copy-hash-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-hash-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
+                @if (hashValue(item) && hashValue(item) !== '-') {
+                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(hashValue(item), 'copy-hash-' + i, $event)" [appTooltip]="isCopied('copy-hash-' + i) ? 'Copied' : 'Copy'">
+                    <i class="bi" [ngClass]="isCopied('copy-hash-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                  </button>
+                }
               </div>
             </div>
           </div>
-
-          <div class="mb-[10px]" *ngIf="item['url']">
-            <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
-              <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">URL</div>
-              <div class="flex min-w-0 items-center gap-[8px]">
-                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.6px] font-[750] text-[var(--color-text5)]" [appTooltip]="stealerUrlValue(item)">
-                  {{ truncate(stealerUrlValue(item), 30) }}
+          @if (item['url']) {
+            <div class="mb-[10px]">
+              <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
+                <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">URL</div>
+                <div class="flex min-w-0 items-center gap-[8px]">
+                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.6px] font-[750] text-[var(--color-text5)]" [appTooltip]="stealerUrlValue(item)">
+                    {{ truncate(stealerUrlValue(item), 30) }}
+                  </div>
+                  @if (stealerUrlValue(item) && stealerUrlValue(item) !== '-') {
+                    <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(stealerUrlValue(item), 'copy-stealer-url-' + i, $event)" [appTooltip]="isCopied('copy-stealer-url-' + i) ? 'Copied' : 'Copy'">
+                      <i class="bi" [ngClass]="isCopied('copy-stealer-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                    </button>
+                  }
                 </div>
-                <button *ngIf="stealerUrlValue(item) && stealerUrlValue(item) !== '-'" type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(stealerUrlValue(item), 'copy-stealer-url-' + i, $event)" [appTooltip]="isCopied('copy-stealer-url-' + i) ? 'Copied' : 'Copy'">
-                  <i class="bi" [ngClass]="isCopied('copy-stealer-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                </button>
               </div>
             </div>
-          </div>
+          }
         </div>
       </div>
-    </ng-container>
-
-    <ng-container *ngIf="stResults.length > showLimitStealer">
+    }
+    @if (stResults.length > showLimitStealer) {
       <div class="text-center pb-[12px]">
         <span class="ui-see-more-btn cursor-pointer">
           See More
         </span>
       </div>
-    </ng-container>
-  </ng-container>
+    }
+  }
 </div>

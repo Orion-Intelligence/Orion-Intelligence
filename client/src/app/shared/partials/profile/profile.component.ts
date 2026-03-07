@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, Output, EventEmitter } from '@angular/core';
-import { NgIf, NgOptimizedImage, NgClass } from "@angular/common";
+import { NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { Router } from '@angular/router';
@@ -13,10 +13,9 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   standalone: true,
   imports: [
     NgOptimizedImage,
-    NgIf,
     TooltipDirective,
     NgClass,
-    AlertNotificationComponent,
+    AlertNotificationComponent
   ],
   templateUrl: './profile.component.html'
 })

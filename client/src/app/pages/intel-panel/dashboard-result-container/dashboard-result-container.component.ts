@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgForOf, NgIf } from '@angular/common';
+
 import { DashboardResultsGeneralComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
 import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -21,14 +21,12 @@ import { DashboardResultDefacementComponent } from '../dashboard-results/dashboa
 @Component({
   selector: 'app-dashboard-result-container',
   imports: [
-    NgIf,
     PaginationComponent,
     DashboardResultsGeneralComponent,
     ResultComponent,
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
-    NgForOf,
     DashboardResultDefacementComponent
   ],
   templateUrl: './dashboard-result-container.component.html',

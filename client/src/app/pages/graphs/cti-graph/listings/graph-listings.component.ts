@@ -1,11 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 @Component({
   selector: 'app-listings',
-  imports: [NgFor, NgIf, FormsModule, TooltipDirective],
+  imports: [FormsModule, TooltipDirective],
   templateUrl: './graph-listings.component.html',
   animations: [fadeInDashboardItem]
 })

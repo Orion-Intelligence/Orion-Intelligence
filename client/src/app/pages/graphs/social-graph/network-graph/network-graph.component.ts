@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, viewChild, ElementRef, effect, signal, OnDestroy, output, computed, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Network, Options, Position } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { NetworkData, PlatformResult } from '../../../../shared/model/social/social-scan.models';
@@ -10,7 +10,7 @@ import { SocialMapperStateService } from '../services/social-mapper-state.servic
   templateUrl: './network-graph.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   host: {
     '[class.manipulation-active]': 'isManipulating()',
   }

@@ -3,62 +3,67 @@
     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-0">{{ menuTitle() }}</p>
     <p class="text-xs text-slate-500 truncate mt-1 mb-0">{{ menuSubtitle() }}</p>
   </div>
-  <ng-container [ngSwitch]="data()!.type">
-    <div *ngSwitchCase="'user'">
-      <div class="p-2">
-        <div class="px-2 pt-1 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Analysis</div>
-        <button (click)="action.emit('setAlias')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-sky-200 rounded-md hover:bg-sky-500/20 hover:text-sky-100 transition-colors group">
-          <i class="bi bi-pencil-square w-5 h-5 text-sky-300 group-hover:text-sky-200 transition-colors"></i>
-          <span class="flex-grow">Set Alias</span>
-          <i class="bi bi-chevron-right text-xs text-sky-300/70 group-hover:text-sky-200 transition-colors"></i>
-        </button>
-        <button (click)="action.emit('fetchLinks')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-200 rounded-md hover:bg-indigo-600/30 hover:text-white transition-colors group">
-          <i class="bi bi-link-45deg w-5 h-5 text-slate-400 group-hover:text-indigo-300 transition-colors"></i>
-          <span class="flex-grow">Fetch exposed post links</span>
-          <i class="bi bi-chevron-right text-xs text-slate-500 group-hover:text-indigo-300 transition-colors"></i>
-        </button>
-        <button (click)="action.emit('clearConnections')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-200 rounded-md hover:bg-slate-700/70 hover:text-white transition-colors group">
-          <i class="bi bi-x-circle w-5 h-5 text-slate-400 group-hover:text-slate-200 transition-colors"></i>
-          <span class="flex-grow">Clear Connections</span>
-          <i class="bi bi-chevron-right text-xs text-slate-500 group-hover:text-slate-300 transition-colors"></i>
-        </button>
-        <div class="my-2 h-px bg-slate-700/70"></div>
-        <button (click)="action.emit('deleteProfile')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
-          <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
-          <span class="flex-grow">Delete Profile</span>
-          <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors"></i>
-        </button>
+  @switch (data()!.type) {
+    @case ('user') {
+      <div>
+        <div class="p-2">
+          <div class="px-2 pt-1 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Analysis</div>
+          <button (click)="action.emit('setAlias')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-sky-200 rounded-md hover:bg-sky-500/20 hover:text-sky-100 transition-colors group">
+            <i class="bi bi-pencil-square w-5 h-5 text-sky-300 group-hover:text-sky-200 transition-colors"></i>
+            <span class="flex-grow">Set Alias</span>
+            <i class="bi bi-chevron-right text-xs text-sky-300/70 group-hover:text-sky-200 transition-colors"></i>
+          </button>
+          <button (click)="action.emit('fetchLinks')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-200 rounded-md hover:bg-indigo-600/30 hover:text-white transition-colors group">
+            <i class="bi bi-link-45deg w-5 h-5 text-slate-400 group-hover:text-indigo-300 transition-colors"></i>
+            <span class="flex-grow">Fetch exposed post links</span>
+            <i class="bi bi-chevron-right text-xs text-slate-500 group-hover:text-indigo-300 transition-colors"></i>
+          </button>
+          <button (click)="action.emit('clearConnections')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-200 rounded-md hover:bg-slate-700/70 hover:text-white transition-colors group">
+            <i class="bi bi-x-circle w-5 h-5 text-slate-400 group-hover:text-slate-200 transition-colors"></i>
+            <span class="flex-grow">Clear Connections</span>
+            <i class="bi bi-chevron-right text-xs text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+          </button>
+          <div class="my-2 h-px bg-slate-700/70"></div>
+          <button (click)="action.emit('deleteProfile')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
+            <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
+            <span class="flex-grow">Delete Profile</span>
+            <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors"></i>
+          </button>
+        </div>
       </div>
-    </div>
-
-    <div *ngSwitchCase="'platform'">
-      <div class="p-2">
-        <button (click)="action.emit('removeNode')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
-          <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
-          <span>Remove from Graph</span>
-          <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors ml-auto"></i>
-        </button>
+    }
+    @case ('platform') {
+      <div>
+        <div class="p-2">
+          <button (click)="action.emit('removeNode')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
+            <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
+            <span>Remove from Graph</span>
+            <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors ml-auto"></i>
+          </button>
+        </div>
       </div>
-    </div>
-
-    <div *ngSwitchCase="'group'">
-      <div class="p-2">
-        <button (click)="action.emit('removeNode')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
-          <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
-          <span>Remove Group from Graph</span>
-          <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors ml-auto"></i>
-        </button>
+    }
+    @case ('group') {
+      <div>
+        <div class="p-2">
+          <button (click)="action.emit('removeNode')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
+            <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
+            <span>Remove Group from Graph</span>
+            <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors ml-auto"></i>
+          </button>
+        </div>
       </div>
-    </div>
-
-    <div *ngSwitchCase="'customEntity'">
-      <div class="p-2">
-        <button (click)="action.emit('deleteEntity')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
-          <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
-          <span>Delete Entity</span>
-          <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors ml-auto"></i>
-        </button>
+    }
+    @case ('customEntity') {
+      <div>
+        <div class="p-2">
+          <button (click)="action.emit('deleteEntity')" class="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-red-300 rounded-md hover:bg-red-500/20 hover:text-red-200 transition-colors group">
+            <i class="bi bi-trash3-fill w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors"></i>
+            <span>Delete Entity</span>
+            <i class="bi bi-chevron-right text-xs text-red-400/70 group-hover:text-red-300 transition-colors ml-auto"></i>
+          </button>
+        </div>
       </div>
-    </div>
-  </ng-container>
+    }
+  }
 </div>

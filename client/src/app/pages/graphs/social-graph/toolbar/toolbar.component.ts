@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToolbarComponent {

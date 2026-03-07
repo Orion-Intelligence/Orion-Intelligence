@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DatePipe, NgForOf, NgIf, SlicePipe, CommonModule } from '@angular/common';
+import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { SocialResultItem } from '../../../../shared/model/results/social/social.callback.model';
@@ -11,9 +11,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   selector: 'app-dashboard-result-social',
   standalone: true,
   imports: [
-    NgForOf,
     DatePipe,
-    NgIf,
     SlicePipe,
     RouterLink,
     TooltipDirective,

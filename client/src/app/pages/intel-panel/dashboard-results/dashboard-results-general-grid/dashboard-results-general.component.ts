@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HelperService } from '../../../../shared/services/helper.service';
@@ -13,7 +13,7 @@ import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
-  imports: [NgForOf, RouterLink, DatePipe, NgIf, TooltipDirective, CommonModule, NgClass],
+  imports: [RouterLink, DatePipe, TooltipDirective, CommonModule, NgClass],
   standalone: true
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {

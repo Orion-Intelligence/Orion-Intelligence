@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
 
 @Component({
   selector: 'app-export-choice-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './export-choice-modal.component.html'
 })
 export class ExportChoiceModalComponent {
