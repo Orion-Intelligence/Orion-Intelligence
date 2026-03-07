@@ -89,8 +89,8 @@ class crawl_model:
                 response = await client.post(
                     "http://trusted-micros-api:8010/nlp/parse", json={"data": model.data}, timeout=10)
                 return response.json()
-        except Exception as ex:
-            return {"error": str(ex)}
+        except Exception:
+            return {"error": "Failed to parse chat"}
 
     @staticmethod
     async def parse_summarize_ai(model: nlp_data_model):
@@ -99,8 +99,8 @@ class crawl_model:
                 response = await client.post(
                     "http://trusted-micros-api:8010/nlp/summarize/ai", json={"data": model.data}, timeout=200)
                 return response.json()
-        except Exception as ex:
-            return {"error": str(ex)}
+        except Exception:
+            return {"error": "Failed to summarize chat"}
 
     @staticmethod
     async def scan_domain(model, user_id: str = "system"):
@@ -179,8 +179,8 @@ class crawl_model:
                     "http://trusted-micros-api:8010/nlp/chat/report", json=model.model_dump(), timeout=200)
                 response.raise_for_status()
                 return response.json()
-        except Exception as ex:
-            return {"error": str(ex)}
+        except Exception:
+            return {"error": "Failed to generate chat report"}
 
     @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):
@@ -330,8 +330,8 @@ class crawl_model:
             if not os.path.exists(file_path):
                 return {"error": "File not found"}
             return FileResponse(path=file_path, filename=filename, media_type="image/webp")
-        except Exception as e:
-            return {"error": f"Failed to retrieve screenshot: {str(e)}"}
+        except Exception:
+            return {"error": "Failed to retrieve screenshot"}
 
     @staticmethod
     async def invoke_file_upload(payload: ScreenshotPayload):
@@ -341,8 +341,8 @@ class crawl_model:
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
             return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}
-        except Exception as e:
-            return {"error": f"Failed to save screenshot: {str(e)}"}
+        except Exception:
+            return {"error": "Failed to save screenshot"}
 
     async def index_log_record(self, log_model: LogModel):
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -377,8 +377,8 @@ class crawl_model:
 
             return JSONResponse(content={"message": "Dump records saved successfully"}, status_code=200)
 
-        except Exception as e:
-            return JSONResponse(content={"error": f"Failed to save dump records: {str(e)}"}, status_code=500)
+        except Exception:
+            return JSONResponse(content={"error": "Failed to save dump records"}, status_code=500)
 
     @staticmethod
     async def fetch_cti_label(payload: CTITextRequest):

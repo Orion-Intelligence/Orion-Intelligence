@@ -35,6 +35,7 @@ export class HomeSearchComponent implements OnInit {
   homeInsightExpanded = false;
   public insightDragging = false;
   public insightDragY: number | null = null;
+  insightTranslateY = 0;
 
   @Input() isRoleAdmin: boolean = true;
   @Input() hideToolsSection: boolean = false;
@@ -55,16 +56,22 @@ export class HomeSearchComponent implements OnInit {
 
   private computeInsightMax() {
     this.insightMax = Math.round(window.innerHeight * 0.30);
-    if (!this.insightDragging && this.insightDragY == null) {
-    }
+    this.refreshInsightTransformClass();
   }
 
-  getInsightTransform(): string {
+  private getInsightTransform(): string {
     const max = this.insightMax || Math.round(window.innerHeight * 0.30);
     const y = this.insightDragging
       ? (this.insightDragY ?? (this.homeInsightExpanded ? -max : 0))
       : (this.homeInsightExpanded ? -max : 0);
     return `translate3d(0, ${y}px, 0)`;
+  }
+
+  private refreshInsightTransformClass(): void {
+    const transform = this.getInsightTransform();
+    const match = /,\s*(-?\d+)px,/.exec(transform);
+    const y = match ? Number(match[1]) : 0;
+    this.insightTranslateY = Math.max(0, Math.min(600, Math.round(Math.abs(Math.min(0, y)))));
   }
 
   onSetMatchType(type: string) {
@@ -147,6 +154,7 @@ export class HomeSearchComponent implements OnInit {
       return;
     }
     this.homeInsightExpanded = !this.homeInsightExpanded;
+    this.refreshInsightTransformClass();
   }
 
   onInsightPointerDown(event: PointerEvent): void {
@@ -170,6 +178,7 @@ export class HomeSearchComponent implements OnInit {
     this.insightStartY = event.clientY;
     this.insightStartOffset = this.homeInsightExpanded ? -max : 0;
     this.insightDragY = this.insightStartOffset;
+    this.refreshInsightTransformClass();
 
     this.attachWindowPointerListeners();
   }
@@ -216,6 +225,7 @@ export class HomeSearchComponent implements OnInit {
 
     const next = this.insightStartOffset + dy;
     this.insightDragY = Math.max(-max, Math.min(0, next));
+    this.refreshInsightTransformClass();
   }
 
   onInsightPointerUp(event: PointerEvent): void {
@@ -242,6 +252,7 @@ export class HomeSearchComponent implements OnInit {
     this.insightPointerId = null;
     this.insightDragging = false;
     this.insightDragY = null;
+    this.refreshInsightTransformClass();
 
     this.detachWindowPointerListeners();
   }
@@ -259,6 +270,7 @@ export class HomeSearchComponent implements OnInit {
     this.insightDragY = null;
     this.suppressInsightClick = true;
     this.insightMoved = false;
+    this.refreshInsightTransformClass();
 
     this.detachWindowPointerListeners();
   }
@@ -272,4 +284,5 @@ export class HomeSearchComponent implements OnInit {
       detailsEl.open = false;
     }
   }
+
 }

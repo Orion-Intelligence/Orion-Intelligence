@@ -218,6 +218,30 @@ html:has(body.dark-theme) {
   animation: loader_indeterminate 1.5s linear infinite;
 }
 
+@for $i from 0 through 100 {
+  .ui-wpct-#{$i} {
+    width: #{$i + '%'};
+  }
+}
+
+@for $i from 0 through 2000 {
+  $value: $i * 2;
+  .ui-left-#{$value},
+  [data-left="#{$value}"] {
+    left: #{$value}px;
+  }
+  .ui-top-#{$value},
+  [data-top="#{$value}"] {
+    top: #{$value}px;
+  }
+}
+
+@for $i from 0 through 600 {
+  .ui-translate-y-neg-#{$i} {
+    transform: translate3d(0, -#{$i}px, 0);
+  }
+}
+
 
 @keyframes slideUp {
   from {
@@ -1329,6 +1353,49 @@ html:has(body.dark-theme) {
   filter: var(--ui-icon-filter-light);
 }
 
+.custom-tooltip {
+  position: fixed;
+  z-index: 2147483000;
+  max-width: 320px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 500;
+  background: rgba(9, 14, 24, 0.96);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  white-space: normal;
+  word-break: break-word;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms ease;
+}
+
+.custom-tooltip[data-visible='1'] {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-platform-bg='slate'] { background-color: #475569 !important; }
+[data-platform-bg='red'] { background-color: #b91c1c !important; }
+[data-platform-bg='orange'] { background-color: #c2410c !important; }
+[data-platform-bg='amber'] { background-color: #b45309 !important; }
+[data-platform-bg='green'] { background-color: #166534 !important; }
+[data-platform-bg='cyan'] { background-color: #0e7490 !important; }
+[data-platform-bg='blue'] { background-color: #1d4ed8 !important; }
+[data-platform-bg='violet'] { background-color: #6d28d9 !important; }
+[data-platform-bg='pink'] { background-color: #be185d !important; }
+
+app-world-heatmap .country.is-clickable {
+  cursor: pointer;
+}
+
+app-world-heatmap .country:not(.is-clickable) {
+  cursor: default;
+}
+
 .light-theme app-world-heatmap .map-container {
   mask-image: none;
 }
@@ -1658,6 +1725,14 @@ html:has(body.dark-theme) {
   border: 2px solid #ffffff;
   border-radius: 9999px;
   box-shadow: none;
+}
+
+@for $i from 0 through 256 {
+  $size: $i * 2;
+  .network-graph-followers-overlay[data-size="#{$size}"] {
+    width: #{$size}px;
+    height: #{$size}px;
+  }
 }
 
 .network-graph-followers-overlay-img {

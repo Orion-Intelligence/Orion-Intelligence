@@ -676,6 +676,18 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     this.followersShortcutClicked.emit(nodeId);
   }
 
+  toPositionValue(rawValue: number): number {
+    const step = 2;
+    const rounded = Math.round(rawValue / step) * step;
+    return Math.max(0, Math.min(4000, rounded));
+  }
+
+  toSizeValue(rawValue: number): number {
+    const step = 2;
+    const rounded = Math.round(rawValue / step) * step;
+    return Math.max(0, Math.min(512, rounded));
+  }
+
   trackByOverlayNodeId( _index: number, item: { nodeId: string; } ): string {
     return item.nodeId;
   }

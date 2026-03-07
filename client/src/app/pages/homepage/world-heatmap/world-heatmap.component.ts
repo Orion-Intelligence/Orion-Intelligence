@@ -244,8 +244,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         .attr('font-weight', 500)
         .attr('text-anchor', 'middle')
         .attr('fill', legendColors.tickLabel)
-        .style('fill', legendColors.tickLabel)
-        .style('opacity', '1')
+        .attr('opacity', 1)
         .attr('opacity', 0)
         .transition()
         .duration(600)
@@ -253,8 +252,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         .attr('x', d => (d / max) * barW)
         .text(d => String(d)), update => update
         .attr('fill', legendColors.tickLabel)
-        .style('fill', legendColors.tickLabel)
-        .style('opacity', '1')
+        .attr('opacity', 1)
         .attr('font-size', tickSize)
         .attr('font-weight', 500)
         .transition()
@@ -371,11 +369,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const color = this.getColorScale();
     this.mapG.selectAll<SVGPathElement, any>('path.country')
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
+      .classed('is-clickable', (d: any) => this.getValueForFeature(d) != null)
       .attr('fill', (d: any) => {
         const v = this.getValueForFeature(d);
         return v == null ? this.neutralFill : color(v);
-      })
-      .style('cursor', (d: any) => this.getValueForFeature(d) == null ? 'default' : 'pointer');
+      });
   }
 
   private onHoverMove(event: MouseEvent, d: any): void {
@@ -405,18 +403,18 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (y < 8) {
       y = 8;
     }
+    const left = this.normalizePositionValue(x);
+    const top = this.normalizePositionValue(y);
     this.tooltip
       .attr('class', this.tooltipVisibleClass)
-      .style('left', `${x}px`)
-      .style('top', `${y}px`);
+      .attr('data-left', String(left))
+      .attr('data-top', String(top));
   }
 
   private onHoverOut(event: MouseEvent): void {
     d3.select(event.currentTarget as SVGPathElement).classed('hovered', false);
     this.tooltip
-      .attr('class', this.tooltipHiddenClass)
-      .style('left', null)
-      .style('top', null);
+      .attr('class', this.tooltipHiddenClass);
   }
 
   private onCountryClick(d: any): void {
@@ -469,7 +467,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
     countries
       .classed('has-data', (d: any) => getValueForFeature(d) != null)
-      .style('cursor', (d: any) => getValueForFeature(d) == null ? 'default' : 'pointer')
+      .classed('is-clickable', (d: any) => getValueForFeature(d) != null)
       .transition()
       .duration(1100)
       .ease(d3.easeCubicInOut)
@@ -480,5 +478,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         const interpolateFill = d3.interpolateRgb(currentFill, nextFill);
         return (t: number) => interpolateFill(t);
       });
+  }
+
+  private normalizePositionValue(rawValue: number): number {
+    const step = 2;
+    const rounded = Math.round(rawValue / step) * step;
+    return Math.max(0, Math.min(4000, rounded));
   }
 }

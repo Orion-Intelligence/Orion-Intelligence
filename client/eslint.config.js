@@ -1005,6 +1005,45 @@ module.exports = [
       'local/no-style-url-in-component': 'error',
       'local/rxjs-empty-error-handler-param': 'error',
       'local/assignment-single-line': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "CallExpression[callee.property.name='setStyle']",
+          message: 'Do not manipulate CSS from TS. Use ngClass/static classes.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='removeStyle']",
+          message: 'Do not manipulate CSS from TS. Use ngClass/static classes.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='addClass']",
+          message: 'Do not manipulate CSS from TS. Use ngClass/static classes.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='removeClass']",
+          message: 'Do not manipulate CSS from TS. Use ngClass/static classes.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='style']",
+          message: 'Do not set CSS via JS/TS style() calls. Move styles to CSS classes.'
+        },
+        {
+          selector: "AssignmentExpression[left.type='MemberExpression'][left.object.type='MemberExpression'][left.object.property.name='style']",
+          message: 'Do not assign element.style.* from TS. Use ngClass/static classes.'
+        },
+        {
+          selector: "AssignmentExpression[left.property.name='innerHTML']",
+          message: 'Do not assign innerHTML directly.'
+        },
+        {
+          selector: "AssignmentExpression[left.property.name='outerHTML']",
+          message: 'Do not assign outerHTML directly.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='insertAdjacentHTML']",
+          message: 'Do not inject HTML directly from TS.'
+        }
+      ],
     },
   },
   {
@@ -1020,6 +1059,7 @@ module.exports = [
       'local/template-attr-single-line': 'error',
       'local/template-asset-src-root': 'error',
       'local/template-asset-src-no-parent': 'error',
+      '@angular-eslint/template/no-inline-styles': 'error',
     },
   },
   {

@@ -16,18 +16,6 @@ def configure_swagger(app: FastAPI):
             title="Orion Intelligence OpenAPI",
             oauth2_redirect_url="/docs/oauth2-redirect", ).body.decode("utf-8")
 
-        swagger_ui_html += """
-        <script>
-            window.onload = function() {
-                let token = localStorage.getItem('swagger_access_token');
-                if (token) {
-                    let swaggerUi = window.ui;
-                    if (swaggerUi) {
-                        swaggerUi.preauthorizeApiKey("OAuth2PasswordBearer", "Bearer " + token);
-                    }
-                }
-            };
-        </script>
-        """
+        swagger_ui_html += '<script src="/static/swagger-auth.js"></script>'
 
         return HTMLResponse(content=swagger_ui_html)

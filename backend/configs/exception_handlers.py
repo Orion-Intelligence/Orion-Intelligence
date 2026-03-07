@@ -23,7 +23,7 @@ async def global_exception_handler(_: Request, exc: Exception):
 
     if config.DEBUG:
         error_response = ErrorResponseModel(
-            error=str(exc), traceback=clean_traceback(exc))
+            error="An unexpected error occurred", traceback=[])
         return JSONResponse(status_code=status_code, content=error_response.model_dump())
 
     return RedirectResponse(url=f"/{status_code}")

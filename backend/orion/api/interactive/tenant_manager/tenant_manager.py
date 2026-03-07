@@ -343,7 +343,7 @@ class TenantManager:
             return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
                 tenant_allowed), }
 
-        except HTTPException as e:
+        except HTTPException:
             raise HTTPException(status_code=400, detail="Username or email already exists")
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=str(e) or "Error creating user")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Error creating user")

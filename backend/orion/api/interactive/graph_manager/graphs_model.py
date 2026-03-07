@@ -42,13 +42,13 @@ class graphs_model:
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content=str(response),
+                        content={"detail": "Social service request failed"},
                     )
 
                 return response.json()
 
-        except Exception as ex:
-            return JSONResponse(status_code=500, content=str(ex))
+        except Exception:
+            return JSONResponse(status_code=500, content={"detail": "Failed to process social search"})
 
     async def get_tabs_summary(self, user_id: str, graph_type: str = "social"):
         try:
@@ -75,8 +75,8 @@ class graphs_model:
                 "tabs": tabs,
             }
 
-        except Exception as ex:
-            return JSONResponse(status_code=500, content=str(ex))
+        except Exception:
+            return JSONResponse(status_code=500, content={"detail": "Failed to fetch tabs summary"})
 
     async def add_tab(self, user_id: str, graph_type: str, tab: dict):
         try:
@@ -125,8 +125,8 @@ class graphs_model:
                 "max_tabs_allowed": 5,
             }
 
-        except Exception as ex:
-            return JSONResponse(status_code=500, content=str(ex))
+        except Exception:
+            return JSONResponse(status_code=500, content={"detail": "Failed to add tab"})
 
     async def upsert_data(self, user_id: str, graph_type: str, data: dict):
         try:
@@ -203,5 +203,5 @@ class graphs_model:
             saved = await self._engine.save(new_doc)
             return saved
 
-        except Exception as ex:
-            return JSONResponse(status_code=500, content=str(ex))
+        except Exception:
+            return JSONResponse(status_code=500, content={"detail": "Failed to save graph data"})

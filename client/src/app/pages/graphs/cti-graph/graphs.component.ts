@@ -616,7 +616,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.originalNodeState.clear();
     const container = this.networkContainer?.nativeElement;
     if (container) {
-      container.innerHTML = '';
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
     }
   }
 
@@ -758,9 +760,8 @@ export class GraphComponent implements OnInit, OnDestroy {
         top = viewportPadding;
       }
       menu.classList.remove('hidden');
-      menu.classList.add('right-auto', 'bottom-auto', 'transform-none', 'z-[10000]');
-      menu.style.left = `${left}px`;
-      menu.style.top = `${top}px`;
+      menu.setAttribute('data-left', String(this.normalizePositionValue(left)));
+      menu.setAttribute('data-top', String(this.normalizePositionValue(top)));
       this.contextMenuNodeId = node.id;
       this.contextMenuNode = node;
       this.contextCanExpand = this.canContextExpand();
@@ -798,6 +799,12 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.contextCanCollapse = false;
     this.contextShowOpenCti = false;
     this.contextShowOpenReport = false;
+  }
+
+  private normalizePositionValue(rawValue: number): number {
+    const step = 2;
+    const rounded = Math.round(rawValue / step) * step;
+    return Math.max(0, Math.min(4000, rounded));
   }
 
   private getEdgeIdsToRemove(fromId: string, toIds: string[]): string[] {

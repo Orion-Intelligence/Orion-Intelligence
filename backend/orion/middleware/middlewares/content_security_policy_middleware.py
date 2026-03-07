@@ -37,7 +37,11 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         elif request.url.path.startswith("/dashboard/social-mapper"):
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "
                                                            "script-src 'self'; "
+                                                           "script-src-elem 'self'; "
+                                                           "script-src-attr 'none'; "
                                                            "style-src 'self'; "
+                                                           "style-src-elem 'self'; "
+                                                           "style-src-attr 'none'; "
                                                            "img-src 'self' data: https:; "
                                                            "font-src 'self'; "
                                                            "connect-src 'self'; "
@@ -50,7 +54,11 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         else:
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "
                                                            "script-src 'self'; "
+                                                           "script-src-elem 'self'; "
+                                                           "script-src-attr 'none'; "
                                                            "style-src 'self'; "
+                                                           "style-src-elem 'self'; "
+                                                           "style-src-attr 'none'; "
                                                            "img-src 'self' data: https://try.orionintelligence.org; "
                                                            "font-src 'self'; "
                                                            "connect-src 'self'; "

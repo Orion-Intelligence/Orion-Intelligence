@@ -65,16 +65,6 @@ export class JsonViewerComponent implements OnInit {
     return Object.keys(obj);
   }
 
-  depthMargin(level: number): number {
-    if (level <= 0) {
-      return 0;
-    }
-    if (level === 1 || level === 2) {
-      return 20;
-    }
-    return level * 20;
-  }
-
   openToken(value: any): string {
     return this.isArray(value) ? '[' : '{';
   }

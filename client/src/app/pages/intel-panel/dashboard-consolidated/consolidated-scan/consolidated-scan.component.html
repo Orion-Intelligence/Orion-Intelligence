@@ -37,7 +37,7 @@
       @if (isCollapsed) {
         <div>
           <div class="mt-[12px] h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-            <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [style.width.%]="(isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100"></div>
+            <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [ngClass]="'ui-wpct-' + ((isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100)"></div>
           </div>
         </div>
       }
@@ -120,7 +120,7 @@
               <div class="inline-flex items-center gap-[50px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-[12px]">
                 <div class="w-[226px] max-[768px]:w-full">
                   <div class="h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-                    <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [style.width.%]="mergedProgress || 6"></div>
+                    <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [ngClass]="'ui-wpct-' + (mergedProgress || 6)"></div>
                   </div>
                 </div>
                 <div class="font-[Inter] text-[14px] font-normal leading-[18.2px] text-[var(--color-text4)] whitespace-nowrap">{{ completedCount }}/{{ totalCount }} scans completed</div>

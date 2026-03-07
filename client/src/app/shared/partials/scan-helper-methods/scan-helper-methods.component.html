@@ -41,7 +41,7 @@
           @if (isLoading) {
             <div class="flex flex-col gap-[10px]">
               <div class="relative h-[28px] overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#0f1821]">
-                <div class="h-full bg-[linear-gradient(90deg,#0ea5e9_0%,#06b6d4_100%)] shadow-[0_0_10px_rgba(14,165,233,0.3)] transition-[width] duration-300" [style.width.%]="progress"></div>
+                <div class="h-full bg-[linear-gradient(90deg,#0ea5e9_0%,#06b6d4_100%)] shadow-[0_0_10px_rgba(14,165,233,0.3)] transition-[width] duration-300" [ngClass]="'ui-wpct-' + progressWidthValue"></div>
                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[12px] font-bold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.3)]">{{ progress }}%</span>
               </div>
               <div class="flex items-center gap-[8px] rounded-[6px] border border-[rgba(87,165,235,0.2)] bg-[rgba(87,165,235,0.1)] px-[12px] py-[8px] text-[13px] text-[#9bb4d1]">{{ statusMessage }}</div>

@@ -1,32 +1,27 @@
-import { Directive, ElementRef, Renderer2, effect, inject, input } from '@angular/core';
+import { Directive, HostBinding, effect, inject, input } from '@angular/core';
 import { IconService } from '../../../../shared/services/icon.service';
 @Directive({
   selector: '[socialMapperPlatformBg]',
   standalone: true,
 })
 export class PlatformIconBgDirective {
-  private el = inject(ElementRef<HTMLElement>);
-  private renderer = inject(Renderer2);
   private iconService = inject(IconService);
-  private activeColorClass = 'social-graph-platform-bg-slate';
 
+  @HostBinding('attr.data-platform-bg') platformBg = 'slate';
   platformName = input.required<string>({ alias: 'socialMapperPlatformBg' });
 
   constructor() {
     effect(() => {
       const platformName = this.platformName();
       const brandColor = this.iconService.getPlatformBrandColor(platformName);
-      const nextClass = this.getColorClassFromHex(brandColor);
-      this.renderer.removeClass(this.el.nativeElement, this.activeColorClass);
-      this.renderer.addClass(this.el.nativeElement, nextClass);
-      this.activeColorClass = nextClass;
+      this.platformBg = this.getColorBucketFromHex(brandColor);
     });
   }
 
-  private getColorClassFromHex(hex: string): string {
+  private getColorBucketFromHex(hex: string): string {
     const normalizedHex = hex.replace('#', '');
     if (!/^[0-9a-fA-F]{6}$/.test(normalizedHex)) {
-      return 'social-graph-platform-bg-slate';
+      return 'slate';
     }
     const r = parseInt(normalizedHex.substring(0, 2), 16) / 255;
     const g = parseInt(normalizedHex.substring(2, 4), 16) / 255;
@@ -35,9 +30,9 @@ export class PlatformIconBgDirective {
     const min = Math.min(r, g, b);
     const delta = max - min;
     if (delta === 0) {
-      return 'social-graph-platform-bg-slate';
+      return 'slate';
     }
-    let hue = 0;
+    let hue: number;
     if (max === r) {
       hue = ((g - b) / delta) % 6;
     }
@@ -52,26 +47,26 @@ export class PlatformIconBgDirective {
       hue += 360;
     }
     if (hue < 20 || hue >= 340) {
-      return 'social-graph-platform-bg-red';
+      return 'red';
     }
     if (hue < 45) {
-      return 'social-graph-platform-bg-orange';
+      return 'orange';
     }
     if (hue < 70) {
-      return 'social-graph-platform-bg-amber';
+      return 'amber';
     }
     if (hue < 160) {
-      return 'social-graph-platform-bg-green';
+      return 'green';
     }
     if (hue < 200) {
-      return 'social-graph-platform-bg-cyan';
+      return 'cyan';
     }
     if (hue < 245) {
-      return 'social-graph-platform-bg-blue';
+      return 'blue';
     }
     if (hue < 300) {
-      return 'social-graph-platform-bg-violet';
+      return 'violet';
     }
-    return 'social-graph-platform-bg-pink';
+    return 'pink';
   }
 }

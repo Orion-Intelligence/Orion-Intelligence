@@ -4,10 +4,10 @@
       <i class="bi bi-x-lg text-sm font-bold"></i>
     </button>
   }
-  <div class="absolute inset-0 z-10 pointer-events-none">
-    @if (iconOverlayNodes().length > 0) {
-      @for (overlay of iconOverlayNodes(); track trackByOverlayNodeId($index, overlay)) {
-        <button type="button" class="network-graph-followers-overlay pointer-events-auto" [style.left.px]="overlay.x" [style.top.px]="overlay.y" [style.width.px]="overlay.size" [style.height.px]="overlay.size" (click)="onFollowersShortcutClick($event, overlay.nodeId)">
+    <div class="absolute inset-0 z-10 pointer-events-none">
+      @if (iconOverlayNodes().length > 0) {
+        @for (overlay of iconOverlayNodes(); track trackByOverlayNodeId($index, overlay)) {
+        <button type="button" class="network-graph-followers-overlay pointer-events-auto" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" [attr.data-size]="toSizeValue(overlay.size)" (click)="onFollowersShortcutClick($event, overlay.nodeId)">
           <img src="assets/images/shared/socialicon.png" alt="" class="network-graph-followers-overlay-img" />
         </button>
       }

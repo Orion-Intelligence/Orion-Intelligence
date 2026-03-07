@@ -53,7 +53,7 @@
       <div class="mt-[12px] ml-0 max-w-[720px]">
         <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ currentStep || 'Scanning...' }} ({{ progressValue }}%)</div>
         <div class="h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-          <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [style.width.%]="progressValue"></div>
+          <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
         </div>
       </div>
     }

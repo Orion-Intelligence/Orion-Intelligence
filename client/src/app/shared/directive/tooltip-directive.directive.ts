@@ -7,6 +7,8 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
   private showTimeout: any = null;
   private removeContainerScroll?: () => void;
   private rafHideScheduled = false;
+  private tooltipLeft = 0;
+  private tooltipTop = 0;
 
   @Input('appTooltip') tooltipText = '';
 
@@ -69,46 +71,27 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
       this.showTimeout = null;
     }
     if (this.tooltip) {
-      this.renderer.removeClass(this.tooltip, 'opacity-100');
-      this.renderer.addClass(this.tooltip, 'opacity-0');
-      this.renderer.addClass(this.tooltip, 'pointer-events-none');
-      this.renderer.addClass(this.tooltip, 'hidden');
+      this.renderer.setAttribute(this.tooltip, 'data-visible', '0');
     }
   }
 
   private createOrUpdateTooltip(): void {
     if (!this.tooltip) {
       this.tooltip = this.renderer.createElement('div');
-      this.renderer.addClass(this.tooltip, 'custom-tooltip');
-      [
-        'fixed',
-        'z-[2147483000]',
-        'max-w-[320px]',
-        'py-[6px]',
-        'px-[10px]',
-        'rounded-[8px]',
-        'text-[12px]',
-        'leading-[1.35]',
-        'font-medium',
-        'bg-[rgba(9,14,24,0.96)]',
-        'text-white',
-        'shadow-[0_8px_22px_rgba(0,0,0,0.35)]',
-        'whitespace-normal',
-        'break-words',
-        'pointer-events-none',
-        'opacity-0',
-        'hidden'
-      ].forEach(cls => this.renderer.addClass(this.tooltip, cls));
+      this.renderer.setAttribute(this.tooltip, 'class', 'custom-tooltip');
+      this.renderer.setAttribute(this.tooltip, 'data-left', String(this.tooltipLeft));
+      this.renderer.setAttribute(this.tooltip, 'data-top', String(this.tooltipTop));
+      this.renderer.setAttribute(this.tooltip, 'data-visible', '0');
       this.renderer.appendChild(document.body, this.tooltip);
     }
     else {
-      this.renderer.setProperty(this.tooltip, 'textContent', '');
+      while (this.tooltip.firstChild) {
+        this.renderer.removeChild(this.tooltip, this.tooltip.firstChild);
+      }
     }
     const textNode = this.renderer.createText(this.tooltipText);
     this.renderer.appendChild(this.tooltip, textNode);
-    this.renderer.removeClass(this.tooltip, 'hidden');
-    this.renderer.addClass(this.tooltip, 'opacity-0');
-    this.renderer.removeClass(this.tooltip, 'opacity-100');
+    this.renderer.setAttribute(this.tooltip, 'data-visible', '0');
     requestAnimationFrame(() => {
       if (!this.tooltip) {
         return;
@@ -144,10 +127,8 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
       else if (top + tooltipRect.height > window.innerHeight - margin) {
         top = window.innerHeight - tooltipRect.height - margin;
       }
-      this.tooltip.style.top = `${top}px`;
-      this.tooltip.style.left = `${left}px`;
-      this.renderer.removeClass(this.tooltip, 'opacity-0');
-      this.renderer.addClass(this.tooltip, 'opacity-100');
+      this.setTooltipPositionAttributes(top, left);
+      this.renderer.setAttribute(this.tooltip, 'data-visible', '1');
     });
   }
 
@@ -159,5 +140,27 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
         this.renderer.removeChild(document.body, t);
       }
     }
+  }
+
+  private setTooltipPositionAttributes(top: number, left: number): void {
+    if (!this.tooltip) {
+      return;
+    }
+    const nextLeft = this.normalizePositionValue(left);
+    const nextTop = this.normalizePositionValue(top);
+    if (nextLeft !== this.tooltipLeft) {
+      this.tooltipLeft = nextLeft;
+      this.renderer.setAttribute(this.tooltip, 'data-left', String(nextLeft));
+    }
+    if (nextTop !== this.tooltipTop) {
+      this.tooltipTop = nextTop;
+      this.renderer.setAttribute(this.tooltip, 'data-top', String(nextTop));
+    }
+  }
+
+  private normalizePositionValue(rawValue: number): number {
+    const step = 2;
+    const rounded = Math.round(rawValue / step) * step;
+    return Math.max(0, Math.min(4000, rounded));
   }
 }

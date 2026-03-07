@@ -57,20 +57,18 @@ export class ContextMenuComponent {
   });
   menuPosition = computed(() => {
     const data = this.data();
-    const fallback = {
-      left: '50%',
-      top: '50%',
-      transform: 'translate(0, 0)',
-      originClass: 'origin-top-left',
-    };
-    if (!data || typeof window === 'undefined') {
-      return fallback;
-    }
+    const left = this.toPositionValue(data?.x ?? 0);
+    const top = this.toPositionValue(data?.y ?? 0);
     return {
-      left: `${data.x}px`,
-      top: `${data.y}px`,
-      transform: 'translate(0, 0)',
       originClass: 'origin-top-left',
+      left,
+      top,
     };
   });
+
+  private toPositionValue(rawValue: number): number {
+    const step = 2;
+    const rounded = Math.round(rawValue / step) * step;
+    return Math.max(0, Math.min(4000, rounded));
+  }
 }

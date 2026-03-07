@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { LowerPipe } from '../../../pipes/lower.pipe';
@@ -7,7 +7,7 @@ import { sidebarItemTooltips } from '../../../constants/shared-enums';
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
   standalone: true,
-  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, TooltipDirective, LowerPipe],
+  imports: [NgClass, AsyncPipe, RouterLink, TooltipDirective, LowerPipe],
   templateUrl: './dashboard-sidebar-collapsed.component.html',
 })
 export class SidebarSectionComponent {

@@ -203,6 +203,11 @@ export class ScanHelperMethods implements OnDestroy {
     }
   }
 
+  get progressWidthValue(): number {
+    const progress = Number(this.progress);
+    return Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0;
+  }
+
   getSubdomainUrl(subdomain: string): string {
     return subdomain.match(/^https?:\/\//i) ? subdomain : `https://${subdomain}`;
   }

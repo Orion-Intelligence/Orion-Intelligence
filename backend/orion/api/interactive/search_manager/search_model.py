@@ -123,11 +123,11 @@ class search_model:
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content=str(response))
+                        content={"detail": "Social service request failed"})
                 return response.json()
-        except Exception as ex:
+        except Exception:
             return JSONResponse(
-                status_code=500, content=str(ex))
+                status_code=500, content={"detail": "Failed to process social search"})
 
     async def _request_doc(self, index, doc_id, lang: Optional[str] = None, translate_fields: Optional[List[str]] = None):
         if translate_fields is None:

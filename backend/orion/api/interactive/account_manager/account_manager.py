@@ -113,8 +113,8 @@ class AccountManager:
             await engine.save(user)
             return {"message": "User created successfully", "username": username, "email": email}
 
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=str(e) or "Error creating user")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Error creating user")
 
     async def delete_user(self, user, current_user):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager

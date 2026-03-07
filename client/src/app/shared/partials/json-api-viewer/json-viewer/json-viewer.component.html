@@ -2,7 +2,7 @@
   <div class="font-mono text-[13px] text-[var(--color-text4)]">{{ '{' }}</div>
 }
 
-<div class="relative" [class.pl-4]="level > 0" [style.marginLeft.px]="depthMargin(level)">
+<div class="relative" [class.pl-4]="level > 0">
   <span class="pointer-events-none absolute bottom-0 left-[3px] top-0 border-l-[1.5px] border-[var(--color-divider)]"></span>
   <ul class="list-none pl-0 font-mono text-[13px] leading-[1.55]">
     @for (key of keys(json); track key; let last = $last) {
