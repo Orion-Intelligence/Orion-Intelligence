@@ -35,7 +35,7 @@
                   <span class="h-1 w-1 rounded-full bg-[#a0b8d1]"></span>
                   <span>{{ timeAgo(n.lastSeen) }}</span>
                 </div>
-                <button class="border-0 bg-transparent font-[Inter] text-[12px] font-semibold text-[#57a5eb]" (click)="seeDetails(n.categoryName,n.hash)">See Details</button>
+                <button data-testid="tenant-notification-see-details" class="border-0 bg-transparent font-[Inter] text-[12px] font-semibold text-[#57a5eb]" (click)="seeDetails(n.categoryName,n.hash)">See Details</button>
               </div>
             </div>
           }
@@ -46,7 +46,7 @@
       <div class="flex flex-col gap-2">
         <button (click)="close()" class="w-full rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-blue-810)]" type="button">Close</button>
         @if (alertNotifications.length>0) {
-          <button (click)="clearAll()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110" type="button">Clear All</button>
+          <button data-testid="tenant-notification-clear-all" (click)="clearAll()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110" type="button">Clear All</button>
         }
       </div>
     </div>

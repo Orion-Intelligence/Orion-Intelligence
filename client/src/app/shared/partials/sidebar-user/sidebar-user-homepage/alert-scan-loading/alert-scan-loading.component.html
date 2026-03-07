@@ -13,7 +13,7 @@
 
     @if (this.licenseService.getLicenses().includes('maintainer')) {
       <div class="flex justify-center">
-        <button type="button" class="ui-alert-cancel-btn rounded-full px-[16px] py-[9px] text-[13px] font-extrabold" (click)="cancelScan()">
+        <button data-testid="tenant-scan-cancel" type="button" class="ui-alert-cancel-btn rounded-full px-[16px] py-[9px] text-[13px] font-extrabold" (click)="cancelScan()">
           Cancel
         </button>
       </div>

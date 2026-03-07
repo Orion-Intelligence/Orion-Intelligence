@@ -12,7 +12,7 @@
       <div class="category_report_flex flex gap-[10px]">
         <div class="btn-group report-menu-option-container mr-0" [ngClass]="isLightTheme() ? 'bg-[#f7fbff] border-[#d3deeb]' : ''">
           @if (licenseService.isMaintainer()) {
-            <button (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('add')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='add' ? 'bg-[#cfe0f4]' : ''">
+            <button data-testid="tenant-alert-add-button" (click)="showAlertPopup('add','')" appTooltip="add alert" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('add')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='add' ? 'bg-[#cfe0f4]' : ''">
               <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" class="category_report_tool-icon" />
             </button>
           }
@@ -29,14 +29,14 @@
             <div class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
           }
           @if (this.alerts.length>0 &&licenseService.isMaintainer()) {
-            <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('flush')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='flush' ? 'bg-[#cfe0f4]' : ''">
+            <button data-testid="tenant-alert-flush-all" (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('flush')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='flush' ? 'bg-[#cfe0f4]' : ''">
               <img alt="scan" height="20" src="assets/images/shared/theme/bin.svg" width="20" class="category_report_tool-icon" />
             </button>
           }
           @if (licenseService.isMaintainer()) {
             <div class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
           }
-          <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('sidebar')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='sidebar' ? 'bg-[#cfe0f4]' : ''">
+          <button data-testid="tenant-alert-open-sidebar" (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('sidebar')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='sidebar' ? 'bg-[#cfe0f4]' : ''">
             <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" class="category_report_tool-icon" />
           </button>
         </div>
@@ -88,7 +88,7 @@
 
     <div class="category_report_alerts mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
       @for (item of filteredAlerts; track item) {
-        <div class="category_report_alert-card">
+        <div data-testid="tenant-alert-report-card" class="category_report_alert-card">
           <div class="category_report_alert-header">
             <div class="category_report_alert-card-top">
               <span class="category_report_flex" [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
@@ -178,7 +178,7 @@
           <div class="category_report_alert-footer">
             <div class="category_report_alert-divider"></div>
             <div class="category_report_alert-footer-buttons">
-              <div (click)="seeDetailReprot(item.id)" class="category_report_alert-btn">See Details</div>
+              <div data-testid="tenant-alert-report-see-details" (click)="seeDetailReprot(item.id)" class="category_report_alert-btn">See Details</div>
               <button #printBtn ngxPrint printSectionId="alertReport" [useExistingCss]="true" class="hidden">
               </button>
             </div>

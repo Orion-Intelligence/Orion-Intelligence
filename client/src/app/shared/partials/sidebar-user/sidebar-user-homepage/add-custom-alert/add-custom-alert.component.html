@@ -1,4 +1,4 @@
-<div class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
+<div data-testid="tenant-alert-modal" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
   <div class="ui-popup-shell relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] p-[30px] font-[Inter] max-[900px]:p-[18px]" @popupAnimation>
     <div>
       <div class="text-[24px] font-semibold leading-none">{{ heading }}</div>
@@ -14,14 +14,14 @@
       </button>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Title</label>
-      <input [(ngModel)]="alert.title" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter title" name="title" />
+      <input data-testid="tenant-alert-title" [(ngModel)]="alert.title" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter title" name="title" />
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Description</label>
-      <textarea [(ngModel)]="alert.description" class="min-h-[110px] w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" placeholder="Enter description" name="alert_description" rows="4"></textarea>
+      <textarea data-testid="tenant-alert-description" [(ngModel)]="alert.description" class="min-h-[110px] w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" placeholder="Enter description" name="alert_description" rows="4"></textarea>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Select IOC Type</label>
       <div class="relative">
-        <button type="button" class="flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" (click)="toggleIocDropdown($event)">
+        <button data-testid="tenant-alert-ioc-type-toggle" type="button" class="flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" (click)="toggleIocDropdown($event)">
           <span>{{ getIOCTypeLabel(alert.ioc_type!) }}</span>
           <i class="bi text-[12px] text-[#57718D]" [ngClass]="iocDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
         </button>
@@ -29,7 +29,7 @@
           <ul class="absolute left-0 right-0 z-20 mt-2 max-h-[250px] overflow-y-auto rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1 shadow-[0_6px_16px_rgba(0,0,0,0.15)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#888] [&::-webkit-scrollbar-thumb:hover]:bg-[#555]" (click)="$event.stopPropagation()">
             @for (item of allowedIocTypes; track item; let last = $last) {
               <li>
-                <button type="button" class="flex w-full items-center justify-between rounded-[6px] px-[10px] py-[8px] text-[14px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onIOCTypeChange(item.key)" [class]="alert.ioc_type === item.key ? 'bg-[var(--color-blue-820)] text-[var(--color-text1)]' : ''">
+                <button data-testid="tenant-alert-ioc-type-option" type="button" class="flex w-full items-center justify-between rounded-[6px] px-[10px] py-[8px] text-[14px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onIOCTypeChange(item.key)" [class]="alert.ioc_type === item.key ? 'bg-[var(--color-blue-820)] text-[var(--color-text1)]' : ''">
                   <span>{{ item.title }}</span>
                   @if (alert.ioc_type === item.key) {
                     <span>✓</span>
@@ -45,13 +45,13 @@
       </div>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Source</label>
-      <input [(ngModel)]="alert.source" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter source" name="source" />
+      <input data-testid="tenant-alert-source" [(ngModel)]="alert.source" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter source" name="source" />
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">URL</label>
-      <input [(ngModel)]="alert.url" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter url" name="url" />
+      <input data-testid="tenant-alert-url" [(ngModel)]="alert.url" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter url" name="url" />
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">IOC Value</label>
-      <input [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter IOC value" name="ioc_value" />
+      <input data-testid="tenant-alert-ioc-value" [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter IOC value" name="ioc_value" />
     </form>
     @if (formError) {
       <div class="mt-[8px] text-center">
@@ -64,7 +64,7 @@
 
     <div class="mt-[26px] flex items-center justify-between gap-[15px]">
       <button class="ui-alert-cancel-btn px-[24px] text-[14px]" (click)="cancleAlert(false)">Cancel</button>
-      <button class="h-[42px] rounded-[8px] bg-[#57A5EB] px-[24px] text-[14px] font-medium text-[#0e1626]" (click)="saveAlert()">
+      <button data-testid="tenant-alert-save" class="h-[42px] rounded-[8px] bg-[#57A5EB] px-[24px] text-[14px] font-medium text-[#0e1626]" (click)="saveAlert()">
         {{ edit ? 'Save Alert' : 'Add Alert' }}
       </button>
     </div>
