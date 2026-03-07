@@ -1,4 +1,5 @@
 import {
+  ensureDomainScannerModalOpen,
   openFirstReportAndGoBack,
   openHomepageAndSearch,
   searchInIocs,
@@ -7,6 +8,39 @@ import {
 } from './controllers/13-consolidated.controller';
 
 describe('Consolidated - IOC Basic Flow', () => {
+  const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
+  const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
+  const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'bbc.com', 'cnn.com'];
+  const DOMAIN_SCANNER_INPUT_SELECTOR = '[data-testid="domain-scanner-input"]';
+
+  const runDomainScannerFlow = () => {
+    cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    ensureDomainScannerModalOpen();
+    cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
+    cy.get(DOMAIN_SCANNER_INPUT_SELECTOR).scrollIntoView().should('be.visible').clear().type('abcderfghh');
+    cy.get('[data-testid="domain-scanner-search-subdomains"]').click();
+    cy.get('[data-testid="domain-scanner-search-subdomains"]', {timeout: 30000}).should('not.be.disabled');
+
+    DOMAIN_SCANNER_TEST_DOMAINS.forEach((domain) => {
+      cy.get(DOMAIN_SCANNER_INPUT_SELECTOR).scrollIntoView().should('be.visible').clear().type(domain);
+      cy.get('[data-testid="domain-scanner-search-subdomains"]').click();
+      cy.get('[data-testid="domain-scanner-search-subdomains"]', {timeout: 30000}).should('not.be.disabled');
+    });
+
+    cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click();
+    cy.get(DOMAIN_SCANNER_INPUT_SELECTOR).clear().type('1.1.1.1');
+    cy.get('[data-testid="domain-scanner-lookup-ip"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="domain-scanner-lookup-ip"]', {timeout: 30000}).should('not.be.disabled');
+
+    ensureDomainScannerModalOpen();
+    cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
+    ensureDomainScannerModalOpen();
+    cy.get(DOMAIN_SCANNER_INPUT_SELECTOR, {timeout: 30000}).should('be.visible').clear().type('example.com');
+    cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
+    cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').click('topLeft');
+  };
+
   const validateAllTelemetryTabs = () => {
     cy.get('div.sensor-tabs button.sensor-tab:visible', {timeout: 30000}).then(($tabs) => {
       const tabCount = $tabs.length;
@@ -506,5 +540,10 @@ describe('Consolidated - IOC Basic Flow', () => {
     searchInIocs('');
     clearSideFilters();
     runAdvancedFilterFlow();
+  });
+
+  it('opens domain scanner and runs Subdomains, IP Lookup, and Wayback scans', () => {
+    openHomepageAndSearch('{enter}');
+    runDomainScannerFlow();
   });
 });
