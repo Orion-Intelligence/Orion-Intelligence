@@ -109,7 +109,12 @@ async def test_search_dynamic_software(param: search_dynamic_crack_model = Body(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def test_search_dynamic_ip_scan(param: search_dynamic_crack_model = Body(...)):
+@test_routes.post(
+    "/api/urlscan/dns",
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def test_search_dynamic_ip_scan(param: DomainScanRequest = Body(...)):
     return _pending_or_api_mock("urlscan_ip", "urlscan_domain_iplookup.json")
 
 @test_routes.post(
