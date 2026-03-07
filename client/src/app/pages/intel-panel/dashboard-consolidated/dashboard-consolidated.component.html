@@ -38,13 +38,10 @@
             </ng-template>
 
             <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
-              <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-4 max-[640px]:p-3"
-                [attr.data-testid]="'consolidated-section-' + index.key.replace('_model', '')"
-                *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
+              <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-4 max-[640px]:p-3" [attr.data-testid]="'consolidated-section-' + index.key.replace('_model', '')" *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
                 <div class="flex items-center justify-between">
                   <span class="mb-[10px] block">
-                    <div class="text-sm font-semibold text-[var(--color-text1)]"
-                      [attr.data-testid]="'consolidated-section-title-' + index.key.replace('_model', '')">
+                    <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'consolidated-section-title-' + index.key.replace('_model', '')">
                       {{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}
                     </div>
                     <div [attr.data-testid]="'consolidated-section-count-' + index.key.replace('_model', '')" class="text-xs text-[var(--color-text4)]">Result count {{ pageCounts[index.key] || 0 }}</div>
