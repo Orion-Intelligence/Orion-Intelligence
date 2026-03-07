@@ -12,7 +12,7 @@
         </div>
 
         <div class="ml-auto flex items-center gap-[20px]">
-          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="flex cursor-pointer justify-center">
+          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="flex cursor-pointer justify-center" data-testid="open-cti-graph">
             <div class="pb-[10px] pl-[10px]">
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
@@ -119,6 +119,6 @@
   </ng-container>
 
   <div class="flex justify-center" *ngIf="isExpandAble && searchResults.length > 2">
-    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
   </div>
 </div>

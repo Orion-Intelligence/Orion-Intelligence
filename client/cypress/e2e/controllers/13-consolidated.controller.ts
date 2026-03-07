@@ -33,7 +33,32 @@ export function switchToIocsTab() {
 }
 
 export function searchInIocs(query: string) {
-  cy.get('[data-testid="ioc-basic-search-input"]', {timeout: 30000}).should('be.visible').clear().type(`${query}{enter}`);
+  cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).click({force: true});
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="side-filter-close"]:visible').length) {
+      cy.get('[data-testid="side-filter-close"]').first().click({force: true});
+    }
+  });
+  cy.scrollTo('top', {ensureScrollable: false});
+  cy.get('app-credentials-search-bar [data-testid="ioc-basic-search-input"]', {timeout: 30000})
+    .should('have.length.at.least', 1)
+    .then(($inputs) => {
+      const visible = $inputs.filter(':visible');
+      const target = visible.length ? visible[0] : $inputs[0];
+      cy.wrap(target)
+        .scrollIntoView()
+        .should('exist')
+        .click({force: true})
+        .type('{selectAll}{backspace}', {force: true});
+
+      if (query && query.length > 0) {
+        cy.wrap(target)
+          .type(query, {force: true, delay: 0})
+          .type('{enter}', {force: true});
+      } else {
+        cy.wrap(target).type('{enter}', {force: true});
+      }
+    });
 }
 
 export function toggleIocAdvanced() {
@@ -66,6 +91,12 @@ export function closeDomainScannerModalIfOpen() {
 export function openFirstReportAndGoBack() {
   cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().should('be.visible').click({force: true});
   cy.url({timeout: 30000}).should('include', '/dashboard/profile/consolidated');
-  cy.go('back');
-  cy.get('.ui-consolidated-main', {timeout: 30000}).should('exist');
+  cy.get('img[alt="Back"]', {timeout: 30000})
+    .filter(':visible')
+    .first()
+    .scrollIntoView()
+    .click({force: true});
+  cy.get('[data-testid="consolidated-tab-deep-search"]', {timeout: 30000})
+    .should('be.visible')
+    .click({force: true});
 }

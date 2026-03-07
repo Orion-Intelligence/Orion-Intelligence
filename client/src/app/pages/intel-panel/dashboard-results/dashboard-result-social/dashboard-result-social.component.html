@@ -14,7 +14,7 @@
         </div>
 
         <div class="ml-auto flex gap-[20px]">
-          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report">
+          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report" data-testid="open-cti-graph">
             <div class="p-[0_0_10px_10px]">
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
             </div>
@@ -92,7 +92,7 @@
   </div>
 
   <div class="flex justify-center" *ngIf="isExpandAble && searchResults.length > 2">
-    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed">
+    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">
       {{ isCollapsed ? 'See More' : 'See Less' }}
     </span>
   </div>

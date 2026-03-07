@@ -8,14 +8,14 @@
         </div>
 
         <div class="ml-auto flex gap-[20px]" *ngIf="!isMobileMode()">
-          <div *ngIf="!licenseService.isMaintainer() && (type === 'strategic' || type === 'general') && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/')); else elseBlock" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center">
+          <div *ngIf="!licenseService.isMaintainer() && (type === 'strategic' || type === 'general') && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/')); else elseBlock" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
             <div class="p-[0_0_10px_10px]">
               <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
             </div>
           </div>
 
           <ng-template #elseBlock>
-            <div *ngIf="type !== 'Strategic' && type !== 'general'" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center">
+            <div *ngIf="type !== 'Strategic' && type !== 'general'" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
               </div>
@@ -81,6 +81,6 @@
   </ng-container>
 
   <div class="flex justify-center pt-[4px]" *ngIf="isExpandAble && searchResults.length > 2">
-    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
   </div>
 </div>

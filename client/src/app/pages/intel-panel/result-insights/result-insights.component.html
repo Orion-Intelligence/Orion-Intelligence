@@ -1,6 +1,6 @@
 <div class="space-y-4">
-  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4">
-    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isKeywordExpanded')">
+  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-keyword">
+    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isKeywordExpanded')" data-testid="insights-toggle-keyword">
       <span class="text-sm font-semibold text-[var(--color-text1)]">Keyword insights</span>
       <div [attr.aria-label]="isSectionExpanded('isKeywordExpanded') ? 'Collapse' : 'Expand'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)]">
         <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isKeywordExpanded') }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
@@ -9,7 +9,7 @@
 
     <div class="mt-4 grid gap-3 sm:grid-cols-2" *ngIf="isSectionExpanded('isKeywordExpanded')">
       <ng-container *ngFor="let item of keywordData; let i = index">
-        <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3">
+        <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-keyword-item-' + i">
           <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ item.label }}</div>
         </div>
@@ -17,8 +17,8 @@
     </div>
   </div>
 
-  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4">
-    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isCoverageExpanded')">
+  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-coverage">
+    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isCoverageExpanded')" data-testid="insights-toggle-coverage">
       <span class="text-sm font-semibold text-[var(--color-text1)]">Results General Coverage</span>
       <div [attr.aria-label]="isSectionExpanded('isCoverageExpanded') ? 'Collapse' : 'Expand'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)]">
         <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isCoverageExpanded') }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
@@ -26,8 +26,8 @@
     </div>
 
     <div class="mt-4 grid gap-3 sm:grid-cols-2" *ngIf="isSectionExpanded('isCoverageExpanded')">
-      <ng-container *ngFor="let item of coverageData">
-        <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3">
+      <ng-container *ngFor="let item of coverageData; let i = index">
+        <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-coverage-item-' + i">
           <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
           <div class="flex items-center gap-2 text-xs text-[var(--color-text4)]">
             <span *ngIf="item.color" class="h-2.5 w-2.5 rounded-full" [ngClass]="coverageDotClass(item)"></span>
@@ -38,8 +38,8 @@
     </div>
   </div>
 
-  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" *ngIf="result_count>0">
-    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isThreatExpanded')">
+  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" *ngIf="result_count>0" data-testid="insights-section-threat-actor">
+    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isThreatExpanded')" data-testid="insights-toggle-threat-actor">
       <span class="text-sm font-semibold text-[var(--color-text1)]">Search in Threat Actor</span>
       <div [attr.aria-label]="isSectionExpanded('isThreatExpanded') ? 'Collapse' : 'Expand'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)]">
         <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isThreatExpanded') }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
@@ -49,18 +49,18 @@
     <div *ngIf="isSectionExpanded('isThreatExpanded')" class="mt-4 space-y-4">
       <div class="ui-consolidated-sub flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2">
         <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="magnifier" class="h-4 w-4">
-        <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" />
+        <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" data-testid="insights-threat-search-input" />
       </div>
 
       <div class="flex flex-wrap gap-2">
-        <label *ngFor="let option of filterOptions" class="ui-consolidated-sub flex items-center gap-2 rounded-full border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text3)]">
-          <input type="radio" name="filter" [checked]="selectedFilter === option" (change)="toggleFilter(option)" class="h-3.5 w-3.5 accent-[var(--color-blue-640)]" />
+        <label *ngFor="let option of filterOptions" class="ui-consolidated-sub flex items-center gap-2 rounded-full border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text3)]" [attr.data-testid]="'insights-threat-filter-' + (option | lowercase)">
+          <input type="radio" name="filter" [checked]="selectedFilter === option" (change)="toggleFilter(option)" class="h-3.5 w-3.5 accent-[var(--color-blue-640)]" [attr.data-testid]="'insights-threat-filter-radio-' + (option | lowercase)" />
           {{ option }}
         </label>
       </div>
 
       <div class="max-h-48 space-y-2 overflow-y-auto">
-        <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text3)]" *ngFor="let item of threatResults()">
+        <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text3)]" *ngFor="let item of threatResults(); let i = index" [attr.data-testid]="'insights-threat-item-' + i">
           {{ item }}
         </div>
       </div>
@@ -71,8 +71,8 @@
     </div>
   </div>
 
-  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" *ngIf="result_count>0">
-    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isUrlsExpanded')">
+  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" *ngIf="result_count>0" data-testid="insights-section-unique-urls">
+    <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isUrlsExpanded')" data-testid="insights-toggle-unique-urls">
       <span class="text-sm font-semibold text-[var(--color-text1)]">Unique URLs</span>
       <div [attr.aria-label]="isSectionExpanded('isUrlsExpanded') ? 'Collapse' : 'Expand'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)]">
         <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isUrlsExpanded') }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
@@ -80,7 +80,7 @@
     </div>
 
     <div class="mt-4 max-h-56 space-y-2 overflow-y-auto" *ngIf="isSectionExpanded('isUrlsExpanded')">
-      <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text3)]" *ngFor="let url of uniqueUrls">
+      <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text3)]" *ngFor="let url of uniqueUrls; let i = index" [attr.data-testid]="'insights-unique-url-item-' + i">
         <div class="flex items-center gap-2 text-sm text-[var(--color-text1)]">
           <span class="h-2.5 w-2.5 rounded-full" [ngClass]="statusDotClass(url.status)"></span>
           {{ url.title.length > 50 ? (url.title | slice: 0:50) + '…' : url.title }}
@@ -91,8 +91,8 @@
   </div>
 
   <div *ngFor="let section of dataSections">
-    <div *ngIf="section.data?.length" class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4">
-      <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection(section.key)">
+    <div *ngIf="section.data?.length" class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" [attr.data-testid]="'insights-section-' + section.key">
+      <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection(section.key)" [attr.data-testid]="'insights-toggle-' + section.key">
         <span class="text-sm font-semibold text-[var(--color-text1)]">{{ section.title }}</span>
         <div [attr.aria-label]="isSectionExpanded(section.key) ? 'Collapse' : 'Expand'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)]">
           <img [ngClass]="{ 'rotate-180': !isSectionExpanded(section.key) }" alt="toggle icon" class="transition" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
@@ -100,7 +100,7 @@
       </div>
 
       <div class="mt-4 max-h-56 space-y-2 overflow-y-auto" *ngIf="isSectionExpanded(section.key)">
-        <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text3)]" *ngFor="let item of section.data; let isLast = last">
+        <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text3)]" *ngFor="let item of section.data; let i = index; let isLast = last" [attr.data-testid]="'insights-item-' + section.key + '-' + i">
           <span class="text-[var(--color-text1)]">{{ item }}</span>
         </div>
       </div>
