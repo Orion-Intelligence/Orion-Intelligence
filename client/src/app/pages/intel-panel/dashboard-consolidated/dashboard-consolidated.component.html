@@ -47,7 +47,7 @@
                       [attr.data-testid]="'consolidated-section-title-' + index.key.replace('_model', '')">
                       {{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}
                     </div>
-                    <div class="text-xs text-[var(--color-text4)]">Result count {{ pageCounts[index.key] || 0 }}</div>
+                    <div [attr.data-testid]="'consolidated-section-count-' + index.key.replace('_model', '')" class="text-xs text-[var(--color-text4)]">Result count {{ pageCounts[index.key] || 0 }}</div>
                   </span>
                   <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-blue-640)]" *ngIf="!this.licenseService.isMaintainer()">
                     Explore

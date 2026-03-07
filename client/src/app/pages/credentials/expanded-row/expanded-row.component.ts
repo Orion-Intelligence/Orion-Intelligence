@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { NgClass, NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
@@ -13,8 +13,9 @@ type TelemetryGroup = {
   imports: [NgIf, NgForOf, NgClass, TitleCasePipe, TooltipDirective],
   templateUrl: './expanded-row.component.html',
 })
-export class ExpandedRowComponent implements OnChanges {
+export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private copiedTimer: any = null;
+  private telemetryGroupsCache: TelemetryGroup[] = [];
 
   activeTelemetryKey: string | null = null;
   matchedValues: string[] = [];
@@ -29,6 +30,12 @@ export class ExpandedRowComponent implements OnChanges {
   constructor(private rowHelper: ResultRowHelperService) {
   }
 
+  ngOnDestroy(): void {
+    if (this.copiedTimer) {
+      clearTimeout(this.copiedTimer);
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['mode'] || changes['item'] || changes['result'] || changes['index']) {
       this.activeTelemetryKey = null;
@@ -36,11 +43,17 @@ export class ExpandedRowComponent implements OnChanges {
       if (this.copiedTimer) {
         clearTimeout(this.copiedTimer);
       }
+    }
+    if (changes['mode'] || changes['item'] || changes['result']) {
+      this.rebuildTelemetryGroups();
+    }
+    if (changes['mode'] || changes['item'] || changes['result'] || changes['index'] || changes['searchQuery']) {
       this.parseSearchQuery();
     }
   }
 
   parseSearchQuery() {
+    this.matchedValues = [];
     if (!this.searchQuery) {
       return;
     }
@@ -54,7 +67,9 @@ export class ExpandedRowComponent implements OnChanges {
       if (tagMatch) {
         value = tagMatch[2].trim();
       }
-      this.matchedValues.push(value);
+      if (value) {
+        this.matchedValues.push(value);
+      }
     }
   }
 
@@ -73,7 +88,7 @@ export class ExpandedRowComponent implements OnChanges {
   }
 
   get rowTypeLabel(): string {
-    return this.indexValue === '1' ? 'Stealer Log' : 'Threats';
+    return this.mode === 'stealer' ? 'Stealer Log' : 'Threats';
   }
 
   get channelValue(): string {
@@ -91,7 +106,11 @@ export class ExpandedRowComponent implements OnChanges {
 
   get yearValue(): string {
     const d = this.item?.date || this.result?.m_update_date;
-    return d ? new Date(d).toISOString().slice(0, 7) : '-';
+    if (!d) {
+      return '-';
+    }
+    const parsed = new Date(d);
+    return Number.isNaN(parsed.getTime()) ? '-' : parsed.toISOString().slice(0, 7);
   }
 
   get fileTypeValue(): string {
@@ -118,7 +137,7 @@ export class ExpandedRowComponent implements OnChanges {
   }
 
   get telemetryGroups(): TelemetryGroup[] {
-    return this.mode === 'stealer' ? this.buildStealerGroups(this.item) : this.buildThreatGroups(this.result);
+    return this.telemetryGroupsCache;
   }
 
   get telemetryCount(): number {
@@ -256,6 +275,12 @@ export class ExpandedRowComponent implements OnChanges {
       clearTimeout(this.copiedTimer);
     }
     this.copiedTimer = setTimeout(() => (this.copiedKey = null), 1200);
+  }
+
+  private rebuildTelemetryGroups() {
+    this.telemetryGroupsCache = this.mode === 'stealer'
+      ? this.buildStealerGroups(this.item)
+      : this.buildThreatGroups(this.result);
   }
 
   private buildReportText(): string {

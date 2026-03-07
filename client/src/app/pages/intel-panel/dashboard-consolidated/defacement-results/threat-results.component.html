@@ -1,12 +1,12 @@
-<div class="ui-consolidated-main max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
+<div data-testid="defacement-report" class="ui-consolidated-main max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
   <div class="flex cursor-pointer items-center justify-between max-[640px]:flex-wrap max-[640px]:gap-[10px]" (click)="toggleResultsBarCollapse()">
-    <div class="flex text-[16px] font-bold text-[var(--color-text1)]">
+    <div data-testid="defacement-report-title" class="flex text-[16px] font-bold text-[var(--color-text1)]">
       {{ results_defacement ? 'IP Threat Report' : 'Stealer Log Report' }}
     </div>
 
     <div class="mr-[-10px] flex items-center gap-[20px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
       <ng-container *ngIf="results_defacement?.Result?.length && (threatTypeCounts | keyvalue).length > 0">
-        <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" *ngFor="let type of threatTypeCounts | keyvalue" (click)="onFilterTypeClick(type.key, $event)">
+        <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" *ngFor="let type of threatTypeCounts | keyvalue" (click)="onFilterTypeClick(type.key, $event)">
           {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
           <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
         </div>
@@ -19,7 +19,7 @@
         </div>
       </ng-container>
 
-      <div class="relative inline-block cursor-pointer before:absolute before:inset-[-10px_-15px] before:content-['']">
+      <div data-testid="defacement-report-toggle" class="relative inline-block cursor-pointer before:absolute before:inset-[-10px_-15px] before:content-['']">
         <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="p-[3px_8px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
       </div>
     </div>
@@ -28,10 +28,10 @@
   <ng-container *ngIf="isExpandable && results_defacement?.Result as defResults">
     <ng-container *ngFor="let item of defResults.slice(0, showLimitDefacement); let i = index; let last = last">
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
-        <div class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
+        <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
             <div class="min-w-0">
-              <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">IOC THREAT | {{ item.m_ioc_type[0] }}</b>
+              <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">IOC THREAT | {{ item.m_ioc_type[0] }}</b>
               <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
                 Date: <span class="font-[600] text-[var(--color-text2)]">{{ dateValue(item) }}</span>
               </div>

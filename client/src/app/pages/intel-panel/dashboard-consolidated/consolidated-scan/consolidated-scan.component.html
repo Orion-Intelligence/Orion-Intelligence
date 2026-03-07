@@ -1,8 +1,8 @@
-<section class="ui-consolidated-main mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] max-[640px]:gap-[12px] max-[640px]:p-[12px]" *ngIf="showUi && !isLoading">
+<section data-testid="consolidated-scan-section" class="ui-consolidated-main mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] max-[640px]:gap-[12px] max-[640px]:p-[12px]" *ngIf="showUi && !isLoading">
   <header class="w-full">
     <div class="flex w-full items-center justify-between gap-[12px]">
       <div class="min-w-0">
-        <h1 class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">Threats Scans Report: {{ targetLabel }}</h1>
+        <h1 data-testid="consolidated-scan-title" class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">Threats Scans Report: {{ targetLabel }}</h1>
 
         <div class="mt-[6px] inline-flex items-center gap-[7px] font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap max-[640px]:whitespace-normal" *ngIf="isProcessing || runningTypes.length">
           <span class="ui-scan-pulse-dot h-[7px] w-[7px] rounded-full bg-[#26B961]"></span>
@@ -46,7 +46,7 @@
   <div class="flex w-full items-stretch gap-[24px] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1200px]:flex-col" *ngIf="!isCollapsed">
     <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" *ngIf="domainResults.length" @scanAnimation>
       <div class="flex flex-col gap-[9px] p-[12px]">
-        <h2 class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Open Web Presence Scan</h2>
+        <h2 data-testid="consolidated-scan-openweb-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Open Web Presence Scan</h2>
 
         <div class="flex w-full flex-col gap-[8px]">
           <div class="flex w-full items-start justify-between rounded-[8px] max-[640px]:hidden">
@@ -63,7 +63,7 @@
               <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
             </div>
             <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">
-              <a class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/seo-scan', basic: '/dashboard/scanner/basic-scan', repo: '/dashboard/scanner/repository-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: '', page: 1, matchtype: 'or', domain: r.domain, scanType: r.scanType }" target="_blank" rel="noopener">
+              <a data-testid="consolidated-scan-openweb-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/seo-scan', basic: '/dashboard/scanner/basic-scan', repo: '/dashboard/scanner/repository-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: '', page: 1, matchtype: 'or', domain: r.domain, scanType: r.scanType }" target="_blank" rel="noopener">
                 Details
               </a>
             </div>
@@ -74,7 +74,7 @@
 
     <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" *ngIf="liveApiRows.length" @scanAnimation>
       <div class="flex flex-col gap-[9px] p-[12px]">
-        <h2 class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Active Threat Discovery/Live Api</h2>
+        <h2 data-testid="consolidated-scan-liveapi-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">Active Threat Discovery/Live Api</h2>
 
         <div class="flex w-full flex-col gap-[8px]">
           <div class="flex w-full items-start justify-between rounded-[8px] max-[640px]:hidden">
@@ -89,7 +89,7 @@
             </div>
             <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-full">{{ row.profile }}</div>
             <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
-              <a class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [href]="row.url || '#'" target="_blank">
+              <a data-testid="consolidated-scan-liveapi-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [href]="row.url || '#'" target="_blank">
                 Detail
               </a>
             </div>
