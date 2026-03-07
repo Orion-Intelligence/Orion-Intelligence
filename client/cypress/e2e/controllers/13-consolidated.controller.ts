@@ -1,20 +1,17 @@
-export function deleteAllEnabledIocAdvancedFilters() {
-  cy.get('[data-testid="ioc-adv-delete-filter"]').then(($allButtons) => {
-    const $enabledButtons = $allButtons.filter(':enabled');
-
-    if ($enabledButtons.length === 0) {
-      return;
-    }
-
-    cy.wrap($enabledButtons[0]).scrollIntoView().should('be.visible').click();
-    deleteAllEnabledIocAdvancedFilters();
-  });
-}
-
 const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
 const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'bbc.com', 'cnn.com'];
 const DOMAIN_SCANNER_INPUT_SELECTOR = '[data-testid="domain-scanner-input"]';
+
+function executeIocAdvancedSearch() {
+  cy.get('[data-testid="ioc-adv-execute"]', {timeout: 30000})
+    .filter(':visible')
+    .first()
+    .scrollIntoView()
+    .should('be.visible')
+    .and('not.be.disabled')
+    .click();
+}
 
 export function openHomepageAndSearch(query = '{enter}') {
   cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').click();
@@ -23,26 +20,22 @@ export function openHomepageAndSearch(query = '{enter}') {
 }
 
 export function switchToDeepSearchTab() {
-  cy.get('[data-testid="consolidated-tab-deep-search"]', {timeout: 30000}).should('be.visible').click({force: true});
-}
-
-export function searchInDeepSearch(query: string) {
-  cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).should('be.visible').clear().type(`${query}{enter}`);
+  cy.get('[data-testid="consolidated-tab-deep-search"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
 }
 
 export function switchToIocsTab() {
-  cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).should('be.visible').click({force: true});
+  cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
 }
 
 export function searchInIocs(query: string) {
-  cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).click({force: true});
+  cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().click();
   cy.get('[data-testid="side-filter-close"]', {timeout: 30000}).then(($closeButtons) => {
     const visibleClose = $closeButtons.filter(':visible').first();
     if (visibleClose.length) {
-      cy.wrap(visibleClose).click({force: true});
+      cy.wrap(visibleClose).scrollIntoView().click();
     }
   });
-  cy.scrollTo('top', {ensureScrollable: false});
+  cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
   cy.get('[data-testid="ioc-basic-search-input"]', {timeout: 30000})
     .should('have.length.at.least', 1)
     .then(($inputs) => {
@@ -51,21 +44,17 @@ export function searchInIocs(query: string) {
       cy.wrap(target)
         .scrollIntoView()
         .should('exist')
-        .click({force: true})
-        .type('{selectAll}{backspace}', {force: true});
+        .click()
+        .type('{selectAll}{backspace}');
 
       if (query && query.length > 0) {
         cy.wrap(target)
-          .type(query, {force: true, delay: 0})
-          .type('{enter}', {force: true});
+          .type(query, {delay: 0})
+          .type('{enter}');
       } else {
-        cy.wrap(target).type('{enter}', {force: true});
+        cy.wrap(target).type('{enter}');
       }
     });
-}
-
-export function toggleIocAdvanced() {
-  cy.get('[data-testid="ioc-advanced-toggle"]', {timeout: 30000}).should('be.visible').click({force: true});
 }
 
 export function ensureDomainScannerModalOpen() {
@@ -81,27 +70,18 @@ export function ensureDomainScannerModalOpen() {
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');
 }
 
-export function closeDomainScannerModalIfOpen() {
-  cy.get(`[data-testid="consolidated-open-domain-scanner"], ${DOMAIN_SCANNER_SELECTOR}`, {timeout: 30000}).then(($els) => {
-    const isModalVisible = $els.filter(`${DOMAIN_SCANNER_SELECTOR}:visible`).length > 0;
-    if (isModalVisible) {
-      cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: 30000}).should('be.visible').click('topLeft');
-      cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: 30000}).should('not.exist');
-    }
-  });
-}
-
 export function openFirstReportAndGoBack() {
-  cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().should('be.visible').click({force: true});
+  cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().should('be.visible').click();
   cy.url({timeout: 30000}).should('include', '/dashboard/profile/consolidated');
   cy.get('[data-testid="dashboard-header-back"]', {timeout: 30000})
     .filter(':visible')
     .first()
     .scrollIntoView()
-    .click({force: true});
+    .click();
   cy.get('[data-testid="consolidated-tab-deep-search"]', {timeout: 30000})
+    .scrollIntoView()
     .should('be.visible')
-    .click({force: true});
+    .click();
 }
 
 export function runDomainScannerFlow() {
@@ -132,29 +112,16 @@ export function runDomainScannerFlow() {
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').click('topLeft');
 }
 
-export function validateAllTelemetryTabs() {
-  cy.get('[data-testid="ioc-expanded-telemetry-tab"]:visible', {timeout: 30000}).then(($tabs) => {
-    const tabCount = $tabs.length;
-    expect(tabCount).to.be.greaterThan(0);
-
-    for (let i = 0; i < tabCount; i += 1) {
-      cy.get('[data-testid="ioc-expanded-telemetry-tab"]:visible').eq(i).click({force: true});
-      cy.get('[data-testid="ioc-expanded-telemetry-details"]:visible', {timeout: 30000}).should('be.visible');
-      cy.get('[data-testid="ioc-expanded-telemetry-details"] [data-testid="ioc-expanded-telemetry-value"]:visible', {timeout: 30000}).should('have.length.greaterThan', 0);
-    }
-  });
-}
-
 export function applyPasswordSchemeAndValidate() {
-  cy.get('[data-testid="ioc-open-password-scheme"]', {timeout: 30000}).first().click({force: true});
+  cy.get('[data-testid="ioc-open-password-scheme"]', {timeout: 30000}).first().scrollIntoView().click();
   cy.get('[data-testid="password-scheme-modal"]', {timeout: 30000}).should('be.visible');
   cy.get('[data-testid="password-scheme-title"]', {timeout: 30000}).should('contain.text', 'Password Scheme Filter');
 
-  cy.get('[data-testid="password-scheme-min-length"]', {timeout: 30000}).clear().type('8', {force: true});
-  cy.get('[data-testid="password-scheme-max-length"]', {timeout: 30000}).clear().type('24', {force: true});
-  cy.get('[data-testid="password-scheme-has-alphabets"]', {timeout: 30000}).check({force: true});
-  cy.get('[data-testid="password-scheme-has-numbers"]', {timeout: 30000}).check({force: true});
-  cy.get('[data-testid="password-scheme-search"]', {timeout: 30000}).click({force: true});
+  cy.get('[data-testid="password-scheme-min-length"]', {timeout: 30000}).scrollIntoView().clear().type('8');
+  cy.get('[data-testid="password-scheme-max-length"]', {timeout: 30000}).scrollIntoView().clear().type('24');
+  cy.get('[data-testid="password-scheme-has-alphabets"]', {timeout: 30000}).scrollIntoView().check();
+  cy.get('[data-testid="password-scheme-has-numbers"]', {timeout: 30000}).scrollIntoView().check();
+  cy.get('[data-testid="password-scheme-search"]', {timeout: 30000}).scrollIntoView().click();
   cy.get('[data-testid="password-scheme-modal"]', {timeout: 30000}).should('not.exist');
 
   cy.get('[data-testid="ioc-threat-table"]', {timeout: 30000}).scrollIntoView();
@@ -164,8 +131,8 @@ export function applyPasswordSchemeAndValidate() {
 export function openIocFilterPanel() {
   cy.log('Filter: scroll to top and open panel');
   cy.window().then((win) => win.console.log('Filter: scroll to top and open panel'));
-  cy.scrollTo('top', {ensureScrollable: false});
-  cy.get('[data-testid="side-filter-open"]', {timeout: 30000}).should('be.visible').click({force: true});
+  cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
+  cy.get('[data-testid="side-filter-open"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
   cy.get('[data-testid="side-filter-close"]', {timeout: 30000}).filter(':visible').first().should('be.visible');
 }
 
@@ -184,7 +151,7 @@ function moveDatePickerToMonth(targetLabel: string, attempts = 0): void {
     const targetDate = new Date(`${targetLabel} 1`);
     const goPrev = currentDate.getTime() > targetDate.getTime();
     const navSelector = goPrev ? '[data-testid="side-filter-date-prev-month"]' : '[data-testid="side-filter-date-next-month"]';
-    cy.get(navSelector, {timeout: 30000}).first().click({force: true});
+    cy.get(navSelector, {timeout: 30000}).first().scrollIntoView().click();
     moveDatePickerToMonth(targetLabel, attempts + 1);
   });
 }
@@ -193,24 +160,23 @@ export function applyDateRangeFilter(monthLabel: string, startDay: number, endDa
   cy.log(`Filter: applying date range ${monthLabel} (${startDay}-${endDay})`);
   cy.window().then((win) => win.console.log(`Filter: applying date range ${monthLabel} (${startDay}-${endDay})`));
   openIocFilterPanel();
-  cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click({force: true});
+  cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   moveDatePickerToMonth(monthLabel);
-  cy.get(`[data-testid="side-filter-date-day-${startDay}"]`, {timeout: 30000}).filter(':visible').first().click({force: true});
-  cy.get(`[data-testid="side-filter-date-day-${endDay}"]`, {timeout: 30000}).filter(':visible').first().click({force: true});
-  cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click({force: true});
+  cy.get(`[data-testid="side-filter-date-day-${startDay}"]`, {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get(`[data-testid="side-filter-date-day-${endDay}"]`, {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
 }
 
 export function clearSideFilters() {
   cy.log('Filter: clearing side filters before advanced flow');
   openIocFilterPanel();
-  cy.get('[data-testid="side-filter-reset"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click({force: true});
-  cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click({force: true});
+  cy.get('[data-testid="side-filter-reset"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
 }
 
 export function searchDeepFromTop(query: string) {
   cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
-  cy.scrollTo('top', {ensureScrollable: false});
-  cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).filter(':visible').first().clear({force: true}).type(`${query}{enter}`, {force: true});
+  cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().clear().type(`${query}{enter}`);
 }
 
 export function setAllInsightsExpanded(expand: boolean) {
@@ -218,7 +184,7 @@ export function setAllInsightsExpanded(expand: boolean) {
     cy.wrap($toggle).find('[aria-label]').first().invoke('attr', 'aria-label').then((ariaLabel) => {
       const isExpanded = (ariaLabel || '').toLowerCase().includes('collapse');
       if (expand ? !isExpanded : isExpanded) {
-        cy.wrap($toggle).scrollIntoView().click({force: true});
+        cy.wrap($toggle).scrollIntoView().click();
       }
     });
   });
@@ -228,41 +194,41 @@ export function ensureInsightSectionExpanded(toggleTestId: string) {
   cy.get(`[data-testid="${toggleTestId}"]`, {timeout: 30000}).find('[aria-label]').first().invoke('attr', 'aria-label').then((ariaLabel) => {
     const isExpanded = (ariaLabel || '').toLowerCase().includes('collapse');
     if (!isExpanded) {
-      cy.get(`[data-testid="${toggleTestId}"]`).scrollIntoView().click({force: true});
+      cy.get(`[data-testid="${toggleTestId}"]`).scrollIntoView().click();
     }
   });
 }
 
 export function runAdvancedFilterFlow() {
   cy.log('Advanced: open and test real/fake filters with add/delete');
-  cy.scrollTo('top', {ensureScrollable: false});
+  cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
 
   cy.get('[data-testid="ioc-adv-row"], [data-testid="ioc-basic-search-input"]', {timeout: 30000}).then(($els) => {
     const hasVisibleAdvancedRow = $els.filter('[data-testid="ioc-adv-row"]:visible').length > 0;
     if (!hasVisibleAdvancedRow) {
-      cy.get('[data-testid="ioc-advanced-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click({force: true});
+      cy.get('[data-testid="ioc-advanced-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
     }
   });
   cy.get('[data-testid="ioc-adv-row"]', {timeout: 30000}).filter(':visible').should('have.length.at.least', 1);
 
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
-    cy.get('[data-testid="ioc-adv-tag-select"]').select('m_email', {force: true});
-    cy.get('[data-testid="ioc-adv-value-input"]').clear({force: true}).type('ydt.sja@gail.ccmm', {force: true});
+    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
+    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('ydt.sja@gail.ccmm');
   });
-  cy.get('[data-testid="ioc-adv-execute"]', {timeout: 30000}).filter(':visible').first().click({force: true});
+  executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000}).find('[data-testid="ioc-stealer-row"]', {timeout: 30000}).should('have.length.greaterThan', 0);
 
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
-    cy.get('[data-testid="ioc-adv-add-filter"]').click({force: true});
+    cy.get('[data-testid="ioc-adv-add-filter"]').scrollIntoView().click();
   });
   cy.get('[data-testid="ioc-adv-row"]', {timeout: 30000}).filter(':visible').should('have.length.at.least', 2);
 
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
-    cy.get('[data-testid="ioc-adv-operator-select"]').select('&&', {force: true});
-    cy.get('[data-testid="ioc-adv-tag-select"]').select('m_email', {force: true});
-    cy.get('[data-testid="ioc-adv-value-input"]').clear({force: true}).type('fake-no-result-value-xyz@gmail.com', {force: true});
+    cy.get('[data-testid="ioc-adv-operator-select"]').scrollIntoView().select('&&');
+    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
+    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('fake-no-result-value-xyz@gmail.com');
   });
-  cy.get('[data-testid="ioc-adv-execute"]', {timeout: 30000}).filter(':visible').first().click({force: true});
+  executeIocAdvancedSearch();
 
   cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000}).should(($shell) => {
     const rowCount = $shell.find('[data-testid="ioc-stealer-row"]').length;
@@ -271,13 +237,13 @@ export function runAdvancedFilterFlow() {
   });
 
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
-    cy.get('[data-testid="ioc-adv-delete-filter"]').click({force: true});
+    cy.get('[data-testid="ioc-adv-delete-filter"]').scrollIntoView().click();
   });
-  cy.get('[data-testid="ioc-adv-execute"]', {timeout: 30000}).filter(':visible').first().click({force: true});
+  executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
   cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000}).find('[data-testid="ioc-stealer-row"]', {timeout: 30000}).should('have.length.greaterThan', 0);
 
-  cy.get('[data-testid="ioc-advanced-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click({force: true});
+  cy.get('[data-testid="ioc-advanced-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="ioc-adv-row"]:visible', {timeout: 30000}).should('have.length', 0);
   cy.get('[data-testid="ioc-basic-search-input"]', {timeout: 30000}).filter(':visible').first().should('be.visible');
 }

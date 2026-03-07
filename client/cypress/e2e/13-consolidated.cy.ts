@@ -47,7 +47,8 @@ describe('Consolidated - IOC Basic Flow', () => {
         if (!isExpanded) {
           cy.wrap($icon)
             .closest('[data-testid="defacement-report-toggle"]')
-            .click({force: true});
+            .scrollIntoView()
+            .click();
         }
       });
 
@@ -67,13 +68,13 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="defacement-report-toggle"]', {timeout: 30000})
       .first()
       .scrollIntoView()
-      .click({force: true});
+      .click();
     cy.get('[data-testid="defacement-report-card-title"]', {timeout: 30000}).should('not.exist');
 
     cy.get('[data-testid="defacement-report-toggle"]', {timeout: 30000})
       .first()
       .scrollIntoView()
-      .click({force: true});
+      .click();
     cy.get('[data-testid="defacement-report-card-title"]', {timeout: 30000}).should('be.visible');
 
     cy.get('[data-testid="insights-section-keyword"]', {timeout: 30000}).should('be.visible');
@@ -95,19 +96,21 @@ describe('Consolidated - IOC Basic Flow', () => {
       const keyword = (firstItemText.split(/\s+/).find((part) => part.length >= 3) || 'data').toLowerCase();
 
       cy.get('[data-testid="insights-threat-search-input"]', {timeout: 30000})
-        .clear({force: true})
-        .type(keyword, {force: true});
+        .scrollIntoView()
+        .clear()
+        .type(keyword);
       cy.get('[data-testid="insights-section-threat-actor"] [data-testid^="insights-threat-item-"]', {timeout: 30000}).should(($after) => {
         expect($after.length).to.be.greaterThan(0);
         expect($after.length).to.be.at.most(beforeCount);
       });
 
       cy.get('[data-testid="insights-threat-search-input"]', {timeout: 30000})
-        .clear({force: true})
-        .type('zzzzzzzzzz-no-match', {force: true});
+        .scrollIntoView()
+        .clear()
+        .type('zzzzzzzzzz-no-match');
       cy.get('[data-testid="insights-section-threat-actor"] [data-testid^="insights-threat-item-"]', {timeout: 30000}).should('have.length', 0);
 
-      cy.get('[data-testid="insights-threat-search-input"]', {timeout: 30000}).clear({force: true});
+      cy.get('[data-testid="insights-threat-search-input"]', {timeout: 30000}).scrollIntoView().clear();
     });
 
     consolidatedSections.forEach((sectionId) => {
@@ -127,7 +130,7 @@ describe('Consolidated - IOC Basic Flow', () => {
               .filter(':visible')
               .first()
               .scrollIntoView()
-              .click({force: true});
+              .click();
 
             cy.get('[data-testid="result-card"]', {timeout: 30000}).then(($cardsAfterExpand) => {
               const expanded = $cardsAfterExpand.length;
@@ -144,7 +147,7 @@ describe('Consolidated - IOC Basic Flow', () => {
                       .filter(':visible')
                       .first()
                       .scrollIntoView()
-                      .click({force: true});
+                      .click();
                     cy.get('[data-testid="result-card"]', {timeout: 30000}).its('length').should('be.at.most', expanded);
                   }
                 });
@@ -154,7 +157,19 @@ describe('Consolidated - IOC Basic Flow', () => {
       });
     });
 
-    cy.scrollTo('top', {ensureScrollable: false});
+    cy.get('[data-testid="side-filter-open"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="side-filter-close"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
+    applyDateRangeFilter('January 2026', 13, 16);
+    cy.get('[data-testid="result-card"]', {timeout: 30000}).should('exist');
+    clearSideFilters();
+    cy.get('[data-testid="result-card"]', {timeout: 30000}).should('exist');
+    cy.get('[data-testid="side-filter-open"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="side-filter-close"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
+    applyDateRangeFilter('March 2026', 1, 2);
+    clearSideFilters();
+    cy.get('[data-testid="result-card"]', {timeout: 30000}).should('exist');
+
+    cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
     searchDeepFromTop('example.com');
 
     cy.get('[data-testid="consolidated-scan-section"]', {timeout: 60000}).should('be.visible');
@@ -169,20 +184,21 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="consolidated-scan-openweb-detail"]', {timeout: 30000})
       .first()
       .invoke('removeAttr', 'target')
-      .click({force: true});
+      .scrollIntoView()
+      .click();
     cy.url({timeout: 30000}).should('include', '/dashboard/scanner/');
     openHomepageAndSearch('{enter}');
     switchToDeepSearchTab();
-    cy.scrollTo('top', {ensureScrollable: false});
+    cy.get('[data-testid="dashboard-body"]', {timeout: 30000}).scrollTo('top', {ensureScrollable: false});
     searchDeepFromTop('example.com');
     cy.get('[data-testid="consolidated-scan-section"]', {timeout: 60000}).should('be.visible');
 
     cy.get('[data-testid="consolidated-section-social"]', {timeout: 30000}).scrollIntoView().should('be.visible');
     openFirstReportAndGoBack();
 
-    cy.get('[data-testid="side-filter-open"]', {timeout: 30000}).scrollIntoView().click({force: true});
-    cy.get('[data-testid="side-filter-select-network"]', {timeout: 30000}).select('4: clearnet', {force: true});
-    cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).click({force: true});
+    cy.get('[data-testid="side-filter-open"]', {timeout: 30000}).scrollIntoView().click();
+    cy.get('[data-testid="side-filter-select-network"]', {timeout: 30000}).scrollIntoView().select('4: clearnet');
+    cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).scrollIntoView().click();
     cy.get('[data-testid="result-card"]', {timeout: 30000}).should('have.length.greaterThan', 0);
     cy.get('[data-testid="result-card"]', {timeout: 30000}).then(($cards) => {
       const cardWithNetwork = [...$cards].find((el) => (el.textContent || '').includes('Network:'));
@@ -210,7 +226,7 @@ describe('Consolidated - IOC Basic Flow', () => {
               .scrollIntoView()
               .find('[data-testid="ioc-stealer-row-toggle"]')
               .first()
-              .click({force: true});
+              .click();
           }
         });
       });
@@ -227,7 +243,7 @@ describe('Consolidated - IOC Basic Flow', () => {
               .scrollIntoView()
               .find('[data-testid="ioc-threat-row-toggle"]')
               .first()
-              .click({force: true});
+              .click();
           }
         });
       });
@@ -238,7 +254,8 @@ describe('Consolidated - IOC Basic Flow', () => {
       .first()
       .find('[data-testid="ioc-stealer-row-toggle"]')
       .first()
-      .click({force: true});
+      .scrollIntoView()
+      .click();
     cy.get('[data-testid="ioc-expanded-email-value"]', {timeout: 30000})
       .filter(':visible')
       .should('have.length.greaterThan', 0)
@@ -251,17 +268,19 @@ describe('Consolidated - IOC Basic Flow', () => {
       .first()
       .find('[data-testid="ioc-threat-row-toggle"]')
       .first()
-      .click({force: true});
+      .scrollIntoView()
+      .click();
     cy.get('[data-testid="ioc-expanded-telemetry-title"]', {timeout: 30000})
       .filter(':visible')
       .should('have.length.greaterThan', 0);
 
-    cy.get('[data-testid="ioc-download-results"]', {timeout: 30000}).first().click({force: true});
+    cy.get('[data-testid="ioc-download-results"]', {timeout: 30000}).first().scrollIntoView().click();
     applyPasswordSchemeAndValidate();
 
     cy.get('[data-testid="ioc-basic-tag-m_email"]', {timeout: 30000})
+      .scrollIntoView()
       .should('be.visible')
-      .click({force: true});
+      .click();
     searchInIocs('abc');
     cy.get('[data-testid="ioc-basic-error"]', {timeout: 30000}).should('be.visible');
     cy.get('[data-testid="ioc-stealer-table"]', {timeout: 30000})
