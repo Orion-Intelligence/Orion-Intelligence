@@ -1,7 +1,7 @@
 import 'cypress-axe';
 import "./commands";
 
-if (Cypress.env("coverage")) {
+if (Cypress.expose("coverage")) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("@cypress/code-coverage/support");
 }

@@ -1,0 +1,14 @@
+[run]
+branch = True
+parallel = True
+source =
+    orion
+
+[report]
+omit =
+    */static/*
+    */migrations/*
+    */test_*.py
+    */tests/*
+    */__pycache__/*
+

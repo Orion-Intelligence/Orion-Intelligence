@@ -7,6 +7,7 @@ const isCi =
     process.env["GITLAB_CI"] === "true";
 
 export default defineConfig({
+    allowCypressEnv: false,
     env: {
         coverage: isCi,
         language: "en",
@@ -64,6 +65,23 @@ export default defineConfig({
             "Group of questions",
         ],
         takeScreenshots: false,
+    },
+    expose: {
+        coverage: isCi,
+        TEST_DATA: {
+            stealer_ioc_email: "nora.keen@samplemail.test",
+            stealer_upgrade_name: "Avery Stone",
+            stealer_upgrade_email: "avery.stone@samplemail.test",
+            cti_social_username: "orion_demo_actor",
+            filter_email: "filters.runner@samplemail.test",
+            consolidated_ioc_email: "mila.frost@samplemail.test",
+            consolidated_advanced_email: "kai.rivera@samplemail.test",
+            consolidated_domain_query: "inbox.test",
+            scans_email_breach: "elena.pierce@samplemail.test",
+            scans_social_username: "atlasnode",
+            scans_wanted_name: "Mason Hale",
+            support_email: "support.agent@samplemail.test",
+        },
     },
     e2e: {
         specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",

@@ -1,4 +1,4 @@
-export const TEST_DATA = Cypress.env('TEST_DATA') || {};
+export const TEST_DATA = Cypress.expose('TEST_DATA') || {};
 
 export const ENTITY_FILTERS: [string, string][] = [
   ['Phone Numbers', '+923001234567'],

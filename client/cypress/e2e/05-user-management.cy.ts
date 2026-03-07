@@ -1,7 +1,7 @@
 import {addUser, deleteFirstUser, loginAndClickSidebar, ManagedUser, openUsersList} from './controllers/05-user-management.controller';
 
-const testUsers = Cypress.env('TEST_USERS') || {};
-const testData = Cypress.env('TEST_DATA') || {};
+let testUsers: any = {};
+let testData: any = {};
 const CREATE_USERS: ManagedUser[] = [
   {username: 'testing1', email: 'a@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free']},
   {username: 'testing2', email: 'b@hotmail.com', password: '1qaz!QAZ', role: 'Analyst', licenses: ['Free', 'OSINT Basic']},
@@ -11,6 +11,13 @@ const CREATE_USERS: ManagedUser[] = [
 ];
 
 describe('Orion Intelligence - User Management Creation Flow', () => {
+  before(() => {
+    cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
+      testUsers = TEST_USERS || {};
+      testData = TEST_DATA || {};
+    });
+  });
+
   after(() => {
     cy.logout();
   });

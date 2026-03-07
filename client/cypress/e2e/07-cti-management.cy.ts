@@ -1,9 +1,12 @@
 import {openAndAssertReportModal, visitCtiGraph, visitSocialGraph, waitForToolbarSearchReady, waitForCtiGraphReady} from './controllers/07-cti-management.controller';
 
-const testData = Cypress.env('TEST_DATA') || {};
+let testData: any = {};
 
 describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
   before(() => {
+    cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
+      testData = TEST_DATA || {};
+    });
     cy.loginAsAdmin();
   });
 
@@ -12,9 +15,11 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.clearLocalStorage();
     cy.visit('/login');
 
-    cy.get('[data-testid="login-user"]', {timeout: 20000}).clear().type(Cypress.env('ADMIN_USERNAME'));
-    cy.get('[data-testid="login-pass"]', {timeout: 20000}).clear().type(Cypress.env('ADMIN_PASSWORD'), {log: false});
-    cy.get('[data-testid="login-button"]').click();
+    cy.env(['ADMIN_USERNAME', 'ADMIN_PASSWORD']).then(({ADMIN_USERNAME, ADMIN_PASSWORD}) => {
+      cy.get('[data-testid="login-user"]', {timeout: 20000}).clear().type(ADMIN_USERNAME);
+      cy.get('[data-testid="login-pass"]', {timeout: 20000}).clear().type(ADMIN_PASSWORD, {log: false});
+      cy.get('[data-testid="login-button"]').click();
+    });
 
     cy.location('pathname', {timeout: 30000}).should('include', '/dashboard');
   });

@@ -1,7 +1,7 @@
 import {DOMAIN_SCANNER_TEST_DOMAINS} from '../support/constants';
 import {deleteAllEnabledIocAdvancedFilters} from './controllers/13-consolidated.controller';
 
-const testData = Cypress.env('TEST_DATA') || {};
+let testData: any = {};
 const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
 
@@ -19,6 +19,12 @@ const ensureDomainScannerModalOpen = () => {
 };
 
 describe('Consolidated - IOC Advanced Builder Flow', () => {
+  before(() => {
+    cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
+      testData = TEST_DATA || {};
+    });
+  });
+
   beforeEach(() => {
     cy.loginAsAdmin();
   });

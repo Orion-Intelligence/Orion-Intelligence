@@ -82,7 +82,11 @@ jobs:
           cd "${{ steps.compose_loc.outputs.dir }}"
           python3 - <<'PY'
           import os, pathlib
-          pathlib.Path(".env").write_text(os.environ["ENV_FILE"], encoding="utf-8")
+          p = pathlib.Path(".env")
+          p.write_text(os.environ["ENV_FILE"], encoding="utf-8")
+          with p.open("a", encoding="utf-8") as fp:
+            fp.write("\nCOVERAGE_PROCESS_START=/app/.coveragerc\n")
+            fp.write("COVERAGE_FILE=/app/.coverage\n")
           PY
           test -s .env
 
@@ -124,12 +128,31 @@ jobs:
           set -euo pipefail
           test -s client/coverage/lcov.info
 
+      - name: Generate backend coverage report
+        run: |
+          set -euo pipefail
+          docker exec trusted-web-main sh -lc '
+            set -e
+            coverage combine || true
+            coverage xml -o /tmp/backend-coverage.xml
+            coverage report || true
+          '
+          docker cp trusted-web-main:/tmp/backend-coverage.xml backend/coverage.xml
+          test -s backend/coverage.xml
+
       - name: Upload frontend coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: client/coverage/lcov.info
           language: TypeScript
+
+      - name: Upload backend coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: backend/coverage.xml
+          language: Python
 
       - if: always()
         uses: actions/upload-artifact@v4
@@ -138,6 +161,7 @@ jobs:
           path: |
             client/cypress/screenshots/
             client/cypress/videos/
+            backend/coverage.xml
           retention-days: 7
 
       - if: always()

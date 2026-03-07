@@ -1,15 +1,19 @@
-const testUsers = Cypress.env('TEST_USERS') || {};
 const defaultUserKey = 'testing4';
-const defaultUser = testUsers[defaultUserKey] || {};
-const resetEmail = Cypress.env('RESET_PASSWORD_EMAIL') || 'd@hotmail.com';
-const newPassword = Cypress.env('NEW_PASSWORD');
-
-if (!defaultUser?.username || !defaultUser?.password || !resetEmail || !newPassword) {
-    throw new Error('Missing required account/password env values in cypress.config.ts');
-}
+let defaultUser: any = {};
+let resetEmail = 'd@hotmail.com';
+let newPassword: string | undefined;
 
 describe('Orion Intelligence - Account Settings and Password Reset Flow', () => {
     before(() => {
+        cy.env(['TEST_USERS', 'RESET_PASSWORD_EMAIL', 'NEW_PASSWORD']).then(({TEST_USERS, RESET_PASSWORD_EMAIL, NEW_PASSWORD}) => {
+            const testUsers = TEST_USERS || {};
+            defaultUser = testUsers[defaultUserKey] || {};
+            resetEmail = RESET_PASSWORD_EMAIL || 'd@hotmail.com';
+            newPassword = NEW_PASSWORD;
+            if (!defaultUser?.username || !defaultUser?.password || !resetEmail || !newPassword) {
+                throw new Error('Missing required account/password env values in cypress.config.ts');
+            }
+        });
         cy.loginAsTest1();
     });
 

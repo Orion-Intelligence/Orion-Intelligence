@@ -1,5 +1,11 @@
 describe('Support - Help And Support Form Flow', () => {
-  const testData = Cypress.env('TEST_DATA') || {};
+  let testData: any = {};
+
+  before(() => {
+    cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
+      testData = TEST_DATA || {};
+    });
+  });
 
   beforeEach(() => {
     cy.loginAsAdmin();

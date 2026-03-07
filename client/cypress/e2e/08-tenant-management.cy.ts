@@ -1,12 +1,18 @@
 import {addIOCForAllTabs, approveAllTenants, openManageIOCs, openTenantsPage, waitForBlockingOverlayToClose} from './controllers/08-tenant-management.controller';
 
 describe('Tenant Management - End-to-End Provisioning Flow', () => {
-  const tenant = Cypress.env('TENANT_ACCOUNT');
-  const tenantSubUser = Cypress.env('TENANT_SUB_USER');
+  let tenant: any;
+  let tenantSubUser: any;
 
-  if (!tenant?.username || !tenant?.email || !tenant?.password || !tenantSubUser?.username || !tenantSubUser?.email || !tenantSubUser?.password) {
-    throw new Error('Missing TENANT_ACCOUNT or TENANT_SUB_USER in cypress.config.ts');
-  }
+  before(() => {
+    cy.env(['TENANT_ACCOUNT', 'TENANT_SUB_USER']).then(({TENANT_ACCOUNT, TENANT_SUB_USER}) => {
+      tenant = TENANT_ACCOUNT;
+      tenantSubUser = TENANT_SUB_USER;
+      if (!tenant?.username || !tenant?.email || !tenant?.password || !tenantSubUser?.username || !tenantSubUser?.email || !tenantSubUser?.password) {
+        throw new Error('Missing TENANT_ACCOUNT or TENANT_SUB_USER in cypress.config.ts');
+      }
+    });
+  });
 
   after(() => {
     cy.logout();
