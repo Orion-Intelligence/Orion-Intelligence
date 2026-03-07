@@ -1,0 +1,14 @@
+{
+  "usernames": ["example_user"],
+  "platform": "instagram",
+  "max_followers": 50,
+  "max_following": 50,
+  "targets": [
+    {
+      "usernames": ["example_user", "second_user"],
+      "platform": "instagram",
+      "max_following": 25,
+      "max_followers": 25
+    }
+  ]
+}

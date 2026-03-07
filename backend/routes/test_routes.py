@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from fastapi import APIRouter, Body, Depends, UploadFile, File, Query
+from fastapi import APIRouter, Body, Depends, UploadFile, File, Query, HTTPException
 from configs.app_dependency import license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
@@ -59,10 +59,16 @@ def _pending_or_dynamic_scan(scan_type: str):
     return _load_api_mock(filename)
 
 
+def require_testing_enabled():
+    if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
+        raise HTTPException(status_code=403, detail="Test routes are disabled")
+    return True
+
+
 test_routes = APIRouter(
     dependencies=[
         Depends(status_required([UserStatus.ACTIVE])),
-        Depends(lambda: env_handler.get_instance().env("TESTING_ENABLED", "0") == "1"),
+        Depends(require_testing_enabled),
     ]
 )
 

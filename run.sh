@@ -44,7 +44,7 @@ client_build() {
 }
 
 use_compose_file() {
-    if [ "$1" = "-t" ]; then
+    if [ "$1" = "-t" ] || [ "$1" = "-tb" ]; then
         COMPOSE_FILE="docker-compose-testing.yml"
     elif [ "$1" = "production" ]; then
         COMPOSE_FILE="docker-compose-production.yml"
@@ -62,10 +62,29 @@ wait_for_server() {
 }
 
 wait_for_test_service() {
-    local url="http://127.0.0.1:8080"
-    until curl -s -o /dev/null "$url"; do
+    local url="http://127.0.0.1:8080/api/public"
+    until curl -fsS -o /dev/null "$url"; do
         sleep 2
     done
+}
+
+run_backend_tests_protected() {
+    if [ "${SKIP_BACKEND_TESTS:-0}" = "1" ]; then
+        echo "Skipping backend tests because SKIP_BACKEND_TESTS=1"
+        return 0
+    fi
+
+    local test_timeout="${BACKEND_TEST_TIMEOUT:-1800}"
+    local pytest_cmd='cd /app && python -m pytest -q tests --maxfail=1 --disable-warnings'
+
+    echo "Running backend tests in isolated protected test container..."
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$test_timeout" docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" run --rm --no-deps -T \
+            -e TESTING_ENABLED=1 -e PYTHONPATH=/app web sh -lc "$pytest_cmd"
+    else
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" run --rm --no-deps -T \
+            -e TESTING_ENABLED=1 -e PYTHONPATH=/app web sh -lc "$pytest_cmd"
+    fi
 }
 
 run_test_task() {
@@ -77,7 +96,7 @@ run_test_task() {
 
 set_testing_enabled() {
     sed -i '/^TESTING_ENABLED=/d' "$ENV_FILE" 2>/dev/null || true
-    if [ "$1" = "-t" ]; then
+    if [ "$1" = "-t" ] || [ "$1" = "-tb" ]; then
         echo 'TESTING_ENABLED="1"' >> "$ENV_FILE"
     else
         echo 'TESTING_ENABLED="0"' >> "$ENV_FILE"
@@ -107,6 +126,11 @@ if [ "$COMMAND" = "build" ]; then
             client_build "-t"
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "-t"
+            ;;
+        -tb)
+            client_build "-t"
+            cp nginx/nginx-dev.conf nginx/nginx.conf
+            use_compose_file "-tb"
             ;;
         -c)
             client_build "$FLAG"
@@ -151,6 +175,10 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server
 fi
 
-if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-t" ]; then
+if [ "$COMMAND" = "build" ] && { [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then
     wait_for_test_service
+fi
+
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-tb" ]; then
+    run_backend_tests_protected
 fi
