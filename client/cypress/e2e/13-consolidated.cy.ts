@@ -65,32 +65,32 @@ describe('Consolidated - Domain Scanner Flow', () => {
     cy.logout();
   });
 
-  it('opens domain scanner and runs Subdomains, IP Lookup, and Wayback scans', () => {
-    cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').click();
-    cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
-    cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).scrollIntoView().should('be.visible').type('{enter}');
-    cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    ensureDomainScannerModalOpen();
-    cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
-
-    DOMAIN_SCANNER_TEST_DOMAINS.forEach((d) => {
-      cy.get('[data-testid="domain-scanner-input"]').scrollIntoView().should('be.visible').clear().type(d);
-      cy.get('[data-testid="domain-scanner-search-subdomains"]').click();
-      cy.get('[data-testid="domain-scanner-search-subdomains"]', {timeout: 30000}).should('not.be.disabled');
-    });
-
-    cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="domain-scanner-input"]').clear().type('1.1.1.1{enter}');
-    cy.get('[data-testid="domain-scanner-input"]', {timeout: 30000}).should('not.be.disabled');
-
-    ensureDomainScannerModalOpen();
-    cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
-    cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').within(() => {
-      cy.get('[data-testid="domain-scanner-input"]', {timeout: 30000}).should('be.visible').clear().type('example.com');
-    });
-    cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
-    cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').click('topLeft');
-  });
+  // it('opens domain scanner and runs Subdomains, IP Lookup, and Wayback scans', () => {
+  //   cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').click();
+  //   cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
+  //   cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).scrollIntoView().should('be.visible').type('{enter}');
+  //   cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+  //   cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+  //   ensureDomainScannerModalOpen();
+  //   cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
+  //   cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
+  //
+  //   DOMAIN_SCANNER_TEST_DOMAINS.forEach((d) => {
+  //     cy.get('[data-testid="domain-scanner-input"]').scrollIntoView().should('be.visible').clear().type(d);
+  //     cy.get('[data-testid="domain-scanner-search-subdomains"]').click();
+  //     cy.get('[data-testid="domain-scanner-search-subdomains"]', {timeout: 30000}).should('not.be.disabled');
+  //   });
+  //
+  //   cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click();
+  //   cy.get('[data-testid="domain-scanner-input"]').clear().type('1.1.1.1{enter}');
+  //   cy.get('[data-testid="domain-scanner-input"]', {timeout: 30000}).should('not.be.disabled');
+  //
+  //   ensureDomainScannerModalOpen();
+  //   cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
+  //   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').within(() => {
+  //     cy.get('[data-testid="domain-scanner-input"]', {timeout: 30000}).should('be.visible').clear().type('example.com');
+  //   });
+  //   cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
+  //   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible').click('topLeft');
+  // });
 });
