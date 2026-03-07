@@ -165,6 +165,15 @@ async def test_parse_subdomains(payload: DomainScanRequest):
     return _pending_or_dynamic_scan(payload.scanType)
 
 @test_routes.post(
+    "/api/urlscan/wayback",
+    dependencies=[Depends(
+        role_required(
+            [user_role.ADMIN, user_role.DEMO,user_role.MEMBER, user_role.ANALYST])), Depends(limiter_dependency),
+        Depends(license_required("scanning")), ], )
+async def test_parse_wayback(payload: DomainScanRequest):
+    return _pending_or_dynamic_scan(payload.scanType)
+
+@test_routes.post(
     "/api/ioc/extract",
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
