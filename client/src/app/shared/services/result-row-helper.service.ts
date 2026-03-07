@@ -61,9 +61,7 @@ export class ResultRowHelperService {
     try {
       const ta = document.createElement('textarea');
       ta.value = value;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      ta.style.top = '0';
+      ta.className = 'fixed -left-[9999px] top-0';
       ta.setAttribute('readonly', '');
       document.body.appendChild(ta);
       ta.select();

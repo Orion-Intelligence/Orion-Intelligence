@@ -69,9 +69,10 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
       this.showTimeout = null;
     }
     if (this.tooltip) {
-      this.renderer.setStyle(this.tooltip, 'opacity', '0');
-      this.renderer.setStyle(this.tooltip, 'pointer-events', 'none');
-      this.renderer.setStyle(this.tooltip, 'display', 'none');
+      this.renderer.removeClass(this.tooltip, 'opacity-100');
+      this.renderer.addClass(this.tooltip, 'opacity-0');
+      this.renderer.addClass(this.tooltip, 'pointer-events-none');
+      this.renderer.addClass(this.tooltip, 'hidden');
     }
   }
 
@@ -79,21 +80,25 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
     if (!this.tooltip) {
       this.tooltip = this.renderer.createElement('div');
       this.renderer.addClass(this.tooltip, 'custom-tooltip');
-      this.renderer.setStyle(this.tooltip, 'position', 'fixed');
-      this.renderer.setStyle(this.tooltip, 'opacity', '0');
-      this.renderer.setStyle(this.tooltip, 'z-index', '2147483000');
-      this.renderer.setStyle(this.tooltip, 'max-width', '320px');
-      this.renderer.setStyle(this.tooltip, 'padding', '6px 10px');
-      this.renderer.setStyle(this.tooltip, 'border-radius', '8px');
-      this.renderer.setStyle(this.tooltip, 'font-size', '12px');
-      this.renderer.setStyle(this.tooltip, 'line-height', '1.35');
-      this.renderer.setStyle(this.tooltip, 'font-weight', '500');
-      this.renderer.setStyle(this.tooltip, 'background', 'rgba(9, 14, 24, 0.96)');
-      this.renderer.setStyle(this.tooltip, 'color', '#fff');
-      this.renderer.setStyle(this.tooltip, 'box-shadow', '0 8px 22px rgba(0, 0, 0, 0.35)');
-      this.renderer.setStyle(this.tooltip, 'white-space', 'normal');
-      this.renderer.setStyle(this.tooltip, 'word-break', 'break-word');
-      this.renderer.setStyle(this.tooltip, 'pointer-events', 'none');
+      [
+        'fixed',
+        'z-[2147483000]',
+        'max-w-[320px]',
+        'py-[6px]',
+        'px-[10px]',
+        'rounded-[8px]',
+        'text-[12px]',
+        'leading-[1.35]',
+        'font-medium',
+        'bg-[rgba(9,14,24,0.96)]',
+        'text-white',
+        'shadow-[0_8px_22px_rgba(0,0,0,0.35)]',
+        'whitespace-normal',
+        'break-words',
+        'pointer-events-none',
+        'opacity-0',
+        'hidden'
+      ].forEach(cls => this.renderer.addClass(this.tooltip, cls));
       this.renderer.appendChild(document.body, this.tooltip);
     }
     else {
@@ -101,7 +106,9 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
     }
     const textNode = this.renderer.createText(this.tooltipText);
     this.renderer.appendChild(this.tooltip, textNode);
-    this.renderer.setStyle(this.tooltip, 'display', 'block');
+    this.renderer.removeClass(this.tooltip, 'hidden');
+    this.renderer.addClass(this.tooltip, 'opacity-0');
+    this.renderer.removeClass(this.tooltip, 'opacity-100');
     requestAnimationFrame(() => {
       if (!this.tooltip) {
         return;
@@ -139,7 +146,8 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
       }
       this.tooltip.style.top = `${top}px`;
       this.tooltip.style.left = `${left}px`;
-      this.tooltip.style.opacity = '1';
+      this.renderer.removeClass(this.tooltip, 'opacity-0');
+      this.renderer.addClass(this.tooltip, 'opacity-100');
     });
   }
 

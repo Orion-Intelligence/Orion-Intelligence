@@ -758,12 +758,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         top = viewportPadding;
       }
       menu.classList.remove('hidden');
-      menu.style.right = 'auto';
-      menu.style.bottom = 'auto';
-      menu.style.transform = 'none';
+      menu.classList.add('right-auto', 'bottom-auto', 'transform-none', 'z-[10000]');
       menu.style.left = `${left}px`;
       menu.style.top = `${top}px`;
-      menu.style.zIndex = '10000';
       this.contextMenuNodeId = node.id;
       this.contextMenuNode = node;
       this.contextCanExpand = this.canContextExpand();
@@ -789,7 +786,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const menu = document.getElementById('customContextMenu');
     const listingMenu = document.getElementById('contextMenu');
     if (listingMenu) {
-      listingMenu.style.display = 'none';
+      listingMenu.classList.add('hidden');
     }
     if (menu) {
       menu.classList.add('hidden');
