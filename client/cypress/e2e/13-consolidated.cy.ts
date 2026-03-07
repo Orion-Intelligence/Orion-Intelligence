@@ -18,6 +18,16 @@ const ensureDomainScannerModalOpen = () => {
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');
 };
 
+const closeDomainScannerModalIfOpen = () => {
+  cy.get('body', {timeout: 30000}).then(($body) => {
+    if ($body.find(`${DOMAIN_SCANNER_SELECTOR}:visible`).length === 0) {
+      return;
+    }
+    cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: 30000}).should('be.visible').click('topLeft');
+    cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: 30000}).should('not.exist');
+  });
+};
+
 describe('Consolidated - IOC Advanced Builder Flow', () => {
   before(() => {
     cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
@@ -68,6 +78,7 @@ describe('Consolidated - Domain Scanner Flow', () => {
   });
 
   after(() => {
+    closeDomainScannerModalIfOpen();
     cy.logout();
   });
 
@@ -76,7 +87,6 @@ describe('Consolidated - Domain Scanner Flow', () => {
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().should('be.visible').click();
     cy.get('[data-testid="homepage-search-input"]', {timeout: 30000}).scrollIntoView().should('be.visible').type('{enter}');
     cy.get('[data-testid="consolidated-tab-iocs"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     ensureDomainScannerModalOpen();
     cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
