@@ -31,8 +31,6 @@ import { AlertExportService } from '../../../services/export/alert-export.servic
   animations: [overlayAnimation],
 })
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
-  private loadingDisplayTimer: ReturnType<typeof setTimeout> | null = null;
-  private isManualLoadingTrigger = false;
   private scanStatusSub?: Subscription;
 
   hoveredHomeTool: 'print' | 'flush' | 'scan' | null = null;
@@ -56,22 +54,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     effect(() => {
       const isLoading = this.alertService.isAlertScanLoading();
       if (!isLoading) {
-        this.clearLoadingDisplayTimer();
         this.showAlertScanLoading.set(false);
-        this.isManualLoadingTrigger = false;
         return;
       }
-      if (this.isManualLoadingTrigger) {
-        this.clearLoadingDisplayTimer();
-        this.showAlertScanLoading.set(true);
-        return;
-      }
-      this.clearLoadingDisplayTimer();
-      this.loadingDisplayTimer = setTimeout(() => {
-        if (this.alertService.isAlertScanLoading() && !this.isManualLoadingTrigger) {
-          this.showAlertScanLoading.set(true);
-        }
-      }, 5000);
+      this.showAlertScanLoading.set(true);
     });
   }
 
@@ -288,20 +274,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.scanStatusSub?.unsubscribe();
-    this.clearLoadingDisplayTimer();
   }
 
   private startManualLoadingDisplay(): void {
-    this.isManualLoadingTrigger = true;
-    this.clearLoadingDisplayTimer();
     this.showAlertScanLoading.set(true);
-  }
-
-  private clearLoadingDisplayTimer(): void {
-    if (this.loadingDisplayTimer) {
-      clearTimeout(this.loadingDisplayTimer);
-      this.loadingDisplayTimer = null;
-    }
   }
 
   isLightTheme(): boolean {
