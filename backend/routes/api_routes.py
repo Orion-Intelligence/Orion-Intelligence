@@ -168,6 +168,26 @@ async def get_insight():
     return {"insights": insights, "latestDocument": latestDocument, "country_insight": country_insight}
 
 
+@api_routes.get(
+    "/api/insight/country",
+    summary="Get paginated country insights",
+    tags=["System Info"],
+    operation_id="getCountryInsights",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.DEMO, user_role.ANALYST]))])
+async def get_country_insight(
+        category: str = Query(...),
+        country: str = Query(...),
+        page: int = Query(1, ge=1),
+        limit: int = Query(20, ge=1, le=200)):
+    return await homepage_model.getInstance().get_country_specific_insights_paginated(
+        category=category,
+        country=country,
+        page=page,
+        limit=limit
+    )
+
+
 @api_routes.post(
     "/api/search/stealerlogs",
     summary="Search stealer log reports",

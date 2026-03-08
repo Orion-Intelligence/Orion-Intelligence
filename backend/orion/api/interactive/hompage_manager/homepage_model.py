@@ -81,7 +81,7 @@ class homepage_model:
     @staticmethod
     async def get_country_specific_insights():
         redis_instance = redis_controller.getInstance()
-        redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}:country"
+        redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}:country_v1"
         cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
         if cached:
             try:
@@ -104,7 +104,8 @@ class homepage_model:
 
         for index_name, response in zip(indices, responses):
             hits = response.get("hits", {}).get("hits", []) if response else []
-            sources = [hit.get("_source", {}) for hit in hits if hit.get("_source", {}).get("m_country")]
+            sources = [homepage_model._country_only_payload(hit.get("_source", {}))
+                for hit in hits if hit.get("_source", {}).get("m_country")]
 
             if index_name == ELASTIC_INDEX.S_LEAK_INDEX:
                 grouped_results["leak"] = sources
@@ -121,6 +122,98 @@ class homepage_model:
 
         await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(grouped_results), 86400])
         return grouped_results
+
+    @staticmethod
+    async def get_country_specific_insights_paginated(category: str, country: str, page: int = 1, limit: int = 20):
+        all_country_insights = await homepage_model.get_country_specific_insights()
+        category_key = (category or "").strip().lower()
+        country_key = (country or "").strip().lower()
+
+        if not category_key or not country_key:
+            return {"items": [], "total": 0, "page": page, "limit": limit, "has_more": False}
+
+        category_items = all_country_insights.get(category_key, []) if isinstance(all_country_insights, dict) else []
+        filtered_items = [
+            item for item in category_items
+            if homepage_model._country_matches(item.get("m_country", []), country_key)
+        ]
+
+        start_index = (page - 1) * limit
+        end_index = start_index + limit
+        paginated_items = filtered_items[start_index:end_index]
+        page_hashes = [item.get("m_hash") for item in paginated_items if item.get("m_hash")]
+        items = await homepage_model._resolve_country_items(category_key, page_hashes, paginated_items)
+        total = len(filtered_items)
+
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "has_more": end_index < total
+        }
+
+    @staticmethod
+    async def _resolve_country_items(category_key: str, page_hashes: list[str], fallback_items: list[dict]) -> list[dict]:
+        index_name = homepage_model._country_category_to_index(category_key)
+        if not index_name or not page_hashes:
+            return fallback_items
+
+        query = {
+            "size": len(page_hashes),
+            "query": {
+                "bool": {
+                    "must": [
+                        {"terms": {"m_hash": page_hashes}}
+                    ]
+                }
+            },
+            "track_total_hits": False
+        }
+
+        responses = await elastic_controller.get_instance().search_consolidated_queries([index_name], [query])
+        hits = responses[0].get("hits", {}).get("hits", []) if responses and responses[0] else []
+        source_by_hash = {
+            hit.get("_source", {}).get("m_hash"): hit.get("_source", {})
+            for hit in hits if hit.get("_source", {}).get("m_hash")
+        }
+
+        ordered_sources = [source_by_hash[h] for h in page_hashes if h in source_by_hash]
+        return ordered_sources if ordered_sources else fallback_items
+
+    @staticmethod
+    def _country_category_to_index(category_key: str) -> str | None:
+        mapping = {
+            "leak": ELASTIC_INDEX.S_LEAK_INDEX,
+            "generic": ELASTIC_INDEX.S_GENERIC_INDEX,
+            "exploit": ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            "chat": ELASTIC_INDEX.S_CHATS_INDEX,
+            "social": ELASTIC_INDEX.S_SOCIAL_INDEX,
+            "defacement": ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        }
+        return mapping.get(category_key)
+
+    @staticmethod
+    def _country_only_payload(source: dict) -> dict:
+        country_value = source.get("m_country", [])
+        if isinstance(country_value, str):
+            countries = [country_value]
+        elif isinstance(country_value, list):
+            countries = [str(value) for value in country_value if value]
+        else:
+            countries = []
+        return {"m_country": countries, "m_hash": source.get("m_hash")}
+
+    @staticmethod
+    def _country_matches(country_values: list | str, country_key: str) -> bool:
+        values = country_values if isinstance(country_values, list) else [country_values]
+        for value in values:
+            if not value:
+                continue
+            parts = [part.strip().lower() for part in str(value).split(",") if part.strip()]
+            if country_key in parts:
+                return True
+        return False
 
     @staticmethod
     def transform_for_display(model_key: str, item: dict) -> dict:

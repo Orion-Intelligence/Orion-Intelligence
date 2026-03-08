@@ -1,15 +1,14 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { ActivatedRoute } from '@angular/router';
 import { HeatmapReportComponent } from './heatmap-report/heatmap-report.component';
 import { AppService } from '../../../services/core/app/app.service';
-type CountryData = {
-    id: string;
-    name: string;
-    value: number;
-};
+import { ApiService } from '../../../shared/services/api.service';
+import { CountryData, CountryInsightPageResponse } from '../../../shared/model/homepage/country-insight.model';
 @Component({
   selector: 'app-world-heatmap',
   imports: [HeatmapReportComponent],
@@ -36,12 +35,17 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private readonly tooltipVisibleClass = `${this.tooltipBaseClass} heatmap-tooltip-visible opacity-100`;
   private readonly countryClass = 'country cursor-pointer [stroke:rgb(255_255_255_/14%)] [stroke-width:0.7px] transition-[opacity] duration-200 ease-in-out hover:opacity-90 hover:[stroke:rgb(255_255_255_/50%)] [&.hovered]:opacity-90 [&.hovered]:[stroke:rgb(255_255_255_/50%)] [body.light-theme_&]:[stroke:rgb(23_34_53_/18%)] [body.light-theme_&:hover]:[stroke:rgb(23_34_53_/38%)] [body.light-theme_&.hovered]:[stroke:rgb(23_34_53_/38%)]';
   private readonly pixelGridLineClass = 'pointer-events-none [stroke:rgb(255_255_255_/4%)] [stroke-width:0.5px] [body.light-theme_&]:[stroke:rgb(23_34_53_/7%)]';
+  private selectedCountryPage = 1;
+  private readonly countryReportLimit = 20;
 
   public activeCountryReports: any;
   public activeCategoryKey: string | null = null;
-  public selectedCountryReports: any;
+  public selectedCountryReports: any[] = [];
   public mapData: CountryData[] = [];
   public isOpenCountryReport = false;
+  public isCountryReportLoading = false;
+  public isCountryReportLoadingMore = false;
+  public hasMoreCountryReports = false;
 
   private isLightTheme(): boolean {
     if (typeof document === 'undefined') {
@@ -68,7 +72,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     };
   }
 
-  constructor(private route: ActivatedRoute, private appService: AppService) {
+  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService) {
   }
 
   ngOnInit(): void {
@@ -423,7 +427,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       return;
     }
     this.selectedName = name.toLowerCase();
-    this.openCountryReport(name);
+    this.openCountryReport();
   }
 
   private gettingUniqueCountrys(): CountryData[] {
@@ -442,19 +446,64 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     }));
   }
 
-  private openCountryReport(name: string): void {
-    this.selectedCountryReports = this.getReportsByCountry(name);
+  private openCountryReport(): void {
     this.isOpenCountryReport = true;
-  }
-
-  getReportsByCountry(country: string): any[] {
-    const key = country.toLowerCase();
-    return this.activeCountryReports?.filter((r: any) => r?.m_country?.some((c: string) => c.split(',').some(p => p.trim().toLowerCase() === key))) ?? [];
+    this.selectedCountryReports = [];
+    this.selectedCountryPage = 1;
+    this.hasMoreCountryReports = false;
+    this.fetchCountryReportsPage(1, false);
   }
 
   closeCountryReport(): void {
     this.isOpenCountryReport = false;
     this.selectedName = null;
+    this.selectedCountryReports = [];
+    this.hasMoreCountryReports = false;
+    this.isCountryReportLoading = false;
+    this.isCountryReportLoadingMore = false;
+    this.selectedCountryPage = 1;
+  }
+
+  async loadMoreCountryReports(): Promise<void> {
+    if (!this.hasMoreCountryReports || this.isCountryReportLoadingMore || !this.selectedName) {
+      return;
+    }
+    await this.fetchCountryReportsPage(this.selectedCountryPage + 1, true);
+  }
+
+  private async fetchCountryReportsPage(page: number, append: boolean): Promise<void> {
+    if (!this.selectedName || !this.activeCategoryKey) {
+      return;
+    }
+    if (append) {
+      this.isCountryReportLoadingMore = true;
+    }
+    else {
+      this.isCountryReportLoading = true;
+    }
+
+    try {
+      const params = new HttpParams()
+        .set('category', this.activeCategoryKey)
+        .set('country', this.selectedName)
+        .set('page', String(page))
+        .set('limit', String(this.countryReportLimit));
+      const response = await firstValueFrom(this.apiService.get<CountryInsightPageResponse>('insight/country', { params }));
+      const incomingItems = Array.isArray(response?.items) ? response.items : [];
+      this.selectedCountryReports = append ? [...this.selectedCountryReports, ...incomingItems] : incomingItems;
+      this.selectedCountryPage = response?.page ?? page;
+      this.hasMoreCountryReports = Boolean(response?.has_more);
+    }
+    catch {
+      if (!append) {
+        this.selectedCountryReports = [];
+      }
+      this.hasMoreCountryReports = false;
+    }
+    finally {
+      this.isCountryReportLoading = false;
+      this.isCountryReportLoadingMore = false;
+    }
   }
 
   private animateMapTransition(): void {

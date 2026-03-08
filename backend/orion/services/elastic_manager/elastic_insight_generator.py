@@ -40,7 +40,7 @@ class elastic_insight_generator:
 
         query_statement = {
             "size": size_,
-            "_source": {"excludes": ["m_embedding"]},
+            "_source": ["m_country", "m_hash"],
             "query": {
                 "bool": {
                     "must": [

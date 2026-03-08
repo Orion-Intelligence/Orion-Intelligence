@@ -9,6 +9,12 @@
     </div>
 
     <div class="overflow-y-auto p-4 max-[768px]:p-3">
+      @if (loading && !reports.length) {
+        <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)] px-3.5 py-3 text-[13px] font-semibold text-[var(--color-text2)]">
+          Loading...
+        </div>
+      }
+
       @for (report of reports; track report) {
         <div class="mb-3 rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)] last:mb-0">
           <div class="border-b border-[var(--tenant-line)] px-3.5 py-2.5">
@@ -42,6 +48,17 @@
               </div>
             }
           </div>
+        </div>
+      }
+
+      @if (hasMore) {
+        <div class="mt-4 flex justify-center">
+          <button type="button" data-testid="heatmap-report-load-more" class="inline-flex min-w-[120px] items-center justify-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-4 py-2 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] disabled:cursor-not-allowed disabled:opacity-70" [disabled]="loadingMore" (click)="onLoadMore($event)">
+            @if (loadingMore) {
+              <span class="h-3.5 w-3.5 animate-spin rounded-full border border-[var(--tenant-line)] border-t-[var(--color-text2)]"></span>
+            }
+            Load more
+          </button>
         </div>
       }
     </div>
