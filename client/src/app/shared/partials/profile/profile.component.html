@@ -5,7 +5,7 @@
         <a data-testid="profile-notification-bell" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
           @if (!this.appService.userSessionData().tenant.hasOnboarding) {
             <div class="relative p-0">
-              <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24" class="h-6 w-6">
+              <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="20" class="h-6 w-5">
               <span class="absolute right-[-7px] top-[-6px] mt-[2px] inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold leading-none text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
                 {{ getUnseenAlertCount() }}
               </span>

@@ -1,13 +1,16 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, OnDestroy, signal } from '@angular/core';
 import { switchMap, takeWhile, tap, timer } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../core/app/app.service';
+import { Subscription } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class AlertService {
+export class AlertService implements OnDestroy {
   private isCheckingStatus = false;
   private hasAutoCheckedOnce = false;
+  private scanStartSub?: Subscription;
+  private scanStatusSub?: Subscription;
 
   isAlertScanLoading = signal<boolean>(true);
 
@@ -16,9 +19,15 @@ export class AlertService {
 
   scanIOCs() {
     this.isAlertScanLoading.set(true);
-    this.apiService.post<any>('profile/alert/scan', null).subscribe({
+    this.scanStartSub?.unsubscribe();
+    this.scanStatusSub?.unsubscribe();
+    this.scanStartSub = this.apiService.post<any>('profile/alert/scan', null).subscribe({
       next: () => {
-        this.autoCheckScanStatus()?.subscribe({
+        const stream = this.autoCheckScanStatus();
+        if (!stream) {
+          return;
+        }
+        this.scanStatusSub = stream.subscribe({
           next: (res: any) => {
             if (!res?.scan_running) {
               this.getLatestAlerts();
@@ -36,11 +45,14 @@ export class AlertService {
   }
 
   cancelScanIOCs() {
+    this.isAlertScanLoading.set(false);
+    this.scanStatusSub?.unsubscribe();
     this.apiService.post<any>('profile/alert/scan/cancel', null).subscribe({
       next: (_) => {
         this.isAlertScanLoading.set(false);
       },
       error: (_) => {
+        this.isAlertScanLoading.set(false);
       },
     });
   }
@@ -85,5 +97,10 @@ export class AlertService {
         this.isAlertScanLoading.set(false);
       }
     }));
+  }
+
+  ngOnDestroy(): void {
+    this.scanStartSub?.unsubscribe();
+    this.scanStatusSub?.unsubscribe();
   }
 }

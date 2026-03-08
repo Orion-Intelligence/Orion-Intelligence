@@ -1281,7 +1281,7 @@ html:has(body.dark-theme) {
 .ui-alert-cancel-btn {
   height: 42px;
   border-radius: 8px;
-  border: 1px solid #4f6479 !important;
+  border: 1px solid rgb(148 163 184 / 35%) !important;
   background: rgba(79, 100, 121, 0.12) !important;
   color: var(--color-text1) !important;
   transition: background-color 0.18s ease, border-color 0.18s ease;
@@ -1289,11 +1289,11 @@ html:has(body.dark-theme) {
 
 .ui-alert-cancel-btn:hover {
   background: rgba(79, 100, 121, 0.2) !important;
-  border-color: #627b93 !important;
+  border-color: rgb(148 163 184 / 55%) !important;
 }
 
 .light-theme .ui-alert-cancel-btn {
-  border-color: #8ea6c1 !important;
+  border-color: #c9d8e8 !important;
   background: #ffffff !important;
   color: #1f2e47 !important;
 }

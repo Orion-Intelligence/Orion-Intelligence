@@ -22,6 +22,7 @@ import { MessagePopupComponent } from "../../message-popup/message-popup.compone
 import { AlertExportComponentComponent } from "./alert-export-component/alert-export-component.component";
 import { NgxPrintModule } from 'ngx-print';
 import { countFilterValues } from '../../../utils/filter-values.util';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-sidebar-user-homepage',
   imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
@@ -31,6 +32,7 @@ import { countFilterValues } from '../../../utils/filter-values.util';
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   private loadingDisplayTimer: ReturnType<typeof setTimeout> | null = null;
   private isManualLoadingTrigger = false;
+  private scanStatusSub?: Subscription;
 
   hoveredHomeTool: 'print' | 'flush' | 'scan' | null = null;
   alertCategories: AlertCategorySummary[] = [];
@@ -91,7 +93,8 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     if (!stream) {
       return;
     }
-    stream.subscribe(res => {
+    this.scanStatusSub?.unsubscribe();
+    this.scanStatusSub = stream.subscribe(res => {
       this.alertService.isAlertScanLoading.set(res.scan_running);
     });
   }
@@ -193,6 +196,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     });
   }
 
+  hasReports(): boolean {
+    return (this.lowRisks + this.mediumRisks + this.highRisks + this.criticalRisks) > 0;
+  }
+
   getRiskLevel(type: string): string {
     const normalized = type.toLowerCase();
     switch (normalized) {
@@ -262,9 +269,11 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
       this.alertService.isAlertScanLoading.set(true);
       this.apiService.post('profile/alerts/delete/all', null).subscribe({
         next: () => {
-          this.appService.userSessionData().alerts = [];
-          this.ngOnInit();
-          this.alertService.isAlertScanLoading.set(false);
+          queueMicrotask(() => {
+            this.appService.userSessionData().alerts = [];
+            this.initializeData();
+            this.alertService.isAlertScanLoading.set(false);
+          });
         },
         error: (err) => {
           this.alertService.isAlertScanLoading.set(false);
@@ -275,6 +284,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.scanStatusSub?.unsubscribe();
     this.clearLoadingDisplayTimer();
   }
 
