@@ -78,8 +78,12 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   initializeData() {
-    this.alertCategories = this.convertAlertsToCategories(this.appService.userSessionData().alerts);
-    this.countRiskCount(this.appService.userSessionData().alerts);
+    const alerts = this.appService.userSessionData().alerts;
+    const categories = this.convertAlertsToCategories(alerts);
+    queueMicrotask(() => {
+      this.alertCategories = categories;
+      this.countRiskCount(alerts);
+    });
   }
 
   checkScanProgress() {

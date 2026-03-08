@@ -8,16 +8,16 @@
       <span class="font-[Inter] text-[18px] font-semibold text-[var(--color-text1)]">Notifications</span>
       <img [src]="isLightTheme() ? 'assets/images/shared/searchFilter_clossButton.svg' : 'assets/images/shared/theme/searchFilter_clossButton_white.svg'" alt="close" class="h-4 w-4 cursor-pointer" (click)="close()" />
     </div>
-    <div class="w-[325px] flex-1 overflow-y-auto px-0 py-2 [scrollbar-color:#667085_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#667085] [&::-webkit-scrollbar]:w-[6px] max-[420px]:w-[calc(100%-20px)]">
+    <div class="w-[325px] flex-1 overflow-y-auto px-0 py-2 [scrollbar-color:#667085_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#667085] [&::-webkit-scrollbar]:w-[6px] max-[420px]:w-[calc(100%-20px)]" (scroll)="onNotificationScroll($event)">
       @if (alertNotifications.length==0) {
-        <div class="my-[10px] rounded-[12px] border border-[var(--color-border)] p-4">
-          <div class="report-mapping-empty-header">No structured records found!</div>
-          <div class="report-mapping-empty-body">We’re watching this source — new breach or tracking data will appear here</div>
+        <div class="my-[10px] rounded-[12px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.03)] p-4 [body.light-theme_&]:bg-[rgba(0,0,0,0.02)]">
+          <div class="text-[14px] font-semibold text-[var(--color-text1)]">No alerts to show yet.</div>
+          <div class="mt-1 text-[12px] leading-[1.5] text-[var(--color-text4)]">We’re monitoring this source. New breach or tracking results will appear here automatically.</div>
         </div>
       }
       @if (alertNotifications.length>0) {
         <div class="space-y-3">
-          @for (n of alertNotifications; track n) {
+          @for (n of visibleAlertNotifications; track n.hash) {
             <div class="my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors hover:bg-[var(--color-blue-810)]">
               <div class="flex items-center justify-between">
                 <span class="font-[Inter] text-[16px] font-medium text-[var(--color-text1)]">{{ n.categoryName.charAt(0).toUpperCase() + n.categoryName.slice(1) }}</span>
@@ -40,6 +40,11 @@
             </div>
           }
         </div>
+        @if (isLoadingMore) {
+          <div class="flex w-full items-center justify-center py-3">
+            <div class="h-6 w-6 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
+          </div>
+        }
       }
     </div>
     <div class="w-full px-5">

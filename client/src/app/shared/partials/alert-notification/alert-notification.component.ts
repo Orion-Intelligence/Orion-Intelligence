@@ -16,6 +16,10 @@ import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.ani
 })
 export class AlertNotificationComponent implements OnChanges {
   alertNotifications: AlertNotification[] = [];
+  visibleAlertNotifications: AlertNotification[] = [];
+  readonly batchSize: number = 50;
+  displayedCount: number = 50;
+  isLoadingMore: boolean = false;
 
   @Input() isNotificationOpen!: boolean | null;
 
@@ -29,8 +33,31 @@ export class AlertNotificationComponent implements OnChanges {
       const value = changes['isNotificationOpen'].currentValue;
       if (value === true) {
         this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
+        this.resetVisibleNotifications();
       }
     }
+  }
+
+  resetVisibleNotifications(): void {
+    this.displayedCount = this.batchSize;
+    this.visibleAlertNotifications = this.alertNotifications.slice(0, this.displayedCount);
+    this.isLoadingMore = false;
+  }
+
+  onNotificationScroll(event: Event): void {
+    if (this.isLoadingMore || this.visibleAlertNotifications.length >= this.alertNotifications.length) {
+      return;
+    }
+    const target = event.target as HTMLElement;
+    if (target.scrollTop + target.clientHeight < target.scrollHeight - 120) {
+      return;
+    }
+    this.isLoadingMore = true;
+    setTimeout(() => {
+      this.displayedCount = Math.min(this.displayedCount + this.batchSize, this.alertNotifications.length);
+      this.visibleAlertNotifications = this.alertNotifications.slice(0, this.displayedCount);
+      this.isLoadingMore = false;
+    }, 250);
   }
 
   convertToAlertNotifications(alerts: AlertModel[]): AlertNotification[] {
@@ -231,6 +258,7 @@ export class AlertNotificationComponent implements OnChanges {
       next: response => {
         this.appService.userSessionData().alerts = response;
         this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
+        this.resetVisibleNotifications();
       }
     });
   }

@@ -1,7 +1,13 @@
 @if (appService.userSessionData().tenant.quotaExceeded) {
-  <div class="w-full bg-[#fef3c7] px-[16px] py-[10px] text-center text-[13px] text-[#92400e]" role="alert">
-    <strong>User quota exceeded.</strong>
-    Access is restricted until existing users are removed or the quota is increased.
+  <div @quotaBannerAnimation class="w-full border-b border-[#f2d58f] bg-[linear-gradient(90deg,#fff9e7_0%,#fff2cb_50%,#ffe9b4_100%)] px-[16px] py-[10px] text-[#7a4b00] shadow-[0_4px_14px_rgba(146,64,14,0.10)] max-[640px]:px-[10px] max-[640px]:py-[9px]" role="alert" aria-live="polite">
+    <div class="mx-auto flex max-w-[1100px] items-center justify-center gap-[10px] text-center max-[640px]:items-start max-[640px]:justify-start max-[640px]:gap-[8px] max-[640px]:text-left">
+      <span class="inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-full bg-[#f59e0b] text-[12px] font-bold text-white max-[640px]:h-[20px] max-[640px]:w-[20px] max-[640px]:text-[11px]">!</span>
+      <p class="m-0 text-[13px] leading-[1.5] text-[#6b3f00] max-[640px]:flex-1 max-[640px]:text-[12px] max-[640px]:leading-[1.45]">
+        <strong>User quota exceeded.</strong>
+        <span class="mx-2 inline-block -translate-y-[1px] align-middle text-[#a86a00] max-[640px]:hidden">〡</span>
+        <span class="font-medium text-[#5a3200] max-[640px]:mt-[2px] max-[640px]:block">Account access is limited at the moment. Remove one or more users, or increase your quota to restore full access.</span>
+      </p>
+    </div>
   </div>
 }
 
@@ -14,5 +20,3 @@
   </main>
 }
 <app-message-notification></app-message-notification>
-
-

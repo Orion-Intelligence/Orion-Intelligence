@@ -4,7 +4,7 @@ import { ErrorStoreService } from '../../shared/services/error-store.service';
 import { filter, map, Observable } from 'rxjs';
 
 import { AppService } from '../../services/core/app/app.service';
-import { appAnimation } from '../../shared/animations/app.animations';
+import { appAnimation, quotaBannerAnimation } from '../../shared/animations/app.animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MessageNotificationComponent } from '../../shared/partials/message-notification/message-notification.component';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
@@ -13,7 +13,7 @@ import { LoaderComponent } from '../../shared/partials/loader/loader.component';
   standalone: true,
   imports: [RouterOutlet, FormsModule, ReactiveFormsModule, MessageNotificationComponent, LoaderComponent],
   templateUrl: './app.component.html',
-  animations: [appAnimation],
+  animations: [appAnimation, quotaBannerAnimation],
 })
 export class AppComponent {
   protected readonly JSON = JSON;
