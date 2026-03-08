@@ -1,3 +1,4 @@
+import asyncio
 import re
 from typing import List
 from pathlib import Path
@@ -14,7 +15,6 @@ from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, UserStatus, LicenseName, user_role
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
@@ -243,16 +243,28 @@ class AccountManager:
     async def get_node(self, current_user) -> NodeCallbackModel:
         user = current_user
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
-        alerts = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(user.tenant_uuid))
-
-        dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
-        enc = Fernet(dek)
+        tenant_id = str(user.tenant_uuid)
 
         assigned_quota = tenant.user_quota
-        total_user = await self._engine.count(db_user_account, (db_user_account.tenant_uuid == str(user.tenant_uuid)))
+        should_count_users = bool(not tenant.is_default and assigned_quota is not None)
+        dek_task = KeyManager.get_instance().get_or_create_dek(str(tenant.id))
+        summary_task = AlertManager.getInstance().get_alert_summary(tenant_id)
+        count_task = (
+            self._engine.count(db_user_account, (db_user_account.tenant_uuid == tenant_id))
+            if should_count_users else None
+        )
 
-        raw_alerts = alerts.alerts if alerts and alerts.alerts else []
-        alerts_list = AlertManager.getInstance().filter_alerts_by_license(raw_alerts, user)
+        if count_task is not None:
+            dek, alert_summary, total_user = await asyncio.gather(dek_task, summary_task, count_task)
+        else:
+            dek, alert_summary = await asyncio.gather(dek_task, summary_task)
+            total_user = 0
+
+        enc = Fernet(dek)
+
+        quota_exceeded = bool(
+            not tenant.is_default and assigned_quota is not None and assigned_quota < total_user
+        )
 
         tenant_image_file = self.TENANT_DIR / f"{str(tenant.id)}.png"
         tenant_image_path = "/api/s/static/tenant/" + (str(tenant.id) if tenant_image_file.is_file() else "default")
@@ -273,7 +285,6 @@ class AccountManager:
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
                 enc, tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
                 self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
-                assigned_quota), "quotaExceeded": bool(
-                not tenant.is_default and tenant.user_quota is not None and assigned_quota < total_user), "image": tenant_image_path, }, "alerts": alerts_list, })
+                assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path, }, "alerts": [], "alert_summary": alert_summary, })
 
         return node

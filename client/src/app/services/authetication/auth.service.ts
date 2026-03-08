@@ -50,8 +50,6 @@ export class AuthService {
         if (!this.applyLoginResponse(response)) {
           return;
         }
-        this.appService.loadSession(true).then(() => {
-        });
       },
       error: (error) => {
         if (error?.error?.detail === 'Verification pending.') {

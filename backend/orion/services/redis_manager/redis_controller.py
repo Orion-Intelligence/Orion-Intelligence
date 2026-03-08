@@ -102,6 +102,9 @@ class redis_controller:
         if await lock.locked():
             await lock.release()
 
+    async def __delete_key(self, p_key):
+        await self.__redis.delete(p_key)
+
     async def invoke_trigger(self, p_commands, p_data=None):
         if p_commands == REDIS_COMMANDS.S_GET_INT:
             return await self.__get_int(p_data[0], p_data[1], p_data[2])
@@ -131,3 +134,5 @@ class redis_controller:
             return await self.__acquire_lock(p_data[0], p_data[1], p_data[2])
         elif p_commands == REDIS_COMMANDS.S_RELEASE_LOCK:
             await self.__release_lock(p_data[0])
+        elif p_commands == REDIS_COMMANDS.S_DELETE_KEY:
+            await self.__delete_key(p_data[0])

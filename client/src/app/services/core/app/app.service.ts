@@ -15,6 +15,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class AppService {
   private entitiesCache: any[] | null = null;
+  private sessionLoadPromise: Promise<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
@@ -54,7 +55,17 @@ export class AppService {
         assignedQuota: '0',
         quotaExceeded: false
       },
-      alerts: []
+      alerts: [],
+      alert_summary: {
+        unseen_total: 0,
+        counts_by_type: {},
+        counts_by_risk: {
+          critical: 0,
+          high: 0,
+          medium: 0,
+          low: 0
+        }
+      }
     };
   }
 
@@ -73,17 +84,27 @@ export class AppService {
   }
 
   async loadSession(forced = false): Promise<void> {
+    if (this.sessionLoadPromise) {
+      return this.sessionLoadPromise;
+    }
+
     let token = localStorage.getItem('token');
     if (token || forced) {
-      try {
-        const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
-        if (session) {
-          this.userSessionData.set(session);
+      this.sessionLoadPromise = (async () => {
+        try {
+          const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
+          if (session) {
+            this.userSessionData.set(session);
+          }
         }
-      }
-      catch {
-        this.userSessionData.set(this.createEmptyUserSessionData());
-      }
+        catch {
+          this.userSessionData.set(this.createEmptyUserSessionData());
+        }
+        finally {
+          this.sessionLoadPromise = null;
+        }
+      })();
+      return this.sessionLoadPromise;
     }
   }
 

@@ -5,9 +5,11 @@ from typing import Any, List
 
 from fastapi import HTTPException
 
+from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
 from orion.api.interactive.alert_manager.function_map.function_maping import MODULE_ALERT_TYPE_MAP, SCANNING_ALERT_TYPES
 
 from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
+from orion.services.redis_manager.redis_controller import redis_controller
 from configs.app_dependency import get_user_permissions
 
 
@@ -26,6 +28,9 @@ class AlertManager:
     def __init__(self):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
         self._engine = mongo_controller.get_instance().get_engine()
+        self._redis = redis_controller.getInstance()
+        self._alert_summary_ttl_seconds = 300
+        self._summary_helper = AlertSummaryHelper(self._engine, self._redis, self._alert_summary_ttl_seconds)
         if AlertManager.__instance is not None:
             raise Exception("This class is a singleton!")
         AlertManager.__instance = self
@@ -41,6 +46,9 @@ class AlertManager:
     def _smart_hash(*parts) -> str:
         base = "|".join(str(p).strip().lower() for p in parts if p is not None)
         return hashlib.sha256(base.encode("utf-8")).hexdigest()
+
+    async def get_alert_summary(self, tenant_id: str):
+        return await self._summary_helper.get_alert_summary(tenant_id)
 
     async def upsert_alert(self,
             tenantId: str,
@@ -95,6 +103,7 @@ class AlertManager:
             doc_to_save = existing_doc
 
         await self._engine.save(doc_to_save)
+        await self._summary_helper.invalidate_alert_summary_cache(tenantId)
         return "Updated" if alert_updated else "Created"
 
     async def add_custom_alert(self, data: AlertModel, current_user):
@@ -139,6 +148,7 @@ class AlertManager:
                     alert.status = new_alert.status
                     alert.last_seen = datetime.now(timezone.utc)
                     await self._engine.save(existing_doc)
+                    await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
                     return {"message": "Updated"}
 
         if existing_doc:
@@ -148,6 +158,7 @@ class AlertManager:
             save_doc = db_alert_model(tenant_id=tenant_uuid, alerts=[new_alert])
 
         await self._engine.save(save_doc)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
         return {"message": "Created"}
 
     async def update_alert(self, alert_to_update: AlertModel, current_user):
@@ -173,6 +184,7 @@ class AlertManager:
         if not updated:
             raise HTTPException(status_code=404, detail="No matching alert found to update")
         await self._engine.save(existing_doc)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
         return {"message": "Alert updated successfully", "updated_hash": hash_to_find}
 
     async def set_alert_seen(self, alerts_to_update: list[AlertModel], current_user):
@@ -200,6 +212,7 @@ class AlertManager:
             raise HTTPException(status_code=404, detail="No matching alerts found to update")
 
         await self._engine.save(existing_doc)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
 
         return {"message": "Alerts updated successfully", "updated": updated_count}
 
@@ -220,6 +233,7 @@ class AlertManager:
         existing_doc.alerts = updated_alerts
 
         await self._engine.save(existing_doc)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
 
         return {"message": "Alert deleted successfully", "id": id}
 
@@ -337,6 +351,7 @@ class AlertManager:
 
         existing_doc.alerts = []
         await self._engine.save(existing_doc)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
 
         return {"message": "All alerts deleted successfully"}
 
@@ -357,6 +372,7 @@ class AlertManager:
                 status_code=404, detail=f"No alerts found with type '{alert_type}'")
 
         await self._engine.save(existing_doc)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
 
         return {"message": f"Deleted {deleted_count} alerts of type '{alert_type}'"}
 

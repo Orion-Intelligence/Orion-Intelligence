@@ -30,6 +30,7 @@ import { AlertExportService } from '../../../../services/export/alert-export.ser
 })
 export class CategoryAlertReportComponent implements OnInit {
   private appendTimer: ReturnType<typeof setTimeout> | null = null;
+  private alertLookupById = new Map<string, AlertModel>();
 
   filterModel: FilterModel = alert_filters;
   alerts: CategoryAlerts[] = []
@@ -55,13 +56,24 @@ export class CategoryAlertReportComponent implements OnInit {
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
   isExportChoiceOpen: boolean = false;
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.' }];
+  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'category-alert-export-option-report' }];
   openedActionMenuId: string | null = null;
   expandedAlertIds = new Set<string>();
   hoveredReportTool: 'add' | 'import' | 'flush' | 'sidebar' | null = null;
 
   constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+  }
+
+  private decrementUnseenSummary(by: number = 1): void {
+    const summary = this.appService.userSessionData().alert_summary;
+    if (!summary) {
+      return;
+    }
+    this.appService.userSessionData().alert_summary = {
+      ...summary,
+      unseen_total: Math.max(0, Number(summary.unseen_total || 0) - by)
+    };
   }
 
   isLightTheme(): boolean {
@@ -132,6 +144,11 @@ export class CategoryAlertReportComponent implements OnInit {
     this.apiService.get<any>(endpoint).subscribe({
       next: response => {
         const rawItems: AlertModel[] = response?.items || [];
+        for (const item of rawItems) {
+          if (item?.alert_id) {
+            this.alertLookupById.set(item.alert_id, item);
+          }
+        }
         const convertedItems = this.convertAlertsList(rawItems, this.category);
 
         this.currentPage = response?.page || nextPage;
@@ -190,7 +207,7 @@ export class CategoryAlertReportComponent implements OnInit {
   showAlertPopup(action: string, id: string) {
     switch (action) {
       case 'edit':
-        const alert = this.appService.userSessionData().alerts.find(a => a.alert_id === id);
+        const alert = this.alertLookupById.get(id);
         if (alert) {
           this.selectedAlert = alert;
           this.showEditAlertPopup = true;
@@ -319,6 +336,7 @@ export class CategoryAlertReportComponent implements OnInit {
     this.currentPage = 0;
     this.hasMoreAlerts = false;
     this.isInitialLoading = true;
+    this.alertLookupById.clear();
     this.alerts = [];
     this.filteredAlerts = [];
     this.visibleFilteredAlerts = [];
@@ -326,7 +344,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   seeDetailReprot(alertId: string) {
-    this.alertToShowReport = this.appService.userSessionData()?.alerts?.find(a => a.alert_id === alertId) || null;
+    this.alertToShowReport = this.alertLookupById.get(alertId) || null;
 
     if (!this.alertToShowReport) {
       return;
@@ -334,6 +352,9 @@ export class CategoryAlertReportComponent implements OnInit {
     if (this.alertToShowReport) {
       this.alertToShowReport.report_seen = true;
       this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
+        next: () => {
+          this.decrementUnseenSummary(1);
+        }
       });
       this.openExportChoice();
     }
@@ -362,8 +383,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
       if (hasEnterprise) {
 
-        const alerts = this.appService.userSessionData().alerts;
-        const _alert = alerts.find(a => a.alert_id === id);
+        const _alert = this.alertLookupById.get(id);
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';
           let scanType: string;
@@ -444,6 +464,7 @@ export class CategoryAlertReportComponent implements OnInit {
           _alert.report_seen = true;
           this.apiService.post('alert/seen', [_alert]).subscribe({
             next: () => {
+              this.decrementUnseenSummary(1);
             },
             error: (_err) => {
             },

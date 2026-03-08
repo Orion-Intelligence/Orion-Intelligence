@@ -43,7 +43,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   noIocPopup = signal(false);
   showAlertScanLoading = signal(false);
   isExportChoiceOpen = false;
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for alerts.' }];
+  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for alerts.', testId: 'home-alert-export-option-report' }];
 
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService) {
     effect(() => {
@@ -69,11 +69,11 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   initializeData() {
-    const alerts = this.appService.userSessionData().alerts;
-    const categories = this.convertAlertsToCategories(alerts);
+    const summary = this.appService.userSessionData().alert_summary;
+    const categories = this.convertCountsToCategories(summary?.counts_by_type || {});
     queueMicrotask(() => {
       this.alertCategories = categories;
-      this.countRiskCount(alerts);
+      this.countRiskFromSummary(summary?.counts_by_risk);
     });
   }
 
@@ -104,28 +104,14 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     return this.appService.userSessionData().user.role === 'member';
   }
 
-  convertAlertsToCategories(alerts: AlertModel[]): AlertCategorySummary[] {
-    const activeAlerts = alerts.filter(a => a.status !== 'ignore');
-    const grouped: Record<string, AlertModel[]> = {};
-    for (const alert of activeAlerts) {
-      const key = alert.type || 'Unknown';
-      if (!grouped[key]) {
-        grouped[key] = [];
-      }
-      grouped[key].push(alert);
-    }
-    const summaries: AlertCategorySummary[] = Object.entries(grouped).map(([category, group]) => {
-      const uniqueIocs = Array.from(new Set(group.map(a => a.ioc_value)));
-      const oldest = group
-        .map(a => new Date(a.first_seen || new Date()))
-        .sort((a, b) => a.getTime() - b.getTime())[0];
-      const tags = Array.from(new Set(group.flatMap(a => a.content_types || []).filter(Boolean)));
+  convertCountsToCategories(countsByType: Record<string, number>): AlertCategorySummary[] {
+    const summaries: AlertCategorySummary[] = Object.entries(countsByType).map(([category, count]) => {
       return {
         categoryName: category,
         risk: this.getRiskLevel(category),
-        iocCount: uniqueIocs.length,
-        detectedDate: oldest,
-        tags
+        iocCount: Number(count || 0),
+        detectedDate: null,
+        tags: []
       };
     });
     const ALL_CATEGORIES = [
@@ -159,30 +145,11 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     return summaries;
   }
 
-  countRiskCount(alerts: AlertModel[]) {
-    this.criticalRisks = 0;
-    this.highRisks = 0;
-    this.mediumRisks = 0;
-    this.lowRisks = 0;
-    alerts.forEach(alert => {
-      const risk = this.getRiskLevel(alert.type ?? '').toLowerCase();
-      switch (risk) {
-        case 'critical':
-          this.criticalRisks++;
-          break;
-        case 'high':
-          this.highRisks++;
-          break;
-        case 'medium':
-          this.mediumRisks++;
-          break;
-        case 'low':
-          this.lowRisks++;
-          break;
-        default:
-          break;
-      }
-    });
+  countRiskFromSummary(riskCounts?: { critical?: number; high?: number; medium?: number; low?: number }) {
+    this.criticalRisks = Number(riskCounts?.critical || 0);
+    this.highRisks = Number(riskCounts?.high || 0);
+    this.mediumRisks = Number(riskCounts?.medium || 0);
+    this.lowRisks = Number(riskCounts?.low || 0);
   }
 
   hasReports(): boolean {
@@ -260,6 +227,11 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
         next: () => {
           queueMicrotask(() => {
             this.appService.userSessionData().alerts = [];
+            this.appService.userSessionData().alert_summary = {
+              unseen_total: 0,
+              counts_by_type: {},
+              counts_by_risk: { critical: 0, high: 0, medium: 0, low: 0 }
+            };
             this.initializeData();
             this.alertService.isAlertScanLoading.set(false);
           });
@@ -297,7 +269,22 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   exportAlerts(_type: string): void {
-    this.alertExportService.exportPdf(this.appService.userSessionData().alerts || [], 'Brand Alerts');
-    this.closeExportChoice();
+    this.apiService.get<any>('profile/alerts').subscribe({
+      next: (alerts) => {
+        const normalizedAlerts: AlertModel[] = Array.isArray(alerts)
+          ? alerts
+          : (Array.isArray(alerts?.items) ? alerts.items : []);
+        if (!normalizedAlerts.length) {
+          this.messageNotificationService.show('No alerts available to export right now.');
+          this.closeExportChoice();
+          return;
+        }
+        this.alertExportService.exportPdf(normalizedAlerts, 'Brand Alerts');
+        this.closeExportChoice();
+      },
+      error: () => {
+        this.closeExportChoice();
+      }
+    });
   }
 }

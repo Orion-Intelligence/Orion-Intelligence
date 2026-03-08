@@ -3,10 +3,10 @@
 }
 
 @if (isNotificationOpen) {
-  <div class="fixed right-0 top-0 z-50 flex h-screen w-[360px] flex-col items-center gap-[10px] rounded-l-[16px] border-l border-[var(--color-border)] bg-[var(--color-blue-850)] py-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] max-[420px]:w-full max-[420px]:rounded-none" @sidebarAnimation>
+  <div data-testid="tenant-notification-sidebar" class="fixed right-0 top-0 z-50 flex h-screen w-[360px] flex-col items-center gap-[10px] rounded-l-[16px] border-l border-[var(--color-border)] bg-[var(--color-blue-850)] py-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] max-[420px]:w-full max-[420px]:rounded-none" @sidebarAnimation>
     <div class="flex w-[340px] items-center justify-between border-b border-[var(--color-border)] px-[6px] pb-3 max-[420px]:w-[calc(100%-20px)]">
       <span class="font-[Inter] text-[18px] font-semibold text-[var(--color-text1)]">Notifications</span>
-      <button type="button" (click)="close()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+      <button data-testid="tenant-notification-close" type="button" (click)="close()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
         <img alt="close" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon" />
       </button>
     </div>

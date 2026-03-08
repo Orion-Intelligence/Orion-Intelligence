@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Literal
+from typing import Dict, List, Optional, Literal
 
 from pydantic import BaseModel, Field
 
@@ -41,3 +41,8 @@ class NodeCallbackModel(BaseModel):
     user: UserDataModel
     tenant: TenantDataModel
     alerts: List[AlertModel] = Field(default_factory=list)
+    alert_summary: Dict[str, Dict[str, int] | int] = Field(default_factory=lambda: {
+        "unseen_total": 0,
+        "counts_by_type": {},
+        "counts_by_risk": {"critical": 0, "high": 0, "medium": 0, "low": 0},
+    })

@@ -2,6 +2,18 @@ export interface userSessionData {
     user: UserDataModel;
     tenant: TenantDataModel;
     alerts: AlertModel[];
+    alert_summary?: AlertSummary;
+}
+
+export interface AlertSummary {
+    unseen_total: number;
+    counts_by_type: Record<string, number>;
+    counts_by_risk: {
+        critical: number;
+        high: number;
+        medium: number;
+        low: number;
+    };
 }
 export interface UserDataModel {
     email: string;

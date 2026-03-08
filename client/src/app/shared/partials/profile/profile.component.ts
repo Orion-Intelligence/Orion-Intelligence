@@ -166,7 +166,12 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getUnseenAlertCount(): number {
-    return this.appService.userSessionData().alerts.filter(alert => !alert.report_seen).length;
+    const summary = this.appService.userSessionData().alert_summary;
+    if (summary && typeof summary.unseen_total === 'number') {
+      return summary.unseen_total;
+    }
+    const alerts = this.appService.userSessionData().alerts;
+    return (Array.isArray(alerts) ? alerts : []).filter(alert => !alert.report_seen).length;
   }
 
   openSupportPopup() {

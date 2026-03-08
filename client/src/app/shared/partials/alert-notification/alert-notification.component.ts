@@ -31,13 +31,24 @@ export class AlertNotificationComponent implements OnChanges {
   isFetchingDetail: boolean = false;
   alertToShowReport: AlertModel | null = null;
   isExportChoiceOpen: boolean = false;
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.' }];
+  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
 
   @Input() isNotificationOpen!: boolean | null;
 
   @Output() closeNotification = new EventEmitter<void>();
 
   constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService) {
+  }
+
+  private decrementUnseenSummary(by: number = 1): void {
+    const summary = this.appService.userSessionData().alert_summary;
+    if (!summary) {
+      return;
+    }
+    this.appService.userSessionData().alert_summary = {
+      ...summary,
+      unseen_total: Math.max(0, Number(summary.unseen_total || 0) - by)
+    };
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -156,8 +167,11 @@ export class AlertNotificationComponent implements OnChanges {
     this.isFetchingDetail = true;
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
-        this.appService.userSessionData().alerts = response;
-        const selectedAlert = this.appService.userSessionData().alerts.find(a => a.data_hash === hash) || null;
+        const alerts: AlertModel[] = Array.isArray(response)
+          ? response
+          : (Array.isArray(response?.items) ? response.items : []);
+        this.appService.userSessionData().alerts = alerts;
+        const selectedAlert = alerts.find(a => a.data_hash === hash) || null;
         if (!selectedAlert) {
           this.isFetchingDetail = false;
           return;
@@ -167,6 +181,7 @@ export class AlertNotificationComponent implements OnChanges {
         this.alertToShowReport.report_seen = true;
         this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
           next: () => {
+            this.decrementUnseenSummary(1);
             this.fetchNotifications(true);
             this.isFetchingDetail = false;
             this.openExportChoice();
@@ -204,30 +219,46 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   clearAll() {
-    const alerts = this.appService.userSessionData().alerts;
-    if (!alerts) {
-      return;
-    }
-    alerts.forEach(alert => {
-      alert.report_seen = true;
-    });
-    this.apiService.post('alert/seen', alerts).subscribe({
-      next: () => {
-        this.getLatestAlerts();
-        this.messageNotificationService.show("Clear all alerts successfully!");
-        this.close();
-      },
-      error: (err) => {
-        const mess = err?.error?.detail || 'Clear all alerts failed';
-        this.messageNotificationService.show(mess);
-      },
+    this.apiService.get<any>('profile/alerts').subscribe({
+      next: (alerts) => {
+        const allAlerts: AlertModel[] = Array.isArray(alerts)
+          ? alerts
+          : (Array.isArray(alerts?.items) ? alerts.items : []);
+        if (allAlerts.length === 0) {
+          this.fetchNotifications(true);
+          return;
+        }
+        allAlerts.forEach(alert => {
+          alert.report_seen = true;
+        });
+        this.apiService.post('alert/seen', allAlerts).subscribe({
+          next: () => {
+            const summary = this.appService.userSessionData().alert_summary;
+            if (summary) {
+              this.appService.userSessionData().alert_summary = {
+                ...summary,
+                unseen_total: 0
+              };
+            }
+            this.getLatestAlerts();
+            this.messageNotificationService.show("Clear all alerts successfully!", 'success');
+            this.close();
+          },
+          error: (err) => {
+            const mess = err?.error?.detail || 'Clear all alerts failed';
+            this.messageNotificationService.show(mess);
+          },
+        });
+      }
     });
   }
 
   getLatestAlerts() {
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
-        this.appService.userSessionData().alerts = response;
+        this.appService.userSessionData().alerts = Array.isArray(response)
+          ? response
+          : (Array.isArray(response?.items) ? response.items : []);
         this.fetchNotifications(true);
       }
     });

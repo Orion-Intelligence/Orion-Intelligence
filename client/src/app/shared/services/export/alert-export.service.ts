@@ -8,14 +8,14 @@ export class AlertExportService {
   constructor(private documentExport: DocumentExportService) {
   }
 
-  exportPdf(alerts: AlertModel[], title: string = 'Brand Alerts'): void {
+  exportPdf(alerts: AlertModel[] | null | undefined, title: string = 'Brand Alerts'): void {
     const payload = this.buildPayload(alerts, title);
     this.documentExport.exportDocumentPdf(payload);
   }
 
-  private buildPayload(alerts: AlertModel[], title: string): GraphReportPayload {
+  private buildPayload(alerts: AlertModel[] | null | undefined, title: string): GraphReportPayload {
     const exportAtIso = new Date().toISOString();
-    const safeAlerts = (alerts || []).filter(Boolean);
+    const safeAlerts = (Array.isArray(alerts) ? alerts : []).filter(Boolean);
     const baseSummary: Record<string, string | number> = {
       total_alerts: safeAlerts.length,
       exported_at: exportAtIso
