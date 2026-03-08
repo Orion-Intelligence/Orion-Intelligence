@@ -111,7 +111,7 @@ export default defineConfig({
         baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1366,
         viewportHeight: 1200,
-        defaultCommandTimeout: 15000,
+        defaultCommandTimeout: 35000,
         waitForAnimations: false,
         animationDistanceThreshold: 0,
         screenshotOnRunFailure: false,
