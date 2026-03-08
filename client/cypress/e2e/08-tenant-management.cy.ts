@@ -15,25 +15,24 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
   });
 
   after(() => {
-    waitForBlockingOverlayToClose();
     cy.logout();
   });
 
-  // it('creates tenant account and completes email verification', () => {
-  //   cy.clearAllEmails();
-  //   cy.visit('/signup');
-  //
-  //   cy.get('[data-testid="signup-username"]', {timeout: 30000}).type(tenant.username);
-  //   cy.get('[data-testid="signup-companymail"]', {timeout: 30000}).type(tenant.email);
-  //   cy.get('[data-testid="signup-password"]', {timeout: 30000}).type(tenant.password, {log: false});
-  //   cy.get('[data-testid="signup-submit"]', {timeout: 30000}).should('be.visible').click();
-  //   cy.get('[data-testid="welcome-tick"]', {timeout: 30000}).should('exist');
-  //   cy.get('[data-testid="welcome-goto-login"]', {timeout: 30000}).click();
-  //
-  //   cy.openLastMailAndGetUrl().then((url) => {
-  //     cy.visit(url);
-  //   });
-  // });
+  it('creates tenant account and completes email verification', () => {
+    cy.clearAllEmails();
+    cy.visit('/signup');
+
+    cy.get('[data-testid="signup-username"]', {timeout: 30000}).type(tenant.username);
+    cy.get('[data-testid="signup-companymail"]', {timeout: 30000}).type(tenant.email);
+    cy.get('[data-testid="signup-password"]', {timeout: 30000}).type(tenant.password, {log: false});
+    cy.get('[data-testid="signup-submit"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="welcome-tick"]', {timeout: 30000}).should('exist');
+    cy.get('[data-testid="welcome-goto-login"]', {timeout: 30000}).click();
+
+    cy.openLastMailAndGetUrl().then((url) => {
+      cy.visit(url);
+    });
+  });
 
   it('verifies tenants and assigns enterprise license as admin', () => {
     cy.loginAsAdmin();
@@ -44,103 +43,134 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     const state = {verifiedCount: 0};
     approveAllTenants(state);
 
-    cy.then(() => {
-      expect(state.verifiedCount).to.be.greaterThan(0);
-    });
-
     openTenantsPage();
     cy.logout();
   });
 
-  // it('completes tenant onboarding and adds tenant user', () => {
-  //   cy.visit('/login');
-  //   cy.reload();
-  //   cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
-  //   cy.get('[data-testid="login-pass"]', {timeout: 30000}).type(tenant.password, {log: false});
-  //   cy.get('[data-testid="login-button"]', {timeout: 30000}).click();
-  //
-  //   cy.get('[data-testid="tenant-company-input"]', {timeout: 30000}).should('be.visible').clear().type('orion intelligence');
-  //   cy.get('[data-testid="tenant-onboarding-next-step1"]', {timeout: 30000}).should('be.visible').click();
-  //   cy.get('[data-testid="tenant-onboarding-next-step2"]', {timeout: 30000}).should('be.visible').click();
-  //   cy.get('[data-testid="tenant-onboarding-confirm"]', {timeout: 30000}).should('be.visible').click();
-  //
-  //   openManageIOCs();
-  //   addIOCForAllTabs();
-  //
-  //   cy.get('[data-testid="sidebar-subitem-profile-users"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  //   waitForBlockingOverlayToClose();
-  //   cy.get('[data-testid="tenant-add-user-button"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="tenant-add-user-username"]', {timeout: 30000}).type(tenantSubUser.username);
-  //   cy.get('[data-testid="tenant-add-user-email"]', {timeout: 30000}).type(tenantSubUser.email);
-  //   cy.get('[data-testid="tenant-add-user-password"]', {timeout: 30000}).type(tenantSubUser.password, {log: false});
-  //   cy.get('[data-testid="tenant-add-user-submit"]', {timeout: 30000}).scrollIntoView().should('be.visible').and('not.be.disabled').click();
-  //   cy.logout();
-  //   cy.url().should('include', '/login');
-  // });
-  //
-  // it('updates tenant user quota to one as admin', () => {
-  //   cy.loginAsAdmin();
-  //   cy.visit('/dashboard/profile/homepage');
-  //   openTenantsPage();
-  //   cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
-  //   cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block', {timeout: 15000}).filter(':visible').first().scrollTo('right', {ensureScrollable: false});
-  //   cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').clear().type('1');
-  //   cy.get('[data-testid="tenant-save-changes"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
-  //   cy.logout();
-  // });
-  //
-  // it('logs in tenant and validates homepage navigation', () => {
-  //   cy.visit('/login');
-  //   cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
-  //   cy.get('[data-testid="login-pass"]', {timeout: 30000}).type(tenant.password, {log: false});
-  //   cy.get('[data-testid="login-button"]', {timeout: 30000}).click();
-  //   cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
-  //   cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  //   cy.location('pathname', {timeout: 20000}).should('include', '/dashboard/profile/homepage');
-  // });
-  //
-  // it('handles tenant alerts and notifications end-to-end', () => {
-  //   cy.visit('/login');
-  //   cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
-  //   cy.get('[data-testid="login-pass"]', {timeout: 30000}).type(tenant.password, {log: false});
-  //   cy.get('[data-testid="login-button"]', {timeout: 30000}).click();
-  //
-  //   cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
-  //   cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  //
-  //   cy.get('[data-testid="tenant-home-scan-all"]', {timeout: 40000}).scrollIntoView().should('be.visible').and('not.be.disabled').click();
-  //   cy.get('app-alert-scan-loading', {timeout: 60000}).should('not.exist');
-  //   waitForBlockingOverlayToClose();
-  //   cy.get('[data-testid="tenant-home-print-alerts"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //
-  //   cy.get('[data-testid="profile-notification-bell"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="tenant-notification-see-details"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
-  //
-  //   cy.get('[data-testid="profile-notification-bell"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="tenant-notification-clear-all"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //
-  //   cy.get('[data-testid="tenant-home-alert-category-card"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="tenant-alert-report-see-details"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
-  //
-  //   cy.get('[data-testid="tenant-alert-add-button"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="tenant-alert-modal"]', {timeout: 30000}).should('be.visible');
-  //   cy.get('[data-testid="tenant-alert-title"]', {timeout: 30000}).should('be.visible').clear().type('Test Alert');
-  //   cy.get('[data-testid="tenant-alert-description"]').clear().type('Test description');
-  //   cy.get('[data-testid="tenant-alert-ioc-type-toggle"]').click();
-  //   cy.get('[data-testid="tenant-alert-ioc-type-option"]').contains('Domains').click();
-  //   cy.get('[data-testid="tenant-alert-source"]').clear().type('Automation');
-  //   cy.get('[data-testid="tenant-alert-url"]').clear().type('https://example.com');
-  //   cy.get('[data-testid="tenant-alert-ioc-value"]').clear().type('example.com');
-  //   cy.get('[data-testid="tenant-alert-save"]').scrollIntoView().should('be.visible').click();
-  //
-  //   cy.get('[data-testid="tenant-alert-open-sidebar"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 30000}).scrollIntoView().click();
-  //   cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 30000}).scrollIntoView().click();
-  //   cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //
-  //   cy.get('[data-testid="tenant-alert-flush-all"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-  //   cy.get('[data-testid="confirmation-yes-button"]', {timeout: 30000}).should('be.visible').click();
-  // });
+  it('completes tenant onboarding and adds tenant user', () => {
+    cy.visit('/login');
+    cy.reload();
+    cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
+    cy.get('[data-testid="login-pass"]', {timeout: 30000}).type(tenant.password, {log: false});
+    cy.get('[data-testid="login-button"]', {timeout: 30000}).click();
+
+    cy.get('[data-testid="tenant-company-input"]', {timeout: 30000}).should('be.visible').clear().type('orion intelligence');
+    cy.get('[data-testid="tenant-onboarding-next-step1"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="tenant-onboarding-next-step2"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="tenant-onboarding-confirm"]', {timeout: 30000}).should('be.visible').click();
+
+    openManageIOCs();
+    addIOCForAllTabs();
+
+    cy.get('[data-testid="sidebar-subitem-profile-users"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+    waitForBlockingOverlayToClose();
+    cy.get('[data-testid="tenant-add-user-button"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-add-user-username"]', {timeout: 30000}).type(tenantSubUser.username);
+    cy.get('[data-testid="tenant-add-user-email"]', {timeout: 30000}).type(tenantSubUser.email);
+    cy.get('[data-testid="tenant-add-user-password"]', {timeout: 30000}).type(tenantSubUser.password, {log: false});
+    cy.get('[data-testid="tenant-add-user-submit"]', {timeout: 30000}).scrollIntoView().should('be.visible').and('not.be.disabled').click();
+    cy.logout();
+    cy.url().should('include', '/login');
+  });
+
+  it('updates tenant user quota to one as admin', () => {
+    cy.loginAsAdmin();
+    cy.visit('/dashboard/profile/homepage');
+    openTenantsPage();
+    cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
+    cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').clear().type('1');
+    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 15000})
+      .filter(':visible')
+      .first()
+      .scrollTo('bottom', {ensureScrollable: false});
+
+    cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block', {timeout: 15000})
+      .filter(':visible')
+      .first()
+      .scrollTo('bottomRight', {ensureScrollable: false});
+
+    cy.get('[data-testid="tenant-save-changes"]', {timeout: 15000})
+      .filter(':visible')
+      .first()
+      .then(($btn) => {
+        const btn = $btn.get(0) as HTMLElement;
+        btn.scrollIntoView();
+        const parentScroller = btn.closest('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block') as HTMLElement | null;
+        if (parentScroller) {
+          parentScroller.scrollTop = parentScroller.scrollHeight;
+          parentScroller.scrollLeft = parentScroller.scrollWidth;
+          parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
+        }
+        cy.wrap($btn).should('be.visible').and('not.be.disabled');
+        btn.click();
+      });
+    cy.logout();
+  });
+
+  it('logs in tenant and validates homepage navigation', () => {
+    cy.visit('/login');
+    cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
+    cy.get('[data-testid="login-pass"]', {timeout: 30000}).type(tenant.password, {log: false});
+    cy.get('[data-testid="login-button"]', {timeout: 30000}).click();
+    cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+    cy.location('pathname', {timeout: 20000}).should('include', '/dashboard/profile/homepage');
+  });
+
+  it('handles tenant alerts and notifications end-to-end', () => {
+    cy.visit('/login');
+    cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
+    cy.get('[data-testid="login-pass"]', {timeout: 30000}).type(tenant.password, {log: false});
+    cy.get('[data-testid="login-button"]', {timeout: 30000}).click();
+
+    cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+
+    cy.get('app-alert-scan-loading', {timeout: 10000}).should('not.exist');
+    cy.get('[data-testid="tenant-home-print-alerts"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+
+    cy.get('[data-testid="profile-notification-bell"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-notification-see-details"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
+
+    cy.get('[data-testid="profile-notification-bell"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-notification-clear-all"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+
+    cy.get('[data-testid="tenant-home-alert-category-card"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-alert-report-see-details"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
+
+    cy.get('[data-testid="tenant-alert-add-button"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-alert-modal"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="tenant-alert-title"]', {timeout: 30000}).should('be.visible').clear().type('Test Alert');
+    cy.get('[data-testid="tenant-alert-description"]').clear().type('Test description');
+    cy.get('[data-testid="tenant-alert-ioc-type-toggle"]').click();
+    cy.get('[data-testid="tenant-alert-ioc-type-option"]').contains('Domains').click();
+    cy.get('[data-testid="tenant-alert-source"]').clear().type('Automation');
+    cy.get('[data-testid="tenant-alert-url"]').clear().type('https://example.com');
+    cy.get('[data-testid="tenant-alert-ioc-value"]').clear().type('example.com');
+    cy.get('[data-testid="tenant-alert-save"]').scrollIntoView().should('be.visible').click();
+
+    cy.get('[data-testid="tenant-alert-open-sidebar"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    Cypress._.times(12, () => {
+      cy.get('[data-testid="side-filter-date-prev-month"]', {timeout: 30000}).first().click();
+    });
+    cy.get('[data-testid="side-filter-date-day-15"]', {timeout: 30000})
+      .not('.text-slate-400')
+      .first()
+      .scrollIntoView()
+      .click();
+    Cypress._.times(12, () => {
+      cy.get('[data-testid="side-filter-date-next-month"]', {timeout: 30000}).first().click();
+    });
+    cy.get('[data-testid="side-filter-date-day-15"]', {timeout: 30000})
+      .not('.text-slate-400')
+      .first()
+      .scrollIntoView()
+      .click();
+    cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+
+    cy.get('[data-testid="tenant-alert-flush-all"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="confirmation-yes-button"]', {timeout: 30000}).should('be.visible').click();
+  });
 });

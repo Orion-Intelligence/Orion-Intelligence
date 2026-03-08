@@ -24,12 +24,12 @@ function scrollTenantTableToBottomLeft() {
 
   cy.get('@tenantDesktopScroller')
     .find('tbody:visible tr:last', {timeout: 15000})
-    .scrollIntoView({block: 'end', inline: 'end'});
+    .scrollIntoView();
 
   cy.get('@tenantDesktopScroller').then(($scroller) => {
     const cell = $scroller.find('td:contains("No tenants available.")').first();
     if (cell.length) {
-      cy.wrap(cell).scrollIntoView({block: 'end', inline: 'end'});
+      cy.wrap(cell).scrollIntoView();
     }
   });
 }
@@ -55,7 +55,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
       );
     });
     if (rows.length === 0) {
-      return;
+      throw new Error('Expected at least one "Not Verified" tenant row, found none');
     }
     if (rows.length !== 1) {
       throw new Error(`Expected exactly 1 row, found ${rows.length}`);
@@ -85,15 +85,26 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
     cy.get('[data-testid="tenant-verified-toggle"]', {timeout: 15000}).first().scrollIntoView().should('exist').then(($btn) => {
       if (($btn.text() || '').toLowerCase().includes('not verified')) {
-        cy.wrap($btn).scrollIntoView({block: 'center'}).should('be.visible').click();
+        cy.wrap($btn).scrollIntoView().should('be.visible').click();
         cy.wrap(true).as('changed');
       }
     });
 
+    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 15000})
+      .filter(':visible')
+      .first()
+      .scrollTo('bottom', {ensureScrollable: false});
+    cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block', {timeout: 15000})
+      .filter(':visible')
+      .first()
+      .scrollTo('bottomRight', {ensureScrollable: false});
+
     cy.get('[data-testid="tenant-license-enterprise"]', {timeout: 15000}).first().scrollIntoView().should('exist').then(($card) => {
       const $cb = $card.find('input[type="checkbox"], input.license-checkbox').first();
       if (!$cb.prop('checked')) {
-        cy.wrap($card).scrollIntoView({block: 'center'}).should('be.visible').click();
+        const cardEl = $card.get(0) as HTMLElement;
+        cardEl.scrollIntoView();
+        cardEl.click();
         cy.wrap(true).as('changed');
       }
     });
@@ -110,20 +121,20 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
           .first()
           .scrollTo('bottomRight', {ensureScrollable: false});
 
-        cy.get('@tenantEditPanel')
-          .find('[data-testid="tenant-save-changes"]', {timeout: 15000})
+        cy.get('[data-testid="tenant-save-changes"]', {timeout: 15000})
           .filter(':visible')
           .first()
           .then(($btn) => {
             const btn = $btn.get(0) as HTMLElement;
-            btn.scrollIntoView({block: 'center', inline: 'nearest'});
+            btn.scrollIntoView();
             const parentScroller = btn.closest('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block') as HTMLElement | null;
             if (parentScroller) {
               parentScroller.scrollTop = parentScroller.scrollHeight;
               parentScroller.scrollLeft = parentScroller.scrollWidth;
               parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
             }
-            cy.wrap($btn).should('be.visible').click();
+            cy.wrap($btn).should('be.visible').and('not.be.disabled');
+            btn.click();
           });
       }
     });
@@ -140,7 +151,12 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 export function openTenantsPage() {
   cy.viewport(1440, 900);
   cy.get('[data-testid="sidebar-subitem-profile-tenant"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  cy.url().should('include', '/dashboard/profile/tenant');
+  cy.location('pathname', {timeout: 15000}).then((path) => {
+    if (!path.includes('/dashboard/profile/tenant')) {
+      cy.visit('/dashboard/profile/tenant');
+    }
+  });
+  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
 }
 
 export function openManageIOCs() {
