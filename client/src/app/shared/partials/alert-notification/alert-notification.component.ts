@@ -64,7 +64,7 @@ export class AlertNotificationComponent implements OnChanges {
     return this.hasMore || this.alertNotifications.length < this.totalCount;
   }
 
-  private fetchNotifications(reset: boolean): void {
+  private fetchNotifications(reset: boolean, attempt: number = 1): void {
     if (this.isLoadingMore) {
       return;
     }
@@ -78,6 +78,12 @@ export class AlertNotificationComponent implements OnChanges {
           ...n,
           lastSeen: n?.lastSeen ? new Date(n.lastSeen) : n?.lastSeen
         }));
+        if (reset && nextPage === 1 && items.length === 0 && attempt < 3) {
+          this.isLoadingMore = false;
+          this.isLoadMoreTriggered = false;
+          setTimeout(() => this.fetchNotifications(true, attempt + 1), 800);
+          return;
+        }
         this.totalCount = response?.total || 0;
         this.currentPage = response?.page || nextPage;
         this.hasMore = !!response?.has_more;
