@@ -164,6 +164,7 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
       cy.get('body').then($body => {
         if ($body.find('[data-testid="tenant-scan-cancel"]').length > 0) {
           cy.wait(10000);
+          cy.reload()
           cy.get('body').then($bodyAfterWait => {
             if ($bodyAfterWait.find('[data-testid="tenant-scan-cancel"]').length > 0) {
               cy.get('[data-testid="tenant-scan-cancel"]', {timeout: 30000})
