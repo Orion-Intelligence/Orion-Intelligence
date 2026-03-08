@@ -1,6 +1,8 @@
 import json
 from typing import Dict
 
+from fastapi import HTTPException
+
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, AlertModel
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
@@ -21,9 +23,8 @@ class AlertSummaryHelper:
                 REDIS_COMMANDS.S_DELETE_KEY,
                 [self.summary_cache_key(str(tenant_id))]
             )
-        except Exception:
-            # Cache invalidation should not block alert mutations.
-            pass
+        except Exception as ex:
+            raise HTTPException(status_code=500, detail=f"Redis cache delete failed: {ex}")
 
     @staticmethod
     def risk_from_alert_type(alert_type: str) -> str:
@@ -72,8 +73,8 @@ class AlertSummaryHelper:
             cached = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [key, None, None])
             if cached:
                 return json.loads(cached)
-        except Exception:
-            pass
+        except Exception as ex:
+            raise HTTPException(status_code=500, detail=f"Redis cache read failed: {ex}")
 
         alerts_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant_id))
         alerts = alerts_doc.alerts if alerts_doc and alerts_doc.alerts else []
@@ -84,7 +85,7 @@ class AlertSummaryHelper:
                 REDIS_COMMANDS.S_SET_STRING,
                 [key, json.dumps(summary), self._ttl_seconds]
             )
-        except Exception:
-            pass
+        except Exception as ex:
+            raise HTTPException(status_code=500, detail=f"Redis cache write failed: {ex}")
 
         return summary
