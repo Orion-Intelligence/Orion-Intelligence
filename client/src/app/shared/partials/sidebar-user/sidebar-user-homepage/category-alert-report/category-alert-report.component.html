@@ -86,9 +86,9 @@
       <app-empty-result class="p-0 m-0"></app-empty-result>
     }
 
-    <div class="category_report_alerts mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
-      @for (item of filteredAlerts; track item) {
-        <div data-testid="tenant-alert-report-card" class="category_report_alert-card">
+    <div class="alert-card-stagger-list category_report_alerts mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
+      @for (item of visibleFilteredAlerts; track item) {
+        <div data-testid="tenant-alert-report-card" class="alert-card-stagger-item category_report_alert-card">
           <div class="category_report_alert-header">
             <div class="category_report_alert-card-top">
               <span class="category_report_flex" [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
@@ -189,6 +189,13 @@
         </div>
       }
     </div>
+    @if (canLoadMoreAlerts()) {
+      <div class="mt-3 flex w-full items-center justify-center">
+        <button type="button" [disabled]="isLoadingMoreAlerts" (click)="loadMoreAlerts()" class="rounded-md border border-[var(--color-border)] bg-transparent px-4 py-2 text-[12px] font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-70">
+          {{ isLoadingMoreAlerts ? 'Loading...' : 'Load more' }}
+        </button>
+      </div>
+    }
   </div>
 
   @if (showCustomAlertPopup) {

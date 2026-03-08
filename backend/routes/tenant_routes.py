@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi import Depends, UploadFile
 
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
@@ -251,8 +251,26 @@ async def update_alert(data: AlertModel, current_user=Depends(get_current_user))
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
-async def get_user_alerts(current_user=Depends(get_current_user)):
-    return await AlertManager.getInstance().getAllAlerts(current_user)
+async def get_user_alerts(
+    current_user=Depends(get_current_user),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=20),
+    alert_type: str | None = Query(None),
+    paginate: bool = Query(False),
+    compact: bool = Query(False),
+    unseen_only: bool = Query(False),
+    include_counts: bool = Query(False),
+):
+    return await AlertManager.getInstance().getAllAlerts(
+        current_user,
+        page=page,
+        limit=limit,
+        alert_type=alert_type,
+        paginate=paginate,
+        compact=compact,
+        unseen_only=unseen_only,
+        include_counts=include_counts,
+    )
 
 
 @tenant_routes.post(

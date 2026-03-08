@@ -13,6 +13,9 @@ export interface AlertNotification {
     subCategory: string;
     lastSeen: Date;
     hash: string;
+    iocValue?: string;
+    type?: string;
+    reportSeen?: boolean;
 }
 export interface CategoryAlerts {
     id: string;

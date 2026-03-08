@@ -1,0 +1,33 @@
+@keyframes notif-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notif-stagger-item {
+  opacity: 0;
+  animation: notif-stagger-in 260ms ease forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes alert-card-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-card-stagger-item {
+  opacity: 0;
+  animation: alert-card-stagger-in 260ms ease forwards;
+  will-change: opacity, transform;
+}

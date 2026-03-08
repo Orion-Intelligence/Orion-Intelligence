@@ -622,6 +622,50 @@ const localRules = {
       },
     },
 
+    'no-inline-styles-in-component': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Disallow inline styles in Angular component metadata.',
+        },
+        schema: [],
+        messages: {
+          noInlineStyles: 'Do not use inline styles in @Component. Use global/custom classes instead.',
+        },
+      },
+      create(context) {
+        function isComponentDecorator(dec) {
+          const expr = dec.expression;
+          return expr
+            && expr.type === 'CallExpression'
+            && expr.callee.type === 'Identifier'
+            && expr.callee.name === 'Component';
+        }
+
+        function hasStylesProperty(arg) {
+          return arg
+            && arg.type === 'ObjectExpression'
+            && arg.properties.some(prop => {
+              if (prop.type !== 'Property') return false;
+              const key = prop.key;
+              return key && (
+                (key.type === 'Identifier' && key.name === 'styles')
+                || (key.type === 'Literal' && key.value === 'styles')
+              );
+            });
+        }
+
+        return {
+          Decorator(node) {
+            if (!isComponentDecorator(node)) return;
+            const arg = node.expression.arguments && node.expression.arguments[0];
+            if (!arg || !hasStylesProperty(arg)) return;
+            context.report({ messageId: 'noInlineStyles', node });
+          },
+        };
+      },
+    },
+
     'class-field-single-line': {
       meta: {
         type: 'layout',
@@ -1003,6 +1047,7 @@ module.exports = [
       'local/import-single-line': 'error',
       'local/function-params-single-line': 'error',
       'local/no-style-url-in-component': 'error',
+      'local/no-inline-styles-in-component': 'error',
       'local/rxjs-empty-error-handler-param': 'error',
       'local/assignment-single-line': 'error',
       'no-restricted-syntax': [

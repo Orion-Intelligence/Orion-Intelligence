@@ -28,9 +28,17 @@ import { EmptyResultComponent } from '../../../empty-result/empty-result.compone
   templateUrl: './category-alert-report.component.html',
 })
 export class CategoryAlertReportComponent implements OnInit {
+  private appendTimer: ReturnType<typeof setTimeout> | null = null;
   filterModel: FilterModel = alert_filters;
   alerts: CategoryAlerts[] = []
   filteredAlerts: CategoryAlerts[] = []
+  visibleFilteredAlerts: CategoryAlerts[] = [];
+  readonly serverPageSize: number = 20;
+  readonly incrementalDelayMs: number = 90;
+  currentPage: number = 0;
+  hasMoreAlerts: boolean = false;
+  isLoadingMoreAlerts: boolean = false;
+  activeDateRange: string | null = null;
   searchText: string = '';
   category: string = '';
   iocTypes: Record<string, string> = {};
@@ -68,10 +76,87 @@ export class CategoryAlertReportComponent implements OnInit {
       return '';
     })).subscribe(lastSegment => {
       this.category = lastSegment;
+      this.getLatestAlerts();
     });
     this.iocTypes = { ...search_filter_labels };
-    this.alerts = this.convertAlertsList(this.appService.userSessionData().alerts, this.category);
-    this.filteredAlerts = this.alerts;
+  }
+
+  private clearAppendTimer(): void {
+    if (this.appendTimer) {
+      clearTimeout(this.appendTimer);
+      this.appendTimer = null;
+    }
+  }
+
+  private appendVisibleAlertsIncrementally(items: CategoryAlerts[], reset: boolean): void {
+    this.clearAppendTimer();
+    this.visibleFilteredAlerts = reset ? [] : [...this.visibleFilteredAlerts];
+
+    if (items.length === 0) {
+      this.isLoadingMoreAlerts = false;
+      return;
+    }
+
+    let index = 0;
+    const appendNext = () => {
+      if (index >= items.length) {
+        this.isLoadingMoreAlerts = false;
+        this.appendTimer = null;
+        return;
+      }
+
+      this.visibleFilteredAlerts = [...this.visibleFilteredAlerts, items[index]];
+      index += 1;
+      this.appendTimer = setTimeout(appendNext, this.incrementalDelayMs);
+    };
+
+    appendNext();
+  }
+
+  private loadAlertsPage(reset: boolean): void {
+    if (!this.category || this.isLoadingMoreAlerts) {
+      return;
+    }
+
+    const nextPage = reset ? 1 : this.currentPage + 1;
+    this.isLoadingMoreAlerts = true;
+    const endpoint = `profile/alerts?paginate=true&page=${nextPage}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
+
+    this.apiService.get<any>(endpoint).subscribe({
+      next: response => {
+        const rawItems: AlertModel[] = response?.items || [];
+        const convertedItems = this.convertAlertsList(rawItems, this.category);
+
+        this.currentPage = response?.page || nextPage;
+        this.hasMoreAlerts = !!response?.has_more;
+        this.alerts = reset ? convertedItems : [...this.alerts, ...convertedItems];
+
+        if (this.activeDateRange) {
+          const [startStr, endStr] = this.activeDateRange.split(',');
+          this.filterByDate(new Date(startStr), new Date(endStr));
+          this.visibleFilteredAlerts = [...this.filteredAlerts];
+          this.isLoadingMoreAlerts = false;
+          return;
+        }
+
+        this.filteredAlerts = [...this.alerts];
+        this.appendVisibleAlertsIncrementally(convertedItems, reset);
+      },
+      error: () => {
+        this.isLoadingMoreAlerts = false;
+      }
+    });
+  }
+
+  canLoadMoreAlerts(): boolean {
+    return this.hasMoreAlerts;
+  }
+
+  loadMoreAlerts(): void {
+    if (!this.canLoadMoreAlerts()) {
+      return;
+    }
+    this.loadAlertsPage(false);
   }
 
   flushAll() {
@@ -194,7 +279,6 @@ export class CategoryAlertReportComponent implements OnInit {
     if (refresh) {
       this.getLatestAlerts();
     }
-    this.filteredAlerts = this.alerts;
     this.showCustomAlertPopup = false;
     this.showEditAlertPopup = false;
   }
@@ -223,13 +307,12 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   getLatestAlerts() {
-    this.apiService.get<any>('profile/alerts').subscribe({
-      next: response => {
-        this.appService.userSessionData().alerts = response
-        this.alerts = this.convertAlertsList(this.appService.userSessionData().alerts, this.category);
-        this.filteredAlerts = this.alerts;
-      }
-    })
+    this.currentPage = 0;
+    this.hasMoreAlerts = false;
+    this.alerts = [];
+    this.filteredAlerts = [];
+    this.visibleFilteredAlerts = [];
+    this.loadAlertsPage(true);
   }
 
   seeDetailReprot(alertId: string) {
@@ -554,9 +637,11 @@ export class CategoryAlertReportComponent implements OnInit {
 
   applyFilter(filters: Record<string, string | null>) {
     const range = filters['daterange'];
+    this.activeDateRange = range || null;
 
     if (!range) {
       this.filteredAlerts = [...this.alerts];
+      this.visibleFilteredAlerts = [...this.filteredAlerts];
       return;
     }
 

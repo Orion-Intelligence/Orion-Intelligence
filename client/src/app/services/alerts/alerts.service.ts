@@ -79,9 +79,10 @@ export class AlertService implements OnDestroy {
 
   getScanStatus() {
     return this.apiService.post<any>('profile/alert/scan/status', {}).pipe(tap(res => {
-      if (res?.scan_running === false) {
+      if (this.hasAutoCheckedOnce && res?.scan_running === false) {
         this.getLatestAlerts();
       }
+      this.hasAutoCheckedOnce = true;
     }));
   }
 

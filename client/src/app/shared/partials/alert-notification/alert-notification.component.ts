@@ -1,107 +1,120 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
-import { Router } from '@angular/router';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
 import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
-import { LicenseService } from '../../../services/licenses/licenses.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
+import { NgxPrintModule } from 'ngx-print';
+import { AlertExportComponentComponent } from '../sidebar-user/sidebar-user-homepage/alert-export-component/alert-export-component.component';
 @Component({
   selector: 'app-alert-notification',
-  imports: [CommonModule, NgClass],
+  imports: [CommonModule, NgClass, NgxPrintModule, AlertExportComponentComponent],
   templateUrl: './alert-notification.component.html',
   animations: [sidebarAnimation, overlayAnimation],
 })
 export class AlertNotificationComponent implements OnChanges {
+  private appendTimer: ReturnType<typeof setTimeout> | null = null;
   alertNotifications: AlertNotification[] = [];
-  visibleAlertNotifications: AlertNotification[] = [];
-  readonly batchSize: number = 50;
-  displayedCount: number = 50;
+  readonly batchSize: number = 20;
+  readonly incrementalDelayMs: number = 120;
+  readonly incrementalChunkSize: number = 1;
+  currentPage: number = 0;
+  totalCount: number = 0;
+  hasMore: boolean = false;
+  countsByType: Record<string, number> = {};
   isLoadingMore: boolean = false;
-
+  isLoadMoreTriggered: boolean = false;
+  isFetchingDetail: boolean = false;
+  alertToShowReport: AlertModel | null = null;
+  @ViewChild('printBtn') printBtn!: ElementRef<HTMLButtonElement>;
   @Input() isNotificationOpen!: boolean | null;
-
   @Output() closeNotification = new EventEmitter<void>();
 
-  constructor(public appService: AppService, public router: Router, public apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService) {
+  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isNotificationOpen']) {
       const value = changes['isNotificationOpen'].currentValue;
-      if (value === true) {
-        this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
-        this.resetVisibleNotifications();
+      if (value === true && this.alertNotifications.length === 0) {
+        this.fetchNotifications(true);
       }
     }
   }
 
-  resetVisibleNotifications(): void {
-    this.displayedCount = this.batchSize;
-    this.visibleAlertNotifications = this.alertNotifications.slice(0, this.displayedCount);
-    this.isLoadingMore = false;
+  canLoadMore(): boolean {
+    return this.hasMore || this.alertNotifications.length < this.totalCount;
   }
 
-  onNotificationScroll(event: Event): void {
-    if (this.isLoadingMore || this.visibleAlertNotifications.length >= this.alertNotifications.length) {
+  private fetchNotifications(reset: boolean): void {
+    if (this.isLoadingMore) {
       return;
     }
-    const target = event.target as HTMLElement;
-    if (target.scrollTop + target.clientHeight < target.scrollHeight - 120) {
-      return;
-    }
+
+    this.clearAppendTimer();
+    const nextPage = reset ? 1 : this.currentPage + 1;
     this.isLoadingMore = true;
-    setTimeout(() => {
-      this.displayedCount = Math.min(this.displayedCount + this.batchSize, this.alertNotifications.length);
-      this.visibleAlertNotifications = this.alertNotifications.slice(0, this.displayedCount);
-      this.isLoadingMore = false;
-    }, 250);
+    this.apiService.get<any>(`profile/alerts?paginate=true&compact=true&unseen_only=true&include_counts=true&page=${nextPage}&limit=${this.batchSize}`).subscribe({
+      next: response => {
+        const items = (response?.items || []).map((n: any) => ({
+          ...n,
+          lastSeen: n?.lastSeen ? new Date(n.lastSeen) : n?.lastSeen
+        }));
+        this.totalCount = response?.total || 0;
+        this.currentPage = response?.page || nextPage;
+        this.hasMore = !!response?.has_more;
+        this.countsByType = response?.counts_by_type || {};
+        this.isLoadingMore = false;
+        this.isLoadMoreTriggered = false;
+        this.appendNotificationsIncrementally(items, reset);
+      },
+      error: () => {
+        this.isLoadingMore = false;
+        this.isLoadMoreTriggered = false;
+      }
+    });
   }
 
-  convertToAlertNotifications(alerts: AlertModel[]): AlertNotification[] {
-    return alerts
-      .filter(alert => alert.type && alert.ioc_value && alert.last_seen && alert.data_hash &&
-          !alert.report_seen)
-      .map(alert => {
-        const notification: AlertNotification = {
-          categoryName: alert.type!,
-          risk: this.getRiskLevel(alert.type!),
-          iocNames: [alert.ioc_type!],
-          subCategory: alert.content_types?.[0]!,
-          lastSeen: new Date(alert.last_seen!),
-          hash: alert.data_hash!
-        };
-        return notification;
-      });
-  }
-
-  getRiskLevel(type: string): string {
-    const normalized = type.toLowerCase();
-    switch (normalized) {
-      case 'general':
-      case 'seo scanning':
-        return 'Low';
-      case 'breach':
-      case 'exploit':
-      case 'feed':
-      case 'playstore-scanning':
-      case 'social-scanner':
-      case 'email-breach':
-      case 'stealerlogs':
-      case 'software-scanning':
-        return 'Critical';
-      case 'defacement':
-      case 'advanced scanning':
-      case 'repo scanning':
-        return 'High';
-      case 'social':
-      case 'discussion':
-        return 'Medium';
-      default:
-        return 'Unknown';
+  loadMoreNotifications(): void {
+    if (!this.canLoadMore()) {
+      return;
     }
+    this.isLoadMoreTriggered = true;
+    this.fetchNotifications(false);
+  }
+
+  private clearAppendTimer(): void {
+    if (this.appendTimer) {
+      clearTimeout(this.appendTimer);
+      this.appendTimer = null;
+    }
+  }
+
+  private appendNotificationsIncrementally(items: AlertNotification[], reset: boolean): void {
+    this.alertNotifications = reset ? [] : [...this.alertNotifications];
+
+    if (items.length === 0) {
+      return;
+    }
+
+    let index = 0;
+    const appendNext = () => {
+      if (index >= items.length) {
+        this.appendTimer = null;
+        return;
+      }
+
+      const nextChunk = items.slice(index, index + this.incrementalChunkSize);
+      this.alertNotifications = [...this.alertNotifications, ...nextChunk];
+      index += this.incrementalChunkSize;
+      this.appendTimer = setTimeout(() => {
+        requestAnimationFrame(appendNext);
+      }, this.incrementalDelayMs);
+    };
+
+    requestAnimationFrame(appendNext);
   }
 
   timeAgo(date: Date | string): string {
@@ -134,97 +147,35 @@ export class AlertNotificationComponent implements OnChanges {
     return `${years} year${years > 1 ? 's' : ''} ago`;
   }
 
-  seeDetails(category: string, hash: string) {
-    this.close();
-    this.licenseService.loadLicenses().subscribe(licenses => {
-      const hasEnterprise = licenses.includes('enterprise');
-      if (hasEnterprise) {
-        const alerts = this.appService.userSessionData().alerts;
-        const _alert = alerts.find(a => a.data_hash === hash);
-        if (_alert?.type) {
-          const value = _alert.ioc_value || '-';
-          let scanType: string;
-          let route: string = '/dashboard/scanner/basic-scan';
-          switch (_alert.type.toLowerCase()) {
-            case "advance scanning":
-              scanType = "advance";
-              route = "/dashboard/scanner/port-scan";
-              this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
-              });
-              break;
-            case "seo scanning":
-              scanType = "seo";
-              route = "/dashboard/scanner/seo-scan";
-              this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
-              });
-              break;
-            case "repo scanning":
-              scanType = "repo";
-              route = "/dashboard/scanner/repository-scan";
-              this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
-              });
-              break;
-            case "email-breach":
-              const _username = value.split('@')[0];
-              scanType = "repo";
-              route = "/dashboard/api/email-breach";
-              this.router.navigate([route], {
-                queryParams: { username: _username, email: value }
-              });
-              break;
-            case "playstore-scanning":
-              scanType = "repo";
-              route = "/dashboard/api/playstore-scanner";
-              this.router.navigate([route], {
-                queryParams: { playstore: value }
-              });
-              break;
-            case "social-scanner":
-              scanType = "repo";
-              route = "/dashboard/api/social-scanner";
-              this.router.navigate([route], {
-                queryParams: { username: value }
-              });
-              break;
-            case "stealerlogs":
-              route = "/dashboard/stealerlogs/credential";
-              const queryParams: any = {
-                q: "",
-                page: 1,
-                category: "credential",
-                fullsearch: true,
-                matchtype: "or",
-                must: false
-              };
-              if (this.isDomain(value)) {
-                queryParams.domain = value;
-              }
-              else {
-                queryParams.user = value;
-              }
-              this.router.navigate([route], { queryParams });
-              break;
-            default:
-              this.router.navigate([`/dashboard/${category}/all/${hash}`]);
-              break;
-          }
+  seeDetails(_category: string, hash: string) {
+    this.isFetchingDetail = true;
+    this.apiService.get<any>('profile/alerts').subscribe({
+      next: response => {
+        this.appService.userSessionData().alerts = response;
+        const selectedAlert = this.appService.userSessionData().alerts.find(a => a.data_hash === hash) || null;
+        if (!selectedAlert) {
+          this.isFetchingDetail = false;
+          return;
         }
-        if (_alert) {
-          _alert.report_seen = true;
-        }
-        this.apiService.post('alert/seen', [_alert]).subscribe({
+
+        this.alertToShowReport = selectedAlert;
+        this.alertToShowReport.report_seen = true;
+        this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
           next: () => {
+            this.fetchNotifications(true);
+            this.isFetchingDetail = false;
+            setTimeout(() => {
+              this.printBtn?.nativeElement?.click();
+            }, 0);
           },
-          error: (_err) => {
+          error: () => {
+            this.isFetchingDetail = false;
           },
         });
-      }
-      else {
-        this.messageNotificationService.show("Please purchase enterprise license to view reports");
-      }
+      },
+      error: () => {
+        this.isFetchingDetail = false;
+      },
     });
   }
 
@@ -257,19 +208,9 @@ export class AlertNotificationComponent implements OnChanges {
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
         this.appService.userSessionData().alerts = response;
-        this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
-        this.resetVisibleNotifications();
+        this.fetchNotifications(true);
       }
     });
-  }
-
-  isDomain(value: string): boolean {
-    if (!value) {
-      return false;
-    }
-    value = value.replace(/https?:\/\//, "").replace(/^www\./, "");
-    const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
-    return domainRegex.test(value);
   }
 
   isLightTheme(): boolean {

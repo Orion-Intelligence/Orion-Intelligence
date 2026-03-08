@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import hashlib
 import threading
-from typing import List
+from typing import Any, List
 
 from fastapi import HTTPException
 
@@ -223,7 +223,42 @@ class AlertManager:
 
         return {"message": "Alert deleted successfully", "id": id}
 
-    async def getAllAlerts(self, current_user):
+    def _to_notification_item(self, alert: AlertModel) -> dict[str, Any]:
+        normalized = (alert.type or "").lower()
+        if normalized in {"general", "seo scanning"}:
+            risk = "Low"
+        elif normalized in {"breach", "exploit", "feed", "playstore-scanning", "social-scanner",
+            "email-breach", "stealerlogs", "software-scanning"}:
+            risk = "Critical"
+        elif normalized in {"defacement", "advanced scanning", "repo scanning"}:
+            risk = "High"
+        elif normalized in {"social", "discussion"}:
+            risk = "Medium"
+        else:
+            risk = "Unknown"
+
+        return {
+            "categoryName": alert.type or "",
+            "risk": risk,
+            "iocNames": [alert.ioc_type] if alert.ioc_type else [],
+            "subCategory": (alert.content_types[0] if alert.content_types else ""),
+            "lastSeen": alert.last_seen,
+            "hash": alert.data_hash,
+            "iocValue": alert.ioc_value or "",
+            "type": alert.type or "",
+            "reportSeen": bool(alert.report_seen),
+        }
+
+    async def getAllAlerts(
+            self,
+            current_user,
+            page: int = 1,
+            limit: int = 20,
+            alert_type: str | None = None,
+            paginate: bool = False,
+            compact: bool = False,
+            unseen_only: bool = False,
+            include_counts: bool = False):
         alerts_data = await self._engine.find_one(
             db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
 
@@ -233,9 +268,60 @@ class AlertManager:
                 status_code=202, detail="Scan is still processing")
 
         if not alerts_data:
+            if paginate:
+                response: dict[str, Any] = {
+                    "items": [],
+                    "total": 0,
+                    "page": page,
+                    "limit": limit,
+                    "has_more": False
+                }
+                if include_counts:
+                    response["counts_by_type"] = {}
+                return response
             return []
 
-        return alerts_data.alerts
+        alerts = alerts_data.alerts or []
+
+        if alert_type:
+            _type = alert_type.strip().lower()
+            alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == _type]
+
+        if unseen_only:
+            alerts = [alert for alert in alerts if not bool(alert.report_seen)]
+
+        if not paginate:
+            return alerts
+
+        counts_by_type: dict[str, int] = {}
+        if include_counts:
+            for alert in alerts:
+                key = (alert.type or "").strip().lower()
+                if not key:
+                    continue
+                counts_by_type[key] = counts_by_type.get(key, 0) + 1
+
+        sorted_alerts = sorted(
+            alerts,
+            key=lambda a: a.last_seen or a.first_seen or datetime.min.replace(tzinfo=timezone.utc),
+            reverse=True)
+        total = len(sorted_alerts)
+        start = (page - 1) * limit
+        end = start + limit
+        paged_alerts = sorted_alerts[start:end]
+
+        items = [self._to_notification_item(alert) for alert in paged_alerts] if compact else paged_alerts
+
+        response: dict[str, Any] = {
+            "items": items,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "has_more": end < total,
+        }
+        if include_counts:
+            response["counts_by_type"] = counts_by_type
+        return response
 
     async def delete_all_alerts(self, current_user):
         tenant_uuid = str(current_user.tenant_uuid)

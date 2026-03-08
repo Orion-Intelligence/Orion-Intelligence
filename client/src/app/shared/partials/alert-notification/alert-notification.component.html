@@ -6,9 +6,23 @@
   <div class="fixed right-0 top-0 z-50 flex h-screen w-[360px] flex-col items-center gap-[10px] rounded-l-[16px] border-l border-[var(--color-border)] bg-[var(--color-blue-850)] py-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] max-[420px]:w-full max-[420px]:rounded-none" @sidebarAnimation>
     <div class="flex w-[340px] items-center justify-between border-b border-[var(--color-border)] px-[6px] pb-3 max-[420px]:w-[calc(100%-20px)]">
       <span class="font-[Inter] text-[18px] font-semibold text-[var(--color-text1)]">Notifications</span>
-      <img [src]="isLightTheme() ? 'assets/images/shared/searchFilter_clossButton.svg' : 'assets/images/shared/theme/searchFilter_clossButton_white.svg'" alt="close" class="h-4 w-4 cursor-pointer" (click)="close()" />
+      <button type="button" (click)="close()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+        <img alt="close" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon" />
+      </button>
     </div>
-    <div class="w-[325px] flex-1 overflow-y-auto px-0 py-2 [scrollbar-color:#667085_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#667085] [&::-webkit-scrollbar]:w-[6px] max-[420px]:w-[calc(100%-20px)]" (scroll)="onNotificationScroll($event)">
+    <div class="w-[325px] flex-1 overflow-y-auto px-0 py-2 [scrollbar-color:#667085_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#667085] [&::-webkit-scrollbar]:w-[6px] max-[420px]:w-[calc(100%-20px)]">
+      @if (isLoadingMore && !isLoadMoreTriggered) {
+        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+          <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
+          Loading alerts...
+        </div>
+      }
+      @if (isFetchingDetail) {
+        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+          <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
+          Fetching alert details...
+        </div>
+      }
       @if (alertNotifications.length==0) {
         <div class="my-[10px] rounded-[12px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.03)] p-4 [body.light-theme_&]:bg-[rgba(0,0,0,0.02)]">
           <div class="text-[14px] font-semibold text-[var(--color-text1)]">No alerts to show yet.</div>
@@ -16,9 +30,9 @@
         </div>
       }
       @if (alertNotifications.length>0) {
-        <div class="space-y-3">
-          @for (n of visibleAlertNotifications; track n.hash) {
-            <div class="my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors hover:bg-[var(--color-blue-810)]">
+        <div class="notification-stagger-list space-y-3">
+          @for (n of alertNotifications; track n.hash) {
+            <div class="notif-stagger-item my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors hover:bg-[var(--color-blue-810)]">
               <div class="flex items-center justify-between">
                 <span class="font-[Inter] text-[16px] font-medium text-[var(--color-text1)]">{{ n.categoryName.charAt(0).toUpperCase() + n.categoryName.slice(1) }}</span>
                 <span class="rounded-full border border-[var(--color-border)] px-2 py-1 font-[Inter] text-[12px] font-semibold" [ngClass]="{ 'bg-[rgb(255,0,0,0.15)] text-[#ff4d4f]': n.risk.toLowerCase() === 'critical', 'bg-[rgb(255,165,0,0.15)] text-[#f59e0b]': n.risk.toLowerCase() === 'high', 'bg-[rgb(255,215,0,0.15)] text-[#facc15]': n.risk.toLowerCase() === 'medium', 'bg-[rgb(0,255,0,0.15)] text-[#4ade80]': n.risk.toLowerCase() === 'low' }">
@@ -40,9 +54,11 @@
             </div>
           }
         </div>
-        @if (isLoadingMore) {
-          <div class="flex w-full items-center justify-center py-3">
-            <div class="h-6 w-6 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
+        @if (canLoadMore()) {
+          <div class="flex w-full items-center justify-center py-2">
+            <button type="button" [disabled]="isLoadingMore" (click)="loadMoreNotifications()" class="rounded-md border border-[var(--color-border)] bg-transparent px-4 py-2 text-[12px] font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-70">
+              {{ isLoadingMore && isLoadMoreTriggered ? 'Loading...' : 'Load more' }}
+            </button>
           </div>
         }
       }
@@ -54,6 +70,12 @@
           <button data-testid="tenant-notification-clear-all" (click)="clearAll()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110" type="button">Clear All</button>
         }
       </div>
+    </div>
+    <button #printBtn ngxPrint printSectionId="alertReport" [useExistingCss]="true" class="hidden"></button>
+    <div id="alertReport" class="hidden">
+      @if (alertToShowReport) {
+        <app-alert-export-component [alerts]="alertToShowReport"></app-alert-export-component>
+      }
     </div>
   </div>
 }
