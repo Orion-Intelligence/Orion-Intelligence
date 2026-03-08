@@ -1,15 +1,20 @@
 import { Injectable } from '@angular/core';
 import { ExportSharedService } from './export-shared.service';
 import { GraphExportService } from './graph-export.service';
+import { DocumentExportService } from './document-export.service';
 import { GraphReportExportType, GraphReportPayload, UnifiedReportPayloadInput } from '../../model/report/report-export.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportExportService extends ExportSharedService {
-  constructor(private graphExport: GraphExportService) {
+  constructor(private graphExport: GraphExportService, private documentExport: DocumentExportService) {
     super();
   }
 
   exportByType(payload: GraphReportPayload, type: GraphReportExportType): void {
+    if (type === 'doc_pdf') {
+      this.documentExport.exportDocumentPdf(payload);
+      return;
+    }
     this.graphExport.exportByType(payload, type);
   }
 

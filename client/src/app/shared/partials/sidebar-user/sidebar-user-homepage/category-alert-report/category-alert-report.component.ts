@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,17 +18,19 @@ import { LicenseService } from '../../../../../services/licenses/licenses.servic
 import { ConfirmationPopupComponent } from "../../../confirmation-popup/confirmation-popup.component";
 import { HelperService } from '../../../../services/helper.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
-import { NgxPrintModule } from 'ngx-print';
-import { AlertExportComponentComponent } from "../alert-export-component/alert-export-component.component";
 import { EmptyResultComponent } from '../../../empty-result/empty-result.component';
+import { ExportChoiceModalComponent } from '../../../export-choice-modal/export-choice-modal.component';
+import { ExportChoiceOption } from '../../../../model/report/export-choice.model';
+import { AlertExportService } from '../../../../services/export/alert-export.service';
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, NgxPrintModule, AlertExportComponentComponent, EmptyResultComponent],
+  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent],
   templateUrl: './category-alert-report.component.html',
 })
 export class CategoryAlertReportComponent implements OnInit {
   private appendTimer: ReturnType<typeof setTimeout> | null = null;
+
   filterModel: FilterModel = alert_filters;
   alerts: CategoryAlerts[] = []
   filteredAlerts: CategoryAlerts[] = []
@@ -38,6 +40,7 @@ export class CategoryAlertReportComponent implements OnInit {
   currentPage: number = 0;
   hasMoreAlerts: boolean = false;
   isLoadingMoreAlerts: boolean = false;
+  isInitialLoading: boolean = false;
   activeDateRange: string | null = null;
   searchText: string = '';
   category: string = '';
@@ -51,12 +54,13 @@ export class CategoryAlertReportComponent implements OnInit {
   selectedDeleteAlertId: string = '';
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
+  isExportChoiceOpen: boolean = false;
+  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.' }];
   openedActionMenuId: string | null = null;
   expandedAlertIds = new Set<string>();
   hoveredReportTool: 'add' | 'import' | 'flush' | 'sidebar' | null = null;
-  @ViewChild('printBtn') printBtn!: ElementRef<HTMLButtonElement>;
 
-  constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService ) {
+  constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -120,6 +124,9 @@ export class CategoryAlertReportComponent implements OnInit {
 
     const nextPage = reset ? 1 : this.currentPage + 1;
     this.isLoadingMoreAlerts = true;
+    if (reset) {
+      this.isInitialLoading = true;
+    }
     const endpoint = `profile/alerts?paginate=true&page=${nextPage}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
 
     this.apiService.get<any>(endpoint).subscribe({
@@ -130,6 +137,7 @@ export class CategoryAlertReportComponent implements OnInit {
         this.currentPage = response?.page || nextPage;
         this.hasMoreAlerts = !!response?.has_more;
         this.alerts = reset ? convertedItems : [...this.alerts, ...convertedItems];
+        this.isInitialLoading = false;
 
         if (this.activeDateRange) {
           const [startStr, endStr] = this.activeDateRange.split(',');
@@ -144,6 +152,7 @@ export class CategoryAlertReportComponent implements OnInit {
       },
       error: () => {
         this.isLoadingMoreAlerts = false;
+        this.isInitialLoading = false;
       }
     });
   }
@@ -309,6 +318,7 @@ export class CategoryAlertReportComponent implements OnInit {
   getLatestAlerts() {
     this.currentPage = 0;
     this.hasMoreAlerts = false;
+    this.isInitialLoading = true;
     this.alerts = [];
     this.filteredAlerts = [];
     this.visibleFilteredAlerts = [];
@@ -325,11 +335,25 @@ export class CategoryAlertReportComponent implements OnInit {
       this.alertToShowReport.report_seen = true;
       this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
       });
-
-      setTimeout(() => {
-        this.printBtn.nativeElement.click();
-      }, 0);
+      this.openExportChoice();
     }
+  }
+
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  exportSelectedAlert(_type: string): void {
+    if (!this.alertToShowReport) {
+      this.closeExportChoice();
+      return;
+    }
+    this.alertExportService.exportPdf([this.alertToShowReport], 'Brand Alerts');
+    this.closeExportChoice();
   }
 
   seeDetails(id: string, hash: string) {

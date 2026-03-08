@@ -4,25 +4,23 @@ import autoTable, { RowInput } from 'jspdf-autotable';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
-  private readonly SECTION_RADIUS = 4;
-  private readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
-  private readonly TABLE_ROW_BG_RGB: [number, number, number] = [236, 242, 250];
-  private readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [224, 233, 245];
-  private readonly TABLE_BORDER_RGB: [number, number, number] = [194, 212, 238];
-  private readonly TABLE_BORDER_WIDTH = 0.2;
+  protected readonly SECTION_RADIUS = 4;
+  protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
+  protected readonly TABLE_ROW_BG_RGB: [number, number, number] = [236, 242, 250];
+  protected readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [224, 233, 245];
+  protected readonly TABLE_BORDER_RGB: [number, number, number] = [194, 212, 238];
+  protected readonly TABLE_BORDER_WIDTH = 0.2;
 
   exportByType(payload: GraphReportPayload, type: GraphReportExportType): void {
     if (type === 'json') {
       this.exportGraphJson(payload);
       return;
     }
-    if (type === 'graph_pdf') {
-      const bytes = this.buildGraphPdfBytes(payload);
-      this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
-      return;
+    if (type !== 'graph_pdf') {
+      throw new Error(`GraphExportService only supports graph exports. Received: ${type}`);
     }
-    const bytes = this.buildDocPdfBytes(payload);
-    this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-doc-report.pdf`);
+    const bytes = this.buildGraphPdfBytes(payload);
+    this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
   }
 
   private exportGraphJson(payload: GraphReportPayload): void {
@@ -452,205 +450,8 @@ export class GraphExportService {
     doc.text(value, x + 12, y + 50);
   }
 
-  private toTitle(input: string): string {
+  protected toTitle(input: string): string {
     return input.replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  }
-
-  private buildDocPdfBytes(payload: GraphReportPayload): Uint8Array {
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
-    const meta = this.makeMeta(payload);
-    const hooks = this.makeHeaderFooterHooks(payload, meta);
-    this.drawCover(doc, payload, meta, 'Document Report');
-    const pageW = doc.internal.pageSize.getWidth();
-    const contentW = pageW - 80;
-    this.drawInfoSectionMarker(doc, 160, contentW, 'Executive Summary');
-    autoTable(doc, {
-      startY: 172,
-      margin: { left: 40, right: 40 },
-      tableWidth: contentW,
-      body: Object.entries(payload.summary ?? {}).map(([k, v]) => [k, String(v)]) as RowInput[],
-      styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didParseCell: (data: any) => {
-        if (data.column.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [214, 226, 240];
-        }
-      },
-      theme: 'plain',
-      didDrawPage: hooks.didDrawPage
-    });
-    this.drawRoundedTableContainer(doc, 40, contentW, 160, (doc as any).lastAutoTable?.finalY ?? 160);
-    if (this.isJpegDataUrl(payload.graphImageDataUrl)) {
-      const snapshotMarkerY = (doc as any).lastAutoTable.finalY + 14;
-      this.drawInfoSectionMarker(doc, snapshotMarkerY, contentW, 'Network Snapshot');
-      autoTable(doc, {
-        startY: snapshotMarkerY + 12,
-        margin: { left: 40, right: 40 },
-        tableWidth: contentW,
-        body: [['', '']] as RowInput[],
-        styles: { fontSize: 9, cellPadding: 6, textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        bodyStyles: { lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        theme: 'plain',
-        didDrawPage: hooks.didDrawPage
-      });
-      this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
-      const y = (doc as any).lastAutoTable.finalY + 10;
-      const fit = this.fitRect(doc, this.getPageW(doc) - 80, 260, 40, y);
-      doc.addImage(payload.graphImageDataUrl as string, 'JPEG', fit.x, fit.y, fit.w, fit.h, undefined, 'FAST');
-    }
-    const nodeMarkerY = Math.max((doc as any).lastAutoTable?.finalY ?? 160, 160) + 18;
-    this.drawInfoSectionMarker(doc, nodeMarkerY, contentW, 'Nodes');
-    autoTable(doc, {
-      startY: nodeMarkerY + 12,
-      margin: { left: 40, right: 40 },
-      tableWidth: contentW,
-      body: [['Node', 'Type', 'ID'], ...payload.nodes.slice(0, 150).map(n => [n.label || n.id, n.type, n.id])] as RowInput[],
-      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      columnStyles: { 0: { cellWidth: 260 }, 1: { cellWidth: 110 }, 2: { cellWidth: 150 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didParseCell: (data: any) => {
-        if (data.row.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [207, 220, 236];
-        }
-      },
-      theme: 'plain',
-      didDrawPage: hooks.didDrawPage
-    });
-    this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
-    if (payload.tables?.length) {
-      payload.tables.forEach((t, idx) => {
-        const sectionTitle = this.getReportSectionTitle(t, idx);
-        const tableRows = this.buildReportSectionRows(t.values ?? {});
-        let markerY = ((doc as any).lastAutoTable.finalY ?? 160) + 18;
-        markerY = this.resolveMarkerY(doc, markerY, 86);
-        this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
-        const reportSectionDidDrawPage = (data: any) => {
-          hooks.didDrawPage(data);
-          this.drawInfoSectionMarker(data.doc as jsPDF, 86, contentW, sectionTitle || 'Info');
-        };
-        autoTable(doc, {
-          startY: markerY + 12,
-          margin: { top: 99, left: 40, right: 40, bottom: 58 },
-          tableWidth: contentW,
-          body: tableRows as RowInput[],
-          styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-          columnStyles: { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
-          bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-          alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-          didParseCell: (data: any) => {
-            if (data.row.index === 0) {
-              data.cell.styles.fontStyle = 'bold';
-              data.cell.styles.fillColor = [207, 220, 236];
-              return;
-            }
-            if (data.column.index === 0) {
-              data.cell.styles.fontStyle = 'bold';
-              data.cell.styles.fillColor = [214, 226, 240];
-            }
-          },
-          theme: 'plain',
-          didDrawPage: reportSectionDidDrawPage
-        });
-        const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
-        if (screenshotDataUrl) {
-          const lastY = (doc as any).lastAutoTable?.finalY ?? (markerY + 12);
-          const imageY = this.resolveMarkerY(doc, lastY + 10, 86);
-          this.drawScreenshotPreview(doc, screenshotDataUrl, 40, imageY, contentW, 180);
-        }
-        this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
-      });
-    }
-    const edgeMarkerY = (doc as any).lastAutoTable.finalY + 18;
-    this.drawInfoSectionMarker(doc, edgeMarkerY, contentW, 'Connection Matrix');
-    autoTable(doc, {
-      startY: edgeMarkerY + 12,
-      margin: { left: 40, right: 40 },
-      tableWidth: contentW,
-      body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 200).map((e, i) => [String(i + 1), e.from, e.to, e.label ?? ''])] as RowInput[],
-      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: 150 }, 2: { cellWidth: 150 }, 3: { cellWidth: 177 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didParseCell: (data: any) => {
-        if (data.row.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [207, 220, 236];
-        }
-      },
-      theme: 'plain',
-      didDrawPage: hooks.didDrawPage
-    });
-    this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
-    return this.docToBytes(doc);
-  }
-
-  private drawCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, subtitle: string): void {
-    this.drawReportBackgroundPattern(doc);
-    const W = this.getPageW(doc);
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, W, 138, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.text(this.fitSingleLine(doc, payload.title || 'Network Report', W - 80), 40, 48);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(226, 232, 240);
-    doc.text(`${subtitle} • ${meta.kindLabel}`, 40, 70);
-    const sessionText = this.compactSession(payload.sessionName || '—');
-    const sessionLines = doc.splitTextToSize(`Session: ${sessionText}`, W - 80) as string[];
-    doc.text(sessionLines, 40, 90);
-    const generatedY = 90 + (sessionLines.length * 12);
-    doc.text(this.fitSingleLine(doc, `Generated: ${meta.generatedAt}`, W - 80), 40, generatedY);
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.5);
-    doc.line(40, 146, W - 40, 146);
-    doc.setTextColor(15, 23, 42);
-  }
-
-  private makeHeaderFooterHooks(payload: GraphReportPayload, meta: GraphReportMeta): {
-        didDrawPage: (data: any) => void;
-        drawHeader: (doc: jsPDF, section: string) => void;
-        drawFooter: (doc: jsPDF, meta: any) => void;
-    } {
-    const drawHeader = (doc: jsPDF, section: string) => {
-      this.drawStandardPageHeader(doc, payload.title || 'Network Report', section, 54);
-    };
-    const drawFooter = (doc: jsPDF, meta2: any) => {
-      const W = this.getPageW(doc);
-      const H = this.getPageH(doc);
-      const pageNo = doc.getCurrentPageInfo().pageNumber;
-      const total = doc.getNumberOfPages();
-      doc.setDrawColor(226, 232, 240);
-      doc.line(40, H - 54, W - 40, H - 54);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(51, 65, 85);
-      const compactSession = this.compactSession(payload.sessionName || '—');
-      doc.text(this.fitSingleLine(doc, `${meta2.kindLabel} • ${compactSession} • ${meta2.generatedAt}`, W - 170), 40, H - 32);
-      doc.text(`Page ${pageNo} of ${total}`, W - 40, H - 32, { align: 'right' });
-    };
-    const didDrawPage = (data: any) => {
-      const pageNo = data?.pageNumber ?? docPageNumberSafe(data?.doc);
-      const section = pageNo === 1 ? 'Overview' : 'Details';
-      const d = data?.doc as jsPDF;
-      drawHeader(d, section);
-      drawFooter(d, meta);
-    };
-    const docPageNumberSafe = (d?: jsPDF): number => {
-      try {
-        return d?.getCurrentPageInfo().pageNumber ?? 1;
-      }
-      catch {
-        return 1;
-      }
-    };
-    return { didDrawPage, drawHeader, drawFooter };
   }
 
   private buildTypeComposition(nodes: GraphReportNode[]): {
@@ -700,9 +501,10 @@ export class GraphExportService {
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }
 
-  private makeMeta(payload: GraphReportPayload): GraphReportMeta {
+  protected makeMeta(payload: GraphReportPayload): GraphReportMeta {
     const generatedAt = new Date(payload.generatedAtIso).toLocaleString();
-    const kindLabel = payload.graphKind === 'cti' ? 'CTI Network' : 'Social Network';
+    const isAlertReport = payload.nodes.length > 0 && payload.nodes.every(node => String(node.type || '').toLowerCase() === 'alert');
+    const kindLabel = isAlertReport ? 'Brand Alerts' : (payload.graphKind === 'cti' ? 'CTI Network' : 'Social Network');
     return { generatedAt, kindLabel };
   }
 
@@ -718,7 +520,7 @@ export class GraphExportService {
     return W;
   }
 
-  private isJpegDataUrl(dataUrl?: string): boolean {
+  protected isJpegDataUrl(dataUrl?: string): boolean {
     return typeof dataUrl === 'string' && /^data:image\/jpeg;base64,/.test(dataUrl);
   }
 
@@ -733,7 +535,7 @@ export class GraphExportService {
     return { x: left, y: top, w: W - left - right, h: H - top - bottom };
   }
 
-  private fitRect(_: jsPDF, maxW: number, maxH: number, x: number, y: number): {
+  protected fitRect(_: jsPDF, maxW: number, maxH: number, x: number, y: number): {
         x: number;
         y: number;
         w: number;
@@ -742,7 +544,7 @@ export class GraphExportService {
     return { x, y, w: maxW, h: maxH };
   }
 
-  private drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number): void {
+  protected drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number): void {
     const W = this.getPageW(doc);
     doc.setFillColor(248, 250, 252);
     doc.rect(0, 0, W, barBottom, 'F');
@@ -760,7 +562,7 @@ export class GraphExportService {
     doc.text(this.fitSingleLine(doc, section, 170), W - 40, 34, { align: 'right' });
   }
 
-  private fitSingleLine(doc: jsPDF, text: string, maxWidth: number): string {
+  protected fitSingleLine(doc: jsPDF, text: string, maxWidth: number): string {
     const input = String(text || '');
     if (!input) {
       return '';
@@ -776,12 +578,12 @@ export class GraphExportService {
     return out + ellipsis;
   }
 
-  private fitSingleLineStrict(doc: jsPDF, text: string, maxWidth: number, maxChars: number, safetyFactor: number = 0.86): string {
+  protected fitSingleLineStrict(doc: jsPDF, text: string, maxWidth: number, maxChars: number, safetyFactor: number = 0.86): string {
     const limited = String(text || '').slice(0, Math.max(0, maxChars));
     return this.fitSingleLine(doc, limited, maxWidth * safetyFactor);
   }
 
-  private truncateWithEllipsis(value: string, maxChars: number): string {
+  protected truncateWithEllipsis(value: string, maxChars: number): string {
     const input = String(value || '');
     if (input.length <= maxChars) {
       return input;
@@ -789,7 +591,7 @@ export class GraphExportService {
     return `${input.slice(0, Math.max(0, maxChars))}...`;
   }
 
-  private drawReportBackgroundPattern(doc: jsPDF): void {
+  protected drawReportBackgroundPattern(doc: jsPDF): void {
     const W = this.getPageW(doc);
     const H = this.getPageH(doc);
     doc.setDrawColor(246, 248, 252);
@@ -800,7 +602,7 @@ export class GraphExportService {
     }
   }
 
-  private drawRoundedTableContainer(doc: jsPDF, x: number, width: number, startY: number, endY: number): void {
+  protected drawRoundedTableContainer(doc: jsPDF, x: number, width: number, startY: number, endY: number): void {
     // Intentionally no outer border for tables.
     void doc;
     void x;
@@ -809,7 +611,7 @@ export class GraphExportService {
     void endY;
   }
 
-  private drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string): void {
+  protected drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string): void {
     const x = 40;
     const normalizedLabel = String(label || '').trim();
     const text = this.fitSingleLine(doc, normalizedLabel || 'Info', Math.max(110, width - 24));
@@ -827,14 +629,14 @@ export class GraphExportService {
     doc.text(text, badgeX + 8, badgeTopY + 11);
   }
 
-  private drawClippedText( doc: jsPDF, text: string, x: number, y: number, clipX: number, clipY: number, clipWidth: number, clipHeight: number, align: 'left' | 'center' | 'right' = 'left' ): void {
+  protected drawClippedText( doc: jsPDF, text: string, x: number, y: number, clipX: number, clipY: number, clipWidth: number, clipHeight: number, align: 'left' | 'center' | 'right' = 'left' ): void {
     doc.saveGraphicsState();
     doc.rect(clipX, clipY, clipWidth, clipHeight, null).clip().discardPath();
     doc.text(text, x, y, { align });
     doc.restoreGraphicsState();
   }
 
-  private getReportSectionTitle(table: GraphReportTableRow, index: number): string {
+  protected getReportSectionTitle(table: GraphReportTableRow, index: number): string {
     const fromTitle = this.cleanReportFieldLabel(table?.title ?? '');
     if (fromTitle) {
       return fromTitle;
@@ -849,7 +651,7 @@ export class GraphExportService {
     return `Section ${index + 1}`;
   }
 
-  private buildReportSectionRows(values: Record<string, string>): Array<[string, string]> {
+  protected buildReportSectionRows(values: Record<string, string>): Array<[string, string]> {
     const rows: Array<[string, string]> = [['Field', 'Value']];
     Object.entries(values ?? {}).forEach(([rawKey, rawValue]) => {
       const key = this.cleanReportFieldLabel(rawKey);
@@ -896,7 +698,7 @@ export class GraphExportService {
     return raw.replace(/\s*,\s*/g, ', ').replace(/\s+/g, ' ').trim();
   }
 
-  private resolveMarkerY(doc: jsPDF, requestedY: number, resetY: number, onNewPage?: () => void): number {
+  protected resolveMarkerY(doc: jsPDF, requestedY: number, resetY: number, onNewPage?: () => void): number {
     const pageBottom = this.getPageH(doc) - 58;
     const minBlockHeight = 26; // marker + minimum first-row space
     if (requestedY + minBlockHeight <= pageBottom) {
@@ -907,7 +709,7 @@ export class GraphExportService {
     return resetY;
   }
 
-  private findTableScreenshotDataUrl(table: GraphReportTableRow): string | null {
+  protected findTableScreenshotDataUrl(table: GraphReportTableRow): string | null {
     const title = String(table?.title || '').toLowerCase();
     const values = table?.values ?? {};
     // Prefer fields that are explicitly screenshot-related, then fall back to any image data URL.
@@ -952,7 +754,7 @@ export class GraphExportService {
     return 'JPEG';
   }
 
-  private drawScreenshotPreview(doc: jsPDF, dataUrl: string, x: number, y: number, width: number, maxH: number): void {
+  protected drawScreenshotPreview(doc: jsPDF, dataUrl: string, x: number, y: number, width: number, maxH: number): void {
     const normalizedDataUrl = this.normalizeDataUrl(dataUrl);
     const pageBottom = this.getPageH(doc) - 58;
     const renderY = Math.min(y, pageBottom - 20);
@@ -972,7 +774,7 @@ export class GraphExportService {
     doc.addImage(normalizedDataUrl, imgType, fit.x + ((fit.w - drawW) / 2), fit.y + 4, drawW, drawH, undefined, 'FAST');
   }
 
-  private compactSession(session: string): string {
+  protected compactSession(session: string): string {
     const value = String(session || '').trim();
     if (!value || value.length <= 26) {
       return value || '—';
@@ -989,30 +791,30 @@ export class GraphExportService {
     };
   }
 
-  private getPageW(doc: jsPDF): number {
+  protected getPageW(doc: jsPDF): number {
     return doc.internal.pageSize.getWidth();
   }
 
-  private getPageH(doc: jsPDF): number {
+  protected getPageH(doc: jsPDF): number {
     return doc.internal.pageSize.getHeight();
   }
 
-  private docToBytes(doc: jsPDF): Uint8Array {
+  protected docToBytes(doc: jsPDF): Uint8Array {
     const buf = doc.output('arraybuffer');
     return new Uint8Array(buf);
   }
 
-  private buildSafeFilename(payload: GraphReportPayload): string {
+  protected buildSafeFilename(payload: GraphReportPayload): string {
     const date = new Date(payload.generatedAtIso).toISOString().slice(0, 10);
     const base = `${payload.graphKind}-${payload.sessionName || 'session'}-${date}-${payload.title || 'report'}`;
     return base.replace(/[^a-z0-9_-]/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase();
   }
 
-  private downloadText(content: string, mimeType: string, filename: string): void {
+  protected downloadText(content: string, mimeType: string, filename: string): void {
     this.downloadBlobFromParts([content], mimeType, filename);
   }
 
-  private downloadBinary(content: Uint8Array, mimeType: string, filename: string): void {
+  protected downloadBinary(content: Uint8Array, mimeType: string, filename: string): void {
     const binary = new Uint8Array(content);
     this.downloadBlobFromParts([binary], mimeType, filename);
   }

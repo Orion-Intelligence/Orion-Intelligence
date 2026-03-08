@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
@@ -6,16 +6,18 @@ import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
-import { NgxPrintModule } from 'ngx-print';
-import { AlertExportComponentComponent } from '../sidebar-user/sidebar-user-homepage/alert-export-component/alert-export-component.component';
+import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
+import { ExportChoiceOption } from '../../model/report/export-choice.model';
+import { AlertExportService } from '../../services/export/alert-export.service';
 @Component({
   selector: 'app-alert-notification',
-  imports: [CommonModule, NgClass, NgxPrintModule, AlertExportComponentComponent],
+  imports: [CommonModule, NgClass, ExportChoiceModalComponent],
   templateUrl: './alert-notification.component.html',
   animations: [sidebarAnimation, overlayAnimation],
 })
 export class AlertNotificationComponent implements OnChanges {
   private appendTimer: ReturnType<typeof setTimeout> | null = null;
+
   alertNotifications: AlertNotification[] = [];
   readonly batchSize: number = 20;
   readonly incrementalDelayMs: number = 120;
@@ -28,11 +30,14 @@ export class AlertNotificationComponent implements OnChanges {
   isLoadMoreTriggered: boolean = false;
   isFetchingDetail: boolean = false;
   alertToShowReport: AlertModel | null = null;
-  @ViewChild('printBtn') printBtn!: ElementRef<HTMLButtonElement>;
+  isExportChoiceOpen: boolean = false;
+  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.' }];
+
   @Input() isNotificationOpen!: boolean | null;
+
   @Output() closeNotification = new EventEmitter<void>();
 
-  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService) {
+  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -164,9 +169,7 @@ export class AlertNotificationComponent implements OnChanges {
           next: () => {
             this.fetchNotifications(true);
             this.isFetchingDetail = false;
-            setTimeout(() => {
-              this.printBtn?.nativeElement?.click();
-            }, 0);
+            this.openExportChoice();
           },
           error: () => {
             this.isFetchingDetail = false;
@@ -177,6 +180,23 @@ export class AlertNotificationComponent implements OnChanges {
         this.isFetchingDetail = false;
       },
     });
+  }
+
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  exportSelectedAlert(_type: string): void {
+    if (!this.alertToShowReport) {
+      this.closeExportChoice();
+      return;
+    }
+    this.alertExportService.exportPdf([this.alertToShowReport], 'Brand Alerts');
+    this.closeExportChoice();
   }
 
   close() {

@@ -19,13 +19,14 @@ import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/ho
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { overlayAnimation } from '../../../animations/popup.animations';
 import { MessagePopupComponent } from "../../message-popup/message-popup.component";
-import { AlertExportComponentComponent } from "./alert-export-component/alert-export-component.component";
-import { NgxPrintModule } from 'ngx-print';
 import { countFilterValues } from '../../../utils/filter-values.util';
 import { Subscription } from 'rxjs';
+import { ExportChoiceModalComponent } from '../../export-choice-modal/export-choice-modal.component';
+import { ExportChoiceOption } from '../../../model/report/export-choice.model';
+import { AlertExportService } from '../../../services/export/alert-export.service';
 @Component({
   selector: 'app-sidebar-user-homepage',
-  imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
+  imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, ExportChoiceModalComponent],
   templateUrl: './sidebar-user-homepage.component.html',
   animations: [overlayAnimation],
 })
@@ -43,8 +44,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   isConfirmationOpen = signal(false);
   noIocPopup = signal(false);
   showAlertScanLoading = signal(false);
+  isExportChoiceOpen = false;
+  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for alerts.' }];
 
-  constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService) {
     effect(() => {
       if (!this.alertService.isAlertScanLoading()) {
         this.initializeData();
@@ -307,5 +310,18 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   setHomeToolHover(tool: 'print' | 'flush' | 'scan' | null): void {
     this.hoveredHomeTool = tool;
+  }
+
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  exportAlerts(_type: string): void {
+    this.alertExportService.exportPdf(this.appService.userSessionData().alerts || [], 'Brand Alerts');
+    this.closeExportChoice();
   }
 }

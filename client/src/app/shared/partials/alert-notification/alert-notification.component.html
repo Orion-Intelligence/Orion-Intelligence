@@ -71,11 +71,17 @@
         }
       </div>
     </div>
-    <button #printBtn ngxPrint printSectionId="alertReport" [useExistingCss]="true" class="hidden"></button>
-    <div id="alertReport" class="hidden">
-      @if (alertToShowReport) {
-        <app-alert-export-component [alerts]="alertToShowReport"></app-alert-export-component>
-      }
-    </div>
   </div>
 }
+
+<app-export-choice-modal
+  [visible]="isExportChoiceOpen"
+  [title]="'Export Alert'"
+  [subtitle]="'Choose the export format.'"
+  [options]="alertExportOptions"
+  [overlayTestId]="'notification-alert-export-overlay'"
+  [modalTestId]="'notification-alert-export-modal'"
+  [closeTestId]="'notification-alert-export-close'"
+  (closed)="closeExportChoice()"
+  (optionSelected)="exportSelectedAlert($event)">
+</app-export-choice-modal>

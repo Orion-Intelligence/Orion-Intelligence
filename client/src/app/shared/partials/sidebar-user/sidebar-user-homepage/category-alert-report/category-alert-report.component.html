@@ -82,7 +82,28 @@
       </div>
     }
 
-    @if (filteredAlerts.length==0) {
+    @if (isLoadingMoreAlerts && visibleFilteredAlerts.length === 0) {
+      <div class="mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
+        <div class="category_report_alert-card">
+          <div class="ui-shimmer h-[20px] w-[120px] rounded-[6px] bg-[var(--color-divider)]"></div>
+          <div class="mt-3 ui-shimmer h-[14px] w-[65%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="mt-2 ui-shimmer h-[14px] w-[45%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="mt-4 ui-shimmer h-[1px] w-full bg-[var(--color-divider)]"></div>
+          <div class="mt-3 ui-shimmer h-[12px] w-[90%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="mt-4 ui-shimmer h-[34px] w-[130px] rounded-[8px] bg-[var(--color-divider)]"></div>
+        </div>
+        <div class="category_report_alert-card">
+          <div class="ui-shimmer h-[20px] w-[120px] rounded-[6px] bg-[var(--color-divider)]"></div>
+          <div class="mt-3 ui-shimmer h-[14px] w-[65%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="mt-2 ui-shimmer h-[14px] w-[45%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="mt-4 ui-shimmer h-[1px] w-full bg-[var(--color-divider)]"></div>
+          <div class="mt-3 ui-shimmer h-[12px] w-[90%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="mt-4 ui-shimmer h-[34px] w-[130px] rounded-[8px] bg-[var(--color-divider)]"></div>
+        </div>
+      </div>
+    }
+
+    @if (!isLoadingMoreAlerts && !isInitialLoading && visibleFilteredAlerts.length==0) {
       <app-empty-result class="p-0 m-0"></app-empty-result>
     }
 
@@ -179,8 +200,6 @@
             <div class="category_report_alert-divider"></div>
             <div class="category_report_alert-footer-buttons">
               <div data-testid="tenant-alert-report-see-details" (click)="seeDetailReprot(item.id)" class="category_report_alert-btn">See Details</div>
-              <button #printBtn ngxPrint printSectionId="alertReport" [useExistingCss]="true" class="hidden">
-              </button>
             </div>
           </div>
           @if (isDeleteAlertConfirmationOpen() && selectedDeleteAlertId === item.id) {
@@ -223,8 +242,14 @@
     (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
   }
 
-  <div id="alertReport" class="hidden">
-    @if (alertToShowReport) {
-      <app-alert-export-component [alerts]="alertToShowReport"></app-alert-export-component>
-    }
-  </div>
+  <app-export-choice-modal
+    [visible]="isExportChoiceOpen"
+    [title]="'Export Alert'"
+    [subtitle]="'Choose the export format.'"
+    [options]="alertExportOptions"
+    [overlayTestId]="'category-alert-export-overlay'"
+    [modalTestId]="'category-alert-export-modal'"
+    [closeTestId]="'category-alert-export-close'"
+    (closed)="closeExportChoice()"
+    (optionSelected)="exportSelectedAlert($event)">
+  </app-export-choice-modal>
