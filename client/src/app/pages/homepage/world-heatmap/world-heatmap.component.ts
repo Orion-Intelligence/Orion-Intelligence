@@ -430,6 +430,21 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.openCountryReport();
   }
 
+  public getReportsByCountry(country: string): any[] {
+    const normalizedTarget = (country || '').trim().toLowerCase();
+    if (!normalizedTarget || !Array.isArray(this.activeCountryReports)) {
+      return [];
+    }
+
+    return this.activeCountryReports.filter((report: any) => {
+      const countries = Array.isArray(report?.m_country) ? report.m_country : [];
+      return countries.some((entry: string) => String(entry || '')
+        .split(',')
+        .map((part) => part.trim().toLowerCase())
+        .includes(normalizedTarget));
+    });
+  }
+
   private gettingUniqueCountrys(): CountryData[] {
     const counts: Record<string, number> = {};
     this.activeCountryReports?.forEach((doc: any) => {

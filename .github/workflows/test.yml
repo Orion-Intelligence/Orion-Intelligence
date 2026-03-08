@@ -32,6 +32,8 @@ jobs:
       - run: |
           set -euo pipefail
           cd client
+          export npm_config_loglevel=error
+          export NODE_OPTIONS=--no-deprecation
           npm install
           npx ng build --configuration=instrumented
 
@@ -120,6 +122,8 @@ jobs:
       - run: |
           set -euo pipefail
           cd client
+          export npm_config_loglevel=error
+          export NODE_OPTIONS=--no-deprecation
           npm ci --include=dev || npm install --include=dev
           npx cypress verify
           CYPRESS=true npx cypress run --browser chrome --config baseUrl="http://127.0.0.1:8080"
