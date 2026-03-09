@@ -1,0 +1,11 @@
+{
+  "m_hash": "journey-doc",
+  "m_title": "Journey STIX Test",
+  "m_content": "test content",
+  "m_network": "onion",
+  "m_url": "http://example.onion",
+  "m_base_url": "http://example.onion",
+  "m_content_type": [
+    "leaks"
+  ]
+}

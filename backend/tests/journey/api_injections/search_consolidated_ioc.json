@@ -1,0 +1,8 @@
+{
+  "q": "test",
+  "page": 1,
+  "network": "all",
+  "category": "all",
+  "content": "all",
+  "ioc": "m_email:test@example.com"
+}

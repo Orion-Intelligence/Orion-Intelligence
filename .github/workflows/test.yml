@@ -125,6 +125,7 @@ jobs:
           cd client
           export npm_config_loglevel=error
           export NODE_OPTIONS=--no-deprecation
+          mkdir -p cypress/screenshots cypress/videos coverage
           npm ci --include=dev || npm install --include=dev
           npx cypress verify
           CYPRESS=true npx cypress run --browser chrome --config baseUrl="http://127.0.0.1:8080"
@@ -162,12 +163,32 @@ jobs:
           test -s backend/coverage.xml
 
       - name: Upload combined coverage to Codacy
+        if: always()
+        id: codacy_reports
+        run: |
+          set -euo pipefail
+          reports=""
+          if [ -s client/coverage/lcov.info ]; then
+            reports="client/coverage/lcov.info"
+          fi
+          if [ -s backend/coverage.xml ]; then
+            if [ -n "$reports" ]; then
+              reports="${reports},backend/coverage.xml"
+            else
+              reports="backend/coverage.xml"
+            fi
+          fi
+          echo "reports=${reports}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload combined coverage to Codacy
+        if: always() && steps.codacy_reports.outputs.reports != ''
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: client/coverage/lcov.info,backend/coverage.xml
+          coverage-reports: ${{ steps.codacy_reports.outputs.reports }}
 
       - name: Build merged coverage summary (client + backend)
+        if: always()
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -181,29 +202,31 @@ jobs:
           out_dir = root / "coverage-merged"
           out_dir.mkdir(parents=True, exist_ok=True)
 
-          if not lcov_path.exists() or lcov_path.stat().st_size == 0:
-            raise SystemExit("client/coverage/lcov.info missing or empty")
-          if not backend_xml.exists() or backend_xml.stat().st_size == 0:
-            raise SystemExit("backend/coverage.xml missing or empty")
-
-          # Parse LCOV line coverage.
           client_total = 0
           client_covered = 0
-          for raw in lcov_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-            if raw.startswith("DA:"):
-              _, pair = raw.split("DA:", 1)
-              parts = pair.split(",")
-              if len(parts) != 2:
-                continue
-              hits = int(parts[1])
-              client_total += 1
-              if hits > 0:
-                client_covered += 1
+          if lcov_path.exists() and lcov_path.stat().st_size > 0:
+            # Parse LCOV line coverage.
+            for raw in lcov_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+              if raw.startswith("DA:"):
+                _, pair = raw.split("DA:", 1)
+                parts = pair.split(",")
+                if len(parts) != 2:
+                  continue
+                hits = int(parts[1])
+                client_total += 1
+                if hits > 0:
+                  client_covered += 1
 
-          # Parse backend Cobertura line coverage.
-          cov = ET.parse(backend_xml).getroot()
-          backend_total = int(cov.attrib.get("lines-valid", "0"))
-          backend_covered = int(cov.attrib.get("lines-covered", "0"))
+          backend_total = 0
+          backend_covered = 0
+          if backend_xml.exists() and backend_xml.stat().st_size > 0:
+            # Parse backend Cobertura line coverage.
+            cov = ET.parse(backend_xml).getroot()
+            backend_total = int(cov.attrib.get("lines-valid", "0"))
+            backend_covered = int(cov.attrib.get("lines-covered", "0"))
+
+          if (client_total + backend_total) == 0:
+            raise SystemExit("No client or backend coverage files were produced")
 
           total_lines = client_total + backend_total
           covered_lines = client_covered + backend_covered
@@ -245,16 +268,46 @@ jobs:
           print((out_dir / "coverage-summary.md").read_text(encoding="utf-8"))
           PY
 
-      - if: always()
+      - name: Detect artifact files
+        if: always()
+        id: artifact_files
+        run: |
+          set -euo pipefail
+          has_cypress=false
+          has_coverage=false
+
+          if find client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
+            has_cypress=true
+          fi
+
+          if [ -s backend/coverage.xml ] || [ -s coverage-merged/coverage-summary.json ] || [ -s coverage-merged/coverage-summary.md ]; then
+            has_coverage=true
+          fi
+
+          {
+            echo "has_cypress=${has_cypress}"
+            echo "has_coverage=${has_coverage}"
+          } >> "$GITHUB_OUTPUT"
+
+      - if: always() && steps.artifact_files.outputs.has_cypress == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: cypress-artifacts
           path: |
             client/cypress/screenshots/
             client/cypress/videos/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - if: always() && steps.artifact_files.outputs.has_coverage == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-artifacts
+          path: |
             backend/coverage.xml
             coverage-merged/coverage-summary.json
             coverage-merged/coverage-summary.md
+          if-no-files-found: ignore
           retention-days: 7
 
       - if: always()

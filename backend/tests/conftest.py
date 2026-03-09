@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
+import shutil
 import sys
+import warnings
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -13,6 +17,38 @@ from fastapi.testclient import TestClient
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
+
+warnings.filterwarnings(
+    "ignore",
+    message=r"The 'http_auth' parameter is deprecated\..*",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"Passing transport options in the API method is deprecated\..*",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"datetime\.datetime\.utcnow\(\) is deprecated.*",
+    category=DeprecationWarning,
+)
+logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "filterwarnings",
+        r"ignore:The 'http_auth' parameter is deprecated\..*:DeprecationWarning",
+    )
+    config.addinivalue_line(
+        "filterwarnings",
+        r"ignore:Passing transport options in the API method is deprecated\..*:DeprecationWarning",
+    )
+    config.addinivalue_line(
+        "filterwarnings",
+        r"ignore:datetime\.datetime\.utcnow\(\) is deprecated.*:DeprecationWarning",
+    )
 
 
 @pytest.fixture
@@ -70,6 +106,262 @@ def client_factory():
 
     for client in reversed(clients):
         client.__exit__(None, None, None)
+
+
+def _shared_test_user() -> SimpleNamespace:
+    return SimpleNamespace(
+        id="507f1f77bcf86cd799439011",
+        username="admin_test",
+        role="admin",
+        status="active",
+        tenant_uuid="507f1f77bcf86cd799439012",
+        licenses=["maintainer"],
+        subscription=True,
+        account_verify_at=None,
+        preferences={"theme": "dark-theme"},
+        twofa_enabled=False,
+        email="admin@example.com",
+    )
+
+
+@pytest.fixture(scope="session")
+def main_app_client(tmp_path_factory):
+    from configs import app_dependency
+    from configs import limiter_dependency as limiter_module
+    from main import app
+    from routes import test_routes as test_routes_module
+    from orion.constants import constant
+    from orion.api.interactive.hompage_manager.homepage_model import homepage_model
+    from orion.api.interactive.search_manager.search_model import search_model
+    from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS
+    from orion.api.server.crawl_manager.crawl_model import crawl_model
+    from orion.management.managers.service_manager import service_manager
+    from orion.management.managers.test_manager import test_manager
+    from orion.services.arango_manager.arango_controller import arango_controller
+    from orion.services.arango_manager.arango_enums import ARANGO_CONNECTIONS
+    from orion.services.elastic_manager.elastic_controller import elastic_controller
+    from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
+    from orion.services.mongo_manager.mongo_controller import mongo_controller
+    from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
+    from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+
+    test_user = _shared_test_user()
+    dependency_overrides = dict(app.dependency_overrides)
+
+    original_elastic_ip = ELASTIC_CONNECTIONS.S_DATABASE_IP
+    original_stealer_ip = ELASTIC_CONNECTIONS.S_STEALER_IP
+    original_mongo_ip = MONGO_CONNECTIONS.S_MONGO_DATABASE_IP
+    original_mongo_port = MONGO_CONNECTIONS.S_MONGO_DATABASE_PORT
+    original_arango_url = ARANGO_CONNECTIONS.ARANGO_URL
+    original_parser_path = CRAWL_PATHS.M_PARSER_FILE_PATH
+    original_feeder_path = CRAWL_PATHS.M_FEEDER_FILE_PATH
+    original_screenshot_path = CRAWL_PATHS.M_SCREENSHOT
+    original_license_rules = constant.license_rules
+    original_init_services = service_manager.init_services
+    original_test_mocks_dir = test_routes_module._MOCKS_DIR
+    original_social_search = search_model.social_search
+    original_scrape_social = crawl_model.scrape_social
+    original_invoke_analytics = homepage_model.invoke_analytics
+    original_insight_consolidated_result = homepage_model.insight_consolidated_result
+    original_get_country_specific_insights = homepage_model.get_country_specific_insights
+    original_get_country_specific_insights_paginated = homepage_model.get_country_specific_insights_paginated
+
+    test_mocks_dir = tmp_path_factory.mktemp("api-mocks")
+    for mock_file in original_test_mocks_dir.glob("*.json"):
+        shutil.copy2(mock_file, test_mocks_dir / mock_file.name)
+
+    ELASTIC_CONNECTIONS.S_DATABASE_IP = "127.0.0.1"
+    ELASTIC_CONNECTIONS.S_STEALER_IP = "127.0.0.1"
+    MONGO_CONNECTIONS.S_MONGO_DATABASE_IP = "127.0.0.1"
+    MONGO_CONNECTIONS.S_MONGO_DATABASE_PORT = 27020
+    ARANGO_CONNECTIONS.ARANGO_URL = "http://127.0.0.1:8529"
+    CRAWL_PATHS.M_PARSER_FILE_PATH = str(BACKEND_ROOT / "static" / ".well-known" / "parser_files.zip")
+    CRAWL_PATHS.M_FEEDER_FILE_PATH = str(BACKEND_ROOT / "static" / ".well-known" / "feeder") + "/"
+    CRAWL_PATHS.M_SCREENSHOT = str(BACKEND_ROOT / "static" / "resource" / "screenshot" / "breach") + "/"
+    test_routes_module._MOCKS_DIR = test_mocks_dir
+    constant.license_rules = {
+        "maintainer": {
+            "modules": "all",
+            "cti_graph": True,
+            "mapping": True,
+            "scanning": True,
+            "maintainer": True,
+        }
+    }
+
+    async def _role_ok():
+        return user_role.ADMIN
+
+    async def _status_ok():
+        return UserStatus.ACTIVE
+
+    async def _user_ok():
+        return test_user
+
+    async def _no_limit():
+        yield
+
+    async def _social_search_for_tests(model, key):
+        if key == "phone":
+            payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
+            return {
+                "job_id": "mock-social-phone-recon",
+                "result": [
+                    {
+                        "phone": payload.get("query"),
+                        "platform": "whatsapp",
+                        "status": "active",
+                    }
+                ],
+            }
+
+        if key == "metadata":
+            payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
+            return {
+                "job_id": "mock-social-metadata",
+                "result": {
+                    "username": payload.get("username"),
+                    "platform": payload.get("platform"),
+                    "tokens": payload.get("tokens", []),
+                },
+            }
+
+        return await original_social_search(model, key)
+
+    async def _scrape_social_for_tests(model, user_id: str = "system"):
+        payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
+        return {
+            "job_id": "mock-social-scrape",
+            "user_id": user_id,
+            "result": payload,
+        }
+
+    async def _invoke_analytics_for_tests(self):
+        return {"total_documents": 1, "total_sources": 1}
+
+    async def _insight_consolidated_result_for_tests(self):
+        return []
+
+    async def _get_country_specific_insights_for_tests(self):
+        return {
+            "defacement": [
+                {
+                    "m_hash": "69d3cce5ded4358905a671b20fd4aa4d6280ea38bd313b331e83f72a4783a3a6",
+                    "m_country": ["India"],
+                }
+            ]
+        }
+
+    async def _get_country_specific_insights_paginated_for_tests(self, category: str, country: str, page: int = 1, limit: int = 20):
+        category_key = (category or "").strip().lower()
+        country_key = (country or "").strip().lower()
+        items = []
+        if category_key == "defacement" and country_key == "india":
+            items = [
+                {
+                    "m_hash": "69d3cce5ded4358905a671b20fd4aa4d6280ea38bd313b331e83f72a4783a3a6",
+                    "m_country": ["India"],
+                }
+            ]
+        return {
+            "items": items[:limit],
+            "total": len(items),
+            "page": page,
+            "limit": limit,
+            "has_more": False,
+        }
+
+    async def _init_services_for_tests(self):
+        if self._is_available:
+            return True
+
+        last_error = None
+        for _ in range(30):
+            try:
+                _, writer = await asyncio.open_connection("127.0.0.1", 9400)
+                writer.close()
+                await writer.wait_closed()
+                break
+            except (OSError, ConnectionRefusedError) as exc:
+                last_error = exc
+                await asyncio.sleep(1)
+        else:
+            raise RuntimeError("Elasticsearch test service is not reachable on 127.0.0.1:9400") from last_error
+
+        await elastic_controller.get_instance().initialize()
+        await mongo_controller.get_instance().link_connection()
+        await test_manager.get_instance().reset_test_mongo_and_import_mocks()
+        await mongo_controller.get_instance().ensure_indexes()
+        await mongo_controller.get_instance().initialize()
+        await test_manager.get_instance().reset_test_elastic_and_import_mocks()
+        await arango_controller.get_instance().link_connection()
+        await arango_controller.get_instance().initialize()
+        await test_manager.get_instance().reset_test_arango_and_import_mocks()
+
+        self._is_available = True
+        return True
+
+    service_manager.init_services = _init_services_for_tests
+    service_manager.get_instance()._is_available = False
+
+    app.dependency_overrides[app_dependency.get_current_role] = _role_ok
+    app.dependency_overrides[app_dependency.get_current_status] = _status_ok
+    app.dependency_overrides[app_dependency.get_current_user] = _user_ok
+    app.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
+    search_model.social_search = staticmethod(_social_search_for_tests)
+    crawl_model.scrape_social = staticmethod(_scrape_social_for_tests)
+    homepage_model.invoke_analytics = _invoke_analytics_for_tests
+    homepage_model.insight_consolidated_result = _insight_consolidated_result_for_tests
+    homepage_model.get_country_specific_insights = _get_country_specific_insights_for_tests
+    homepage_model.get_country_specific_insights_paginated = _get_country_specific_insights_paginated_for_tests
+
+    client = TestClient(app)
+    client.__enter__()
+    constant.license_rules = {
+        "maintainer": {
+            "modules": "all",
+            "cti_graph": True,
+            "mapping": True,
+            "scanning": True,
+            "maintainer": True,
+        }
+    }
+    try:
+        yield client
+    finally:
+        client.__exit__(None, None, None)
+        controller = elastic_controller.get_instance()
+
+        async def _close_elastic_clients():
+            seen = set()
+            for attr in ("_elastic_controller__m_core_connection", "_elastic_controller__m_dump_connection"):
+                conn = getattr(controller, attr, None)
+                if conn is None or id(conn) in seen:
+                    continue
+                seen.add(id(conn))
+                await conn.close()
+                setattr(controller, attr, None)
+
+        asyncio.run(_close_elastic_clients())
+        app.dependency_overrides = dependency_overrides
+        service_manager.init_services = original_init_services
+        service_manager.get_instance()._is_available = False
+        ELASTIC_CONNECTIONS.S_DATABASE_IP = original_elastic_ip
+        ELASTIC_CONNECTIONS.S_STEALER_IP = original_stealer_ip
+        MONGO_CONNECTIONS.S_MONGO_DATABASE_IP = original_mongo_ip
+        MONGO_CONNECTIONS.S_MONGO_DATABASE_PORT = original_mongo_port
+        ARANGO_CONNECTIONS.ARANGO_URL = original_arango_url
+        CRAWL_PATHS.M_PARSER_FILE_PATH = original_parser_path
+        CRAWL_PATHS.M_FEEDER_FILE_PATH = original_feeder_path
+        CRAWL_PATHS.M_SCREENSHOT = original_screenshot_path
+        test_routes_module._MOCKS_DIR = original_test_mocks_dir
+        search_model.social_search = original_social_search
+        crawl_model.scrape_social = original_scrape_social
+        homepage_model.invoke_analytics = original_invoke_analytics
+        homepage_model.insight_consolidated_result = original_insight_consolidated_result
+        homepage_model.get_country_specific_insights = original_get_country_specific_insights
+        homepage_model.get_country_specific_insights_paginated = original_get_country_specific_insights_paginated
+        constant.license_rules = original_license_rules
 
 
 @pytest.fixture
