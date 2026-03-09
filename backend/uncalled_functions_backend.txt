@@ -1,0 +1,400 @@
+configs/app_dependency.py
+  - get_current_role:17
+  - get_current_status:29
+  - get_current_user:46
+
+configs/exception_handlers.py
+  - password_size_exception_handler:45
+  - value_error_exception_handler:49
+  - form_validation_exception_handler:53
+
+configs/swagger_config.py
+  - configure_swagger.custom_swagger_ui:14
+
+configs/token_auth_provider.py
+  - TokenAuthProvider.login:24
+  - TokenAuthProvider.is_authenticated:50
+  - TokenAuthProvider.get_admin_config:71
+  - TokenAuthProvider.get_admin_user:76
+  - TokenAuthProvider.logout:82
+  - setup_admin:88
+
+orion/api/interactive/account_manager/account_manager.py
+  - AccountManager.__init__:29
+  - AccountManager.get_instance:43
+  - AccountManager.create_user:73
+  - AccountManager.delete_user:120
+  - AccountManager.update_user:149
+  - AccountManager.getProfileImage:221
+
+orion/api/interactive/alert_manager/alert_manager.py
+  - AlertManager.get_alert_job:39
+  - AlertManager.get_user_alerts:44
+  - AlertManager.get_alert_summary:51
+  - AlertManager.upsert_alert:124
+  - AlertManager.add_custom_alert:168
+  - AlertManager.get_scan_status_by_tenant_id:465
+  - AlertManager.get_allowed_alert_types:474
+
+orion/api/interactive/alert_manager/alert_summary_helper.py
+  - AlertSummaryHelper.summary_cache_key:18
+  - AlertSummaryHelper.invalidate_alert_summary_cache:21
+  - AlertSummaryHelper.risk_from_alert_type:31
+  - AlertSummaryHelper.build_alert_summary:52
+  - AlertSummaryHelper.get_alert_summary:71
+
+orion/api/interactive/auditlog_manager/audit_log_manager.py
+  - AuditLogManager.get_instance:20
+  - AuditLogManager.__init__:27
+  - AuditLogManager.register:33
+  - AuditLogManager._parse_iso:39
+  - AuditLogManager.get:46
+
+orion/api/interactive/auth_manager/auth_manager.py
+  - auth_manager.get_instance:28
+  - auth_manager.__init__:35
+  - auth_manager.authenticate_user:41
+  - auth_manager.verify_user:114
+  - auth_manager.update_password:136
+  - auth_manager.forgot_password:154
+  - auth_manager.edit_userStatus_and_sendMail_from_admin:180
+
+orion/api/interactive/directory_manager/directory_model.py
+  - directory_model.getInstance:19
+  - directory_model.__init__:24
+  - directory_model.fetch_filtered_urls:27
+  - directory_model.invoke_directory:65
+
+orion/api/interactive/directory_manager/directory_shared_model/directory_callback_model.py
+  - directory_callback_link.from_odmantic:20
+
+orion/api/interactive/dump_manager/dump_model.py
+  - dump_model.getInstance:15
+  - dump_model.__init__:20
+  - dump_model.fetch_filtered_dumps:23
+  - dump_model.invoke_dump:51
+
+orion/api/interactive/dump_manager/dump_shared_model/dump_callback_model.py
+  - dump_callback_link.from_odmantic:19
+
+orion/api/interactive/graph_manager/graphs_model.py
+  - graphs_model.getInstance:13
+  - graphs_model.__init__:18
+  - graphs_model.social_search:21
+  - graphs_model.get_tabs_summary:54
+  - graphs_model.add_tab:82
+  - graphs_model.upsert_data:132
+
+orion/api/interactive/hompage_manager/homepage_model.py
+  - homepage_model.getInstance:18
+
+orion/api/interactive/payment_manager/payment_manager.py
+  - PaymentManager.get_instance:13
+  - PaymentManager.__init__:18
+  - PaymentManager.send_subscription_info:24
+
+orion/api/interactive/resource_manager/resource_manager.py
+  - ResourceManager.__init__:13
+  - ResourceManager.get_instance:29
+  - ResourceManager.get_tenant_image:34
+  - ResourceManager.uploadTenantImage:39
+  - ResourceManager.get_user_image:61
+  - ResourceManager.get_system_image:66
+  - ResourceManager.get_favicon:72
+  - ResourceManager._save_image:78
+  - ResourceManager.update_system_image:93
+  - ResourceManager.update_user_image:98
+  - ResourceManager.delete_user_image:104
+  - ResourceManager.deleteTenantImage:112
+  - ResourceManager.delete_system_image:121
+  - ResourceManager.get_robots_txt:131
+
+orion/api/interactive/search_manager/search_callback_model.py
+  - search_callback.get_doc:146
+
+orion/api/interactive/search_manager/search_model.py
+  - search_model.request_defacement_doc:144
+  - search_model.request_exploit_doc:147
+  - search_model.request_leak_doc:150
+  - search_model.request_chat_doc:153
+  - search_model.request_social_doc:156
+  - search_model.request_general_doc:159
+  - search_model.search_stealerlogs_persona_breach:213
+
+orion/api/interactive/signup_manager/signup_manager.py
+  - SignupManager.signup_user:25
+  - SignupManager._send_verification_email:101
+  - SignupManager.resend_verification_email:114
+  - SignupManager.send_support_mail:149
+
+orion/api/interactive/tenant_manager/tenant_bootstrap.py
+  - create_default_tenant:12
+  - create_default_users:38
+  - tenant_boostrap:64
+
+orion/api/interactive/tenant_manager/tenant_manager.py
+  - TenantManager.get_instance:30
+  - TenantManager.__init__:37
+  - TenantManager._dek:48
+  - TenantManager.validate_company_email:83
+  - TenantManager.create_tenant:105
+  - TenantManager.update_tenant:137
+  - TenantManager.get_all_tenant:248
+
+orion/api/server/config_manager/config_controller.py
+  - config_controller.getInstance:19
+  - config_controller.__init__:24
+  - config_controller.load_config:39
+  - config_controller.get:46
+  - config_controller.refresh_config:49
+  - config_controller.get_system_info:52
+  - config_controller.get_system_info.asset:58
+  - config_controller.update_public_config:80
+  - config_controller.getSystemResource:108
+  - config_controller.uploadSystemResource:119
+
+orion/api/server/crawl_manager/crawl_model.py
+  - crawl_model._update_or_create_model:45
+  - crawl_model.make_cti_request:80
+  - crawl_model.invoke_social_index:197
+  - crawl_model.invoke_chat_index:227
+  - crawl_model.invoke_generic_index:239
+  - crawl_model.invoke_exploit_index:249
+  - crawl_model.init_stealerlogs:259
+  - crawl_model.invoke_leak_index:269
+  - crawl_model.invoke_news_index:279
+  - crawl_model.invoke_tracking_index:289
+  - crawl_model.invoke_defacement_index:299
+  - crawl_model.index_log_record:348
+  - crawl_model.invoke_dump_index:361
+  - crawl_model.fetch_cti_label:385
+
+orion/api/server/entity_manager/entity_manager.py
+  - entity_manager.get_instance:20
+  - entity_manager.__init__:25
+  - entity_manager.get_entity_relations:43
+  - entity_manager.create_or_update_entity_nodes:97
+
+orion/api/server/entity_manager/entity_request_generator.py
+  - EntityRequestGenerator.get_cluster_documents_query:7
+  - EntityRequestGenerator.build_property_search_query:177
+  - EntityRequestGenerator.get_document_or_property_query:229
+  - EntityRequestGenerator.deduplicate_key:345
+
+orion/helper_manager/helper_controller.py
+  - helper_controller.parse_filters_json:26
+  - helper_controller.create_template_context:40
+  - helper_controller.get_base_url:65
+  - helper_controller.getFilterClause:72
+  - helper_controller.on_create_random_search_count:119
+  - helper_controller.detect_and_translate:126
+  - helper_controller.normalize_url:134
+  - helper_controller.validate_company_email_domain:149
+  - helper_controller.build_assets:183
+  - helper_controller.clone_model:204
+  - helper_controller.strip_query:226
+
+orion/management/jobs/insight_job.py
+  - insight_job.update_insights:131
+
+orion/management/managers/cronjob_manager.py
+  - cronjob_manager.get_instance:17
+  - cronjob_manager.__init__:22
+  - cronjob_manager.build_assets:30
+  - cronjob_manager.purge_loop:36
+  - cronjob_manager.__init_handles:42
+  - cronjob_manager.init_jobs:45
+  - cronjob_manager.iocs_alert_loop:51
+
+orion/management/managers/service_manager.py
+  - service_manager.get_instance:19
+  - service_manager.__init__:24
+  - service_manager.init_services:32
+  - service_manager.init_cronjobs:64
+  - service_manager.check_status:70
+  - service_manager.build_assets:74
+
+orion/services/__init__.py
+  - env_manager:2
+
+orion/services/arango_manager/arango_controller.py
+  - arango_controller.get_instance:17
+  - arango_controller.__init__:22
+  - arango_controller.link_connection:30
+  - arango_controller.get_db:60
+  - arango_controller.get_graph:63
+  - arango_controller.initialize:67
+
+orion/services/bloom_manager/bloom_controller.py
+  - bloom_controller.__new__:12
+  - bloom_controller.__init__:18
+  - bloom_controller.isduplicate:26
+
+orion/services/elastic_manager/elastic_controller.py
+  - elastic_controller.initialize:31
+  - elastic_controller.__link_connection:34
+  - elastic_controller.get_connection:43
+  - elastic_controller.__conn_for_indices:53
+  - elastic_controller.__initialize_mappings:60
+  - elastic_controller.purge_old_records:149
+
+orion/services/elastic_manager/elastic_insight_generator.py
+  - elastic_insight_generator._strip_query:8
+  - elastic_insight_generator.on_insight_leakdata:15
+  - elastic_insight_generator.on_insight_consolidated_country:39
+  - elastic_insight_generator.on_shared_data_query:74
+  - elastic_insight_generator.on_insight_general_data:83
+  - elastic_insight_generator.on_insight_exploitdata:87
+  - elastic_insight_generator.on_insight_defacement_data:91
+  - elastic_insight_generator.on_insight_telegram_data:101
+  - elastic_insight_generator.on_insight_consolidated_data:110
+
+orion/services/elastic_manager/elastic_request_generator.py
+  - elastic_request_generator.build_es_from_tagged._as_list:49
+  - elastic_request_generator.on_search_persona:385
+
+orion/services/elastic_manager/elastic_semantic_controller.py
+  - elastic_semantic_controller.get_instance:18
+  - elastic_semantic_controller.__init__:23
+  - elastic_semantic_controller.init:26
+  - elastic_semantic_controller.get_connection:31
+  - elastic_semantic_controller.close:34
+  - elastic_semantic_controller.__collect_indices:43
+  - elastic_semantic_controller.__post_init_semantic:46
+  - elastic_semantic_controller.__ensure_vector_field:50
+  - elastic_semantic_controller.__embed_texts:64
+  - elastic_semantic_controller.embed_query:82
+  - elastic_semantic_controller.embed_query_sync:92
+  - elastic_semantic_controller.compute_vec:115
+  - elastic_semantic_controller.enrich_for_semantic:125
+
+orion/services/encryption_manager/encryption_manager.py
+  - encryption_manager.__init__:7
+  - encryption_manager.create:12
+  - encryption_manager.encrypt:15
+  - encryption_manager.decrypt:18
+
+orion/services/encryption_manager/key_manager.py
+  - KeyManager.get_instance:17
+  - KeyManager.__init__:22
+  - KeyManager._new_dek:29
+  - KeyManager._wrap:32
+  - KeyManager._unwrap:35
+  - KeyManager.get_or_create_dek:38
+  - KeyManager.create_dek:50
+  - KeyManager.get_profile_dek:57
+
+orion/services/log_manager/log_controller.py
+  - log.__cleanup_old_logs:106
+  - log.i:132
+  - log.s:140
+  - log.c:166
+
+orion/services/mail_manager/mail_manager.py
+  - mail_manager.get_instance:16
+  - mail_manager.__init__:21
+  - mail_manager.process_app_variables:26
+  - mail_manager._prepare_verification_message:37
+  - mail_manager.send_verification_mail:50
+  - mail_manager.send_verification_mail_list:54
+  - mail_manager._send_sync_email:59
+  - mail_manager._send_sync_email_list:64
+  - mail_manager._send_sync:69
+
+orion/services/mongo_manager/mongo_controller.py
+  - mongo_controller.link_connection:27
+  - mongo_controller.ensure_indexes:41
+  - mongo_controller.initialize:63
+  - mongo_controller.get_admin:70
+
+orion/services/mongo_manager/shared_model/db_auth_models.py
+  - hash_password:40
+  - db_user_account.verify_password:129
+  - db_user_account.is_admin:132
+  - db_user_account.is_crawler:135
+  - db_user_account.is_demo:138
+  - db_user_account.verify_2fa:141
+  - db_user_account.provisioning_uri:146
+
+orion/services/mongo_manager/shared_model/db_system_settings.py
+  - db_system_model.validate_value:31
+
+orion/services/mongo_manager/shared_model/db_tenant_model.py
+  - db_tenant_model.validate_all:36
+
+orion/services/mongo_manager/shared_views/tenant_admin_view.py
+  - TenantAdminView.__init__:17
+  - TenantAdminView.before_create:21
+  - TenantAdminView.before_edit:28
+  - TenantAdminView.delete:42
+
+orion/services/mongo_manager/shared_views/tenant_key_admin_view.py
+  - TenantKeyAdminView.__init__:13
+  - TenantKeyAdminView.delete:17
+
+orion/services/mongo_manager/shared_views/user_admin_view.py
+  - UserAdminView.__init__:14
+  - UserAdminView.before_edit:18
+  - UserAdminView.delete:22
+
+orion/services/redis_manager/redis_controller.py
+  - redis_controller.initialize:22
+  - redis_controller.destroy_instance:30
+  - redis_controller.close_connection:33
+  - redis_controller.__set_bool:36
+  - redis_controller.__get_bool:39
+  - redis_controller.__set_int:48
+  - redis_controller.__get_int:51
+  - redis_controller.__set_float:57
+  - redis_controller.__get_float:60
+  - redis_controller.__set_string:66
+  - redis_controller.__get_string:69
+  - redis_controller.__set_list:80
+  - redis_controller.__get_list:85
+  - redis_controller.__get_keys:91
+  - redis_controller.__flush_all:94
+  - redis_controller.__acquire_lock:97
+  - redis_controller.__release_lock:101
+  - redis_controller.__delete_key:106
+  - redis_controller.invoke_trigger:109
+
+orion/services/session_manager/session_manager.py
+  - session_manager.get_instance:25
+  - session_manager.__init__:32
+  - session_manager.verify_2fa_and_issue:163
+  - session_manager._build_session:208
+
+orion/services/stix_manager/converters/chat_converter.py
+  - chat_converter.convert:11
+
+orion/services/stix_manager/converters/defacement_converter.py
+  - defacement_converter.convert:11
+
+orion/services/stix_manager/converters/exploit_converter.py
+  - exploit_converter.convert:11
+
+orion/services/stix_manager/converters/general_converter.py
+  - general_converter.convert:11
+
+orion/services/stix_manager/converters/leak_converter.py
+  - leak_converter.convert:11
+
+orion/services/stix_manager/converters/social_converter.py
+  - social_converter.convert:11
+
+orion/services/stix_manager/stix_manager.py
+  - stix_manager.get_defacement_stix:91
+  - stix_manager.get_exploit_stix:94
+  - stix_manager.get_social_stix:100
+  - stix_manager.get_general_stix:103
+  - stix_manager.get_chat_stix:106
+
+routes/admin_routes.py
+  - custom_edit_api:24
+  - custom_edit_api_trailing:30
+  - update_user:47
+  - upload_system_image:56
+
+routes/public_api_routes.py
+  - get_tenant_resource:30
+  - get_user_resource:35

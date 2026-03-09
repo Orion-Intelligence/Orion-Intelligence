@@ -159,6 +159,84 @@ jobs:
             client/coverage/lcov.info
             backend/coverage.xml
 
+      - name: Build merged coverage summary (client + backend)
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import xml.etree.ElementTree as ET
+
+          root = pathlib.Path(".")
+          lcov_path = root / "client" / "coverage" / "lcov.info"
+          backend_xml = root / "backend" / "coverage.xml"
+          out_dir = root / "coverage-merged"
+          out_dir.mkdir(parents=True, exist_ok=True)
+
+          if not lcov_path.exists() or lcov_path.stat().st_size == 0:
+            raise SystemExit("client/coverage/lcov.info missing or empty")
+          if not backend_xml.exists() or backend_xml.stat().st_size == 0:
+            raise SystemExit("backend/coverage.xml missing or empty")
+
+          # Parse LCOV line coverage.
+          client_total = 0
+          client_covered = 0
+          for raw in lcov_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+            if raw.startswith("DA:"):
+              _, pair = raw.split("DA:", 1)
+              parts = pair.split(",")
+              if len(parts) != 2:
+                continue
+              hits = int(parts[1])
+              client_total += 1
+              if hits > 0:
+                client_covered += 1
+
+          # Parse backend Cobertura line coverage.
+          cov = ET.parse(backend_xml).getroot()
+          backend_total = int(cov.attrib.get("lines-valid", "0"))
+          backend_covered = int(cov.attrib.get("lines-covered", "0"))
+
+          total_lines = client_total + backend_total
+          covered_lines = client_covered + backend_covered
+          pct = (covered_lines / total_lines * 100.0) if total_lines else 0.0
+
+          summary = {
+            "client": {
+              "covered_lines": client_covered,
+              "total_lines": client_total,
+              "line_coverage_percent": round((client_covered / client_total * 100.0) if client_total else 0.0, 2),
+            },
+            "backend": {
+              "covered_lines": backend_covered,
+              "total_lines": backend_total,
+              "line_coverage_percent": round((backend_covered / backend_total * 100.0) if backend_total else 0.0, 2),
+            },
+            "combined": {
+              "covered_lines": covered_lines,
+              "total_lines": total_lines,
+              "line_coverage_percent": round(pct, 2),
+            },
+          }
+
+          (out_dir / "coverage-summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+          (out_dir / "coverage-summary.md").write_text(
+            "\n".join(
+              [
+                "# Combined Coverage Summary",
+                "",
+                f"- Client (LCOV): {summary['client']['covered_lines']}/{summary['client']['total_lines']} ({summary['client']['line_coverage_percent']}%)",
+                f"- Backend (Cobertura XML): {summary['backend']['covered_lines']}/{summary['backend']['total_lines']} ({summary['backend']['line_coverage_percent']}%)",
+                f"- Combined: {summary['combined']['covered_lines']}/{summary['combined']['total_lines']} ({summary['combined']['line_coverage_percent']}%)",
+                "",
+              ]
+            ),
+            encoding="utf-8",
+          )
+
+          print((out_dir / "coverage-summary.md").read_text(encoding="utf-8"))
+          PY
+
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -167,6 +245,8 @@ jobs:
             client/cypress/screenshots/
             client/cypress/videos/
             backend/coverage.xml
+            coverage-merged/coverage-summary.json
+            coverage-merged/coverage-summary.md
           retention-days: 7
 
       - if: always()
