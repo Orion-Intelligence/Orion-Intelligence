@@ -1,0 +1,192 @@
+import {CONTENT_TYPES, ENTITY_FILTERS, NETWORK_OPTIONS, SAFE_SEARCH_OPTIONS, SEARCH_BY_OPTIONS, SORT_OPTIONS} from '../support/constants';
+import {applyEntityFilter, selectDateRangeAndReopen, selectDateRangeResetAndReopen} from './controllers/12-filter-management.controller';
+
+describe('Filter Management - General Intelligence Flow', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('applies all filters, tools, and auto-apply options in General Intelligence', () => {
+    cy.get('[data-testid="sidebar-group-strategic"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="dashboard-advance-toggle"]', {timeout: 30000}).should('exist').scrollIntoView().check();
+    cy.get('app-search-filters', {timeout: 20000}).should('be.visible');
+
+    ENTITY_FILTERS.forEach(([name, value]) => applyEntityFilter(name, value));
+
+    cy.get('[data-testid="entity-filter-clear-selection"]', {timeout: 20000}).scrollIntoView().click();
+    cy.get('body').click(0, 0);
+    cy.get('[data-testid="dashboard-tools-toggle"]', {timeout: 20000}).scrollIntoView().click();
+    cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).scrollIntoView().should('exist');
+
+    SORT_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).scrollIntoView().click();
+      cy.get(option === 'Newest first' ? '[data-testid="result-tools-sort-newest"]' : '[data-testid="result-tools-sort-oldest"]', {timeout: 20000}).scrollIntoView().click();
+      cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).type('{enter}');
+    });
+
+    SEARCH_BY_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="result-tools-searchby"]', {timeout: 20000}).scrollIntoView().click();
+      cy.get(option === 'Match Semantic' ? '[data-testid="result-tools-searchby-semantic"]' : option === 'Match any term (OR)' ? '[data-testid="result-tools-searchby-or"]' : option === 'Match indivisual terms (AND)' ? '[data-testid="result-tools-searchby-and"]' : '[data-testid="result-tools-searchby-full"]', {timeout: 20000}).scrollIntoView().click();
+      cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).should('be.visible').clear().type('test query{enter}');
+    });
+
+    cy.openSideFilter();
+
+    SAFE_SEARCH_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-safe"]', {timeout: 30000}).scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 20000}).filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 20000}).filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+    cy.openSideFilter();
+
+    CONTENT_TYPES.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-content"]', {timeout: 30000}).scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    cy.closeSideFilter();
+    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 20000}).first().should('be.visible').scrollIntoView().click();
+  });
+});
+
+describe('Filter Management - Data Breach Flow', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('applies all filter options in Data Breach', () => {
+    cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().click();
+    cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
+    cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').scrollIntoView().check();
+    cy.openSideFilter();
+
+    NETWORK_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    SAFE_SEARCH_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-safe"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    selectDateRangeAndReopen();
+    cy.get('[data-testid="side-filter-reset"]').scrollIntoView().click();
+
+    CONTENT_TYPES.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    cy.closeSideFilter();
+    cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
+  });
+});
+
+describe('Filter Management - Defacement Flow', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('applies all filters in Defacement with auto-apply', () => {
+    cy.get('[data-testid="sidebar-group-defacement"]').scrollIntoView().click();
+    cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
+    cy.openSideFilter();
+    selectDateRangeResetAndReopen();
+
+    NETWORK_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    cy.closeSideFilter();
+    cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
+  });
+});
+
+describe('Filter Management - Social Flow', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('applies all filters in Social with auto-apply', () => {
+    cy.get('[data-testid="sidebar-group-social"]').scrollIntoView().click();
+    cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
+    cy.openSideFilter();
+    selectDateRangeResetAndReopen();
+
+    NETWORK_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    CONTENT_TYPES.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    cy.closeSideFilter();
+    cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
+  });
+});
+
+describe('Filter Management - Exploit Flow', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('applies all filters in Exploit with auto-apply', () => {
+    cy.get('[data-testid="sidebar-group-exploit"]').scrollIntoView().click();
+    cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
+    cy.openSideFilter();
+    selectDateRangeResetAndReopen();
+
+    CONTENT_TYPES.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    NETWORK_OPTIONS.forEach((option) => {
+      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.openSideFilter();
+    });
+
+    cy.closeSideFilter();
+    cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
+  });
+});
