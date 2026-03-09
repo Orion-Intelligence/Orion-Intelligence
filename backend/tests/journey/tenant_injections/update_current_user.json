@@ -1,0 +1,8 @@
+{
+  "username": "tenantown1",
+  "email": "owner-updated@journeytenantacme.io",
+  "preferences": {
+    "theme": "light-theme"
+  },
+  "twofa_enabled": false
+}

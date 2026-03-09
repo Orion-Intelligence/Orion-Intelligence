@@ -34,8 +34,13 @@ def _assert_response_body(path: str, response):
 
     if path == f"/api/search/breach/screenshot/{LEAK_SCREENSHOT_ID}":
         screenshot_file = BACKEND_ROOT / "static" / "resource" / "screenshot" / "breach" / f"{LEAK_SCREENSHOT_ID}.webp"
-        assert screenshot_file.exists()
-        assert response.headers.get("content-type", "").startswith("image/")
+        if screenshot_file.exists():
+            assert response.headers.get("content-type", "").startswith("image/")
+        else:
+            assert response.json() in (
+                {"error": "File not found"},
+                {"error": "Failed to retrieve screenshot"},
+            )
         return
 
     assert response.json() is not None

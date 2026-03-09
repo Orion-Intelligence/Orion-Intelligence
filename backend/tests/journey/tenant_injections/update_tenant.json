@@ -1,0 +1,14 @@
+{
+  "id": "",
+  "name": "Journey Tenant Updated",
+  "phone": "+92-300-0000000",
+  "country": "Pakistan",
+  "city": "Karachi",
+  "postal_code": "75400",
+  "subscription": true,
+  "verified": true,
+  "status": "active",
+  "licenses": [
+    "free"
+  ]
+}

@@ -228,12 +228,21 @@ def main_app_client(tmp_path_factory):
     }
 
     async def _role_ok():
+        current = getattr(app.state, "test_current_user", None)
+        if current is not None:
+            return current.role
         return user_role.ADMIN
 
     async def _status_ok():
+        current = getattr(app.state, "test_current_user", None)
+        if current is not None:
+            return current.status
         return UserStatus.ACTIVE
 
     async def _user_ok():
+        current = getattr(app.state, "test_current_user", None)
+        if current is not None:
+            return current
         return test_user
 
     async def _no_limit():
@@ -387,6 +396,7 @@ def main_app_client(tmp_path_factory):
     client = TestClient(app)
     client.__enter__()
     app.state.test_sent_mailbox = sent_mailbox
+    app.state.test_current_user = None
     constant.license_rules = {
         "maintainer": {
             "modules": "all",
@@ -436,6 +446,8 @@ def main_app_client(tmp_path_factory):
         session_manager.generate_verification_token = original_generate_verification_token
         if hasattr(app.state, "test_sent_mailbox"):
             delattr(app.state, "test_sent_mailbox")
+        if hasattr(app.state, "test_current_user"):
+            delattr(app.state, "test_current_user")
         constant.license_rules = original_license_rules
 
 
