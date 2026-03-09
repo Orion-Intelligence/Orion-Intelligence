@@ -28,3 +28,4 @@ sphinx_rtd_theme
 cryptography>=43.0.1
 bloom-filter2
 coverage
+pytest
