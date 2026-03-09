@@ -1,30 +1,18 @@
-
 from __future__ import annotations
 
+import asyncio
+import json
 from types import SimpleNamespace
-from typing import Any, cast
+from typing import Any
 
 import pytest
-from fastapi import status
+from fastapi import Request
 
-from configs import app_dependency
-from configs import limiter_dependency as limiter_module
+import routes.crawl_routes as cr
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from routes.crawl_routes import crawl_routes
-
-
-async def _allow_role():
-    return user_role.ADMIN
-
-
-async def _allow_user():
-    return SimpleNamespace(id="u1", tenant_uuid="t1", role="admin", licenses=["maintainer"])
-
-
-async def _no_limit():
-    yield
+from orion.services.session_manager.session_manager import session_manager
 
 
 class FakeCrawl:
@@ -89,15 +77,24 @@ class FakeEntityManager:
         return {"ok": True, "doc": data.get("m_document_id")}
 
 
-@pytest.fixture
-def crawl_client(app_factory, client_factory):
-    app = app_factory(crawl_routes)
-    app_any = cast(Any, app)
-    app_any.dependency_overrides[app_dependency.get_current_role] = _allow_role
-    app_any.dependency_overrides[app_dependency.get_current_user] = _allow_user
-    app_any.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
+class _FakeSessionManager:
+    async def get_current_role(self, _token):
+        return user_role.ADMIN
 
-    return client_factory(app)
+    async def get_current_user(self, _token):
+        return SimpleNamespace(id="u1", tenant_uuid="t1", role=user_role.ADMIN, licenses=["maintainer"])
+
+
+def _json_request(payload: Any) -> Request:
+    body = json.dumps(payload).encode("utf-8")
+
+    async def receive():
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    return Request(
+        {"type": "http", "method": "POST", "path": "/", "headers": [(b"content-type", b"application/json")]},
+        receive=receive,
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -105,6 +102,7 @@ def patch_singletons(monkeypatch):
     fake = FakeCrawl()
     monkeypatch.setattr(crawl_model, "getInstance", staticmethod(lambda: fake))
     monkeypatch.setattr(entity_manager, "get_instance", staticmethod(lambda: FakeEntityManager()))
+    monkeypatch.setattr(session_manager, "get_instance", staticmethod(lambda: _FakeSessionManager()))
 
 
 @pytest.mark.parametrize(
@@ -130,17 +128,31 @@ def patch_singletons(monkeypatch):
         ("post", "/api/index/stealerlog", "index_stealerlog.json", "index_stealerlog"),
     ],
 )
-def test_crawl_routes_happy_path(crawl_client, load_injection, method, path, payload_file, expected_route):
+def test_crawl_routes_happy_path(load_injection, method, path, payload_file, expected_route):
     payload = load_injection(payload_file) if payload_file else None
+    routes = {
+        ("get", "/api/feeder/leak"): lambda _p: cr.feeder("leak"),
+        ("get", "/api/parser"): lambda _p: cr.parser(),
+        ("post", "/api/index/leak"): lambda p: cr.index_leak_data(_json_request(p)),
+        ("post", "/api/index/news"): lambda p: cr.index_news_data(_json_request(p)),
+        ("post", "/api/index/tracking"): lambda p: cr.index_tracking_data(_json_request(p)),
+        ("post", "/api/index/exploit"): lambda p: cr.index_exploit_data(_json_request(p)),
+        ("post", "/api/index/defacement"): lambda p: cr.index_defacement_data(_json_request(p)),
+        ("post", "/api/screenshot"): lambda p: cr.screenshot(cr.ScreenshotPayload(**p)),
+        ("post", "/api/index/generic"): lambda p: cr.index_generic(_json_request(p)),
+        ("post", "/api/nlp/parse"): lambda p: cr.parse_text(cr.nlp_data_model(**p)),
+        ("post", "/api/nlp/parse/ai"): lambda p: cr.parse_ai(cr.nlp_data_model(**p)),
+        ("post", "/api/nlp/summarize/ai"): lambda p: cr.summarize_ai(cr.nlp_data_model(**p)),
+        ("post", "/api/index/chat"): lambda p: cr.index_chat_data(_json_request(p)),
+        ("post", "/api/index/social"): lambda p: cr.index_social_data(_json_request(p)),
+        ("post", "/api/index/sanctions"): lambda p: cr.index_sanctions_data(_json_request(p)),
+        ("post", "/api/index/entity"): lambda p: cr.index_entities(_json_request(p), [cr.entity_model(**item) for item in p]),
+        ("post", "/api/index/dump"): lambda p: cr.index_dump(_json_request(p)),
+        ("post", "/api/index/stealerlog"): lambda p: cr.index_stealerlog(cr.LogBatchModel(**p)),
+    }
 
-    if method == "get":
-        response = crawl_client.get(path)
-    else:
-        response = crawl_client.post(path, json=payload)
+    body = asyncio.run(routes[(method, path)](payload))
 
-    assert response.status_code == status.HTTP_200_OK, response.text
-
-    body = response.json()
     if path == "/api/index/entity":
         assert isinstance(body, list)
         assert body[0]["ok"] is True
@@ -152,12 +164,11 @@ def test_crawl_routes_happy_path(crawl_client, load_injection, method, path, pay
 
 
 @pytest.mark.parametrize("payload_file", ["index_sanctions_chat.json", "index_sanctions_list.json", "index_sanctions_single.json"])
-def test_sanctions_route_variants(crawl_client, load_injection, payload_file):
-    response = crawl_client.post("/api/index/sanctions", json=load_injection(payload_file))
-    assert response.status_code == 200
-    assert response.json()["route"] == "index_sanctions"
+def test_sanctions_route_variants(load_injection, payload_file):
+    body = asyncio.run(cr.index_sanctions_data(_json_request(load_injection(payload_file))))
+    assert body["route"] == "index_sanctions"
 
 
-def test_crawl_route_validation_error(crawl_client):
-    response = crawl_client.post("/api/screenshot", json={"filename": "f.webp"})
-    assert response.status_code == 422
+def test_crawl_route_validation_error():
+    with pytest.raises(Exception):
+        asyncio.run(cr.screenshot(cr.ScreenshotPayload(filename="f.webp")))

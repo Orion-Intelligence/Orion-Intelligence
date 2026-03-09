@@ -17,6 +17,8 @@ def _as_list(value: Any) -> List[Any]:
 
 
 def _get(raw: Any, key: str) -> Any:
+    if isinstance(raw, dict):
+        return raw.get(key)
     try:
         return getattr(raw, key)
     except Exception:

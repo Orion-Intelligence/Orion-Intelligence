@@ -34,7 +34,7 @@ passlib = "~1.7.4"
 PyJWT = "~2.10.1"
 
 [tool.pytest.ini_options]
-addopts = "--forked --ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --cov=orion --cov=routes --cov=configs --cov-report=term-missing"
+addopts = "--ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --cov=orion --cov=routes --cov=configs --cov-report=term-missing"
 testpaths = ["backend/tests"]
 filterwarnings = [
     "ignore:`FieldValidationInfo` is deprecated, use `ValidationInfo` instead.:DeprecationWarning:pydantic_core.*",

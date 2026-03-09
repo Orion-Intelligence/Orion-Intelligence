@@ -58,7 +58,15 @@ def app_factory():
 
 @pytest.fixture
 def client_factory():
-    def _factory(app: FastAPI):
-        return TestClient(app)
+    clients: list[TestClient] = []
 
-    return _factory
+    def _factory(app: FastAPI):
+        client = TestClient(app)
+        client.__enter__()
+        clients.append(client)
+        return client
+
+    yield _factory
+
+    for client in reversed(clients):
+        client.__exit__(None, None, None)

@@ -20,6 +20,7 @@ from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
+from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
 from routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS)
 
@@ -30,6 +31,7 @@ STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_requ
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
+STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
 
 
 async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_type: Optional[str] = None):
@@ -683,3 +685,33 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
 )
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/stix/convert/{kind}",
+    summary="Convert Orion document payload to STIX 2.1 bundle",
+    tags=["Stix"],
+    operation_id="convertPayloadToStix",
+    status_code=200,
+    dependencies=STIX_MEMBER_DEPS,
+)
+async def convert_stix_single(kind: str, payload: dict = Body(...)):
+    kind_normalized = kind.strip().lower()
+    if kind_normalized not in STIX_KIND_VALUES:
+        return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
+    return convert_to_stix(kind_normalized, payload)
+
+
+@api_routes.post(
+    "/api/stix/convert/{kind}/batch",
+    summary="Convert multiple Orion payloads to STIX 2.1 bundles",
+    tags=["Stix"],
+    operation_id="convertPayloadBatchToStix",
+    status_code=200,
+    dependencies=STIX_MEMBER_DEPS,
+)
+async def convert_stix_batch(kind: str, payloads: list[dict] = Body(...)):
+    kind_normalized = kind.strip().lower()
+    if kind_normalized not in STIX_KIND_VALUES:
+        return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
+    return {"items": [convert_to_stix(kind_normalized, payload) for payload in payloads]}

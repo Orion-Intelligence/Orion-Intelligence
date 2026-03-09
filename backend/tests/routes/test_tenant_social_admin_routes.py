@@ -68,7 +68,7 @@ class _FakeAlertManager:
     async def update_alert(self, *_):
         return {"message": "Alert updated successfully"}
 
-    async def getAllAlerts(self, *_):
+    async def getAllAlerts(self, *_, **__):
         return []
 
     async def get_scan_status(self, *_):
@@ -146,6 +146,23 @@ def _build_client(monkeypatch, role: user_role, alert_running: bool = False):
     from orion.api.interactive.search_manager.search_model import search_model
     from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
     from orion.api.server.config_manager.config_controller import config_controller
+    from orion.services.session_manager.session_manager import session_manager
+
+    class _FakeSession:
+        async def get_current_role(self, *_):
+            return role
+
+        async def get_current_status(self, *_):
+            return UserStatus.ACTIVE
+
+        async def get_current_user(self, *_):
+            return SimpleNamespace(
+                id="u1",
+                tenant_uuid="t1",
+                role=role,
+                licenses=["maintainer"],
+                status=UserStatus.ACTIVE,
+            )
 
     monkeypatch.setattr(TenantManager, "get_instance", staticmethod(lambda: _FakeTenantManager()))
     monkeypatch.setattr(AccountManager, "get_instance", staticmethod(lambda: _FakeAccountManager()))
@@ -156,6 +173,7 @@ def _build_client(monkeypatch, role: user_role, alert_running: bool = False):
     monkeypatch.setattr(search_model, "getInstance", staticmethod(lambda: _FakeSearchModel()))
     monkeypatch.setattr(config_controller, "getInstance", staticmethod(lambda: _FakeConfigController()))
     monkeypatch.setattr(auth_manager, "edit_userStatus_and_sendMail_from_admin", staticmethod(lambda *_: None))
+    monkeypatch.setattr(session_manager, "get_instance", staticmethod(lambda: _FakeSession()))
 
     constant.license_rules = {
         "maintainer": {
@@ -189,7 +207,9 @@ def _build_client(monkeypatch, role: user_role, alert_running: bool = False):
     app_any.dependency_overrides[app_dependency.get_current_status] = _status_ok
     app_any.dependency_overrides[app_dependency.get_current_user] = _user_ok
 
-    return TestClient(app)
+    client = TestClient(app)
+    client.__enter__()
+    return client
 
 
 @pytest.mark.parametrize(

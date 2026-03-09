@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import jwt
@@ -8,6 +9,7 @@ import pytest
 from fastapi import HTTPException
 
 from orion.constants.constant import CONSTANTS
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
 
@@ -20,6 +22,24 @@ class _FakeEngine:
         return self.user
 
     async def save(self, _user):
+        return None
+
+
+class _FakeEngineRefresh:
+    def __init__(self, user, maintainer_user):
+        self.user = user
+        self.maintainer_user = maintainer_user
+        self.calls = 0
+        self.saved = []
+
+    async def find_one(self, *_args, **_kwargs):
+        self.calls += 1
+        if self.calls == 1:
+            return self.user
+        return self.maintainer_user
+
+    async def save(self, user):
+        self.saved.append(user)
         return None
 
 
@@ -106,3 +126,153 @@ def test_crawler_role_bypasses_sid_checks():
     out = asyncio.run(sm.get_current_user(token))
 
     assert out.username == "crawler_u"
+
+
+def test_create_access_token_sets_sid_for_non_crawler():
+    user = SimpleNamespace(
+        username="john",
+        role=user_role.MEMBER,
+        id="u1",
+        current_session_id=None,
+    )
+    sm = _new_manager(user)
+    sm.get_current_role = lambda _token: asyncio.sleep(0, result=user_role.MEMBER)
+
+    token, role = asyncio.run(sm.create_access_token({"sub": "john"}, timedelta(hours=3)))
+    payload = jwt.decode(token, CONSTANTS.S_AUTH_SECRET_KEY, algorithms=[CONSTANTS.S_AUTH_ALGORITHM])
+
+    assert role == user_role.MEMBER
+    assert "sid" in payload
+    assert any(c[0] == REDIS_COMMANDS.S_SET_STRING for c in sm._redis.calls)
+
+
+def test_create_access_token_marks_free_token():
+    user = SimpleNamespace(username="john", role=user_role.MEMBER, id="u1", current_session_id=None)
+    sm = _new_manager(user)
+    sm.get_current_role = lambda _token: asyncio.sleep(0, result=user_role.MEMBER)
+
+    token, _ = asyncio.run(sm.create_access_token({"sub": "john"}, free=True))
+    payload = jwt.decode(token, CONSTANTS.S_AUTH_SECRET_KEY, algorithms=[CONSTANTS.S_AUTH_ALGORITHM], options={"verify_exp": False})
+
+    assert payload["free"] is True
+
+
+def test_refresh_token_returns_same_for_free_token():
+    user = SimpleNamespace(username="john", role=user_role.MEMBER, id="u1", current_session_id="sid-1")
+    sm = _new_manager(user)
+
+    token = _token({"sub": "john", "free": True})
+    out = asyncio.run(sm.refresh_token(token))
+    assert out["access_token"] == token
+    assert out["token_type"] == "bearer"
+
+
+def test_refresh_token_rejects_missing_sub():
+    user = SimpleNamespace(username="john", role=user_role.MEMBER, id="u1", current_session_id="sid-1")
+    sm = _new_manager(user)
+
+    token = _token({"sid": "sid-1"})
+    with pytest.raises(HTTPException) as ex:
+        asyncio.run(sm.refresh_token(token))
+    assert ex.value.status_code == 401
+    assert ex.value.detail == "Invalid token"
+
+
+def test_refresh_token_rejects_sid_mismatch_in_redis():
+    user = SimpleNamespace(
+        username="john",
+        role=user_role.MEMBER,
+        id="u1",
+        tenant_uuid="507f1f77bcf86cd799439011",
+        current_session_id="sid-current",
+        subscription=True,
+        account_verify_at=None,
+        licenses=[LicenseName.FREE],
+        status=UserStatus.ACTIVE,
+    )
+    maintainer = SimpleNamespace(account_verify_at=None)
+
+    sm = object.__new__(session_manager)
+    sm._engine = _FakeEngineRefresh(user, maintainer)
+    sm._redis = _FakeRedis(sid="sid-redis")
+    sm._session_ttl = 1800
+    sm.has_onboarding = lambda *_: asyncio.sleep(0, result=False)
+
+    token = _token({"sub": "john", "sid": "sid-token"})
+    with pytest.raises(HTTPException) as ex:
+        asyncio.run(sm.refresh_token(token))
+    assert ex.value.status_code == 401
+    assert ex.value.detail == "Invalid token"
+
+
+def test_get_current_role_rejects_unknown_role():
+    user = SimpleNamespace(username="john", role="nope", id="u1", current_session_id="sid-1", status=UserStatus.ACTIVE)
+    sm = _new_manager(user, redis_sid="sid-1")
+    token = _token({"sub": "john", "sid": "sid-1"})
+
+    with pytest.raises(HTTPException) as ex:
+        asyncio.run(sm.get_current_role(token))
+    assert ex.value.status_code == 403
+
+
+def test_get_current_status_rejects_unknown_status():
+    user = SimpleNamespace(username="john", role=user_role.MEMBER, id="u1", current_session_id="sid-1", status="weird")
+    sm = _new_manager(user, redis_sid="sid-1")
+    token = _token({"sub": "john", "sid": "sid-1"})
+
+    with pytest.raises(HTTPException) as ex:
+        asyncio.run(sm.get_current_status(token))
+    assert ex.value.status_code == 403
+
+
+def test_create_temp_token_contains_twofa_claim():
+    token = asyncio.run(session_manager.create_temp_token("john", ttl_minutes=5, extra={"x": 1}))
+    payload = jwt.decode(token, CONSTANTS.S_AUTH_SECRET_KEY, algorithms=[CONSTANTS.S_AUTH_ALGORITHM])
+    assert payload["sub"] == "john"
+    assert payload["twofa"] is True
+    assert payload["x"] == 1
+
+
+def test_has_onboarding_false_for_empty_company_id():
+    sm = object.__new__(session_manager)
+    sm._engine = _FakeEngine(None)
+    out = asyncio.run(sm.has_onboarding(""))
+    assert out is False
+
+
+def test_refresh_token_trial_expired_member_returns_402():
+    user = SimpleNamespace(
+        username="john",
+        role=user_role.MEMBER,
+        id="u1",
+        tenant_uuid="507f1f77bcf86cd799439011",
+        current_session_id="sid-1",
+        subscription=False,
+        account_verify_at=None,
+        licenses=[LicenseName.FREE],
+        status=UserStatus.ACTIVE,
+    )
+    maintainer = SimpleNamespace(account_verify_at=datetime.now(timezone.utc) - timedelta(days=40))
+
+    sm = object.__new__(session_manager)
+    sm._engine = _FakeEngineRefresh(user, maintainer)
+    sm._redis = _FakeRedis(sid="sid-1")
+    sm._session_ttl = 1800
+    sm.has_onboarding = lambda *_: asyncio.sleep(0, result=False)
+
+    token = _token({"sub": "john", "sid": "sid-1"})
+    with pytest.raises(HTTPException) as ex:
+        asyncio.run(sm.refresh_token(token))
+    assert ex.value.status_code == 402
+
+
+def test_generate_verification_token_returns_uuid_like_string():
+    token = session_manager.generate_verification_token()
+    assert isinstance(token, str)
+    assert len(token) >= 32
+
+
+def test_logout_user_noop_paths():
+    # Current implementation is a no-op for any token value.
+    assert session_manager.logout_user("") is None
+    assert session_manager.logout_user("token-1") is None

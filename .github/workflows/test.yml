@@ -89,6 +89,7 @@ jobs:
           with p.open("a", encoding="utf-8") as fp:
             fp.write("\nCOVERAGE_PROCESS_START=/app/.coveragerc\n")
             fp.write("COVERAGE_FILE=/app/.coverage\n")
+            fp.write("TESTING_ENABLED=1\n")
           PY
           test -s .env
 
@@ -132,16 +133,22 @@ jobs:
           set -euo pipefail
           test -s client/coverage/lcov.info
 
-      - name: Generate backend coverage report
+      - name: Run backend tests with coverage
         run: |
           set -euo pipefail
           docker exec trusted-web-main sh -lc '
             set -e
-            rm -f /app/.coverage
-            coverage combine || true
-            coverage xml -o /tmp/backend-coverage.xml
-            coverage report || true
+            cd /app
+            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
+              --maxfail=1 --disable-warnings \
+              --cov=orion --cov=routes --cov=configs \
+              --cov-report=term-missing \
+              --cov-report=xml:/tmp/backend-coverage.xml
           '
+
+      - name: Generate backend coverage report
+        run: |
+          set -euo pipefail
           docker cp trusted-web-main:/tmp/backend-coverage.xml backend/coverage.xml
           test -s backend/coverage.xml
 

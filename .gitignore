@@ -36,6 +36,10 @@ db.sqlite3
 client/cypress/downloads/*
 client/cypress/screenshots/*
 client/coverage/*
+.coverage
+.coverage.*
+backend/.coverage
+backend/.coverage.*
 
 static/trustly/.well-known/model/*
 backend/static/.well-known/parser_files.zip
