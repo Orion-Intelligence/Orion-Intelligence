@@ -139,10 +139,9 @@ jobs:
           docker exec trusted-web-main sh -lc '
             set -e
             cd /app
+            python -m pip install --quiet pytest pytest-cov
             TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
               --maxfail=1 --disable-warnings \
-              --cov=orion --cov=routes --cov=configs \
-              --cov-report=term-missing \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
 
