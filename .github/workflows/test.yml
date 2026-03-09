@@ -140,7 +140,7 @@ jobs:
             set -e
             cd /app
             python -m pip install --quiet pytest pytest-cov
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
+            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/static \
               -m static --maxfail=1 --disable-warnings
           '
 
