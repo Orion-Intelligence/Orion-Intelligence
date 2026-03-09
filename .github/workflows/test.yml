@@ -133,7 +133,7 @@ jobs:
           set -euo pipefail
           test -s client/coverage/lcov.info
 
-      - name: Run backend tests with coverage
+      - name: Run backend static tests with coverage
         run: |
           set -euo pipefail
           docker exec trusted-web-main sh -lc '
@@ -141,7 +141,17 @@ jobs:
             cd /app
             python -m pip install --quiet pytest pytest-cov
             TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
-              --maxfail=1 --disable-warnings \
+              -m static --maxfail=1 --disable-warnings
+          '
+
+      - name: Run backend journey tests with coverage append
+        run: |
+          set -euo pipefail
+          docker exec trusted-web-main sh -lc '
+            set -e
+            cd /app
+            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/journey \
+              -m journey --cov-append --maxfail=1 --disable-warnings \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
 
@@ -155,9 +165,7 @@ jobs:
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: |
-            client/coverage/lcov.info
-            backend/coverage.xml
+          coverage-reports: client/coverage/lcov.info,backend/coverage.xml
 
       - name: Build merged coverage summary (client + backend)
         run: |
