@@ -51,6 +51,17 @@ def pytest_configure(config):
     )
 
 
+def pytest_collection_modifyitems(items):
+    for item in items:
+        path_parts = Path(str(item.fspath)).parts
+        if "tests" not in path_parts:
+            continue
+        if "static" in path_parts:
+            item.add_marker(pytest.mark.static)
+        if "journey" in path_parts:
+            item.add_marker(pytest.mark.journey)
+
+
 @pytest.fixture
 def fake_user():
     return SimpleNamespace(
