@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Any, cast
 
 import pytest
 from fastapi import status
@@ -91,10 +92,10 @@ class FakeEntityManager:
 @pytest.fixture
 def crawl_client(app_factory, client_factory):
     app = app_factory(crawl_routes)
-
-    app.dependency_overrides[app_dependency.get_current_role] = _allow_role
-    app.dependency_overrides[app_dependency.get_current_user] = _allow_user
-    app.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
+    app_any = cast(Any, app)
+    app_any.dependency_overrides[app_dependency.get_current_role] = _allow_role
+    app_any.dependency_overrides[app_dependency.get_current_user] = _allow_user
+    app_any.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
 
     return client_factory(app)
 

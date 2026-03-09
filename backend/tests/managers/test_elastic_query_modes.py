@@ -12,8 +12,8 @@ def _model(matchtype="or", q="test"):
 def test_build_ioc_filter_clauses_handles_search_all_and_specific_keys():
     clauses = elastic_request_generator.build_ioc_filter_clauses(
         {
-            "m_search_all": ["example.com"],
-            "m_email": ["a@example.com"],
+            "m_search_all": ["exdsaample.com"],
+            "m_email": ["a@examsadple.com"],
             "unknown": ["x"],
         }
     )

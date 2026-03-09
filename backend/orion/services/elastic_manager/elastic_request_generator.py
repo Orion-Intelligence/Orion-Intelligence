@@ -85,7 +85,8 @@ class elastic_request_generator:
 
             if ioc_key == "m_search_all":
                 es_fields = []
-                for key in allowed_keys:
+                search_keys = allowed_keys or ELASTIC_ENUMS.ioc_field_mapping.keys()
+                for key in search_keys:
                     mapped = ELASTIC_ENUMS.ioc_field_mapping.get(key)
                     if not mapped:
                         continue

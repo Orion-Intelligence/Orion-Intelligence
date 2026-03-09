@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Any, cast
 
 import pytest
 from fastapi import FastAPI
@@ -208,11 +209,11 @@ def api_public_client(monkeypatch):
     app = FastAPI()
     app.include_router(api_routes)
     app.include_router(public_routes)
-
-    app.dependency_overrides[app_dependency.get_current_role] = _role_ok
-    app.dependency_overrides[app_dependency.get_current_status] = _status_ok
-    app.dependency_overrides[app_dependency.get_current_user] = _user_ok
-    app.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
+    app_any = cast(Any, app)
+    app_any.dependency_overrides[app_dependency.get_current_role] = _role_ok
+    app_any.dependency_overrides[app_dependency.get_current_status] = _status_ok
+    app_any.dependency_overrides[app_dependency.get_current_user] = _user_ok
+    app_any.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
 
     return TestClient(app)
 

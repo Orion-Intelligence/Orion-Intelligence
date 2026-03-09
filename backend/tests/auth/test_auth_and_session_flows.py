@@ -7,8 +7,8 @@ from types import SimpleNamespace
 
 import asyncio
 import pytest
+import httpx
 from fastapi import HTTPException
-from fastapi.testclient import TestClient
 
 from routes.auth_routes import auth_router
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
@@ -80,88 +80,89 @@ def _build_auth_app(monkeypatch):
     return app
 
 
+def _request(app, method: str, path: str, **kwargs):
+    cookies = kwargs.pop("cookies", None)
+
+    async def _run():
+        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+        async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+            if cookies:
+                client.cookies.update(cookies)
+            return await client.request(method, path, **kwargs)
+
+    return asyncio.run(_run())
+
+
 def test_token_route_sets_cookie(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/token", data={"username": "good", "password": "pass"})
+    resp = _request(app, "POST", "/api/token", data={"username": "good", "password": "pass"})
     assert resp.status_code == 200
     assert "access_token" in resp.cookies
 
 
 def test_token_route_invalid_credentials(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/token", data={"username": "bad", "password": "pass"})
+    resp = _request(app, "POST", "/api/token", data={"username": "bad", "password": "pass"})
     assert resp.status_code == 401
 
 
 def test_2fa_verify_success(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/token/2fa/verify", json={"code": "123456"}, headers={"Authorization": "Bearer tmp"})
+    resp = _request(app, "POST", "/api/token/2fa/verify", json={"code": "123456"}, headers={"Authorization": "Bearer tmp"})
     assert resp.status_code == 200
     assert resp.json()["access_token"] == "token-2fa"
 
 
 def test_2fa_verify_invalid_code(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/token/2fa/verify", json={"code": "999999"}, headers={"Authorization": "Bearer tmp"})
+    resp = _request(app, "POST", "/api/token/2fa/verify", json={"code": "999999"}, headers={"Authorization": "Bearer tmp"})
     assert resp.status_code == 401
 
 
 def test_refresh_token_success(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/token/refresh", headers={"Authorization": "Bearer valid"})
+    resp = _request(app, "POST", "/api/token/refresh", headers={"Authorization": "Bearer valid"})
     assert resp.status_code == 200
     assert resp.json()["access_token"] == "refreshed-token"
 
 
 def test_refresh_token_missing(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/token/refresh")
+    resp = _request(app, "POST", "/api/token/refresh")
     assert resp.status_code == 401
 
 
 def test_refresh_token_expired(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/token/refresh", headers={"Authorization": "Bearer expired"})
+    resp = _request(app, "POST", "/api/token/refresh", headers={"Authorization": "Bearer expired"})
     assert resp.status_code == 401
 
 
 def test_logout_returns_response_and_clears_cookie(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/logout", cookies={"access_token": "token-123"})
+    resp = _request(app, "POST", "/api/logout", cookies={"access_token": "token-123"})
     assert resp.status_code == 200
     assert resp.json()["detail"] == "Logged out"
 
 
 def test_verify_user_route(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/verify/good-token")
+    resp = _request(app, "POST", "/api/verify/good-token")
     assert resp.status_code == 200
 
 
 def test_verify_user_invalid(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-    resp = client.post("/api/verify/bad")
+    resp = _request(app, "POST", "/api/verify/bad")
     assert resp.status_code == 404
 
 
 def test_forgot_and_update_password_routes(monkeypatch):
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-
-    forgot = client.post("/api/forgot", json={"email": "user@example.com"})
+    forgot = _request(app, "POST", "/api/forgot", json={"email": "user@example.com"})
     assert forgot.status_code == 200
 
-    update = client.post("/api/updatePassword", json={"token": "abc", "password": "Aa!123456"})
+    update = _request(app, "POST", "/api/updatePassword", json={"token": "abc", "password": "Aa!123456"})
     assert update.status_code == 200
 
 
@@ -174,9 +175,7 @@ def test_support_route(monkeypatch):
     monkeypatch.setattr(SignupManager, "send_support_mail", staticmethod(_fake_support))
 
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-
-    resp = client.post("/api/support", json={"email": "corp@example.org", "subject": "help", "message": "need setup"})
+    resp = _request(app, "POST", "/api/support", json={"email": "corp@example.org", "subject": "help", "message": "need setup"})
     assert resp.status_code == 200
 
 
@@ -185,9 +184,7 @@ def test_token_demo_route_sets_cookie(monkeypatch):
 
     monkeypatch.setattr(env_handler, "get_instance", staticmethod(lambda: SimpleNamespace(env=lambda k, d=None: "demo_user" if k == "DEMO_USERNAME" else "demo_pass")))
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-
-    resp = client.post("/api/token/demo")
+    resp = _request(app, "POST", "/api/token/demo")
     assert resp.status_code == 200
     assert "access_token" in resp.cookies
 
@@ -205,12 +202,10 @@ def test_signup_and_resend_verification_routes(monkeypatch):
     monkeypatch.setattr(SignupManager, "resend_verification_email", staticmethod(_fake_resend))
 
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-
-    signup = client.post("/api/signup", json={"username": "member_user", "email": "user@example.com", "password": "Aa!123456"})
+    signup = _request(app, "POST", "/api/signup", json={"username": "member_user", "email": "user@example.com", "password": "Aa!123456"})
     assert signup.status_code == 200
 
-    resend = client.post("/api/signup/verificaion", json={"username": "member_user", "email": "user@example.com", "password": "Aa!123456"})
+    resend = _request(app, "POST", "/api/signup/verificaion", json={"username": "member_user", "email": "user@example.com", "password": "Aa!123456"})
     assert resend.status_code == 200
 
 
@@ -224,9 +219,9 @@ def test_subscription_request_route(monkeypatch):
     monkeypatch.setattr(PaymentManager, "get_instance", staticmethod(lambda: _FakePayment()))
 
     app = _build_auth_app(monkeypatch)
-    client = TestClient(app)
-
-    resp = client.post(
+    resp = _request(
+        app,
+        "POST",
         "/api/subscription/request",
         json={"name": "Acme", "phone": "+12025550123", "email": "owner@example.com", "plan": "monthly-highlighted"},
     )

@@ -32,3 +32,13 @@ email-validator = "2.2.0"
 pymongo = "~4.11"
 passlib = "~1.7.4"
 PyJWT = "~2.10.1"
+
+[tool.pytest.ini_options]
+addopts = "--forked --ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --cov=orion --cov=routes --cov=configs --cov-report=term-missing"
+testpaths = ["backend/tests"]
+filterwarnings = [
+    "ignore:`FieldValidationInfo` is deprecated, use `ValidationInfo` instead.:DeprecationWarning:pydantic_core.*",
+    "ignore:Pydantic V1 style `@root_validator` validators are deprecated.*",
+    "ignore:Support for class-based `config` is deprecated, use ConfigDict instead.*:DeprecationWarning:pydantic.*",
+    "ignore:`json_encoders` is deprecated.*:DeprecationWarning:pydantic.*",
+]

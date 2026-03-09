@@ -29,3 +29,4 @@ cryptography>=43.0.1
 bloom-filter2
 coverage
 pytest
+pytest-forked

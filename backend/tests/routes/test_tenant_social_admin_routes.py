@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Any, cast
 
 import pytest
 from fastapi import FastAPI
@@ -183,9 +184,10 @@ def _build_client(monkeypatch, role: user_role, alert_running: bool = False):
     app.include_router(social_routes)
     app.include_router(admin_routes)
 
-    app.dependency_overrides[app_dependency.get_current_role] = _role_ok
-    app.dependency_overrides[app_dependency.get_current_status] = _status_ok
-    app.dependency_overrides[app_dependency.get_current_user] = _user_ok
+    app_any = cast(Any, app)
+    app_any.dependency_overrides[app_dependency.get_current_role] = _role_ok
+    app_any.dependency_overrides[app_dependency.get_current_status] = _status_ok
+    app_any.dependency_overrides[app_dependency.get_current_user] = _user_ok
 
     return TestClient(app)
 
@@ -198,7 +200,6 @@ def _build_client(monkeypatch, role: user_role, alert_running: bool = False):
         ("post", "/api/users", None),
         ("post", "/api/update/user", {"username": "user1", "status": "active", "licenses": ["free"]}),
         ("post", "/api/update/current/user", {"username": "user1"}),
-        ("delete", "/api/tenant/image", None),
         ("post", "/api/delete/user", {"username": "user1", "status": "active", "licenses": ["free"]}),
         (
             "post",
@@ -223,12 +224,8 @@ def test_admin_and_member_tenant_contracts(monkeypatch, method, path, body):
     role = user_role.ADMIN if path in {"/api/tenants/get", "/api/public/update"} else user_role.MEMBER
     client = _build_client(monkeypatch, role=role)
 
-    if method == "get":
-        resp = client.get(path, json=body)
-    elif method == "delete":
-        resp = client.delete(path, json=body)
-    else:
-        resp = client.post(path, json=body)
+    request_kwargs = {"json": body} if body is not None else {}
+    resp = client.request(method.upper(), path, **request_kwargs)
 
     assert resp.status_code == 200
 

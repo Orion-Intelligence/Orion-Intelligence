@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import Any, cast
 
 from configs import app_dependency
 from configs import limiter_dependency as limiter_module
@@ -32,9 +33,10 @@ async def _fake_cti_label(payload):
 
 def test_micro_cti_fetch(app_factory, client_factory, load_injection, monkeypatch):
     app = app_factory(micro_routes)
-    app.dependency_overrides[app_dependency.get_current_role] = _allow_role
-    app.dependency_overrides[app_dependency.get_current_user] = _allow_user
-    app.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
+    app_any = cast(Any, app)
+    app_any.dependency_overrides[app_dependency.get_current_role] = _allow_role
+    app_any.dependency_overrides[app_dependency.get_current_user] = _allow_user
+    app_any.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
 
     monkeypatch.setattr(crawl_model, "fetch_cti_label", staticmethod(_fake_cti_label))
 
@@ -46,9 +48,10 @@ def test_micro_cti_fetch(app_factory, client_factory, load_injection, monkeypatc
 
 def test_micro_nlp_chat_report(app_factory, client_factory, load_injection, monkeypatch):
     app = app_factory(micro_routes)
-    app.dependency_overrides[app_dependency.get_current_role] = _allow_role
-    app.dependency_overrides[app_dependency.get_current_user] = _allow_user
-    app.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
+    app_any = cast(Any, app)
+    app_any.dependency_overrides[app_dependency.get_current_role] = _allow_role
+    app_any.dependency_overrides[app_dependency.get_current_user] = _allow_user
+    app_any.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
 
     monkeypatch.setattr(crawl_model, "getInstance", staticmethod(lambda: FakeMicroCrawl()))
 

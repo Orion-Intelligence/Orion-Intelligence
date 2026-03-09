@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import SimpleNamespace
 import asyncio
-import json
-
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.stix_manager.stix_manager import stix_manager
 from orion.api.interactive.search_manager.search_model import search_model
@@ -74,12 +72,16 @@ def test_stix_manager_delegates_to_converter(monkeypatch):
 
     sm = stix_manager.get_instance()
     monkeypatch.setattr(sm, "_search_model", _FakeSearch())
-    sm._SPECS["leak"] = sm._SPECS["leak"].__class__(
-        fetch_method="request_leak_doc",
-        model_cls=sm._SPECS["leak"].model_cls,
-        converter_cls=_FakeConverter,
-        missing_error="No leak document found",
-        accepts_lang=True,
+    monkeypatch.setitem(
+        sm._SPECS,
+        "leak",
+        replace(
+            sm._SPECS["leak"],
+            fetch_method="request_leak_doc",
+            converter_cls=_FakeConverter,
+            missing_error="No leak document found",
+            accepts_lang=True,
+        ),
     )
 
     out = asyncio.run(sm.get_leak_stix("doc1"))
@@ -96,7 +98,7 @@ def test_test_manager_fix_oid_and_date():
 def test_test_manager_load_mocks_dirs_exist():
     from pathlib import Path
 
-    base = Path("backend/static/test/mocks")
+    base = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks"
     assert (base / "mongo").exists()
     assert (base / "elastic").exists()
     assert (base / "arango").exists()
