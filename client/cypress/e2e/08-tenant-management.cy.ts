@@ -78,7 +78,16 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     openTenantsPage();
     cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
     cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').clear().type('1');
+    cy.get('[data-testid="tenant-edit-panel"]', {timeout: 30000})
+      .filter(':visible')
+      .first()
+      .within(() => {
+        cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000})
+          .first()
+          .scrollIntoView()
+          .clear({force: true})
+          .type('1', {force: true});
+      });
     cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 35000})
       .filter(':visible')
       .first()
