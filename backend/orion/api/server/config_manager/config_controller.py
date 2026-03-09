@@ -120,7 +120,7 @@ class config_controller:
         MAX_FILE_SIZE = 100 * 1024
 
         if len(contents) > MAX_FILE_SIZE:
-            raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 100 KB.")
+            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 100 KB.")
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")

@@ -26,7 +26,7 @@
                 <i class="bi bi-plus-lg text-lg"></i>
               </button>
               @if (isAddMenuVisible) {
-                <div (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-52 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/95 p-1.5 shadow-2xl ring-1 ring-white/5 backdrop-blur-md">
+                <div (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-52 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] p-1.5 shadow-2xl ring-1 ring-white/5 backdrop-blur-md">
                   <button data-testid="cti-tab-add-new-session" (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
                     <span class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-blue-700)]/60 text-[var(--color-text3)] transition-colors group-hover:bg-indigo-500 group-hover:text-white">
                       <i class="bi bi-plus-square text-lg"></i>

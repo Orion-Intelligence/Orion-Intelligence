@@ -126,6 +126,7 @@ export class HelperService {
       }).catch(() => {});
     }
   }
+  
 
   highlightWords(text: string): SafeHtml {
     if (!text) {
