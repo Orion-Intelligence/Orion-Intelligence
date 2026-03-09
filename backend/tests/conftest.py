@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import shutil
 import sys
 import warnings
@@ -120,18 +121,20 @@ def client_factory():
 
 
 def _shared_test_user() -> SimpleNamespace:
+    from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
+
     return SimpleNamespace(
-        id="507f1f77bcf86cd799439011",
-        username="admin_test",
+        id="6942fc487720aacfcdeb030d",
+        username="admin",
         role="admin",
         status="active",
-        tenant_uuid="507f1f77bcf86cd799439012",
-        licenses=["maintainer"],
+        tenant_uuid="6942fc487720aacfcdeb030b",
+        licenses=[LicenseName.MAINTAINER, LicenseName.ENTERPRISE],
         subscription=True,
         account_verify_at=None,
         preferences={"theme": "dark-theme"},
         twofa_enabled=False,
-        email="admin@example.com",
+        email="",
     )
 
 
@@ -152,12 +155,19 @@ def main_app_client(tmp_path_factory):
     from orion.services.arango_manager.arango_enums import ARANGO_CONNECTIONS
     from orion.services.elastic_manager.elastic_controller import elastic_controller
     from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
+    from orion.services.mail_manager.mail_manager import mail_manager
     from orion.services.mongo_manager.mongo_controller import mongo_controller
     from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
     from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+    from orion.services.redis_manager.redis_controller import redis_controller
+    from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
+    from orion.services.session_manager.session_manager import session_manager
 
     test_user = _shared_test_user()
     dependency_overrides = dict(app.dependency_overrides)
+    redis_state: dict[str, int] = {}
+    sent_mailbox: list[dict[str, str]] = []
+    verification_token_state = {"value": 0}
 
     original_elastic_ip = ELASTIC_CONNECTIONS.S_DATABASE_IP
     original_stealer_ip = ELASTIC_CONNECTIONS.S_STEALER_IP
@@ -176,16 +186,33 @@ def main_app_client(tmp_path_factory):
     original_insight_consolidated_result = homepage_model.insight_consolidated_result
     original_get_country_specific_insights = homepage_model.get_country_specific_insights
     original_get_country_specific_insights_paginated = homepage_model.get_country_specific_insights_paginated
+    original_send_verification_mail = mail_manager.send_verification_mail
+    original_redis_invoke_trigger = redis_controller.invoke_trigger
+    original_generate_verification_token = session_manager.generate_verification_token
 
     test_mocks_dir = tmp_path_factory.mktemp("api-mocks")
     for mock_file in original_test_mocks_dir.glob("*.json"):
         shutil.copy2(mock_file, test_mocks_dir / mock_file.name)
 
-    ELASTIC_CONNECTIONS.S_DATABASE_IP = "127.0.0.1"
-    ELASTIC_CONNECTIONS.S_STEALER_IP = "127.0.0.1"
-    MONGO_CONNECTIONS.S_MONGO_DATABASE_IP = "127.0.0.1"
-    MONGO_CONNECTIONS.S_MONGO_DATABASE_PORT = 27020
-    ARANGO_CONNECTIONS.ARANGO_URL = "http://127.0.0.1:8529"
+    running_in_container = Path("/.dockerenv").exists()
+    if running_in_container:
+        elastic_host = original_elastic_ip or "elasticsearch"
+        elastic_port = int(ELASTIC_CONNECTIONS.S_DATABASE_PORT or 9400)
+        mongo_host = original_mongo_ip or "mongo"
+        mongo_port = int(original_mongo_port or 27017)
+        arango_url = original_arango_url or "http://trusted-web-arangodb:8529"
+    else:
+        elastic_host = "127.0.0.1"
+        elastic_port = 9400
+        mongo_host = "127.0.0.1"
+        mongo_port = 27020
+        arango_url = "http://127.0.0.1:8529"
+
+    ELASTIC_CONNECTIONS.S_DATABASE_IP = elastic_host
+    ELASTIC_CONNECTIONS.S_STEALER_IP = elastic_host
+    MONGO_CONNECTIONS.S_MONGO_DATABASE_IP = mongo_host
+    MONGO_CONNECTIONS.S_MONGO_DATABASE_PORT = mongo_port
+    ARANGO_CONNECTIONS.ARANGO_URL = arango_url
     CRAWL_PATHS.M_PARSER_FILE_PATH = str(BACKEND_ROOT / "static" / ".well-known" / "parser_files.zip")
     CRAWL_PATHS.M_FEEDER_FILE_PATH = str(BACKEND_ROOT / "static" / ".well-known" / "feeder") + "/"
     CRAWL_PATHS.M_SCREENSHOT = str(BACKEND_ROOT / "static" / "resource" / "screenshot" / "breach") + "/"
@@ -282,6 +309,32 @@ def main_app_client(tmp_path_factory):
             "has_more": False,
         }
 
+    async def _send_verification_mail_for_tests(self, to: str, subject: str, body: str):
+        token_match = re.search(r"/welcome/([^\"'\\s<]+)", body)
+        sent_mailbox.append(
+            {
+                "to": to,
+                "subject": subject,
+                "body": body,
+                "token": token_match.group(1) if token_match else "",
+            }
+        )
+        return {"to": to, "subject": subject, "body": body}
+
+    async def _redis_invoke_trigger_for_tests(self, p_commands, p_data=None):
+        if p_commands == REDIS_COMMANDS.S_GET_INT:
+            key, default, _expiry = p_data
+            return str(redis_state.get(key, default))
+        if p_commands == REDIS_COMMANDS.S_SET_INT:
+            key, value, _expiry = p_data
+            redis_state[key] = int(value)
+            return True
+        return None
+
+    def _generate_verification_token_for_tests():
+        verification_token_state["value"] += 1
+        return f"journey-verification-token-{verification_token_state['value']}"
+
     async def _init_services_for_tests(self):
         if self._is_available:
             return True
@@ -289,7 +342,7 @@ def main_app_client(tmp_path_factory):
         last_error = None
         for _ in range(30):
             try:
-                _, writer = await asyncio.open_connection("127.0.0.1", 9400)
+                _, writer = await asyncio.open_connection(elastic_host, elastic_port)
                 writer.close()
                 await writer.wait_closed()
                 break
@@ -297,7 +350,9 @@ def main_app_client(tmp_path_factory):
                 last_error = exc
                 await asyncio.sleep(1)
         else:
-            raise RuntimeError("Elasticsearch test service is not reachable on 127.0.0.1:9400") from last_error
+            raise RuntimeError(
+                f"Elasticsearch test service is not reachable on {elastic_host}:{elastic_port}"
+            ) from last_error
 
         await elastic_controller.get_instance().initialize()
         await mongo_controller.get_instance().link_connection()
@@ -325,9 +380,13 @@ def main_app_client(tmp_path_factory):
     homepage_model.insight_consolidated_result = _insight_consolidated_result_for_tests
     homepage_model.get_country_specific_insights = _get_country_specific_insights_for_tests
     homepage_model.get_country_specific_insights_paginated = _get_country_specific_insights_paginated_for_tests
+    mail_manager.send_verification_mail = _send_verification_mail_for_tests
+    redis_controller.invoke_trigger = _redis_invoke_trigger_for_tests
+    session_manager.generate_verification_token = staticmethod(_generate_verification_token_for_tests)
 
     client = TestClient(app)
     client.__enter__()
+    app.state.test_sent_mailbox = sent_mailbox
     constant.license_rules = {
         "maintainer": {
             "modules": "all",
@@ -372,6 +431,11 @@ def main_app_client(tmp_path_factory):
         homepage_model.insight_consolidated_result = original_insight_consolidated_result
         homepage_model.get_country_specific_insights = original_get_country_specific_insights
         homepage_model.get_country_specific_insights_paginated = original_get_country_specific_insights_paginated
+        mail_manager.send_verification_mail = original_send_verification_mail
+        redis_controller.invoke_trigger = original_redis_invoke_trigger
+        session_manager.generate_verification_token = original_generate_verification_token
+        if hasattr(app.state, "test_sent_mailbox"):
+            delattr(app.state, "test_sent_mailbox")
         constant.license_rules = original_license_rules
 
 
