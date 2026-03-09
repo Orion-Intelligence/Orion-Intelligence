@@ -47,6 +47,10 @@ class alert_job:
         self._crawl_model = crawl_model.getInstance()
         self._cancel_scan_flags = {}
 
+    @staticmethod
+    def _tenant_key(tenant_id) -> str:
+        return str(tenant_id)
+
     async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
         try:
             clean_domain = ioc_value.strip()
@@ -179,14 +183,16 @@ class alert_job:
             return False
 
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
-        self._cancel_scan_flags[str(tenant.id)] = False
+        tenant_key = self._tenant_key(tenant.id)
+        if tenant_key not in self._cancel_scan_flags:
+            self._cancel_scan_flags[tenant_key] = False
         try:
             iocs = tenant.iocs
             if not iocs:
                 return
             if category == "scanning":
                 for ioc in iocs:
-                    if self._cancel_scan_flags.get(tenant.id):
+                    if self._cancel_scan_flags.get(tenant_key):
                         return
                     ioc_type_name = ioc.ioc_id
                     if ioc_type_name in ["m_domain", "m_url"]:
@@ -199,7 +205,7 @@ class alert_job:
                                     scans_to_run = ["repo"]
                             for scan_type in scans_to_run:
                                 await self._handle_scanning_alert(
-                                    str(tenant.id), ioc_value, ioc_type_name, scan_type)
+                                    tenant_key, ioc_value, ioc_type_name, scan_type)
 
                     for ioc_value in ioc.values or []:
                         scans = []
@@ -242,7 +248,7 @@ class alert_job:
                             result_list = scan_result.get("result", [])
                             if result_list:
                                 await self._handle_dynamic_scanning_alert(
-                                    str(tenant.id), ioc_type_name, ioc_value, scan_type, result_list)
+                                    tenant_key, ioc_type_name, ioc_value, scan_type, result_list)
 
                         except Exception as dynamic_e:
                             pass
@@ -332,6 +338,7 @@ class alert_job:
                         results = es_response_dict.get("Result", [])
 
                         if results:
+                            bulk_alerts = []
                             for result in results:
                                 hash = result.get("m_hash") or ""
                                 _content_types = result.get("m_content_type") or []
@@ -383,19 +390,33 @@ class alert_job:
                                         name=key, values=ioc_values)
                                     all_ioc_list.append(new_ioc)
 
-                                await self._alert_manager.upsert_alert(
-                                    tenantId=str(tenant.id),
-                                    category=category,
-                                    ioc_type=ioc_type_name,
-                                    ioc_value=ioc_value,
-                                    title=_title,
-                                    description=_description,
-                                    url=_url,
-                                    source=_source,
-                                    content_types=_content_types,
-                                    all_ioc=all_ioc_list,
-                                    data_hash=hash)
-                                total_alerts_processed += 1
+                                bulk_alerts.append({
+                                    "category": category,
+                                    "ioc_type": ioc_type_name,
+                                    "ioc_value": ioc_value,
+                                    "title": _title,
+                                    "description": _description,
+                                    "url": _url,
+                                    "source": _source,
+                                    "content_types": _content_types,
+                                    "all_ioc": all_ioc_list,
+                                    "data_hash": hash,
+                                })
+
+                                if len(bulk_alerts) >= 200:
+                                    await self._alert_manager.upsert_alerts_bulk(
+                                        tenantId=tenant_key,
+                                        alerts_payload=bulk_alerts,
+                                        chunk_size=200)
+                                    total_alerts_processed += len(bulk_alerts)
+                                    bulk_alerts = []
+
+                            if bulk_alerts:
+                                await self._alert_manager.upsert_alerts_bulk(
+                                    tenantId=tenant_key,
+                                    alerts_payload=bulk_alerts,
+                                    chunk_size=200)
+                                total_alerts_processed += len(bulk_alerts)
                     except Exception as sub_e:
                         pass
         except Exception as e:
@@ -420,7 +441,7 @@ class alert_job:
             except Exception as ex:
                 pass
             finally:
-                self._cancel_scan_flags.pop(tenant.id, None)
+                self._cancel_scan_flags.pop(self._tenant_key(tenant.id), None)
                 await self._alert_manager.getInstance().set_scan_running(tenant.id, False)
 
     def get_additional_result_keys(self, result: any) -> list[tuple[str, any]]:
@@ -516,4 +537,4 @@ class alert_job:
             await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
 
     async def cancel_tenant_scan(self, tenant_id: str):
-        self._cancel_scan_flags[tenant_id] = True
+        self._cancel_scan_flags[self._tenant_key(tenant_id)] = True

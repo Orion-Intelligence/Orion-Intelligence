@@ -75,7 +75,6 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
 
   it('updates tenant user quota to one as admin', () => {
     cy.loginAsAdmin();
-    cy.visit('/dashboard/profile/homepage');
     openTenantsPage();
     cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
     cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
@@ -160,43 +159,22 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
       });
       cy.get('.ui-filter-sidebar-overlay', {timeout: 60000}).should('not.exist');
     };
-    const waitAndCancelScanIfVisible = () => {
-      cy.get('body').then($body => {
-        if ($body.find('[data-testid="tenant-scan-cancel"]').length > 0) {
-          cy.wait(10000);
-          cy.get('body').then($bodyAfterWait => {
-            if ($bodyAfterWait.find('[data-testid="tenant-scan-cancel"]').length > 0) {
-              cy.get('[data-testid="tenant-scan-cancel"]', {timeout: 30000})
-                .first()
-                .scrollIntoView()
-                .click({force: true, waitForAnimations: false, animationDistanceThreshold: 0});
-              cy.reload()
-            }
-          });
-        }
-      });
-    };
-
     cy.visit('/login');
     cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
     cy.get('[data-testid="login-pass"]', {timeout: 30000}).type(tenant.password, {log: false});
     cy.get('[data-testid="login-button"]', {timeout: 30000}).click();
 
     cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
-    waitAndCancelScanIfVisible();
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-    waitAndCancelScanIfVisible();
 
     cy.get('app-alert-scan-loading', {timeout: 10000}).should('not.exist');
     cy.get('[data-testid="tenant-home-print-alerts"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
-    waitAndCancelScanIfVisible();
 
     cy.get('[data-testid="profile-notification-bell"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-notification-see-details"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
     exportFromModal('notification-alert-export-modal', 'notification-alert-export-option-report');
     closeNotificationSidebar();
-    waitAndCancelScanIfVisible();
 
     cy.get('[data-testid="profile-notification-bell"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-notification-clear-all"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
@@ -205,7 +183,6 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     cy.get('[data-testid="tenant-home-alert-category-card"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-report-see-details"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
     exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
-    waitAndCancelScanIfVisible();
 
     cy.get('[data-testid="tenant-alert-add-button"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-modal"]', {timeout: 30000}).should('be.visible');
@@ -241,6 +218,5 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
 
     cy.get('[data-testid="tenant-alert-flush-all"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="confirmation-yes-button"]', {timeout: 30000}).should('be.visible').click();
-    waitAndCancelScanIfVisible();
   });
 });

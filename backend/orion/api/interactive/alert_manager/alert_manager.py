@@ -50,6 +50,64 @@ class AlertManager:
     async def get_alert_summary(self, tenant_id: str):
         return await self._summary_helper.get_alert_summary(tenant_id)
 
+    async def upsert_alerts_bulk(self, tenantId: str, alerts_payload: list[dict], chunk_size: int = 200):
+        if not alerts_payload:
+            return {"created": 0, "updated": 0}
+
+        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenantId)
+        if not existing_doc:
+            existing_doc = db_alert_model(tenant_id=tenantId, alerts=[])
+
+        existing_index = {
+            ((a.data_hash or ""), (a.type or ""), (a.ioc_value or "")): a
+            for a in (existing_doc.alerts or [])
+        }
+
+        created_count = 0
+        updated_count = 0
+
+        for start in range(0, len(alerts_payload), chunk_size):
+            chunk = alerts_payload[start:start + chunk_size]
+            now = datetime.now(timezone.utc)
+
+            for payload in chunk:
+                category = payload.get("category", "")
+                ioc_type = payload.get("ioc_type", "")
+                ioc_value = payload.get("ioc_value", "")
+                data_hash = payload.get("data_hash") or self._smart_hash(
+                    category, ioc_type, ioc_value, payload.get("source", ""), payload.get("url", ""))
+                key = (data_hash, category, ioc_value)
+
+                existing_alert = existing_index.get(key)
+                if existing_alert:
+                    existing_alert.last_seen = now
+                    updated_count += 1
+                    continue
+
+                new_alert = AlertModel(
+                    alert_id=f"{data_hash}-{ioc_value}",
+                    type=category,
+                    ioc_type=ioc_type,
+                    ioc_value=ioc_value,
+                    data_hash=data_hash,
+                    title=payload.get("title", ""),
+                    description=payload.get("description", ""),
+                    url=payload.get("url", ""),
+                    source=payload.get("source", ""),
+                    content_types=payload.get("content_types", []),
+                    status=alert_status.ACTIVE,
+                    first_seen=now,
+                    last_seen=now,
+                    all_ioc=payload.get("all_ioc", []), )
+                existing_doc.alerts.append(new_alert)
+                existing_index[key] = new_alert
+                created_count += 1
+
+            await self._engine.save(existing_doc)
+
+        await self._summary_helper.invalidate_alert_summary_cache(tenantId)
+        return {"created": created_count, "updated": updated_count}
+
     async def upsert_alert(self,
             tenantId: str,
             category: str,
