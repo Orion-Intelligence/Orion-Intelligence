@@ -67,7 +67,8 @@ export function ensureDomainScannerModalOpen() {
         .click({force: true});
     }
   });
-  cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');
+  cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('exist');
+  cy.get(DOMAIN_SCANNER_INPUT_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('be.visible');
 }
 
 export function openFirstReportAndGoBack() {
