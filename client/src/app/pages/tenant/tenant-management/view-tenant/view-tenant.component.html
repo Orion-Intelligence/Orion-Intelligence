@@ -143,7 +143,7 @@
                                 </div>
                               </div>
                             </div>
-                            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
+                            <div data-testid="tenant-edit-form-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
                               <div class="text-[19px] font-bold text-[var(--color-text1)]">Edit Tenant</div>
                               <div class="mt-2 space-y-3 pt-1">
                                 <div>
@@ -239,7 +239,7 @@
                   @if (tenant._expanded) {
                     <div class="border-t border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] px-3 py-3">
                       <div class="space-y-3">
-                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
+                        <div data-testid="tenant-edit-form-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
                           <div class="text-base font-bold text-[var(--color-text1)]">Tenant Information</div>
                           <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                             <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
@@ -259,7 +259,7 @@
                         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
                           <div class="text-base font-bold text-[var(--color-text1)]">Edit Tenant</div>
                           <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Quota</label>
-                          <input type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
+                          <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                           <label class="mt-3 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
                           <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.status">
                             <option [ngValue]="TenantStatus.ACTIVE">Active</option>

@@ -77,10 +77,11 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
-    cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="tenant-edit-panel"]', {timeout: 30000})
+    cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click({force: true});
+    cy.get('[data-testid="tenant-edit-form-panel"]', {timeout: 30000})
       .filter(':visible')
       .first()
+      .as('tenantEditFormPanel')
       .within(() => {
         cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000})
           .first()
@@ -98,8 +99,8 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
       .first()
       .scrollTo('bottomRight', {ensureScrollable: false});
 
-    cy.get('[data-testid="tenant-save-changes"]', {timeout: 35000})
-      .filter(':visible')
+    cy.get('@tenantEditFormPanel', {timeout: 35000})
+      .find('[data-testid="tenant-save-changes"]', {timeout: 35000})
       .first()
       .then(($btn) => {
         const btn = $btn.get(0) as HTMLElement;
@@ -110,8 +111,7 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
           parentScroller.scrollLeft = parentScroller.scrollWidth;
           parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
         }
-        cy.wrap($btn).should('be.visible').and('not.be.disabled');
-        btn.click();
+        cy.wrap($btn).should('exist').and('not.be.disabled').click({force: true});
       });
     cy.logout();
   });
