@@ -98,7 +98,7 @@ def test_test_manager_fix_oid_and_date():
 def test_test_manager_load_mocks_dirs_exist():
     from pathlib import Path
 
-    base = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks"
+    base = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks"
     assert (base / "mongo").exists()
     assert (base / "elastic").exists()
     assert (base / "arango").exists()

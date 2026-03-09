@@ -34,7 +34,7 @@ from routes.api_routes import api_routes
 from routes import test_routes as tr
 
 
-BACKEND_ROOT = Path(__file__).resolve().parents[2]
+BACKEND_ROOT = Path(__file__).resolve().parents[3]
 MOCKS_ROOT = BACKEND_ROOT / "static" / "test" / "mocks"
 API_MOCKS = MOCKS_ROOT / "api"
 ELASTIC_MOCKS = MOCKS_ROOT / "elastic"
