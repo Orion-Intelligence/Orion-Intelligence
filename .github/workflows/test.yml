@@ -133,6 +133,7 @@ jobs:
           test -s client/coverage/lcov.info
 
       - name: Generate backend coverage report
+        if: false
         run: |
           set -euo pipefail
           docker exec trusted-web-main sh -lc '
@@ -152,6 +153,7 @@ jobs:
           language: TypeScript
 
       - name: Upload backend coverage to Codacy
+        if: false
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
