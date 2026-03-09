@@ -34,6 +34,11 @@ warnings.filterwarnings(
     message=r"datetime\.datetime\.utcnow\(\) is deprecated.*",
     category=DeprecationWarning,
 )
+warnings.filterwarnings(
+    "ignore",
+    message=r"The `dict` method is deprecated; use `model_dump` instead\..*",
+    category=DeprecationWarning,
+)
 logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
 
 
@@ -49,6 +54,10 @@ def pytest_configure(config):
     config.addinivalue_line(
         "filterwarnings",
         r"ignore:datetime\.datetime\.utcnow\(\) is deprecated.*:DeprecationWarning",
+    )
+    config.addinivalue_line(
+        "filterwarnings",
+        r"ignore:The `dict` method is deprecated; use `model_dump` instead\..*:DeprecationWarning",
     )
 
 
@@ -139,35 +148,19 @@ def _shared_test_user() -> SimpleNamespace:
 
 
 @pytest.fixture(scope="session")
-def main_app_client(tmp_path_factory):
-    from configs import app_dependency
-    from configs import limiter_dependency as limiter_module
+def _main_app_client_session(tmp_path_factory):
     from main import app
     from routes import test_routes as test_routes_module
     from orion.constants import constant
-    from orion.api.interactive.hompage_manager.homepage_model import homepage_model
-    from orion.api.interactive.search_manager.search_model import search_model
     from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS
-    from orion.api.server.crawl_manager.crawl_model import crawl_model
     from orion.management.managers.service_manager import service_manager
     from orion.management.managers.test_manager import test_manager
     from orion.services.arango_manager.arango_controller import arango_controller
     from orion.services.arango_manager.arango_enums import ARANGO_CONNECTIONS
     from orion.services.elastic_manager.elastic_controller import elastic_controller
     from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
-    from orion.services.mail_manager.mail_manager import mail_manager
     from orion.services.mongo_manager.mongo_controller import mongo_controller
     from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
-    from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
-    from orion.services.redis_manager.redis_controller import redis_controller
-    from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
-    from orion.services.session_manager.session_manager import session_manager
-
-    test_user = _shared_test_user()
-    dependency_overrides = dict(app.dependency_overrides)
-    redis_state: dict[str, int] = {}
-    sent_mailbox: list[dict[str, str]] = []
-    verification_token_state = {"value": 0}
 
     original_elastic_ip = ELASTIC_CONNECTIONS.S_DATABASE_IP
     original_stealer_ip = ELASTIC_CONNECTIONS.S_STEALER_IP
@@ -180,15 +173,6 @@ def main_app_client(tmp_path_factory):
     original_license_rules = constant.license_rules
     original_init_services = service_manager.init_services
     original_test_mocks_dir = test_routes_module._MOCKS_DIR
-    original_social_search = search_model.social_search
-    original_scrape_social = crawl_model.scrape_social
-    original_invoke_analytics = homepage_model.invoke_analytics
-    original_insight_consolidated_result = homepage_model.insight_consolidated_result
-    original_get_country_specific_insights = homepage_model.get_country_specific_insights
-    original_get_country_specific_insights_paginated = homepage_model.get_country_specific_insights_paginated
-    original_send_verification_mail = mail_manager.send_verification_mail
-    original_redis_invoke_trigger = redis_controller.invoke_trigger
-    original_generate_verification_token = session_manager.generate_verification_token
 
     test_mocks_dir = tmp_path_factory.mktemp("api-mocks")
     for mock_file in original_test_mocks_dir.glob("*.json"):
@@ -227,123 +211,6 @@ def main_app_client(tmp_path_factory):
         }
     }
 
-    async def _role_ok():
-        current = getattr(app.state, "test_current_user", None)
-        if current is not None:
-            return current.role
-        return user_role.ADMIN
-
-    async def _status_ok():
-        current = getattr(app.state, "test_current_user", None)
-        if current is not None:
-            return current.status
-        return UserStatus.ACTIVE
-
-    async def _user_ok():
-        current = getattr(app.state, "test_current_user", None)
-        if current is not None:
-            return current
-        return test_user
-
-    async def _no_limit():
-        yield
-
-    async def _social_search_for_tests(model, key):
-        if key == "phone":
-            payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
-            return {
-                "job_id": "mock-social-phone-recon",
-                "result": [
-                    {
-                        "phone": payload.get("query"),
-                        "platform": "whatsapp",
-                        "status": "active",
-                    }
-                ],
-            }
-
-        if key == "metadata":
-            payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
-            return {
-                "job_id": "mock-social-metadata",
-                "result": {
-                    "username": payload.get("username"),
-                    "platform": payload.get("platform"),
-                    "tokens": payload.get("tokens", []),
-                },
-            }
-
-        return await original_social_search(model, key)
-
-    async def _scrape_social_for_tests(model, user_id: str = "system"):
-        payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
-        return {
-            "job_id": "mock-social-scrape",
-            "user_id": user_id,
-            "result": payload,
-        }
-
-    async def _invoke_analytics_for_tests(self):
-        return {"total_documents": 1, "total_sources": 1}
-
-    async def _insight_consolidated_result_for_tests(self):
-        return []
-
-    async def _get_country_specific_insights_for_tests(self):
-        return {
-            "defacement": [
-                {
-                    "m_hash": "69d3cce5ded4358905a671b20fd4aa4d6280ea38bd313b331e83f72a4783a3a6",
-                    "m_country": ["India"],
-                }
-            ]
-        }
-
-    async def _get_country_specific_insights_paginated_for_tests(self, category: str, country: str, page: int = 1, limit: int = 20):
-        category_key = (category or "").strip().lower()
-        country_key = (country or "").strip().lower()
-        items = []
-        if category_key == "defacement" and country_key == "india":
-            items = [
-                {
-                    "m_hash": "69d3cce5ded4358905a671b20fd4aa4d6280ea38bd313b331e83f72a4783a3a6",
-                    "m_country": ["India"],
-                }
-            ]
-        return {
-            "items": items[:limit],
-            "total": len(items),
-            "page": page,
-            "limit": limit,
-            "has_more": False,
-        }
-
-    async def _send_verification_mail_for_tests(self, to: str, subject: str, body: str):
-        token_match = re.search(r"/welcome/([^\"'\\s<]+)", body)
-        sent_mailbox.append(
-            {
-                "to": to,
-                "subject": subject,
-                "body": body,
-                "token": token_match.group(1) if token_match else "",
-            }
-        )
-        return {"to": to, "subject": subject, "body": body}
-
-    async def _redis_invoke_trigger_for_tests(self, p_commands, p_data=None):
-        if p_commands == REDIS_COMMANDS.S_GET_INT:
-            key, default, _expiry = p_data
-            return str(redis_state.get(key, default))
-        if p_commands == REDIS_COMMANDS.S_SET_INT:
-            key, value, _expiry = p_data
-            redis_state[key] = int(value)
-            return True
-        return None
-
-    def _generate_verification_token_for_tests():
-        verification_token_state["value"] += 1
-        return f"journey-verification-token-{verification_token_state['value']}"
-
     async def _init_services_for_tests(self):
         if self._is_available:
             return True
@@ -379,35 +246,11 @@ def main_app_client(tmp_path_factory):
     service_manager.init_services = _init_services_for_tests
     service_manager.get_instance()._is_available = False
 
-    app.dependency_overrides[app_dependency.get_current_role] = _role_ok
-    app.dependency_overrides[app_dependency.get_current_status] = _status_ok
-    app.dependency_overrides[app_dependency.get_current_user] = _user_ok
-    app.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
-    search_model.social_search = staticmethod(_social_search_for_tests)
-    crawl_model.scrape_social = staticmethod(_scrape_social_for_tests)
-    homepage_model.invoke_analytics = _invoke_analytics_for_tests
-    homepage_model.insight_consolidated_result = _insight_consolidated_result_for_tests
-    homepage_model.get_country_specific_insights = _get_country_specific_insights_for_tests
-    homepage_model.get_country_specific_insights_paginated = _get_country_specific_insights_paginated_for_tests
-    mail_manager.send_verification_mail = _send_verification_mail_for_tests
-    redis_controller.invoke_trigger = _redis_invoke_trigger_for_tests
-    session_manager.generate_verification_token = staticmethod(_generate_verification_token_for_tests)
-
     client = TestClient(app)
     client.__enter__()
-    app.state.test_sent_mailbox = sent_mailbox
     app.state.test_current_user = None
-    constant.license_rules = {
-        "maintainer": {
-            "modules": "all",
-            "cti_graph": True,
-            "mapping": True,
-            "scanning": True,
-            "maintainer": True,
-        }
-    }
     try:
-        yield client
+        yield app, client
     finally:
         client.__exit__(None, None, None)
         controller = elastic_controller.get_instance()
@@ -419,11 +262,12 @@ def main_app_client(tmp_path_factory):
                 if conn is None or id(conn) in seen:
                     continue
                 seen.add(id(conn))
-                await conn.close()
+                close = getattr(conn, "close", None)
+                if close is not None:
+                    await close()
                 setattr(controller, attr, None)
 
         asyncio.run(_close_elastic_clients())
-        app.dependency_overrides = dependency_overrides
         service_manager.init_services = original_init_services
         service_manager.get_instance()._is_available = False
         ELASTIC_CONNECTIONS.S_DATABASE_IP = original_elastic_ip
@@ -435,6 +279,153 @@ def main_app_client(tmp_path_factory):
         CRAWL_PATHS.M_FEEDER_FILE_PATH = original_feeder_path
         CRAWL_PATHS.M_SCREENSHOT = original_screenshot_path
         test_routes_module._MOCKS_DIR = original_test_mocks_dir
+        if hasattr(app.state, "test_current_user"):
+            delattr(app.state, "test_current_user")
+        constant.license_rules = original_license_rules
+
+
+@pytest.fixture
+def main_app_client(_main_app_client_session):
+    from configs import app_dependency
+    from configs import limiter_dependency as limiter_module
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+    from orion.api.interactive.hompage_manager.homepage_model import homepage_model
+    from orion.api.interactive.search_manager.search_model import search_model
+    from orion.api.server.crawl_manager.crawl_model import crawl_model
+    from orion.services.mail_manager.mail_manager import mail_manager
+    from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+    from orion.services.redis_manager.redis_controller import redis_controller
+    from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
+    from orion.services.session_manager.session_manager import session_manager
+
+    app, client = _main_app_client_session
+    test_user = _shared_test_user()
+    dependency_overrides = dict(app.dependency_overrides)
+    redis_state: dict[str, int] = {}
+    sent_mailbox: list[dict[str, str]] = []
+    verification_token_state = {"value": 0}
+    audit_entries: list[dict[str, str]] = []
+
+    original_audit_get_instance = AuditLogManager.get_instance
+    original_social_search = search_model.social_search
+    original_scrape_social = crawl_model.scrape_social
+    original_invoke_analytics = homepage_model.invoke_analytics
+    original_insight_consolidated_result = homepage_model.insight_consolidated_result
+    original_get_country_specific_insights = homepage_model.get_country_specific_insights
+    original_get_country_specific_insights_paginated = homepage_model.get_country_specific_insights_paginated
+    original_send_verification_mail = mail_manager.send_verification_mail
+    original_redis_invoke_trigger = redis_controller.invoke_trigger
+    original_generate_verification_token = session_manager.generate_verification_token
+
+    async def _role_ok():
+        current = getattr(app.state, "test_current_user", None)
+        if current is not None:
+            return current.role
+        return user_role.ADMIN
+
+    async def _status_ok():
+        current = getattr(app.state, "test_current_user", None)
+        if current is not None:
+            return current.status
+        return UserStatus.ACTIVE
+
+    async def _user_ok():
+        current = getattr(app.state, "test_current_user", None)
+        if current is not None:
+            return current
+        return test_user
+
+    async def _no_limit():
+        yield
+
+    async def _social_search_for_tests(model, key):
+        if key == "phone":
+            payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
+            return {
+                "job_id": "mock-social-phone-recon",
+                "result": [{"phone": payload.get("query"), "platform": "whatsapp", "status": "active"}],
+            }
+        if key == "metadata":
+            payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
+            return {
+                "job_id": "mock-social-metadata",
+                "result": {
+                    "username": payload.get("username"),
+                    "platform": payload.get("platform"),
+                    "tokens": payload.get("tokens", []),
+                },
+            }
+        return await original_social_search(model, key)
+
+    async def _scrape_social_for_tests(model, user_id: str = "system"):
+        payload = model.model_dump() if hasattr(model, "model_dump") else dict(model)
+        return {"job_id": "mock-social-scrape", "user_id": user_id, "result": payload}
+
+    async def _invoke_analytics_for_tests(self):
+        return {"total_documents": 1, "total_sources": 1}
+
+    async def _insight_consolidated_result_for_tests(self):
+        return []
+
+    async def _get_country_specific_insights_for_tests(self):
+        return {"defacement": [{"m_hash": "69d3cce5ded4358905a671b20fd4aa4d6280ea38bd313b331e83f72a4783a3a6", "m_country": ["India"]}]}
+
+    async def _get_country_specific_insights_paginated_for_tests(self, category: str, country: str, page: int = 1, limit: int = 20):
+        items = []
+        if (category or "").strip().lower() == "defacement" and (country or "").strip().lower() == "india":
+            items = [{"m_hash": "69d3cce5ded4358905a671b20fd4aa4d6280ea38bd313b331e83f72a4783a3a6", "m_country": ["India"]}]
+        return {"items": items[:limit], "total": len(items), "page": page, "limit": limit, "has_more": False}
+
+    async def _send_verification_mail_for_tests(self, to: str, subject: str, body: str):
+        token_match = re.search(r"/welcome/([^\"'\\s<]+)", body)
+        sent_mailbox.append({"to": to, "subject": subject, "body": body, "token": token_match.group(1) if token_match else ""})
+        return {"to": to, "subject": subject, "body": body}
+
+    async def _redis_invoke_trigger_for_tests(self, p_commands, p_data=None):
+        if p_commands == REDIS_COMMANDS.S_GET_INT:
+            key, default, _expiry = p_data
+            return str(redis_state.get(key, default))
+        if p_commands == REDIS_COMMANDS.S_SET_INT:
+            key, value, _expiry = p_data
+            redis_state[key] = int(value)
+            return True
+        return None
+
+    def _generate_verification_token_for_tests():
+        verification_token_state["value"] += 1
+        return f"journey-verification-token-{verification_token_state['value']:04d}"
+
+    class _AuditManagerForTests:
+        async def register(self, tenant_id: str, user_id: str, action: str):
+            audit_entries.append({"tenant_id": tenant_id, "user_id": user_id, "action": action})
+
+        async def get(self, param, current_user):
+            page = getattr(param, "page", 1)
+            return {"items": list(audit_entries), "page": page, "total": len(audit_entries)}
+
+    app.dependency_overrides[app_dependency.get_current_role] = _role_ok
+    app.dependency_overrides[app_dependency.get_current_status] = _status_ok
+    app.dependency_overrides[app_dependency.get_current_user] = _user_ok
+    app.dependency_overrides[limiter_module.limiter_dependency] = _no_limit
+    AuditLogManager.get_instance = staticmethod(lambda: _AuditManagerForTests())
+    search_model.social_search = staticmethod(_social_search_for_tests)
+    crawl_model.scrape_social = staticmethod(_scrape_social_for_tests)
+    homepage_model.invoke_analytics = _invoke_analytics_for_tests
+    homepage_model.insight_consolidated_result = _insight_consolidated_result_for_tests
+    homepage_model.get_country_specific_insights = _get_country_specific_insights_for_tests
+    homepage_model.get_country_specific_insights_paginated = _get_country_specific_insights_paginated_for_tests
+    mail_manager.send_verification_mail = _send_verification_mail_for_tests
+    redis_controller.invoke_trigger = _redis_invoke_trigger_for_tests
+    session_manager.generate_verification_token = staticmethod(_generate_verification_token_for_tests)
+    app.state.test_sent_mailbox = sent_mailbox
+    app.state.test_current_user = None
+    client.cookies.clear()
+
+    try:
+        yield client
+    finally:
+        app.dependency_overrides = dependency_overrides
+        AuditLogManager.get_instance = original_audit_get_instance
         search_model.social_search = original_social_search
         crawl_model.scrape_social = original_scrape_social
         homepage_model.invoke_analytics = original_invoke_analytics
@@ -446,9 +437,8 @@ def main_app_client(tmp_path_factory):
         session_manager.generate_verification_token = original_generate_verification_token
         if hasattr(app.state, "test_sent_mailbox"):
             delattr(app.state, "test_sent_mailbox")
-        if hasattr(app.state, "test_current_user"):
-            delattr(app.state, "test_current_user")
-        constant.license_rules = original_license_rules
+        app.state.test_current_user = None
+        client.cookies.clear()
 
 
 @pytest.fixture
