@@ -137,6 +137,7 @@ jobs:
           set -euo pipefail
           docker exec trusted-web-main sh -lc '
             set -e
+            rm -f /app/.coverage
             coverage combine || true
             coverage xml -o /tmp/backend-coverage.xml
             coverage report || true
