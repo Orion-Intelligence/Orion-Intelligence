@@ -36,6 +36,10 @@ PyJWT = "~2.10.1"
 [tool.pytest.ini_options]
 addopts = "--ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --cov=orion --cov=routes --cov=configs --cov-report=term-missing"
 testpaths = ["backend/tests"]
+markers = [
+    "static: isolated tests (unit/contract) allowed to use mocks/monkeypatch",
+    "journey: end-to-end user journey tests; monkeypatch fixture is forbidden",
+]
 filterwarnings = [
     "ignore:`FieldValidationInfo` is deprecated, use `ValidationInfo` instead.:DeprecationWarning:pydantic_core.*",
     "ignore:Pydantic V1 style `@root_validator` validators are deprecated.*",
