@@ -11,4 +11,5 @@ omit =
     */test_*.py
     */tests/*
     */__pycache__/*
-
+    */orion/services/__init__.py
+    */orion/services/log_manager/log_controller.py

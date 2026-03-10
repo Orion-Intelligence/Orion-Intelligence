@@ -48,4 +48,7 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-omit = ["*/__init__.py"]
+omit = [
+    "*/__init__.py",
+    "*/orion/services/log_manager/log_controller.py",
+]

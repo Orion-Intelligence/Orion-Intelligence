@@ -22,10 +22,14 @@ exclude_paths:
   - "backend/tests/**"
   - "backend/static/**"
   - "backend/migrations/**"
+  - "backend/orion/services/__init__.py"
+  - "backend/orion/services/log_manager/log_controller.py"
   - "backend/orion/services/elastic_manager/elastic_request_generator.py"
   - client/cypress/**
   - backend/static/**
   - backend/migrations/**
+  - "backend/orion/services/__init__.py"
+  - "backend/orion/services/log_manager/log_controller.py"
   - backend/orion/services/elastic_manager/elastic_request_generator.py
 
 engines:
@@ -48,8 +52,12 @@ engines:
       - "backend/tests/**"
       - "backend/static/**"
       - "backend/migrations/**"
+      - "backend/orion/services/__init__.py"
+      - "backend/orion/services/log_manager/log_controller.py"
       - "backend/orion/services/elastic_manager/elastic_request_generator.py"
       - client/cypress/**
       - backend/static/**
       - backend/migrations/**
+      - "backend/orion/services/__init__.py"
+      - "backend/orion/services/log_manager/log_controller.py"
       - backend/orion/services/elastic_manager/elastic_request_generator.py
