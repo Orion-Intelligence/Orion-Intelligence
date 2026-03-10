@@ -156,6 +156,28 @@ jobs:
               --cov-report=xml:/tmp/backend-coverage.xml
           '
 
+      - name: Run backend service tests with coverage append
+        run: |
+          set -euo pipefail
+          docker exec trusted-web-main sh -lc '
+            set -e
+            cd /app
+            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/service \
+              --cov-append --maxfail=1 --disable-warnings \
+              --cov-report=xml:/tmp/backend-coverage.xml
+          '
+
+      - name: Run backend tenant tests with coverage append
+        run: |
+          set -euo pipefail
+          docker exec trusted-web-main sh -lc '
+            set -e
+            cd /app
+            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/tenant \
+              --cov-append --maxfail=1 --disable-warnings \
+              --cov-report=xml:/tmp/backend-coverage.xml
+          '
+
       - name: Run backend crawler tests with coverage append
         run: |
           set -euo pipefail
