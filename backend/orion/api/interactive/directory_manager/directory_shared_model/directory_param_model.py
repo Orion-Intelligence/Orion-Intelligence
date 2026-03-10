@@ -1,10 +1,12 @@
 from typing import Literal
 
 from typing_extensions import Annotated
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 
 class directory_param_model(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     page: int = Field(
         1, ge=1, )
 
@@ -15,4 +17,7 @@ class directory_param_model(BaseModel):
 
     network: Literal["all", "clearnet", "onion", "i2p"] = "all"
 
-    mDateRange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
+    mDateRange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = Field(
+        default="",
+        alias="daterange",
+    )

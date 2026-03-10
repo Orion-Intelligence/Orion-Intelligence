@@ -1,4 +1,3 @@
-import { Suggestion } from '../shared/common-result';
 import { initCallbackModel } from '../callback.init';
 export class SocialResultItem {
   m_content?: string;
@@ -38,12 +37,10 @@ export class SocialResultItem {
 }
 export class SocialCallbackModel {
   Result!: SocialResultItem[];
-  Suggestions!: Suggestion[];
   Page_Count!: number;
 
   constructor(init?: Partial<SocialCallbackModel>) {
     this.Result = [];
-    this.Suggestions = [];
     this.Page_Count = 0;
     if (init) {
       initCallbackModel(this, init, r => new SocialResultItem(r));

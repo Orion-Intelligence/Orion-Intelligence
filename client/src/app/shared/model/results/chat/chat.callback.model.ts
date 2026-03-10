@@ -1,4 +1,3 @@
-import { Suggestion } from '../shared/common-result';
 import { initCallbackModel } from '../callback.init';
 export class ChatResultItem {
   m_content?: string;
@@ -38,7 +37,6 @@ export class ChatResultItem {
 }
 export class ChatCallbackModel {
   Result: ChatResultItem[] = [];
-  Suggestions: Suggestion[] = [];
   Page_Count!: number;
 
   constructor(init?: Partial<ChatCallbackModel>) {

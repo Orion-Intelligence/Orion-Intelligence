@@ -1,4 +1,3 @@
-import { Suggestion } from "../shared/common-result";
 import { initCallbackModel } from '../callback.init';
 export class DefacementResultItem {
   q!: string;
@@ -24,7 +23,6 @@ export class DefacementResultItem {
 export class DefacementCallbackModel {
   Result: DefacementResultItem[] = [];
   Page_Count!: number;
-  Suggestions!: Suggestion[];
 
   constructor(init?: Partial<DefacementCallbackModel>) {
     if (init) {

@@ -1,4 +1,3 @@
-import { Suggestion } from '../shared/common-result';
 import { initCallbackModel } from '../callback.init';
 export class GeneralResultItem {
   m_title!: string;
@@ -40,12 +39,10 @@ export class GeneralResultItem {
 }
 export class GeneralCallbackModel {
   Result!: GeneralResultItem[];
-  Suggestions!: Suggestion[];
   Page_Count!: number;
 
   constructor(init?: Partial<GeneralCallbackModel>) {
     this.Result = [];
-    this.Suggestions = [];
     this.Page_Count = 0;
     if (init) {
       initCallbackModel(this, init, r => new GeneralResultItem(r));

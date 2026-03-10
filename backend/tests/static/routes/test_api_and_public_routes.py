@@ -50,13 +50,13 @@ class _FakeSearchModel:
         return {"Result": [], "Page_Count": 0, "Total_Hits": 0}
 
     async def search_stealerlogs_result(self, *args, **kwargs):
-        return {"Result": [], "Suggestions": [], "Page_Count": 0}
+        return {"Result": [], "Page_Count": 0}
 
     async def search_stealer_iocs(self, *args, **kwargs):
-        return {"Result": [], "Suggestions": [], "Page_Count": 0}
+        return {"Result": [], "Page_Count": 0}
 
     async def search_stealerlogs_persona_breach(self, *args, **kwargs):
-        return {"Result": [], "Suggestions": [], "Page_Count": 0}
+        return {"Result": [], "Page_Count": 0}
 
     async def dynamic_search(self, *args, **kwargs):
         return {"ok": True, "route": "dynamic"}

@@ -1,4 +1,3 @@
-import { Suggestion } from '../shared/common-result';
 import { initCallbackModel } from '../callback.init';
 export class LeakResultItem {
   m_ref_html?: string | null;
@@ -34,7 +33,6 @@ export class LeakResultItem {
 export class LeakCallbackModel {
   Result: LeakResultItem[] = [];
   Page_Count!: number;
-  Suggestions: Suggestion[] = [];
 
   constructor(init?: Partial<LeakCallbackModel>) {
     if (init) {

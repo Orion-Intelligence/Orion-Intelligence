@@ -10,7 +10,6 @@ import { FiltersComponent } from '../filters/filters.component';
 import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
 import { SortType } from '../../constants/shared-enums';
 import { EmptyQueryComponent } from '../empty-query/empty-query.component';
-import { Suggestion } from '../../model/results/shared/common-result';
 import { query } from '@angular/animations';
 import { Category } from "../../constants/pages";
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -74,7 +73,6 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() isList!: boolean;
   @Input() isTool: boolean = true;
   @Input() showEmptyQuery = false;
-  @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery = '';
   @Input() analyticsToggle = false;
   @Input() list_grid = false;
@@ -174,23 +172,6 @@ export class ResultComponent implements OnInit, OnChanges {
     this.updateQuery.emit(query);
     this.reloadData.emit();
     this.init_domains();
-  }
-
-  onGetSuggestion() {
-    if (this.searchQuery && this.suggestion && this.suggestion.options.length > 0 && this.suggestion.options.length < 15) {
-      return this.searchQuery.replace(this.suggestion?.text, this.suggestion?.options[0].text);
-    }
-    return '';
-  }
-
-  onUpdateSuggestion(suggestion: string) {
-    if (this.suggestion && this.suggestion.options.length) {
-      this.searchQuery = suggestion;
-      this.local_query = suggestion;
-      this.updateQuery.emit(suggestion);
-    }
-    this.reloadData.emit();
-    this.result_triggered = true;
   }
 
   onToolToggle(event: Event): void {
