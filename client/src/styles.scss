@@ -1742,6 +1742,28 @@ app-world-heatmap .country:not(.is-clickable) {
   object-fit: contain;
   pointer-events: none;
 }
+
+.network-graph-relationship-overlay {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  border: 1px solid rgba(252, 211, 77, 0.55);
+  border-radius: 9999px;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.5);
+}
+
+@for $i from 0 through 256 {
+  $size: $i * 2;
+  .network-graph-relationship-overlay[data-size="#{$size}"] {
+    width: #{$size}px;
+    height: #{$size}px;
+  }
+}
+
 .home-menu-progress-track {
   width: 100%;
   height: 5px;

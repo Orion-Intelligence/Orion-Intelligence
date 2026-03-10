@@ -55,9 +55,9 @@
                           <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
                             <i class="bi bi-search w-5 h-5 text-[var(--color-text4)] leading-none"></i>
                           </div>
-                          <input type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border-0 bg-[var(--color-blue-690)] py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+                          <input data-testid="social-graph-search-input" type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border-0 bg-[var(--color-blue-690)] py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
                           @if (graphSearchTerm()) {
-                            <button (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
+                            <button data-testid="social-graph-search-clear" (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
                               <i class="bi bi-x-circle-fill"></i>
                             </button>
                           }
@@ -174,8 +174,8 @@
             <app-context-menu data-testid="social-context-menu" [data]="state.contextMenuData()" (action)="handleContextMenuAction($event)"></app-context-menu>
           }
           @if (platformAliasModalData(); as aliasData) {
-            <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="closePlatformAliasModal()">
-              <div class="ui-graph-popup-panel w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] shadow-2xl p-4" (click)="$event.stopPropagation()">
+            <div data-testid="social-alias-modal-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="closePlatformAliasModal()">
+              <div data-testid="social-alias-modal" class="ui-graph-popup-panel w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] shadow-2xl p-4" (click)="$event.stopPropagation()">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <h3 class="text-base font-semibold text-[var(--color-text1)] mb-1">Set Graph Alias</h3>
@@ -185,11 +185,11 @@
                 </div>
                 <div class="mt-4">
                   <label class="block text-xs font-medium text-[var(--color-text4)] mb-1">Alias (graph label only)</label>
-                  <input type="text" [value]="platformAliasInput()" (input)="onPlatformAliasInputChanged($event)" placeholder="Leave empty to reset" class="block w-full rounded-md border-0 bg-[var(--color-blue-800)] py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6" />
+                  <input data-testid="social-alias-input" type="text" [value]="platformAliasInput()" (input)="onPlatformAliasInputChanged($event)" placeholder="Leave empty to reset" class="block w-full rounded-md border-0 bg-[var(--color-blue-800)] py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none sm:text-sm sm:leading-6" />
                 </div>
                 <div class="mt-4 flex items-center justify-end gap-2">
-                  <button type="button" (click)="closePlatformAliasModal()" class="px-3 py-2 text-sm font-medium text-[var(--color-text2)] bg-[var(--color-blue-720)] rounded-md hover:bg-[var(--color-blue-710)] transition-colors">Cancel</button>
-                  <button type="button" (click)="savePlatformAlias()" class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 transition-colors">Save</button>
+                  <button data-testid="social-alias-cancel" type="button" (click)="closePlatformAliasModal()" class="px-3 py-2 text-sm font-medium text-[var(--color-text2)] bg-[var(--color-blue-720)] rounded-md hover:bg-[var(--color-blue-710)] transition-colors">Cancel</button>
+                  <button data-testid="social-alias-save" type="button" (click)="savePlatformAlias()" class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 transition-colors">Save</button>
                 </div>
               </div>
             </div>

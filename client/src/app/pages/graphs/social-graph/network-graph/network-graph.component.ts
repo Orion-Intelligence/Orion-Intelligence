@@ -63,6 +63,12 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         y: number;
         size: number;
     }[]>([]);
+  relationshipOverlayNodes = signal<{
+        nodeId: string;
+        x: number;
+        y: number;
+        size: number;
+    }[]>([]);
   loadingNodeIds = computed(() => {
     const loadingIds = new Set<string>();
     const statesToProcess = [
@@ -511,33 +517,60 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         if (this.iconOverlayNodes().length > 0) {
           this.iconOverlayNodes.set([]);
         }
-        return;
       }
-      const overlays: {
+      else {
+        const overlays: {
                 nodeId: string;
                 x: number;
                 y: number;
                 size: number;
             }[] = [];
-      const scale = network.getScale();
-      for (const nodeId of nodesToDraw) {
-        const nodePosition = network.getPosition(nodeId as string);
-        if (nodePosition) {
-          const domPosition = network.canvasToDOM(nodePosition);
-          const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId as string);
-          const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 25;
-          const domRadius = baseSize * scale;
-          const overlaySize = domRadius * 1.0;
-          const offset = domRadius * 0.707;
-          overlays.push({
-            nodeId: nodeId as string,
-            x: domPosition.x + offset,
-            y: domPosition.y - offset,
-            size: overlaySize
-          });
+        const scale = network.getScale();
+        for (const nodeId of nodesToDraw) {
+          const nodePosition = network.getPosition(nodeId as string);
+          if (nodePosition) {
+            const domPosition = network.canvasToDOM(nodePosition);
+            const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId as string);
+            const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 25;
+            const domRadius = baseSize * scale;
+            const overlaySize = domRadius * 1.0;
+            const offset = domRadius * 0.707;
+            overlays.push({
+              nodeId: nodeId as string,
+              x: domPosition.x + offset,
+              y: domPosition.y - offset,
+              size: overlaySize
+            });
+          }
         }
+        this.iconOverlayNodes.set(overlays);
       }
-      this.iconOverlayNodes.set(overlays);
+      const relationshipOverlays: {
+                nodeId: string;
+                x: number;
+                y: number;
+                size: number;
+            }[] = [];
+      const relationshipNodes = this.data().nodes.filter(node => node.id.toString().startsWith('relationship-node-'));
+      const relationshipScale = network.getScale();
+      for (const relationshipNode of relationshipNodes) {
+        const nodeId = relationshipNode.id.toString();
+        const nodePosition = network.getPosition(nodeId);
+        if (!nodePosition) {
+          continue;
+        }
+        const domPosition = network.canvasToDOM(nodePosition);
+        const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId);
+        const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 18;
+        const domRadius = baseSize * relationshipScale;
+        relationshipOverlays.push({
+          nodeId,
+          x: domPosition.x,
+          y: domPosition.y,
+          size: Math.max(18, domRadius * 1.2)
+        });
+      }
+      this.relationshipOverlayNodes.set(relationshipOverlays);
     });
     network.on('click', (properties) => {
       if (this.editMode()) {
@@ -674,6 +707,11 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   onFollowersShortcutClick(event: MouseEvent, nodeId: string) {
     event.stopPropagation();
     this.followersShortcutClicked.emit(nodeId);
+  }
+
+  onRelationshipShortcutClick(event: MouseEvent, nodeId: string) {
+    event.stopPropagation();
+    this.relationshipNodeClicked.emit(nodeId);
   }
 
   toPositionValue(rawValue: number): number {

@@ -1,4 +1,11 @@
-import {openAndAssertReportModal, visitCtiGraph, visitSocialGraph, waitForToolbarSearchReady, waitForCtiGraphReady} from './controllers/07-cti-management.controller';
+import {
+  openAndAssertReportModal,
+  setupSocialGraphInterceptors,
+  visitCtiGraph,
+  visitSocialGraph,
+  waitForToolbarSearchReady,
+  waitForCtiGraphReady
+} from './controllers/07-cti-management.controller';
 
 let testData: any = {};
 
@@ -13,15 +20,8 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
   beforeEach(() => {
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.visit('/login');
-
-    cy.env(['ADMIN_USERNAME', 'ADMIN_PASSWORD']).then(({ADMIN_USERNAME, ADMIN_PASSWORD}) => {
-      cy.get('[data-testid="login-user"]', {timeout: 20000}).clear().type(ADMIN_USERNAME);
-      cy.get('[data-testid="login-pass"]', {timeout: 20000}).clear().type(ADMIN_PASSWORD, {log: false});
-      cy.get('[data-testid="login-button"]').click();
-    });
-
-    cy.location('pathname', {timeout: 30000}).should('include', '/dashboard');
+    cy.loginAsAdmin();
+    cy.location('pathname', {timeout: 35000}).should('include', '/dashboard');
   });
 
   after(() => {
@@ -205,5 +205,200 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     visitSocialGraph();
 
     cy.get('[data-testid="social-graph-root"]').should('exist');
+  });
+
+  it('covers deeper social graph popup, modal, and upload flows', () => {
+    visitSocialGraph();
+    setupSocialGraphInterceptors();
+
+    cy.get('[data-testid="graph-toolbar-image-search"]').click();
+    cy.get('[data-testid="social-graph-root"] input[type="file"][accept*="image/png"]', {timeout: 30000}).first()
+      .invoke('removeClass', 'hidden')
+      .invoke('css', 'display', 'block')
+      .invoke('css', 'visibility', 'visible')
+      .invoke('css', 'position', 'fixed')
+      .invoke('css', 'left', '0')
+      .invoke('css', 'top', '0')
+      .invoke('css', 'width', '1px')
+      .invoke('css', 'height', '1px')
+      .invoke('css', 'opacity', '1')
+      .selectFile('cypress/fixtures/profile.png', {force: true});
+    cy.wait('@imageRecon', {timeout: 30000});
+    cy.get('[data-testid="social-manage-profiles-modal"]', {timeout: 90000}).should('be.visible');
+    cy.get('[data-testid="social-manage-profiles-filter"]').should('be.visible').type('twit');
+    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
+      cy.contains('Twitter').should('be.visible');
+      cy.get('input[placeholder="Search username..."]').should('have.value', 'image_scan_user');
+      cy.contains('button', 'Fetch profile').should('be.visible').and('not.be.disabled');
+      cy.contains('a', 'View link').should('have.attr', 'href').and('include', 'x.com/image_scan_user');
+    });
+    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
+      cy.contains('button', 'Fetch profile').first().click();
+    });
+    cy.wait('@socialRecon', {timeout: 30000});
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+    cy.contains('.home-menu-created-item', 'image_scan_user', {timeout: 90000})
+      .should('contain.text', 'Completed')
+      .click();
+    cy.get('[data-testid="social-manage-profiles-modal"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
+      cy.get('[data-testid="social-manage-profiles-select-all"]')
+        .scrollIntoView()
+        .should('be.visible')
+        .and('not.be.disabled')
+        .click({force: true});
+      cy.get('[data-testid="social-manage-profiles-update-graph"]')
+        .scrollIntoView()
+        .should('be.visible')
+        .click({force: true});
+    });
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+
+    cy.get('[data-cy="social-graph-search-trigger"]', {timeout: 30000}).click({force: true});
+    cy.get('[data-testid="social-graph-search-input"]', {timeout: 30000}).should('be.visible').type('image');
+    cy.get('[data-testid="social-graph-search-clear"]').click({force: true});
+    cy.get('[data-testid="social-graph-search-input"]').should('have.value', '');
+    cy.get('body').then(($body) => {
+      const editToggle = $body.find('[data-cy="graph-toolbar-edit-toggle"]:visible').first();
+      if (editToggle.length) {
+        cy.wrap(editToggle).click({force: true});
+        cy.wrap(editToggle).click({force: true});
+      }
+    });
+
+    cy.get('[data-testid="social-network-container"] canvas', {timeout: 30000}).first().then(($canvas) => {
+      const rect = $canvas[0].getBoundingClientRect();
+      cy.wrap($canvas).trigger('contextmenu', {
+        button: 2,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+        force: true
+      });
+    });
+    cy.get('body').then(($body) => {
+      const contextMenu = $body.find('[data-testid="social-context-menu-panel"]:visible').first();
+      if (!contextMenu.length) {
+        return;
+      }
+      cy.wrap(contextMenu).should('be.visible');
+      cy.contains('[data-testid="social-context-menu-panel"] button', 'Set Alias').click({force: true});
+      cy.get('[data-testid="social-alias-modal"]', {timeout: 15000}).should('be.visible');
+      cy.get('[data-testid="social-alias-input"]').clear().type('Alias User');
+      cy.get('[data-testid="social-alias-save"]').click();
+      cy.get('[data-testid="social-alias-modal"]').should('not.exist');
+    });
+
+    cy.get('[data-testid="graph-toolbar-view-list"]', {timeout: 30000}).click();
+    cy.get('[data-testid="social-list-manage-profiles"]', {timeout: 90000}).should('be.visible');
+    cy.get('[data-testid="social-list-user-summary-trigger"]').first().should(($el) => {
+      const text = $el.text();
+      expect(text).to.match(/Alias User|image_scan_user/);
+    });
+    cy.get('[data-testid="social-list-platform-row"]').first().click({force: true});
+    cy.get('[data-testid="social-list-platform-visit-profile"]', {timeout: 30000})
+      .should('have.attr', 'href')
+      .and('match', /^https?:\/\//);
+    cy.contains('[data-testid="social-list-platform-row"] + div, div', 'Visit Profile').should('be.visible');
+    cy.contains('[data-testid="social-list-platform-row"] + div, div', 'Followers and Following').should('be.visible');
+
+    cy.get('[data-testid="social-list-user-summary-trigger"]', {timeout: 90000}).first().click();
+    cy.get('[data-testid="social-summary-popup"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="social-summary-popup"]').within(() => {
+      cy.get('[data-testid="social-summary-all-platforms"]').scrollIntoView().should('be.visible');
+      cy.contains('summary', 'Profile Metadata Results').scrollIntoView().should('be.visible');
+      cy.contains('button', 'Search Metadata').scrollIntoView().should('be.visible').click();
+      cy.contains('Enter at least one token to search.', {timeout: 10000}).should('be.visible');
+      cy.get('input[placeholder="Type a token and press Enter"]').first().type('email leaked{enter}');
+      cy.contains('button', 'Search Metadata').scrollIntoView().should('be.visible').click();
+      cy.wait('@socialMetadata', {timeout: 30000});
+      cy.get('a[href^="http"]').should('exist');
+      cy.contains('Twitter').scrollIntoView().click();
+      cy.contains('a', 'Visit').should('have.attr', 'href').and('include', 'x.com/image_scan_user');
+      cy.contains('button', 'Fetch Followers').scrollIntoView().should('be.visible').click();
+      cy.wait('@socialFollowers', {timeout: 30000});
+      cy.contains('button', 'Fetch Following').scrollIntoView().should('be.visible').click();
+      cy.wait('@socialFollowing', {timeout: 30000});
+      cy.contains('button', 'Fetch Images').scrollIntoView().should('be.visible').click();
+      cy.wait('@socialImages', {timeout: 30000});
+    });
+    cy.get('body').then(($body) => {
+      const loadMore = $body.find('[data-testid="social-summary-popup"] button').filter((_, el) => el.textContent?.trim() === 'Load More');
+      if (loadMore.length) {
+        cy.wrap(loadMore.first()).click();
+      }
+    });
+    cy.get('[data-testid="social-summary-popup"]').within(() => {
+      cy.get('button[title="Re-scan profile"]').click({force: true});
+    });
+    cy.wait('@socialRecon', {timeout: 30000});
+    cy.get('[data-testid="social-summary-popup"]').should('not.exist');
+
+    cy.get('[data-testid="social-list-manage-profiles"]').first().click();
+    cy.get('[data-testid="social-manage-profiles-modal"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="social-manage-profiles-cancel"]').click();
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+
+    cy.get('[data-testid="social-list-followers-following"]').first().click();
+    cy.get('[data-testid="social-follower-scan-popup"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="social-follower-scan-filter"]').type('a');
+    cy.get('[data-testid="social-follower-tab-following"]').click();
+    cy.get('[data-testid="social-follower-tab-connections"]').click();
+    cy.get('[data-testid="social-follower-tab-followers"]').click();
+    cy.get('[data-testid="social-follower-scan-popup"]').within(() => {
+      cy.contains('button', 'Fetch Followers').then(($button) => {
+        if ($button.length) {
+          cy.wrap($button).click({force: true});
+        }
+      });
+    });
+    cy.wait('@socialFollowers', {timeout: 30000});
+    cy.get('[data-testid="social-follower-scan-popup"]').within(() => {
+      cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).should('have.length.greaterThan', 1);
+      cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).eq(0).click({force: true});
+      cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).eq(1).click({force: true});
+      cy.get('[data-testid="social-follower-scan-confirm"]').should('not.be.disabled').click({force: true});
+    });
+    cy.wait('@socialRecon', {timeout: 30000});
+    cy.wait('@socialRecon', {timeout: 30000});
+    cy.contains('.home-menu-created-item', 'ally_one', {timeout: 90000}).should('contain.text', 'Completed').click();
+    cy.get('[data-testid="social-manage-profiles-modal"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
+      cy.get('[data-testid="social-manage-profiles-select-all"]')
+        .scrollIntoView()
+        .should('be.visible')
+        .and('not.be.disabled')
+        .click({force: true});
+      cy.get('[data-testid="social-manage-profiles-update-graph"]')
+        .scrollIntoView()
+        .should('be.visible')
+        .click({force: true});
+    });
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+    cy.contains('.home-menu-created-item', 'ally_two', {timeout: 90000}).should('contain.text', 'Completed').click();
+    cy.get('[data-testid="social-manage-profiles-modal"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
+      cy.get('[data-testid="social-manage-profiles-select-all"]')
+        .scrollIntoView()
+        .should('be.visible')
+        .and('not.be.disabled')
+        .click({force: true});
+      cy.get('[data-testid="social-manage-profiles-update-graph"]')
+        .scrollIntoView()
+        .should('be.visible')
+        .click({force: true});
+    });
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+
+    cy.get('[data-testid="graph-toolbar-view-graph"]', {timeout: 30000}).click();
+    cy.get('[data-testid="social-relationship-node-trigger"]', {timeout: 30000})
+      .should('have.length.greaterThan', 0)
+      .first()
+      .click({force: true});
+    cy.get('[data-testid="social-relationship-popup"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="social-relationship-open-account"]').first()
+      .should('have.attr', 'href')
+      .and('match', /^https?:\/\//);
+    cy.get('[data-testid="social-relationship-close"]').click({force: true});
+    cy.get('[data-testid="social-relationship-popup"]').should('not.exist');
   });
 });

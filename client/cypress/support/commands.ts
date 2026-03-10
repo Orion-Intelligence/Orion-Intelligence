@@ -44,9 +44,15 @@ Cypress.Commands.add("logout", () => {
     cy.location('pathname').then((pathname) => {
         if (pathname.includes('/login')) return;
         cy.scrollTo("top", { ensureScrollable: false });
-        cy.get('[data-testid="profile-menu"]', { timeout: 10000 }).filter(':visible').first().scrollIntoView().should('be.visible').click();
-        cy.get('[data-testid="signout-btn"]', { timeout: 10000 }).filter(':visible').first().scrollIntoView().should('be.visible').click();
-        cy.get('[data-testid="login-user"]', { timeout: 10000 }).should('exist');
+        cy.get('body').then(($body) => {
+            const profileMenu = $body.find('[data-testid="profile-menu"]:visible').first();
+            if (!profileMenu.length) {
+                return;
+            }
+            cy.wrap(profileMenu).scrollIntoView().should('be.visible').click();
+            cy.get('[data-testid="signout-btn"]', { timeout: 10000 }).filter(':visible').first().scrollIntoView().should('be.visible').click();
+            cy.get('[data-testid="login-user"]', { timeout: 10000 }).should('exist');
+        });
     });
 });
 Cypress.Commands.add("openSideFilter", () => {

@@ -1,5 +1,5 @@
-<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" (click)="close.emit()">
-  <div class="ui-graph-popup-panel w-full max-w-3xl max-h-[85vh] bg-slate-800 border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden" (click)="$event.stopPropagation()">
+<div data-testid="social-relationship-popup-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" (click)="close.emit()">
+  <div data-testid="social-relationship-popup" class="ui-graph-popup-panel w-full max-w-3xl max-h-[85vh] bg-slate-800 border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden" (click)="$event.stopPropagation()">
     <div class="px-4 py-3 border-b border-slate-700 bg-slate-900 flex items-center justify-between gap-4">
       <div>
         <h3 class="text-lg font-semibold text-slate-100 mb-0">Relationship Details</h3>
@@ -21,14 +21,14 @@
               <p class="text-sm text-slate-200 mb-1"><span class="text-slate-400">Source Account:</span> {{ item.sourcePlatform }} / {{ '@' + item.sourceUsername }}</p>
               <p class="text-xs text-slate-400 mb-0">Source Profile: {{ item.sourceUser }}</p>
             </div>
-            <a [href]="getAccountUrl(item)" target="_blank" rel="noopener noreferrer" class="h-8 px-3 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-400/40 hover:bg-cyan-500/25 transition-colors text-xs font-semibold inline-flex items-center gap-1.5"><i class="bi bi-link-45deg"></i><span>Open Account</span></a>
+            <a data-testid="social-relationship-open-account" [href]="getAccountUrl(item)" target="_blank" rel="noopener noreferrer" class="h-8 px-3 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-400/40 hover:bg-cyan-500/25 transition-colors text-xs font-semibold inline-flex items-center gap-1.5"><i class="bi bi-link-45deg"></i><span>Open Account</span></a>
           </div>
         </div>
       }
     </div>
 
     <div class="px-4 py-3 border-t border-slate-700 bg-slate-900 flex justify-end">
-      <button type="button" class="px-3 py-1.5 rounded-md bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors text-sm" (click)="close.emit()">Close</button>
+      <button data-testid="social-relationship-close" type="button" class="px-3 py-1.5 rounded-md bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors text-sm" (click)="close.emit()">Close</button>
     </div>
   </div>
 </div>

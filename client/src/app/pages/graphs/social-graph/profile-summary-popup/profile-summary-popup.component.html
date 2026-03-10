@@ -1,5 +1,5 @@
-<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="onClose()">
-  <div class="ui-graph-popup-panel flex w-full max-w-5xl min-h-[70vh] max-h-[90vh] flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-2xl" (click)="$event.stopPropagation()">
+<div data-testid="social-summary-popup-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="onClose()">
+  <div data-testid="social-summary-popup" class="ui-graph-popup-panel flex w-full max-w-5xl min-h-[70vh] max-h-[90vh] flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-2xl" (click)="$event.stopPropagation()">
 
 
     <div class="p-3 flex items-center justify-between gap-3 border-b border-slate-700 bg-slate-900 flex-shrink-0 rounded-t-lg">
@@ -39,7 +39,7 @@
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <i class="bi bi-search w-5 h-5 text-slate-400"></i>
             </div>
-            <input type="text" placeholder="Filter platforms..." [value]="platformSearchTerm()" (input)="onSearchTermChange($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-2 pl-10 pr-10 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            <input data-testid="social-summary-platform-filter" type="text" placeholder="Filter platforms..." [value]="platformSearchTerm()" (input)="onSearchTermChange($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-2 pl-10 pr-10 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
             @if (platformSearchTerm()) {
               <button (click)="clearSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
             }
@@ -47,7 +47,7 @@
         </div>
         <div class="flex-grow overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
           <div class="flex flex-col p-2">
-            <div (click)="onAllPlatformsClick()" class="group flex items-center p-2 rounded-md transition-colors cursor-pointer" [class.bg-slate-700]="selectedPlatform() === 'all'">
+            <div data-testid="social-summary-all-platforms" (click)="onAllPlatformsClick()" class="group flex items-center p-2 rounded-md transition-colors cursor-pointer" [class.bg-slate-700]="selectedPlatform() === 'all'">
               <div class="flex-shrink-0 rounded-md mr-3 flex items-center justify-center text-lg font-bold text-white h-8 w-8 p-1.5 bg-slate-600">
                 <i class="bi bi-collection-fill"></i>
               </div>

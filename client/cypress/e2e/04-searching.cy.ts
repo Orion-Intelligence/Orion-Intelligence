@@ -1,4 +1,4 @@
-import {clickOpenReport, clickSidebarSubItem, openExploitSubmenu, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearch, typeExploitSearch, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickOpenReport, clickSidebarSubItem, exerciseJsonViewerOnce, openExploitSubmenu, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearch, typeExploitSearch, waitForSearchReady} from './controllers/04-searching.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
   before(() => {
@@ -168,7 +168,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     waitForSearchReady();
     cy.get('@q').type('police{enter}');
     clickOpenReport();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    exerciseJsonViewerOnce();
   });
 
   it('runs Stealer logs IOCS search flow and expands a row', () => {

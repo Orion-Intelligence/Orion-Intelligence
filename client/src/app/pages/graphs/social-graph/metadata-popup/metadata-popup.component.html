@@ -1,5 +1,5 @@
-<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="onClose()">
-  <div class="ui-graph-popup-panel flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
+<div data-testid="social-platform-popup-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="onClose()">
+  <div data-testid="social-platform-popup" class="ui-graph-popup-panel flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
 
 
     <div class="p-3 flex items-start justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-850)] flex-shrink-0 rounded-t-lg">
@@ -13,10 +13,10 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <a [href]="getAccountUrl()" target="_blank" rel="noopener noreferrer" title="Visit Profile" class="h-8 w-8 flex items-center justify-center rounded-full text-[var(--color-text2)] bg-[var(--color-blue-720)]/80 hover:bg-[var(--color-blue-720)] hover:text-white transition-colors">
+        <a data-testid="social-platform-popup-visit-profile" [href]="getAccountUrl()" target="_blank" rel="noopener noreferrer" title="Visit Profile" class="h-8 w-8 flex items-center justify-center rounded-full text-[var(--color-text2)] bg-[var(--color-blue-720)]/80 hover:bg-[var(--color-blue-720)] hover:text-white transition-colors">
           <i class="bi bi-link-45deg text-lg"></i>
         </a>
-        <button (click)="onClose()" type="button" class="h-8 w-8 flex items-center justify-center rounded-full text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-white transition-colors">
+        <button data-testid="social-platform-popup-close-icon" (click)="onClose()" type="button" class="h-8 w-8 flex items-center justify-center rounded-full text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-white transition-colors">
           <i class="bi bi-x-lg text-lg"></i>
         </button>
       </div>
@@ -48,7 +48,7 @@
 
       <div class="space-y-3">
 
-        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+        <details data-testid="social-platform-popup-profile-details" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Profile Details</span>
@@ -62,7 +62,7 @@
             @if (data().profileDetails === undefined && !isFetching()) {
               <div>
                 <div>
-                  <button (click)="fetchProfile.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-profile" (click)="fetchProfile.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-person-lines-fill"></i>
                     <span>Fetch Profile Info</span>
                   </button>
@@ -104,7 +104,7 @@
         </details>
 
 
-        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+        <details data-testid="social-platform-popup-recent-posts" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Recent Posts</span>
@@ -118,7 +118,7 @@
             @if (data().posts === undefined && !isFetchingPosts()) {
               <div>
                 <div>
-                  <button (click)="fetchPosts.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-posts" (click)="fetchPosts.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-file-post"></i>
                     <span>Fetch Posts</span>
                   </button>
@@ -176,7 +176,7 @@
           </div>
         </details>
 
-        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+        <details data-testid="social-platform-popup-post-connections" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Post Connections</span>
@@ -209,7 +209,7 @@
         </details>
 
 
-        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+        <details data-testid="social-platform-popup-followers" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Followers</span>
@@ -223,7 +223,7 @@
             @if (data().followers_list === undefined && !isFetchingFollowers()) {
               <div>
                 <div>
-                  <button (click)="fetchFollowers.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-followers" (click)="fetchFollowers.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-person-plus"></i>
                     <span>Fetch Followers</span>
                   </button>
@@ -273,7 +273,7 @@
         </details>
 
 
-        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+        <details data-testid="social-platform-popup-following" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Following</span>
@@ -287,7 +287,7 @@
             @if (data().following_list === undefined && !isFetchingFollowing()) {
               <div>
                 <div>
-                  <button (click)="fetchFollowing.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-following" (click)="fetchFollowing.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-person-check"></i>
                     <span>Fetch Following</span>
                   </button>
@@ -337,12 +337,12 @@
         </details>
 
 
-        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+        <details data-testid="social-platform-popup-images" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Associated Images</span>
             @if (data().images !== undefined) {
-              <button (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Fetch Images">
+              <button data-testid="social-platform-popup-fetch-images-inline" (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Fetch Images">
                 Fetch Images
               </button>
             }
@@ -351,7 +351,7 @@
             @if (data().images === undefined && !isFetchingImages()) {
               <div>
                 <div>
-                  <button (click)="fetchImages.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-images" (click)="fetchImages.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
                     <i class="bi bi-images"></i>
                     <span>Fetch Images</span>
                   </button>
@@ -405,7 +405,7 @@
         </details>
 
 
-        <details class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
+        <details data-testid="social-platform-popup-raw-metadata" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Raw Metadata</span>
@@ -441,7 +441,7 @@
 
 
     <div class="p-3 bg-[var(--color-blue-850)] flex justify-end items-center gap-4 flex-shrink-0 mt-auto rounded-b-lg border-t border-[var(--color-border)]">
-      <button (click)="onClose()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+      <button data-testid="social-platform-popup-done" (click)="onClose()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
         Done
       </button>
     </div>

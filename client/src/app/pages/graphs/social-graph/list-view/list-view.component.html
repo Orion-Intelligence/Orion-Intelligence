@@ -22,11 +22,11 @@
                         <i class="bi bi-person-fill text-4xl text-slate-400"></i>
                       </div>
                       <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-indigo-400 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ userNode.label }}</h3>
+                        <h3 data-testid="social-list-user-summary-trigger" class="text-lg font-bold text-indigo-400 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ userNode.label }}</h3>
                         <p class="text-sm text-slate-400">{{ getPlatformsForUserNode(userNode.id.toString()).length }} platform(s) visible</p>
                       </div>
                       <div class="flex items-center gap-2 flex-shrink-0">
-                        <button (click)="state.openManageProfilesModal(userNode.label)" class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">Manage Profiles</button>
+                        <button data-testid="social-list-manage-profiles" (click)="state.openManageProfilesModal(userNode.label)" class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">Manage Profiles</button>
                         <button (click)="state.openDeleteConfirmation(userNode.label)" title="Delete Profile" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 bg-slate-700 hover:bg-red-500/20 hover:text-red-400 transition-colors"><i class="bi bi-trash3 leading-none block"></i></button>
                       </div>
                     </div>
@@ -38,7 +38,7 @@
                             <div>
                               @if (getPlatformData(platformNode.id.toString()); as platformData) {
                                 <div class="bg-slate-700/50 rounded-lg overflow-hidden transition-all duration-300">
-                                  <div (click)="platformNodeClicked.emit(platformNode.id.toString())" class="p-3 flex items-center gap-3 cursor-pointer hover:bg-slate-700 transition-colors">
+                                  <div data-testid="social-list-platform-row" (click)="platformNodeClicked.emit(platformNode.id.toString())" class="p-3 flex items-center gap-3 cursor-pointer hover:bg-slate-700 transition-colors">
                                     <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]">
                                       <app-social-icon [platformName]="platformNode.label"></app-social-icon>
                                     </div>
@@ -47,10 +47,10 @@
                                       <p class="text-xs text-slate-400 truncate">{{ getFollowerSummary(platformData) }}</p>
                                     </div>
                                     <div class="flex items-center gap-1.5">
-                                      <a [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-7 h-7 rounded-full flex items-center justify-center text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Open account in new tab">
+                                      <a data-testid="social-list-platform-open-link" [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-7 h-7 rounded-full flex items-center justify-center text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Open account in new tab">
                                         <i class="bi bi-link-45deg text-sm leading-none"></i>
                                       </a>
-                                      <button data-cy="list-view-followers-following" (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Followers and Following">
+                                      <button data-testid="social-list-followers-following" data-cy="list-view-followers-following" (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Followers and Following">
                                         <i class="bi bi-people-fill text-[11px] leading-none"></i>
                                       </button>
                                     </div>
@@ -123,7 +123,7 @@
                                               <span>Followers and Following</span>
                                             </button>
                                           </div>
-                                          <a [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 font-semibold">
+                                          <a data-testid="social-list-platform-visit-profile" [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 font-semibold">
                                             <span>Visit Profile</span>
                                             <i class="bi bi-link-45deg"></i>
                                           </a>

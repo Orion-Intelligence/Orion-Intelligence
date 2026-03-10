@@ -1,4 +1,4 @@
-import {addUser, deleteFirstUser, loginAndClickSidebar, ManagedUser, openUsersList} from './controllers/05-user-management.controller';
+import {addUser, completeSubscriptionPopupFlow, deleteFirstUser, loginAndClickSidebar, loginAsUser, ManagedUser, openSidebarGroup, openSidebarSubItem, openUsersList} from './controllers/05-user-management.controller';
 
 let testUsers: any = {};
 let testData: any = {};
@@ -49,6 +49,17 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
   it('logs in as testing4 and verifies scanner and api sidebar groups', () => {
     loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity API'], testUsers, testData);
+  });
+
+  it('logs in as testing5 and completes the stealer logs subscription paywall flow', () => {
+    loginAsUser(testUsers.testing5.username, testUsers.testing5.password);
+    openSidebarGroup('Stealer logs');
+    completeSubscriptionPopupFlow(testData, () => {
+      openSidebarGroup('Stealer logs');
+      openSidebarSubItem('stealerlogs', 'iocs');
+    });
+    cy.url({timeout: 30000}).should('match', /\/($|homepage)/);
+    cy.logout();
   });
 });
 

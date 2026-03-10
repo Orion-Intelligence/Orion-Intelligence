@@ -110,9 +110,10 @@ export function runDomainScannerFlow() {
   ensureDomainScannerModalOpen();
   cy.get(DOMAIN_SCANNER_INPUT_SELECTOR, {timeout: 30000}).should('be.visible').clear().type('example.com');
   cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
-  cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT})
-    .should('be.visible')
-    .click('topLeft', {force: true});
+  cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('exist').within(() => {
+    cy.get('button[aria-label="Close"]').click({force: true});
+  });
+  cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('not.exist');
 }
 
 export function applyPasswordSchemeAndValidate() {

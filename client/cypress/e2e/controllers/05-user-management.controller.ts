@@ -25,6 +25,15 @@ function getSidebarGroupTestId(itemName: string): string {
   return `sidebar-group-${routePrefix}`;
 }
 
+export function openSidebarGroup(itemName: string) {
+  const sidebarGroupTestId = getSidebarGroupTestId(itemName);
+  cy.get(`[data-testid="${sidebarGroupTestId}"]`, {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
+}
+
+export function openSidebarSubItem(routePrefix: string, itemSlug: string) {
+  cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${itemSlug}"]`, {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
+}
+
 export function setSelect(name: 'role' | 'status', optionText: string) {
   cy.get('@addUserModal').find(`select[name="${name}"]`, {timeout: 30000}).should('exist').then(($select) => {
     const optionLabels = [...$select.find('option')].map((opt) => (opt.textContent || '').replace(/\s+/g, ' ').trim()).filter(Boolean);
@@ -83,8 +92,7 @@ export function loginAndClickSidebar(username: string, sidebarItems: string[], t
   }
   loginAsUser(username, selectedUser.password);
   sidebarItems.forEach((itemName) => {
-    const sidebarGroupTestId = getSidebarGroupTestId(itemName);
-    cy.get(`[data-testid="${sidebarGroupTestId}"]`, {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
+    openSidebarGroup(itemName);
 
     if (username === 'testing5' && itemName === 'Stealer logs') {
       cy.get('body').then(($b) => {
@@ -101,6 +109,62 @@ export function loginAndClickSidebar(username: string, sidebarItems: string[], t
     }
   });
   cy.logout();
+}
+
+export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => void) {
+  cy.intercept('POST', '**/api/subscription/request', (req) => {
+    req.reply({
+      statusCode: 200,
+      body: {message: 'sent'}
+    });
+  }).as('subscriptionRequest');
+  const subscriptionPopupSelector = '.ui-graph-popup-overlay';
+
+  cy.get(subscriptionPopupSelector, {timeout: 30000}).should('be.visible');
+  cy.contains('h2', 'Upgrade to Dark Web Shield Pro', {timeout: 30000}).should('be.visible');
+  cy.contains('button', 'Proceed to Payment', {timeout: 30000}).should('be.disabled');
+
+  cy.get('input#name', {timeout: 30000}).focus().blur().should('have.attr', 'aria-invalid', 'true');
+  cy.get('input#phone', {timeout: 30000}).focus().blur().should('have.attr', 'aria-invalid', 'true');
+  cy.get('input#email', {timeout: 30000}).focus().blur().should('have.attr', 'aria-invalid', 'true');
+  cy.get('span', {timeout: 30000})
+    .filter((_, el) => (el.textContent || '').trim() === 'Required')
+    .should('have.length.at.least', 3);
+
+  cy.get('input#name', {timeout: 30000}).clear().type('A').blur();
+  cy.contains('span', 'Too short', {timeout: 30000}).should('be.visible');
+
+  cy.get('input#phone', {timeout: 30000}).clear().type('abc').blur();
+  cy.contains('span', 'Invalid', {timeout: 30000}).should('exist');
+
+  cy.get('input#email', {timeout: 30000}).clear().type('invalid-email').blur();
+  cy.contains('span', 'Invalid', {timeout: 30000}).should('exist');
+
+  cy.get('input[type="radio"][name="subscription"][value="monthly"]', {timeout: 30000}).check({force: true}).should('be.checked');
+  cy.get('input[type="radio"][name="subscription"][value="annual"]', {timeout: 30000}).check({force: true}).should('be.checked');
+
+  cy.get('input#name', {timeout: 30000}).should('be.visible').clear().type(testData.stealer_upgrade_name);
+  cy.get('input#phone', {timeout: 30000}).should('be.visible').clear().type('03001234567');
+  cy.get('input#email', {timeout: 30000}).should('be.visible').clear().type(testData.stealer_upgrade_email);
+  cy.contains('button', 'Proceed to Payment', {timeout: 30000}).should('not.be.disabled').click();
+
+  cy.wait('@subscriptionRequest', {timeout: 30000}).then(({request, response}) => {
+    expect(request.body).to.include({
+      plan: 'annual',
+      name: testData.stealer_upgrade_name,
+      phone: '03001234567',
+      email: testData.stealer_upgrade_email
+    });
+    expect(response?.statusCode).to.be.oneOf([200, 201]);
+  });
+
+  cy.url({timeout: 30000}).should('include', '/notification');
+  cy.contains('div', 'Subscription Request Sent', {timeout: 30000}).should('be.visible');
+  cy.contains('p', 'Our team has received your subscription request', {timeout: 30000}).should('be.visible');
+  cy.contains('button', 'Homepage', {timeout: 30000}).should('be.visible').click();
+
+  cy.contains('button[type="button"]', 'Close', {timeout: 30000}).should('be.visible').click();
+  cy.get(subscriptionPopupSelector, {timeout: 30000}).should('not.exist');
 }
 
 export function openUsersList(usersUrl: string) {

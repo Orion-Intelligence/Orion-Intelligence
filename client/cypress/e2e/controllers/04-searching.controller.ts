@@ -65,6 +65,39 @@ export function clickOpenReport() {
   cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
 }
 
+export function exerciseJsonViewerOnce() {
+  cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+  cy.contains('app-json-api-viewer span', 'Json Response', {timeout: 30000}).should('be.visible').click();
+  cy.get('app-json-api-viewer app-json-viewer', {timeout: 30000}).should('exist').and('be.visible');
+
+  const expandableRowSelector = 'app-json-api-viewer app-json-viewer li:has(> div.group + div.ml-5)';
+
+  cy.get(expandableRowSelector, {timeout: 30000}).first().find('> div.ml-5').should('exist');
+  cy.get(expandableRowSelector, {timeout: 30000}).first().find('> div.group .text-\\[14px\\]').invoke('text').then((keyText) => {
+    const normalizedKey = keyText.trim();
+
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+      .closest('li')
+      .as('jsonExpandableRow');
+
+    cy.get('@jsonExpandableRow').find('> div.group').click();
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+      .closest('li')
+      .find('> div.ml-5')
+      .should('not.exist');
+
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+      .closest('li')
+      .find('> div.group')
+      .click();
+
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+      .closest('li')
+      .find('> div.ml-5')
+      .should('exist');
+  });
+}
+
 export function openFirstReportAndValidateNavigationOrModal() {
   cy.location('pathname').then((pathBefore) => {
     clickOpenReport();
