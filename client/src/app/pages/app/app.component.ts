@@ -8,10 +8,11 @@ import { appAnimation, quotaBannerAnimation } from '../../shared/animations/app.
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MessageNotificationComponent } from '../../shared/partials/message-notification/message-notification.component';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
+import { TrailNotificationComponent } from '../../shared/partials/trail-notification/trail-notification.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule, ReactiveFormsModule, MessageNotificationComponent, LoaderComponent],
+  imports: [RouterOutlet, FormsModule, ReactiveFormsModule, MessageNotificationComponent, LoaderComponent, TrailNotificationComponent],
   templateUrl: './app.component.html',
   animations: [appAnimation, quotaBannerAnimation],
 })

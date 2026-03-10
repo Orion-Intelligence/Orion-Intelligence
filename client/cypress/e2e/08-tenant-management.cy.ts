@@ -1,4 +1,13 @@
-import {addIOCForAllTabs, approveAllTenants, openManageIOCs, openTenantsPage, waitForBlockingOverlayToClose} from './controllers/08-tenant-management.controller';
+import {
+  addIOCForAllTabs,
+  applyAuditLogDateRange,
+  approveAllTenants,
+  openAuditLogPage,
+  openManageIOCs,
+  openTenantsPage,
+  resetAuditLogFilters,
+  waitForBlockingOverlayToClose
+} from './controllers/08-tenant-management.controller';
 
 describe('Tenant Management - End-to-End Provisioning Flow', () => {
   let tenant: any;
@@ -77,7 +86,7 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
-    cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click({force: true});
+    cy.get('[data-testid="tenant-edit-button"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-edit-form-panel"]', {timeout: 30000})
       .filter(':visible')
       .first()
@@ -86,8 +95,8 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
         cy.get('[data-testid="tenant-user-quota-input"]', {timeout: 30000})
           .first()
           .scrollIntoView()
-          .clear({force: true})
-          .type('1', {force: true});
+          .clear()
+          .type('1');
       });
     cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 35000})
       .filter(':visible')
@@ -111,8 +120,28 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
           parentScroller.scrollLeft = parentScroller.scrollWidth;
           parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
         }
-        cy.wrap($btn).should('exist').and('not.be.disabled').click({force: true});
+        cy.wrap($btn).should('exist').and('not.be.disabled').click();
       });
+    cy.logout();
+  });
+
+  it('opens admin audit log and triggers export plus date filters', () => {
+    cy.loginAsAdmin();
+    openAuditLogPage();
+
+    cy.get('app-auditlog-list table tbody tr, app-auditlog-list .rounded-xl', {timeout: 30000}).should('have.length.greaterThan', 0);
+    cy.contains('button', 'Export', {timeout: 30000})
+      .filter(':visible')
+      .first()
+      .scrollIntoView()
+      .should('be.visible')
+      .click({waitForAnimations: false, animationDistanceThreshold: 0});
+
+    applyAuditLogDateRange(14);
+    cy.contains('No audit logs found for the selected filters.', {timeout: 30000}).should('be.visible');
+
+    resetAuditLogFilters();
+    cy.get('app-auditlog-list table tbody tr, app-auditlog-list .rounded-xl', {timeout: 30000}).should('have.length.greaterThan', 0);
     cy.logout();
   });
 
@@ -134,13 +163,13 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
           cy.get(`[data-testid="${optionTestId}"]`, {timeout: 30000})
             .scrollIntoView()
             .should('be.visible')
-            .click({waitForAnimations: false, animationDistanceThreshold: 0, force: true});
+            .click({waitForAnimations: false, animationDistanceThreshold: 0});
         }
         else {
           cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
             .scrollIntoView()
             .should('be.visible')
-            .click({waitForAnimations: false, animationDistanceThreshold: 0, force: true});
+            .click({waitForAnimations: false, animationDistanceThreshold: 0});
         }
       });
       cy.get(`[data-testid="${modalTestId}"]`, {timeout: 60000}).should('not.exist');
@@ -158,12 +187,12 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
         if ($body.find('.ui-filter-sidebar-overlay').length > 0) {
           cy.get('.ui-filter-sidebar-overlay', {timeout: 30000})
             .first()
-            .click({force: true, waitForAnimations: false, animationDistanceThreshold: 0});
+            .click({waitForAnimations: false, animationDistanceThreshold: 0});
         }
         else if ($body.find('[data-testid="side-filter-close"]').length > 0) {
           cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
             .first()
-            .click({force: true, waitForAnimations: false, animationDistanceThreshold: 0});
+            .click({waitForAnimations: false, animationDistanceThreshold: 0});
         }
       });
       cy.get('.ui-filter-sidebar-overlay', {timeout: 60000}).should('not.exist');

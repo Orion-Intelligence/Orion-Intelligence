@@ -159,6 +159,37 @@ export function openTenantsPage() {
   cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
 }
 
+export function openAuditLogPage() {
+  cy.viewport(1440, 900);
+  cy.visit('/dashboard/profile/auditlog');
+  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/auditlog');
+  cy.get('app-auditlog .ui-page-title', {timeout: 30000}).should('contain.text', 'Audit Logs');
+}
+
+export function openAuditLogFilter() {
+  cy.get('app-auditlog #top', {timeout: 30000}).scrollIntoView();
+  cy.contains('button', 'Filter', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-close"]', {timeout: 30000}).filter(':visible').first().should('be.visible');
+}
+
+export function applyAuditLogDateRange(monthsBack: number) {
+  openAuditLogFilter();
+  cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+
+  for (let i = 0; i < monthsBack; i += 1) {
+    cy.get('[data-testid="side-filter-date-prev-month"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  }
+
+  cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+}
+
+export function resetAuditLogFilters() {
+  openAuditLogFilter();
+  cy.get('[data-testid="side-filter-reset"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+}
+
 export function openManageIOCs() {
   cy.get('[data-testid="sidebar-subitem-profile-ioc"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/ioc');

@@ -43,6 +43,18 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Dump'], testUsers, testData);
   });
 
+  it('logs in as testing2 and updates account settings preferences', () => {
+    loginAsUser(testUsers.testing2.username, testUsers.testing2.password);
+    cy.intercept('POST', '**/api/update/current/user').as('updateCurrentUser');
+    cy.visit('/dashboard/profile/account');
+    cy.get('[data-testid="account-settings-form"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="account-settings-twofa-toggle"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.wait('@updateCurrentUser', {timeout: 30000});
+    cy.get('[data-testid="account-settings-theme-toggle"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    cy.wait('@updateCurrentUser', {timeout: 30000});
+    cy.logout();
+  });
+
   it('logs in as testing3 and verifies assigned license sidebar groups', () => {
     loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs', 'Dump'], testUsers, testData);
   });
@@ -59,6 +71,25 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
       openSidebarSubItem('stealerlogs', 'iocs');
     });
     cy.url({timeout: 30000}).should('match', /\/($|homepage)/);
+    cy.logout();
+  });
+
+  it('logs in as testing1 and shows the trial subscription banner near expiry', () => {
+    cy.clock(new Date('2026-03-10T12:00:00Z').getTime(), ['Date']);
+    cy.intercept('POST', '**/api/get/tenant/node', (req) => {
+      req.continue((res) => {
+        if (res.body?.user) {
+          res.body.user.role = 'member';
+          res.body.user.subscription = false;
+          res.body.user.verificationDate = '2026-02-20T12:00:00Z';
+        }
+      });
+    }).as('trialSession');
+
+    loginAsUser(testUsers.testing1.username, testUsers.testing1.password);
+    cy.wait('@trialSession', {timeout: 30000});
+    cy.get('[data-testid="trial-subscription-banner"]', {timeout: 30000}).should('be.visible');
+    cy.contains('[data-testid="trial-subscription-banner"]', 'Your subscription is about to expire in 10 days.', {timeout: 30000}).should('be.visible');
     cy.logout();
   });
 });

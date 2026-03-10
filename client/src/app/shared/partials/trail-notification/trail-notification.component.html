@@ -1,6 +1,6 @@
 @if (trialNotificationCheck;) {
-  @if (!subscriptionService.accountExpirable()&&subscriptionService.getTrialDaysLeft()<30) {
-    <div class="mt-2 rounded-md border border-[var(--color-border)] bg-[var(--color-banner)] px-4 py-2 text-xs text-[var(--color-text1)]">
+  @if (!subscriptionService.accountExpirable() && subscriptionService.getTrialDaysLeft() > 0 && subscriptionService.getTrialDaysLeft() < 30) {
+    <div data-testid="trial-subscription-banner" class="mt-2 rounded-md border border-[var(--color-border)] bg-[var(--color-banner)] px-4 py-2 text-xs text-[var(--color-text1)]">
       <span class="flex items-center gap-2">
         <img alt="Info Icon" class="h-4 w-4" src="assets/images/shared/hint.svg" />
         <span>Your subscription is about to expire in {{subscriptionService.getTrialDaysLeft()}} days.</span>
