@@ -51,28 +51,28 @@
 
     @if (filteredAlerts.length>0) {
       <div class="category_report_summary-row mb-4 grid grid-cols-4 gap-3">
-        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#e9f2ff_0%,#ffffff_100%)] !border-[#bfd2ea]' : ''">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[#f7fbff] !border-[#cad8e8]' : ''">
           <div class="user-homepage_alerts-card-content">
             <span class="category_report_summary-card-heading">Total IOC</span>
             <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : '/assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Total unique IOCs found in alerts" />
           </div>
           <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(filteredAlerts)}}</span>
         </div>
-        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#fff4e7_0%,#ffffff_100%)] !border-[#f2d5ad]' : ''">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[#fffaf4] !border-[#e7d8bf]' : ''">
           <div class="user-homepage_alerts-card-content">
             <span class="category_report_summary-card-heading">Newly Found</span>
             <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : 'assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Total non seen alert report" />
           </div>
           <span class="category_report_summary-card-value">{{getNewAlertCount()}}</span>
         </div>
-        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#f2faff_0%,#ffffff_100%)] !border-[#c9dde9]' : ''">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[#f7fbff] !border-[#cad8e8]' : ''">
           <div class="user-homepage_alerts-card-content">
             <span class="category_report_summary-card-heading">Last Update</span>
             <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : 'assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Alerts update on" />
           </div>
           <span class="category_report_summary-card-value">{{getLatestDetectedDate(filteredAlerts)}}</span>
         </div>
-        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[linear-gradient(180deg,#edf8ef_0%,#ffffff_100%)] !border-[#c6e1cc]' : ''">
+        <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[#f7fcf8] !border-[#cfe0d2]' : ''">
           <div class="user-homepage_alerts-card-content">
             <span class="category_report_summary-card-heading">Sources</span>
             <img [src]="isLightTheme() ? '/assets/images/shared/info-dark.svg' : 'assets/images/shared/theme/info-light.svg'" alt="Critical Alert" class="user-homepage_alerts-card-icon h-[18px] w-[18px]" appTooltip="Total sources found in alerts" />
@@ -187,7 +187,7 @@
               <div class="category_report_alert-iocs">
                 <span class="category_report_alert-iocs-heading">IOCs</span>
                 <div class="category_report_alert-iocs-tags">
-                  @for (ioc of getFilteredIocs(item.allIOC); track ioc) {
+                  @for (ioc of getFilteredIocs(item.allIOC); track ioc.label) {
                     <div class="category_report_alert-iocs-tag">
                       {{ ioc.label }}({{ ioc.count }})
                     </div>

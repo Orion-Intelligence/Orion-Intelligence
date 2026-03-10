@@ -45,7 +45,7 @@ export class CategoryAlertReportComponent implements OnInit {
   activeDateRange: string | null = null;
   searchText: string = '';
   category: string = '';
-  iocTypes: Record<string, string> = {};
+  iocTypes: Record<string, string> = { ...search_filter_labels };
   showCustomAlertPopup: boolean = false;
   showEditAlertPopup: boolean = false;
   isFilterOpen$: Observable<boolean>;
@@ -94,7 +94,6 @@ export class CategoryAlertReportComponent implements OnInit {
       this.category = lastSegment;
       this.getLatestAlerts();
     });
-    this.iocTypes = { ...search_filter_labels };
   }
 
   private clearAppendTimer(): void {
@@ -605,7 +604,8 @@ export class CategoryAlertReportComponent implements OnInit {
       .map(ioc => ({
         label: this.iocTypes[ioc.name],
         count: ioc.values.length
-      }));
+      }))
+      .filter(ioc => !!ioc.label && ioc.count > 0);
   }
 
   countUniqueSources(alerts: CategoryAlerts[]): number {
