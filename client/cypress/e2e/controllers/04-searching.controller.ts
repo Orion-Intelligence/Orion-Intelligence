@@ -67,6 +67,20 @@ export function clickOpenReport() {
 
 export function exerciseJsonViewerOnce() {
   cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+  cy.window().then((win) => {
+    if (!win.navigator.clipboard) {
+      Object.defineProperty(win.navigator, 'clipboard', {
+        value: {
+          writeText: () => Promise.resolve(),
+        },
+        configurable: true,
+      });
+    }
+    cy.stub(win.navigator.clipboard, 'writeText').resolves().as('copyJsonToClipboard');
+  });
+  cy.get('app-json-api-viewer button[appTooltip="Copy JSON"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+  cy.get('@copyJsonToClipboard').should('have.been.calledOnce');
+  cy.contains('app-json-api-viewer span', 'Copied', {timeout: 30000}).should('be.visible');
   cy.contains('app-json-api-viewer span', 'Json Response', {timeout: 30000}).should('be.visible').click();
   cy.get('app-json-api-viewer app-json-viewer', {timeout: 30000}).should('exist');
 
