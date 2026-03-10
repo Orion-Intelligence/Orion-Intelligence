@@ -154,6 +154,95 @@ def test_tenant_manager_encrypt_and_get_tenant(monkeypatch):
     assert out.iocs[0].ioc_id == "m_email"
 
 
+def test_tenant_manager_update_tenant_persists_email_iocs(monkeypatch):
+    manager = object.__new__(TenantManager)
+    tenant_id = str(ObjectId())
+    key = Fernet.generate_key()
+    saved = []
+    tenant = SimpleNamespace(
+        id=ObjectId(tenant_id),
+        name="Acme",
+        phone="123",
+        country="US",
+        city="NY",
+        postal_code="10001",
+        licenses=[],
+        email="team@acme.com",
+        iocs=[],
+        is_default=False,
+        verified=False,
+        user_quota=2,
+        status=TenantStatus.ONBOARDING,
+        model_dump=lambda: {
+            "name": tenant.name,
+            "phone": tenant.phone,
+            "country": tenant.country,
+            "city": tenant.city,
+            "postal_code": tenant.postal_code,
+            "licenses": tenant.licenses,
+            "iocs": [
+                {"ioc_id": ioc.ioc_id, "name": ioc.name, "values": list(ioc.values)}
+                for ioc in tenant.iocs
+            ],
+        },
+    )
+
+    class _Key:
+        async def create_dek(self, *_):
+            return key
+
+        async def get_profile_dek(self, *_):
+            return key
+
+    class _Engine:
+        async def find_one(self, model, *_args, **_kwargs):
+            if model.__name__ == "db_alert_model":
+                return None
+            return tenant
+
+        async def save(self, obj):
+            saved.append(obj)
+
+        async def find(self, *_args, **_kwargs):
+            return []
+
+        async def count(self, *_args, **_kwargs):
+            return 1
+
+    class _Audit:
+        async def register(self, *_args, **_kwargs):
+            return "ok"
+
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+    from orion.services.encryption_manager.key_manager import KeyManager
+
+    monkeypatch.setattr(KeyManager, "get_instance", staticmethod(lambda: _Key()))
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _Audit()))
+    manager._engine = _Engine()
+    _run(TenantManager.encrypt_tenant(tenant))
+
+    payload = SimpleNamespace(
+        id=tenant_id,
+        name="Acme Updated",
+        phone="456",
+        country="CA",
+        city="Toronto",
+        postal_code="M5H",
+        verified=True,
+        user_quota=3,
+        status=TenantStatus.ACTIVE,
+        licenses=["free"],
+        iocs=[IocCategory(ioc_id="m_email", name="Email", values=["test-1", "test-2", "alexsssi@scrypton.com"])],
+    )
+    current_user = SimpleNamespace(id="u1", username="alice", role="member", tenant_uuid=tenant_id, licenses=["free"])
+
+    out = _run(manager.update_tenant(payload, current_user))
+
+    assert saved
+    assert out["tenant"]["iocs"][0]["ioc_id"] == "m_email"
+    assert out["tenant"]["iocs"][0]["values"] == ["test-1", "test-2", "alexsssi@scrypton.com"]
+
+
 def test_account_manager_get_all_users_and_update_current_user():
     mgr = object.__new__(AccountManager)
     saved = []

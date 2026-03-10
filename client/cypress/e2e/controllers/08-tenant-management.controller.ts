@@ -202,6 +202,17 @@ export function addIOCForAllTabs() {
       cy.wrap(tab).scrollIntoView().should('be.visible').click();
       cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 30000}).should('be.visible').clear().type(`test-${index}`);
       cy.get('[data-testid="tenant-ioc-add-button"]', {timeout: 30000}).should('be.visible').and('not.be.disabled').click();
+
+      if ((tab.textContent || '').trim() === 'Emails') {
+        cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 30000})
+          .should('be.visible')
+          .clear()
+          .type('laverdure700@mail.com');
+        cy.get('[data-testid="tenant-ioc-add-button"]', {timeout: 30000})
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
+      }
     });
   });
 

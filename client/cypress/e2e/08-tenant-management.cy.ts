@@ -184,18 +184,33 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     };
     const closeFilterSidebar = () => {
       cy.get('body').then($body => {
-        if ($body.find('.ui-filter-sidebar-overlay').length > 0) {
-          cy.get('.ui-filter-sidebar-overlay', {timeout: 30000})
-            .first()
-            .click({waitForAnimations: false, animationDistanceThreshold: 0});
-        }
-        else if ($body.find('[data-testid="side-filter-close"]').length > 0) {
+        if ($body.find('[data-testid="side-filter-close"]:visible').length > 0) {
           cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+            .filter(':visible')
             .first()
+            .scrollIntoView()
+            .should('be.visible')
             .click({waitForAnimations: false, animationDistanceThreshold: 0});
         }
       });
-      cy.get('.ui-filter-sidebar-overlay', {timeout: 60000}).should('not.exist');
+      cy.get('body', {timeout: 60000}).should($body => {
+        expect($body.find('.ui-filter-sidebar-overlay:visible').length).to.eq(0);
+        expect($body.find('[data-testid="side-filter-close"]:visible').length).to.eq(0);
+      });
+    };
+    const openFilterSidebar = () => {
+      cy.get('body').then($body => {
+        if ($body.find('[data-testid="side-filter-close"]:visible').length === 0) {
+          cy.get('[data-testid="tenant-alert-open-sidebar"]', {timeout: 30000})
+            .scrollIntoView()
+            .should('be.visible')
+            .click();
+        }
+      });
+      cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+        .filter(':visible')
+        .first()
+        .should('be.visible');
     };
     cy.visit('/login');
     cy.get('[data-testid="login-user"]', {timeout: 30000}).type(tenant.username);
@@ -233,7 +248,7 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     cy.get('[data-testid="tenant-alert-ioc-value"]').clear().type('example.com');
     cy.get('[data-testid="tenant-alert-save"]').scrollIntoView().should('be.visible').click();
 
-    cy.get('[data-testid="tenant-alert-open-sidebar"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+    openFilterSidebar();
     cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     Cypress._.times(12, () => {
       cy.get('[data-testid="side-filter-date-prev-month"]', {timeout: 30000}).first().click();

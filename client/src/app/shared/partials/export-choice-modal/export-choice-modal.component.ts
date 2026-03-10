@@ -1,11 +1,12 @@
 
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
 
 @Component({
   selector: 'app-export-choice-modal',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './export-choice-modal.component.html'
 })
 export class ExportChoiceModalComponent {
@@ -28,5 +29,9 @@ export class ExportChoiceModalComponent {
 
   select(value: string): void {
     this.optionSelected.emit(value);
+  }
+
+  isLightTheme(): boolean {
+    return document.body.classList.contains('light-theme');
   }
 }

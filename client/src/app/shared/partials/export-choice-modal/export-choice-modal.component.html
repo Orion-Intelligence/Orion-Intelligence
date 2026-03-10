@@ -7,13 +7,13 @@
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
-      <p class="mb-4 text-sm text-slate-300">{{ subtitle }}</p>
+      <p class="mb-4 text-sm" [ngClass]="isLightTheme() ? 'text-[#475467]' : 'text-slate-300'">{{ subtitle }}</p>
       <div class="grid gap-2">
         @for (option of options; track option) {
           <button [attr.data-testid]="option.testId || null" type="button" class="w-full rounded-lg border border-slate-600 bg-slate-700/60 px-3 py-3 text-left hover:border-indigo-400 hover:bg-slate-700" (click)="select(option.value)">
-            <div class="text-sm font-semibold text-white">{{ option.title }}</div>
+            <div class="text-sm font-semibold" [ngClass]="isLightTheme() ? 'text-[#172235]' : 'text-white'">{{ option.title }}</div>
             @if (option.description) {
-              <div class="text-xs text-slate-300">{{ option.description }}</div>
+              <div class="text-xs" [ngClass]="isLightTheme() ? 'text-[#475467]' : 'text-slate-300'">{{ option.description }}</div>
             }
           </button>
         }

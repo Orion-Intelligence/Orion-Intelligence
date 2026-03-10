@@ -48,6 +48,30 @@ body {
   overflow-x: hidden !important;
 }
 
+* {
+  scrollbar-width: auto !important;
+  scrollbar-color: var(--color-blue-880) transparent !important;
+}
+
+*::-webkit-scrollbar {
+  display: block !important;
+  width: 12px !important;
+  height: 12px !important;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 9999px !important;
+  background: var(--color-blue-880) !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-blue-720) !important;
+}
+
 p {
   overflow-wrap: anywhere;
   word-break: break-word;

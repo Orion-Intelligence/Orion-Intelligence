@@ -10,5 +10,16 @@
   "status": "active",
   "licenses": [
     "free"
+  ],
+  "iocs": [
+    {
+      "ioc_id": "m_email",
+      "name": "Email",
+      "values": [
+        "test-1",
+        "test-2",
+        "alexsssi@scrypton.com"
+      ]
+    }
   ]
 }

@@ -57,64 +57,65 @@
           @case (2) {
             <div class="text-white">
               <h2 class="mb-1 text-[20px] font-bold">Add IOCs</h2>
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-[14px] font-normal text-[#a0b8d1]">Add IOCs description here...</p>
-                <div class="flex items-center gap-4">
-                  <input type="text" class="h-[40px] w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-810)] px-3 text-[14px] text-[var(--color-text1)] outline-none focus:border-[#ffffff40] max-[640px]:w-[200px]" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
-                  <div class="m-0 inline-flex cursor-pointer items-center justify-center" (click)="openConfirmationPopup()">
-                    <button appTooltip="clear all" class="inline-flex h-[34px] w-[34px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-750)] p-0">
-                      <img alt="clear" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
-                    </button>
+              <div class="flex items-center justify-between gap-2 max-[760px]:flex-wrap">
+                <p class="text-[14px] font-normal text-[#a0b8d1]">Manage and organize IOC values used by your tenant searches.</p>
+                <div class="flex items-center gap-2 max-[760px]:w-full max-[760px]:justify-between">
+                  <div class="relative max-[760px]:flex-1">
+                    <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" class="pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300" />
+                    <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
                   </div>
+                  <button appTooltip="clear all" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
+                    <img alt="scan" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
+                  </button>
                 </div>
               </div>
-              <div class="relative mt-[21px] flex items-center gap-[15px] overflow-hidden">
+              <div class="relative mt-[21px] flex h-10 items-center gap-[15px] overflow-hidden">
                 @if (showLeftFade) {
-                  <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_right,#172235,transparent)]"></div>
+                  <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-r from-[#172235] to-transparent"></div>
                 }
-                <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center" (click)="scrollLeft()">
-                  <div class="absolute inset-[-10px]"></div>
-                  <img src="assets/images/shared/onboarding_leftButton.svg" alt="left" />
-                </div>
-                <div class="flex flex-1 gap-[25px] overflow-hidden px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%]" #categoryScroll>
-                  @if (onboardingData.iocs.length > 0) {
+                <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollLeft()" [disabled]="getFilteredIocs().length === 0">
+                  <img src="assets/images/shared/onboarding_leftButton.svg" alt="filter icon" class="h-4 w-4" />
+                </button>
+                <div class="flex h-full flex-1 items-center gap-[8px] overflow-x-auto px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" #categoryScroll>
+                  @if (getFilteredIocs().length > 0) {
                     @for (category of getFilteredIocs(); track category) {
-                      <div class="cursor-pointer whitespace-nowrap border-b-2 border-transparent pb-[6px] text-[14px] font-normal text-[var(--color-text6)] hover:border-[#ffffff50]" [ngClass]="{ 'border-b-2 border-[var(--color-text1)] !text-[var(--color-text1)]': category.ioc_id === selectedCategoryId }" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+                      <div class="cursor-pointer whitespace-nowrap rounded-full border px-4 py-1.5 font-[Inter] text-xs font-semibold transition-colors" [ngClass]="category.ioc_id === selectedCategoryId ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                         {{ category.name }}
                       </div>
                     }
                   } @else {
-                    <div class="text-[14px] text-[var(--color-text6)]">No entity filters available.</div>
+                    <div class="flex h-full w-full min-w-full items-center justify-start rounded-[8px] bg-[var(--color-blue-810)]/35 px-3 text-left font-[Inter] text-[12px] text-[var(--color-text4)]">
+                      No entity filters available.
+                    </div>
                   }
                 </div>
-                <div class="relative flex h-[24px] w-[24px] cursor-pointer items-center justify-center" (click)="scrollRight()">
-                  <div class="absolute inset-[-10px]"></div>
-                  <img src="assets/images/shared/onboarding_rightButton.svg" alt="right" />
-                </div>
+                <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollRight()" [disabled]="getFilteredIocs().length === 0">
+                  <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" class="h-4 w-4" />
+                </button>
                 @if (showRightFade) {
-                  <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-[linear-gradient(to_left,#172235,transparent)]"></div>
+                  <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-l from-[#172235] to-transparent"></div>
                 }
               </div>
-              <div class="mb-4 mt-4 h-[2px] w-full bg-[var(--color-border)]"></div>
-              <label class="mb-2 block text-[14px] font-normal text-white [body.light-theme_&]:text-[#172235]">Enter IOCs</label>
+              <div class="mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]"></div>
+              <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">Enter IOCs</label>
               <div class="relative w-full">
-                <input type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 pr-[96px] text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-                <button type="button" class="absolute right-2 top-1/2 h-[35px] w-[80px] -translate-y-1/2 rounded-[6px] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-[13px] text-white" (click)="addIoc(inputEl.value); inputEl.value=''">
+                <input type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+                <button type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">
                   Add
                 </button>
               </div>
-              <div class="my-4 h-[2px] w-full bg-[var(--color-border)]"></div>
-              <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
-              <div class="max-h-[220px] overflow-y-auto max-[1024px]:max-h-[100px]">
+              <div class="my-[16px] h-[2px] w-full bg-[var(--color-border)]"></div>
+              <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
+              <div class="max-h-[500px] min-h-[20px] space-y-3 overflow-y-auto max-[1024px]:max-h-[100px]">
                 @if (hasIocsWithValues()) {
                   <div>
                     @for (ioc of onboardingData.iocs; track ioc) {
                       <div>
                         @if (ioc.values.length > 0) {
-                          <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
-                          <div class="flex flex-wrap gap-2">
+                          <p class="my-[12px] mb-[8px] font-[Inter] text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
+                          <div class="flex flex-wrap gap-[8px]">
                             @for (value of ioc.values; track value) {
-                              <div class="flex cursor-pointer items-center gap-2 rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-1 text-[12px] font-normal text-[var(--color-text1)] hover:bg-[#FCFCFC20]">
+                              <div class="flex cursor-pointer items-center gap-[8px] rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-[4px] font-[Inter] text-[12px] font-normal text-[var(--color-text1)] transition hover:bg-[#FCFCFC20]">
                                 <span>{{ value }}</span>
                                 <span (click)="removeIoc(ioc.ioc_id, value)">✕</span>
                               </div>
@@ -174,7 +175,7 @@
 
         @switch (currentStep) {
           @case (1) {
-            <button data-testid="tenant-onboarding-next-step1" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] disabled:cursor-not-allowed disabled:bg-[#666] disabled:text-[#2c2d2f]" (click)="goNext()" [disabled]="!onboardingData.name">
+            <button data-testid="tenant-onboarding-next-step1" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] transition disabled:cursor-not-allowed disabled:opacity-50" (click)="goNext()" [disabled]="!onboardingData.name">
               Next
             </button>
           }
