@@ -156,19 +156,24 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
   });
 
   it('handles tenant alerts and notifications end-to-end', () => {
+    const clickWhenVisible = (selector: string, timeout: number = 30000) => {
+      cy.get(selector, {timeout}).scrollIntoView();
+      cy.get(selector, {timeout}).should('be.visible');
+      cy.get(selector, {timeout}).click({waitForAnimations: false, animationDistanceThreshold: 0});
+    };
+
     const exportFromModal = (modalTestId: string, optionTestId: string) => {
       cy.get(`[data-testid="${modalTestId}"]`, {timeout: 30000}).should('be.visible');
       cy.get('body').then($body => {
         if ($body.find(`[data-testid="${optionTestId}"]`).length > 0) {
-          cy.get(`[data-testid="${optionTestId}"]`, {timeout: 30000})
-            .scrollIntoView()
-            .should('be.visible')
-            .click({waitForAnimations: false, animationDistanceThreshold: 0});
+          clickWhenVisible(`[data-testid="${optionTestId}"]`);
         }
         else {
           cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
-            .scrollIntoView()
-            .should('be.visible')
+            .scrollIntoView();
+          cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
+            .should('be.visible');
+          cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
             .click({waitForAnimations: false, animationDistanceThreshold: 0});
         }
       });
@@ -177,7 +182,7 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     const closeNotificationSidebar = () => {
       cy.get('body').then($body => {
         if ($body.find('[data-testid="tenant-notification-sidebar"]').length > 0) {
-          cy.get('[data-testid="tenant-notification-close"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
+          clickWhenVisible('[data-testid="tenant-notification-close"]');
         }
       });
       cy.get('[data-testid="tenant-notification-sidebar"]', {timeout: 30000}).should('not.exist');
@@ -188,8 +193,14 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
           cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
             .filter(':visible')
             .first()
-            .scrollIntoView()
-            .should('be.visible')
+            .scrollIntoView();
+          cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+            .filter(':visible')
+            .first()
+            .should('be.visible');
+          cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+            .filter(':visible')
+            .first()
             .click({waitForAnimations: false, animationDistanceThreshold: 0});
         }
       });
@@ -201,10 +212,7 @@ describe('Tenant Management - End-to-End Provisioning Flow', () => {
     const openFilterSidebar = () => {
       cy.get('body').then($body => {
         if ($body.find('[data-testid="side-filter-close"]:visible').length === 0) {
-          cy.get('[data-testid="tenant-alert-open-sidebar"]', {timeout: 30000})
-            .scrollIntoView()
-            .should('be.visible')
-            .click();
+          clickWhenVisible('[data-testid="tenant-alert-open-sidebar"]');
         }
       });
       cy.get('[data-testid="side-filter-close"]', {timeout: 30000})

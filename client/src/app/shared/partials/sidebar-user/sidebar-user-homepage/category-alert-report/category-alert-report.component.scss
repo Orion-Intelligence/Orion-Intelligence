@@ -314,19 +314,6 @@
     box-shadow: 0 8px 20px rgb(0 0 0 / 30%);
 }
 
-.category_report_alert-card .dropdown-menu::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    width: 14px;
-    height: 14px;
-    background: var(--color-blue-700);
-    border-top: 1px solid var(--color-border);
-    border-left: 1px solid var(--color-border);
-    transform: rotate(45deg);
-}
-
 .category_report_alert-card .dropdown-item {
     display: block;
     width: 100%;
