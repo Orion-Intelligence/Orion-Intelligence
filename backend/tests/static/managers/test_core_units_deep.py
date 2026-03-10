@@ -16,6 +16,7 @@ from orion.management.jobs.insight_job import insight_job
 from orion.management.models.insight_model import InsightData
 from orion.management.models.insight_model_comparison import InsightComparisonModel
 from orion.constants.constant import CONSTANTS
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 
 
 def test_tenant_manager_validators_and_helpers():
@@ -52,6 +53,21 @@ def test_account_manager_safe_decrypt_and_create_tenant_user():
 
     with pytest.raises(HTTPException):
         asyncio.run(mgr.create_tenant_user(existing_user=True, existing_mail=None, password="x"))
+
+
+def test_account_manager_create_tenant_user_rejects_too_long_and_bad_hash(monkeypatch):
+    mgr = object.__new__(AccountManager)
+
+    with pytest.raises(HTTPException):
+        asyncio.run(mgr.create_tenant_user(existing_user=None, existing_mail=None, password="x" * 257))
+
+    class _BrokenPwd:
+        def hash(self, _password):
+            raise RuntimeError("bad hash")
+
+    monkeypatch.setattr(CONSTANTS, "S_AUTH_PWD_CONTEXT", _BrokenPwd())
+    with pytest.raises(HTTPException):
+        asyncio.run(mgr.create_tenant_user(existing_user=None, existing_mail=None, password="GoodPass123!"))
 
 
 def test_homepage_static_helpers_and_country_paths(monkeypatch):
@@ -157,3 +173,124 @@ def test_homepage_invoke_analytics_and_country_cache(monkeypatch):
     assert out is not None
     grouped = asyncio.run(homepage_model.get_country_specific_insights())
     assert "leak" in grouped
+
+
+def test_account_manager_create_user_get_all_users_and_update_current_user(monkeypatch):
+    mgr = object.__new__(AccountManager)
+    saved = []
+
+    class _Engine:
+        async def find(self, *_args, **_kwargs):
+            return [SimpleNamespace(dict=lambda: {"username": "alice", "email": "a@example.com"})]
+
+        async def find_one(self, *_args, **_kwargs):
+            return None
+
+        async def save(self, obj):
+            saved.append(obj)
+
+    class _Mongo:
+        def get_engine(self):
+            return _Engine()
+
+    class _Audit:
+        async def register(self, *_args, **_kwargs):
+            return True
+
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+    from orion.helper_manager.helper_controller import helper_controller
+    from orion.services.mongo_manager.mongo_controller import mongo_controller
+
+    mgr._engine = _Engine()
+    monkeypatch.setattr(mongo_controller, "get_instance", staticmethod(lambda: _Mongo()))
+    monkeypatch.setattr(helper_controller, "extract_user_mail_fields", staticmethod(lambda _d: ("newuser", "new@example.com", "StrongPass123!")))
+    monkeypatch.setattr(
+        AccountManager,
+        "create_tenant_user",
+        lambda self, *_args: CONSTANTS.S_AUTH_PWD_CONTEXT.hash("StrongPass123!"),
+    )
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _Audit()))
+
+    created = asyncio.run(
+        mgr.create_user(
+            SimpleNamespace(
+                role=user_role.ANALYST,
+                status=UserStatus.ACTIVE,
+                subscription=False,
+                licenses=[LicenseName.FREE],
+            ),
+            SimpleNamespace(role=user_role.ADMIN, tenant_uuid="tenant-1"),
+        )
+    )
+    users = asyncio.run(
+        mgr.get_all_users(SimpleNamespace(role="admin", tenant_uuid="tenant-1", licenses=[]))
+    )
+    none_users = asyncio.run(
+        mgr.get_all_users(SimpleNamespace(role="member", tenant_uuid="tenant-1", licenses=[]))
+    )
+
+    current_user = SimpleNamespace(username="newuser")
+    mgr._engine = SimpleNamespace(
+        find_one=lambda *_args, **_kwargs: asyncio.sleep(
+            0,
+            result=SimpleNamespace(
+                username="newuser",
+                email="old@example.com",
+                preferences={"theme": "dark-theme"},
+                twofa_enabled=True,
+                twofa_secret="secret",
+                tenant_uuid="tenant-1",
+                id="u1",
+            ),
+        ),
+        save=lambda obj: asyncio.sleep(0, result=saved.append(obj)),
+    )
+    updated = asyncio.run(
+        mgr.update_current_user(
+            SimpleNamespace(
+                username="newer",
+                email="newer@example.com",
+                preferences={"theme": "light-theme"},
+                twofa_enabled=False,
+            ),
+            current_user,
+        )
+    )
+
+    assert created["username"] == "newuser"
+    assert users[0].username == "alice"
+    assert none_users == []
+    assert updated["message"] == "User updated successfully"
+
+
+def test_account_manager_create_user_invalid_email_fails(monkeypatch):
+    mgr = object.__new__(AccountManager)
+
+    class _Engine:
+        async def find_one(self, *_args, **_kwargs):
+            return None
+
+    class _Mongo:
+        def get_engine(self):
+            return _Engine()
+
+    from orion.helper_manager.helper_controller import helper_controller
+    from orion.services.mongo_manager.mongo_controller import mongo_controller
+
+    monkeypatch.setattr(mongo_controller, "get_instance", staticmethod(lambda: _Mongo()))
+    monkeypatch.setattr(helper_controller, "extract_user_mail_fields", staticmethod(lambda _d: ("userok", "bad-email", "StrongPass123!")))
+
+    with pytest.raises(HTTPException) as ex:
+        asyncio.run(
+            mgr.create_user(
+                SimpleNamespace(
+                    role=user_role.ANALYST,
+                    status=UserStatus.ACTIVE,
+                    subscription=False,
+                    licenses=[LicenseName.FREE],
+                ),
+                SimpleNamespace(role=user_role.ADMIN, tenant_uuid="tenant-1"),
+            )
+        )
+
+    assert ex.value.status_code == 400

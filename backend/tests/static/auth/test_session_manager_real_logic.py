@@ -276,3 +276,93 @@ def test_logout_user_noop_paths():
     # Current implementation is a no-op for any token value.
     assert session_manager.logout_user("") is None
     assert session_manager.logout_user("token-1") is None
+
+
+def test_verify_2fa_and_issue_sets_secret_and_returns_session(monkeypatch):
+    import pyotp
+
+    user = SimpleNamespace(
+        username="john",
+        role=user_role.MEMBER,
+        id="u1",
+        tenant_uuid="507f1f77bcf86cd799439011",
+        twofa_secret=None,
+        twofa_enabled=False,
+        subscription=True,
+        account_verify_at=None,
+        licenses=[LicenseName.FREE],
+        status=UserStatus.ACTIVE,
+    )
+    sm = _new_manager(user, redis_sid="sid-1")
+    sm.create_access_token = lambda *_args, **_kwargs: asyncio.sleep(0, result=("access-1", user_role.MEMBER))
+
+    original_get_instance = session_manager.get_instance
+    monkeypatch.setattr(session_manager, "get_instance", staticmethod(lambda: SimpleNamespace(has_onboarding=lambda *_: asyncio.sleep(0, result=True))))
+    monkeypatch.setattr(pyotp, "TOTP", lambda _secret: SimpleNamespace(verify=lambda _code, valid_window=1: True))
+
+    temp = asyncio.run(session_manager.create_temp_token("john", extra={"tfa_secret": "SECRET"}))
+    out = asyncio.run(sm.verify_2fa_and_issue(temp, "123456"))
+
+    monkeypatch.setattr(session_manager, "get_instance", original_get_instance)
+    assert out["access_token"] == "access-1"
+    assert out["session"]["hasOnboarding"] is True
+    assert user.twofa_secret == "SECRET"
+    assert user.twofa_enabled is True
+
+
+def test_verify_2fa_and_issue_rejects_invalid_code():
+    import pyotp
+
+    user = SimpleNamespace(username="john", role=user_role.MEMBER, id="u1", tenant_uuid="507f1f77bcf86cd799439011", twofa_secret="SECRET")
+    sm = _new_manager(user, redis_sid="sid-1")
+    pyotp.TOTP = lambda _secret: SimpleNamespace(verify=lambda _code, valid_window=1: False)
+
+    temp = asyncio.run(session_manager.create_temp_token("john"))
+    with pytest.raises(HTTPException) as ex:
+        asyncio.run(sm.verify_2fa_and_issue(temp, "000000"))
+    assert ex.value.status_code == 401
+
+
+def test_refresh_token_success_for_member_and_crawler_paths():
+    member = SimpleNamespace(
+        username="john",
+        role=user_role.MEMBER,
+        id="u1",
+        tenant_uuid="507f1f77bcf86cd799439011",
+        current_session_id="sid-1",
+        subscription=True,
+        account_verify_at=None,
+        licenses=[LicenseName.FREE],
+        status=UserStatus.ACTIVE,
+    )
+    maintainer = SimpleNamespace(account_verify_at=None)
+    sm = object.__new__(session_manager)
+    sm._engine = _FakeEngineRefresh(member, maintainer)
+    sm._redis = _FakeRedis(sid="sid-1")
+    sm._session_ttl = 1800
+    sm.has_onboarding = lambda *_: asyncio.sleep(0, result=True)
+
+    token = _token({"sub": "john", "sid": "sid-1"})
+    out = asyncio.run(sm.refresh_token(token))
+    assert out["token_type"] == "bearer"
+    assert out["session"]["hasOnboarding"] is True
+
+    crawler = SimpleNamespace(
+        username="crawl",
+        role=user_role.CRAWLER,
+        id="u2",
+        tenant_uuid="507f1f77bcf86cd799439012",
+        current_session_id="sid-c",
+        subscription=False,
+        account_verify_at=None,
+        licenses=[LicenseName.ENTERPRISE],
+        status=UserStatus.ACTIVE,
+    )
+    crawler_maintainer = SimpleNamespace(account_verify_at=None)
+    sm2 = object.__new__(session_manager)
+    sm2._engine = _FakeEngineRefresh(crawler, crawler_maintainer)
+    sm2._redis = _FakeRedis(sid="sid-c")
+    sm2._session_ttl = 1800
+    sm2.has_onboarding = lambda *_: asyncio.sleep(0, result=False)
+    out2 = asyncio.run(sm2.refresh_token(_token({"sub": "crawl"})))
+    assert out2["session"]["role"] == "crawler"

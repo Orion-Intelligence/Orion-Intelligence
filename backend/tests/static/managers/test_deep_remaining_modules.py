@@ -21,6 +21,7 @@ from orion.management.jobs.alert_job import alert_job
 from orion.management.jobs.insight_job import insight_job
 from orion.management.models.insight_model import InsightData
 from orion.services.encryption_manager.key_manager import KeyManager
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, TenantStatus
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
@@ -206,6 +207,66 @@ def test_account_manager_get_all_users_and_update_current_user():
     out = _run(mgr.update_current_user(request, SimpleNamespace(username="alice")))
     assert out["message"] == "User updated successfully"
     assert saved and saved[-1].twofa_secret is None
+
+
+def test_account_manager_delete_update_and_profile_image_paths(monkeypatch, tmp_path: Path):
+    mgr = object.__new__(AccountManager)
+    mgr.IMAGE_DIR = tmp_path / "profile"
+    mgr.TENANT_DIR = tmp_path / "tenant"
+    mgr.IMAGE_DIR.mkdir()
+    mgr.TENANT_DIR.mkdir()
+    tenant_default = mgr.TENANT_DIR / "logo_url_default.png"
+    tenant_default.write_bytes(b"default")
+    user_file = mgr.TENANT_DIR / "u1.png"
+    user_file.write_bytes(b"user")
+
+    deleted = []
+    removed = []
+    saved = []
+    tenant_id = str(ObjectId())
+    user = SimpleNamespace(id="u1", username="alice", tenant_uuid=tenant_id, role="member", status="active", licenses=[LicenseName.FREE])
+    tenant = SimpleNamespace(id=ObjectId(tenant_id), is_default=False, user_quota=0)
+
+    class _Engine:
+        async def find_one(self, model, *_args, **_kwargs):
+            if model.__name__ == "db_tenant_model":
+                return tenant
+            return user
+
+        async def remove(self, *_args, **_kwargs):
+            removed.append(True)
+
+        async def delete(self, obj):
+            deleted.append(obj)
+
+        async def save(self, obj):
+            saved.append(obj)
+
+        async def count(self, *_args, **_kwargs):
+            return 1
+
+    class _Audit:
+        async def register(self, *_args, **_kwargs):
+            return "ok"
+
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _Audit()))
+    mgr._engine = _Engine()
+
+    out = _run(mgr.delete_user(SimpleNamespace(username="alice"), SimpleNamespace(id="admin1", licenses=[LicenseName.MAINTAINER], tenant_uuid=tenant_id)))
+    assert out["message"] == "User deleted successfully"
+    assert removed and deleted
+
+    user.status = UserStatus.DISABLE
+    req = SimpleNamespace(username="alice", status=UserStatus.ACTIVE, licenses=[LicenseName.FREE])
+    with pytest.raises(HTTPException):
+        _run(mgr.update_user(req, SimpleNamespace(id="admin1", licenses=[LicenseName.MAINTAINER], tenant_uuid=tenant_id)))
+
+    resp = _run(mgr.getProfileImage("u1"))
+    assert resp.headers["X-Default-Image"] == "false"
+    resp2 = _run(mgr.getProfileImage("missing"))
+    assert resp2.headers["X-Default-Image"] == "true"
 
 
 def test_search_model_dynamic_social_and_stealer_password_filter(monkeypatch):

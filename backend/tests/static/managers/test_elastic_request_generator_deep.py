@@ -105,3 +105,83 @@ def test_misc_generators_and_lookup_queries():
 
     assert isinstance(elastic_request_generator.generate_graph_queries(), list)
     assert isinstance(elastic_request_generator.generate_insight_queries(), list)
+
+
+def test_request_generator_covers_consolidated_full_result_and_semantic_failover(monkeypatch):
+    model = search_consolidated_param_model(
+        q="alpha beta",
+        category="all",
+        page=1,
+        network="all",
+        content="all",
+        matchtype="semantic",
+    )
+
+    from orion.helper_manager.env_handler import env_handler
+    from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
+
+    class _ExplodingSemantic:
+        def embed_query_sync(self, _):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(env_handler, "get_instance", staticmethod(lambda: SimpleNamespace(env=lambda *_: "1")))
+    monkeypatch.setattr(elastic_semantic_controller, "get_instance", staticmethod(lambda: _ExplodingSemantic()))
+
+    indices, query, boosts = elastic_request_generator().on_search_consolidated_ranked_data(
+        model,
+        pfilter={"m_country": ["US"]},
+        base_index=["generic_model"],
+        blocked_categories=[],
+        allowed_categories=[],
+    )
+    assert indices == ["generic_model"]
+    assert "bool" in query["query"]["function_score"]["query"]
+    assert isinstance(boosts, list)
+
+
+def test_request_generator_persona_sanctions_and_general_edge_paths():
+    idx_none, query_none = elastic_request_generator.on_search_persona(SimpleNamespace(q=""))
+    assert idx_none is None
+    assert query_none is None
+
+    idx_persona, query_persona = elastic_request_generator.on_search_persona(SimpleNamespace(q="a@example.com"))
+    assert idx_persona
+    assert query_persona["aggs"]["channels"]["terms"]["size"] == 3
+
+    assert elastic_request_generator.index_query_general({"m_important_content": "", "m_title": "", "m_url": "https://x"}) == []
+    assert elastic_request_generator.index_query_sanctions({"schema_name": "Company"}) == []
+    assert elastic_request_generator.index_query_sanctions({"id": "42", "schema_name": "Company"})[0]
+
+
+def test_request_generator_consolidated_filters_and_stealerlog_alert_empty(monkeypatch):
+    model = search_consolidated_param_model(
+        q='"exact phrase"',
+        category="news",
+        page=1,
+        network="telegram",
+        content="phishing",
+        safe=True,
+        daterange="",
+        matchtype="or",
+    )
+
+    indices, query, _boosts = elastic_request_generator().on_search_consolidated_ranked_data(
+        model,
+        pfilter={"m_url": ["example.com"]},
+        base_index=["generic_model"],
+        blocked_categories=["adult"],
+        allowed_categories=["news"],
+    )
+    bool_query = query["query"]["function_score"]["query"]["bool"]
+    assert indices == ["generic_model"]
+    assert any("m_network" in clause.get("term", {}) for clause in bool_query["filter"])
+    assert any("adult" in str(clause) for clause in bool_query["must_not"])
+
+    idx, body = elastic_request_generator.on_search_stealerlogs_data(
+        search_credential_param_model(q="", page=1),
+        pFilter={},
+        consolidated=True,
+        alert=True,
+    )
+    assert idx is None
+    assert body is None

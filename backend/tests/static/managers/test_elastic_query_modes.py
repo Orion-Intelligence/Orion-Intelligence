@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
+
+import pytest
 
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 
@@ -157,3 +160,155 @@ def test_build_query_block_semantic_enabled_uses_knn(monkeypatch):
     assert "knn" in fs["query"]
     assert "script_score" in fs
     assert query["min_score"] == 0.4
+
+
+def test_semantic_controller_init_embed_and_enrich_paths(monkeypatch):
+    import orion.services.elastic_manager.elastic_semantic_controller as semantic_module
+    from orion.helper_manager.env_handler import env_handler
+    from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_SEMANTIC
+    from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
+
+    class _Indices:
+        def __init__(self):
+            self.put_calls = []
+
+        async def get_mapping(self, index):
+            if index == "already-indexed":
+                return {index: {"mappings": {"properties": {ELASTIC_SEMANTIC.S_EMBED_FIELD: {"type": "dense_vector"}}}}}
+            return {index: {"mappings": {"properties": {}}}}
+
+        async def put_mapping(self, index, body):
+            self.put_calls.append((index, body))
+
+    class _Conn:
+        def __init__(self):
+            self.indices = _Indices()
+            self.closed = False
+
+        async def close(self):
+            self.closed = True
+
+    class _AsyncResp:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"result": {"embeddings": [[0.1, 0.2, 0.3], [0.9, 0.8, 0.7]]}}
+
+    class _AsyncClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def post(self, url, json):
+            return _AsyncResp()
+
+    class _SyncResp(_AsyncResp):
+        def json(self):
+            return {"result": {"embedding": [0.4, 0.5, 0.6]}}
+
+    class _SyncClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def post(self, url, json):
+            return _SyncResp()
+
+    conn = _Conn()
+    ctrl = elastic_semantic_controller()
+
+    monkeypatch.setattr(env_handler, "get_instance", staticmethod(lambda: SimpleNamespace(env=lambda *_: "http://embed.test")))
+    monkeypatch.setattr(semantic_module.httpx, "AsyncClient", _AsyncClient)
+    monkeypatch.setattr(semantic_module.httpx, "Client", _SyncClient)
+
+    asyncio.run(ctrl.init(conn, ["already-indexed", "needs-index"]))
+    assert ctrl.get_connection() is conn
+    assert len(conn.indices.put_calls) == 1
+    assert conn.indices.put_calls[0][0] == "needs-index"
+
+    assert asyncio.run(ctrl.embed_query("hello")) == [0.1, 0.2, 0.3]
+    assert elastic_semantic_controller.embed_query_sync("hello") == [0.4, 0.5, 0.6]
+    assert asyncio.run(ctrl.compute_vec({"m_title": "A", "m_important_content": "B", "m_content": "C"})) == [0.1, 0.2, 0.3]
+    assert asyncio.run(ctrl.compute_vec({"m_title": " ", "m_content": ""})) is None
+
+    single = {ELASTIC_KEYS.S_VALUE: {"m_title": "Doc"}}
+    enriched_single = asyncio.run(ctrl.enrich_for_semantic(single))
+    assert ELASTIC_SEMANTIC.S_EMBED_FIELD in enriched_single[ELASTIC_KEYS.S_VALUE]
+
+    batch = [{ELASTIC_KEYS.S_VALUE: {"m_title": "One"}}, {ELASTIC_KEYS.S_VALUE: {"m_title": "Two"}}]
+    enriched_batch = asyncio.run(ctrl.enrich_for_semantic(batch))
+    assert all(ELASTIC_SEMANTIC.S_EMBED_FIELD in item[ELASTIC_KEYS.S_VALUE] for item in enriched_batch)
+
+    asyncio.run(ctrl.close())
+    assert conn.closed is True
+
+
+def test_semantic_controller_embed_and_enrich_raise_on_bad_payload(monkeypatch):
+    import orion.services.elastic_manager.elastic_semantic_controller as semantic_module
+    from orion.helper_manager.env_handler import env_handler
+    from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS
+    from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
+
+    class _BadAsyncResp:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"result": {}}
+
+    class _BadAsyncClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def post(self, url, json):
+            return _BadAsyncResp()
+
+    class _BadSyncResp(_BadAsyncResp):
+        pass
+
+    class _BadSyncClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def post(self, url, json):
+            return _BadSyncResp()
+
+    ctrl = elastic_semantic_controller()
+    monkeypatch.setattr(env_handler, "get_instance", staticmethod(lambda: SimpleNamespace(env=lambda *_: "http://embed.test")))
+    monkeypatch.setattr(semantic_module.httpx, "AsyncClient", _BadAsyncClient)
+    monkeypatch.setattr(semantic_module.httpx, "Client", _BadSyncClient)
+
+    with pytest.raises(Exception):
+        asyncio.run(ctrl.embed_query("hello"))
+    with pytest.raises(Exception):
+        elastic_semantic_controller.embed_query_sync("hello")
+
+    async def _explode(_doc):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(ctrl, "compute_vec", _explode)
+    with pytest.raises(RuntimeError):
+        asyncio.run(ctrl.enrich_for_semantic({ELASTIC_KEYS.S_VALUE: {"m_title": "Doc"}}))

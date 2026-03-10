@@ -3,13 +3,10 @@ import re
 from datetime import timedelta, timezone
 from datetime import datetime
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.constants.constant import CONSTANTS, allowed_keys
-from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.bloom_manager.bloom_controller import bloom_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
 from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
 

@@ -189,3 +189,120 @@ def test_filter_alerts_by_license_respects_allowed_types(monkeypatch):
 
     out = mgr.filter_alerts_by_license(alerts, user)
     assert [a.type for a in out] == ["breach", "social"]
+
+
+def test_upsert_alert_create_and_update_paths():
+    mgr = _manager(db_alert_model(tenant_id="t1", alerts=[]))
+    created = asyncio.run(
+        mgr.upsert_alert(
+            tenantId="t1",
+            category="breach",
+            ioc_type="m_email",
+            ioc_value="a@example.com",
+            title="Breach",
+            url="https://x",
+            description="desc",
+            source="src",
+            all_ioc=[],
+            content_types=["news"],
+        )
+    )
+    updated = asyncio.run(
+        mgr.upsert_alert(
+            tenantId="t1",
+            category="breach",
+            ioc_type="m_email",
+            ioc_value="a@example.com",
+            title="Breach",
+            url="https://x",
+            description="desc",
+            source="src",
+            all_ioc=[],
+            content_types=["news"],
+            data_hash=mgr._engine.doc.alerts[0].data_hash,
+        )
+    )
+    assert created == "Created"
+    assert updated == "Updated"
+
+
+def test_add_custom_alert_create_then_update_and_scan_status_paths():
+    mgr = _manager(db_alert_model(tenant_id="t1", alerts=[]))
+    user = _user()
+    alert = AlertModel(type="social", ioc_type="m_username", ioc_value="alice", title="t", description="d")
+
+    created = asyncio.run(mgr.add_custom_alert(alert, user))
+    updated = asyncio.run(mgr.add_custom_alert(alert, user))
+    status = asyncio.run(mgr.get_scan_status(user))
+    status2 = asyncio.run(mgr.get_scan_status_by_tenant_id("t1"))
+
+    assert created["message"] == "Created"
+    assert updated["message"] == "Updated"
+    assert status == {"scan_running": False}
+    assert status2 == {"scan_running": False}
+
+
+def test_alert_deletion_and_seen_branches_raise_when_missing():
+    mgr = _manager(db_alert_model(tenant_id="t1", alerts=[AlertModel(alert_id="a1", data_hash="h1", type="breach")]))
+    user = _user()
+
+    with pytest.raises(HTTPException):
+        asyncio.run(mgr.delete_alert("missing", user))
+    with pytest.raises(HTTPException):
+        asyncio.run(mgr.set_alert_seen([AlertModel(data_hash="missing", report_seen=True)], user))
+    with pytest.raises(HTTPException):
+        asyncio.run(mgr.delete_alerts_by_type(user, "social"))
+
+
+def test_notification_mapping_and_allowed_types(monkeypatch):
+    mgr = _manager()
+    assert mgr._to_notification_item(AlertModel(type="general", ioc_type="m_email", data_hash="h1"))["risk"] == "Low"
+    assert mgr._to_notification_item(AlertModel(type="unknown", ioc_type="m_email", data_hash="h2"))["risk"] == "Unknown"
+
+
+def test_get_all_alerts_filters_non_paginated_and_delete_all_success():
+    now = datetime.now(timezone.utc)
+    doc = db_alert_model(
+        tenant_id="t1",
+        alerts=[
+            AlertModel(type="breach", ioc_type="m_email", ioc_value="a@example.com", data_hash="h1", report_seen=False, last_seen=now),
+            AlertModel(type="social", ioc_type="m_username", ioc_value="alice", data_hash="h2", report_seen=True, last_seen=now),
+        ],
+    )
+    mgr = _manager(doc)
+
+    out = asyncio.run(mgr.getAllAlerts(_user(), paginate=False, alert_type="breach", unseen_only=True))
+    deleted = asyncio.run(mgr.delete_all_alerts(_user()))
+
+    assert len(out) == 1
+    assert out[0].data_hash == "h1"
+    assert deleted["message"] == "All alerts deleted successfully"
+    assert mgr._engine.doc.alerts == []
+
+
+def test_set_scan_running_updates_existing_doc_and_allowed_types_paths(monkeypatch):
+    mgr = _manager(db_alert_model(tenant_id="t1", scan_running=False, alerts=[]))
+    out = asyncio.run(mgr.set_scan_running("t1", True, cancle_scan=False))
+    assert out == {"tenant_id": "t1", "scan_running": True}
+    assert mgr._engine.doc.scan_running is True
+
+    from orion.api.interactive.alert_manager import alert_manager as alert_manager_module
+
+    monkeypatch.setattr(alert_manager_module, "get_user_permissions", lambda _u: {"modules": "all", "scanning": True, "maintainer": False})
+    allowed = AlertManager.get_allowed_alert_types(SimpleNamespace())
+    assert "social" in allowed or "breach" in allowed
+
+
+def test_filter_alerts_by_license_returns_all_for_maintainer(monkeypatch):
+    mgr = _manager()
+    alerts = [AlertModel(type="breach"), AlertModel(type="social")]
+
+    from orion.api.interactive.alert_manager import alert_manager as alert_manager_module
+
+    monkeypatch.setattr(alert_manager_module, "get_user_permissions", lambda _u: {"maintainer": True, "modules": [], "scanning": False})
+    out = mgr.filter_alerts_by_license(alerts, SimpleNamespace())
+    assert out == alerts
+
+    monkeypatch.setattr("orion.api.interactive.alert_manager.alert_manager.get_user_permissions", lambda _u: {"modules": "all", "scanning": True, "maintainer": False})
+    allowed = AlertManager.get_allowed_alert_types(SimpleNamespace())
+    assert "breach" in allowed

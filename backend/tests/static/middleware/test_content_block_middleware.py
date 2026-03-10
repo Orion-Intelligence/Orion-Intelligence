@@ -44,6 +44,8 @@ def test_dashboard_allows_authenticated_user(monkeypatch):
     monkeypatch.setattr(session_manager, "get_instance", staticmethod(lambda: _SessionWithUser()))
 
     client = TestClient(app)
-    resp = client.get("/dashboard", cookies={"access_token": "x.y.z"})
+    client.cookies.set("access_token", "x.y.z")
+    resp = client.get("/dashboard")
+    client.cookies.clear()
     assert resp.status_code == 200
     assert resp.json()["ok"] is True
