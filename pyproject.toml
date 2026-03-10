@@ -46,3 +46,6 @@ filterwarnings = [
     "ignore:Support for class-based `config` is deprecated, use ConfigDict instead.*:DeprecationWarning:pydantic.*",
     "ignore:`json_encoders` is deprecated.*:DeprecationWarning:pydantic.*",
 ]
+
+[tool.coverage.run]
+omit = ["*/__init__.py"]
