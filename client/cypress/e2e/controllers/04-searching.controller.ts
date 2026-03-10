@@ -68,11 +68,11 @@ export function clickOpenReport() {
 export function exerciseJsonViewerOnce() {
   cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
   cy.contains('app-json-api-viewer span', 'Json Response', {timeout: 30000}).should('be.visible').click();
-  cy.get('app-json-api-viewer app-json-viewer', {timeout: 30000}).should('exist').and('be.visible');
+  cy.get('app-json-api-viewer app-json-viewer', {timeout: 30000}).should('exist');
 
   const expandableRowSelector = 'app-json-api-viewer app-json-viewer li:has(> div.group + div.ml-5)';
 
-  cy.get(expandableRowSelector, {timeout: 30000}).first().find('> div.ml-5').should('exist');
+  cy.get(expandableRowSelector, {timeout: 30000}).first().scrollIntoView().should('be.visible').find('> div.ml-5').should('exist');
   cy.get(expandableRowSelector, {timeout: 30000}).first().find('> div.group .text-\\[14px\\]').invoke('text').then((keyText) => {
     const normalizedKey = keyText.trim();
 
@@ -80,7 +80,7 @@ export function exerciseJsonViewerOnce() {
       .closest('li')
       .as('jsonExpandableRow');
 
-    cy.get('@jsonExpandableRow').find('> div.group').click();
+    cy.get('@jsonExpandableRow').scrollIntoView().find('> div.group').should('be.visible').click();
     cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
       .closest('li')
       .find('> div.ml-5')
@@ -88,7 +88,9 @@ export function exerciseJsonViewerOnce() {
 
     cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
       .closest('li')
+      .scrollIntoView()
       .find('> div.group')
+      .should('be.visible')
       .click();
 
     cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
