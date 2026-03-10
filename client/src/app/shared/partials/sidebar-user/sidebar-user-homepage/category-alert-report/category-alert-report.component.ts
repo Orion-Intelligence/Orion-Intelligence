@@ -223,6 +223,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   toggleActionMenu(id: string, event: Event) {
+    event.preventDefault();
     event.stopPropagation();
     this.openedActionMenuId = this.openedActionMenuId === id ? null : id;
   }
