@@ -286,7 +286,7 @@ class alert_job:
                 search_func = self._search_model.search_consolidated_ranked_result
             elif category == "stealerlogs":
                 ParamModel = search_credential_param_model
-                search_func = self._search_model.search_stealerlogs_result
+                search_func = self._search_model.search_stealer_iocs
             else:
                 return
 
@@ -297,23 +297,17 @@ class alert_job:
                 for ioc_value in ioc.values or []:
 
                     search_data = {"entity_filter": {ioc_type_name: [
-                        ioc_value]}, "category": search_data_category, "page": 1, "size": 100, "matchtype": 'or', "fullsearch": True, "must": True, }
+                        ioc_value]}, "category": search_data_category, "page": 1, "size": 100, "matchtype": 'or', "fullsearch": True, "must": True,"ioc":f"{ioc_type_name}:{ioc_value}" }
 
                     try:
                         search_param = ParamModel(**search_data)
                         if category == "stealerlogs":
-                            if ioc_type_name == "m_domain":
-                                search_param.url = ioc_value
-                                search_param.entity_filter.pop("m_domain", None)
-                            elif ioc_type_name == "m_user":
-                                search_param.user = ioc_value
-                                search_param.entity_filter.pop("m_user", None)
-                            es_response = await search_func(search_param, True)
+                            es_response = await search_func(search_param)
                         elif category == "social":
                             es_response = await search_func(search_param, base_index, [], [])
                         elif category == "discussion":
                             es_response = await search_func(search_param, base_index, [], [])
-                        if category == "defacement":
+                        elif category == "defacement":
                             es_response = await search_func(search_param, base_index, [], [])
                         elif category == "breach":
                             es_response = await search_func(search_param, base_index,  ["news"], ["leaks", "tracking"])

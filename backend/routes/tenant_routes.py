@@ -175,6 +175,14 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     return await AuditLogManager.get_instance().get(param, current_user)
 
 
+@tenant_routes.get(
+    "/api/get/tenant/alert/summary",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(status_required([UserStatus.ACTIVE])), ], )
+async def get_node(current_user=Depends(get_current_user)):
+    return await AlertManager.getInstance().get_alert_summary(str(current_user.tenant_uuid))
+
 @tenant_routes.post(
     "/api/get/tenant/node",
     status_code=200,
