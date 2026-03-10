@@ -125,6 +125,7 @@ export class HelperService {
       this.copyShareUrl(shareUrl);
     }
   }
+  
 
   highlightWords(text: string): SafeHtml {
     if (!text) {

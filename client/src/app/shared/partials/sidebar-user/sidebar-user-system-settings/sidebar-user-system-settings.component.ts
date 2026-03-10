@@ -7,6 +7,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ConfigSettings } from '../../../model/app/config';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 @Component({
   selector: 'app-sidebar-user-system-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent],
@@ -19,7 +20,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
 
-  constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService) {
+  constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService,private messageNotificationService: MessageNotificationService) {
   }
 
   ngOnInit(): void {
@@ -55,23 +56,31 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.isEditing = false;
   }
 
-  updateUserResource(file: File, key: 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
+  updateUserResource(file: File,key: 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
     const formData = new FormData();
     formData.append('file', file);
-    return this.apiService.put<any>(`system/image?key=${key}`, formData).subscribe(res => {
-      if (res?.logo_url) {
-        (this.appService.getConfig().appSettings as any).logo_url = res.logo_url;
-      }
-      if (res?.logo_wide_light) {
-        (this.appService.getConfig().appSettings as any).logo_wide_light = res.logo_wide_light;
-      }
-      if (res?.logo_wide_dark) {
-        (this.appService.getConfig().appSettings as any).logo_wide_dark = res.logo_wide_dark;
-      }
-      if ((this.appService.getConfig().appSettings as any).logo_url) {
-        this.appService.updateFavicon((this.appService.getConfig().appSettings as any).logo_url);
-      }
-    });
+    return this.apiService
+      .put<any>(`system/image?key=${key}`, formData)
+      .subscribe({
+        next: (res) => {
+          if (res?.logo_url) {
+            (this.appService.getConfig().appSettings as any).logo_url = res.logo_url;
+          }
+          if (res?.logo_wide_light) {
+            (this.appService.getConfig().appSettings as any).logo_wide_light = res.logo_wide_light;
+          }
+          if (res?.logo_wide_dark) {
+            (this.appService.getConfig().appSettings as any).logo_wide_dark = res.logo_wide_dark;
+          }
+          if ((this.appService.getConfig().appSettings as any).logo_url) {
+            this.appService.updateFavicon((this.appService.getConfig().appSettings as any).logo_url);
+          }
+        },
+        error: (err) => {
+          const message = err?.error?.detail || 'Failed to upload image';
+          this.messageNotificationService.show(message);
+        }
+      });
   }
 
   deleteUserResource(key: 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {

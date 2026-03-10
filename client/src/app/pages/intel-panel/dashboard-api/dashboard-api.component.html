@@ -98,10 +98,14 @@
             <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-shield-exclamation"></i> Total Results</div>
             <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? ((cryptoResult?.recent_transactions?.length || 0) || 1) : cardsData.length }}</div>
           </div>
-          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
-            <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-person-badge"></i> Query 1</div>
-            <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ1 || q1) || 'not found' }}</div>
-          </div>
+         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
+        <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]">
+          <i class="bi bi-person-badge"></i> Query 1
+        </div>
+        <div class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-mono text-[var(--color-text1)]"[title]="(displayQ1 || q1) || 'not found'">
+          {{ (displayQ1 || q1) || 'not found' }}
+        </div>
+      </div>
           @if (apiType !== 'social' && apiType !== 'wanted' && apiType !== 'national-identity' && apiType !== 'cracked' && apiType !== 'software') {
             <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
               <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-envelope"></i> Query 2</div>
