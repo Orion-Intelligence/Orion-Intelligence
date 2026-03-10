@@ -48,6 +48,11 @@ body {
   overflow-x: hidden !important;
 }
 
+p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 html.light-theme,
 body.light-theme {
   background: #ffffff;
@@ -872,6 +877,11 @@ html:has(body.dark-theme) {
   color: #ffffff !important;
 }
 
+.dark-theme .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value,
+.dark-theme .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value:hover {
+  background-color: rgb(13 148 136 / 1) !important;
+}
+
 .ui-graph-toolbar-search-btn:disabled:hover {
   color: #ffffff !important;
 }
@@ -890,6 +900,11 @@ html:has(body.dark-theme) {
 
 .light-theme .ui-graph-toolbar-search-btn {
   background-color: #2b90ee !important;
+}
+
+.light-theme .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value,
+.light-theme .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value:hover {
+  background-color: rgb(13 148 136 / 1) !important;
 }
 
 .light-theme .ui-graph-toolbar-search-btn:hover {

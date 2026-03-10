@@ -4,12 +4,13 @@ import { franc } from 'franc-min';
 import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
 import { AppService } from '../../services/core/app/app.service';
+import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
-  constructor(private sanitizer: DomSanitizer, private appService: AppService) {
+  constructor(private sanitizer: DomSanitizer, private appService: AppService, private messageNotificationService: MessageNotificationService) {
   }
 
   detectLanguageName(text: string): string {
@@ -61,15 +62,6 @@ export class HelperService {
     }).filter((v): v is string => !!v);
   }
 
-  extractEmails(text: string): string[] {
-    if (!text) {
-      return [];
-    }
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const matches = text.match(emailRegex) || [];
-    return Array.from(new Set(matches.map(e => e.toLowerCase().trim())));
-  }
-
   downloadAsCSV(data: any) {
     const csvContent = this.convertToCSV(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -118,12 +110,19 @@ export class HelperService {
   }
 
   shareResult(url: string) {
-    if (navigator.share) {
+    const shareUrl = this.normalizeShareUrl(url);
+    if (navigator.share && shareUrl) {
       navigator.share({
         title: this.appService.getConfig().appSettings.app_name,
         text: 'Sharing a relevant CTI resource for review.',
-        url: url
-      }).catch(() => {});
+        url: shareUrl
+      }).catch(() => {
+        this.copyShareUrl(shareUrl);
+      });
+      return;
+    }
+    if (shareUrl) {
+      this.copyShareUrl(shareUrl);
     }
   }
 
@@ -211,5 +210,31 @@ export class HelperService {
       const comparison = strA.localeCompare(strB, undefined, { sensitivity: 'base' });
       return order === 'asc' ? comparison : -comparison;
     });
+  }
+
+  private normalizeShareUrl(url: string): string {
+    const raw = String(url || '').trim() || window.location.href;
+    if (!raw) {
+      return '';
+    }
+    const normalized = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    try {
+      return new URL(normalized).toString();
+    }
+    catch {
+      return window.location.href || '';
+    }
+  }
+
+  private copyShareUrl(shareUrl: string): void {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        this.messageNotificationService.show('Share link copied to clipboard.', 'success');
+      }).catch(() => {
+        this.messageNotificationService.show(shareUrl, 'success', 5000);
+      });
+      return;
+    }
+    this.messageNotificationService.show(shareUrl, 'success', 5000);
   }
 }

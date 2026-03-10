@@ -16,7 +16,7 @@
         </button>
       }
       @if (showSearchActionButton()) {
-        <button data-cy="graph-toolbar-search-button" data-testid="graph-toolbar-search-button" type="button" (click)="searchSubmitted.emit()" [disabled]="isSearchDisabled()" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
+        <button data-cy="graph-toolbar-search-button" data-testid="graph-toolbar-search-button" type="button" (click)="searchSubmitted.emit()" [disabled]="isSearchDisabled()" [class.has-value]="!!searchTerm().trim()" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
           {{ searchActionLabel() }}
         </button>
       }
