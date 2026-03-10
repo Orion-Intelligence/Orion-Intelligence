@@ -64,11 +64,11 @@ export class AlertService implements OnDestroy {
   }
 
   getLatestAlerts() {
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<any>('get/tenant/alert/summary').subscribe({
       next: response => {
         this.appService.userSessionData.update(data => ({
           ...data,
-          alerts: response
+          alert_summary: response
         }));
         this.isAlertScanLoading.set(false);
         this.setPendingScanFlag(false);
