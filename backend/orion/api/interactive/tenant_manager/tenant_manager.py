@@ -175,7 +175,7 @@ class TenantManager:
         if data.licenses is not None and len(data.licenses) > 0:
             tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
-        if data.iocs is not None and len(data.iocs) > 0:
+        if data.iocs is not None:
             tenant.iocs = [IocCategory(
                 ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
                 name=enc.encrypt(ioc.name.encode()).decode(),
@@ -343,7 +343,7 @@ class TenantManager:
             return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
                 tenant_allowed), }
 
-        except HTTPException:
-            raise HTTPException(status_code=400, detail="Username or email already exists")
+        except HTTPException as e:
+            raise e
         except Exception:
             raise HTTPException(status_code=400, detail="Error creating user")
