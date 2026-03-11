@@ -43,12 +43,16 @@ Cypress.Commands.add("loginAsTest1", () => {
 Cypress.Commands.add("logout", () => {
     cy.location('pathname').then((pathname) => {
         if (pathname.includes('/login')) return;
-        cy.scrollTo("top", { ensureScrollable: false });
-        cy.get('body').then(($body) => {
+        cy.document({ log: false }).then((doc) => {
+            if (!doc?.body) {
+                return;
+            }
+            const $body = Cypress.$(doc.body);
             const profileMenu = $body.find('[data-testid="profile-menu"]:visible').first();
             if (!profileMenu.length) {
                 return;
             }
+            cy.scrollTo("top", { ensureScrollable: false });
             cy.wrap(profileMenu).scrollIntoView().should('be.visible').click();
             cy.get('[data-testid="signout-btn"]', { timeout: 10000 }).filter(':visible').first().scrollIntoView().should('be.visible').click();
             cy.get('[data-testid="login-user"]', { timeout: 10000 }).should('exist');
