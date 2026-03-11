@@ -28,13 +28,45 @@ app-root {
 
 [data-cy="dashboard-main"],
 [data-cy="dashboard-sidebar-main"],
-[data-cy="dashboard-sub-container"],
-[data-cy="dashboard-container"],
-[data-cy="dashboard-body"],
-#dashboard__sidebar-main,
-#dashboard-container {
+#dashboard__sidebar-main {
   width: 100%;
   max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+[data-cy="dashboard-sidebar-main"] {
+  display: grid !important;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: stretch;
+}
+
+#dashboard__sidebar-main {
+  display: grid !important;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: stretch;
+}
+
+[data-cy="dashboard-sidebar-main"] > [data-cy="dashboard-sidebar"],
+#dashboard__sidebar-main > [data-cy="dashboard-sidebar"] {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+[data-cy="dashboard-sidebar-main"] > [data-cy="dashboard-container"],
+#dashboard__sidebar-main > [data-cy="dashboard-container"] {
+  min-width: 0;
+  width: auto !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+[data-cy="dashboard-container"],
+[data-cy="dashboard-sub-container"],
+[data-cy="dashboard-body"],
+#dashboard-container {
+  width: 100%;
+  max-width: 100% !important;
+  min-width: 0;
   overflow-x: hidden !important;
 }
 

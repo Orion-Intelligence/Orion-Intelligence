@@ -66,28 +66,43 @@ Cypress.Commands.add("scrollDashboardToTop", () => {
         win.scrollTo(0, 0);
         win.document.documentElement.scrollTop = 0;
         win.document.body.scrollTop = 0;
+    });
 
-        const dashboardContainer = win.document.querySelector('#dashboard-container') as HTMLElement | null;
-        if (dashboardContainer) {
-            dashboardContainer.scrollTop = 0;
+    cy.get('body', { log: false }).then(($body) => {
+        if ($body.find('#dashboard-container').length) {
+            cy.get('#dashboard-container', { timeout: 20000, log: false })
+                .scrollTo('top', { ensureScrollable: false, duration: 0, log: false });
         }
 
-        const dashboardBody = win.document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
-        if (dashboardBody) {
-            dashboardBody.scrollTop = 0;
+        if ($body.find('[data-testid="dashboard-body"]').length) {
+            cy.get('[data-testid="dashboard-body"]', { timeout: 20000, log: false })
+                .scrollTo('top', { ensureScrollable: false, duration: 0, log: false });
         }
     });
 });
 Cypress.Commands.add("openSideFilter", () => {
+    cy.scrollDashboardToTop();
     cy.get('body').then(($body) => {
         const isOpen = $body.find('.ui-filter-sidebar-panel.right-0').length > 0;
         if (!isOpen) {
             cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
                 .filter(':visible')
                 .first()
-                .should('be.visible')
                 .scrollIntoView()
-                .click();
+                .should('be.visible');
+            cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
+                .filter(':visible')
+                .first()
+                .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
+            cy.get('body').then(($retryBody) => {
+                if ($retryBody.find('.ui-filter-sidebar-panel.right-0').length === 0) {
+                    cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
+                        .filter(':visible')
+                        .first()
+                        .scrollIntoView()
+                        .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
+                }
+            });
         }
     });
     cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 }).should('exist');
@@ -108,14 +123,20 @@ Cypress.Commands.add("closeSideFilter", () => {
     cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 }).should('not.exist');
 });
 Cypress.Commands.add("applySideFilter", () => {
-    cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 })
-        .first()
-        .within(() => {
-            cy.get('[data-testid="side-filter-apply"]', { timeout: 20000 })
-                .should('be.visible')
+    cy.get('body').then(($body) => {
+        const visibleApply = $body.find('[data-testid="side-filter-apply"]:visible').first();
+        if (visibleApply.length) {
+            cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 })
+                .filter(':visible')
+                .first()
+                .scrollTo('bottom', { ensureScrollable: false, duration: 0 });
+
+            cy.wrap(visibleApply)
                 .scrollIntoView()
-                .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
-        });
+                .should('be.visible')
+                .click({ force: true, waitForAnimations: false, animationDistanceThreshold: 0 });
+        }
+    });
     cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 }).should('not.exist');
 });
 Cypress.Commands.add("clearAllEmails", () => {

@@ -1,12 +1,12 @@
 import {CONTENT_TYPES, ENTITY_FILTERS, NETWORK_OPTIONS, SAFE_SEARCH_OPTIONS, SEARCH_BY_OPTIONS, SORT_OPTIONS} from '../support/constants';
 import {applyEntityFilter, selectDateRangeAndReopen, selectDateRangeResetAndReopen} from './controllers/12-filter-management.controller';
 
-describe('Filter Management - General Intelligence Flow', () => {
+describe('Filter Management', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
   });
 
-  after(() => {
+  afterEach(() => {
     cy.logout();
   });
 
@@ -58,17 +58,6 @@ describe('Filter Management - General Intelligence Flow', () => {
     cy.closeSideFilter();
     cy.get('[data-testid="dashboard-search-submit"]', {timeout: 20000}).first().should('be.visible').scrollIntoView().click();
   });
-});
-
-describe('Filter Management - Data Breach Flow', () => {
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
-
-  after(() => {
-    cy.logout();
-  });
-
   it('applies all filter options in Data Breach', () => {
     cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
@@ -89,6 +78,7 @@ describe('Filter Management - Data Breach Flow', () => {
 
     selectDateRangeAndReopen();
     cy.get('[data-testid="side-filter-reset"]').scrollIntoView().click();
+    cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
       cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
@@ -99,17 +89,6 @@ describe('Filter Management - Data Breach Flow', () => {
     cy.closeSideFilter();
     cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
   });
-});
-
-describe('Filter Management - Defacement Flow', () => {
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
-
-  after(() => {
-    cy.logout();
-  });
-
   it('applies all filters in Defacement with auto-apply', () => {
     cy.get('[data-testid="sidebar-group-defacement"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
@@ -118,24 +97,13 @@ describe('Filter Management - Defacement Flow', () => {
 
     NETWORK_OPTIONS.forEach((option) => {
       cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.applySideFilter();
       cy.openSideFilter();
     });
 
     cy.closeSideFilter();
     cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
   });
-});
-
-describe('Filter Management - Social Flow', () => {
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
-
-  after(() => {
-    cy.logout();
-  });
-
   it('applies all filters in Social with auto-apply', () => {
     cy.get('[data-testid="sidebar-group-social"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
@@ -157,17 +125,6 @@ describe('Filter Management - Social Flow', () => {
     cy.closeSideFilter();
     cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
   });
-});
-
-describe('Filter Management - Exploit Flow', () => {
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
-
-  after(() => {
-    cy.logout();
-  });
-
   it('applies all filters in Exploit with auto-apply', () => {
     cy.get('[data-testid="sidebar-group-exploit"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
