@@ -206,6 +206,17 @@ export class DashboardService {
     this.m_current_route = "";
   }
 
+  clearResultCaches(): void {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith('dashboard-results-cache|')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => sessionStorage.removeItem(key));
+  }
+
   private cancelOngoingRequest() {
   }
 

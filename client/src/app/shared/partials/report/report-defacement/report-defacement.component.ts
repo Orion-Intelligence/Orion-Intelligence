@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -10,6 +10,7 @@ import { ResultSectionComponent } from '../../result-components/result-section/r
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
+import { ScrollService } from '../../../services/scroll.service';
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
@@ -25,7 +26,7 @@ import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlU
     TooltipDirective
   ]
 })
-export class ReportDefacementComponent implements OnInit {
+export class ReportDefacementComponent implements OnInit, AfterViewInit {
   defacementData: DefacementResultItem | null = null;
   lang = 'en';
   isExpandedMetadata = true;
@@ -33,33 +34,27 @@ export class ReportDefacementComponent implements OnInit {
   content = '';
   listItems: any[] = [];
   arrayKeys: string[] = [];
-
-  constructor(private route: ActivatedRoute, private appService: AppService) {
+  constructor(private route: ActivatedRoute, private appService: AppService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
     this.lang = this.appService.getConfig().appSettings.language_allowed;
   }
 
   ngOnInit(): void {
-    this.scrollToTop();
     this.route.data.subscribe(data => {
       if (data['reportdata']) {
         this.defacementData = data['reportdata'] as DefacementResultItem;
         this.prepareMetadata();
+        this.scrollToTop();
       }
     });
   }
 
+  ngAfterViewInit(): void {
+    this.scrollToTop();
+  }
+
   private scrollToTop(): void {
-    const dashboardContainer = document.getElementById('dashboard-container');
-    if (dashboardContainer) {
-      dashboardContainer.scrollTop = 0;
-    }
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    requestAnimationFrame(() => {
-      const container = document.getElementById('dashboard-container');
-      if (container) {
-        container.scrollTop = 0;
-      }
-    });
+    this.scrollService.scrollReportToTop();
+    this.elementRef.nativeElement.scrollIntoView({ block: 'start', behavior: 'auto' });
   }
 
   get filteredArrayKeys(): string[] {

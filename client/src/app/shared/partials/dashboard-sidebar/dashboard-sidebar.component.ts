@@ -91,6 +91,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       this.router.navigateByUrl('/').then();
     }
     else {
+      if (section !== Category.PROFILE) {
+        this.dashboardService.clearResultCaches();
+      }
       this.dashboardService.resetParams();
       this.selectionStore.setSelectedSection(section);
       let firstSubcategory: string | undefined;
@@ -142,6 +145,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onOptionSelected(option: string) {
+    if (this.selectionStore.getSelectedSection() !== Category.PROFILE) {
+      this.dashboardService.clearResultCaches();
+    }
     this.dashboardService.resetParams();
     this.onResetCallback();
     this.selectionStore.setSelectedOption(option);

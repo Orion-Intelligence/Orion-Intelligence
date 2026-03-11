@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { DashboardResultsGeneralComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
@@ -6,7 +6,7 @@ import { PaginationComponent } from '../../../shared/partials/pagination/paginat
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { Category } from '../../../shared/constants/pages';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { combineLatest, distinctUntilChanged } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
 import { general_filters } from '../../../shared/constants/filters';
 import { AppService } from '../../../services/core/app/app.service';
@@ -17,6 +17,7 @@ import { ConsolidatedParamModel } from '../../../shared/model/results/consolidat
 import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
 import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
+import { ScrollService } from '../../../shared/services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -32,7 +33,7 @@ import { DashboardResultDefacementComponent } from '../dashboard-results/dashboa
   templateUrl: './dashboard-result-container.component.html',
   animations: [fadeInDashboardItem],
 })
-export class DashboardResultContainer implements OnInit, AfterViewInit {
+export class DashboardResultContainer implements OnInit, AfterViewInit, AfterViewChecked {
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
   protected readonly Category = Category;
@@ -43,8 +44,9 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
   public isResponseLoading = signal(false);
   type: Category = Category.STRATEGIC;
   apiEndpoint: string = '';
+  private pendingScrollRestore = false;
 
-  constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService) {
     this.type = this.route.snapshot.data['type'] as Category;
     this.apiEndpoint = this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
   }
@@ -59,6 +61,15 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
+  }
+
+  ngAfterViewChecked(): void {
+    if (!this.pendingScrollRestore || !Array.isArray(this.currentResultModel) || this.currentResultModel.length === 0) {
+      return;
+    }
+    this.pendingScrollRestore = false;
+    this.scrollService.scrollToSavedPosition();
+    requestAnimationFrame(() => this.scrollService.scrollToSavedPosition());
   }
 
   ngOnInit(): void {
@@ -78,6 +89,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
         if (cachedResult && !this.hasResultData()) {
           try {
             this.currentResultModel = JSON.parse(cachedResult);
+            this.restoreSavedScroll();
           }
           catch {
             sessionStorage.removeItem(cacheKey);
@@ -104,12 +116,13 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
     this.currentResultModel = null;
 
     this.dashboardService.fetchSearchResults<any>(this.apiEndpoint,
-      this.dashboardService.consolidatedParamModel).pipe(switchMap((response) => timer(1000).pipe(map(() => response))))
+      this.dashboardService.consolidatedParamModel)
       .subscribe((response) => {
         if (response.success && response.data) {
           this.currentResultModel = response.data["Result"];
           this.maxPages = Number(response.data["Page_Count"] ?? 1) || 1;
           sessionStorage.setItem(this.buildCacheKey(), JSON.stringify(this.currentResultModel));
+          this.restoreSavedScroll();
         }
         this.isResponseLoading.set(false);
       });
@@ -169,5 +182,10 @@ export class DashboardResultContainer implements OnInit, AfterViewInit {
       this.dashboardService.consolidatedParamModel.page || '1',
       this.dashboardService.consolidatedParamModel.q || ''
     ].join('|');
+  }
+
+  private restoreSavedScroll(): void {
+    this.cdr.detectChanges();
+    this.pendingScrollRestore = true;
   }
 }

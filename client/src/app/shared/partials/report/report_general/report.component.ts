@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
@@ -18,13 +18,14 @@ import { ReportHeaderComponent } from '../../report-header/report-header.compone
 import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
 import { CodeBlockComponent } from '../../code-block/code-block.component';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isLikelyUrl as isLikelyUrlUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
+import { ScrollService } from '../../../services/scroll.service';
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
   imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent],
   animations: [fadeInDashboardItem],
 })
-export class ReportComponent implements OnInit {
+export class ReportComponent implements OnInit, AfterViewInit {
   protected readonly last = last;
   protected readonly Category = Category;
 
@@ -43,8 +44,7 @@ export class ReportComponent implements OnInit {
   isExpandedMetadata = true;
   username = signal<string>('');
   role = signal<string>('');
-
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, protected authService: AuthService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, protected authService: AuthService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
     this.lang = appService.getConfig().appSettings.language_allowed;
     this.lang_detected = appService.getConfig().appSettings.language_allowed;
     this.username.set(this.appService.userSessionData().user.username);
@@ -62,7 +62,6 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.scrollToTop();
     this.route.data.subscribe(({ reportdata, type }) => {
       this.resultItem = reportdata;
       this.type = type;
@@ -78,21 +77,17 @@ export class ReportComponent implements OnInit {
       if (content) {
         this.lang_detected = this.helperService.detectLanguageName(content);
       }
+      this.scrollToTop();
     });
   }
 
+  ngAfterViewInit(): void {
+    this.scrollToTop();
+  }
+
   private scrollToTop(): void {
-    const dashboardContainer = document.getElementById('dashboard-container');
-    if (dashboardContainer) {
-      dashboardContainer.scrollTop = 0;
-    }
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    requestAnimationFrame(() => {
-      const container = document.getElementById('dashboard-container');
-      if (container) {
-        container.scrollTop = 0;
-      }
-    });
+    this.scrollService.scrollReportToTop();
+    this.elementRef.nativeElement.scrollIntoView({ block: 'start', behavior: 'auto' });
   }
 
   langUpdate(result: any) {

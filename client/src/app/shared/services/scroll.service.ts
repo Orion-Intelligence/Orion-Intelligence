@@ -5,6 +5,12 @@ import { DashboardService } from '../../services/dashboard/dashboard.service';
   providedIn: 'root'
 })
 export class ScrollService {
+  private readonly resultWindowScrollPositionKey = 'resultWindowScrollPosition';
+  private readonly resultContainerScrollPositionKey = 'resultContainerScrollPosition';
+  private readonly resultDocumentScrollPositionKey = 'resultDocumentScrollPosition';
+  private readonly resultBodyScrollPositionKey = 'resultBodyScrollPosition';
+  private readonly resultDashboardBodyScrollPositionKey = 'resultDashboardBodyScrollPosition';
+
   constructor(protected licenseService: LicenseService, protected dashboardService: DashboardService) {
     this.resetOnReload();
   }
@@ -13,8 +19,11 @@ export class ScrollService {
     const navEntries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[];
     const isHardReload = navEntries?.[0]?.type === 'reload';
     if (isHardReload || ingore) {
-      sessionStorage.setItem('scrollPosition', '0');
-      sessionStorage.setItem('selectedItem', '');
+      sessionStorage.removeItem(this.resultWindowScrollPositionKey);
+      sessionStorage.removeItem(this.resultContainerScrollPositionKey);
+      sessionStorage.removeItem(this.resultDocumentScrollPositionKey);
+      sessionStorage.removeItem(this.resultBodyScrollPositionKey);
+      sessionStorage.removeItem(this.resultDashboardBodyScrollPositionKey);
       window.scrollTo(0, 0);
     }
   }
@@ -35,47 +44,93 @@ export class ScrollService {
     }
   }
 
-  saveCurrentPosition(itemId = ''): void {
-    const container = document.getElementById('dashboard-container');
-    const position = container ? container.scrollTop : window.scrollY;
-    sessionStorage.setItem('scrollPosition', String(position));
-    sessionStorage.setItem('selectedItem', itemId);
+  scrollReportToTop(): void {
+    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+    const dashboardContainer = document.getElementById('dashboard-container');
+    const documentElement = document.documentElement;
+    const body = document.body;
+
+    const resetTop = () => {
+      if (dashboardBody) {
+        dashboardBody.scrollTop = 0;
+      }
+      if (dashboardContainer) {
+        dashboardContainer.scrollTop = 0;
+      }
+      if (documentElement) {
+        documentElement.scrollTop = 0;
+      }
+      if (body) {
+        body.scrollTop = 0;
+      }
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    };
+
+    resetTop();
+    requestAnimationFrame(() => resetTop());
+    setTimeout(() => resetTop(), 50);
+    setTimeout(() => resetTop(), 150);
+  }
+
+  saveCurrentPosition(_itemId = ''): void {
+    const dashboardContainer = document.getElementById('dashboard-container');
+    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+    const documentElement = document.documentElement;
+    const body = document.body;
+    const windowPosition = window.scrollY;
+    const containerPosition = dashboardContainer?.scrollTop ?? 0;
+    const documentPosition = documentElement?.scrollTop ?? 0;
+    const bodyPosition = body?.scrollTop ?? 0;
+    const dashboardBodyPosition = dashboardBody?.scrollTop ?? 0;
+    sessionStorage.setItem(this.resultWindowScrollPositionKey, String(windowPosition));
+    sessionStorage.setItem(this.resultContainerScrollPositionKey, String(containerPosition));
+    sessionStorage.setItem(this.resultDocumentScrollPositionKey, String(documentPosition));
+    sessionStorage.setItem(this.resultBodyScrollPositionKey, String(bodyPosition));
+    sessionStorage.setItem(this.resultDashboardBodyScrollPositionKey, String(dashboardBodyPosition));
   }
 
   scrollToSavedPosition(): void {
-    const savedPosition = sessionStorage.getItem('scrollPosition');
-    const savedItemId = sessionStorage.getItem('selectedItem');
-    if (savedPosition === null) {
+    const savedWindowPosition = sessionStorage.getItem(this.resultWindowScrollPositionKey);
+    const savedContainerPosition = sessionStorage.getItem(this.resultContainerScrollPositionKey);
+    const savedDocumentPosition = sessionStorage.getItem(this.resultDocumentScrollPositionKey);
+    const savedBodyPosition = sessionStorage.getItem(this.resultBodyScrollPositionKey);
+    const savedDashboardBodyPosition = sessionStorage.getItem(this.resultDashboardBodyScrollPositionKey);
+    if (
+      savedWindowPosition === null &&
+      savedContainerPosition === null &&
+      savedDocumentPosition === null &&
+      savedBodyPosition === null &&
+      savedDashboardBodyPosition === null
+    ) {
       return;
     }
 
-    const position = parseInt(savedPosition, 10);
+    const windowPosition = parseInt(savedWindowPosition ?? '0', 10);
+    const containerPosition = parseInt(savedContainerPosition ?? '0', 10);
+    const documentPosition = parseInt(savedDocumentPosition ?? '0', 10);
+    const bodyPosition = parseInt(savedBodyPosition ?? '0', 10);
+    const dashboardBodyPosition = parseInt(savedDashboardBodyPosition ?? '0', 10);
     const applyScroll = () => {
-      let scrollableContainer: HTMLElement | null = savedItemId ? document.getElementById('item-' + savedItemId) : null;
-      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
-        scrollableContainer = scrollableContainer.parentElement;
-      }
-
       const dashboardContainer = document.getElementById('dashboard-container');
-      if (scrollableContainer) {
-        scrollableContainer.scrollTop = position;
+      const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+      const documentElement = document.documentElement;
+      const body = document.body;
+      if (dashboardContainer) {
+        dashboardContainer.scrollTop = containerPosition;
       }
-      else if (dashboardContainer) {
-        dashboardContainer.scrollTop = position;
+      if (dashboardBody) {
+        dashboardBody.scrollTop = dashboardBodyPosition;
       }
-      else {
-        window.scrollTo({ top: position, behavior: 'auto' });
+      if (documentElement) {
+        documentElement.scrollTop = documentPosition;
       }
+      if (body) {
+        body.scrollTop = bodyPosition;
+      }
+      window.scrollTo({ top: windowPosition, behavior: 'auto' });
     };
 
     applyScroll();
-    requestAnimationFrame(applyScroll);
-    setTimeout(applyScroll, 80);
-  }
-
-  private isScrollable(element: HTMLElement): boolean {
-    const style = window.getComputedStyle(element);
-    const overflowY = style.overflowY;
-    return (overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight;
+    requestAnimationFrame(() => applyScroll());
   }
 }

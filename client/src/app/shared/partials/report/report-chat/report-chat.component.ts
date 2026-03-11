@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
 import { CommonModule, NgClass, SlicePipe } from '@angular/common';
@@ -14,6 +14,7 @@ import { ReportHeaderComponent } from '../../report-header/report-header.compone
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
 import { AppService } from '../../../../services/core/app/app.service';
+import { ScrollService } from '../../../services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
 @Component({
   selector: 'app-report-chat',
@@ -32,7 +33,7 @@ import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlU
   ],
   animations: [fadeInDashboardItem]
 })
-export class ReportChatComponent implements OnInit {
+export class ReportChatComponent implements OnInit, AfterViewInit {
   protected readonly last = last;
 
   resultItem: ChatResultItem | SocialResultItem | null = null;
@@ -42,30 +43,24 @@ export class ReportChatComponent implements OnInit {
   content = '';
   summary = '';
   isExpandedMetadata = true;
-
-  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router) {
+  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
   }
 
   ngOnInit(): void {
-    this.scrollToTop();
     this.route.data.subscribe(({ reportdata }) => {
       this.resultItem = reportdata;
       this.processResultItem();
+      this.scrollToTop();
     });
   }
 
+  ngAfterViewInit(): void {
+    this.scrollToTop();
+  }
+
   private scrollToTop(): void {
-    const dashboardContainer = document.getElementById('dashboard-container');
-    if (dashboardContainer) {
-      dashboardContainer.scrollTop = 0;
-    }
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    requestAnimationFrame(() => {
-      const container = document.getElementById('dashboard-container');
-      if (container) {
-        container.scrollTop = 0;
-      }
-    });
+    this.scrollService.scrollReportToTop();
+    this.elementRef.nativeElement.scrollIntoView({ block: 'start', behavior: 'auto' });
   }
 
   metaadataToggleContent(): void {
