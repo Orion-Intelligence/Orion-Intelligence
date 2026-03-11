@@ -6,7 +6,7 @@
 
     <div class="mr-[-10px] flex items-center gap-[20px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
       @if (results_defacement?.Result?.length && (threatTypeCounts | keyvalue).length > 0) {
-        @for (type of threatTypeCounts | keyvalue; track type) {
+        @for (type of threatTypeCounts | keyvalue; track type.key) {
           <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick(type.key, $event)">
             {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
             <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
@@ -28,7 +28,7 @@
   </div>
 
   @if (isExpandable && results_defacement?.Result; as defResults) {
-    @for (item of defResults.slice(0, showLimitDefacement); track item; let i = $index; let last = $last) {
+    @for (item of defResults.slice(0, showLimitDefacement); track item.m_hash || item.m_url || $index; let i = $index; let last = $last) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
         <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
@@ -129,7 +129,7 @@
     @if (results_defacement?.Result?.length) {
       <hr class="mt-[16px] h-px border-0 bg-[var(--color-divider)]" />
     }
-    @for (item of stResults.slice(0, showLimitStealer); track item; let i = $index) {
+    @for (item of stResults.slice(0, showLimitStealer); track item.hash || item.url || item.username || $index; let i = $index) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
         <div class="ui-consolidated-sub flex min-h-[190px] w-full flex-col justify-between rounded-[10px] border p-[14px] text-[var(--color-text1)] shadow-[0_8px_20px_rgba(0,0,0,0.14)] transition-[background,border-color,box-shadow,transform,filter] duration-150 hover:border-[var(--color-blue-640)] hover:shadow-[0_14px_34px_rgba(0,0,0,0.22)] hover:translate-y-[-1px] hover:brightness-[1.01] max-[640px]:p-[10px]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--color-divider)] pb-[12px] mb-[12px]">

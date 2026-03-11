@@ -36,7 +36,7 @@
               }
               @if ((users?.length || 0) > 0) {
                 <tbody class="text-[15px] font-normal text-[var(--color-text3)]" @fadeInDashboardItem>
-                  @for (user of users; track user; let i = $index) {
+                  @for (user of users; track user.email || user.username || $index; let i = $index) {
                     <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''">
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
@@ -186,7 +186,7 @@
           </div>
           <div class="space-y-3 p-0 md:hidden" @fadeInDashboardItem>
             @if ((users?.length || 0) > 0) {
-              @for (user of users; track user; let i = $index) {
+              @for (user of users; track user.email || user.username || $index; let i = $index) {
                 <div class="overflow-hidden rounded-[10px] bg-[var(--tenant-row-bg)]">
                   <div class="flex items-center justify-between px-3 py-2.5">
                     <div class="min-w-0">

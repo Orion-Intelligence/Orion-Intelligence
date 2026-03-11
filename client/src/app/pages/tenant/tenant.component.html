@@ -78,7 +78,7 @@
                 </button>
                 <div class="flex h-full flex-1 items-center gap-[8px] overflow-x-auto px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" #categoryScroll>
                   @if (getFilteredIocs().length > 0) {
-                    @for (category of getFilteredIocs(); track category) {
+                    @for (category of getFilteredIocs(); track category.ioc_id) {
                       <div class="cursor-pointer whitespace-nowrap rounded-full border px-4 py-1.5 font-[Inter] text-xs font-semibold transition-colors" [ngClass]="category.ioc_id === selectedCategoryId ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                         {{ category.name }}
                       </div>
@@ -109,7 +109,7 @@
               <div class="max-h-[500px] min-h-[20px] space-y-3 overflow-y-auto max-[1024px]:max-h-[100px]">
                 @if (hasIocsWithValues()) {
                   <div>
-                    @for (ioc of onboardingData.iocs; track ioc) {
+                    @for (ioc of onboardingData.iocs; track ioc.ioc_id) {
                       <div>
                         @if (ioc.values.length > 0) {
                           <p class="my-[12px] mb-[8px] font-[Inter] text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
@@ -143,7 +143,7 @@
               <div class="max-h-[290px] overflow-y-auto">
                 @if (hasIocsWithValues()) {
                   <div>
-                    @for (ioc of onboardingData.iocs; track ioc) {
+                    @for (ioc of onboardingData.iocs; track ioc.ioc_id) {
                       <div>
                         @if (ioc.values.length > 0) {
                           <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>

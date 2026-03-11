@@ -55,7 +55,7 @@
                   <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Risk</div>
                   <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
                 </div>
-                @for (r of domainResults; track r) {
+                @for (r of domainResults; track r.scanType + '|' + r.domain) {
                   <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-2 max-[640px]:gap-x-[10px] max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
                     <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">{{ r.scanType | titlecase }} Scan</div>
                     <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-auto">{{ today | date:'MMMM dd, yyyy' }}</div>
@@ -83,7 +83,7 @@
                   <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Profile</div>
                   <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">Action</div>
                 </div>
-                @for (row of liveApiRows.slice(0,3); track row) {
+                @for (row of liveApiRows.slice(0,3); track row.url || row.profile || $index) {
                   <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
                     <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
                       {{ (row.url || 'Details').replace('https://', '').replace('http://', '').replace('www.', '') }}

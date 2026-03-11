@@ -3,7 +3,7 @@
     <div>
       <div>
         <div class="mt-[16px] grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
-          @for (item of getResultItems(modelKey); track item) {
+          @for (item of getResultItems(modelKey); track item.hash || item.url || $index) {
             <div class="ui-home-insight-card group flex h-[205px] w-full flex-col justify-between overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] text-[var(--color-text2)] shadow-[0_6px_18px_var(--color-shadow-light)] transition-all duration-200 hover:border-[var(--color-text4)]/30 hover:bg-[var(--color-blue-720)]">
               <div class="mb-[10px] grid grid-cols-2 gap-x-4">
                 <div class="min-w-0">

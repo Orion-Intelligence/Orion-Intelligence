@@ -38,7 +38,7 @@
                   </app-defacement-results>
                 }
               }
-              @for (index of groupedResults | sortGroupedResults; track index) {
+              @for (index of groupedResults | sortGroupedResults; track index.key) {
                 @if (index.key !== 'defacement_model' && index.key !== 'stealer_model') {
                   <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-4 max-[640px]:p-3" [attr.data-testid]="'consolidated-section-' + index.key.replace('_model', '')">
                     <div class="flex items-center justify-between">
@@ -82,7 +82,7 @@
                 }
               }
             } @else {
-              @for (item of rankedResult.result; track item) {
+              @for (item of rankedResult.result; track item.m_hash || item.m_message_id || item.id || item.m_url || $index) {
                 <div class="mt-4">
                   <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-3">
                     @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model') {

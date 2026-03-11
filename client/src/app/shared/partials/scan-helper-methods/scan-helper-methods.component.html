@@ -88,7 +88,7 @@
                 <span class="text-[14px] text-[#9bb4d1]">IP Lookup Complete</span>
               </div>
               <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#1a2835] p-[4px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
-                @for (record of dnsRecords; track record) {
+                @for (record of dnsRecords; track record.ip || record.hostname || $index) {
                   <div class="mb-[10px] overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#152230]">
                     <div class="flex items-center gap-[10px] p-[11px] transition" [ngClass]="record.hostname ? 'cursor-pointer hover:bg-[#1f303f]' : 'opacity-60'" (click)="copy(record.ip + ': ' + (record.hostname || 'No PTR record'), 'DNS record copied')" role="button" tabindex="0">
                       <span class="text-[14px] font-bold" [ngClass]="record.hostname ? 'text-[#22c55e]' : 'text-[#ef4444]'">{{ record.hostname ? '✓' : '✗' }}</span>
@@ -116,7 +116,7 @@
                 <button class="ml-auto rounded-[6px] bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] px-[14px] py-[6px] text-[13px] font-medium text-white shadow-[0_1px_4px_rgba(87,165,235,0.25)] transition hover:translate-y-[-1px] hover:bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:shadow-[0_2px_6px_rgba(87,165,235,0.3)] active:translate-y-0" type="button" (click)="copy(getAllWaybackUrls(), 'All URLs copied')">Copy all</button>
               </div>
               <div class="max-h-[250px] overflow-y-auto rounded-[6px] border border-[#2c3a4a] bg-[#152230] p-[8px] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:rounded-[4px] [&::-webkit-scrollbar-track]:bg-[#0f1821] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[#2c3a4a] [&::-webkit-scrollbar-thumb:hover]:bg-[#3a4a5f]">
-                @for (snapshot of waybackSnapshots; track snapshot) {
+                @for (snapshot of waybackSnapshots; track snapshot.url || snapshot.timestamp || $index) {
                   <div class="mb-[10px] cursor-pointer overflow-hidden rounded-[6px] border border-[#2c3a4a] bg-[#152230]" (click)="copy(snapshot.url, 'URL copied')">
                     <div class="flex items-center gap-[10px] bg-[#1a2835] p-[10px_12px]">
                       <span class="flex-1 break-all font-mono text-[12px] text-[#e1e8f0]">{{ snapshot.timestamp }}</span>

@@ -361,7 +361,7 @@
                     </button>
                     @if (expandedResultIndex === idx) {
                       <div class="mt-[12px] space-y-[10px]">
-                        @for (entry of getObjectEntries(item); track entry) {
+                        @for (entry of getObjectEntries(item); track entry.key || $index) {
                           <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]">
                             <div class="text-[12px] text-[var(--color-text4)]">{{ displayFieldLabel(entry.key) }}</div>
                             @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {

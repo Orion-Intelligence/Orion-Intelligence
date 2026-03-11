@@ -9,7 +9,7 @@
 
     @if (isSectionExpanded('isKeywordExpanded')) {
       <div class="mt-4 grid gap-3 sm:grid-cols-2">
-        @for (item of keywordData; track item; let i = $index) {
+        @for (item of keywordData; track item.label; let i = $index) {
           <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-keyword-item-' + i">
             <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ item.label }}</div>
@@ -29,7 +29,7 @@
 
     @if (isSectionExpanded('isCoverageExpanded')) {
       <div class="mt-4 grid gap-3 sm:grid-cols-2">
-        @for (item of coverageData; track item; let i = $index) {
+        @for (item of coverageData; track item.label; let i = $index) {
           <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-coverage-item-' + i">
             <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
             <div class="flex items-center gap-2 text-xs text-[var(--color-text4)]">
@@ -67,7 +67,7 @@
             }
           </div>
           <div class="max-h-48 space-y-2 overflow-y-auto">
-            @for (item of threatResults(); track item; let i = $index) {
+            @for (item of threatResults(); track $index; let i = $index) {
               <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text3)]" [attr.data-testid]="'insights-threat-item-' + i">
                 {{ item }}
               </div>
@@ -93,7 +93,7 @@
       </div>
       @if (isSectionExpanded('isUrlsExpanded')) {
         <div class="mt-4 max-h-56 space-y-2 overflow-y-auto">
-          @for (url of uniqueUrls; track url; let i = $index) {
+          @for (url of uniqueUrls; track url.url; let i = $index) {
             <div class="ui-consolidated-sub rounded-md border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text3)]" [attr.data-testid]="'insights-unique-url-item-' + i">
               <div class="flex items-center gap-2 text-sm text-[var(--color-text1)]">
                 <span class="h-2.5 w-2.5 rounded-full" [ngClass]="statusDotClass(url.status)"></span>
@@ -107,7 +107,7 @@
     </div>
   }
 
-  @for (section of dataSections; track section) {
+  @for (section of dataSections; track section.key) {
     <div>
       @if (section.data?.length) {
         <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" [attr.data-testid]="'insights-section-' + section.key">

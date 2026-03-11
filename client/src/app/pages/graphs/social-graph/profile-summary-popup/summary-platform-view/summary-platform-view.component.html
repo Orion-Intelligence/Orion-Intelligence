@@ -42,7 +42,7 @@
       <div class="p-3 border-t border-slate-700 space-y-3">
         <div class="flex flex-col gap-2">
           <div class="flex flex-wrap items-center gap-2 rounded-md border border-slate-700 bg-slate-900/60 px-2 py-2">
-            @for (token of metadataTokens(); track token) {
+            @for (token of metadataTokens(); track $index) {
               <span class="inline-flex items-center gap-1 rounded-full bg-slate-700/70 px-2 py-1 text-[11px] text-slate-200">
                 <span>{{ token }}</span>
                 <button type="button" (click)="removeMetadataToken(token)" class="text-slate-400 hover:text-slate-100">
@@ -76,7 +76,7 @@
               }
               @if ((meta?.results?.length || 0) > 0) {
                 <div class="space-y-2 mt-2">
-                  @for (row of (meta?.results || []).slice(0, 10); track row) {
+                  @for (row of (meta?.results || []).slice(0, 10); track row.url || row.title || $index) {
                     <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
                       <div class="text-xs text-slate-300 font-semibold">{{ row.title || 'Untitled' }}</div>
                       @if (row.url) {
@@ -131,7 +131,7 @@
           }
           @if (p.profileDetails && getProfileDetailEntries(p).length > 0) {
             <dl class="text-sm">
-              @for (item of getProfileDetailEntries(p); track item) {
+              @for (item of getProfileDetailEntries(p); track $index) {
                 <div class="py-3 border-b border-slate-700/30 last:border-b-0">
                   <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
                   <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
@@ -177,7 +177,7 @@
           }
           @if (p.posts && p.posts.length > 0) {
             <div class="space-y-3">
-              @for (post of displayPosts(); track post) {
+              @for (post of displayPosts(); track post.post_url || $index) {
                 <div class="rounded-lg bg-slate-700/50 p-3 text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                   <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
                   <div class="flex items-center justify-between text-slate-400">
@@ -264,7 +264,7 @@
             </div>
           } @else {
             <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-              @for (follower of displayFollowers(); track follower) {
+              @for (follower of displayFollowers(); track $index) {
                 <button type="button" (click)="scanConnections([follower])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                   {{ '@' + follower }}
                 </button>
@@ -313,7 +313,7 @@
             </div>
           } @else {
             <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-              @for (user of displayFollowing(); track user) {
+              @for (user of displayFollowing(); track $index) {
                 <button type="button" (click)="scanConnections([user])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                   {{ '@' + user }}
                 </button>
@@ -365,7 +365,7 @@
             @if (imageList.length > 0) {
               <div class="max-h-80 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  @for (image of displayImages(); track image) {
+                  @for (image of displayImages(); track image.image_url || image.thumbnail || $index) {
                     <div class="group relative overflow-hidden rounded-md border border-slate-700 transition-colors hover:border-indigo-500 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                       <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
                         <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">

@@ -29,7 +29,7 @@
             }
             @if (filteredItems.length>0) {
               <tbody @fadeInDashboardItem>
-                @for (item of filteredItems; track item; let i = $index) {
+                @for (item of filteredItems; track extractId(item.edge._id) || $index; let i = $index) {
                   <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer border-t border-[var(--color-divider)] hover:bg-[var(--color-blue-720)]">
                     <td class="px-3 py-2 text-[var(--color-text1)]">{{ (i + 1) }}</td>
                     <td class="px-3 py-2 text-[var(--color-text1)]">{{ extractId(item.edge._id) }}</td>

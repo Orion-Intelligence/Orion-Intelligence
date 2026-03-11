@@ -7,7 +7,7 @@
   </div>
 
   @if (viewAlerts.length) {
-    @for (alert of viewAlerts; track alert; let i = $index) {
+    @for (alert of viewAlerts; track alert.alert_id || alert.data_hash || alert.title || $index; let i = $index) {
       <section class="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4" [ngClass]="statusClass(alert.status)">
         <header class="flex flex-wrap items-center justify-between gap-3">
           <div class="text-sm font-semibold text-[var(--color-text1)]">

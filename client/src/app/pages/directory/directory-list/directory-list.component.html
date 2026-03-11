@@ -16,7 +16,7 @@
       }
       @if ((data?.mDirectoryCallbackLinks?.length || 0) > 0) {
         <tbody @fadeInDashboardItem>
-          @for (item of data.mDirectoryCallbackLinks | slice:0:visibleCount; track item; let i = $index) {
+          @for (item of data.mDirectoryCallbackLinks | slice:0:visibleCount; track item.url || $index; let i = $index) {
             @if (item.url?.trim()) {
               <tr>
                 <td data-label="ID">
@@ -32,7 +32,7 @@
                 <td data-label="Category">
                   <div class="flex flex-wrap gap-[6px]">
                     @if (item.content_type?.length) {
-                      @for (category of item.content_type | slice:0:2; track category) {
+                      @for (category of item.content_type | slice:0:2; track $index) {
                         <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text2)]">
                           {{ category | titlecase }}
                         </div>

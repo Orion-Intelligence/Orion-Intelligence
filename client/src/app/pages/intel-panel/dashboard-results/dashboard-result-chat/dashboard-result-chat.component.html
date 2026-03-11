@@ -1,10 +1,10 @@
 <div [ngClass]="isConsolidatedView ? 'w-full min-w-0 space-y-4' : 'w-full max-w-[910px] px-2 sm:px-0 space-y-4'">
-  @for (item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30)); track item) {
+  @for (item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30)); track item.m_message_id || item.m_hash || item.m_url || $index) {
     <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-white px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-[10px]">
           @if (item.m_content_type?.length) {
-            @for (tag of item.m_content_type; track tag) {
+            @for (tag of item.m_content_type; track $index) {
               <span class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
             }
           } @else {
@@ -39,9 +39,9 @@
       }
       @if (item.m_file_name?.length) {
         <h5 class="mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded Files</h5>
-        @for (file of item.m_file_name | slice:0:3; track file) {
+        @for (file of item.m_file_name | slice:0:3; track $index) {
           <div class="text-[12px] font-medium text-[var(--color-text8)]">
-            @for (part of file.split(' - '); track part) {
+            @for (part of file.split(' - '); track $index) {
               <div>{{ part | normalizeUnicode}}</div>
             }
           </div>
@@ -57,7 +57,7 @@
           @if (item.m_content) {
             <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Raw Data Content</h5>
             <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
-              @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track part; let last = $last) {
+              @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                 {{ part | normalizeUnicode }}@if (!last) {
                 <br />
               }
@@ -73,7 +73,7 @@
           @if (item.m_content) {
             <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Raw Data Content</h5>
             <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
-              @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track part; let last = $last) {
+              @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                 {{ part | normalizeUnicode }}@if (!last) {
                 <br />
               }
@@ -86,7 +86,7 @@
       } @else {
         @if (item.m_content) {
           <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
-            @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track part; let last = $last) {
+            @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
               {{ part | normalizeUnicode}}@if (!last) {
               <br />
             }
@@ -103,7 +103,7 @@
 }
 @if (item.m_weblink?.length) {
   <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
-  @for (link of item.m_weblink | slice:0:3; track link) {
+  @for (link of item.m_weblink | slice:0:3; track $index) {
     <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
       {{ link }}
     </div>

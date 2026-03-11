@@ -27,7 +27,7 @@
 @if (!isResponseLoading()) {
   <div @fadeInDashboardItem>
     <div class="mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]">
-      @for (item of currentResultModel; track item) {
+      @for (item of currentResultModel; track item.m_hash || item.m_message_id || item.id || item.m_url || $index) {
         <div class="space-y-6">
           @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model') {
             <app-dashboard-results-general-grid

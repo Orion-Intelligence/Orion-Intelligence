@@ -61,7 +61,7 @@
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Tags</p>
         <div class="flex max-w-[65%] flex-wrap justify-end gap-1.5">
-          @for (tag of resultItem?.m_content_type; track tag) {
+          @for (tag of resultItem?.m_content_type; track $index) {
             <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--color-text3)]">
               {{ tag }}
             </span>

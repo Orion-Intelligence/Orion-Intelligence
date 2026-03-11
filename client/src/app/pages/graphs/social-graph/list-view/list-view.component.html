@@ -197,17 +197,17 @@
                             <div class="p-4 border-t border-slate-700/50">
                               <h4 class="text-sm font-semibold text-slate-400 mb-2">Extracted Data</h4>
                               <div class="space-y-3">
-                                @for (record of getEntityReportRecords(entity); track record; let recordIndex = $index) {
+                                @for (record of getEntityReportRecords(entity); track $index; let recordIndex = $index) {
                                   <div class="rounded-lg border border-slate-700/70 bg-slate-900/20 p-3">
                                     @if (getEntityReportRecords(entity).length > 1) {
                                       <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Record {{ recordIndex + 1 }}</div>
                                     }
                                     <div class="space-y-2">
-                                      @for (item of getEntityRecordEntries(record); track item) {
+                                      @for (item of getEntityRecordEntries(record); track $index) {
                                         <div class="rounded-md border border-slate-700/60 bg-slate-800/40 p-2">
                                           <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ item.label }}</div>
                                           <div class="mt-1 space-y-1">
-                                            @for (valueItem of item.values; track valueItem) {
+                                            @for (valueItem of item.values; track $index) {
                                               <div class="text-sm break-words text-slate-200">{{ valueItem }}</div>
                                             }
                                           </div>

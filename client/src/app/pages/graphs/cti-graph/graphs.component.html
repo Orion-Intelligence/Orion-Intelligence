@@ -4,7 +4,7 @@
     <header class="absolute left-0 right-0 top-0 z-50 h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
       <div class="flex h-full items-center justify-between pl-4">
         <nav class="flex h-full items-center gap-1.5">
-          @for (tab of tabs; track tab) {
+          @for (tab of tabs; track tab.id) {
             <div (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ' + (activeTabId === tab.id ? 'bg-[#0f172a] text-[var(--color-text1)] shadow-[0_1px_0_0_#0f172a]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
               @if (editingTabId === tab.id) {
                 <div>
@@ -143,7 +143,7 @@
                     <span>Document</span>
                     <span>Type</span>
                   </div>
-                  @for (row of listRows; track row) {
+                  @for (row of listRows; track row.id || $index) {
                     <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-5 py-3 text-sm text-[var(--color-text2)] last:border-b-0">
                       <span class="truncate">{{ row.label || row.id }}</span>
                       <span class="text-[var(--color-text4)]">{{ row.cluster }}</span>
@@ -167,7 +167,7 @@
                   <span>Document</span>
                   <span>Type</span>
                 </div>
-                @for (row of listRows; track row) {
+                @for (row of listRows; track row.id || $index) {
                   <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-text2)] last:border-b-0">
                     <span class="truncate">{{ row.label || row.id }}</span>
                     <span class="text-[var(--color-text4)]">{{ row.cluster }}</span>

@@ -15,7 +15,7 @@
         </div>
       }
 
-      @for (report of reports; track report) {
+      @for (report of reports; track report?.m_hash || report?.m_url || report?.m_title || $index) {
         <div class="mb-3 rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)] last:mb-0">
           <div class="border-b border-[var(--tenant-line)] px-3.5 py-2.5">
             <h4 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">{{ report?.m_title || 'Untitled Report' }}</h4>

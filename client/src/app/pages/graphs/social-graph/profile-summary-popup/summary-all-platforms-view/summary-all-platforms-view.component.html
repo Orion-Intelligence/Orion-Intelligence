@@ -30,9 +30,9 @@
           </div>
           @if (profileBreachCards().length > 0) {
             <div class="space-y-2 mt-2">
-              @for (card of profileBreachCards().slice(0, 5); track card) {
+              @for (card of profileBreachCards().slice(0, 5); track $index) {
                 <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-                  @for (entry of getObjectEntries(card).slice(0, 8); track entry) {
+                  @for (entry of getObjectEntries(card).slice(0, 8); track entry.key || $index) {
                     <div class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
                       <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
                       @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
@@ -60,9 +60,9 @@
           </div>
           @if (profileStealerRows().length > 0) {
             <div class="space-y-2 mt-2">
-              @for (row of profileStealerRows().slice(0, 10); track row) {
+              @for (row of profileStealerRows().slice(0, 10); track $index) {
                 <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-                  @for (entry of getObjectEntries(row).slice(0, 8); track entry) {
+                  @for (entry of getObjectEntries(row).slice(0, 8); track entry.key || $index) {
                     <div class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
                       <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
                       @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
@@ -95,7 +95,7 @@
     <div class="p-3 border-t border-slate-700 space-y-3">
       <div class="flex flex-col gap-2">
         <div class="flex flex-wrap items-center gap-2 rounded-md border border-slate-700 bg-slate-900/60 px-2 py-2">
-          @for (token of profileMetadataTokens(); track token) {
+          @for (token of profileMetadataTokens(); track $index) {
             <span class="inline-flex items-center gap-1 rounded-full bg-slate-700/70 px-2 py-1 text-[11px] text-slate-200">
               <span>{{ token }}</span>
               <button type="button" (click)="removeMetadataToken(token)" class="text-slate-400 hover:text-slate-100">
@@ -132,7 +132,7 @@
             }
             @if ((meta?.results?.length || 0) > 0) {
               <div class="space-y-2 mt-2">
-                @for (row of (meta?.results || []).slice(0, 10); track row) {
+                @for (row of (meta?.results || []).slice(0, 10); track row.url || row.title || $index) {
                   <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
                     <div class="text-xs text-slate-300 font-semibold">{{ row.title || 'Untitled' }}</div>
                     @if (row.url) {
@@ -168,7 +168,7 @@
       </div>
 
       <div class="space-y-2">
-        @for (platform of displayPlatformsForDetails(); track platform; let i = $index) {
+        @for (platform of displayPlatformsForDetails(); track platform.url || platform.keyUsername || $index; let i = $index) {
           <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
             @if (platform.profileDetails !== undefined) {
               <div class="bg-slate-800/50 rounded-lg p-3">
@@ -181,7 +181,7 @@
                 </div>
                 @if (platform.profileDetails && getProfileDetailEntries(platform).length > 0) {
                   <dl class="text-sm">
-                    @for (item of getProfileDetailEntries(platform); track item) {
+                    @for (item of getProfileDetailEntries(platform); track $index) {
                       <div class="py-2 border-b border-slate-700/30 last:border-b-0">
                         <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
                         <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
@@ -238,7 +238,7 @@
       </div>
 
       <div class="space-y-2">
-        @for (platform of displayPlatformsForPosts(); track platform; let i = $index) {
+        @for (platform of displayPlatformsForPosts(); track platform.url || platform.keyUsername || $index; let i = $index) {
           <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
             @if (platform.posts !== undefined) {
               <div class="bg-slate-800/50 rounded-lg p-3">
@@ -251,7 +251,7 @@
                 </div>
                 @if (platform.posts?.length) {
                   <div class="space-y-3">
-                    @for (post of platform.posts!.slice(0, 3); track post) {
+                    @for (post of platform.posts!.slice(0, 3); track post.post_url || $index) {
                       <div class="bg-slate-700/50 p-3 rounded-lg text-sm">
                         <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
                         <div class="flex items-center justify-between text-slate-400">
@@ -314,7 +314,7 @@
       </div>
 
       <div class="space-y-2">
-        @for (platform of displayPlatformsForPosts(); track platform; let i = $index) {
+        @for (platform of displayPlatformsForPosts(); track platform.url || platform.keyUsername || $index; let i = $index) {
           <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
             <div class="bg-slate-800/50 rounded-lg p-3">
               <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
@@ -330,7 +330,7 @@
                     <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ platform.post_connections?.length || 0 }} connections</span>
                   </div>
                   <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-                    @for (connection of getVisiblePostConnections(platform); track connection) {
+                    @for (connection of getVisiblePostConnections(platform); track $index) {
                       <button type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
                         {{ '@' + connection }}
                       </button>
@@ -374,7 +374,7 @@
       </div>
 
       <div class="space-y-2">
-        @for (platform of displayPlatformsForImages(); track platform; let i = $index) {
+        @for (platform of displayPlatformsForImages(); track platform.url || platform.keyUsername || $index; let i = $index) {
           <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
             @if (platform.images !== undefined) {
               <div class="bg-slate-800/50 rounded-lg p-3">
@@ -390,7 +390,7 @@
                 </div>
                 @if (platform.images?.length) {
                   <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-                    @for (image of platform.images; track image) {
+                    @for (image of platform.images; track image.image_url || image.thumbnail || $index) {
                       <div class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors">
                         <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title"><img [src]="image.thumbnail" [alt]="image.title" class="w-full h-20 object-cover transition-transform duration-300 group-hover:scale-105"></a>
                       </div>

@@ -25,7 +25,7 @@
       } @else {
         @if (getContentLines(resultItem).length > 0) {
           <div class="mt-4 space-y-4">
-            @for (section of getContentLines(resultItem).slice(0, 12); track section; let i = $index) {
+            @for (section of getContentLines(resultItem).slice(0, 12); track $index; let i = $index) {
               <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft p-3">
                 <h3 class="text-[11px] font-medium uppercase tracking-[0.05em] text-[var(--color-text4)]">Section {{ i + 1 }}</h3>
                 <p class="mt-2 text-sm text-[var(--color-text3)]">{{ section.length > 550 ? (section | slice:0:550) + '...' : section }}</p>
