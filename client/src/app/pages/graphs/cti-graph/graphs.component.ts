@@ -8,7 +8,6 @@ import { GraphContextMenuComponent } from './context-menu/context-menu.component
 import { NgClass, isPlatformBrowser } from '@angular/common';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { ActivatedRoute } from '@angular/router';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
@@ -45,8 +44,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly minZoomScale = 0.35;
   private minZoomLockPosition: { x: number; y: number; } | null = null;
   private readonly originalNodeState = new Map<string, NodeVisualState>();
-  private readonly sessionSearchKey = 'cti_graph_node_search';
-  private readonly sessionPhysicsKey = 'cti_graph_physics_enabled';
   private readonly clusterNodePrefix = 'cti_vertices/';
   private nodeTypeById: Record<string, string> = {};
   private readonly graphType = 'graph';
@@ -97,6 +94,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   };
   private static sessionCounter = 1;
   private pendingFilters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
+  private pendingSessionState: GraphSessionState | null = null;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -164,11 +162,12 @@ export class GraphComponent implements OnInit, OnDestroy {
   set networkContainerRef(ref: ElementRef | undefined) {
     if (ref) {
       this.networkContainer = ref;
+      this.tryRestorePendingSessionState();
       this.tryApplyPendingFilters();
     }
   }
 
-  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
+  constructor( private api: ApiService, private clipboard: Clipboard, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -176,26 +175,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }
     this.tryApplyPendingFilters();
-    this.restoreSessionState();
     this.loadSessions();
-    this.route.queryParams.subscribe(params => {
-      this.selectedType = params['selectedType'] || 'cluster';
-      this.singleInput = params['singleInput'] || 'all';
-      this.propertyType = params['propertyType'] || 'all';
-      this.propertyValue = params['propertyValue'] || '';
-      this.maxEdge =
-  (+params['maxEdge'] > 800 || +params['maxEdge'] < 0) ? '25' : (params['maxEdge'] || '25');
-      this.maxDepth =
-  (+params['maxDepth'] > 5 || +params['maxDepth'] < 0) ? '1' : (params['maxDepth'] || '1');
-      this.onSidebarApply({
-        selectedType: this.selectedType,
-        singleInput: this.singleInput,
-        propertyType: this.propertyType,
-        propertyValue: this.propertyValue,
-        maxEdge: Number(this.maxEdge),
-        maxDepth: Number(this.maxDepth)
-      });
-    });
   }
 
   ngOnDestroy(): void {
@@ -207,6 +187,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   onSidebarCollapsedChange(isCollapsed: boolean): void {
     this.isSidebarCollapsed = isCollapsed;
+    this.updateActiveSessionState({ isSidebarCollapsed: isCollapsed });
   }
 
   private tryApplyPendingFilters(): void {
@@ -218,6 +199,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.onSidebarApply(queued);
   }
 
+  private tryRestorePendingSessionState(): void {
+    if (!this.isTailwindReady || !this.networkContainer || !this.pendingSessionState) {
+      return;
+    }
+    const pending = this.pendingSessionState;
+    this.pendingSessionState = null;
+    this.restoreGraphSessionState(pending);
+  }
+
   private createDefaultSessionState(): GraphSessionState {
     return {
       selectedType: 'cluster',
@@ -226,6 +216,10 @@ export class GraphComponent implements OnInit, OnDestroy {
       propertyValue: '',
       maxEdge: 25,
       maxDepth: 1,
+      isSidebarCollapsed: false,
+      graphData: null,
+      groupExpandedState: {},
+      limitReached: false,
       nodeSearchText: '',
       physicsEnabled: true,
       isGraphView: true,
@@ -245,7 +239,76 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.tabs.find(t => t.id === this.activeTabId);
   }
 
-  private saveSessions(): void {
+  get activeSidebarFilters(): { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } {
+    const active = this.getActiveTab();
+    const state = active?.state ?? this.createDefaultSessionState();
+    return {
+      selectedType: state.selectedType,
+      singleInput: state.singleInput,
+      propertyType: state.propertyType,
+      propertyValue: state.propertyValue,
+      maxEdge: state.maxEdge,
+      maxDepth: state.maxDepth
+    };
+  }
+
+  get activeSidebarCollapsed(): boolean {
+    const active = this.getActiveTab();
+    return active?.state.isSidebarCollapsed ?? false;
+  }
+
+  private applyActiveTabState(): void {
+    const active = this.getActiveTab();
+    if (!active) {
+      return;
+    }
+    this.onSidebarApply({
+      selectedType: active.state.selectedType,
+      singleInput: active.state.singleInput,
+      propertyType: active.state.propertyType,
+      propertyValue: active.state.propertyValue,
+      maxEdge: active.state.maxEdge,
+      maxDepth: active.state.maxDepth
+    });
+  }
+
+  private restoreGraphSessionState(state: GraphSessionState): void {
+    if (!this.isTailwindReady || !this.networkContainer) {
+      this.pendingSessionState = state;
+      return;
+    }
+    this.showMaxEdgeNotice = Number(state.maxEdge) > 50;
+    if (!state.graphData) {
+      this.resetGraph();
+      this.listRows = [];
+      this.flattenedDocuments = [];
+      this.limitReached = !!state.limitReached;
+      this.isEmpty = false;
+      this.loading = false;
+      return;
+    }
+    this.renderGraph(state.graphData);
+    this.initListings(state.graphData);
+    this.limitReached = !!state.limitReached;
+    this.loading = true;
+    Object.entries(state.groupExpandedState ?? {})
+      .filter(([, expanded]) => !!expanded)
+      .forEach(([nodeId]) => {
+        const node = this.nodeSet.get(nodeId) as ExtendedNode | undefined;
+        if (!node) {
+          return;
+        }
+        const subNodes = this.getContextSubNodes(nodeId, node);
+        if (subNodes.length > 0) {
+          this.expandGroupFromNodeId(nodeId, subNodes, 200, false);
+        }
+      });
+    this.captureOriginalNodeColors();
+    this.applyPropertyHighlights();
+    this.applyNodeSearchHighlight();
+  }
+
+  private saveSessions(force: boolean = false): void {
     if (!isPlatformBrowser(this.platformId) || !this.hasLoadedSessions) {
       return;
     }
@@ -255,7 +318,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       tabs: this.tabs
     };
     const nextSignature = JSON.stringify(payload);
-    if (nextSignature === this.lastSavedSessionSignature) {
+    if (!force && nextSignature === this.lastSavedSessionSignature) {
       return;
     }
     this.api.post<any>(`social/session/upsert?graph_type=${this.graphType}`, payload).subscribe({
@@ -297,6 +360,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           tabs: this.tabs
         });
         this.applySession(this.activeTabId);
+        this.applyActiveTabState();
       },
       error: () => {
         this.hasLoadedSessions = true;
@@ -314,6 +378,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.tabs = [...this.tabs, newTab];
     this.activeTabId = newTab.id;
     this.applySession(newTab.id);
+    this.applyActiveTabState();
     this.saveSessions();
   }
 
@@ -323,6 +388,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.activeTabId = id;
     this.applySession(id);
+    this.applyActiveTabState();
     this.saveSessions();
   }
 
@@ -570,23 +636,42 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.isGraphView = s.isGraphView;
     this.isListingsCollapsed = s.isListingsCollapsed;
     this.expandEnabled = s.expandEnabled;
-    this.onSidebarApply({
-      selectedType: s.selectedType,
-      singleInput: s.singleInput,
-      propertyType: s.propertyType,
-      propertyValue: s.propertyValue,
-      maxEdge: s.maxEdge,
-      maxDepth: s.maxDepth
-    });
+    this.isSidebarCollapsed = s.isSidebarCollapsed;
+    this.selectedType = s.selectedType;
+    this.singleInput = s.singleInput;
+    this.propertyType = s.propertyType;
+    this.propertyValue = s.propertyValue;
+    this.maxEdge = s.maxEdge;
+    this.maxDepth = s.maxDepth;
+    this.restoreGraphSessionState(s);
   }
 
-  private updateActiveSessionState(partial: Partial<GraphSessionState>): void {
+  private updateActiveSessionState(partial: Partial<GraphSessionState>, persist: boolean = true): void {
     const active = this.getActiveTab();
     if (!active) {
       return;
     }
     this.tabs = this.tabs.map(tab => tab.id === active.id ? { ...tab, state: { ...tab.state, ...partial } } : tab);
-    this.saveSessions();
+    if (persist) {
+      this.saveSessions();
+    }
+  }
+
+  onSidebarFiltersChanged(filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }): void {
+    this.selectedType = filters.selectedType;
+    this.singleInput = filters.singleInput;
+    this.propertyType = filters.propertyType;
+    this.propertyValue = filters.propertyValue;
+    this.maxEdge = filters.maxEdge;
+    this.maxDepth = filters.maxDepth;
+    this.updateActiveSessionState({
+      selectedType: this.selectedType,
+      singleInput: this.singleInput,
+      propertyType: this.propertyType,
+      propertyValue: this.propertyValue,
+      maxEdge: Number(this.maxEdge),
+      maxDepth: Number(this.maxDepth)
+    });
   }
 
   resetGraph(): void {
@@ -660,11 +745,21 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.limitReached = limit_reached;
       this.loading = true;
       this.initListings(results);
+      this.updateActiveSessionState({
+        graphData: this.result,
+        limitReached: this.limitReached,
+        groupExpandedState: { ...this.groupExpandedState }
+      });
     },
     error: _ => {
       this.isEmpty = true;
       this.limitReached = false;
       this.loading = true;
+      this.updateActiveSessionState({
+        graphData: [],
+        limitReached: false,
+        groupExpandedState: {}
+      });
     }
   });
   }
@@ -925,7 +1020,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return Array.from(collapsedTargets);
   }
 
-  private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number): void {
+  private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number, persist: boolean = true): void {
     const isExpanded = this.groupExpandedState[nodeId] || false;
     if (isExpanded) {
       return;
@@ -968,9 +1063,12 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.groupExpandedState[nodeId] = true;
     this.updateGroupNodeVisual(nodeId, uniqueSubNodes.length, true);
+    if (persist) {
+      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
+    }
   }
 
-  private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false): void {
+  private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false, persist: boolean = true): void {
     const isExpanded = this.groupExpandedState[nodeId] || false;
     if (!isExpanded && !force) {
       return;
@@ -978,6 +1076,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.removeSubNodesAndEdges(nodeId, subNodes);
     this.groupExpandedState[nodeId] = false;
     this.updateGroupNodeVisual(nodeId, subNodes.length, false);
+    if (persist) {
+      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
+    }
   }
 
   expandGroupNode(): void {
@@ -1141,7 +1242,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   onPhysicsToggled(enabled: boolean): void {
     this.physicsEnabled = enabled;
     this.updateActiveSessionState({ physicsEnabled: this.physicsEnabled });
-    this.persistSessionState();
     if (this.network) {
       this.network.setOptions({ physics: { enabled } });
     }
@@ -1154,7 +1254,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   onNodeSearchChange(value: string): void {
     this.nodeSearchText = value ?? '';
     this.updateActiveSessionState({ nodeSearchText: this.nodeSearchText });
-    this.persistSessionState();
     this.applyNodeSearchHighlight();
   }
 
@@ -1178,7 +1277,10 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   toggleExpandCollapseAll(): void {
     this.expandEnabled = !this.expandEnabled;
-    this.updateActiveSessionState({ expandEnabled: this.expandEnabled });
+    this.updateActiveSessionState({
+      expandEnabled: this.expandEnabled,
+      groupExpandedState: this.expandEnabled ? {} : { ...this.groupExpandedState }
+    });
     this.nodeSet.get().forEach(node => {
       const groupNode = node as ExtendedNode;
       if (!groupNode.isGroup || !groupNode.subNodes || !groupNode.id) {
@@ -1186,10 +1288,10 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       const nodeId = String(groupNode.id);
       if (this.expandEnabled) {
-        this.expandGroupFromNodeId(nodeId, groupNode.subNodes, 200);
+        this.expandGroupFromNodeId(nodeId, groupNode.subNodes, 200, false);
       }
       else {
-        this.collapseGroupFromNodeId(nodeId, groupNode.subNodes);
+        this.collapseGroupFromNodeId(nodeId, groupNode.subNodes, false, false);
       }
     });
     this.captureOriginalNodeColors();
@@ -1216,8 +1318,12 @@ export class GraphComponent implements OnInit, OnDestroy {
       propertyType: this.propertyType,
       propertyValue: this.propertyValue,
       maxEdge: Number(this.maxEdge),
-      maxDepth: Number(this.maxDepth)
+      maxDepth: Number(this.maxDepth),
+      graphData: null,
+      groupExpandedState: {},
+      limitReached: false
     });
+    this.saveSessions(true);
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
       this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
     }
@@ -1780,6 +1886,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.edgeSet.remove(residualEdgesToRemove);
     this.groupExpandedState[clusterNodeId] = false;
     this.updateGroupNodeVisual(clusterNodeId, this.getClusterDocumentIds(clusterNodeId).length, false);
+    this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
   }
 
   private getVisibleClusterAttachedNodeIds(clusterNodeId: string): string[] {
@@ -1868,6 +1975,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.captureOriginalNodeColors(newNodes.map(n => String(n.id)));
       this.applyNodeSearchHighlight();
       this.groupExpandedState[nodeId] = true;
+      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
       this.network.selectNodes([nodeId]);
       this.network.unselectAll();
       return;
@@ -1883,6 +1991,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     });
     this.groupExpandedState[nodeId] = false;
+    this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
     if (this.orignalColor) {
       this.nodeSet.update({ id: nodeId, color: this.orignalColor });
     }
@@ -2042,27 +2151,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  private restoreSessionState(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-    const savedSearch = window.sessionStorage.getItem(this.sessionSearchKey);
-    const savedPhysics = window.sessionStorage.getItem(this.sessionPhysicsKey);
-    if (savedSearch !== null) {
-      this.nodeSearchText = savedSearch;
-    }
-    if (savedPhysics !== null) {
-      this.physicsEnabled = savedPhysics === 'true';
-    }
-  }
-
-  private persistSessionState(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-    window.sessionStorage.setItem(this.sessionSearchKey, this.nodeSearchText);
-    window.sessionStorage.setItem(this.sessionPhysicsKey, String(this.physicsEnabled));
-  }
 }
 const BOOTSTRAP_ICON_PATHS: Record<string, {
   viewBox: string;

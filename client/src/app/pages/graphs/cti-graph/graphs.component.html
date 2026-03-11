@@ -1,10 +1,11 @@
 @if (isTailwindReady) {
+  @if (hasLoadedSessions) {
   <div class="fixed inset-0" (click)="closeMenus()">
     <header class="absolute left-0 right-0 top-0 z-50 h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
-      <div class="h-full flex items-end justify-between pl-4">
-        <nav class="flex h-full items-end gap-1.5">
+      <div class="flex h-full items-center justify-between pl-4">
+        <nav class="flex h-full items-center gap-1.5">
           @for (tab of tabs; track tab) {
-            <div (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center border border-b-2 pl-3 pr-2 pt-2 pb-1.5 text-sm font-medium rounded-t-md transition-colors ' + (activeTabId === tab.id ? 'border-[var(--color-border)] border-b-indigo-400 bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-[0_1px_0_0_var(--color-blue-700)]' : 'border-transparent border-b-transparent text-[var(--color-text4)] hover:border-[var(--color-border)] hover:border-b-[var(--color-border)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
+            <div (click)="editingTabId !== tab.id && selectSession(tab.id)" [class]="'group relative flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ' + (activeTabId === tab.id ? 'bg-[#0f172a] text-[var(--color-text1)] shadow-[0_1px_0_0_#0f172a]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
               @if (editingTabId === tab.id) {
                 <div>
                   <input #renameInput data-testid="cti-tab-rename-input" type="text" [value]="tab.name" (blur)="renameSession(tab.id, renameInput.value)" (keydown.enter)="renameSession(tab.id, renameInput.value)" (keydown.escape)="stopEditing()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500">
@@ -13,30 +14,28 @@
                 <span data-testid="cti-tab-name" (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1">{{ tab.name }}</span>
               }
               @if (tabs.length> 1) {
-                <button data-testid="cti-tab-close" (click)="$event.stopPropagation(); closeSession(tab.id)" [class]="'ml-1 rounded-full p-1 text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white ' + (activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')">
+                <button data-testid="cti-tab-close" (click)="$event.stopPropagation(); closeSession(tab.id)" class="ml-1 flex h-6 w-6 items-center justify-center rounded-full text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white">
                   <i class="bi bi-x-lg text-xs"></i>
                 </button>
               }
             </div>
           }
-          <div class="pl-1">
-            <div #addMenuWrapper class="relative">
+          <div class="flex h-full items-center pl-1">
+            <div class="mr-2 h-7 w-px bg-white/5"></div>
+            <div #addMenuWrapper class="relative flex items-center">
               <input data-testid="cti-tab-file-input" type="file" class="hidden" id="graphSessionFileInput" (change)="importSessionFile($event)" accept=".json">
-              <button data-cy="cti-tab-add-menu" data-testid="cti-tab-add-menu" (click)="toggleAddMenu($event)" class="flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="New Session">
-                <i class="bi bi-plus-lg text-lg"></i>
+              <button data-cy="cti-tab-add-menu" data-testid="cti-tab-add-menu" (click)="toggleAddMenu($event)" [class]="isAddMenuVisible ? 'flex h-8 w-8 items-center justify-center rounded-md bg-[#0f172a] text-white shadow-sm' : 'flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white'" title="New Session">
+                <i class="bi bi-plus-lg text-base leading-none"></i>
               </button>
               @if (isAddMenuVisible) {
-                <div (click)="$event.stopPropagation()" class="absolute top-full left-0 z-20 mt-2 w-52 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] p-1.5 shadow-2xl ring-1 ring-white/5 backdrop-blur-md">
-                  <button data-testid="cti-tab-add-new-session" (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-blue-700)]/60 text-[var(--color-text3)] transition-colors group-hover:bg-indigo-500 group-hover:text-white">
-                      <i class="bi bi-plus-square text-lg"></i>
-                    </span>
+                <div (click)="$event.stopPropagation()" class="absolute top-[calc(100%+5px)] left-0 z-20 w-48 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
+                  <button data-testid="cti-tab-add-new-session" (click)="addSession(); closeMenus()" class="group flex w-full items-center gap-3 rounded px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                    <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>New Session</span>
                   </button>
-                  <label data-testid="cti-tab-import-session-label" for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-700)] hover:text-white">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-blue-700)]/60 text-[var(--color-text3)] transition-colors group-hover:bg-indigo-500 group-hover:text-white">
-                      <i class="bi bi-upload text-lg"></i>
-                    </span>
+                  <div class="mx-2 my-1 h-px bg-white/5"></div>
+                  <label data-testid="cti-tab-import-session-label" for="graphSessionFileInput" (click)="closeMenus()" class="group flex w-full cursor-pointer items-center gap-3 rounded px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
+                    <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
                     <span>Import Session</span>
                   </label>
                 </div>
@@ -76,11 +75,14 @@
       </div>
     </header>
     <div class="absolute inset-x-0 bottom-0 top-12 flex">
-      <app-cti-sidebar
-        class="hidden flex-shrink-0 flex-col overflow-hidden border-b border-[var(--color-border)] bg-[#172235] backdrop-blur-md lg:flex lg:border-r"
-        (filtersApplied)="onSidebarApply($event)"
-        (collapsedChange)="onSidebarCollapsedChange($event)">
-      </app-cti-sidebar>
+	      <app-cti-sidebar
+	        class="hidden flex-shrink-0 flex-col overflow-hidden border-b border-[var(--color-border)] bg-[#172235] backdrop-blur-md lg:flex lg:border-r"
+	        [filters]="activeSidebarFilters"
+	        [collapsed]="activeSidebarCollapsed"
+	        (filtersChanged)="onSidebarFiltersChanged($event)"
+	        (filtersApplied)="onSidebarApply($event)"
+	        (collapsedChange)="onSidebarCollapsedChange($event)">
+	      </app-cti-sidebar>
       <main class="flex-grow min-h-0 relative">
         <div class="pointer-events-none absolute left-0 right-0 top-0 z-30 p-2 sm:p-4">
           <div class="pointer-events-auto flex-shrink-0 z-10">
@@ -254,6 +256,20 @@
       </div>
     }
   </div>
+  } @else {
+  <div class="fixed inset-0 overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_32%),linear-gradient(180deg,_var(--color-blue-850),_#08111f)]">
+    <div class="absolute inset-0 opacity-30 [background-image:radial-gradient(circle,_rgba(148,163,184,0.18)_1px,_transparent_1px)] [background-size:1.5rem_1.5rem]"></div>
+    <div class="relative flex h-full items-center justify-center px-6">
+      <div class="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-800)]/70 p-8 text-center shadow-2xl backdrop-blur-md">
+        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15">
+          <div class="h-6 w-6 animate-spin rounded-full border-2 border-indigo-300/30 border-t-indigo-300"></div>
+        </div>
+        <h2 class="text-lg font-semibold text-[var(--color-text1)]">Restoring CTI Session</h2>
+        <p class="mt-2 text-sm text-[var(--color-text4)]">Loading tabs, filters, graph state, and expanded groups.</p>
+      </div>
+    </div>
+  </div>
+  }
 } @else {
   <div class="fixed inset-0 flex items-center justify-center bg-[var(--color-blue-850)] text-[var(--color-text4)]">
     <p>Loading graph styles...</p>
@@ -268,4 +284,3 @@
   (closed)="closeReportExportModal()"
   (optionSelected)="exportByType($event)">
 </app-export-choice-modal>
-

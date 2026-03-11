@@ -25,6 +25,10 @@ export type GraphSessionState = {
     propertyValue: string;
     maxEdge: number;
     maxDepth: number;
+    isSidebarCollapsed: boolean;
+    graphData: GraphResultItem[] | null;
+    groupExpandedState: Record<string, boolean>;
+    limitReached: boolean;
     nodeSearchText: string;
     physicsEnabled: boolean;
     isGraphView: boolean;

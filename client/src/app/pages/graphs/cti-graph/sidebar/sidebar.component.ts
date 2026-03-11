@@ -1,5 +1,4 @@
-import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { GraphClusterType, GraphType, search_filter_labels } from '../../../../shared/constants/shared-enums';
@@ -10,7 +9,7 @@ import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.
   templateUrl: './sidebar.component.html',
   imports: [FormsModule, ReactiveFormsModule, TitleCasePipe, SidebarShellComponent],
 })
-export class SidebarComponent implements OnInit {
+export class SidebarComponent implements OnInit, OnChanges {
   isCollapsed = false;
   isMobile = false;
   selectedType = 'cluster';
@@ -25,12 +24,12 @@ export class SidebarComponent implements OnInit {
     label,
     key
   }));
+  @Input() filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
+  @Input() collapsed = false;
 
   @Output() filtersApplied = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
+  @Output() filtersChanged = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
   @Output() collapsedChange = new EventEmitter<boolean>();
-
-  constructor(private router: Router, private route: ActivatedRoute) {
-  }
 
   private buildFilterPayload() {
     return {
@@ -43,25 +42,34 @@ export class SidebarComponent implements OnInit {
     };
   }
 
-  private navigateWithFilters() {
-    this.router.navigate([], { queryParams: this.buildFilterPayload() }).then();
-  }
-
   private emitFilters() {
     this.filtersApplied.emit(this.buildFilterPayload());
   }
 
+  emitDraftFilters() {
+    this.filtersChanged.emit(this.buildFilterPayload());
+  }
+
+  private applyIncomingFilters(filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }) {
+    this.selectedType = filters.selectedType || 'cluster';
+    this.singleInput = filters.singleInput || 'all';
+    this.propertyType = filters.propertyType || 'all';
+    this.propertyValue = filters.propertyValue || '';
+    this.maxNodes = Number(filters.maxEdge) || 25;
+    this.maxDepth = Number(filters.maxDepth) || 1;
+  }
+
   ngOnInit(): void {
     this.updateViewportState();
-    this.route.queryParams.subscribe(params => {
-      this.selectedType = params['selectedType'] || 'cluster';
-      this.singleInput = params['singleInput'] || 'all';
-      this.propertyType = params['propertyType'] || 'all';
-      this.propertyValue = params['propertyValue'] || '';
-      this.maxNodes = (+params['maxEdge'] > 800 || +params['maxEdge'] < 0) ? '25' : (params['maxEdge'] || '25');
-      this.maxDepth = (+params['maxDepth'] > 5 || +params['maxDepth'] < 0) ? '1' : (params['maxDepth'] || '1');
-      this.emitFilters();
-    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filters']?.currentValue) {
+      this.applyIncomingFilters(changes['filters'].currentValue);
+    }
+    if (changes['collapsed']) {
+      this.isCollapsed = !!changes['collapsed'].currentValue;
+    }
   }
 
   private updateViewportState(): void {
@@ -84,7 +92,6 @@ export class SidebarComponent implements OnInit {
   }
 
   applyFilters() {
-    this.navigateWithFilters();
     this.emitFilters();
   }
 
@@ -106,7 +113,9 @@ export class SidebarComponent implements OnInit {
     this.singleInput = 'all';
     this.propertyType = 'all';
     this.propertyValue = '';
-    this.navigateWithFilters();
+    this.maxNodes = 25;
+    this.maxDepth = 1;
+    this.emitDraftFilters();
     this.emitFilters();
   }
 
@@ -126,17 +135,20 @@ export class SidebarComponent implements OnInit {
       this.propertyType = 'all';
       this.propertyValue = '';
     }
+    this.emitDraftFilters();
   }
 
   validateMaxNodes() {
     if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 800) {
       this.maxNodes = 25;
     }
+    this.emitDraftFilters();
   }
 
   validateMaxDepth() {
     if (!this.maxDepth || this.maxDepth < 1 || this.maxDepth > 5) {
       this.maxDepth = 2;
     }
+    this.emitDraftFilters();
   }
 }
