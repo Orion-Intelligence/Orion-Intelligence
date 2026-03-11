@@ -7,7 +7,7 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { buildUsernameSuggestions, buildUsernameSuggestionText } from '../../../../shared/utils/auth-form.util';
+import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../../shared/utils/auth-form.util';
 @Component({
   selector: 'app-add-tenant',
   imports: [FormsModule, NgClass],
@@ -22,6 +22,10 @@ export class AddTenantComponent implements OnInit {
   errorText: string = "";
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
   usernameSuggestion: string = "";
+  showPasswordMeter = false;
+  passwordStrength: PasswordStrength = null;
+  passwordChecks: PasswordChecks = createEmptyPasswordChecks();
+  currentUnmetCheck: string | null = null;
 
   @Output() closs = new EventEmitter<void>();
   @Output() accountAdded = new EventEmitter<void>();
@@ -48,7 +52,7 @@ export class AddTenantComponent implements OnInit {
       this.errorText = 'Email is required';
       return;
     }
-    if (!this.model.password) {
+    if (!this.model.password || !this.allPasswordRequirementsMet) {
       this.errorText = 'Password is required';
       return;
     }
@@ -104,9 +108,39 @@ export class AddTenantComponent implements OnInit {
     const index = tenant.licenses.indexOf(license);
     if (index > -1) {
       tenant.licenses.splice(index, 1);
+      return;
     }
-    else {
-      tenant.licenses.push(license);
+    if (license === LicenseName.ENTERPRISE) {
+      tenant.licenses = [LicenseName.ENTERPRISE];
+      return;
     }
+    tenant.licenses = tenant.licenses.filter((l: LicenseName) => l !== LicenseName.ENTERPRISE);
+    if (license === LicenseName.FREE) {
+      tenant.licenses = [LicenseName.FREE];
+      return;
+    }
+    if (license === LicenseName.OSINT_BASIC) {
+      tenant.licenses = tenant.licenses.filter((l: LicenseName) =>
+        l !== LicenseName.OSINT_ADVANCED && l !== LicenseName.FREE);
+    }
+    if (license === LicenseName.OSINT_ADVANCED) {
+      tenant.licenses = tenant.licenses.filter((l: LicenseName) =>
+        l !== LicenseName.OSINT_BASIC && l !== LicenseName.FREE);
+    }
+    tenant.licenses = tenant.licenses.filter((l: LicenseName) => l !== LicenseName.FREE);
+
+    tenant.licenses.push(license);
+  }
+
+  onPasswordInput(password: string) {
+    const evaluation = evaluatePasswordInput(password);
+    this.showPasswordMeter = evaluation.showPasswordMeter;
+    this.passwordChecks = evaluation.passwordChecks;
+    this.currentUnmetCheck = evaluation.currentUnmetCheck;
+    this.passwordStrength = evaluation.passwordStrength;
+  }
+
+  get allPasswordRequirementsMet(): boolean {
+    return areAllPasswordRequirementsMet(this.passwordChecks);
   }
 }

@@ -99,7 +99,6 @@ export class SidebarUserIocComponent implements OnInit {
     this.appService.tenantData.set({ ...filteredOnboardingData });
     this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => {
-        this.appService.setOnboardingStatus(true);
       },
       error: (_err) => {
       },
@@ -132,7 +131,6 @@ export class SidebarUserIocComponent implements OnInit {
       this.appService.tenantData.set({ ...filteredOnboardingData });
       this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
         next: () => {
-          this.appService.setOnboardingStatus(true);
         },
         error: (_err) => {
         },
