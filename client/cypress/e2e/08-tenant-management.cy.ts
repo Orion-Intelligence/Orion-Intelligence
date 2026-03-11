@@ -183,7 +183,15 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     const closeNotificationSidebar = () => {
       cy.get('body').then($body => {
         if ($body.find('[data-testid="tenant-notification-sidebar"]').length > 0) {
-          clickWhenVisible('[data-testid="tenant-notification-close"]');
+          if ($body.find('[data-testid="tenant-notification-close"]:visible').length > 0) {
+            clickWhenVisible('[data-testid="tenant-notification-close"]');
+          }
+          else {
+            cy.contains('[data-testid="tenant-notification-sidebar"] button', 'Close', {timeout: 30000})
+              .scrollIntoView()
+              .should('be.visible')
+              .click({waitForAnimations: false, animationDistanceThreshold: 0});
+          }
         }
       });
       cy.get('[data-testid="tenant-notification-sidebar"]', {timeout: 30000}).should('not.exist');
