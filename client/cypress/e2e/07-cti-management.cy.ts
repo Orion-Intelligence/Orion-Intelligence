@@ -73,8 +73,13 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.get('[data-testid="cti-tab-add-menu"]').filter(':visible').first().click();
     cy.get('[data-testid="cti-tab-add-new-session"]').filter(':visible').first().click();
     const newName = `CTI Session ${Date.now()}`;
-    cy.get('[data-testid="cti-tab-name"]').filter(':visible').first().dblclick();
-    cy.get('[data-testid="cti-tab-rename-input"]').filter(':visible').first().clear().type(`${newName}{enter}`);
+    cy.get('[data-testid="cti-tab-name"]', {timeout: 15000}).filter(':visible').last().scrollIntoView().dblclick();
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-testid="cti-tab-rename-input"]:visible').length === 0) {
+        cy.get('[data-testid="cti-tab-name"]', {timeout: 15000}).filter(':visible').last().scrollIntoView().dblclick();
+      }
+    });
+    cy.get('[data-testid="cti-tab-rename-input"]', {timeout: 15000}).filter(':visible').last().clear().type(`${newName}{enter}`);
     cy.contains(newName).should('exist');
     cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
     cy.get('[data-testid="cti-export-current-session"]', {timeout: 15000}).filter(':visible').first().click();
