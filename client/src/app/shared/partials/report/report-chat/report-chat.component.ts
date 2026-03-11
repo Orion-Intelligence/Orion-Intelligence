@@ -43,6 +43,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   content = '';
   summary = '';
   isExpandedMetadata = true;
+
   constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
   }
 

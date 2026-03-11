@@ -22,6 +22,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
     });
 
     it('updates avatar/theme/2FA and validates reset password journey', () => {
+        const resolvedNewPassword = newPassword ?? '';
         cy.get('[data-testid="sidebar-group-profile"]', {timeout: 20000}).should('be.visible').click({scrollBehavior: false});
         cy.get('[data-testid="sidebar-subitem-profile-account"]', {timeout: 20000}).should('be.visible').click({scrollBehavior: false});
         cy.location('pathname', {timeout: 20000}).should('include', '/dashboard/profile/account');
@@ -74,16 +75,16 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             });
             cy.url().should('include', '/reset');
             cy.get('.signup-container__title').should('contain', 'Reset Password');
-            cy.get('input[name="password"]').clear().type(defaultUser.password, {log: false}).blur();
-            cy.get('input[name="confirmPassword"]').clear().type(defaultUser.password, {log: false}).blur();
+            cy.get('[data-testid="reset-password"]').clear().type(defaultUser.password, {log: false}).blur();
+            cy.get('[data-testid="reset-confirm-password"]').clear().type(defaultUser.password, {log: false}).blur();
             cy.get('[data-testid="reset-submit"]').click();
             cy.contains('New password must be different from the old one.').should('be.visible');
-            cy.get('input[name="password"]').clear().type(newPassword, {log: false}).blur();
-            cy.get('input[name="confirmPassword"]').clear().type(newPassword, {log: false}).blur();
+            cy.get('[data-testid="reset-password"]').clear().type(resolvedNewPassword, {log: false}).blur();
+            cy.get('[data-testid="reset-confirm-password"]').clear().type(resolvedNewPassword, {log: false}).blur();
             cy.get('[data-testid="reset-submit"]').click();
             cy.url().should('include', '/login');
             cy.get('[data-testid="login-user"]').clear().type(defaultUser.username);
-            cy.get('[data-testid="login-pass"]').clear().type(newPassword, {log: false});
+            cy.get('[data-testid="login-pass"]').clear().type(resolvedNewPassword, {log: false});
             cy.get('[data-testid="login-button"]').click();
         });
     });

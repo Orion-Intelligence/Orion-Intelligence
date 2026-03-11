@@ -34,6 +34,8 @@ import { ScrollService } from '../../../shared/services/scroll.service';
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultContainer implements OnInit, AfterViewInit, AfterViewChecked {
+  private pendingScrollRestore = false;
+
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
   protected readonly Category = Category;
@@ -44,7 +46,6 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   public isResponseLoading = signal(false);
   type: Category = Category.STRATEGIC;
   apiEndpoint: string = '';
-  private pendingScrollRestore = false;
 
   constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService) {
     this.type = this.route.snapshot.data['type'] as Category;

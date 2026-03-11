@@ -34,6 +34,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   content = '';
   listItems: any[] = [];
   arrayKeys: string[] = [];
+
   constructor(private route: ActivatedRoute, private appService: AppService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
     this.lang = this.appService.getConfig().appSettings.language_allowed;
   }

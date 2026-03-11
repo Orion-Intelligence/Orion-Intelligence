@@ -44,6 +44,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   isExpandedMetadata = true;
   username = signal<string>('');
   role = signal<string>('');
+
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, protected authService: AuthService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
     this.lang = appService.getConfig().appSettings.language_allowed;
     this.lang_detected = appService.getConfig().appSettings.language_allowed;

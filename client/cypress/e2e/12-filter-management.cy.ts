@@ -35,6 +35,7 @@ describe('Filter Management - General Intelligence Flow', () => {
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).should('be.visible').clear().type('test query{enter}');
     });
 
+    cy.wait(1)
     cy.openSideFilter();
 
     SAFE_SEARCH_OPTIONS.forEach((option) => {
