@@ -121,22 +121,11 @@
             </div>
             @if (canExportstix()||licenseService.isMaintainer()) {
               <div class="dropdown category_report_alert-dropdown" (click)="$event.stopPropagation()">
-                <button
-                  type="button"
-                  class="category_report_burger-icon category_report_burger-btn"
-                  [attr.id]="'dropdownMenu' + item.id"
-                  [attr.aria-expanded]="openedActionMenuId === item.id"
-                  aria-label="Alert actions"
-                  aria-haspopup="menu"
-                  (click)="toggleActionMenu(item.id, $event)">
+                <button type="button" class="category_report_burger-icon category_report_burger-btn" [attr.id]="'dropdownMenu' + item.id" [attr.aria-expanded]="openedActionMenuId === item.id" aria-label="Alert actions" aria-haspopup="menu" (click)="toggleActionMenu(item.id, $event)">
                   <img src="/assets/images/shared/theme/burger_icon.svg" alt="menu">
                 </button>
                 @if (openedActionMenuId === item.id) {
-                  <ul
-                    class="dropdown-menu dropdown-menu-end category_report_alert_no-arrow category_report_dropdown-menu-animated"
-                    [attr.aria-labelledby]="'dropdownMenu' + item.id"
-                    role="menu"
-                    (click)="$event.stopPropagation()">
+                  <ul class="dropdown-menu dropdown-menu-end category_report_alert_no-arrow category_report_dropdown-menu-animated" [attr.aria-labelledby]="'dropdownMenu' + item.id" role="menu" (click)="$event.stopPropagation()">
                     @if (item.custom&&licenseService.isMaintainer()) {
                       <li>
                         <button type="button" class="dropdown-item" role="menuitem" (click)="showAlertPopup('edit', item.id); closeActionMenus()">Edit Alert</button>
