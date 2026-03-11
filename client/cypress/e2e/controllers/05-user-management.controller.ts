@@ -58,6 +58,7 @@ export function addUser(user: ManagedUser) {
   cy.get('@addUserModal').find('input[name="username"]', {timeout: 30000}).should('be.visible').clear().type(user.username);
   cy.get('@addUserModal').find('input[name="email"]', {timeout: 30000}).should('be.visible').clear().type(user.email);
   cy.get('@addUserModal').find('input[name="password"]', {timeout: 30000}).should('be.visible').clear().type(user.password);
+  cy.get('@addUserModal').find('[data-testid="tenant-add-user-confirm-password"]', {timeout: 30000}).should('be.visible').clear().type(user.password);
   setSelect('role', user.role);
   setSelect('status', 'Active');
   const wanted = user.licenses.map((x) => x.trim().toLowerCase());

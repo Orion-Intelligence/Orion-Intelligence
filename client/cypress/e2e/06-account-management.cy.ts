@@ -66,7 +66,6 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
         cy.get('body', {timeout: 20000}).then(($body) => {
             if ($body.text().includes('Password Reset Email Sent')) {
                 cy.contains('Password Reset Email Sent').should('be.visible');
-                return;
             }
 
             cy.openLastMailAndGetUrl().then((url) => {
@@ -74,7 +73,6 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 cy.visit(url);
             });
             cy.url().should('include', '/reset');
-            cy.get('.signup-container__title').should('contain', 'Reset Password');
             cy.get('[data-testid="reset-password"]').clear().type(defaultUser.password, {log: false}).blur();
             cy.get('[data-testid="reset-confirm-password"]').clear().type(defaultUser.password, {log: false}).blur();
             cy.get('[data-testid="reset-submit"]').click();

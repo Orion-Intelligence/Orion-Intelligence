@@ -77,6 +77,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="tenant-add-user-username"]', {timeout: 30000}).type(tenantSubUser.username);
     cy.get('[data-testid="tenant-add-user-email"]', {timeout: 30000}).type(tenantSubUser.email);
     cy.get('[data-testid="tenant-add-user-password"]', {timeout: 30000}).type(tenantSubUser.password, {log: false});
+    cy.get('[data-testid="tenant-add-user-confirm-password"]', {timeout: 30000}).type(tenantSubUser.password, {log: false});
     cy.get('[data-testid="tenant-add-user-submit"]', {timeout: 30000}).scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.logout();
     cy.url().should('include', '/login');

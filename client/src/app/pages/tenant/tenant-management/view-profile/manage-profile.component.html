@@ -149,8 +149,8 @@
                                     <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                                       @for (license of licenseList; track license) {
                                         @if (canAssignLicense(license)) {
-                                          <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [class.license-selected]="(user.licenses || []).indexOf(license) > -1" [class.license-disabled]="isLicenseDisabled()" (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
-                                            <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">{{ licenseService.getLicenseLabel(license) }}</span>
+                                          <div class="license-card flex min-h-[34px] select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="isLicenseDisabled() ? 'cursor-not-allowed border border-[var(--color-border)] bg-[var(--color-blue-820)] opacity-60' : ((user.licenses || []).indexOf(license) > -1 ? 'cursor-pointer border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'cursor-pointer border border-[var(--color-border)] bg-[var(--color-blue-820)]')" (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
+                                            <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(user.licenses || []).indexOf(license) > -1 ? 'text-white' : ''">{{ licenseService.getLicenseLabel(license) }}</span>
                                             <input type="checkbox" class="hidden" [checked]="(user.licenses || []).indexOf(license) > -1" />
                                           </div>
                                         }
@@ -247,8 +247,8 @@
                             <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                               @for (license of licenseList; track license) {
                                 @if (canAssignLicense(license)) {
-                                  <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [class.license-selected]="(user.licenses || []).indexOf(license) > -1" [class.license-disabled]="isLicenseDisabled()" (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
-                                    <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">{{ licenseService.getLicenseLabel(license) }}</span>
+                                  <div class="license-card flex min-h-[34px] select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="isLicenseDisabled() ? 'cursor-not-allowed border border-[var(--color-border)] bg-[var(--color-blue-820)] opacity-60' : ((user.licenses || []).indexOf(license) > -1 ? 'cursor-pointer border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'cursor-pointer border border-[var(--color-border)] bg-[var(--color-blue-820)]')" (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
+                                    <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(user.licenses || []).indexOf(license) > -1 ? 'text-white' : ''">{{ licenseService.getLicenseLabel(license) }}</span>
                                     <input type="checkbox" class="hidden" [checked]="(user.licenses || []).indexOf(license) > -1" />
                                   </div>
                                 }

@@ -7,10 +7,12 @@ import { ApiService } from '../../../../services/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { overlayAnimation, popupAnimation } from '../../../../animations/popup.animations';
 @Component({
   selector: 'app-add-custom-alert',
   imports: [CommonModule, FormsModule],
   templateUrl: './add-custom-alert.component.html',
+  animations: [overlayAnimation, popupAnimation],
 })
 export class AddCustomAlertComponent implements OnInit {
   protected readonly decodeURIComponent = decodeURIComponent;

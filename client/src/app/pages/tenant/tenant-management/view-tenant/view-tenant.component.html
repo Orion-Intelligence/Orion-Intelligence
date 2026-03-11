@@ -168,9 +168,9 @@
                                   <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                                     @for (license of licenseList; track license) {
                                       @if (licenseService.getLicenseLabel(license) !== 'maintainer') {
-                                        <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [attr.data-testid]="'tenant-license-' + license" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
+                                        <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [attr.data-testid]="'tenant-license-' + license" [ngClass]="tenant.licenses?.includes(license) ? 'border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'border border-[var(--color-border)] bg-[var(--color-blue-820)]'" (click)="toggleTenantLicense(tenant, license)">
                                           <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
-                                          <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
+                                          <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="tenant.licenses?.includes(license) ? 'text-white' : ''">
                                             {{ licenseService.getLicenseLabel(license) }}
                                           </span>
                                         </div>
@@ -269,9 +269,9 @@
                           <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                             @for (license of licenseList; track license) {
                               @if (licenseService.getLicenseLabel(license) !== 'maintainer') {
-                                <div class="license-btn flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [class.license-selected]="tenant.licenses?.includes(license)" (click)="toggleTenantLicense(tenant, license)">
+                                <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="tenant.licenses?.includes(license) ? 'border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'border border-[var(--color-border)] bg-[var(--color-blue-820)]'" (click)="toggleTenantLicense(tenant, license)">
                                   <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
-                                  <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap">
+                                  <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="tenant.licenses?.includes(license) ? 'text-white' : ''">
                                     {{ licenseService.getLicenseLabel(license) }}
                                   </span>
                                 </div>

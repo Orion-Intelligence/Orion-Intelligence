@@ -26,6 +26,7 @@ export class AddTenantComponent implements OnInit {
   passwordStrength: PasswordStrength = null;
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();
   currentUnmetCheck: string | null = null;
+  confirmPassword = '';
 
   @Output() closs = new EventEmitter<void>();
   @Output() accountAdded = new EventEmitter<void>();
@@ -54,6 +55,10 @@ export class AddTenantComponent implements OnInit {
     }
     if (!this.model.password || !this.allPasswordRequirementsMet) {
       this.errorText = 'Password is required';
+      return;
+    }
+    if (this.model.password !== this.confirmPassword) {
+      this.errorText = 'Password and confirm password do not match';
       return;
     }
     if (!this.model.licenses || this.model.licenses.length === 0) {

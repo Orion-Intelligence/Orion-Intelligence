@@ -248,6 +248,156 @@ html:has(body.dark-theme) {
   animation: loader_indeterminate 1.5s linear infinite;
 }
 
+.reset-page-wrapper {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100dvh - 60px);
+  width: 100vw;
+}
+
+.reset-page-overlay {
+  display: flex;
+  min-height: calc(100dvh - 60px);
+  width: 100%;
+  align-items: flex-start;
+  justify-content: center;
+  background: rgba(14, 22, 38, 0.85);
+  padding: 20vh 1rem 0;
+}
+
+.reset-page__card {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 16px;
+  border: 1px solid rgba(252, 252, 252, 0.08);
+  background: rgba(23, 34, 53, 0.5);
+  padding: 42px 36px;
+  font-family: Inter, sans-serif;
+  color: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+
+.ui-auth-title {
+  margin-bottom: 8px;
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.ui-auth-subtitle {
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #9ab2cd;
+}
+
+.ui-auth-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.ui-auth-label {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.ui-auth-input {
+  height: 44px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(252, 252, 252, 0.07);
+  background: #fff;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #0e1626;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 5%);
+  outline: none;
+}
+
+.ui-auth-input::placeholder {
+  color: #5d6f85;
+}
+
+.ui-auth-input-with-icon {
+  padding-left: 40px;
+}
+
+.ui-auth-input-icon {
+  pointer-events: none;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #5d6f85;
+}
+
+.ui-password-meter-track {
+  margin-top: 8px;
+  height: 6px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #e0e0e0;
+}
+
+.ui-password-meter-bar {
+  height: 100%;
+  transition: width 300ms ease;
+}
+
+.ui-password-meter-hint {
+  margin-top: 10px;
+  list-style: none;
+  padding: 0;
+  font-size: 12px;
+  color: #a0b8d1;
+}
+
+.ui-auth-error {
+  margin-top: 8px;
+  width: 100%;
+  border-radius: 8px;
+  background: rgba(220, 53, 69, 0.8);
+  padding: 8px 12px;
+  color: #fff;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 5%);
+}
+
+.ui-auth-primary-btn {
+  margin-top: 20px;
+  height: 44px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+  background: #57a5eb;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 5%);
+}
+
+.ui-auth-primary-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+  .reset-page-overlay {
+    padding: 10px;
+  }
+
+  .reset-page__card,
+  .ui-auth-card {
+    padding: 28px 20px;
+  }
+}
+
 @for $i from 0 through 100 {
   .ui-wpct-#{$i} {
     width: #{$i + '%'};
@@ -1385,10 +1535,6 @@ html:has(body.dark-theme) {
   }
 }
 
-.dark-theme .ui-search-icon {
-  filter: brightness(0) saturate(100%) invert(100%);
-}
-
 .light-theme .ui-topbar-profile-icon {
   filter: var(--ui-icon-filter-light);
 }
@@ -1612,18 +1758,22 @@ app-world-heatmap .country:not(.is-clickable) {
   }
 
   .ui-shimmer {
+    --ui-shimmer-base: rgba(255, 255, 255, 0.06);
+    --ui-shimmer-edge: rgba(255, 255, 255, 0.02);
+    --ui-shimmer-slide-highlight: rgba(255, 255, 255, 0.16);
     position: relative;
     overflow: hidden;
     max-width: 100%;
     box-sizing: border-box;
+    isolation: isolate;
+    background: linear-gradient(180deg, var(--ui-shimmer-base), var(--ui-shimmer-base)) !important;
   }
 
   .ui-shimmer::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0));
-    animation: ui-shimmer-breathe 2.2s ease-in-out infinite;
+    background: linear-gradient(180deg, var(--ui-shimmer-edge), transparent);
     pointer-events: none;
   }
 
@@ -1631,9 +1781,21 @@ app-world-heatmap .country:not(.is-clickable) {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 20%, var(--ui-shimmer-slide-highlight) 48%, transparent 76%);
     animation: ui-shimmer-slide 1.55s linear infinite;
     pointer-events: none;
+  }
+
+  .light-theme .ui-shimmer {
+    --ui-shimmer-base: #cfdceb;
+    --ui-shimmer-edge: rgba(255, 255, 255, 0.42);
+    --ui-shimmer-slide-highlight: rgba(255, 255, 255, 0.88);
+  }
+
+  .dark-theme .ui-shimmer {
+    --ui-shimmer-base: rgba(255, 255, 255, 0.09);
+    --ui-shimmer-edge: rgba(255, 255, 255, 0.045);
+    --ui-shimmer-slide-highlight: rgba(255, 255, 255, 0.2);
   }
 
   .ui-progress-track {
