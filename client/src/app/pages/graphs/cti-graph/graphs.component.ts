@@ -47,7 +47,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly clusterNodePrefix = 'cti_vertices/';
   private nodeTypeById: Record<string, string> = {};
   private readonly graphType = 'graph';
-  private hasLoadedSessions = false;
   private lastSavedSessionSignature = '';
   private readonly globalPointerDownListener = (event: Event) => {
     const target = event.target as Node | null;
@@ -140,6 +139,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   isAddMenuVisible = false;
   isHeaderMenuVisible = false;
   isReportExportModalOpen = false;
+  hasLoadedSessions = false;
   readonly graphExportOptions = GRAPH_REPORT_EXPORT_OPTIONS;
   @ViewChild('addMenuWrapper', { static: false }) addMenuWrapper?: ElementRef<HTMLElement>;
   @ViewChild('headerMenuWrapper', { static: false }) headerMenuWrapper?: ElementRef<HTMLElement>;

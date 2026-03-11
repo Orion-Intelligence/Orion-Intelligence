@@ -24,6 +24,7 @@ export class SidebarComponent implements OnInit, OnChanges {
     label,
     key
   }));
+
   @Input() filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
   @Input() collapsed = false;
 

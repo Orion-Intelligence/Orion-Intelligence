@@ -10,6 +10,7 @@ import { UserImagePickerComponent } from '../user-image-picker/user-image-picker
 import { TenantModel } from '../../../../model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
+import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 @Component({
   selector: 'app-tenant-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent],
@@ -22,7 +23,7 @@ export class TenantSettingsComponent implements OnInit {
   userSessionData: userSessionData;
   userId: string = '';
 
-  constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
@@ -75,10 +76,16 @@ export class TenantSettingsComponent implements OnInit {
   updateUserResource(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.apiService.put<any>('tenant/image', formData).subscribe(res => {
-      if (res?.image) {
-        this.appService.userSessionData().tenant.image =
-                    `/api/s/static/tenant/${res.image}`;
+    return this.apiService.put<any>('tenant/image', formData).subscribe({
+      next: (res) => {
+        if (res?.image) {
+          this.appService.userSessionData().tenant.image =
+                      `/api/s/static/tenant/${res.image}`;
+        }
+      },
+      error: (err) => {
+        const message = err?.error?.detail || 'Failed to upload image';
+        this.messageNotificationService.show(message);
       }
     });
   }

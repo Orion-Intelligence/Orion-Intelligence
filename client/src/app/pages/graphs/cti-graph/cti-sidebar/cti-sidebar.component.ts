@@ -9,6 +9,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 export class CtiSidebarComponent {
   @Input() filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
   @Input() collapsed = false;
+
   @Output() filtersApplied = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
   @Output() filtersChanged = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
   @Output() collapsedChange = new EventEmitter<boolean>();
