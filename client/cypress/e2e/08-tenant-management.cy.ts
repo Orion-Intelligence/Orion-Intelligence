@@ -9,7 +9,7 @@ import {
   waitForBlockingOverlayToClose
 } from './controllers/08-tenant-management.controller';
 
-describe('Tenant Management - End-to-End Provisioning Flow', () => {
+describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenant: any;
   let tenantSubUser: any;
 
