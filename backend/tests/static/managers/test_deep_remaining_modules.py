@@ -36,7 +36,7 @@ def test_alert_job_process_tenant_alerts_stealerlogs_bulk_upsert():
     captured = []
 
     class _Search:
-        async def search_stealerlogs_result(self, *_args, **_kwargs):
+        async def search_stealer_iocs(self, *_args, **_kwargs):
             return {
                 "Result": [
                     {
