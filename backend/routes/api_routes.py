@@ -88,16 +88,19 @@ async def search_social(param: search_consolidated_param_model = Body(...)):
         base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
     else:
-        param.platform = param.category
-        if param.platform == "telegram":
+        if param.category == "telegram":
+            param.category = "all"
             base_index = [ELASTIC_INDEX.S_CHATS_INDEX]
             return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
         else:
+            param.platform = param.category
+            param.category = "all"
             base_index = [ELASTIC_INDEX.S_SOCIAL_INDEX]
-            return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
+            return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
 
 
 @api_routes.post(
+
     "/api/search/exploit",
     summary="Search exploit reports",
     description=SEARCH_DOCS["strategic"]["description"],

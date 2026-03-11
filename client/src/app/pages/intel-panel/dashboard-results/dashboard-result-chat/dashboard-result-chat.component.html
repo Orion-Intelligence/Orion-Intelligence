@@ -1,5 +1,5 @@
 <div [ngClass]="isConsolidatedView ? 'w-full min-w-0 space-y-4' : 'w-full max-w-[910px] px-2 sm:px-0 space-y-4'">
-  @for (item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30)); track item.m_message_id || item.m_hash || item.m_url || $index) {
+  @for (item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30)); track item.m_message_id || item.m_hash || item.m_message_sharable_link || $index) {
     <div [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-white px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-[10px]">

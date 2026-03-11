@@ -129,7 +129,7 @@
     @if (results_defacement?.Result?.length) {
       <hr class="mt-[16px] h-px border-0 bg-[var(--color-divider)]" />
     }
-    @for (item of stResults.slice(0, showLimitStealer); track item.hash || item.url || item.username || $index; let i = $index) {
+    @for (item of stResults.slice(0, showLimitStealer); track item['hash'] || item['url'] || item['username'] || $index; let i = $index) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
         <div class="ui-consolidated-sub flex min-h-[190px] w-full flex-col justify-between rounded-[10px] border p-[14px] text-[var(--color-text1)] shadow-[0_8px_20px_rgba(0,0,0,0.14)] transition-[background,border-color,box-shadow,transform,filter] duration-150 hover:border-[var(--color-blue-640)] hover:shadow-[0_14px_34px_rgba(0,0,0,0.22)] hover:translate-y-[-1px] hover:brightness-[1.01] max-[640px]:p-[10px]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--color-divider)] pb-[12px] mb-[12px]">

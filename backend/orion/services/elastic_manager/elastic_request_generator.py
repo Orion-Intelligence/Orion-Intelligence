@@ -428,6 +428,7 @@ class elastic_request_generator:
         m_network = p_query_model.network
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = p_query_model.content
+        m_platform = (p_query_model.platform or "").strip().lower()
         m_safe_search = p_query_model.safe
         must_clauses = []
         must_not_clause = []
@@ -484,6 +485,9 @@ class elastic_request_generator:
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
+
+        if m_platform and m_platform not in ("", "all"):
+            must_clauses.append({"term": {"m_platform": {"value": m_platform}}})
 
         if m_safe_search and m_safe_search == True:
             must_not_clause.append({"term": {"m_content_type": "adult"}})

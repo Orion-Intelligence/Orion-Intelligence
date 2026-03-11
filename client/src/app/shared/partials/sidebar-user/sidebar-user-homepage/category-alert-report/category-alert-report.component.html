@@ -108,7 +108,7 @@
     }
 
     <div class="alert-card-stagger-list category_report_alerts mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
-      @for (item of visibleFilteredAlerts; track item.alert_id || item.data_hash || item.title || $index) {
+      @for (item of visibleFilteredAlerts; track item.id || item.hash || item.title || $index) {
         <div data-testid="tenant-alert-report-card" class="alert-card-stagger-item category_report_alert-card">
           <div class="category_report_alert-header">
             <div class="category_report_alert-card-top">
