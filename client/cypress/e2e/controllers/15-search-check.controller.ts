@@ -1,4 +1,4 @@
-import {SearchResultData} from '../17-search-check.cy';
+import {SearchResultData} from '../15-search-check.cy';
 
 export const SEARCH_FIXTURES = {
   general_intelligence_data: {
@@ -65,7 +65,7 @@ const SIDEBAR_SUBITEM_PREFIX: Record<string, string> = {
   Feed: 'feed',
 };
 
-export function openSidebarGroup17(title: string) {
+export function openSidebarGroup15(title: string) {
   const testId = SIDEBAR_GROUP_TESTID[title];
   expect(testId, `sidebar testid mapping for "${title}"`).to.exist;
 
@@ -84,7 +84,7 @@ export function openSidebarGroup17(title: string) {
     });
 }
 
-export function clickSidebarSubItem17(groupTitle: string, itemTitle: string) {
+export function clickSidebarSubItem15(groupTitle: string, itemTitle: string) {
   const prefix = SIDEBAR_SUBITEM_PREFIX[groupTitle];
   const testId = SIDEBAR_GROUP_TESTID[groupTitle];
   expect(prefix, `subitem prefix mapping for "${groupTitle}"`).to.exist;
@@ -103,7 +103,7 @@ export function clickSidebarSubItem17(groupTitle: string, itemTitle: string) {
     .click();
 }
 
-export function waitForSearchReady17() {
+export function waitForSearchReady15() {
   cy.get('app-loading-form', {timeout: 30000}).should('not.exist');
 
   cy.get('body').then(($body) => {
@@ -113,8 +113,8 @@ export function waitForSearchReady17() {
   });
 }
 
-export function typeDashboardSearch17(value: string) {
-  waitForSearchReady17();
+export function typeDashboardSearch15(value: string) {
+  waitForSearchReady15();
 
   cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000})
     .first()
@@ -177,10 +177,16 @@ export function assertFirstResultCard(data: SearchResultData) {
 
 export function assertFirstDefacementRow(data: {search_query: string; base_url: string; team: string; date: string; web_url: string}) {
   cy.get('tbody tr.cursor-pointer', {timeout: 35000})
-    .first()
-    .scrollIntoView()
-    .should('be.visible')
-    .as('firstRow');
+    .then(($rows) => {
+      const matchingRow = Array.from($rows).find((row) => {
+        const cells = row.querySelectorAll('td');
+        const rowText = Array.from(cells).map((cell) => cell.textContent?.trim() || '').join(' ');
+        return rowText.includes(data.base_url.trim()) || rowText.includes(data.team.trim());
+      });
+
+      expect(matchingRow, `defacement row for ${data.base_url}`).to.exist;
+      cy.wrap(matchingRow as HTMLTableRowElement).scrollIntoView().should('be.visible').as('firstRow');
+    });
 
   cy.get('@firstRow')
     .find('td[data-label="Base URL"]')

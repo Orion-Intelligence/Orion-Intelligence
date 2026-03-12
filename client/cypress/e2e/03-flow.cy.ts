@@ -1,8 +1,23 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_DATA_BREACH_SECTIONS, FLOW_DEFACEMENT_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_EXPLOIT_SECTIONS, FLOW_GENERAL_INTELLIGENCE_SECTIONS, FLOW_SOCIAL_SECTIONS, FLOW_WEB_SCANS_SECTIONS} from '../support/constants';
 import {clickSidebarSubItem, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup} from './controllers/03-flow.controller';
+import {
+  applyDateRange,
+  applyDirectoryDropdown,
+  assertDirectoryContentVisible,
+  DIRECTORY_CONTENT_OPTION,
+  DIRECTORY_INDEX_OPTION,
+  DIRECTORY_NETWORK_OPTION,
+  resetDirectoryFilters,
+  waitForDirectoryRequest
+} from './controllers/16-directory.controller';
 
 describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
+  let testData: any = {};
+
   before(() => {
+    cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
+      testData = TEST_DATA || {};
+    });
     cy.loginAsAdmin();
   });
 
@@ -149,5 +164,67 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     });
 
     cy.get('[data-testid="world-heatmap-map"] svg', {timeout: 15000}).should('exist');
+  });
+
+  it('opens help and support modal, fills form, and sends message', () => {
+    cy.intercept('POST', '**/support', {
+      statusCode: 200,
+      body: {success: true}
+    }).as('sendSupport');
+
+    cy.get('[data-testid="profile-menu"]', {timeout: 15000}).filter(':visible').first().should('be.visible').click({scrollBehavior: false});
+    cy.get('[data-testid="profile-help-support"]', {timeout: 10000}).filter(':visible').first().should('be.visible').click({scrollBehavior: false});
+    cy.get('[data-testid="support-overlay"]', {timeout: 10000}).should('be.visible').and('not.have.class', 'opacity-0');
+    cy.get('[data-testid="support-modal"]', {timeout: 10000}).should('be.visible');
+    cy.get('[data-testid="support-modal-title"]', {timeout: 10000}).should('be.visible');
+    cy.get('[data-testid="support-email-input"]').should('be.visible').clear().type(testData.support_email);
+    cy.get('[data-testid="support-subject-input"]').should('be.visible').clear().type('Support request from Cypress');
+    cy.get('[data-testid="support-message-input"]').should('be.visible').clear().type('Please review this test support message submission flow.');
+    cy.get('[data-testid="support-send"]').should('be.visible').and('not.be.disabled').click();
+
+    cy.wait('@sendSupport');
+  });
+
+  it('covers directory filters, load more, and pagination', () => {
+    cy.intercept('GET', '**/api/directory*').as('getDirectory');
+    cy.visit('/dashboard/directory');
+    waitForDirectoryRequest();
+    cy.get('app-directory .ui-page-title', {timeout: 30000}).should('contain.text', 'Directory');
+    assertDirectoryContentVisible();
+
+    cy.get('app-directory-list tbody tr', {timeout: 30000}).then(($rows) => {
+      const initialCount = $rows.length;
+
+      if (initialCount > 50) {
+        expect(initialCount).to.be.greaterThan(50);
+        return;
+      }
+
+      cy.get('#bottom', {timeout: 20000}).scrollIntoView();
+      cy.wait(1000);
+      cy.get('app-directory-list tbody tr', {timeout: 30000}).its('length').should('be.greaterThan', initialCount);
+    });
+
+    cy.get('[data-testid="pagination-next"]', {timeout: 20000}).should('exist').scrollIntoView().click();
+    waitForDirectoryRequest();
+    cy.get('[data-testid="pagination-page-2"]', {timeout: 20000}).should('exist');
+    cy.location('search').should('include', 'page=2');
+
+    cy.get('[data-testid="pagination-page-1"]', {timeout: 20000}).scrollIntoView().click();
+    waitForDirectoryRequest();
+
+    applyDirectoryDropdown('network', DIRECTORY_NETWORK_OPTION, 'network');
+    resetDirectoryFilters();
+
+    applyDirectoryDropdown('index', DIRECTORY_INDEX_OPTION, 'index');
+    resetDirectoryFilters();
+
+    applyDirectoryDropdown('content_type', DIRECTORY_CONTENT_OPTION, 'content_type');
+    resetDirectoryFilters();
+
+    applyDateRange(14);
+    cy.contains('No links found!', {timeout: 30000}).should('be.visible');
+
+    resetDirectoryFilters();
   });
 });
