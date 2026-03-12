@@ -293,6 +293,10 @@ export class TabManagerService {
   private deserializeTabState(plainState: SerializableTabState): TabState {
     const newState = this.createNewState();
     for (const key in plainState) {
+      if (key === 'isEditMode') {
+        // Edit mode should never survive a reload/imported tab restore.
+        continue;
+      }
       let value = (plainState as any)[key];
       if (value && value.__type === 'Map') {
         (newState as any)[key].set(new Map(value.value));

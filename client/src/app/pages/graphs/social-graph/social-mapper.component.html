@@ -197,9 +197,10 @@
         </div>
       </main>
     } @else {
-      <div class="flex-grow flex items-center justify-center text-[var(--color-text4)]">
-        <p>Loading session...</p>
-      </div>
+      <app-graph-loading
+        [title]="'Restoring Social Session'"
+        [subtitle]="'Loading tabs, profile state, graph data, and saved selections.'">
+      </app-graph-loading>
     }
     @if (state.isMetadataPopupVisible() && state.selectedPlatformData()) {
       <app-metadata-popup
@@ -327,9 +328,10 @@
       </app-relationship-details-popup>
     }
   } @else {
-    <div class="flex-grow flex items-center justify-center text-[var(--color-text4)]">
-      <p>Loading social mapper styles...</p>
-    </div>
+    <app-graph-loading
+      [title]="'Loading Social Mapper'"
+      [subtitle]="'Loading graph styles.'">
+    </app-graph-loading>
   }
 
 </div>
