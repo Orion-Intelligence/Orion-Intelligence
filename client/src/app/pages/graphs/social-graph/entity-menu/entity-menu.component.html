@@ -4,7 +4,7 @@
       <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isCollapsed()" [class.w-0]="isCollapsed()" [class.opacity-0]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
         <h2 class="text-md whitespace-nowrap font-semibold text-[var(--color-text2)]">Add Entity</h2>
       </div>
-      <button (click)="toggle.emit()" [class]="isCollapsed() ? 'flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
+      <button (click)="toggle.emit()" [class]="isCollapsed() ? 'flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'flex h-10 w-10 items-center justify-center rounded-lg text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
         <i class="bi bi-list text-xl leading-none"></i>
       </button>
     </div>
@@ -12,7 +12,7 @@
       @if (!isCollapsed()) {
         <div class="h-full min-h-0 w-72 p-3 flex flex-col gap-2 overflow-y-auto transition-all duration-300 ease-out">
           <div class="mb-1">
-            <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block h-9 w-full rounded-md border-0 bg-[var(--color-blue-690)] px-3 text-sm text-[var(--color-text1)] shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none">
+            <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-690)] px-3 text-sm text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
           </div>
           @for (option of filteredEntityAddOptions; track option.type) {
             <button [attr.data-testid]="'add-entity-option-' + option.type" (click)="addEntityClicked.emit(option.type)" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
@@ -68,7 +68,7 @@
       </div>
       <div class="p-3 flex flex-col gap-2 overflow-y-auto">
         <div class="mb-1">
-          <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block h-9 w-full rounded-md border-0 bg-[var(--color-blue-690)] px-3 text-sm text-[var(--color-text1)] shadow-sm ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none">
+          <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-690)] px-3 text-sm text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
         </div>
         @for (option of filteredEntityAddOptions; track option.type) {
           <button [attr.data-testid]="'add-entity-option-' + option.type" (click)="addEntityClicked.emit(option.type); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">

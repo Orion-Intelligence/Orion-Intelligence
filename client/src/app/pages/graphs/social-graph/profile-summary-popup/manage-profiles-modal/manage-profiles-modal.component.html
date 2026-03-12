@@ -1,20 +1,18 @@
 <div data-testid="social-manage-profiles-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="close.emit()">
   <div data-testid="social-manage-profiles-modal" class="ui-graph-popup-panel flex h-full w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-2xl" (click)="$event.stopPropagation()">
-    <div class="p-3 flex items-start justify-between gap-3 border-b border-slate-700 bg-slate-900 flex-shrink-0 rounded-t-lg">
+    <div class="p-3 flex items-start justify-between gap-3 border-b border-slate-700 bg-slate-850/90 flex-shrink-0 rounded-t-lg">
       <div class="flex items-center gap-3 min-w-0">
         <div class="h-12 w-12 rounded-full ring-2 ring-slate-600 flex-shrink-0 flex items-center justify-center bg-slate-700">
           <i class="bi bi-person-fill text-3xl text-slate-400"></i>
         </div>
         <div class="min-w-0">
           <h3 class="text-lg font-bold text-slate-100 truncate">Manage Profiles for<span class="mx-2 text-slate-600 font-light">|</span><span class="text-indigo-400">{{ data()!.username }}</span></h3>
-          <span class="inline-block bg-slate-700 text-slate-300 text-xs font-medium px-2 py-0.5 rounded-full mt-1">
+          <span class="mt-1 inline-block rounded-full bg-slate-700 px-2 py-0.5 text-xs font-medium text-slate-300">
             {{ data()!.platforms.length }} platforms found
           </span>
         </div>
       </div>
-      <button (click)="close.emit()" type="button" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
-        <i class="bi bi-x-lg text-lg"></i>
-      </button>
+      <button (click)="close.emit()" type="button" class="ui-social-popup-icon-btn text-slate-400" title="Close"><i class="bi bi-x-lg text-[15px] leading-none"></i></button>
     </div>
 
     <div class="p-3 border-b border-slate-700 space-y-3">
@@ -22,7 +20,7 @@
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
           <i class="bi bi-search w-5 h-5 text-slate-400"></i>
         </div>
-        <input data-testid="social-manage-profiles-filter" type="text" placeholder="Filter platforms..." [value]="searchTerm()" (input)="onSearchChanged($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-2 pl-10 pr-10 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+        <input data-testid="social-manage-profiles-filter" type="text" placeholder="Filter platforms..." [value]="searchTerm()" (input)="onSearchChanged($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/50 py-2.5 pl-10 pr-10 text-white shadow-sm placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm" />
         @if (searchTerm()) {
           <button (click)="clearSearch()" type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors">
             <i class="bi bi-x-circle-fill"></i>
@@ -33,10 +31,10 @@
         <div class="flex items-center justify-between">
           <span class="text-xs text-slate-500">Active Profiles</span>
           <div class="flex items-center gap-2">
-            <button data-testid="social-manage-profiles-select-all" (click)="selectAllVisible()" [disabled]="areAllVisibleSelected()" class="px-2.5 py-1 text-xs font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <button data-testid="social-manage-profiles-select-all" (click)="selectAllVisible()" [disabled]="areAllVisibleSelected()" class="rounded-lg bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50">
               Select All
             </button>
-            <button data-testid="social-manage-profiles-deselect-all" (click)="deselectAllVisible()" [disabled]="areAllVisibleDeselected()" class="px-2.5 py-1 text-xs font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <button data-testid="social-manage-profiles-deselect-all" (click)="deselectAllVisible()" [disabled]="areAllVisibleDeselected()" class="rounded-lg bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50">
               Deselect All
             </button>
           </div>
@@ -63,9 +61,9 @@
               </div>
             }
             <div class="rounded-lg">
-              <div (click)="onPlatformCardClick($event, platform)" class="flex flex-col gap-3 p-3 rounded-lg border transition-colors" [class.cursor-pointer]="!isImageExtractedFlow()" [class.bg-slate-700]="platform.isSelected && !isImageExtractedFlow()" [class.border-slate-500]="platform.isSelected && !isImageExtractedFlow()" [class.border-slate-700]="!platform.isSelected || isImageExtractedFlow()">
+              <div (click)="onPlatformCardClick($event, platform)" class="flex flex-col gap-3 rounded-lg border p-3 transition-colors" [class.cursor-pointer]="!isImageExtractedFlow()" [style.background-color]="platform.isSelected && !isImageExtractedFlow() ? 'rgba(15, 23, 42, 0.34)' : 'rgba(15, 23, 42, 0.12)'" style="border-color: var(--color-border) !important;">
                 <div class="flex items-center">
-                  <div [socialMapperPlatformBg]="platform.platform" class="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-[#64748b] bg-[#475569] p-2 text-lg font-bold text-white shadow-[inset_0_0_0_1px_#64748b]">
+                  <div [socialMapperPlatformBg]="platform.platform" class="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-2 text-lg font-bold text-white">
                     <app-social-icon [platformName]="platform.platform"></app-social-icon>
                   </div>
                   <div class="flex-grow min-w-0">
@@ -87,7 +85,7 @@
                         </span>
                       }
                       @if (isImageExtractedFlow() && isInformational(platform)) {
-                        <a [href]="getProfileUrl(platform)" target="_blank" rel="noopener noreferrer" (click)="onOpenProfileClick($event)" [class.pointer-events-none]="isProfileUrlDisabled(platform)" [class.opacity-40]="isProfileUrlDisabled(platform)" class="ml-auto h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-slate-200 bg-slate-700 hover:bg-slate-600 transition-colors inline-flex items-center justify-center leading-none">
+                        <a [href]="getProfileUrl(platform)" target="_blank" rel="noopener noreferrer" (click)="onOpenProfileClick($event)" [class.pointer-events-none]="isProfileUrlDisabled(platform)" [class.opacity-40]="isProfileUrlDisabled(platform)" class="ml-auto inline-flex h-7 items-center justify-center rounded-lg bg-slate-700 px-2.5 text-[11px] font-medium leading-none text-slate-200 transition-colors hover:bg-slate-600">
                           View link
                         </a>
                       }
@@ -106,11 +104,11 @@
                 </div>
                 @if (isImageExtractedFlow() && !isInformational(platform)) {
                   <div class="flex items-center gap-2">
-                    <input type="text" [value]="platform.draftUsername" (click)="onUsernameInputClick($event)" (input)="onUsernameChanged(platform, $event)" placeholder="Search username..." class="social-mapper-input block flex-grow rounded-md border-0 py-2 px-3 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 outline-none focus:outline-none focus:ring-0 sm:text-sm sm:leading-6" />
-                    <button type="button" (click)="onSearchUsernameClick($event, platform)" [disabled]="!hasValidDraftUsername(platform)" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60">
+                    <input type="text" [value]="platform.draftUsername" (click)="onUsernameInputClick($event)" (input)="onUsernameChanged(platform, $event)" placeholder="Search username..." class="social-mapper-input block flex-grow rounded-lg border border-slate-700/80 bg-slate-950/40 px-3 py-2 text-white shadow-sm placeholder:text-slate-500 outline-none focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm" />
+                    <button type="button" (click)="onSearchUsernameClick($event, platform)" [disabled]="!hasValidDraftUsername(platform)" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                       Fetch profile
                     </button>
-                    <a [href]="getProfileUrl(platform)" target="_blank" rel="noopener noreferrer" (click)="onOpenProfileClick($event)" [class.pointer-events-none]="isProfileUrlDisabled(platform)" [class.opacity-40]="isProfileUrlDisabled(platform)" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-slate-300 bg-slate-700 hover:bg-slate-600 transition-colors inline-flex items-center justify-center leading-none" title="Open profile in new tab">
+                    <a [href]="getProfileUrl(platform)" target="_blank" rel="noopener noreferrer" (click)="onOpenProfileClick($event)" [class.pointer-events-none]="isProfileUrlDisabled(platform)" [class.opacity-40]="isProfileUrlDisabled(platform)" class="inline-flex h-7 items-center justify-center rounded-lg bg-slate-700 px-2.5 text-[11px] font-medium leading-none text-slate-300 transition-colors hover:bg-slate-600" title="Open profile in new tab">
                       View link
                     </a>
                   </div>
@@ -127,20 +125,20 @@
           </div>
         }
       } @else {
-        <div class="h-full flex flex-col items-center justify-center text-center py-8 text-slate-500">
+        <div class="flex h-full flex-col items-center justify-center rounded-lg border border-dashed border-slate-700/80 bg-slate-900/20 py-8 text-center text-slate-500">
           <i class="bi bi-search text-3xl text-slate-600"></i>
           <p class="mt-2 text-sm">No platforms match your search.</p>
         </div>
       }
     </div>
 
-    <div class="p-4 bg-slate-900 flex justify-end items-center gap-4 flex-shrink-0 rounded-b-lg border-t border-slate-700">
-      <button data-testid="social-manage-profiles-cancel" (click)="close.emit()" class="flex items-center gap-2 h-7 px-3 text-[11px] font-medium rounded-md text-slate-200 bg-slate-700 hover:bg-slate-600 border border-slate-600/60 transition-colors">
+    <div class="p-4 bg-slate-850/80 flex justify-end items-center gap-4 flex-shrink-0 rounded-b-lg border-t border-slate-700">
+      <button data-testid="social-manage-profiles-cancel" (click)="close.emit()" class="flex h-7 items-center gap-2 rounded-lg border border-slate-600/60 bg-slate-700 px-3 text-[11px] font-medium text-slate-200 transition-colors hover:bg-slate-600">
         <i class="bi bi-x-circle"></i>
         <span>Cancel</span>
       </button>
       @if (!isImageExtractedFlow()) {
-        <button data-testid="social-manage-profiles-update-graph" (click)="onUpdateGraph()" class="flex items-center gap-2 h-7 px-3 text-[11px] font-medium rounded-md text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+        <button data-testid="social-manage-profiles-update-graph" (click)="onUpdateGraph()" class="inline-flex h-7 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 text-[11px] font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
           <i class="bi bi-check-circle"></i>
           <span>Update Graph</span>
         </button>

@@ -1165,16 +1165,37 @@ html:has(body.dark-theme) {
 .ui-popup-close {
   width: 42px;
   height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 8px;
   font-size: 28px;
   line-height: 1;
   color: #ccc;
+  padding: 0;
   transition: color 0.18s ease, background-color 0.18s ease;
 }
 
 .ui-popup-close:hover {
   background: var(--color-blue-700) !important;
   color: var(--color-blue-640) !important;
+}
+
+.ui-social-popup-icon-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+  color: var(--color-text4);
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.ui-social-popup-icon-btn:hover {
+  background: var(--color-blue-720) !important;
+  color: #fff !important;
 }
 
 .ui-popup-input,

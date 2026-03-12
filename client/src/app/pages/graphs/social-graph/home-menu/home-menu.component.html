@@ -6,7 +6,7 @@
           <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <i class="bi bi-search w-5 h-5 text-slate-400"></i>
           </div>
-          <input type="text" placeholder="Filter items..." [value]="searchTerm()" (input)="onSearchInput($event)" class="block w-full rounded-md border-0 bg-[var(--color-blue-690)] py-1.5 pl-10 pr-3 text-[var(--color-text2)] ring-1 ring-inset ring-[var(--color-border)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+          <input type="text" placeholder="Filter items..." [value]="searchTerm()" (input)="onSearchInput($event)" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-690)] py-1.5 pl-10 pr-3 text-[var(--color-text2)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
         </div>
       </div>
 
@@ -100,7 +100,7 @@
               </div>
               @if (displayJobs().length < jobsWithFilter().length) {
                 <div class="mt-4">
-                  <button (click)="loadMoreJobs()" class="w-full text-center px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800 rounded-md hover:bg-slate-700 transition-colors">Load More</button>
+                  <button (click)="loadMoreJobs()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">Load More</button>
                 </div>
               }
               @if (jobs().length === 0) {
@@ -188,7 +188,7 @@
                 }
                 @if (displayEntities().length < filteredEntities().length) {
                   <div class="mt-2">
-                    <button (click)="loadMoreEntities()" class="w-full text-center px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800 rounded-md hover:bg-slate-700 transition-colors">Load More</button>
+                    <button (click)="loadMoreEntities()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">Load More</button>
                   </div>
                 }
                 @if (customEntities().length === 0) {
@@ -212,11 +212,11 @@
 
     <div sidebar-collapsed class="h-full flex flex-col items-center">
       <div class="py-4 flex flex-col items-center gap-4">
-        <button data-cy="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-xl transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
+        <button data-cy="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
           <i class="bi bi-clock-history text-lg leading-none"></i>
         </button>
         @if (!isSmallScreen()) {
-          <button data-cy="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-xl transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
+          <button data-cy="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
             <i class="bi bi-diagram-3 text-lg leading-none"></i>
           </button>
         }

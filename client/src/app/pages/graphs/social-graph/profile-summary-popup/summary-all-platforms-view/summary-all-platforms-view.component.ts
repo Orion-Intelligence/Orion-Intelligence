@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, WritableSignal, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, WritableSignal, effect, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PlatformResult, ProfileLeakSessionData, ProfileMetadataSessionData } from '../../../../../shared/model/social/social-scan.models';
 import { formatKey } from '../../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
@@ -20,6 +21,7 @@ import { forkJoin, of } from 'rxjs';
 export class SummaryAllPlatformsViewComponent {
   private socialScanService = inject(SocialScanService);
   private tabManager = inject(TabManagerService);
+  private destroyRef = inject(DestroyRef);
 
   username = input.required<string>();
   email = input<string | undefined>();
@@ -59,6 +61,11 @@ export class SummaryAllPlatformsViewComponent {
   displayPlatformsForDetails = computed(() => this.filteredPlatformsForDetails().slice(0, this.visibleDetailsPlatformsCount()));
   displayPlatformsForPosts = computed(() => this.filteredPlatformsForPosts().slice(0, this.visiblePostsPlatformsCount()));
   displayPlatformsForImages = computed(() => this.filteredPlatformsForImages().slice(0, this.visibleImagesPlatformsCount()));
+  totalPlatforms = computed(() => this.platforms().length);
+  detailsReadyCount = computed(() => this.platforms().filter(platform => platform.profileDetails !== undefined).length);
+  postsReadyCount = computed(() => this.platforms().filter(platform => platform.posts !== undefined).length);
+  imagesReadyCount = computed(() => this.platforms().filter(platform => platform.images !== undefined).length);
+  connectionsReadyCount = computed(() => this.platforms().filter(platform => (platform.post_connections?.length ?? 0) > 0).length);
   visiblePostConnectionsCount = signal<Record<string, number>>({});
   readonly postConnectionsInitial = 10;
   readonly postConnectionsIncrement = 10;
@@ -183,7 +190,7 @@ export class SummaryAllPlatformsViewComponent {
     }).pipe(finalize(() => {
       this.profileLeaksLoading.set(false);
       this.profileLeaksLoaded.set(true);
-    })).subscribe({
+    }), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ breach, stealer }) => {
         const leakData: ProfileLeakSessionData = {
           breachCards: Array.isArray(breach?.cards_data) ? breach.cards_data : [],
@@ -231,7 +238,7 @@ export class SummaryAllPlatformsViewComponent {
     this.socialScanService.fetchProfileMetadataTokens(tokens, username).pipe(finalize(() => {
       this.profileMetadataLoading.set(false);
       this.profileMetadataLoaded.set(true);
-    })).subscribe({
+    }), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         const metadataData: ProfileMetadataSessionData = {
           tokens: [...this.profileMetadataTokens()],

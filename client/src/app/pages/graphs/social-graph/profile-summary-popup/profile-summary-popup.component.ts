@@ -53,6 +53,10 @@ export class ProfileSummaryPopupComponent {
   isAnythingFetching = computed(() => {
     return this.isScanInProgress() || this.fetchingState.isUserBusy(this.username());
   });
+  totalPlatforms = computed(() => this.platforms().length);
+  populatedProfilesCount = computed(() => this.platforms().filter(platform => platform.profileDetails !== undefined).length);
+  populatedPostsCount = computed(() => this.platforms().filter(platform => platform.posts !== undefined).length);
+  populatedConnectionsCount = computed(() => this.platforms().filter(platform => (platform.post_connections?.length ?? 0) > 0).length);
 
   constructor(fetchingState: FetchingStateService) {
     this.fetchingState = fetchingState;

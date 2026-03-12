@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, inject, effect, DestroyRef } from '@angular/core';
 
 import { CustomEntity, TabState } from '../../../../shared/model/social/social-scan.models';
 import { GraphOrchestratorService } from '../services/graph-orchestrator.service';
@@ -18,7 +18,9 @@ export class EntityManagerComponent {
   private graphOrchestrator = inject(GraphOrchestratorService);
   private tabManager = inject(TabManagerService);
   private api = inject(ApiService);
+  private destroyRef = inject(DestroyRef);
   private extractionTasks = new Map<string, { intervalId: ReturnType<typeof setInterval>; subscription?: Subscription; pollTimeoutId?: ReturnType<typeof setTimeout>; }>();
+  private isDestroyed = false;
 
   isCollapsed = input.required<boolean>();
   isSmallScreen = input.required<boolean>();
@@ -28,7 +30,15 @@ export class EntityManagerComponent {
   addEntityModalData = signal<AddEntityData | null>(null);
 
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.isDestroyed = true;
+      Array.from(this.extractionTasks.keys()).forEach(id => this.cleanupExtractionTask(id));
+    });
+
     effect(() => {
+      if (this.isDestroyed) {
+        return;
+      }
       const state = this.activeTabState();
       const entities = state.customEntities();
       for (const entity of entities) {
@@ -261,7 +271,7 @@ export class EntityManagerComponent {
   }
 
   private startApiPolling(entityId: string, type: CustomEntity['type'], query: string, label: string) {
-    if (this.extractionTasks.has(entityId)) {
+    if (this.isDestroyed || this.extractionTasks.has(entityId)) {
       return;
     }
     const apiConfig = this.getApiConfig(type, query);
@@ -271,6 +281,10 @@ export class EntityManagerComponent {
     const state = this.activeTabState();
     let progress = Math.max(5, state.customEntities().find(entity => entity.id === entityId)?.progress ?? 5);
     const intervalId = setInterval(() => {
+      if (this.isDestroyed || !this.extractionTasks.has(entityId)) {
+        this.cleanupExtractionTask(entityId);
+        return;
+      }
       progress = Math.min(progress + 6, 88);
       state.customEntities.update(entities => entities.map(entity => entity.id === entityId ? {
         ...entity,
@@ -282,11 +296,16 @@ export class EntityManagerComponent {
 
     this.extractionTasks.set(entityId, { intervalId });
     const executePoll = () => {
-      if (!this.extractionTasks.has(entityId)) {
+      if (this.isDestroyed || !this.extractionTasks.has(entityId)) {
+        this.cleanupExtractionTask(entityId);
         return;
       }
       const subscription = this.api.post<any>(apiConfig.endpoint, apiConfig.payload).subscribe({
         next: (response) => {
+          if (this.isDestroyed || !this.extractionTasks.has(entityId)) {
+            this.cleanupExtractionTask(entityId);
+            return;
+          }
           const rawStatus = `${response?.status || response?.result?.status || ''}`.toLowerCase();
           const progressValue = Number(response?.progress ?? response?.result?.progress ?? progress);
           const rawProgress = Number.isFinite(progressValue) ? progressValue : progress;
@@ -322,6 +341,10 @@ export class EntityManagerComponent {
           this.cleanupExtractionTask(entityId);
         },
         error: () => {
+          if (this.isDestroyed) {
+            this.cleanupExtractionTask(entityId);
+            return;
+          }
           this.cleanupExtractionTask(entityId);
           state.customEntities.update(entities => entities.map(entity => entity.id === entityId ? {
             ...entity,

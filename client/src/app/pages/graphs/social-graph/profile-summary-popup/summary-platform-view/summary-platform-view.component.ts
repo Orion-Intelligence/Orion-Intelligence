@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, effect, inject, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PlatformResult } from '../../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey } from '../../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
@@ -19,6 +20,7 @@ import { finalize } from 'rxjs/operators';
 })
 export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   private socialScanService = inject(SocialScanService);
+  private destroyRef = inject(DestroyRef);
 
   platform = input.required<PlatformResult | null>();
   isScanInProgress = input<boolean>(false);
@@ -122,7 +124,7 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     this.socialScanService.fetchProfileMetadataTokens(tokens, p.username, p.platform).pipe(finalize(() => {
       this.metadataLoading.set(false);
       this.metadataLoaded.set(true);
-    })).subscribe({
+    }), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.metadataResult.set(res || null);
       },

@@ -2,9 +2,9 @@
   <div data-testid="social-platform-popup" class="ui-graph-popup-panel flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
 
 
-    <div class="p-3 flex items-start justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-850)] flex-shrink-0 rounded-t-lg">
+    <div class="p-3 flex items-start justify-between gap-3 border-b border-[var(--color-border)] bg-slate-850/90 flex-shrink-0 rounded-t-lg">
       <div class="flex items-center gap-3 min-w-0">
-        <div [socialMapperPlatformBg]="data().platform" class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-3xl font-bold text-[var(--color-text1)] shadow-[inset_0_0_0_1px_var(--color-border)]">
+        <div [socialMapperPlatformBg]="data().platform" class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-2 text-3xl font-bold text-[var(--color-text1)]">
           <app-social-icon [platformName]="data().platform"></app-social-icon>
         </div>
         <div class="min-w-0">
@@ -13,11 +13,11 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <a data-testid="social-platform-popup-visit-profile" [href]="getAccountUrl()" target="_blank" rel="noopener noreferrer" title="Visit Profile" class="h-8 w-8 flex items-center justify-center rounded-full text-[var(--color-text2)] bg-[var(--color-blue-720)]/80 hover:bg-[var(--color-blue-720)] hover:text-white transition-colors">
-          <i class="bi bi-link-45deg text-lg"></i>
+        <a data-testid="social-platform-popup-visit-profile" [href]="getAccountUrl()" target="_blank" rel="noopener noreferrer" title="Visit Profile" class="ui-social-popup-icon-btn bg-[var(--color-blue-720)]/80 text-[var(--color-text2)]">
+          <i class="bi bi-link-45deg text-[15px] leading-none"></i>
         </a>
-        <button data-testid="social-platform-popup-close-icon" (click)="onClose()" type="button" class="h-8 w-8 flex items-center justify-center rounded-full text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-white transition-colors">
-          <i class="bi bi-x-lg text-lg"></i>
+        <button data-testid="social-platform-popup-close-icon" (click)="onClose()" type="button" class="ui-social-popup-icon-btn" title="Close">
+          <i class="bi bi-x-lg text-[15px] leading-none"></i>
         </button>
       </div>
     </div>
@@ -25,44 +25,46 @@
 
     <div class="flex-grow overflow-y-auto p-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
 
-      <div class="mb-4">
-        @if (data().description) {
-          <p class="text-[var(--color-text4)] text-sm mb-4">{{ data().description }}</p>
-        }
-        <div class="flex items-center gap-4 text-[var(--color-text4)] text-sm">
-          @if (data().joiningDate) {
-            <div class="flex items-center gap-2">
-              <i class="bi bi-calendar3"></i>
-              <span>Joined {{ data().joiningDate }}</span>
-            </div>
+      @if (data().description || data().joiningDate || data().followers !== undefined) {
+        <div class="mb-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/35 p-4">
+          @if (data().description) {
+            <p class="mb-4 text-sm leading-6 text-[var(--color-text4)]">{{ data().description }}</p>
           }
-          @if (data().followers !== undefined) {
-            <div class="flex items-center gap-2">
-              <i class="bi bi-people"></i>
-              <strong class="text-[var(--color-text2)]">{{ formatFollowers(data().followers) }}</strong> followers
-            </div>
-          }
+          <div class="flex items-center gap-4 text-[var(--color-text4)] text-sm">
+            @if (data().joiningDate) {
+              <div class="flex items-center gap-2">
+                <i class="bi bi-calendar3"></i>
+                <span>Joined {{ data().joiningDate }}</span>
+              </div>
+            }
+            @if (data().followers !== undefined) {
+              <div class="flex items-center gap-2">
+                <i class="bi bi-people"></i>
+                <strong class="text-[var(--color-text2)]">{{ formatFollowers(data().followers) }}</strong> followers
+              </div>
+            }
+          </div>
         </div>
-      </div>
+      }
 
 
       <div class="space-y-3">
 
-        <details data-testid="social-platform-popup-profile-details" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+        <details data-testid="social-platform-popup-profile-details" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Profile Details</span>
             @if (data().profileDetails !== undefined) {
-              <button (click)="$event.preventDefault(); fetchProfile.emit(data())" [disabled]="isScanInProgress() || isFetching()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh profile details">
+              <button (click)="$event.preventDefault(); fetchProfile.emit(data())" [disabled]="isScanInProgress() || isFetching()" class="h-7 w-7 flex items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 text-[var(--color-text4)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh profile details">
                 <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetching()"></i>
               </button>
             }
           </summary>
-          <div class="p-3 border-t border-[var(--color-border)]">
+          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
             @if (data().profileDetails === undefined && !isFetching()) {
               <div>
                 <div>
-                  <button data-testid="social-platform-popup-fetch-profile" (click)="fetchProfile.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-profile" (click)="fetchProfile.emit(data())" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                     <i class="bi bi-person-lines-fill"></i>
                     <span>Fetch Profile Info</span>
                   </button>
@@ -83,17 +85,17 @@
             @if (!isFetching() && data().profileDetails !== undefined) {
               <div>
                 @if (data().profileDetails === null || getProfileDetailEntries().length === 0) {
-                  <div class="text-center py-4 text-[var(--color-text4)]">
+                  <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">
                     <i class="bi bi-x-circle text-2xl"></i>
-                    <p class="mt-1 text-sm">No additional profile data found.</p>
+                    <p class="mt-2 text-sm">No additional profile data found.</p>
                   </div>
                 }
                 @if (data().profileDetails && getProfileDetailEntries().length > 0) {
                   <dl class="text-sm">
                     @for (item of getProfileDetailEntries(); track trackByKey($index, item)) {
-                      <div class="py-3 border-b border-[var(--color-border)] last:border-b-0">
-                        <dt class="font-medium text-[var(--color-text4)] truncate">{{ formatKey(item.key) }}</dt>
-                        <dd class="text-[var(--color-text2)] break-words mt-1">{{ item.value }}</dd>
+                      <div class="border-b border-[var(--color-border)] py-2 last:border-b-0 first:pt-0 last:pb-0">
+                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</dt>
+                        <dd class="mt-1 break-words text-sm text-[var(--color-text2)]">{{ item.value }}</dd>
                       </div>
                     }
                   </dl>
@@ -104,21 +106,21 @@
         </details>
 
 
-        <details data-testid="social-platform-popup-recent-posts" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+        <details data-testid="social-platform-popup-recent-posts" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Recent Posts</span>
             @if (data().posts !== undefined) {
-              <button (click)="$event.preventDefault(); fetchPosts.emit(data())" [disabled]="isScanInProgress() || isFetchingPosts()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh posts">
+              <button (click)="$event.preventDefault(); fetchPosts.emit(data())" [disabled]="isScanInProgress() || isFetchingPosts()" class="h-7 w-7 flex items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 text-[var(--color-text4)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh posts">
                 <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingPosts()"></i>
               </button>
             }
           </summary>
-          <div class="p-3 border-t border-[var(--color-border)]">
+          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
             @if (data().posts === undefined && !isFetchingPosts()) {
               <div>
                 <div>
-                  <button data-testid="social-platform-popup-fetch-posts" (click)="fetchPosts.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-posts" (click)="fetchPosts.emit(data())" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                     <i class="bi bi-file-post"></i>
                     <span>Fetch Posts</span>
                   </button>
@@ -139,15 +141,15 @@
             @if (!isFetchingPosts() && data().posts !== undefined) {
               <div>
                 @if (!data().posts?.length) {
-                  <div class="text-center py-4 text-[var(--color-text4)]">
+                  <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">
                     <i class="bi bi-x-circle text-2xl"></i>
-                    <p class="mt-1 text-sm">No posts found for this account.</p>
+                    <p class="mt-2 text-sm">No posts found for this account.</p>
                   </div>
                 }
                 @if (data().posts?.length) {
                   <div class="space-y-3">
                     @for (post of displayPosts(); track trackByPostUrl($index, post)) {
-                      <div class="bg-slate-700/50 p-3 rounded-lg text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                      <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/20 p-3 text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                         <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
                         <div class="flex items-center justify-between text-slate-400">
                           <div class="flex items-center gap-4">
@@ -176,25 +178,25 @@
           </div>
         </details>
 
-        <details data-testid="social-platform-popup-post-connections" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+        <details data-testid="social-platform-popup-post-connections" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Post Connections</span>
           </summary>
-          <div class="p-3 border-t border-[var(--color-border)]">
+          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
             @if (!data().post_connections?.length) {
-              <div class="text-center py-4 text-[var(--color-text4)]">
+              <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">
                 <i class="bi bi-x-circle text-2xl"></i>
-                <p class="mt-1 text-sm">No connections detected in posts.</p>
+                <p class="mt-2 text-sm">No connections detected in posts.</p>
               </div>
             }
             @if (data().post_connections?.length) {
               <div class="flex items-center justify-between">
                 <span class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">{{ data().post_connections?.length || 0 }} connections</span>
               </div>
-              <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
+              <div class="mt-3 flex flex-wrap gap-2">
                 @for (connection of displayPostConnections(); track trackByIndex($index)) {
-                  <button type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
+                  <button type="button" (click)="scanConnections([connection])" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-850)]/30 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-200">
                     {{ '@' + connection }}
                   </button>
                 }
@@ -209,21 +211,21 @@
         </details>
 
 
-        <details data-testid="social-platform-popup-followers" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+        <details data-testid="social-platform-popup-followers" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Followers</span>
             @if (data().followers_list !== undefined) {
-              <button (click)="$event.preventDefault(); fetchFollowers.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowers()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Followers">
+              <button (click)="$event.preventDefault(); fetchFollowers.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowers()" class="h-7 w-7 flex items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 text-[var(--color-text4)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Followers">
                 <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingFollowers()"></i>
               </button>
             }
           </summary>
-          <div class="p-3 border-t border-[var(--color-border)]">
+          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
             @if (data().followers_list === undefined && !isFetchingFollowers()) {
               <div>
                 <div>
-                  <button data-testid="social-platform-popup-fetch-followers" (click)="fetchFollowers.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-followers" (click)="fetchFollowers.emit(data())" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                     <i class="bi bi-person-plus"></i>
                     <span>Fetch Followers</span>
                   </button>
@@ -244,15 +246,18 @@
             @if (!isFetchingFollowers() && data().followers_list !== undefined) {
               <div>
                 @if (!data().followers_list?.length) {
-                  <div class="text-center py-4 text-[var(--color-text4)]">
+                  <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">
                     <i class="bi bi-x-circle text-2xl"></i>
-                    <p class="mt-1 text-sm">No followers found or data is private.</p>
+                    <p class="mt-2 text-sm">No followers found or data is private.</p>
                   </div>
                 }
                 @if (data().followers_list?.length) {
-                  <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">{{ data().followers_list?.length || 0 }} followers</span>
+                  </div>
+                  <div class="mt-3 flex max-h-60 flex-wrap gap-2 overflow-y-auto pr-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
                     @for (follower of displayFollowers(); track trackByUsername($index, follower)) {
-                      <button type="button" (click)="scanConnections([follower])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                      <button type="button" (click)="scanConnections([follower])" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-850)]/30 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-200 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                         {{ '@' + follower }}
                       </button>
                     }
@@ -273,21 +278,21 @@
         </details>
 
 
-        <details data-testid="social-platform-popup-following" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+        <details data-testid="social-platform-popup-following" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Following</span>
             @if (data().following_list !== undefined) {
-              <button (click)="$event.preventDefault(); fetchFollowing.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowing()" class="h-7 w-7 flex items-center justify-center rounded-full text-[var(--color-text4)] bg-[var(--color-blue-720)]/80 border border-[var(--color-border)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Following">
+              <button (click)="$event.preventDefault(); fetchFollowing.emit(data())" [disabled]="isScanInProgress() || isFetchingFollowing()" class="h-7 w-7 flex items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 text-[var(--color-text4)] hover:bg-[var(--color-blue-710)]/80 hover:border-[var(--color-border)] hover:text-[var(--color-text1)] transition-all duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100" title="Refresh Following">
                 <i class="bi bi-arrow-clockwise text-sm" [class.animate-spin]="isFetchingFollowing()"></i>
               </button>
             }
           </summary>
-          <div class="p-3 border-t border-[var(--color-border)]">
+          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
             @if (data().following_list === undefined && !isFetchingFollowing()) {
               <div>
                 <div>
-                  <button data-testid="social-platform-popup-fetch-following" (click)="fetchFollowing.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-following" (click)="fetchFollowing.emit(data())" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                     <i class="bi bi-person-check"></i>
                     <span>Fetch Following</span>
                   </button>
@@ -308,15 +313,18 @@
             @if (!isFetchingFollowing() && data().following_list !== undefined) {
               <div>
                 @if (!data().following_list?.length) {
-                  <div class="text-center py-4 text-[var(--color-text4)]">
+                  <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">
                     <i class="bi bi-x-circle text-2xl"></i>
-                    <p class="mt-1 text-sm">Not following anyone or data is private.</p>
+                    <p class="mt-2 text-sm">Not following anyone or data is private.</p>
                   </div>
                 }
                 @if (data().following_list?.length) {
-                  <div class="max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">{{ data().following_list?.length || 0 }} following</span>
+                  </div>
+                  <div class="mt-3 flex max-h-60 flex-wrap gap-2 overflow-y-auto pr-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
                     @for (user of displayFollowing(); track trackByUsername($index, user)) {
-                      <button type="button" (click)="scanConnections([user])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                      <button type="button" (click)="scanConnections([user])" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-850)]/30 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-200 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                         {{ '@' + user }}
                       </button>
                     }
@@ -337,21 +345,21 @@
         </details>
 
 
-        <details data-testid="social-platform-popup-images" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+        <details data-testid="social-platform-popup-images" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Associated Images</span>
             @if (data().images !== undefined) {
-              <button data-testid="social-platform-popup-fetch-images-inline" (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Fetch Images">
+              <button data-testid="social-platform-popup-fetch-images-inline" (click)="$event.preventDefault(); fetchImages.emit(data())" [disabled]="isScanInProgress() || isFetchingImages()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600" title="Fetch Images">
                 Fetch Images
               </button>
             }
           </summary>
-          <div class="p-3 border-t border-[var(--color-border)]">
+          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
             @if (data().images === undefined && !isFetchingImages()) {
               <div>
                 <div>
-                  <button data-testid="social-platform-popup-fetch-images" (click)="fetchImages.emit(data())" [disabled]="isScanInProgress()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-[var(--color-blue-710)] disabled:cursor-not-allowed">
+                  <button data-testid="social-platform-popup-fetch-images" (click)="fetchImages.emit(data())" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                     <i class="bi bi-images"></i>
                     <span>Fetch Images</span>
                   </button>
@@ -372,16 +380,16 @@
             @if (!isFetchingImages() && data().images !== undefined) {
               <div>
                 @if (!data().images?.length) {
-                  <div class="text-center py-4 text-[var(--color-text4)]">
+                  <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">
                     <i class="bi bi-image-alt text-2xl"></i>
-                    <p class="mt-1 text-sm">No associated images were found.</p>
+                    <p class="mt-2 text-sm">No associated images were found.</p>
                   </div>
                 }
                 @if (data().images?.length) {
                   <div class="max-h-80 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                       @for (image of displayImages(); track trackByImageUrl($index, image)) {
-                        <div class="group relative overflow-hidden rounded-md border border-[var(--color-border)] transition-colors hover:border-indigo-500 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
+                        <div class="group relative overflow-hidden rounded-lg border border-[var(--color-border)] transition-colors hover:border-indigo-500 animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
                           <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title">
                             <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
                           </a>
@@ -405,18 +413,18 @@
         </details>
 
 
-        <details data-testid="social-platform-popup-raw-metadata" class="group rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
+        <details data-testid="social-platform-popup-raw-metadata" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
+          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Raw Metadata</span>
           </summary>
-          <div class="p-3 border-t border-[var(--color-border)]">
+          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
             @if (getMetadataEntries().length > 0) {
               <dl class="text-sm">
                 @for (item of getMetadataEntries(); track trackByKey($index, item)) {
-                  <div class="py-3 border-b border-[var(--color-border)] last:border-b-0">
-                    <dt class="font-medium text-[var(--color-text4)] truncate">{{ formatKey(item.key) }}</dt>
-                    <dd class="text-[var(--color-text2)] break-words mt-1">
+                  <div class="border-b border-[var(--color-border)] py-2 last:border-b-0 first:pt-0 last:pb-0">
+                    <dt class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</dt>
+                    <dd class="mt-1 break-words text-[var(--color-text2)]">
                       @if (isImageUrl(item.value)) {
                         <img [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40 mt-1" [alt]="item.key"/>
                       }
@@ -431,7 +439,7 @@
                 }
               </dl>
             } @else {
-              <p class="text-[var(--color-text4)] text-center py-2">No raw metadata available.</p>
+              <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">No raw metadata available.</div>
             }
           </div>
         </details>
@@ -440,8 +448,8 @@
     </div>
 
 
-    <div class="p-3 bg-[var(--color-blue-850)] flex justify-end items-center gap-4 flex-shrink-0 mt-auto rounded-b-lg border-t border-[var(--color-border)]">
-      <button data-testid="social-platform-popup-done" (click)="onClose()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+    <div class="p-3 bg-slate-850/80 flex justify-end items-center gap-4 flex-shrink-0 mt-auto rounded-b-lg border-t border-[var(--color-border)]">
+      <button data-testid="social-platform-popup-done" (click)="onClose()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-600">
         Done
       </button>
     </div>

@@ -1,151 +1,203 @@
-<div class="flex items-start gap-4 mb-4">
-  <div class="rounded-lg flex-shrink-0 flex items-center justify-center text-4xl font-bold text-white w-16 h-16 p-3 bg-slate-700">
-    <i class="bi bi-collection-fill"></i>
-  </div>
-  <div class="flex-grow">
-    <h3 class="text-2xl font-bold text-slate-100">All Platforms Summary</h3>
-    <p class="text-sm text-slate-400">Aggregated information for {{ username() }}</p>
-  </div>
-</div>
-
-<div class="space-y-3">
-  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
-    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
-      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
-      <span>Profile Leak Intelligence</span>
-    </summary>
-    <div class="p-3 border-t border-slate-700 space-y-3">
-      <button (click)="fetchProfileLeaks()" [disabled]="profileLeaksLoading()" class="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-        <i class="bi" [ngClass]="profileLeaksLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-shield-exclamation'"></i>
-        <span>{{ profileLeaksLoading() ? 'Fetching...' : 'Fetch Profile Leaks' }}</span>
-      </button>
-      @if (profileLeaksError()) {
-        <p class="text-sm text-red-400">{{ profileLeaksError() }}</p>
-      }
-      @if (profileLeaksLoaded()) {
-        <div class="rounded-lg bg-slate-800/50 p-3">
-          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
-            <h4 class="font-semibold text-slate-200">Email Breach Results</h4>
-            <span class="text-xs text-slate-400">{{ profileBreachCards().length }}</span>
-          </div>
-          @if (profileBreachCards().length > 0) {
-            <div class="space-y-2 mt-2">
-              @for (card of profileBreachCards().slice(0, 5); track $index) {
-                <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-                  @for (entry of getObjectEntries(card).slice(0, 8); track entry.key || $index) {
-                    <div class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
-                      <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
-                      @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
-                        <span class="text-slate-200 ml-1 break-words">{{ stringifyPrimitive(entry.value) }}</span>
-                      }
-                      @if (isArrayValue(entry.value)) {
-                        <span class="text-slate-200 ml-1 break-words">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
-                      }
-                      @if (isObjectValue(entry.value)) {
-                        <span class="text-slate-200 ml-1 break-words">[object]</span>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="text-sm text-slate-500 mt-2">No response was found.</p>
-          }
+<div class="space-y-4">
+  <section class="overflow-hidden rounded-xl border border-slate-700/80 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.12),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(99,102,241,0.12),_transparent_28%),linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.96))] p-5">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div class="flex items-start gap-4">
+        <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border border-slate-600/70 bg-slate-800/80 text-4xl text-white">
+          <i class="bi bi-collection-fill"></i>
         </div>
-        <div class="rounded-lg bg-slate-800/50 p-3">
-          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
-            <h4 class="font-semibold text-slate-200">Stealer Log Results</h4>
-            <span class="text-xs text-slate-400">{{ profileStealerRows().length }}</span>
-          </div>
-          @if (profileStealerRows().length > 0) {
-            <div class="space-y-2 mt-2">
-              @for (row of profileStealerRows().slice(0, 10); track $index) {
-                <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-                  @for (entry of getObjectEntries(row).slice(0, 8); track entry.key || $index) {
-                    <div class="text-xs py-1 border-b border-slate-700/30 last:border-b-0">
-                      <span class="text-slate-400">{{ formatKey(entry.key) }}:</span>
-                      @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
-                        <span class="text-slate-200 ml-1 break-words">{{ stringifyPrimitive(entry.value) }}</span>
-                      }
-                      @if (isArrayValue(entry.value)) {
-                        <span class="text-slate-200 ml-1 break-words">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
-                      }
-                      @if (isObjectValue(entry.value)) {
-                        <span class="text-slate-200 ml-1 break-words">[object]</span>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="text-sm text-slate-500 mt-2">No response was found.</p>
-          }
-        </div>
-      }
-    </div>
-  </details>
-
-  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
-    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
-      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
-      <span>Profile Metadata Results</span>
-    </summary>
-    <div class="p-3 border-t border-slate-700 space-y-3">
-      <div class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-2 rounded-md border border-slate-700 bg-slate-900/60 px-2 py-2">
-          @for (token of profileMetadataTokens(); track $index) {
-            <span class="inline-flex items-center gap-1 rounded-full bg-slate-700/70 px-2 py-1 text-[11px] text-slate-200">
-              <span>{{ token }}</span>
-              <button type="button" (click)="removeMetadataToken(token)" class="text-slate-400 hover:text-slate-100">
-                <i class="bi bi-x-lg text-[10px]"></i>
-              </button>
-            </span>
-          }
-          <input type="text" [value]="profileMetadataTokenInput()" (input)="profileMetadataTokenInput.set($any($event.target).value)" (keydown)="onMetadataTokenKeydown($event)" (blur)="addTokensFromInput()" placeholder="Type a token and press Enter" class="min-w-[180px] flex-1 rounded-md bg-transparent px-2 py-1 text-xs text-white placeholder:text-slate-500 focus:outline-none">
-        </div>
-        <div class="flex items-center gap-2">
-          <button (click)="fetchProfileMetadata()" [disabled]="profileMetadataLoading()" class="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed whitespace-nowrap">
-            <i class="bi" [ngClass]="profileMetadataLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-search'"></i>
-            <span>{{ profileMetadataLoading() ? 'Fetching...' : 'Search Metadata' }}</span>
-          </button>
-          @if (profileMetadataTokens().length) {
-            <button type="button" (click)="clearMetadataTokens()" class="text-xs text-slate-400 hover:text-slate-200">Clear</button>
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/70">Aggregate View</p>
+          <h3 class="mt-1 text-2xl font-semibold text-white">All Platforms Summary</h3>
+          <p class="mt-1 text-sm text-slate-300">Cross-platform intelligence for <span class="font-semibold text-white">{{ username() }}</span></p>
+          @if (email()) {
+            <p class="mt-1 truncate font-mono text-xs text-indigo-200/90">{{ email() }}</p>
           }
         </div>
       </div>
-      @if (profileMetadataError()) {
-        <p class="text-sm text-red-400">{{ profileMetadataError() }}</p>
+      <div class="flex flex-wrap gap-2">
+        <button (click)="fetchProfileLeaks()" [disabled]="profileLeaksLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
+          <i class="bi" [ngClass]="profileLeaksLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-shield-exclamation'"></i>
+          <span>{{ profileLeaksLoading() ? 'Fetching leaks...' : 'Fetch Profile Leaks' }}</span>
+        </button>
+        <button (click)="fetchProfileMetadata()" [disabled]="profileMetadataLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
+          <i class="bi" [ngClass]="profileMetadataLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-search'"></i>
+          <span>{{ profileMetadataLoading() ? 'Searching...' : 'Search Metadata' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">Platforms</p>
+        <p class="mt-2 text-2xl font-semibold text-white">{{ totalPlatforms() }}</p>
+      </div>
+      <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">Profile Details</p>
+        <p class="mt-2 text-2xl font-semibold text-white">{{ detailsReadyCount() }}</p>
+      </div>
+      <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">Recent Posts</p>
+        <p class="mt-2 text-2xl font-semibold text-white">{{ postsReadyCount() }}</p>
+      </div>
+      <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">Post Connections</p>
+        <p class="mt-2 text-2xl font-semibold text-white">{{ connectionsReadyCount() }}</p>
+      </div>
+      <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">Images</p>
+        <p class="mt-2 text-2xl font-semibold text-white">{{ imagesReadyCount() }}</p>
+      </div>
+    </div>
+  </section>
+
+  <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
+    <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
+      <div class="flex items-center gap-3">
+        <span>Profile Leak Intelligence</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ profileBreachCards().length + profileStealerRows().length }}</span>
+      </div>
+    </summary>
+    <div class="border-t border-slate-700/80 p-4 space-y-4">
+      @if (profileLeaksError()) {
+        <p class="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">{{ profileLeaksError() }}</p>
       }
-      @if (profileMetadataLoaded() && !profileMetadataError()) {
-        @if (profileMetadataResult(); as meta) {
-          <div>
-            <div class="flex items-center justify-between">
-              @if (meta.query) {
-                <p class="text-xs text-slate-400">Query: {{ meta.query }}</p>
-              }
-              <span class="text-xs text-slate-400">{{ meta.total_found || 0 }}</span>
+      @if (profileLeaksLoaded()) {
+        <div class="grid gap-4 xl:grid-cols-2">
+          <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
+              <h4 class="font-semibold text-slate-100">Email Breach Results</h4>
+              <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] text-slate-400">{{ profileBreachCards().length }}</span>
             </div>
-            @if (meta.timestamp) {
-              <p class="text-xs text-slate-500">Timestamp: {{ meta.timestamp }}</p>
-            }
-            @if ((meta?.results?.length || 0) > 0) {
-              <div class="space-y-2 mt-2">
-                @for (row of (meta?.results || []).slice(0, 10); track row.url || row.title || $index) {
-                  <div class="rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-                    <div class="text-xs text-slate-300 font-semibold">{{ row.title || 'Untitled' }}</div>
-                    @if (row.url) {
-                      <a [href]="row.url" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 break-words hover:underline">{{ row.url }}</a>
-                    }
-                    @if (row.snippet) {
-                      <p class="text-xs text-slate-400 mt-1">{{ row.snippet }}</p>
+            @if (profileBreachCards().length > 0) {
+              <div class="mt-3 space-y-2">
+                @for (card of profileBreachCards().slice(0, 5); track $index) {
+                  <div class="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
+                    @for (entry of getObjectEntries(card).slice(0, 8); track entry.key || $index) {
+                      <div class="border-b border-slate-700/30 py-1.5 text-xs last:border-b-0">
+                        <span class="text-slate-500">{{ formatKey(entry.key) }}:</span>
+                        @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
+                          <span class="ml-1 break-words text-slate-200">{{ stringifyPrimitive(entry.value) }}</span>
+                        }
+                        @if (isArrayValue(entry.value)) {
+                          <span class="ml-1 break-words text-slate-200">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                        }
+                        @if (isObjectValue(entry.value)) {
+                          <span class="ml-1 break-words text-slate-200">[object]</span>
+                        }
+                      </div>
                     }
                   </div>
                 }
               </div>
             } @else {
-              <p class="text-sm text-slate-500 mt-2">No response was found.</p>
+              <p class="mt-3 text-sm text-slate-500">No response was found.</p>
+            }
+          </div>
+
+          <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
+              <h4 class="font-semibold text-slate-100">Stealer Log Results</h4>
+              <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] text-slate-400">{{ profileStealerRows().length }}</span>
+            </div>
+            @if (profileStealerRows().length > 0) {
+              <div class="mt-3 space-y-2">
+                @for (row of profileStealerRows().slice(0, 10); track $index) {
+                  <div class="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
+                    @for (entry of getObjectEntries(row).slice(0, 8); track entry.key || $index) {
+                      <div class="border-b border-slate-700/30 py-1.5 text-xs last:border-b-0">
+                        <span class="text-slate-500">{{ formatKey(entry.key) }}:</span>
+                        @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
+                          <span class="ml-1 break-words text-slate-200">{{ stringifyPrimitive(entry.value) }}</span>
+                        }
+                        @if (isArrayValue(entry.value)) {
+                          <span class="ml-1 break-words text-slate-200">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                        }
+                        @if (isObjectValue(entry.value)) {
+                          <span class="ml-1 break-words text-slate-200">[object]</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="mt-3 text-sm text-slate-500">No response was found.</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </details>
+
+  <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
+    <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
+      <div class="flex items-center gap-3">
+        <span>Profile Metadata Results</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ profileMetadataResult()?.total_found || 0 }}</span>
+      </div>
+    </summary>
+    <div class="border-t border-slate-700/80 p-4 space-y-4">
+      <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/60 px-3 py-3">
+            @for (token of profileMetadataTokens(); track $index) {
+              <span class="inline-flex items-center gap-1 rounded-full bg-slate-700/70 px-2 py-1 text-[11px] text-slate-200">
+                <span>{{ token }}</span>
+                <button type="button" (click)="removeMetadataToken(token)" class="text-slate-400 hover:text-slate-100">
+                  <i class="bi bi-x-lg text-[10px]"></i>
+                </button>
+              </span>
+            }
+            <input type="text" [value]="profileMetadataTokenInput()" (input)="profileMetadataTokenInput.set($any($event.target).value)" (keydown)="onMetadataTokenKeydown($event)" (blur)="addTokensFromInput()" placeholder="Type a token and press Enter" class="min-w-[180px] flex-1 rounded-md bg-transparent px-2 py-1 text-xs text-white placeholder:text-slate-500 focus:outline-none">
+          </div>
+          <div class="flex items-center gap-2">
+            <button (click)="fetchProfileMetadata()" [disabled]="profileMetadataLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
+              <i class="bi" [ngClass]="profileMetadataLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-search'"></i>
+              <span>{{ profileMetadataLoading() ? 'Searching...' : 'Search Metadata' }}</span>
+            </button>
+            @if (profileMetadataTokens().length) {
+              <button type="button" (click)="clearMetadataTokens()" class="text-xs text-slate-400 hover:text-slate-200">Clear</button>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (profileMetadataError()) {
+        <p class="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">{{ profileMetadataError() }}</p>
+      }
+
+      @if (profileMetadataLoaded() && !profileMetadataError()) {
+        @if (profileMetadataResult(); as meta) {
+          <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                @if (meta.query) {
+                  <p class="text-xs text-slate-400">Query: {{ meta.query }}</p>
+                }
+                @if (meta.timestamp) {
+                  <p class="mt-1 text-xs text-slate-500">Timestamp: {{ meta.timestamp }}</p>
+                }
+              </div>
+              <span class="rounded-full bg-slate-800 px-2.5 py-1 text-[11px] text-slate-400">{{ meta.total_found || 0 }} results</span>
+            </div>
+            @if ((meta?.results?.length || 0) > 0) {
+              <div class="mt-3 space-y-2">
+                @for (row of (meta?.results || []).slice(0, 10); track row.url || row.title || $index) {
+                  <div class="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
+                    <div class="text-sm font-semibold text-slate-200">{{ row.title || 'Untitled' }}</div>
+                    @if (row.url) {
+                      <a [href]="row.url" target="_blank" rel="noopener noreferrer" class="mt-1 block break-words text-xs text-indigo-400 hover:underline">{{ row.url }}</a>
+                    }
+                    @if (row.snippet) {
+                      <p class="mt-2 text-xs leading-5 text-slate-400">{{ row.snippet }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="mt-3 text-sm text-slate-500">No response was found.</p>
             }
           </div>
         }
@@ -153,38 +205,41 @@
     </div>
   </details>
 
-  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
-    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
-      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
-      <span>Profile Details</span>
+  <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
+    <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
+      <div class="flex items-center gap-3">
+        <span>Profile Details</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ detailsReadyCount() }}/{{ totalPlatforms() }}</span>
+      </div>
     </summary>
-    <div class="p-3 border-t border-slate-700 space-y-4">
+    <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="detailsSearchTerm()" (input)="onDetailsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+        <input type="text" placeholder="Filter platforms..." [value]="detailsSearchTerm()" (input)="onDetailsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (detailsSearchTerm()) {
-          <button (click)="clearDetailsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+          <button (click)="clearDetailsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
       </div>
 
-      <div class="space-y-2">
-        @for (platform of displayPlatformsForDetails(); track platform.url || platform.keyUsername || $index; let i = $index) {
+      <div class="space-y-3">
+        @for (platform of displayPlatformsForDetails(); track platform.url || platform.keyUsername || $index) {
           <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
             @if (platform.profileDetails !== undefined) {
-              <div class="bg-slate-800/50 rounded-lg p-3">
-                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                  <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+              <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+                <div class="mb-3 flex items-center gap-3 border-b border-slate-700/50 pb-3">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="flex-1 font-semibold text-slate-100">{{ platform.platform }}</h4>
                   @if (fetchingState.profile()[getPlatformUniqueKey(platform)]) {
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                    <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-slate-400" role="status"></div>
                   }
                 </div>
                 @if (platform.profileDetails && getProfileDetailEntries(platform).length > 0) {
-                  <dl class="text-sm">
+                  <dl class="grid gap-2 sm:grid-cols-2">
                     @for (item of getProfileDetailEntries(platform); track $index) {
-                      <div class="py-2 border-b border-slate-700/30 last:border-b-0">
-                        <dt class="font-medium text-slate-400 truncate">{{ formatKey(item.key) }}</dt>
-                        <dd class="text-slate-200 break-words mt-1">{{ item.value }}</dd>
+                      <div class="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3">
+                        <dt class="truncate text-[11px] font-semibold uppercase tracking-wide text-slate-500">{{ formatKey(item.key) }}</dt>
+                        <dd class="mt-1 break-words text-sm text-slate-200">{{ item.value }}</dd>
                       </div>
                     }
                   </dl>
@@ -193,18 +248,18 @@
                 }
               </div>
             } @else {
-              <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
-                <div class="flex items-center gap-2 min-w-0">
-                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                  <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+              <div class="flex items-center justify-between rounded-lg border border-slate-700/70 bg-slate-950/30 p-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="truncate font-semibold text-slate-200">{{ platform.platform }}</h4>
                 </div>
                 @if (fetchingState.profile()[getPlatformUniqueKey(platform)]) {
-                  <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                  <div class="flex shrink-0 items-center gap-2 text-xs text-slate-400">
+                    <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-current" role="status"></div>
                     <span>Fetching...</span>
                   </div>
                 } @else {
-                  <button (click)="fetchProfile.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                  <button (click)="fetchProfile.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                     <i class="bi bi-person-lines-fill"></i><span>Fetch</span>
                   </button>
                 }
@@ -213,53 +268,56 @@
           </div>
         }
         @if (filteredPlatformsForDetails().length === 0) {
-          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
         }
       </div>
 
       @if (displayPlatformsForDetails().length < filteredPlatformsForDetails().length) {
-        <button (click)="loadMoreDetailsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+        <button (click)="loadMoreDetailsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
       }
     </div>
   </details>
 
-  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
-    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
-      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
-      <span>Recent Posts</span>
+  <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
+    <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
+      <div class="flex items-center gap-3">
+        <span>Recent Posts</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ postsReadyCount() }}/{{ totalPlatforms() }}</span>
+      </div>
     </summary>
-    <div class="p-3 border-t border-slate-700 space-y-4">
+    <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+        <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (postsSearchTerm()) {
-          <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+          <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
       </div>
 
-      <div class="space-y-2">
-        @for (platform of displayPlatformsForPosts(); track platform.url || platform.keyUsername || $index; let i = $index) {
+      <div class="space-y-3">
+        @for (platform of displayPlatformsForPosts(); track platform.url || platform.keyUsername || $index) {
           <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
             @if (platform.posts !== undefined) {
-              <div class="bg-slate-800/50 rounded-lg p-3">
-                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                  <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
+              <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+                <div class="mb-3 flex items-center gap-3 border-b border-slate-700/50 pb-3">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="flex-1 font-semibold text-slate-100">{{ platform.platform }}</h4>
                   @if (fetchingState.posts()[getPlatformUniqueKey(platform)]) {
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
+                    <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-slate-400" role="status"></div>
                   }
                 </div>
                 @if (platform.posts?.length) {
                   <div class="space-y-3">
                     @for (post of platform.posts!.slice(0, 3); track post.post_url || $index) {
-                      <div class="bg-slate-700/50 p-3 rounded-lg text-sm">
-                        <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || 'No caption' }}</p>
-                        <div class="flex items-center justify-between text-slate-400">
-                          <div class="flex items-center gap-4">
+                      <div class="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3 text-sm">
+                        <p class="mb-3 line-clamp-3 text-slate-300">{{ post.caption || 'No caption' }}</p>
+                        <div class="flex items-center justify-between gap-3 text-slate-400">
+                          <div class="flex items-center gap-4 text-xs">
                             <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
                             <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
                           </div>
-                          <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">View Post <i class="bi bi-link-45deg text-xs"></i></a>
+                          <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-indigo-400 hover:underline">View Post <i class="bi bi-link-45deg text-xs"></i></a>
                         </div>
                       </div>
                     }
@@ -269,18 +327,18 @@
                 }
               </div>
             } @else {
-              <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
-                <div class="flex items-center gap-2 min-w-0">
-                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                  <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+              <div class="flex items-center justify-between rounded-lg border border-slate-700/70 bg-slate-950/30 p-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="truncate font-semibold text-slate-200">{{ platform.platform }}</h4>
                 </div>
                 @if (fetchingState.posts()[getPlatformUniqueKey(platform)]) {
-                  <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
+                  <div class="flex shrink-0 items-center gap-2 text-xs text-slate-400">
+                    <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-current" role="status"></div>
                     <span>Fetching...</span>
                   </div>
                 } @else {
-                  <button (click)="fetchPosts.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center gap-2 px-3 py-1 text-xs font-medium text-white bg-indigo-600/50 rounded-md hover:bg-indigo-600 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
+                  <button (click)="fetchPosts.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
                     <i class="bi bi-file-post"></i><span>Fetch</span>
                   </button>
                 }
@@ -289,111 +347,105 @@
           </div>
         }
         @if (filteredPlatformsForPosts().length === 0) {
-          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
         }
       </div>
 
       @if (displayPlatformsForPosts().length < filteredPlatformsForPosts().length) {
-        <button (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+        <button (click)="loadMorePostsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
       }
     </div>
   </details>
 
-  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
-    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
-      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
-      <span>Post Connections</span>
+  <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
+    <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
+      <div class="flex items-center gap-3">
+        <span>Post Connections</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ connectionsReadyCount() }}/{{ totalPlatforms() }}</span>
+      </div>
     </summary>
-    <div class="p-3 border-t border-slate-700 space-y-3">
+    <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+        <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (postsSearchTerm()) {
-          <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+          <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
       </div>
 
-      <div class="space-y-2">
-        @for (platform of displayPlatformsForPosts(); track platform.url || platform.keyUsername || $index; let i = $index) {
-          <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-            <div class="bg-slate-800/50 rounded-lg p-3">
-              <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
-                @if (fetchingState.posts()[getPlatformUniqueKey(platform)]) {
-                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-                }
-              </div>
-              @if (platform.post_connections?.length) {
-                <div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-[11px] uppercase tracking-wide text-slate-500">{{ platform.post_connections?.length || 0 }} connections</span>
-                  </div>
-                  <div class="mt-2 max-h-60 overflow-y-auto pr-2 space-y-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#475569] [&::-webkit-scrollbar-thumb:hover]:bg-[#64748b] [&::-webkit-scrollbar-track]:bg-transparent">
-                    @for (connection of getVisiblePostConnections(platform); track $index) {
-                      <button type="button" (click)="scanConnections([connection])" class="w-full rounded-md bg-slate-700/50 px-3 py-1.5 text-left text-sm font-mono text-slate-300 hover:bg-slate-700/70">
-                        {{ '@' + connection }}
-                      </button>
-                    }
-                  </div>
-                  @if (canLoadMorePostConnections(platform)) {
-                    <button (click)="loadMorePostConnections(platform)" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">
-                      Load More
-                    </button>
-                  }
-                </div>
-              } @else {
-                <p class="text-center text-sm text-slate-500 py-2">No connections detected in posts.</p>
+      <div class="space-y-3">
+        @for (platform of displayPlatformsForPosts(); track platform.url || platform.keyUsername || $index) {
+          <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both] rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+            <div class="mb-3 flex items-center gap-3 border-b border-slate-700/50 pb-3">
+              <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+              <h4 class="flex-1 font-semibold text-slate-100">{{ platform.platform }}</h4>
+              @if ((platform.post_connections?.length ?? 0) > 0) {
+                <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300">{{ platform.post_connections?.length }} connections</span>
               }
             </div>
+            @if (platform.post_connections?.length) {
+              <div class="flex flex-wrap gap-2">
+                @for (connection of getVisiblePostConnections(platform); track $index) {
+                  <button type="button" (click)="scanConnections([connection])" class="rounded-full border border-slate-700/70 bg-slate-900/50 px-3 py-1.5 text-sm font-mono text-slate-300 transition-colors hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-200">
+                    {{ '@' + connection }}
+                  </button>
+                }
+              </div>
+              @if (canLoadMorePostConnections(platform)) {
+                <button (click)="loadMorePostConnections(platform)" class="mt-3 w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">
+                  Load More Connections
+                </button>
+              }
+            } @else {
+              <p class="text-center text-sm text-slate-500 py-2">No connections detected in posts.</p>
+            }
           </div>
         }
         @if (filteredPlatformsForPosts().length === 0) {
-          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
         }
       </div>
 
       @if (displayPlatformsForPosts().length < filteredPlatformsForPosts().length) {
-        <button (click)="loadMorePostsPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+        <button (click)="loadMorePostsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
       }
     </div>
   </details>
 
-  <details class="group rounded-lg border border-slate-700 bg-slate-900/30" open>
-    <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-slate-300 list-none [&::-webkit-details-marker]:hidden">
-      <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
-      <span>Associated Images</span>
+  <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
+    <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
+      <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
+      <div class="flex items-center gap-3">
+        <span>Associated Images</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ imagesReadyCount() }}/{{ totalPlatforms() }}</span>
+      </div>
     </summary>
-    <div class="p-3 border-t border-slate-700 space-y-4">
+    <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="imagesSearchTerm()" (input)="onImagesSearch($event)" class="block w-full rounded-md border-0 bg-slate-900/50 py-1.5 pl-9 pr-9 text-white shadow-sm ring-1 ring-inset ring-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+        <input type="text" placeholder="Filter platforms..." [value]="imagesSearchTerm()" (input)="onImagesSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (imagesSearchTerm()) {
-          <button (click)="clearImagesSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300 transition-colors"><i class="bi bi-x-circle-fill"></i></button>
+          <button (click)="clearImagesSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
       </div>
 
-      <div class="space-y-2">
-        @for (platform of displayPlatformsForImages(); track platform.url || platform.keyUsername || $index; let i = $index) {
+      <div class="space-y-3">
+        @for (platform of displayPlatformsForImages(); track platform.url || platform.keyUsername || $index) {
           <div class="animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
             @if (platform.images !== undefined) {
-              <div class="bg-slate-800/50 rounded-lg p-3">
-                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-700/50">
-                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                  <h4 class="font-semibold text-slate-200 flex-grow">{{ platform.platform }}</h4>
-                  <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress() || fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                    Fetch Images
-                  </button>
-                  @if (fetchingState.platformImages()[getPlatformUniqueKey(platform)]) {
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-                  }
+              <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
+                <div class="mb-3 flex items-center gap-3 border-b border-slate-700/50 pb-3">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="flex-1 font-semibold text-slate-100">{{ platform.platform }}</h4>
+                  <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress() || fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">Fetch Images</button>
                 </div>
                 @if (platform.images?.length) {
-                  <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-                    @for (image of platform.images; track image.image_url || image.thumbnail || $index) {
-                      <div class="group relative rounded-md overflow-hidden border border-slate-700 hover:border-indigo-500 transition-colors">
-                        <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" [title]="image.title"><img [src]="image.thumbnail" [alt]="image.title" class="w-full h-20 object-cover transition-transform duration-300 group-hover:scale-105"></a>
-                      </div>
+                  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    @for (image of platform.images!.slice(0, 8); track image.image_url || image.thumbnail || $index) {
+                      <a [href]="image.image_url || image.thumbnail" target="_blank" rel="noopener noreferrer" class="group overflow-hidden rounded-lg border border-slate-700/60 bg-slate-900/30">
+                        <img [src]="image.thumbnail || image.image_url" [alt]="image.title || platform.platform" class="h-28 w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]">
+                      </a>
                     }
                   </div>
                 } @else {
@@ -401,32 +453,23 @@
                 }
               </div>
             } @else {
-              <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between">
-                <div class="flex items-center gap-2 min-w-0">
-                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-[#64748b] bg-[#475569] p-1 text-sm font-bold text-white shadow-[inset_0_0_0_1px_#64748b]"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
-                  <h4 class="font-semibold text-slate-200 truncate">{{ platform.platform }}</h4>
+              <div class="flex items-center justify-between rounded-lg border border-slate-700/70 bg-slate-950/30 p-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
+                  <h4 class="truncate font-semibold text-slate-200">{{ platform.platform }}</h4>
                 </div>
-                @if (fetchingState.platformImages()[getPlatformUniqueKey(platform)]) {
-                  <div class="flex items-center gap-2 text-slate-400 text-xs shrink-0">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current" role="status"></div>
-                    <span>Fetching...</span>
-                  </div>
-                } @else {
-                  <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="flex items-center shrink-0 justify-center h-7 px-2.5 text-[11px] font-medium rounded-[8px] text-white bg-[#2c7ac5] hover:bg-[#236eb7] border border-[#2c7ac5]/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                    Fetch Images
-                  </button>
-                }
+                <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress() || fetchingState.platformImages()[getPlatformUniqueKey(platform)]" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">Fetch Images</button>
               </div>
             }
           </div>
         }
         @if (filteredPlatformsForImages().length === 0) {
-          <p class="text-center text-sm text-slate-500 py-4">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
         }
       </div>
 
       @if (displayPlatformsForImages().length < filteredPlatformsForImages().length) {
-        <button (click)="loadMoreImagesPlatforms()" class="w-full text-center mt-2 px-4 py-2 text-sm font-medium text-indigo-400 bg-slate-800/50 rounded-md hover:bg-slate-700 transition-colors">Load More Platforms</button>
+        <button (click)="loadMoreImagesPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
       }
     </div>
   </details>
