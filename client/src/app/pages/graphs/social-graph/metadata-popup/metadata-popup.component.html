@@ -178,6 +178,7 @@
           </div>
         </details>
 
+        @if (supportsPostConnections(data().platform)) {
         <details data-testid="social-platform-popup-post-connections" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
@@ -209,8 +210,10 @@
             }
           </div>
         </details>
+        }
 
 
+        @if (supportsFollowersFollowing(data().platform)) {
         <details data-testid="social-platform-popup-followers" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
@@ -276,8 +279,10 @@
             }
           </div>
         </details>
+        }
 
 
+        @if (supportsFollowersFollowing(data().platform)) {
         <details data-testid="social-platform-popup-following" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
           <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
@@ -343,6 +348,7 @@
             }
           </div>
         </details>
+        }
 
 
         <details data-testid="social-platform-popup-images" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>

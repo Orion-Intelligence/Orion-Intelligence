@@ -16,6 +16,8 @@ import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
   imports: [SocialIconComponent, PlatformIconBgDirective],
 })
 export class MetadataPopupComponent extends PlatformFeedViewBase {
+  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
+  private static readonly FOLLOW_PLATFORMS = new Set(['instagram', 'twitter', 'behance', 'behnace', 'facebook']);
   data = input.required<PlatformResult>();
   isScanInProgress = input<boolean>(false);
   close = output<void>();
@@ -124,6 +126,14 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
     this.scanUsernames.emit(normalized);
   }
 
+  supportsPostConnections(platformName: string | null | undefined): boolean {
+    return MetadataPopupComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
+  }
+
+  supportsFollowersFollowing(platformName: string | null | undefined): boolean {
+    return MetadataPopupComponent.FOLLOW_PLATFORMS.has(this.normalizePlatformName(platformName));
+  }
+
   private normalizeUsernames(usernames: string[] | null | undefined): string[] {
     const seen = new Set<string>();
     const result: string[] = [];
@@ -144,5 +154,9 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
       result.push(normalized);
     }
     return result;
+  }
+
+  private normalizePlatformName(platformName: string | null | undefined): string {
+    return String(platformName || '').trim().toLowerCase();
   }
 }

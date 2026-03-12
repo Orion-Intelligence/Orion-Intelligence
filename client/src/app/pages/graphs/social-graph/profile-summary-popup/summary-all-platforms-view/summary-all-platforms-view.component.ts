@@ -19,6 +19,7 @@ import { forkJoin, of } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryAllPlatformsViewComponent {
+  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
   private socialScanService = inject(SocialScanService);
   private tabManager = inject(TabManagerService);
   private destroyRef = inject(DestroyRef);
@@ -57,15 +58,21 @@ export class SummaryAllPlatformsViewComponent {
     } | null>(null);
   filteredPlatformsForDetails = computed(() => this.filterPlatforms(this.detailsSearchTerm(), p => p.profileDetails !== undefined));
   filteredPlatformsForPosts = computed(() => this.filterPlatforms(this.postsSearchTerm(), p => p.posts !== undefined));
+  filteredPlatformsForConnections = computed(() =>
+    this.filterPlatforms(this.postsSearchTerm(), () => true)
+      .filter(platform => this.supportsPostConnections(platform.platform))
+  );
   filteredPlatformsForImages = computed(() => this.filterPlatforms(this.imagesSearchTerm(), p => p.images !== undefined));
   displayPlatformsForDetails = computed(() => this.filteredPlatformsForDetails().slice(0, this.visibleDetailsPlatformsCount()));
   displayPlatformsForPosts = computed(() => this.filteredPlatformsForPosts().slice(0, this.visiblePostsPlatformsCount()));
+  displayPlatformsForConnections = computed(() => this.filteredPlatformsForConnections().slice(0, this.visiblePostsPlatformsCount()));
   displayPlatformsForImages = computed(() => this.filteredPlatformsForImages().slice(0, this.visibleImagesPlatformsCount()));
   totalPlatforms = computed(() => this.platforms().length);
   detailsReadyCount = computed(() => this.platforms().filter(platform => platform.profileDetails !== undefined).length);
   postsReadyCount = computed(() => this.platforms().filter(platform => platform.posts !== undefined).length);
   imagesReadyCount = computed(() => this.platforms().filter(platform => platform.images !== undefined).length);
   connectionsReadyCount = computed(() => this.platforms().filter(platform => (platform.post_connections?.length ?? 0) > 0).length);
+  connectionsSupportedCount = computed(() => this.platforms().filter(platform => this.supportsPostConnections(platform.platform)).length);
   visiblePostConnectionsCount = signal<Record<string, number>>({});
   readonly postConnectionsInitial = 10;
   readonly postConnectionsIncrement = 10;
@@ -166,6 +173,10 @@ export class SummaryAllPlatformsViewComponent {
       ...current,
       [key]: (current[key] ?? this.postConnectionsInitial) + this.postConnectionsIncrement
     }));
+  }
+
+  supportsPostConnections(platformName: string | null | undefined): boolean {
+    return SummaryAllPlatformsViewComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
   }
 
   fetchProfileLeaks(): void {
@@ -401,6 +412,10 @@ export class SummaryAllPlatformsViewComponent {
       result.push(normalized);
     }
     return result;
+  }
+
+  private normalizePlatformName(platformName: string | null | undefined): string {
+    return String(platformName || '').trim().toLowerCase();
   }
 
   private getStoredProfileLeakData(): ProfileLeakSessionData | null {

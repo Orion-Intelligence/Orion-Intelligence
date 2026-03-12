@@ -19,6 +19,8 @@ import { finalize } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
+  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
+  private static readonly FOLLOW_PLATFORMS = new Set(['instagram', 'twitter', 'behance', 'behnace', 'facebook']);
   private socialScanService = inject(SocialScanService);
   private destroyRef = inject(DestroyRef);
 
@@ -105,6 +107,14 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     this.scanUsernames.emit(normalized);
   }
 
+  supportsPostConnections(platformName: string | null | undefined): boolean {
+    return SummaryPlatformViewComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
+  }
+
+  supportsFollowersFollowing(platformName: string | null | undefined): boolean {
+    return SummaryPlatformViewComponent.FOLLOW_PLATFORMS.has(this.normalizePlatformName(platformName));
+  }
+
   fetchPlatformMetadata(): void {
     const p = this.platform();
     if (!p) {
@@ -189,5 +199,9 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
       result.push(normalized);
     }
     return result;
+  }
+
+  private normalizePlatformName(platformName: string | null | undefined): string {
+    return String(platformName || '').trim().toLowerCase();
   }
 }

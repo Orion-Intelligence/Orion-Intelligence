@@ -251,7 +251,7 @@ export class SocialMapperStateService {
       added: { message: 'User is already on the graph.', icon: 'bi bi-exclamation-triangle-fill', style: 'bg-yellow-500/90 text-slate-900 border border-yellow-400' },
       scanned: { message: 'A scan for this user already exists.', icon: 'bi bi-info-circle-fill', style: 'bg-blue-500/90 text-white border border-blue-400' },
       scanning: { message: 'A scan for this user is already in progress.', icon: 'bi bi-hourglass-split', style: 'bg-orange-500/90 text-white border border-orange-400' },
-      busy: { message: 'An operation is already in progress for this user.', icon: 'bi bi-info-circle-fill', style: 'bg-cyan-500/90 text-white border border-cyan-400' }
+      busy: { message: 'An operation is already in progress for this user.', icon: 'bi bi-hourglass-split', style: 'bg-orange-500/90 text-white border border-orange-400 animate-pulse' }
     };
     this.notification.set({ type, ...notifications[type] });
     this.notificationTimeout = setTimeout(() => this.notification.set(null), 3000);
