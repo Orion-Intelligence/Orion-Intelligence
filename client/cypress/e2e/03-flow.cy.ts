@@ -1,15 +1,5 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_DATA_BREACH_SECTIONS, FLOW_DEFACEMENT_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_EXPLOIT_SECTIONS, FLOW_GENERAL_INTELLIGENCE_SECTIONS, FLOW_SOCIAL_SECTIONS, FLOW_WEB_SCANS_SECTIONS} from '../support/constants';
-import {clickSidebarSubItem, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup} from './controllers/03-flow.controller';
-import {
-  applyDateRange,
-  applyDirectoryDropdown,
-  assertDirectoryContentVisible,
-  DIRECTORY_CONTENT_OPTION,
-  DIRECTORY_INDEX_OPTION,
-  DIRECTORY_NETWORK_OPTION,
-  resetDirectoryFilters,
-  waitForDirectoryRequest
-} from './controllers/16-directory.controller';
+import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
   let testData: any = {};
@@ -167,6 +157,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
   });
 
   it('opens help and support modal, fills form, and sends message', () => {
+    cy.loginAsAdmin();
     cy.intercept('POST', '**/support', {
       statusCode: 200,
       body: {success: true}
@@ -186,12 +177,15 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
   });
 
   it('covers directory filters, load more, and pagination', () => {
+    cy.loginAsAdmin();
     cy.intercept('GET', '**/api/directory*').as('getDirectory');
     cy.visit('/dashboard/directory');
     waitForDirectoryRequest();
+    cy.scrollDashboardToTop()
     cy.get('app-directory .ui-page-title', {timeout: 30000}).should('contain.text', 'Directory');
     assertDirectoryContentVisible();
 
+    cy.scrollDashboardToTop()
     cy.get('app-directory-list tbody tr', {timeout: 30000}).then(($rows) => {
       const initialCount = $rows.length;
 
@@ -202,6 +196,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
       cy.get('#bottom', {timeout: 20000}).scrollIntoView();
       cy.wait(1000);
+      cy.scrollDashboardToTop()
       cy.get('app-directory-list tbody tr', {timeout: 30000}).its('length').should('be.greaterThan', initialCount);
     });
 

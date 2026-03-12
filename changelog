@@ -1,3 +1,153 @@
+Changelog [1.0.3.1] – 2026-03-13
+*Release date: March 13, 2026*
+
+### Overview
+This update focuses on turning the platform changes introduced in late 2025 into integrated, user-facing workflows across both backend and frontend. It adds a full social intelligence workspace, expands dynamic/API scanning coverage, improves homepage intelligence and alert operations, introduces monitored-source and dump cataloging, strengthens export and STIX reporting, exposes CTI graph and entity workflows more cleanly, and refreshes major parts of the UI stack.
+
+It also includes **platform-level upgrades** that are treated as first-class features in this release:
+- **Angular + UI modernization** with the migrated frontend, Tailwind-based styling, refreshed layouts, and improved responsive behavior
+- **Expanded API and product documentation** covering dynamic scans, social intelligence, and support scanners
+- **Backend quality gates and test coverage** with route/service/integration coverage, mock datasets, and Cypress/API parity checks
+- **Operational hardening** across migrations, middleware, auth/session behavior, and service-readiness handling
+- **Supporting service evolution across Orion-Crawler, Orion-Micros, and Orion-Social** so the release is backed by real ingestion, scan, and social-recon capability growth
+
+### Featured
+- **Social Intelligence Workspace:** A dedicated social graph/social mapper experience with recon, profile enrichment, followers/following, post analysis, metadata search, reverse image lookup, tab persistence, and entity management.
+- **Expanded Dynamic Scanning:** Broader scan coverage across crypto, wanted-list, national identity, software, Play Store/app analysis, file IOC extraction, domain scanning, IP scanning, and social scraping workflows.
+- **CTI Graph + Entity Relationships:** Expanded graph-oriented intelligence workflows with dedicated graph routes, entity relationship retrieval, contextual sidebars, and export-ready graph payloads.
+- **Homepage + Alert Operations:** Stronger homepage analytics, world heatmap interactions, country drill-down insights, alert summaries, custom alerts, export flows, and scan-status handling.
+- **Directory + Dump Catalogs:** New monitored-source directory and breach dump catalog workflows with filters, pagination, and operational visibility.
+- **Credential & Stealer Log Analysis:** Improved credential search/listing, expanded-row drilldowns, password schema visualization, and paywalled stealer-log workflows.
+- **Unified Export + STIX Reporting:** Improved PDF/document export flows and minimal STIX conversion support across multiple intelligence types.
+- **Tenant/Admin Improvements:** Better onboarding, signup/current-user updates, tenant/user/system image handling, branding resources, and audit/user administration paths.
+- **Engineering Quality:** Broader automated backend tests, Cypress expansion, testing fixtures, coverage reporting, and testing Docker support.
+- **Ecosystem Service Growth:** Major underlying additions in Crawler, Micros, and Social services for dump parsing, sanctions ingestion, runtime scans, and richer social collection.
+
+---
+
+## Added
+
+### Social Intelligence Workspace
+- **Dedicated social graph UI:** Added a full `social-graph` / `social-intel` workspace for analyst-driven social mapping.
+- **Cross-platform recon APIs:** Added routes for profile recon, phone recon, profile scraping, metadata search, post retrieval, follower/following retrieval, entity lookup, and online image collection.
+- **Reverse image recon:** Added image-based social recon support through `/api/social/recon/image`.
+- **Persistent graph sessions:** Added backend session upsert and tab APIs plus Mongo persistence for graph sessions.
+- **Interactive graph tooling:** Added graph toolbar, graph search, relationship details, context menus, profile management, entity management, and list/graph viewing modes.
+- **Mobile-aware mapper behavior:** Added smaller-screen behavior that automatically shifts the mapper into a more usable list-oriented mode.
+- **Shared graph infrastructure:** Added shared graph loading, tab management, toolbar, sidebar shell, orchestrator/state services, and relationship resolution utilities that support the mapper workflows.
+
+### CTI Graph & Entity Workflows
+- **CTI graph route exposure:** Added/expanded dedicated `ctigraph` route handling in the dashboard.
+- **Entity relationship API:** Added graph relationship retrieval through `/api/graph` for entity-driven investigation flows.
+- **Graph-side interaction controls:** Added graph context menus, expand/collapse controls, CTI sidebars, and graph-focused navigation elements.
+- **Export-ready graph payloads:** Added report/export payload generation that can render graph-oriented intelligence into downloadable documents.
+
+### Expanded Scan & API Modules
+- **New API panels in the frontend:** Added or expanded UI support for social scanner, wanted list, national identity, Play Store/app scan, software scan, crypto scan, and file IOC extraction.
+- **Domain and IP scanning:** Added request models and route support for domain and IP-based scan workflows.
+- **Support scan coverage:** Added documented support for DNS, subdomain, and Wayback-focused scans.
+- **Security scan UX:** Improved scan progress handling, grade/risk summaries, category breakdowns, proof merging, and report export from the scan view.
+- **Social scrape backend model:** Added request modeling for social scrape operations in crawl workflows.
+- **Scanner route expansion:** Added clearer routed scan variants for basic scan, port/advanced scan, repository scan, SEO scan, APK analysis, and file extraction flows.
+- **Scan helper methods UI:** Added support/helper components to surface scan-specific helper behavior and actions in the client.
+
+### Homepage, Alerts & Intelligence Operations
+- **World heatmap workflows:** Added/improved heatmap rendering, country report opening, overlay close behavior, and country-specific insight retrieval.
+- **Country insight pagination:** Added dedicated paginated country insight retrieval in the backend.
+- **Alert summary helper:** Added backend alert summary shaping to improve homepage alert counts and category/risk summaries.
+- **Custom alert operations:** Added support for create, update, delete, seen-state updates, and summary retrieval for tenant alerts.
+- **Alert homepage actions:** Added/expanded flush-all, manual scan triggering, export options, and loading-state coordination in the profile homepage experience.
+- **Support contact flow:** Added a support modal/component with validation, API submission, and user notifications.
+- **Homepage intelligence refinements:** Expanded homepage search, selected-filter handling, insight cards, and profile homepage management workflows.
+
+### Directory, Dumps & Search Workflows
+- **Monitored source directory:** Added a dedicated directory UI and `/api/directory` support for browsing indexed clearnet/onion/I2P sources.
+- **Advanced directory filtering:** Added filtering by network, index type, content type, date range, and pagination.
+- **Breach dump catalog:** Added `/api/dumps` support and frontend dump-list workflows for leak dump discovery and review.
+- **Ranked consolidated search logic:** Expanded consolidated and IOC-focused search logic in the backend.
+- **Stealer log workflow updates:** Improved stealer log search gating and public persona-breach lookup support.
+- **Search result/report refactoring:** Continued consolidating report rendering and result container behavior across data types.
+- **Route coverage expansion:** Added/refined route handling for discussion, feed, strategic, breach, social, exploit, defacement, consolidated, dump, stealerlogs, tenant, and profile subflows.
+- **Credential intelligence UX:** Improved credential list/search behavior, expanded-row drilldowns, and password schema visualization for dump and stealer-log analysis.
+
+### Admin, Tenant & Audit Operations
+- **Audit log UI and APIs:** Expanded audit log retrieval and the corresponding admin/profile audit log screens.
+- **Tenant administration views:** Improved tenant/user management views for admins and maintainers.
+- **Profile/tenant settings workflows:** Expanded account, tenant, system settings, and current-user update paths.
+
+### Export, Reporting & STIX
+- **Unified report export service:** Added shared export infrastructure for graph and document-style exports.
+- **Alert export service:** Added dedicated alert export support.
+- **Document/PDF report generation:** Added richer report payload generation for CTI, scan, and alert-oriented exports.
+- **Minimal STIX conversion:** Added a minimal STIX conversion layer plus converters for chat, defacement, exploit, general, leak, and social intelligence records.
+- **Batch/single STIX test coverage:** Added journey-level support and fixtures for single and batch STIX conversion flows.
+
+### Tenant, Auth & Branding
+- **Welcome/onboarding flow improvements:** Added/expanded welcome route handling, notification guards, onboarding behavior, and signup handling.
+- **Current-user profile updates:** Improved update flows for current-user metadata and tenant-linked account operations.
+- **Image/resource management:** Added or refined user, tenant, and system image upload/delete flows plus public/static logo handling.
+- **Branding assets:** Added dedicated default favicon and light/dark wide logo resources for white-label and public rendering scenarios.
+- **Public branding delivery:** Improved public/static delivery of favicon and system logo assets for branded and unauthenticated entry points.
+- **Public landing presence:** Added/expanded the Orion Intelligence public website at `orionintelligence.org` to present the platform, service areas, team, pricing/demo paths, and educational cybersecurity content for prospects and partners.
+- **Tenant administration:** Expanded tenant CRUD-related operations, tenant user creation, and audit log workflows.
+- **Password/session flow hardening:** Improved auth/session behavior, token provider handling, and related tests.
+
+### Source Coverage Expansion
+- **Leak source additions:** Added new leak/tracking parsers including ransomware/tracking coverage expansions.
+- **Forum/social source additions:** Added new forum and social parsers for monitored communities and platform intelligence.
+- **News/support source growth:** Expanded news and support-source ingestion coverage in the crawler/parser set.
+- **Crawler fixture expansion:** Added broader injection fixtures for crawl, search, social, and URL scan workflows.
+
+### Orion Ecosystem Service Changes
+- **Orion-Collector custom script governance:** Expanded automated checking, repair, and auditing of custom collector scripts so source-specific parsers can be validated and corrected faster across news, social, defacement, exploit, and API collectors.
+- **Orion-Collector script maintenance growth:** Added substantial repair/update coverage across custom scripts for leak, tracking, forum, social-platform, defacement, and support-data sources.
+- **Orion-Crawler ingestion growth:** Added dedicated dump parser modules, manual dump support, torrent-oriented breach handling, stealer-log extraction/detection/indexing helpers, and file-reader improvements for larger or compressed dump inputs.
+- **OpenSanctions ingestion:** Added OpenSanctions parser/controller support and related crawler data models to feed sanctions-oriented intelligence into the wider platform.
+- **Crawler runtime improvements:** Added browser-pool hooks for Celery workers, updated Aria2/filebrowser-oriented runtime assets, and improved Telegram parsing plus request/web-handler behavior.
+- **Orion-Micros architecture split:** Reorganized the microservice layer into clearer `system_micros` and `user_micros` groupings.
+- **Orion-Micros scan services:** Added dedicated managers for APK scan, IOC extraction, crypto analysis, and domain/IP scanning, including port, repository, SEO, subdomain, and Wayback support.
+- **Orion-Micros NLP/PII services:** Expanded NLP parse, AI summarize/chat-report, embedding, topic classification, translation, IOC parsing, crypto parsing, and broader PII-analysis helpers.
+- **Orion-Micros queue/progress handling:** Added/expanded queue monitoring, progress tracking, and request orchestration for runtime/user-triggered jobs.
+- **Orion-Social API expansion:** Added or stabilized social recon, phone recon, reverse-image recon, multi-target social scraping, profile retrieval, followers, following, posts, online username discovery, online image discovery, and metadata routes.
+- **Orion-Social scraper growth:** Expanded Facebook, Instagram, Twitter/X, TikTok, YouTube, Vimeo, and Behance scraping behavior, including followers/following, posts, reels/comments, and page-focused collection paths.
+- **Orion-Social discovery quality:** Added or improved DuckDuckGo-backed live search, username matching, image search, cross-platform mapping, and richer connection modeling for social graph ingestion.
+
+---
+
+## Platform Enhancements (Integrated)
+
+### Frontend Modernization
+- **Angular migration delivered into product codepaths**
+- **Tailwind integration** added for the client UI
+- **Shared component refresh** across sidebar, filters, notifications, loaders, result views, exports, and report components
+- **Responsive/mobile improvements** across dashboard, graph, and homepage experiences
+- **PWA/static asset refresh** through updated favicon/public icon assets and application shell updates
+
+### Backend Architecture & Operations
+- **Migration runner** added for versioned migration execution
+- **Service readiness middleware** improved
+- **Content security policy handling** improved
+- **Redis/session/auth plumbing** updated and covered with tests
+- **Resource serving** improved for protected/public assets and branding resources
+- **Downstream service contracts** updated to match newer Micros/Social/Crawler request and response shapes
+
+### Documentation
+- **Dynamic scan docs** expanded for APK, crypto, IOC extract, national identity, wanted, and domain scan variants
+- **Social docs** added for profile search, followers, following, posts, metadata, images, global presence, and reverse image recon
+- **Support scan docs** added for DNS, subdomain, and Wayback scans
+
+### Testing, Coverage & CI
+- **Backend coverage integration** added with coverage artifacts and config
+- **Journey/static/service/integration test suites** significantly expanded
+- **Social, tenant, crawl, auth, config, and API route tests** added
+- **Client E2E parity checks** added between Cypress and backend contracts
+- **Testing infrastructure** expanded with `docker-compose-testing.yml` and test DB generation support
+- **Codacy configuration** added for quality reporting
+
+## Notes
+- This release consolidates many late-2025 additions into integrated frontend/backend workflows rather than shipping them only as isolated backend capabilities.
+- The largest visible gains are in **social intelligence**, **expanded scan modules**, **homepage/alert operations**, **directory + dump visibility**, and **export/reporting maturity**.
+
 Changelog [1.0.3.0] – 2025-12-25
 *Release date: December 15, 2025*
 

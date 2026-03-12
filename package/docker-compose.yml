@@ -1,7 +1,7 @@
 services:
   web:
     container_name: trusted-web-main
-    image: msmannan01/orion-intelligence:latest
+    image: msmannan01/orion-intelligence:1.0.3.1
     env_file:
       - .env
     working_dir: /app

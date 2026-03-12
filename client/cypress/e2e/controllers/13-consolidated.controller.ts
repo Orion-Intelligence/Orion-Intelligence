@@ -243,7 +243,9 @@ export function runAdvancedFilterFlow() {
 
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
     cy.get('[data-testid="ioc-adv-operator-select"]').scrollIntoView().select('&&');
+    cy.scrollDashboardToTop()
     cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
+    cy.scrollDashboardToTop()
     cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('fake-no-result-value-xyz@gmail.com');
   });
   executeIocAdvancedSearch();

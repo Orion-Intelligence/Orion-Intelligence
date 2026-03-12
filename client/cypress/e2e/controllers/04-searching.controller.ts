@@ -39,6 +39,7 @@ export function waitForSearchReady() {
 export function typeDashboardSearch(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
+  cy.wait(1000)
   cy.scrollDashboardToTop();
   cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().should('be.visible').and('be.enabled').then(($input) => {
     const currentValue = String($input.val() ?? '').trim();
