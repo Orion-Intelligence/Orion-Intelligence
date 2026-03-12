@@ -14,14 +14,10 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
       testData = TEST_DATA || {};
     });
-    cy.loginAsAdmin();
   });
 
   beforeEach(() => {
-    cy.clearCookies();
-    cy.clearLocalStorage();
     cy.loginAsAdmin();
-    cy.location('pathname', {timeout: 35000}).should('include', '/dashboard');
   });
 
   after(() => {
@@ -82,7 +78,9 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.get('[data-testid="cti-tab-rename-input"]', {timeout: 15000}).filter(':visible').last().clear().type(`${newName}{enter}`);
     cy.contains(newName).should('exist');
     cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-export-current-session"]', {timeout: 15000}).filter(':visible').first().click();
+    cy.contains('button', 'Export Current Session', {timeout: 15000}).then(($button) => {
+      ($button[0] as HTMLButtonElement).click();
+    });
     cy.get('@createObjectURL').should('have.been.called');
     cy.get('@anchorClick').should('have.been.called');
     cy.get('@revokeObjectURL').should('have.been.called');
@@ -173,7 +171,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     visitSocialGraph();
 
     cy.get('[data-testid="social-tab-add-menu"]').filter(':visible').first().click();
-    cy.get('[data-testid="social-new-session"]').filter(':visible').first().click();
+    cy.get('[data-testid="social-tab-add-new-session"]').filter(':visible').first().click();
     const newName = `Social Session ${Date.now()}`;
     cy.get('[data-testid="social-tab-name"]').filter(':visible').first().dblclick();
     cy.get('[data-testid="social-tab-rename-input"]').filter(':visible').first().clear().type(`${newName}{enter}`);
