@@ -34,18 +34,12 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
 
 export function waitForSearchReady() {
   cy.get('app-loading-form', {timeout: 30000}).should('not.exist');
-
-  cy.get('body').then(($body) => {
-    if ($body.find('app-filters:visible, app-search-filters:visible').length) {
-      cy.scrollTo('top', {ensureScrollable: false});
-    }
-  });
 }
 
 export function typeDashboardSearch(value: string) {
   waitForSearchReady();
-
-  cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().scrollIntoView().should('be.visible').and('be.enabled').then(($input) => {
+  cy.scrollDashboardToTop();
+  cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().should('be.visible').and('be.enabled').then(($input) => {
     const currentValue = String($input.val() ?? '').trim();
     if (currentValue.length > 0) {
       cy.wrap($input).clear();

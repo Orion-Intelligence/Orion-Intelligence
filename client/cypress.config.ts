@@ -8,6 +8,12 @@ const isCi =
 
 export default defineConfig({
     allowCypressEnv: false,
+    video: false,
+    numTestsKeptInMemory: 0,
+    watchForFileChanges: false,
+    experimentalMemoryManagement: true,
+    experimentalFastVisibility: true,
+    retries: 0,
     env: {
         coverage: isCi,
         language: "en",
@@ -93,6 +99,7 @@ export default defineConfig({
             }
             on("before:browser:launch", (browser, launchOptions) => {
                 if (browser.family === "chromium") {
+                    launchOptions.args.push("--start-maximized");
                     launchOptions.args.push("--window-size=1920,1080");
                     launchOptions.args.push("--force-device-scale-factor=1");
                 }
@@ -109,11 +116,14 @@ export default defineConfig({
             return config;
         },
         baseUrl: "http://127.0.0.1:4200",
-        viewportWidth: 1366,
-        viewportHeight: 1200,
-        defaultCommandTimeout: 35000,
-        waitForAnimations: false,
-        animationDistanceThreshold: 0,
+        viewportWidth: 1920,
+        viewportHeight: 1080,
+        defaultCommandTimeout: 10000,
+        requestTimeout: 8000,
+        responseTimeout: 15000,
+        pageLoadTimeout: 30000,
+        waitForAnimations: true,
+        animationDistanceThreshold: 5,
         screenshotOnRunFailure: false,
     },
     component: {

@@ -79,6 +79,10 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.go('back');
     cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
+
+    cy.scrollDashboardToTop()
+    cy.get('[data-cy="top"]', { timeout: 20000 }).should('be.visible');
+
     clickSidebarSubItem('Social', 'Twitter');
     typeDashboardSearch('a');
     clickOpenReport();

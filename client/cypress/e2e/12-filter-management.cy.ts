@@ -12,26 +12,30 @@ describe('Filter Management', () => {
 
   it('applies all filters, tools, and auto-apply options in General Intelligence', () => {
     cy.get('[data-testid="sidebar-group-strategic"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-    cy.get('[data-testid="dashboard-advance-toggle"]', {timeout: 30000}).should('exist').scrollIntoView().check();
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="dashboard-advance-toggle"]', {timeout: 30000}).should('exist').check();
     cy.get('app-search-filters', {timeout: 20000}).should('be.visible');
 
     ENTITY_FILTERS.forEach(([name, value]) => applyEntityFilter(name, value));
 
     cy.get('[data-testid="entity-filter-clear-selection"]', {timeout: 20000}).scrollIntoView().click();
     cy.get('body').click(0, 0);
-    cy.get('[data-testid="dashboard-tools-toggle"]', {timeout: 20000}).scrollIntoView().click();
-    cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).scrollIntoView().should('exist');
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="dashboard-tools-toggle"]', {timeout: 20000}).click();
+    cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).should('exist');
 
     SORT_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).scrollIntoView().click();
-      cy.get(option === 'Newest first' ? '[data-testid="result-tools-sort-newest"]' : '[data-testid="result-tools-sort-oldest"]', {timeout: 20000}).scrollIntoView().click();
+      cy.scrollDashboardToTop();
+      cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).click();
+      cy.get(option === 'Newest first' ? '[data-testid="result-tools-sort-newest"]' : '[data-testid="result-tools-sort-oldest"]', {timeout: 20000}).click();
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).type('{enter}');
     });
 
     SEARCH_BY_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="result-tools-searchby"]', {timeout: 20000}).scrollIntoView().click();
-      cy.get(option === 'Match Semantic' ? '[data-testid="result-tools-searchby-semantic"]' : option === 'Match any term (OR)' ? '[data-testid="result-tools-searchby-or"]' : option === 'Match indivisual terms (AND)' ? '[data-testid="result-tools-searchby-and"]' : '[data-testid="result-tools-searchby-full"]', {timeout: 20000}).scrollIntoView().click();
+      cy.scrollDashboardToTop();
+      cy.get('[data-testid="result-tools-searchby"]', {timeout: 20000}).click();
+      cy.get(option === 'Match Semantic' ? '[data-testid="result-tools-searchby-semantic"]' : option === 'Match any term (OR)' ? '[data-testid="result-tools-searchby-or"]' : option === 'Match indivisual terms (AND)' ? '[data-testid="result-tools-searchby-and"]' : '[data-testid="result-tools-searchby-full"]', {timeout: 20000}).click();
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).should('be.visible').clear().type('test query{enter}');
     });
 
@@ -43,10 +47,11 @@ describe('Filter Management', () => {
       cy.openSideFilter();
     });
 
-    cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-    cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 20000}).filter(':visible').first().scrollIntoView().click();
-    cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 20000}).filter(':visible').first().scrollIntoView().click();
-    cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 20000}).filter(':visible').first().click();
+    cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 20000}).filter(':visible').first().click();
+    cy.get('[data-testid="side-filter-apply"]').click();
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
@@ -56,12 +61,14 @@ describe('Filter Management', () => {
     });
 
     cy.closeSideFilter();
-    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 20000}).first().should('be.visible').scrollIntoView().click();
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 20000}).first().should('be.visible').click();
   });
   it('applies all filter options in Data Breach', () => {
     cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
-    cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').scrollIntoView().check();
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').check();
     cy.openSideFilter();
 
     NETWORK_OPTIONS.forEach((option) => {
@@ -77,7 +84,7 @@ describe('Filter Management', () => {
     });
 
     selectDateRangeAndReopen();
-    cy.get('[data-testid="side-filter-reset"]').scrollIntoView().click();
+    cy.get('[data-testid="side-filter-reset"]').click();
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
@@ -87,7 +94,8 @@ describe('Filter Management', () => {
     });
 
     cy.closeSideFilter();
-    cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="dashboard-search-submit"]').first().click();
   });
   it('applies all filters in Defacement with auto-apply', () => {
     cy.get('[data-testid="sidebar-group-defacement"]').scrollIntoView().click();
@@ -102,7 +110,8 @@ describe('Filter Management', () => {
     });
 
     cy.closeSideFilter();
-    cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="dashboard-search-submit"]').first().click();
   });
   it('applies all filters in Social with auto-apply', () => {
     cy.get('[data-testid="sidebar-group-social"]').scrollIntoView().click();

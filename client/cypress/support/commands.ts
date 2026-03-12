@@ -63,21 +63,19 @@ Cypress.Commands.add("logout", () => {
 });
 Cypress.Commands.add("scrollDashboardToTop", () => {
     cy.window({ log: false }).then((win) => {
-        win.scrollTo(0, 0);
-        win.document.documentElement.scrollTop = 0;
-        win.document.body.scrollTop = 0;
-    });
+        const doc = win.document;
+        const elements = Array.from(doc.querySelectorAll<HTMLElement>('*'));
 
-    cy.get('body', { log: false }).then(($body) => {
-        if ($body.find('#dashboard-container').length) {
-            cy.get('#dashboard-container', { timeout: 20000, log: false })
-                .scrollTo('top', { ensureScrollable: false, duration: 0, log: false });
-        }
+        win.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        doc.documentElement.scrollTop = 0;
+        doc.body.scrollTop = 0;
 
-        if ($body.find('[data-testid="dashboard-body"]').length) {
-            cy.get('[data-testid="dashboard-body"]', { timeout: 20000, log: false })
-                .scrollTo('top', { ensureScrollable: false, duration: 0, log: false });
-        }
+        elements.forEach((el) => {
+            if (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) {
+                el.scrollTop = 0;
+                el.scrollLeft = 0;
+            }
+        });
     });
 });
 Cypress.Commands.add("openSideFilter", () => {
@@ -88,7 +86,6 @@ Cypress.Commands.add("openSideFilter", () => {
             cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
                 .filter(':visible')
                 .first()
-                .scrollIntoView()
                 .should('be.visible');
             cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
                 .filter(':visible')
@@ -96,10 +93,10 @@ Cypress.Commands.add("openSideFilter", () => {
                 .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
             cy.get('body').then(($retryBody) => {
                 if ($retryBody.find('.ui-filter-sidebar-panel.right-0').length === 0) {
+                    cy.scrollDashboardToTop();
                     cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
                         .filter(':visible')
                         .first()
-                        .scrollIntoView()
                         .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
                 }
             });
@@ -132,7 +129,6 @@ Cypress.Commands.add("applySideFilter", () => {
                 .scrollTo('bottom', { ensureScrollable: false, duration: 0 });
 
             cy.wrap(visibleApply)
-                .scrollIntoView()
                 .should('be.visible')
                 .click({ force: true, waitForAnimations: false, animationDistanceThreshold: 0 });
         }
