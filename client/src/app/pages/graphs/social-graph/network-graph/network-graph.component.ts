@@ -19,7 +19,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   private fetchingState = inject(FetchingStateService);
   private networkInstance = signal<Network | null>(null);
   private visData = { nodes: new DataSet<any>(), edges: new DataSet<any>(), };
-  private hideButtonTimeout: any;
   private animationFrameId: number | null = null;
   private animationStartTime: number | null = null;
   private readonly minZoomScale = 0.35;
@@ -50,6 +49,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         edges: string[];
     }>();
   public state = inject(SocialMapperStateService);
+  selectedEdgeId = signal<string | null>(null);
   deleteButtonState = signal({
     visible: false,
     x: 0,
@@ -149,7 +149,8 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       else {
         network.disableEditMode();
         network.unselectAll();
-        this.hideDeleteButton(true);
+        this.selectedEdgeId.set(null);
+        this.hideDeleteButton();
         this.isManipulating.set(false);
       }
     });
@@ -571,9 +572,24 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         });
       }
       this.relationshipOverlayNodes.set(relationshipOverlays);
+      const selectedEdgeId = this.selectedEdgeId();
+      if (selectedEdgeId) {
+        this.updateDeleteButtonPosition(network, selectedEdgeId);
+      }
+      else if (this.deleteButtonState().visible) {
+        this.hideDeleteButton();
+      }
     });
     network.on('click', (properties) => {
       if (this.editMode()) {
+        const selectedEdgeId = properties.edges?.length ? String(properties.edges[0]) : null;
+        if (this.selectedEdgeId() !== selectedEdgeId) {
+          this.selectedEdgeId.set(selectedEdgeId);
+        }
+        if (!selectedEdgeId) {
+          network.unselectAll();
+          this.hideDeleteButton();
+        }
         return;
       }
       const { nodes } = properties;
@@ -604,37 +620,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         }
       }
     });
-    network.on('hoverEdge', (properties) => {
-      if (this.editMode()) {
-        this.isManipulating.set(true);
-        this.cancelHideDeleteButton();
-        const edgeId = properties.edge as string;
-        const edgeData = (network as any).body.data.edges.get(edgeId);
-        if (edgeData?.from && edgeData?.to) {
-          const connectedNodeIds = [edgeData.from, edgeData.to];
-          const positions = network.getPositions(connectedNodeIds as string[]);
-          const fromNode = positions[edgeData.from];
-          const toNode = positions[edgeData.to];
-          if (fromNode && toNode) {
-            const midX = (fromNode.x + toNode.x) / 2;
-            const midY = (fromNode.y + toNode.y) / 2;
-            const domPos = network.canvasToDOM({ x: midX, y: midY });
-            this.deleteButtonState.set({
-              visible: true,
-              x: domPos.x,
-              y: domPos.y,
-              edgeId: edgeId
-            });
-          }
-        }
-      }
-    });
-    network.on('blurEdge', () => {
-      if (this.editMode()) {
-        this.isManipulating.set(false);
-        this.hideDeleteButton();
-      }
-    });
     network.on('oncontext', (properties) => {
       properties.event.preventDefault();
       const nodeId = network.getNodeAt(properties.pointer.DOM);
@@ -644,7 +629,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     });
     network.on('dragStart', () => {
       this.dragStart.emit();
-      this.hideDeleteButton(true);
     });
     network.on('zoom', (properties: any) => {
       const currentScale = network.getScale();
@@ -663,7 +647,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         this.minZoomLockPosition = currentPosition;
       }
       this.zoom.emit();
-      this.hideDeleteButton(true);
     });
     this.networkInstance.set(network);
   }
@@ -685,23 +668,60 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   }
 
   deleteEdge(edgeId: string) {
+    this.selectedEdgeId.set(null);
     this.edgeDeleted.emit({ edges: [edgeId] });
-    this.hideDeleteButton(true);
+    this.hideDeleteButton();
   }
 
-  cancelHideDeleteButton() {
-    clearTimeout(this.hideButtonTimeout);
-  }
-
-  hideDeleteButton(immediate = false) {
-    if (immediate) {
+  hideDeleteButton() {
+    const current = this.deleteButtonState();
+    if (current.visible || current.x !== 0 || current.y !== 0 || current.edgeId !== null) {
       this.deleteButtonState.set({ visible: false, x: 0, y: 0, edgeId: null });
     }
-    else {
-      this.hideButtonTimeout = setTimeout(() => {
-        this.deleteButtonState.set({ visible: false, x: 0, y: 0, edgeId: null });
-      }, 200);
+  }
+
+  private updateDeleteButtonPosition(network: Network, edgeId: string): void {
+    const edgeData = (network as any).body.data.edges.get(edgeId);
+    const renderedEdge = (network as any)?.body?.edges?.[edgeId];
+    if (!edgeData?.from || !edgeData?.to) {
+      this.selectedEdgeId.set(null);
+      this.hideDeleteButton();
+      return;
     }
+    let domPos: { x: number; y: number; } | null = null;
+    const viaNode = renderedEdge?.edgeType?.getViaNode?.();
+    const edgePoint = renderedEdge?.edgeType?.getPoint?.(0.5, viaNode);
+    if (edgePoint && Number.isFinite(edgePoint.x) && Number.isFinite(edgePoint.y)) {
+      domPos = network.canvasToDOM({ x: edgePoint.x, y: edgePoint.y });
+    }
+    else {
+      const connectedNodeIds = [edgeData.from, edgeData.to];
+      const positions = network.getPositions(connectedNodeIds as string[]);
+      const fromNode = positions[edgeData.from];
+      const toNode = positions[edgeData.to];
+      if (!fromNode || !toNode) {
+        this.hideDeleteButton();
+        return;
+      }
+      domPos = network.canvasToDOM({
+        x: (fromNode.x + toNode.x) / 2,
+        y: (fromNode.y + toNode.y) / 2
+      });
+    }
+    const nextState = {
+      visible: true,
+      x: this.toPositionValue(domPos.x),
+      y: this.toPositionValue(domPos.y),
+      edgeId
+    };
+    const current = this.deleteButtonState();
+    if (current.visible === nextState.visible
+      && current.x === nextState.x
+      && current.y === nextState.y
+      && current.edgeId === nextState.edgeId) {
+      return;
+    }
+    this.deleteButtonState.set(nextState);
   }
 
   onFollowersShortcutClick(event: MouseEvent, nodeId: string) {

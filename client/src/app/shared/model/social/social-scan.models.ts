@@ -148,6 +148,19 @@ export interface GraphPlatformBatch {
     all: PlatformResult[];
     visibleCount: number;
 }
+export interface ProfileLeakSessionData {
+    breachCards: any[];
+    stealerRows: any[];
+}
+export interface ProfileMetadataSessionData {
+    tokens: string[];
+    result: {
+        query: string;
+        total_found: number;
+        timestamp?: string;
+        results: any[];
+    } | null;
+}
 export interface TabState {
     searchTerm: WritableSignal<string>;
     homeMenuSearchTerm: WritableSignal<string>;
@@ -166,6 +179,8 @@ export interface TabState {
         [username: string]: NetworkNode | null;
     }>;
     graphPlatformBatches: WritableSignal<Map<string, GraphPlatformBatch>>;
+    profileLeakIntelligenceByUser: WritableSignal<Record<string, ProfileLeakSessionData>>;
+    profileMetadataByUser: WritableSignal<Record<string, ProfileMetadataSessionData>>;
 }
 export type SerializableTabState = {
     [K in keyof TabState]: ReturnType<TabState[K]>;

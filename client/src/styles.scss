@@ -1976,6 +1976,24 @@ app-world-heatmap .country:not(.is-clickable) {
   pointer-events: none;
 }
 
+.network-graph-delete-edge-button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: network-delete-edge-appear 160ms ease-out;
+}
+
+@keyframes network-delete-edge-appear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
 .network-graph-relationship-overlay {
   position: absolute;
   transform: translate(-50%, -50%);

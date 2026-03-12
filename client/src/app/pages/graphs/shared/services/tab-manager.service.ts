@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, NetworkNode, GraphPlatformBatch } from '../../../../shared/model/social/social-scan.models';
+import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, NetworkNode, GraphPlatformBatch, ProfileLeakSessionData, ProfileMetadataSessionData } from '../../../../shared/model/social/social-scan.models';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../../../shared/model/report/report-export.model';
@@ -44,6 +44,8 @@ export class TabManagerService {
                 [username: string]: NetworkNode | null;
             }>({}),
       graphPlatformBatches: signal(new Map<string, GraphPlatformBatch>()),
+      profileLeakIntelligenceByUser: signal<Record<string, ProfileLeakSessionData>>({}),
+      profileMetadataByUser: signal<Record<string, ProfileMetadataSessionData>>({}),
     };
   }
 

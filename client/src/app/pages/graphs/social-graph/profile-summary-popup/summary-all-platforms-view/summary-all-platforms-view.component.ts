@@ -1,12 +1,13 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, WritableSignal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, WritableSignal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PlatformResult } from '../../../../../shared/model/social/social-scan.models';
+import { PlatformResult, ProfileLeakSessionData, ProfileMetadataSessionData } from '../../../../../shared/model/social/social-scan.models';
 import { formatKey } from '../../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../../services/fetching-state.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { SocialScanService } from '../../../shared/services/social-scan.service';
+import { TabManagerService } from '../../../shared/services/tab-manager.service';
 import { catchError, finalize, map } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 @Component({
@@ -18,6 +19,7 @@ import { forkJoin, of } from 'rxjs';
 })
 export class SummaryAllPlatformsViewComponent {
   private socialScanService = inject(SocialScanService);
+  private tabManager = inject(TabManagerService);
 
   username = input.required<string>();
   email = input<string | undefined>();
@@ -60,6 +62,37 @@ export class SummaryAllPlatformsViewComponent {
   visiblePostConnectionsCount = signal<Record<string, number>>({});
   readonly postConnectionsInitial = 10;
   readonly postConnectionsIncrement = 10;
+
+  constructor() {
+    effect(() => {
+      const sessionLeakData = this.getStoredProfileLeakData();
+      if (!sessionLeakData) {
+        this.profileLeaksLoaded.set(false);
+        this.profileLeaksError.set('');
+        this.profileBreachCards.set([]);
+        this.profileStealerRows.set([]);
+        return;
+      }
+      this.profileLeaksError.set('');
+      this.profileLeaksLoaded.set(true);
+      this.profileBreachCards.set(Array.isArray(sessionLeakData.breachCards) ? sessionLeakData.breachCards : []);
+      this.profileStealerRows.set(Array.isArray(sessionLeakData.stealerRows) ? sessionLeakData.stealerRows : []);
+    });
+    effect(() => {
+      const sessionMetadata = this.getStoredProfileMetadata();
+      if (!sessionMetadata) {
+        this.profileMetadataTokens.set([]);
+        this.profileMetadataLoaded.set(false);
+        this.profileMetadataError.set('');
+        this.profileMetadataResult.set(null);
+        return;
+      }
+      this.profileMetadataTokens.set(Array.isArray(sessionMetadata.tokens) ? sessionMetadata.tokens : []);
+      this.profileMetadataLoaded.set(true);
+      this.profileMetadataError.set('');
+      this.profileMetadataResult.set(sessionMetadata.result ?? null);
+    });
+  }
 
   loadMoreDetailsPlatforms() {
     this.incrementVisible(this.visibleDetailsPlatformsCount); 
@@ -152,8 +185,13 @@ export class SummaryAllPlatformsViewComponent {
       this.profileLeaksLoaded.set(true);
     })).subscribe({
       next: ({ breach, stealer }) => {
-        this.profileBreachCards.set(Array.isArray(breach?.cards_data) ? breach.cards_data : []);
-        this.profileStealerRows.set(Array.isArray(stealer) ? stealer : []);
+        const leakData: ProfileLeakSessionData = {
+          breachCards: Array.isArray(breach?.cards_data) ? breach.cards_data : [],
+          stealerRows: Array.isArray(stealer) ? stealer : [],
+        };
+        this.profileBreachCards.set(leakData.breachCards);
+        this.profileStealerRows.set(leakData.stealerRows);
+        this.storeProfileLeakData(leakData);
       },
       error: () => {
         this.profileLeaksError.set('Failed to fetch profile leak data.');
@@ -195,7 +233,12 @@ export class SummaryAllPlatformsViewComponent {
       this.profileMetadataLoaded.set(true);
     })).subscribe({
       next: (res) => {
-        this.profileMetadataResult.set(res || null);
+        const metadataData: ProfileMetadataSessionData = {
+          tokens: [...this.profileMetadataTokens()],
+          result: res || null,
+        };
+        this.profileMetadataResult.set(metadataData.result);
+        this.storeProfileMetadata(metadataData);
       },
       error: () => {
         this.profileMetadataError.set('Failed to fetch profile metadata results.');
@@ -225,10 +268,27 @@ export class SummaryAllPlatformsViewComponent {
     }
     this.profileMetadataTokens.set(next);
     this.profileMetadataTokenInput.set('');
+    this.storeProfileMetadata({
+      tokens: next,
+      result: this.profileMetadataResult(),
+    });
   }
 
   removeMetadataToken(token: string): void {
-    this.profileMetadataTokens.set(this.profileMetadataTokens().filter(t => t !== token));
+    const nextTokens = this.profileMetadataTokens().filter(t => t !== token);
+    this.profileMetadataTokens.set(nextTokens);
+    this.storeProfileMetadata({
+      tokens: nextTokens,
+      result: this.profileMetadataResult(),
+    });
+  }
+
+  clearMetadataTokens(): void {
+    this.profileMetadataTokens.set([]);
+    this.storeProfileMetadata({
+      tokens: [],
+      result: this.profileMetadataResult(),
+    });
   }
 
   getObjectEntries(item: any): Array<{
@@ -334,5 +394,57 @@ export class SummaryAllPlatformsViewComponent {
       result.push(normalized);
     }
     return result;
+  }
+
+  private getStoredProfileLeakData(): ProfileLeakSessionData | null {
+    const activeTab = this.tabManager.activeTab();
+    const profileKey = this.getProfileSessionKey();
+    if (!activeTab || !profileKey) {
+      return null;
+    }
+    return activeTab.state.profileLeakIntelligenceByUser()[profileKey] ?? null;
+  }
+
+  private storeProfileLeakData(data: ProfileLeakSessionData): void {
+    const activeTab = this.tabManager.activeTab();
+    const profileKey = this.getProfileSessionKey();
+    if (!activeTab || !profileKey) {
+      return;
+    }
+    activeTab.state.profileLeakIntelligenceByUser.update(current => ({
+      ...current,
+      [profileKey]: data,
+    }));
+    this.tabManager.scheduleSave();
+  }
+
+  private getStoredProfileMetadata(): ProfileMetadataSessionData | null {
+    const activeTab = this.tabManager.activeTab();
+    const profileKey = this.getProfileSessionKey();
+    if (!activeTab || !profileKey) {
+      return null;
+    }
+    return activeTab.state.profileMetadataByUser()[profileKey] ?? null;
+  }
+
+  private storeProfileMetadata(data: ProfileMetadataSessionData): void {
+    const activeTab = this.tabManager.activeTab();
+    const profileKey = this.getProfileSessionKey();
+    if (!activeTab || !profileKey) {
+      return;
+    }
+    activeTab.state.profileMetadataByUser.update(current => ({
+      ...current,
+      [profileKey]: data,
+    }));
+    this.tabManager.scheduleSave();
+  }
+
+  private getProfileSessionKey(): string {
+    const username = (this.username() || '').trim().toLowerCase();
+    if (!username) {
+      return '';
+    }
+    return username;
   }
 }

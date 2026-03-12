@@ -111,7 +111,7 @@
             <span>{{ profileMetadataLoading() ? 'Fetching...' : 'Search Metadata' }}</span>
           </button>
           @if (profileMetadataTokens().length) {
-            <button type="button" (click)="profileMetadataTokens.set([])" class="text-xs text-slate-400 hover:text-slate-200">Clear</button>
+            <button type="button" (click)="clearMetadataTokens()" class="text-xs text-slate-400 hover:text-slate-200">Clear</button>
           }
         </div>
       </div>
