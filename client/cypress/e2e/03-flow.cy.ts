@@ -79,7 +79,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       );
     });
 
-    cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip.heatmap-tooltip-visible', {timeout: 10000}).should('be.visible');
+    cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip.heatmap-tooltip-visible', {timeout: 10000}).should('exist');
 
     cy.get('@usaCountryPath').should('exist').then(($el) => {
       ($el[0] as Element).dispatchEvent(

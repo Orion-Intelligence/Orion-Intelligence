@@ -14,7 +14,10 @@ describe('Filter Management', () => {
     cy.get('[data-testid="sidebar-group-strategic"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
     cy.scrollDashboardToTop();
     cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).should('be.visible').click();
-    cy.get('[data-testid="dashboard-advance-toggle"]', {timeout: 30000}).should('exist').check();
+    cy.get('[data-testid="dashboard-advance-toggle"]', {timeout: 30000}).should('exist').then(($toggle) => {
+      cy.wrap($toggle).closest('label').click();
+      cy.wrap($toggle).closest('label').click();
+    });
     cy.get('app-search-filters', {timeout: 20000}).should('be.visible');
 
     ENTITY_FILTERS.forEach(([name, value]) => applyEntityFilter(name, value));
@@ -68,7 +71,10 @@ describe('Filter Management', () => {
     cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').check();
+    cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').then(($toggle) => {
+      cy.wrap($toggle).closest('label').click();
+      cy.wrap($toggle).closest('label').click();
+    });
     cy.openSideFilter();
 
     NETWORK_OPTIONS.forEach((option) => {
@@ -84,6 +90,7 @@ describe('Filter Management', () => {
     });
 
     selectDateRangeAndReopen();
+    cy.openSideFilter();
     cy.get('[data-testid="side-filter-reset"]').click();
     cy.openSideFilter();
 
@@ -103,6 +110,7 @@ describe('Filter Management', () => {
     cy.openSideFilter();
     selectDateRangeResetAndReopen();
 
+    cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
       cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
       cy.applySideFilter();
@@ -119,6 +127,7 @@ describe('Filter Management', () => {
     cy.openSideFilter();
     selectDateRangeResetAndReopen();
 
+    cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
       cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
       cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
@@ -139,6 +148,7 @@ describe('Filter Management', () => {
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
     cy.openSideFilter();
     selectDateRangeResetAndReopen();
+    cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
       cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);

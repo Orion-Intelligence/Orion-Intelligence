@@ -39,8 +39,8 @@ export function visitCtiGraph() {
 
 export function visitSocialGraph() {
   cy.viewport(1440, 900);
-  cy.visit('/dashboard/social-mapper');
-  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/social-mapper');
+  cy.visit('/dashboard/social-intel');
+  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/social-intel');
   cy.get('[data-testid="social-graph-root"]', {timeout: 30000}).should('be.visible');
 }
 
