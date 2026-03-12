@@ -185,9 +185,14 @@ export const routes: Routes = [
         data: { animation: 'SocialMapper' }
       },
       {
-        path: 'social-mapper',
+        path: 'social-intel',
         component: SocialMapperComponent,
         data: { animation: 'SocialMapper' }
+      },
+      {
+        path: 'social-mapper',
+        redirectTo: 'social-intel',
+        pathMatch: 'full'
       },
       {
         path: 'directory',

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ElementRef, HostListener, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, HostListener, inject, signal, input, output } from '@angular/core';
 
 import { TabManagerService } from '../services/tab-manager.service';
 import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
@@ -15,14 +15,48 @@ import { getFirstFileFromInputEvent, readFileAsText } from '../../../../shared/u
   imports: [AutofocusDirective, ProfileComponent, ExportChoiceModalComponent],
 })
 export class TabBarComponent {
+  private tabManager = inject(TabManagerService, { optional: true });
   private hostRef = inject(ElementRef<HTMLElement>);
 
+  tabs = input<Array<{ id: string; name: string; }>>([]);
+  activeTabId = input<string | null>(null);
+  editingTabId = input<string | null>(null);
+  mode = input<'social' | 'cti'>('social');
+  manageReportExportInternally = input(true);
   isAddMenuVisible = signal(false);
   isHeaderMenuVisible = signal(false);
   isReportExportModalOpen = signal(false);
   readonly graphExportOptions = GRAPH_REPORT_EXPORT_OPTIONS;
+  tabSelected = output<string>();
+  tabClosed = output<string>();
+  tabEditStarted = output<string>();
+  tabRenameSubmitted = output<{ id: string; name: string; }>();
+  tabRenameCancelled = output<void>();
+  newSessionRequested = output<void>();
+  exportCurrentRequested = output<void>();
+  exportReportRequested = output<void>();
+  fileSelected = output<Event>();
 
-  constructor(public tabManager: TabManagerService) { }
+  private currentTabs(): Array<{ id: string; name: string; }> {
+    if (this.tabManager) {
+      return this.tabManager.tabs();
+    }
+    return this.tabs();
+  }
+
+  private currentActiveTabId(): string | null {
+    if (this.tabManager) {
+      return this.tabManager.activeTabId();
+    }
+    return this.activeTabId();
+  }
+
+  private currentEditingTabId(): string | null {
+    if (this.tabManager) {
+      return this.tabManager.editingTabId();
+    }
+    return this.editingTabId();
+  }
 
   toggleAddMenu(event: MouseEvent) {
     event.stopPropagation();
@@ -53,11 +87,20 @@ export class TabBarComponent {
   }
 
   createNewTab() {
-    this.tabManager.addTab();
+    if (this.tabManager) {
+      this.tabManager.addTab();
+    }
+    else {
+      this.newSessionRequested.emit();
+    }
     this.closeMenus();
   }
 
   openReportExportModal() {
+    if (!this.manageReportExportInternally()) {
+      this.exportReportRequested.emit();
+      return;
+    }
     this.isReportExportModalOpen.set(true);
   }
 
@@ -66,11 +109,17 @@ export class TabBarComponent {
   }
 
   exportByType(type: string) {
-    this.tabManager.exportActiveTabReport(type as GraphReportExportType);
+    this.tabManager?.exportActiveTabReport(type as GraphReportExportType);
     this.closeReportExportModal();
   }
 
   onFileSelected(event: Event) {
+    if (!this.tabManager) {
+      this.fileSelected.emit(event);
+      this.closeMenus();
+      return;
+    }
+    const tabManager = this.tabManager;
     const selected = getFirstFileFromInputEvent(event);
     if (!selected) {
       return;
@@ -80,7 +129,7 @@ export class TabBarComponent {
     readFileAsText(file)
       .then((content) => {
         try {
-          this.tabManager.importTab(content);
+          tabManager.importTab(content);
         }
         catch {
         }
@@ -91,14 +140,88 @@ export class TabBarComponent {
   }
 
   handleRename(tabId: string, input: HTMLInputElement) {
-    this.tabManager.renameTab(tabId, input.value);
+    if (this.tabManager) {
+      this.tabManager.renameTab(tabId, input.value);
+    }
+    else {
+      this.tabRenameSubmitted.emit({ id: tabId, name: input.value });
+    }
   }
 
   cancelRename() {
-    this.tabManager.stopEditing();
+    if (this.tabManager) {
+      this.tabManager.stopEditing();
+    }
+    else {
+      this.tabRenameCancelled.emit();
+    }
   }
 
   trackById( _index: number, tab: { id: string; } ): string {
     return tab.id;
+  }
+
+  isActiveTab(tabId: string): boolean {
+    return this.currentActiveTabId() === tabId;
+  }
+
+  isEditingTab(tabId: string): boolean {
+    return this.currentEditingTabId() === tabId;
+  }
+
+  selectTab(tabId: string) {
+    if (this.currentEditingTabId() === tabId) {
+      return;
+    }
+    if (this.tabManager) {
+      this.tabManager.selectTab(tabId);
+    }
+    else {
+      this.tabSelected.emit(tabId);
+    }
+  }
+
+  startEditing(tabId: string) {
+    if (this.tabManager) {
+      this.tabManager.startEditing(tabId);
+    }
+    else {
+      this.tabEditStarted.emit(tabId);
+    }
+  }
+
+  closeTab(tabId: string) {
+    if (this.tabManager) {
+      this.tabManager.closeTab(tabId);
+    }
+    else {
+      this.tabClosed.emit(tabId);
+    }
+  }
+
+  exportCurrentSession() {
+    if (this.tabManager) {
+      this.tabManager.exportActiveTab();
+    }
+    else {
+      this.exportCurrentRequested.emit();
+    }
+    this.closeMenus();
+  }
+
+  fileInputIdValue(): string {
+    return this.mode() === 'cti' ? 'graphSessionFileInput' : 'fileInput';
+  }
+
+  testId(prefix: string): string {
+    return `${this.mode()}-${prefix}`;
+  }
+
+  testCy(prefix: string): string {
+    return `${this.mode()}-${prefix}`;
+  }
+
+  visibleTabs(): Array<{ id: string; name: string; }> {
+    return this.currentTabs();
   }
 }

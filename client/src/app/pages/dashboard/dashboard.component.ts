@@ -45,7 +45,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   isCtiGraph(): boolean {
-    return this.router.url.includes('/dashboard/ctigraph') || this.router.url.includes('/dashboard/social-graph') || this.router.url.includes('/dashboard/social-mapper');
+    return this.router.url.includes('/dashboard/ctigraph') || this.router.url.includes('/dashboard/social-graph') || this.router.url.includes('/dashboard/social-intel') || this.router.url.includes('/dashboard/social-mapper');
   }
 
   ngAfterViewInit() {

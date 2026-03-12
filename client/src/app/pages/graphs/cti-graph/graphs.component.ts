@@ -12,6 +12,8 @@ import { ProfileComponent } from '../../../shared/partials/profile/profile.compo
 import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { TabBarComponent } from '../shared/tab-bar/tab-bar.component';
+import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { ExtendedNode, GraphResultItem, GraphSessionState, GraphSessionTab, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
@@ -21,7 +23,7 @@ import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass]
+  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly maxNodeLabelLength = 28;

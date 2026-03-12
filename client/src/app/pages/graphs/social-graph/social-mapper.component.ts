@@ -29,6 +29,7 @@ import { GraphSearchTriggerComponent } from './graph-search-trigger/graph-search
 import { SocialScanJobService } from './services/social-scan-job.service';
 import { PlatformFetchService } from './services/platform-fetch.service';
 import { RelationshipResolverService } from './services/relationship-resolver.service';
+import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 @Component({
   selector: 'app-social-graph',
@@ -53,7 +54,8 @@ import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/u
     AddEntityModalComponent,
     RelationshipDetailsPopupComponent,
     GraphToolbarComponent,
-    GraphSearchTriggerComponent
+    GraphSearchTriggerComponent,
+    GraphLoadingComponent
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
@@ -97,10 +99,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   entityManager = viewChild(EntityManagerComponent);
   isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
   canEditConnections = computed(() => {
-    const nodes = this.networkData().nodes;
-    const userNodeCount = nodes.filter(n => n.id.toString().startsWith('user-')).length;
-    const customEntityOnGraphCount = this.customEntities().filter(e => e.onGraph).length;
-    const connectableNodesCount = userNodeCount + customEntityOnGraphCount;
+    const connectableNodesCount = this.networkData().nodes.filter(node => !node.id.toString().startsWith('relationship-node-')).length;
     return connectableNodesCount >= 2;
   });
   isUserScanInProgress = computed(() => {

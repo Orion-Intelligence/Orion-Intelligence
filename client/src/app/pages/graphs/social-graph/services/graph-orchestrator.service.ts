@@ -113,7 +113,7 @@ export class GraphOrchestratorService {
         borderWidth: 0, borderWidthSelected: 3, title: `Platforms ${groupStart}-${groupEnd} | ${group.length} platforms | Double-click to expand.`,
         groupedPlatforms: group,
       });
-      newEdges.push({ from: centralNodeId, to: groupId });
+      newEdges.push({ id: `${centralNodeId}->${groupId}`, from: centralNodeId, to: groupId });
     });
     state.networkData.set({ nodes: newNodes, edges: newEdges });
     state.graphPlatformBatches.update(b => {
@@ -137,7 +137,7 @@ export class GraphOrchestratorService {
         this.updateUserConnections(state).then();
         return;
       }
-      const node = platformNodes[index], edge = { from: centralNodeId, to: node.id };
+      const node = platformNodes[index], edge = { id: `${centralNodeId}->${node.id}`, from: centralNodeId, to: node.id };
       state.networkData.update(d => ({ nodes: [...d.nodes, node], edges: [...d.edges, edge] }));
       setTimeout(() => addNodeSequentially(index + 1), 75);
     };
@@ -232,14 +232,42 @@ export class GraphOrchestratorService {
 
   public addEdge( state: TabState, edge: { from: string; to: string; } ) {
     const isConnectingToEntity = state.customEntities().some(e => e.id === edge.from || e.id === edge.to);
+    const edgeId = `${edge.from}->${edge.to}`;
     const styledEdge = isConnectingToEntity
-      ? { ...edge, dashes: [2, 2], color: { color: '#a78bfa', highlight: '#c4b5fd', hover: '#8b5cf6' }, width: 2, smooth: { type: 'dynamic' } }
-      : { ...edge };
+      ? { ...edge, id: edgeId, dashes: [2, 2], color: { color: '#a78bfa', highlight: '#c4b5fd', hover: '#8b5cf6' }, width: 2, smooth: { type: 'dynamic' } }
+      : { ...edge, id: edgeId };
     state.networkData.update(d => ({ ...d, edges: [...d.edges, styledEdge] }));
   }
 
   public deleteEdges(state: TabState, edgeIds: string[]) {
-    state.networkData.update(d => ({ ...d, edges: d.edges.filter((e: any) => !edgeIds.includes(e.id)) }));
+    state.networkData.update(d => {
+      const removedEdges = d.edges.filter((e: any) => edgeIds.includes(String(e.id ?? `${e.from}->${e.to}`)));
+      const remainingEdges = d.edges.filter((e: any) => !edgeIds.includes(String(e.id ?? `${e.from}->${e.to}`)));
+      const orphanedNodeIds = new Set<string>();
+
+      for (const edge of removedEdges) {
+        const connectedNodeIds = [String(edge.from), String(edge.to)];
+        for (const nodeId of connectedNodeIds) {
+          if (nodeId.startsWith('user-') || nodeId.startsWith('relationship-node-')) {
+            continue;
+          }
+          const stillConnected = remainingEdges.some((remainingEdge: any) => String(remainingEdge.from) === nodeId || String(remainingEdge.to) === nodeId);
+          if (!stillConnected) {
+            orphanedNodeIds.add(nodeId);
+          }
+        }
+      }
+
+      if (orphanedNodeIds.size > 0) {
+        state.customEntities.update(entities => entities.map(entity => orphanedNodeIds.has(entity.id) ? { ...entity, onGraph: false } : entity));
+      }
+
+      return {
+        ...d,
+        nodes: d.nodes.filter(node => !orphanedNodeIds.has(String(node.id))),
+        edges: remainingEdges
+      };
+    });
   }
 
   public async handleGroupNodeClicked( state: TabState, { nodeId, position }: { nodeId: string; position: Position; } ) {
@@ -289,7 +317,10 @@ export class GraphOrchestratorService {
         }));
         state.expandedGroupDataByUser.update(c => ({ ...c, [username]: groupNodeToExpand }));
         const platformNodes = platformsToAdd.map(platform => ({ ...this.graphManager.createPlatformNode(platform, iconUrlMap), x: position?.x, y: position?.y }));
-        const newEdges = platformsToAdd.map(platform => ({ from: centralNodeId, to: this.fetchingState.getPlatformUniqueKey(platform) }));
+        const newEdges = platformsToAdd.map(platform => {
+          const platformNodeId = this.fetchingState.getPlatformUniqueKey(platform);
+          return { id: `${centralNodeId}->${platformNodeId}`, from: centralNodeId, to: platformNodeId };
+        });
         const chunkSize = 6;
         for (let index = 0; index < platformNodes.length; index += chunkSize) {
           const nodeChunk = platformNodes.slice(index, index + chunkSize);
