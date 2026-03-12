@@ -16,6 +16,10 @@ from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName
 from orion.services.encryption_manager.key_manager import KeyManager
+from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
+from orion.helper_manager.env_handler import env_handler
+from orion.services.mail_manager.mail_manager import mail_manager
+from orion.constants import constant
 
 
 class TenantManager:
@@ -339,6 +343,18 @@ class TenantManager:
             await engine.save(user)
             await AuditLogManager.get_instance().register(
                 str(current_user.tenant_uuid), str(current_user.id), "tenent created successfully")
+
+            APP_URL = env_handler.get_instance().env("APP_URL")
+            login_url = f"{APP_URL}/login"
+            html_content = constant.mail_template.render(
+                username=user.username,
+                email=user.email,
+                password=password,
+                subject=MailSubject.ACCOUNT_CREATED.value,
+                lurlHeading=MailUrlHeading.ACCOUNT_CREATED.value,
+                url=login_url)
+            await mail_manager.get_instance().send_verification_mail(
+                to=user.email, subject=MailSubject.ACCOUNT_CREATED.value, body=html_content)
 
             return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
                 tenant_allowed), }
