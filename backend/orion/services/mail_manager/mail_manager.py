@@ -4,7 +4,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from orion.helper_manager.env_handler import env_handler
-from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 
 
@@ -23,6 +22,7 @@ class mail_manager:
         mail_manager.__instance = self
 
     async def process_app_variables(self, subject: str, body: str):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
         engine = mongo_controller.get_instance().get_engine()
         record = await engine.find_one(
             db_system_model, db_system_model.key == "app_name")
