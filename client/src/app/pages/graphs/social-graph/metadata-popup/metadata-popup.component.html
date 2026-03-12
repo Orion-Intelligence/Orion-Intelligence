@@ -50,8 +50,8 @@
 
       <div class="space-y-3">
 
-        <details data-testid="social-platform-popup-profile-details" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
+        <details data-testid="social-platform-popup-profile-details" class="group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(15,23,42,0.16)]" open>
+          <summary class="relative flex cursor-pointer items-center justify-between bg-[rgba(15,23,42,0.22)] p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Profile Details</span>
             @if (data().profileDetails !== undefined) {
@@ -60,7 +60,7 @@
               </button>
             }
           </summary>
-          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
+          <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (data().profileDetails === undefined && !isFetching()) {
               <div>
                 <div>
@@ -106,8 +106,8 @@
         </details>
 
 
-        <details data-testid="social-platform-popup-recent-posts" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
+        <details data-testid="social-platform-popup-recent-posts" class="group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(15,23,42,0.16)]" open>
+          <summary class="relative flex cursor-pointer items-center justify-between bg-[rgba(15,23,42,0.22)] p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Recent Posts</span>
             @if (data().posts !== undefined) {
@@ -116,7 +116,7 @@
               </button>
             }
           </summary>
-          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
+          <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (data().posts === undefined && !isFetchingPosts()) {
               <div>
                 <div>
@@ -179,12 +179,12 @@
         </details>
 
         @if (supportsPostConnections(data().platform)) {
-        <details data-testid="social-platform-popup-post-connections" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
+        <details data-testid="social-platform-popup-post-connections" class="group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(15,23,42,0.16)]" open>
+          <summary class="relative flex cursor-pointer items-center justify-between bg-[rgba(15,23,42,0.22)] p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Post Connections</span>
           </summary>
-          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
+          <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (!data().post_connections?.length) {
               <div class="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-850)]/20 px-4 py-8 text-center text-[var(--color-text4)]">
                 <i class="bi bi-x-circle text-2xl"></i>
@@ -214,8 +214,8 @@
 
 
         @if (supportsFollowersFollowing(data().platform)) {
-        <details data-testid="social-platform-popup-followers" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
+        <details data-testid="social-platform-popup-followers" class="group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(15,23,42,0.16)]" open>
+          <summary class="relative flex cursor-pointer items-center justify-between bg-[rgba(15,23,42,0.22)] p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Followers</span>
             @if (data().followers_list !== undefined) {
@@ -224,7 +224,7 @@
               </button>
             }
           </summary>
-          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
+          <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (data().followers_list === undefined && !isFetchingFollowers()) {
               <div>
                 <div>
@@ -283,8 +283,8 @@
 
 
         @if (supportsFollowersFollowing(data().platform)) {
-        <details data-testid="social-platform-popup-following" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
+        <details data-testid="social-platform-popup-following" class="group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(15,23,42,0.16)]" open>
+          <summary class="relative flex cursor-pointer items-center justify-between bg-[rgba(15,23,42,0.22)] p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Following</span>
             @if (data().following_list !== undefined) {
@@ -293,7 +293,7 @@
               </button>
             }
           </summary>
-          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
+          <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (data().following_list === undefined && !isFetchingFollowing()) {
               <div>
                 <div>
@@ -351,8 +351,8 @@
         }
 
 
-        <details data-testid="social-platform-popup-images" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
+        <details data-testid="social-platform-popup-images" class="group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(15,23,42,0.16)]" open>
+          <summary class="relative flex cursor-pointer items-center justify-between bg-[rgba(15,23,42,0.22)] p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Associated Images</span>
             @if (data().images !== undefined) {
@@ -361,7 +361,7 @@
               </button>
             }
           </summary>
-          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
+          <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (data().images === undefined && !isFetchingImages()) {
               <div>
                 <div>
@@ -419,12 +419,12 @@
         </details>
 
 
-        <details data-testid="social-platform-popup-raw-metadata" class="group overflow-hidden rounded-lg border border-[var(--color-border)]" style="background-color: rgba(15, 23, 42, 0.16);" open>
-          <summary class="relative flex cursor-pointer items-center justify-between p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden" style="background-color: rgba(15, 23, 42, 0.22);">
+        <details data-testid="social-platform-popup-raw-metadata" class="group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(15,23,42,0.16)]" open>
+          <summary class="relative flex cursor-pointer items-center justify-between bg-[rgba(15,23,42,0.22)] p-3 pl-[2rem] text-sm font-semibold text-[var(--color-text2)] list-none [&::-webkit-details-marker]:hidden">
             <i class="bi bi-chevron-right pointer-events-none absolute left-[0.75rem] top-1/2 -translate-y-1/2 text-[var(--color-text4)] transition-transform duration-200 group-open:rotate-90"></i>
             <span>Raw Metadata</span>
           </summary>
-          <div class="border-t border-[var(--color-border)] p-4" style="background-color: rgba(15, 23, 42, 0.18);">
+          <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (getMetadataEntries().length > 0) {
               <dl class="text-sm">
                 @for (item of getMetadataEntries(); track trackByKey($index, item)) {

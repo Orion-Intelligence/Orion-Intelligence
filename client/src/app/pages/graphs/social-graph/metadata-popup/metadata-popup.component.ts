@@ -18,6 +18,7 @@ import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
 export class MetadataPopupComponent extends PlatformFeedViewBase {
   private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
   private static readonly FOLLOW_PLATFORMS = new Set(['instagram', 'twitter', 'behance', 'behnace', 'facebook']);
+
   data = input.required<PlatformResult>();
   isScanInProgress = input<boolean>(false);
   close = output<void>();

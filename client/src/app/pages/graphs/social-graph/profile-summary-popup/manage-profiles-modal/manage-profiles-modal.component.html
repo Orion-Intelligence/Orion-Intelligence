@@ -61,7 +61,7 @@
               </div>
             }
             <div class="rounded-lg">
-              <div (click)="onPlatformCardClick($event, platform)" class="flex flex-col gap-3 rounded-lg border p-3 transition-colors" [class.cursor-pointer]="!isImageExtractedFlow()" [style.background-color]="platform.isSelected && !isImageExtractedFlow() ? 'rgba(15, 23, 42, 0.34)' : 'rgba(15, 23, 42, 0.12)'" style="border-color: var(--color-border) !important;">
+              <div (click)="onPlatformCardClick($event, platform)" class="flex flex-col gap-3 rounded-lg border border-[var(--color-border)] p-3 transition-colors" [class.cursor-pointer]="!isImageExtractedFlow()" [class.bg-\[rgba\(15\,23\,42\,0\.34\)\]]="platform.isSelected && !isImageExtractedFlow()" [class.bg-\[rgba\(15\,23\,42\,0\.12\)\]]="!platform.isSelected || isImageExtractedFlow()">
                 <div class="flex items-center">
                   <div [socialMapperPlatformBg]="platform.platform" class="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-2 text-lg font-bold text-white">
                     <app-social-icon [platformName]="platform.platform"></app-social-icon>

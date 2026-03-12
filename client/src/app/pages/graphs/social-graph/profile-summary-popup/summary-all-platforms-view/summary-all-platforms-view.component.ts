@@ -60,8 +60,7 @@ export class SummaryAllPlatformsViewComponent {
   filteredPlatformsForPosts = computed(() => this.filterPlatforms(this.postsSearchTerm(), p => p.posts !== undefined));
   filteredPlatformsForConnections = computed(() =>
     this.filterPlatforms(this.postsSearchTerm(), () => true)
-      .filter(platform => this.supportsPostConnections(platform.platform))
-  );
+      .filter(platform => this.supportsPostConnections(platform.platform)));
   filteredPlatformsForImages = computed(() => this.filterPlatforms(this.imagesSearchTerm(), p => p.images !== undefined));
   displayPlatformsForDetails = computed(() => this.filteredPlatformsForDetails().slice(0, this.visibleDetailsPlatformsCount()));
   displayPlatformsForPosts = computed(() => this.filteredPlatformsForPosts().slice(0, this.visiblePostsPlatformsCount()));

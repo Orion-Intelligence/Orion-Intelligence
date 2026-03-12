@@ -15,14 +15,12 @@ export class TokenRefreshService {
   startTokenRefresh(refreshAction: () => Observable<string | null>): void {
     if (!this.refreshTokenSubscription || this.refreshTokenSubscription.closed) {
       this.refreshTokenSubscription = timer(this.FIRST_REFRESH_DELAY, this.REFRESH_INTERVAL)
-        .pipe(
-          switchMap(() => refreshAction()),
+        .pipe(switchMap(() => refreshAction()),
           catchError(() => {
             this.stopTokenRefresh();
             return EMPTY;
           }),
-          takeUntilDestroyed(this.destroyRef)
-        )
+          takeUntilDestroyed(this.destroyRef))
         .subscribe();
     }
   }
