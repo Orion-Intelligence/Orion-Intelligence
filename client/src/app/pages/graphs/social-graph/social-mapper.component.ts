@@ -668,7 +668,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
     const [userA, userB] = users;
     const connections = this.buildRelationshipConnections(userA, userB);
-    const fallbackCount = Number(relationshipNode.label || 0);
+    const fallbackCount = Number((relationshipNode.relationshipCount ?? relationshipNode.label) || 0);
     const resolvedCount = connections.length > 0 ? connections.length : fallbackCount;
     this.state.openRelationshipPopup({
       userA,

@@ -139,7 +139,8 @@ export class FollowerScanPopupComponent {
   }
 
   getCurrentAccountUrl(): string {
-    return this.platform().url || '#';
+    const platform = this.platform();
+    return buildSocialProfileUrl(platform.platform, platform.username, platform.url);
   }
 
   private addItems<T>(displaySignal: WritableSignal<T[]>, itemsToAdd: T[], onComplete: () => void) {

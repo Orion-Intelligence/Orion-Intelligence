@@ -553,7 +553,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
                 size: number;
             }[] = [];
       const relationshipNodes = this.data().nodes.filter(node => node.id.toString().startsWith('relationship-node-'));
-      const relationshipScale = network.getScale();
       for (const relationshipNode of relationshipNodes) {
         const nodeId = relationshipNode.id.toString();
         const nodePosition = network.getPosition(nodeId);
@@ -563,12 +562,12 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         const domPosition = network.canvasToDOM(nodePosition);
         const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId);
         const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 18;
-        const domRadius = baseSize * relationshipScale;
+        const overlaySize = Math.max(18, Math.round(baseSize * 1.2));
         relationshipOverlays.push({
           nodeId,
           x: domPosition.x,
           y: domPosition.y,
-          size: Math.max(18, domRadius * 1.2)
+          size: overlaySize
         });
       }
       this.relationshipOverlayNodes.set(relationshipOverlays);

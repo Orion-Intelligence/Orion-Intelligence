@@ -9,10 +9,13 @@ import { GraphReportExportType, GraphReportPayload } from '../../../../shared/mo
 export class TabManagerService {
   private readonly maxTabsAllowed = 5;
   private readonly graphType = 'social';
+  private readonly saveDebounceMs = 300;
   private static tabCounter = 1;
   private hasLoadedState = false;
   private hasPendingSave = false;
-  private autosaveIntervalId: any;
+  private saveTimeoutId: any;
+  private isSaveInFlight = false;
+  private shouldResaveAfterCurrent = false;
   private lastSavedSignature = '';
 
   tabs = signal<Tab[]>([]);
@@ -21,7 +24,6 @@ export class TabManagerService {
   activeTab = computed(() => this.tabs().find(t => t.id === this.activeTabId()));
 
   constructor(private api: ApiService, private graphReportExport: ReportExportService) {
-    this.startPeriodicSave();
     this.loadState();
   }
 
@@ -161,6 +163,13 @@ export class TabManagerService {
       return;
     }
     this.hasPendingSave = true;
+    if (this.saveTimeoutId) {
+      clearTimeout(this.saveTimeoutId);
+    }
+    this.saveTimeoutId = setTimeout(() => {
+      this.saveTimeoutId = null;
+      this.flushScheduledSave();
+    }, this.saveDebounceMs);
   }
 
   private buildSerializableState() {
@@ -175,11 +184,7 @@ export class TabManagerService {
     };
   }
 
-  private startPeriodicSave() {
-    this.autosaveIntervalId = setInterval(() => this.tryPeriodicSave(), 5000);
-  }
-
-  private tryPeriodicSave() {
+  private flushScheduledSave() {
     if (!this.hasAuthToken()) {
       this.hasPendingSave = false;
       return;
@@ -190,18 +195,34 @@ export class TabManagerService {
     if (!this.hasPendingSave) {
       return;
     }
+    if (this.isSaveInFlight) {
+      this.shouldResaveAfterCurrent = true;
+      return;
+    }
     const serializableState = this.buildSerializableState();
     const nextSignature = JSON.stringify(serializableState);
     if (nextSignature === this.lastSavedSignature) {
       this.hasPendingSave = false;
       return;
     }
+    this.isSaveInFlight = true;
     this.api.post<any>(`social/session/upsert?graph_type=${this.graphType}`, serializableState).subscribe({
       next: () => {
         this.lastSavedSignature = nextSignature;
         this.hasPendingSave = false;
+        this.isSaveInFlight = false;
+        if (this.shouldResaveAfterCurrent) {
+          this.shouldResaveAfterCurrent = false;
+          this.scheduleSave();
+        }
       },
-      error: () => { },
+      error: () => {
+        this.isSaveInFlight = false;
+        if (this.shouldResaveAfterCurrent) {
+          this.shouldResaveAfterCurrent = false;
+          this.scheduleSave();
+        }
+      },
     });
   }
 

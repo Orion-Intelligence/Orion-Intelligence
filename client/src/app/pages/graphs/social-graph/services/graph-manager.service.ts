@@ -15,8 +15,8 @@ export class GraphManagerService {
       label: entity.label,
       shape: 'circularImage',
       image: this.createEntityNodeSvg(entity.type),
-      size: 34,
-      font: { color: this.getGraphLabelColor(), size: 12 },
+      size: 28,
+      font: { color: this.getGraphLabelColor(), size: 11 },
       color: {
         border: entityConfig.border,
         background: entityConfig.background,
@@ -25,8 +25,8 @@ export class GraphManagerService {
       },
       title: `${entity.type.toUpperCase()} | ${entity.label} | ${entity.value}`,
       borderWidth: 2,
-      borderWidthSelected: 4,
-      shadow: { enabled: true, color: 'rgba(0, 0, 0, 0.45)', size: 10, x: 3, y: 3 }
+      borderWidthSelected: 3,
+      shadow: { enabled: true, color: 'rgba(0, 0, 0, 0.3)', size: 8, x: 2, y: 2 }
     };
   }
 
@@ -36,11 +36,11 @@ export class GraphManagerService {
       label: platform.platform,
       shape: 'circularImage',
       image: iconUrlMap.get(platform.platform),
-      size: 25,
-      font: { color: this.getGraphLabelColor() },
+      size: 21,
+      font: { color: this.getGraphLabelColor(), size: 12 },
       color: { border: getPlatformColor(platform.platform), background: '#334155', highlight: { border: '#facc15', background: '#475569' }, hover: { border: '#2dd4bf', background: '#475569' } },
       borderWidth: 2,
-      borderWidthSelected: 4
+      borderWidthSelected: 3
     };
   }
 

@@ -15,11 +15,11 @@
         </div>
       </div>
       <div class="flex flex-wrap gap-2">
-        <button (click)="fetchProfileLeaks()" [disabled]="profileLeaksLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
+        <button (click)="fetchProfileLeaks()" [disabled]="profileLeaksLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600 whitespace-nowrap">
           <i class="bi" [ngClass]="profileLeaksLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-shield-exclamation'"></i>
           <span>{{ profileLeaksLoading() ? 'Fetching leaks...' : 'Fetch Profile Leaks' }}</span>
         </button>
-        <button (click)="fetchProfileMetadata()" [disabled]="profileMetadataLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
+        <button (click)="fetchProfileMetadata()" [disabled]="profileMetadataLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600 whitespace-nowrap">
           <i class="bi" [ngClass]="profileMetadataLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-search'"></i>
           <span>{{ profileMetadataLoading() ? 'Searching...' : 'Search Metadata' }}</span>
         </button>
@@ -130,7 +130,6 @@
     </div>
   </details>
 
-  @if (connectionsSupportedCount() > 0) {
   <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
@@ -205,7 +204,6 @@
       }
     </div>
   </details>
-  }
 
   <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
@@ -279,7 +277,6 @@
       }
     </div>
   </details>
-
   <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
@@ -359,6 +356,7 @@
     </div>
   </details>
 
+  @if (connectionsSupportedCount() > 0) {
   <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
@@ -414,6 +412,7 @@
       }
     </div>
   </details>
+  }
 
   <details class="group overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/40" open>
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">

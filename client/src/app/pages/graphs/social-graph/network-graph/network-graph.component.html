@@ -16,9 +16,7 @@
     }
     @if (relationshipOverlayNodes().length > 0) {
       @for (overlay of relationshipOverlayNodes(); track trackByOverlayNodeId($index, overlay)) {
-        <button data-testid="social-relationship-node-trigger" type="button" class="network-graph-relationship-overlay pointer-events-auto" [attr.data-node-id]="overlay.nodeId" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" [attr.data-size]="toSizeValue(overlay.size)" (click)="onRelationshipShortcutClick($event, overlay.nodeId)">
-          <i class="bi bi-diagram-3-fill text-[10px]"></i>
-        </button>
+        <button data-testid="social-relationship-node-trigger" type="button" class="network-graph-relationship-overlay pointer-events-auto" [attr.data-node-id]="overlay.nodeId" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" (click)="onRelationshipShortcutClick($event, overlay.nodeId)"></button>
       }
     }
   </div>

@@ -55,7 +55,7 @@
                           <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
                             <i class="bi bi-search w-5 h-5 text-[var(--color-text4)] leading-none"></i>
                           </div>
-                          <input data-testid="social-graph-search-input" type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-690)] py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
+                          <input data-testid="social-graph-search-input" type="text" placeholder="Search on graph..." [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border border-[var(--color-border)] bg-white py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
                           @if (graphSearchTerm()) {
                             <button data-testid="social-graph-search-clear" (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
                               <i class="bi bi-x-circle-fill"></i>

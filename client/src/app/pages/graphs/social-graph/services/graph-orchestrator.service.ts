@@ -415,18 +415,19 @@ export class GraphOrchestratorService {
                   : `${userB} mentioned ${userA}`;
         newRelationshipNodes.push({
           id: relationshipNodeId,
-          label: `${detectorProfileCount}`,
+          label: '',
+          relationshipCount: detectorProfileCount,
           shape: 'dot',
-          size: 14,
-          font: { color: this.getGraphLabelColor(), size: 10 },
+          size: 2,
+          font: { color: this.getGraphLabelColor(), size: 1 },
           color: {
-            border: '#fbbf24',
-            background: '#78350f',
-            highlight: { border: '#fde68a', background: '#92400e' },
-            hover: { border: '#fde68a', background: '#92400e' }
+            border: 'rgba(0,0,0,0)',
+            background: 'rgba(0,0,0,0)',
+            highlight: { border: 'rgba(0,0,0,0)', background: 'rgba(0,0,0,0)' },
+            hover: { border: 'rgba(0,0,0,0)', background: 'rgba(0,0,0,0)' }
           },
-          borderWidth: 2,
-          borderWidthSelected: 3,
+          borderWidth: 0,
+          borderWidthSelected: 0,
           title: `${directionTitle}\nDetected by ${detectorProfileCount} social profile(s)\nPlatforms: ${matchedPlatformsText}`
         });
         const edgeStyle = {

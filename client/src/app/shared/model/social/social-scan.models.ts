@@ -2,6 +2,7 @@ import { WritableSignal } from '@angular/core';
 export interface NetworkNode {
     id: string | number;
     label: string;
+    relationshipCount?: number;
     shape: string;
     image?: string;
     icon?: {
