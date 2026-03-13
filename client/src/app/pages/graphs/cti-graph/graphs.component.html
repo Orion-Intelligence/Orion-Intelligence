@@ -19,7 +19,7 @@
     </app-tab-bar>
     <div class="absolute inset-x-0 bottom-0 top-12 flex">
 	      <app-cti-sidebar
-	        class="hidden flex-shrink-0 flex-col overflow-hidden border-b border-[var(--color-border)] bg-[#172235] backdrop-blur-md lg:flex lg:border-r"
+	        class="hidden flex-shrink-0 flex-col overflow-hidden border-b border-[var(--color-border)] bg-[#172235] backdrop-blur-md [body.light-theme_&]:bg-[var(--color-blue-820-light)] lg:flex lg:border-r"
 	        [filters]="activeSidebarFilters"
 	        [collapsed]="activeSidebarCollapsed"
 	        (filtersChanged)="onSidebarFiltersChanged($event)"

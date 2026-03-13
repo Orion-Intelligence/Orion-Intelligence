@@ -1,5 +1,5 @@
 <div class="h-full w-full flex flex-col transition-all duration-300 ease-in-out">
-  <div class="flex shrink-0 items-center border-b border-slate-800 p-3" [class.gap-3]="!isCollapsed()" [class.justify-between]="!isCollapsed()" [class.justify-center]="isCollapsed()">
+  <div class="flex shrink-0 items-center border-b border-slate-800 p-3 [body.light-theme_&]:border-[var(--color-border)]" [class.gap-3]="!isCollapsed()" [class.justify-between]="!isCollapsed()" [class.justify-center]="isCollapsed()">
     <a [href]="homeHref()" [title]="logoAlt()" class="hidden lg:flex items-center overflow-hidden transition-all duration-300" [class.flex-grow]="!isCollapsed()" [class.w-0]="isCollapsed()" [class.opacity-0]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
       <img [src]="logoSrc" [alt]="logoAlt()" class="h-8 object-contain">
     </a>
