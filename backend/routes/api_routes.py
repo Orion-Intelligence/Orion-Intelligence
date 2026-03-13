@@ -126,7 +126,7 @@ async def search_exploit(param: search_consolidated_param_model = Body(...)):
 async def search_defacement(param: search_consolidated_param_model = Body(...)):
     param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
 
 
 @api_routes.get(
