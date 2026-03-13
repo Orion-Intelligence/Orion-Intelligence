@@ -34,6 +34,82 @@ function scrollTenantTableToBottomLeft() {
   });
 }
 
+export function clickWhenVisible(selector: string, timeout: number = 30000) {
+  cy.get(selector, {timeout}).scrollIntoView();
+  cy.get(selector, {timeout}).should('be.visible');
+  cy.get(selector, {timeout}).click({waitForAnimations: false, animationDistanceThreshold: 0});
+}
+
+export function exportFromModal(modalTestId: string, optionTestId: string) {
+  cy.get(`[data-testid="${modalTestId}"]`, {timeout: 30000}).should('be.visible');
+  cy.get('body').then($body => {
+    if ($body.find(`[data-testid="${optionTestId}"]`).length > 0) {
+      clickWhenVisible(`[data-testid="${optionTestId}"]`);
+    }
+    else {
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
+        .scrollIntoView();
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
+        .should('be.visible');
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
+        .click({waitForAnimations: false, animationDistanceThreshold: 0});
+    }
+  });
+  cy.get(`[data-testid="${modalTestId}"]`, {timeout: 60000}).should('not.exist');
+}
+
+export function closeNotificationSidebar() {
+  cy.get('body').then($body => {
+    if ($body.find('[data-testid="tenant-notification-sidebar"]').length > 0) {
+      if ($body.find('[data-testid="tenant-notification-close"]:visible').length > 0) {
+        clickWhenVisible('[data-testid="tenant-notification-close"]');
+      }
+      else {
+        cy.contains('[data-testid="tenant-notification-sidebar"] button', 'Close', {timeout: 30000})
+          .scrollIntoView()
+          .should('be.visible')
+          .click({waitForAnimations: false, animationDistanceThreshold: 0});
+      }
+    }
+  });
+  cy.get('[data-testid="tenant-notification-sidebar"]', {timeout: 30000}).should('not.exist');
+}
+
+export function closeFilterSidebar() {
+  cy.get('body').then($body => {
+    if ($body.find('[data-testid="side-filter-close"]:visible').length > 0) {
+      cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+        .filter(':visible')
+        .first()
+        .scrollIntoView();
+      cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+        .filter(':visible')
+        .first()
+        .should('be.visible');
+      cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+        .filter(':visible')
+        .first()
+        .click({waitForAnimations: false, animationDistanceThreshold: 0});
+    }
+  });
+  cy.get('body', {timeout: 60000}).should($body => {
+    expect($body.find('.ui-filter-sidebar-overlay:visible').length).to.eq(0);
+    expect($body.find('[data-testid="side-filter-close"]:visible').length).to.eq(0);
+  });
+}
+
+export function openFilterSidebar() {
+  cy.get('body').then($body => {
+    if ($body.find('[data-testid="side-filter-close"]:visible').length === 0) {
+      clickWhenVisible('[data-testid="tenant-alert-open-sidebar"]');
+    }
+  });
+  cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+    .filter(':visible')
+    .first()
+    .should('be.visible');
+}
+
 export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
   if (tries >= 5) return;
 
