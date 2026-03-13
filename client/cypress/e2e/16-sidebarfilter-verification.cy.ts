@@ -4,13 +4,11 @@ import {
   SAFE_SEARCH_OPTIONS,
 } from '../support/constants';
 import {
-  selectDateRangeAndReopen,
   selectDateRangeResetAndReopen
 } from './controllers/16-sidebarfilter-verification.controller';
 
 describe('SideBar Filter Verification', () => {
   beforeEach(() => {
-    cy.viewport(2560, 3000);
     cy.loginAsAdmin();
   });
 

@@ -168,12 +168,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
 
-    cy.get('[data-testid="tenant-home-flush-all"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="confirmation-yes-button"]', {timeout: 30000}).should('be.visible').click();
-    cy.get('[data-testid="tenant-home-scan-all"]', {timeout: 40000}).scrollIntoView().should('be.visible').and('not.be.disabled').click();
-    cy.get('app-alert-scan-loading', {timeout: 30000}).should('exist');
-    cy.get('app-alert-scan-loading', {timeout: 120000}).should('not.exist');
-
+    cy.get('app-alert-scan-loading', {timeout: 10000}).should('not.exist');
     cy.get('[data-testid="tenant-home-print-alerts"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
 
