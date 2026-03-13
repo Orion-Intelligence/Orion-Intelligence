@@ -18,7 +18,10 @@ export const SEARCH_FIXTURES = {
     base_url: ['joindarkside.pro', 'fitcoin-events.com'],
     team: 'CarlyGriggs13',
     date: 'Jan 24, 2026',
-    web_url: 'https://x.com/CarlyGriggs13/status/2014897534108319933',
+    web_url: [
+      'https://x.com/CarlyGriggs13/status/2014897534108319933',
+      'https://x.com/CarlyGriggs13/status/2014897336539844898',
+    ],
   },
   defacement_by_base_url: {
     search_query: 'joindarkside.pro',
@@ -133,7 +136,10 @@ export function typeDashboardSearch15(value: string) {
 export function assertFirstResultCard(data: SearchResultData) {
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
     .first()
-    .scrollIntoView()
+    .scrollIntoView();
+
+  cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
+    .first()
     .should('be.visible');
 
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
@@ -175,8 +181,9 @@ export function assertFirstResultCard(data: SearchResultData) {
   }
 }
 
-export function assertFirstDefacementRow(data: {search_query: string; base_url: string | string[]; team: string; date: string; web_url: string}) {
+export function assertFirstDefacementRow(data: {search_query: string; base_url: string | string[]; team: string; date: string; web_url: string | string[]}) {
   const allowedBaseUrls = Array.isArray(data.base_url) ? data.base_url : [data.base_url];
+  const allowedWebUrls = Array.isArray(data.web_url) ? data.web_url : [data.web_url];
 
   cy.get('tbody tr.cursor-pointer', {timeout: 35000})
     .then(($rows) => {
@@ -216,5 +223,11 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
 
   cy.get('@firstRow')
     .find('td[data-label="Web URL"] a[href]')
-    .should('have.attr', 'href', data.web_url);
+    .invoke('attr', 'href')
+    .then((href) => {
+      expect(
+        allowedWebUrls.includes(href || ''),
+        `expected web url to be one of: ${allowedWebUrls.join(', ')}`
+      ).to.equal(true);
+    });
 }

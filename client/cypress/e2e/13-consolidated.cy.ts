@@ -19,7 +19,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.loginAsAdmin();
   });
 
-  it.only('opens Deep Search section', () => {
+  it('opens Deep Search section', () => {
     const consolidatedSections = [
       'consolidated-section-social',
       'consolidated-section-tracking',

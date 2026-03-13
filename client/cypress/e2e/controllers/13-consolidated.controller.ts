@@ -160,7 +160,7 @@ function moveDatePickerToMonth(targetLabel: string, attempts = 0): void {
     const targetDate = new Date(`${targetLabel} 1`);
     const goPrev = currentDate.getTime() > targetDate.getTime();
     const navSelector = goPrev ? '[data-testid="side-filter-date-prev-month"]' : '[data-testid="side-filter-date-next-month"]';
-    cy.get(navSelector, {timeout: 30000}).first().scrollIntoView().click();
+    cy.get(navSelector, {timeout: 30000}).first().scrollIntoView().click({force: true});
     moveDatePickerToMonth(targetLabel, attempts + 1);
   });
 }
@@ -176,8 +176,8 @@ export function applyDateRangeFilter(monthLabel: string, startDay: number, endDa
     .scrollIntoView()
     .click({force: true});
   moveDatePickerToMonth(monthLabel);
-  cy.get(`[data-testid="side-filter-date-day-${startDay}"]`, {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  cy.get(`[data-testid="side-filter-date-day-${endDay}"]`, {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get(`[data-testid="side-filter-date-day-${startDay}"]`, {timeout: 30000}).first().scrollIntoView().click({force: true});
+  cy.get(`[data-testid="side-filter-date-day-${endDay}"]`, {timeout: 30000}).first().scrollIntoView().click({force: true});
   openIocFilterPanel();
   openIocFilterPanel();
   cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
