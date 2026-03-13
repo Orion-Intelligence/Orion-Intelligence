@@ -45,7 +45,7 @@
             </div>
           </div>
           <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [style.border-bottom]="!item['url'] ? 'none' : null">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Web Server</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="webServerValue(item)">
@@ -58,7 +58,7 @@
                 }
               </div>
             </div>
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [style.border-bottom]="!item['url'] ? 'none' : null">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Attacker</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="attackerValue(item)">
@@ -71,7 +71,7 @@
                 }
               </div>
             </div>
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [class.border-b-0]="!item['url']">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Team</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="teamValue(item)">
@@ -84,7 +84,7 @@
                 }
               </div>
             </div>
-            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] last:border-b-0">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [class.border-b-0]="!item['url']">
               <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">IP(s)</div>
               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                 <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="ipValue(item)">
@@ -98,7 +98,7 @@
               </div>
             </div>
             @if (item.m_url) {
-              <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] md:col-span-2 last:border-b-0">
+              <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px] md:col-span-2 border-b-0">
                 <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">URL</div>
                 <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                   <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)]" [appTooltip]="urlValue(item)">
@@ -131,90 +131,89 @@
     }
     @for (item of stResults.slice(0, showLimitStealer); track item['hash'] || item['url'] || item['username'] || $index; let i = $index) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
-        <div class="ui-consolidated-sub flex min-h-[190px] w-full flex-col justify-between rounded-[10px] border p-[14px] text-[var(--color-text1)] shadow-[0_8px_20px_rgba(0,0,0,0.14)] transition-[background,border-color,box-shadow,transform,filter] duration-150 hover:border-[var(--color-blue-640)] hover:shadow-[0_14px_34px_rgba(0,0,0,0.22)] hover:translate-y-[-1px] hover:brightness-[1.01] max-[640px]:p-[10px]">
-          <div class="flex items-center justify-between gap-[12px] border-b border-[var(--color-divider)] pb-[12px] mb-[12px]">
-            <div>
-              <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[14px] font-[900] uppercase tracking-[0.35px] text-[var(--color-text1)]">Log Type | {{ item['domain'] ? (item['domain']) : 'Unknown' }}</b>
+        <div class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
+          <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+            <div class="min-w-0">
+              <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">LOG TYPE | {{ item['domain'] ? item['domain'] : 'Unknown' }}</b>
+              <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
+                Hash: <span class="font-[600] text-[var(--color-text2)]">{{ hashValue(item) }}</span>
+              </div>
             </div>
             <div (click)="exploreStealer(item['domain'], item['username'])">
-              <span class="inline-flex h-[32px] cursor-pointer items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)] transition-[background,border-color,transform,filter] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0">
+              <span class="inline-flex h-[32px] cursor-pointer items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)] transition-[background,transform,filter] duration-150 hover:bg-[var(--color-blue-820)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0">
                 Explore
               </span>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-x-[12px] gap-y-[10px] mb-[10px] max-[560px]:grid-cols-1">
-            <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
-              <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Username</div>
-              <div class="flex min-w-0 items-center gap-[8px]">
-                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="usernameValue(item)">
+          <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Username</div>
+              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="usernameValue(item)">
                   {{ usernameValue(item) }}
                 </div>
                 @if (usernameValue(item) && usernameValue(item) !== '-') {
-                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(usernameValue(item), 'copy-username-' + i, $event)" [appTooltip]="isCopied('copy-username-' + i) ? 'Copied' : 'Copy'">
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(usernameValue(item), 'copy-username-' + i, $event)" [appTooltip]="isCopied('copy-username-' + i) ? 'Copied' : 'Copy'">
                     <i class="bi" [ngClass]="isCopied('copy-username-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                   </button>
                 }
               </div>
             </div>
-            <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
-              <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Password</div>
-              <div class="flex min-w-0 items-center gap-[8px]">
-                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="passwordValue(item)">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Password</div>
+              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="passwordValue(item)">
                   {{ passwordValue(item) }}
                 </div>
                 @if (passwordValue(item) && passwordValue(item) !== '-') {
-                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(passwordValue(item), 'copy-password-' + i, $event)" [appTooltip]="isCopied('copy-password-' + i) ? 'Copied' : 'Copy'">
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(passwordValue(item), 'copy-password-' + i, $event)" [appTooltip]="isCopied('copy-password-' + i) ? 'Copied' : 'Copy'">
                     <i class="bi" [ngClass]="isCopied('copy-password-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                   </button>
                 }
               </div>
             </div>
-          </div>
-          <div class="grid grid-cols-2 gap-x-[12px] gap-y-[10px] mb-[10px] max-[560px]:grid-cols-1">
-            <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
-              <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Domain</div>
-              <div class="flex min-w-0 items-center gap-[8px]">
-                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="domainValue(item)">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [class.border-b-0]="!item['url']">
+              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Domain</div>
+              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="domainValue(item)">
                   {{ domainValue(item) }}
                 </div>
                 @if (domainValue(item) && domainValue(item) !== '-') {
-                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(domainValue(item), 'copy-domain-' + i, $event)" [appTooltip]="isCopied('copy-domain-' + i) ? 'Copied' : 'Copy'">
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(domainValue(item), 'copy-domain-' + i, $event)" [appTooltip]="isCopied('copy-domain-' + i) ? 'Copied' : 'Copy'">
                     <i class="bi" [ngClass]="isCopied('copy-domain-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                   </button>
                 }
               </div>
             </div>
-            <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
-              <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">Hash</div>
-              <div class="flex min-w-0 items-center gap-[8px]">
-                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13.5px] font-[750] text-[var(--color-text1)]" [appTooltip]="hashValue(item)">
+            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [class.border-b-0]="!item['url']">
+              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">Hash</div>
+              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [appTooltip]="hashValue(item)">
                   {{ hashValue(item) }}
                 </div>
                 @if (hashValue(item) && hashValue(item) !== '-') {
-                  <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(hashValue(item), 'copy-hash-' + i, $event)" [appTooltip]="isCopied('copy-hash-' + i) ? 'Copied' : 'Copy'">
+                  <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(hashValue(item), 'copy-hash-' + i, $event)" [appTooltip]="isCopied('copy-hash-' + i) ? 'Copied' : 'Copy'">
                     <i class="bi" [ngClass]="isCopied('copy-hash-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                   </button>
                 }
               </div>
             </div>
-          </div>
-          @if (item['url']) {
-            <div class="mb-[10px]">
-              <div class="ui-consolidated-inner group flex min-w-0 flex-col rounded-[12px] border border-[var(--color-border)] p-[10px_12px] transition-[background,border-color,filter] duration-150 hover:border-[var(--color-blue-640)]">
-                <div class="mb-[6px] font-[Inter] text-[11px] font-[700] text-[var(--color-text6)]">URL</div>
-                <div class="flex min-w-0 items-center gap-[8px]">
-                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.6px] font-[750] text-[var(--color-text5)]" [appTooltip]="stealerUrlValue(item)">
+            @if (item['url']) {
+              <div class="group flex min-w-0 items-center gap-[10px] py-[8px] md:col-span-2" style="border-bottom: none;">
+                <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">URL</div>
+                <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)]" [appTooltip]="stealerUrlValue(item)">
                     {{ truncate(stealerUrlValue(item), 30) }}
                   </div>
                   @if (stealerUrlValue(item) && stealerUrlValue(item) !== '-') {
-                    <button type="button" class="-mt-[25px] inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[background,border-color,transform,filter,opacity] duration-150 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto" (click)="copyText(stealerUrlValue(item), 'copy-stealer-url-' + i, $event)" [appTooltip]="isCopied('copy-stealer-url-' + i) ? 'Copied' : 'Copy'">
+                    <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" (click)="copyText(stealerUrlValue(item), 'copy-stealer-url-' + i, $event)" [appTooltip]="isCopied('copy-stealer-url-' + i) ? 'Copied' : 'Copy'">
                       <i class="bi" [ngClass]="isCopied('copy-stealer-url-' + i) ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                     </button>
                   }
                 </div>
               </div>
-            </div>
-          }
+            }
+          </div>
         </div>
       </div>
     }

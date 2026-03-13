@@ -168,6 +168,7 @@ function moveDatePickerToMonth(targetLabel: string, attempts = 0): void {
 export function applyDateRangeFilter(monthLabel: string, startDay: number, endDay: number) {
   cy.log(`Filter: applying date range ${monthLabel} (${startDay}-${endDay})`);
   cy.window().then((win) => win.console.log(`Filter: applying date range ${monthLabel} (${startDay}-${endDay})`));
+  cy.scrollDashboardToTop()
   openIocFilterPanel();
   cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   moveDatePickerToMonth(monthLabel);
