@@ -170,7 +170,11 @@ export function applyDateRangeFilter(monthLabel: string, startDay: number, endDa
   cy.window().then((win) => win.console.log(`Filter: applying date range ${monthLabel} (${startDay}-${endDay})`));
   cy.scrollDashboardToTop()
   openIocFilterPanel();
-  cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000})
+    .filter(':visible')
+    .first()
+    .scrollIntoView()
+    .click({force: true});
   moveDatePickerToMonth(monthLabel);
   cy.get(`[data-testid="side-filter-date-day-${startDay}"]`, {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   cy.get(`[data-testid="side-filter-date-day-${endDay}"]`, {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
