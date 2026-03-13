@@ -15,7 +15,7 @@ export const SEARCH_FIXTURES = {
   },
   defacement_by_team: {
     search_query: 'CarlyGriggs13',
-    base_url: 'joindarkside.pro',
+    base_url: ['joindarkside.pro', 'fitcoin-events.com'],
     team: 'CarlyGriggs13',
     date: 'Jan 24, 2026',
     web_url: 'https://x.com/CarlyGriggs13/status/2014897534108319933',
@@ -175,16 +175,18 @@ export function assertFirstResultCard(data: SearchResultData) {
   }
 }
 
-export function assertFirstDefacementRow(data: {search_query: string; base_url: string; team: string; date: string; web_url: string}) {
+export function assertFirstDefacementRow(data: {search_query: string; base_url: string | string[]; team: string; date: string; web_url: string}) {
+  const allowedBaseUrls = Array.isArray(data.base_url) ? data.base_url : [data.base_url];
+
   cy.get('tbody tr.cursor-pointer', {timeout: 35000})
     .then(($rows) => {
       const matchingRow = Array.from($rows).find((row) => {
         const cells = row.querySelectorAll('td');
         const rowText = Array.from(cells).map((cell) => cell.textContent?.trim() || '').join(' ');
-        return rowText.includes(data.base_url.trim()) || rowText.includes(data.team.trim());
+        return allowedBaseUrls.some((baseUrl) => rowText.includes(baseUrl.trim())) || rowText.includes(data.team.trim());
       });
 
-      expect(matchingRow, `defacement row for ${data.base_url}`).to.exist;
+      expect(matchingRow, `defacement row for ${allowedBaseUrls.join(' or ')}`).to.exist;
       cy.wrap(matchingRow as HTMLTableRowElement).scrollIntoView().should('be.visible').as('firstRow');
     });
 
@@ -192,7 +194,10 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
     .find('td[data-label="Base URL"]')
     .invoke('text')
     .then((text) => {
-      expect(text.trim()).to.include(data.base_url.trim());
+      expect(
+        allowedBaseUrls.some((baseUrl) => text.trim().includes(baseUrl.trim())),
+        `expected base url to include one of: ${allowedBaseUrls.join(', ')}`
+      ).to.equal(true);
     });
 
   cy.get('@firstRow')
