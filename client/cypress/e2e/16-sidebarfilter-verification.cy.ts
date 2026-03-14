@@ -120,7 +120,9 @@ describe('SideBar Filter Verification', () => {
       .should('be.visible')
       .click();
 
+    cy.scrollDashboardToTop()
     CONTENT_TYPES.forEach((option: string) => {
+      cy.scrollDashboardToTop()
       openSidebar();
 
       cy.get('[data-testid="side-filter-select-content"]', {timeout: 60000})
