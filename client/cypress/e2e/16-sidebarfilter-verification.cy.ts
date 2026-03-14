@@ -101,6 +101,11 @@ describe('SideBar Filter Verification', () => {
         .its('response.statusCode')
         .should('eq', 200);
 
+      cy.get('.ui-filter-sidebar-panel.right-0', {timeout: 60000})
+        .should('not.exist');
+      cy.get('.ui-filter-sidebar-overlay:visible', {timeout: 60000})
+        .should('not.exist');
+
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000})
         .should('be.visible');
     });
