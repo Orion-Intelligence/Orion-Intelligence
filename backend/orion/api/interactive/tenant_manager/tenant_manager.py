@@ -346,13 +346,22 @@ class TenantManager:
 
             APP_URL = env_handler.get_instance().env("APP_URL")
             login_url = f"{APP_URL}/login"
-            html_content = constant.mail_template.render(
-                username=user.username,
-                email=user.email,
-                password=password,
-                subject=MailSubject.ACCOUNT_CREATED.value,
-                lurlHeading=MailUrlHeading.ACCOUNT_CREATED.value,
-                url=login_url)
+            if constant.mail_template is not None:
+                html_content = constant.mail_template.render(
+                    username=user.username,
+                    email=user.email,
+                    password=password,
+                    subject=MailSubject.ACCOUNT_CREATED.value,
+                    lurlHeading=MailUrlHeading.ACCOUNT_CREATED.value,
+                    url=login_url)
+            else:
+                html_content = (
+                    f"{MailSubject.ACCOUNT_CREATED.value}\n\n"
+                    f"Username: {user.username}\n"
+                    f"Email: {user.email}\n"
+                    f"Password: {password}\n"
+                    f"Login URL: {login_url}"
+                )
             await mail_manager.get_instance().send_verification_mail(
                 to=user.email, subject=MailSubject.ACCOUNT_CREATED.value, body=html_content)
 
