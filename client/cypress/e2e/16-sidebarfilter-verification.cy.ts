@@ -36,11 +36,13 @@ describe('SideBar Filter Verification', () => {
     cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000})
 
 
+    cy.scrollDashboardToTop()
     openSidebar();
     selectDateRangeResetAndReopen();
     openSidebar();
 
     NETWORK_OPTIONS.forEach((option: string) => {
+      cy.scrollDashboardToTop()
       openSidebar();
 
       cy.get('[data-testid="side-filter-reset"]', {timeout: 60000})
