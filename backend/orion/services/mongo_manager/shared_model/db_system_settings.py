@@ -11,6 +11,7 @@ class AllowedKeys(str, Enum):
     APP_NAME = "app_name"
     LANGUAGE_ALLOWED = "language_allowed"
     AI_ENDPOINT = "ai_endpoint"
+    S_ONION = "s_onion"
     LOGO_URL = "logo_url"
     LOGO_WIDE_LIGHT = "logo_wide_light"
     LOGO_WIDE_DARK = "logo_wide_dark"
@@ -20,6 +21,7 @@ VALID_LANGUAGE_CODES = {"en", "fr", "es", "de", "it", "pt", "ru", "zh", "ja", "k
 
 IMAGE_URL_REGEX = re.compile(r"^https?://.+\.(png|jpg|jpeg|svg|webp)$", re.IGNORECASE)
 ENDPOINT_URL_REGEX = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)
+ONION_ADDRESS_REGEX = re.compile(r"^(?:https?://)?[a-z2-7]{56}\.onion/?$", re.IGNORECASE)
 
 
 class db_system_model(Model):
@@ -34,9 +36,10 @@ class db_system_model(Model):
             v.strip()), AllowedKeys.APP_NAME: lambda v: bool(
             v.strip()), AllowedKeys.LANGUAGE_ALLOWED: lambda v: v in VALID_LANGUAGE_CODES, AllowedKeys.AI_ENDPOINT: lambda
                 v: v == "" or bool(
-            ENDPOINT_URL_REGEX.match(v)), }
+            ENDPOINT_URL_REGEX.match(v)), AllowedKeys.S_ONION: lambda v: v == "" or bool(
+            ONION_ADDRESS_REGEX.match(v)), }
 
-        error_messages = {AllowedKeys.API_ALLOWED: "API_ALLOWED must be '0' or '1'", AllowedKeys.VERSION: "VERSION must be a non-empty string", AllowedKeys.APP_NAME: "APP_NAME must be a non-empty string", AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}", AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty", }
+        error_messages = {AllowedKeys.API_ALLOWED: "API_ALLOWED must be '0' or '1'", AllowedKeys.VERSION: "VERSION must be a non-empty string", AllowedKeys.APP_NAME: "APP_NAME must be a non-empty string", AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}", AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty", AllowedKeys.S_ONION: "S_ONION must be a valid onion address or empty", }
 
         if key in validators and not validators[key](value):
             raise ValueError(error_messages[key])
