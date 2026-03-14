@@ -74,13 +74,13 @@
         </div>
         <div class="flex flex-col gap-[2px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
           <span class="text-[var(--color-text4)]">Last checked:</span>
-          <span class="font-medium text-[var(--color-text1)]">{{ item?.m_creation_date | date: 'mediumDate' }}</span>
+          <span class="font-medium text-[var(--color-text1)]">{{ item?.m_update_date | date: 'mediumDate':'UTC' }}</span>
         </div>
         <div class="flex flex-col items-center gap-[5px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
           <span class="text-[var(--color-text4)]">Status</span>
           <div class="d-flex align-items-center max-[768px]:justify-start">
-            <span [ngClass]="{ 'bg-success': isWithinDays(item.m_creation_date, 5), 'bg-warning': isWithinDays(item.m_creation_date, 10) && !isWithinDays(item.m_creation_date, 5), 'bg-danger': !isWithinDays(item.m_creation_date, 10) }" class="me-2 inline-block h-[10px] w-[10px] rounded-full"></span>
-            <span class="font-medium text-[var(--color-text1)]">{{ isWithinDays(item.m_creation_date, 5) ? 'active' : 'inactive' }}</span>
+            <span [ngClass]="{ 'bg-success': isWithinDays(item.m_update_date, 5), 'bg-warning': isWithinDays(item.m_update_date, 10) && !isWithinDays(item.m_update_date, 5), 'bg-danger': !isWithinDays(item.m_update_date, 10) }" class="me-2 inline-block h-[10px] w-[10px] rounded-full"></span>
+            <span class="font-medium text-[var(--color-text1)]">{{ isWithinDays(item.m_update_date, 5) ? 'active' : 'inactive' }}</span>
           </div>
         </div>
       </div>

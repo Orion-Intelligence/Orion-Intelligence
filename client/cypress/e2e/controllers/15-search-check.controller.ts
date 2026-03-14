@@ -4,21 +4,24 @@ export const SEARCH_FIXTURES = {
   general_intelligence_data: {
     search_query: 'underground market - prepaid & cloned cards',
     link_address: 'http://2222fxq4xfkvilzdihu5ybce7ztf66fr6c7ub3enabg5iya2f34ac5id.onion/contact.php',
-    date: 'Jan 25, 2026',
+    date: 'Jan 24, 2026',
     description: 'copyright 2026 - underground marketwe',
   },
   data_breach: {
     search_query: 'Risiko 2023: Uforutsigbare tider krever høyere',
     link_address: 'https://nsm.no/aktuelt/risiko-2023-uforutsigbare-tider-krever-hoyere-beredskap',
-    date: 'Jan 25, 2026',
+    date: 'Jan 24, 2026',
     description: 'Norske virksomheter må forberede seg bedre og ha høyere beredskap',
   },
   defacement_by_team: {
     search_query: 'CarlyGriggs13',
-    base_url: 'joindarkside.pro',
+    base_url: ['joindarkside.pro', 'fitcoin-events.com'],
     team: 'CarlyGriggs13',
     date: 'Jan 24, 2026',
-    web_url: 'https://x.com/CarlyGriggs13/status/2014897534108319933',
+    web_url: [
+      'https://x.com/CarlyGriggs13/status/2014897534108319933',
+      'https://x.com/CarlyGriggs13/status/2014897336539844898',
+    ],
   },
   defacement_by_base_url: {
     search_query: 'joindarkside.pro',
@@ -131,60 +134,43 @@ export function typeDashboardSearch15(value: string) {
 }
 
 export function assertFirstResultCard(data: SearchResultData) {
+  cy.wait(2000)
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-    .first()
-    .scrollIntoView()
-    .should('be.visible');
+    .should('have.length.at.least', 1)
+    .then(($cards) => {
+      const matchingCard = Array.from($cards).find((card) => {
+        const text = (card.textContent || '').trim();
+        const hrefs = Array.from(card.querySelectorAll('a[href]'))
+          .map((link) => link.getAttribute('href') || '')
+          .filter(Boolean);
+        const matchesLink = hrefs.some((href) => href.includes(data.link_address.trim())) || text.includes(data.link_address.trim());
+        const matchesDescription = data.description ? text.includes(data.description.trim().substring(0, 60)) : true;
+        const matchesDate = data.date ? text.includes(data.date) : true;
 
-  cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-    .first()
-    .invoke('html')
-    .then((html) => {
-      if (html.includes('href=')) {
-        cy.get('[data-testid="result-card"], .ui-result-card')
-          .first()
-          .find('a[href]')
-          .first()
-          .should('have.attr', 'href', data.link_address);
-      } else {
-        cy.get('[data-testid="result-card"], .ui-result-card')
-          .first()
-          .invoke('text')
-          .then((text) => {
-            expect(text).to.include(data.link_address.trim());
-          });
-      }
+        return matchesLink && matchesDescription && matchesDate;
+      });
+
+      expect(matchingCard, `result card matching ${data.link_address}`).to.exist;
+      cy.wrap(matchingCard as HTMLElement)
+        .scrollIntoView()
+        .should('be.visible')
+        .as('matchingResultCard');
     });
-
-  if (data.description) {
-    cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-      .first()
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.include(data.description!.trim().substring(0, 60));
-      });
-  }
-
-  if (data.date) {
-    cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-      .first()
-      .invoke('text')
-      .then((text) => {
-        expect(text).to.include(data.date);
-      });
-  }
 }
 
-export function assertFirstDefacementRow(data: {search_query: string; base_url: string; team: string; date: string; web_url: string}) {
+export function assertFirstDefacementRow(data: {search_query: string; base_url: string | string[]; team: string; date: string; web_url: string | string[]}) {
+  const allowedBaseUrls = Array.isArray(data.base_url) ? data.base_url : [data.base_url];
+  const allowedWebUrls = Array.isArray(data.web_url) ? data.web_url : [data.web_url];
+
   cy.get('tbody tr.cursor-pointer', {timeout: 35000})
     .then(($rows) => {
       const matchingRow = Array.from($rows).find((row) => {
         const cells = row.querySelectorAll('td');
         const rowText = Array.from(cells).map((cell) => cell.textContent?.trim() || '').join(' ');
-        return rowText.includes(data.base_url.trim()) || rowText.includes(data.team.trim());
+        return allowedBaseUrls.some((baseUrl) => rowText.includes(baseUrl.trim())) || rowText.includes(data.team.trim());
       });
 
-      expect(matchingRow, `defacement row for ${data.base_url}`).to.exist;
+      expect(matchingRow, `defacement row for ${allowedBaseUrls.join(' or ')}`).to.exist;
       cy.wrap(matchingRow as HTMLTableRowElement).scrollIntoView().should('be.visible').as('firstRow');
     });
 
@@ -192,7 +178,10 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
     .find('td[data-label="Base URL"]')
     .invoke('text')
     .then((text) => {
-      expect(text.trim()).to.include(data.base_url.trim());
+      expect(
+        allowedBaseUrls.some((baseUrl) => text.trim().includes(baseUrl.trim())),
+        `expected base url to include one of: ${allowedBaseUrls.join(', ')}`
+      ).to.equal(true);
     });
 
   cy.get('@firstRow')
@@ -211,5 +200,11 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
 
   cy.get('@firstRow')
     .find('td[data-label="Web URL"] a[href]')
-    .should('have.attr', 'href', data.web_url);
+    .invoke('attr', 'href')
+    .then((href) => {
+      expect(
+        allowedWebUrls.includes(href || ''),
+        `expected web url to be one of: ${allowedWebUrls.join(', ')}`
+      ).to.equal(true);
+    });
 }

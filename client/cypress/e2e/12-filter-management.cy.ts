@@ -39,7 +39,9 @@ describe('Filter Management', () => {
       cy.scrollDashboardToTop();
       cy.get('[data-testid="result-tools-searchby"]', {timeout: 20000}).click();
       cy.get(option === 'Match Semantic' ? '[data-testid="result-tools-searchby-semantic"]' : option === 'Match any term (OR)' ? '[data-testid="result-tools-searchby-or"]' : option === 'Match indivisual terms (AND)' ? '[data-testid="result-tools-searchby-and"]' : '[data-testid="result-tools-searchby-full"]', {timeout: 20000}).click();
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).should('be.visible').clear().type('test query{enter}');
+      cy.wait(1000)
+      cy.scrollDashboardToTop()
+      cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).filter(':visible').first().should('be.visible').clear().type('test query{enter}');
     });
 
     cy.openSideFilter();
@@ -68,6 +70,7 @@ describe('Filter Management', () => {
     cy.get('[data-testid="dashboard-search-submit"]', {timeout: 20000}).first().should('be.visible').click();
   });
   it('applies all filter options in Data Breach', () => {
+    cy.scrollDashboardToTop()
     cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
     cy.scrollDashboardToTop();
@@ -105,6 +108,7 @@ describe('Filter Management', () => {
     cy.get('[data-testid="dashboard-search-submit"]').first().click();
   });
   it('applies all filters in Defacement with auto-apply', () => {
+    cy.scrollDashboardToTop()
     cy.get('[data-testid="sidebar-group-defacement"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
     cy.openSideFilter();
@@ -122,6 +126,7 @@ describe('Filter Management', () => {
     cy.get('[data-testid="dashboard-search-submit"]').first().click();
   });
   it('applies all filters in Social with auto-apply', () => {
+    cy.scrollDashboardToTop()
     cy.get('[data-testid="sidebar-group-social"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
     cy.openSideFilter();
@@ -144,6 +149,7 @@ describe('Filter Management', () => {
     cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
   });
   it('applies all filters in Exploit with auto-apply', () => {
+    cy.scrollDashboardToTop()
     cy.get('[data-testid="sidebar-group-exploit"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
     cy.openSideFilter();

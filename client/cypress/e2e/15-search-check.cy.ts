@@ -27,21 +27,21 @@ describe('Orion Intelligence – Search Result Validation', () => {
     assertFirstResultCard(SEARCH_FIXTURES.data_breach);
   });
 
-  // it('Defacement → All: first row matches fixture searched by team', () => {
-  //   cy.loginAsAdmin();
-  //   openSidebarGroup15('Defacement');
-  //   clickSidebarSubItem15('Defacement', 'All');
-  //   typeDashboardSearch15(SEARCH_FIXTURES.defacement_by_team.search_query);
-  //   assertFirstDefacementRow(SEARCH_FIXTURES.defacement_by_team);
-  // });
+  it('Defacement → All: first row matches fixture searched by team', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup15('Defacement');
+    clickSidebarSubItem15('Defacement', 'All');
+    typeDashboardSearch15(SEARCH_FIXTURES.defacement_by_team.search_query);
+    assertFirstDefacementRow(SEARCH_FIXTURES.defacement_by_team);
+  });
 
-  // it('Defacement → All: first row matches fixture searched by base url', () => {
-  //   cy.loginAsAdmin();
-  //   openSidebarGroup15('Defacement');
-  //   clickSidebarSubItem15('Defacement', 'All');
-  //   typeDashboardSearch15(SEARCH_FIXTURES.defacement_by_base_url.search_query);
-  //   assertFirstDefacementRow(SEARCH_FIXTURES.defacement_by_base_url);
-  // });
+  it('Defacement → All: first row matches fixture searched by base url', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup15('Defacement');
+    clickSidebarSubItem15('Defacement', 'All');
+    typeDashboardSearch15(SEARCH_FIXTURES.defacement_by_base_url.search_query);
+    assertFirstDefacementRow(SEARCH_FIXTURES.defacement_by_base_url);
+  });
 
   it('Social → All: first result matches fixture', () => {
     cy.loginAsAdmin();

@@ -16,9 +16,10 @@ import { MessageNotificationService } from '../../../../services/message_notific
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
-  systemData = { ai_endpoint: '', language_allowed: '', version: '', api_allowed: '0', app_name: '0' };
-  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', };
+  systemData = { ai_endpoint: '', language_allowed: '', version: '', api_allowed: '0', app_name: '0', s_onion: '' };
+  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', s_onion: '' };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
+  onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
 
   constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService,private messageNotificationService: MessageNotificationService) {
   }
@@ -38,6 +39,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.api_allowed = settings.api_allowed;
     this.form.app_name = settings.app_name;
     this.form.ai_endpoint = settings.ai_endpoint;
+    this.form.s_onion = settings.s_onion;
   }
 
   toggleEdit() {
@@ -53,6 +55,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.api_allowed = this.systemData.api_allowed;
     this.form.app_name = this.systemData.app_name;
     this.form.ai_endpoint = this.systemData.ai_endpoint;
+    this.form.s_onion = this.systemData.s_onion;
     this.isEditing = false;
   }
 
@@ -98,6 +101,10 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   }
 
   save() {
+    if (this.form.s_onion && !this.onionPattern.test(this.form.s_onion)) {
+      this.messageNotificationService.show('Invalid onion address');
+      return;
+    }
     this.apiService.post<any>('public/update', { settings: this.form }).subscribe({
       next: (response) => {
         if (response?.settings) {
@@ -110,7 +117,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
               language_allowed: s.language_allowed,
               version: s.version,
               api_allowed: s.api_allowed,
-              app_name: s.app_name
+              app_name: s.app_name,
+              s_onion: s.s_onion
             };
             document.title = s.app_name;
           }
