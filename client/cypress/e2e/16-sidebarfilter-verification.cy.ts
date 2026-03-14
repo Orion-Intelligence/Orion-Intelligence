@@ -4,7 +4,9 @@ import {
   SAFE_SEARCH_OPTIONS,
 } from '../support/constants';
 import {
+  assertAnyResultCardMatchesNetwork,
   openSidebar,
+  openAnyMatchingReport,
   selectAndApply,
   selectDateRangeResetAndReopen
 } from './controllers/16-sidebarfilter-verification.controller';
@@ -73,20 +75,7 @@ describe('SideBar Filter Verification', () => {
               .should('exist')
               .and('be.visible');
           } else {
-            cy.get('[data-testid="result-card"]', {timeout: 60000})
-              .first()
-              .should('be.visible')
-              .within(() => {
-                cy.contains('span', 'Network:', {timeout: 30000})
-                  .should('be.visible')
-                  .parent()
-                  .find('span.font-medium', {timeout: 30000})
-                  .should('be.visible')
-                  .invoke('text')
-                  .then((text: string) => {
-                    expect(text.trim().toLowerCase()).to.equal(option.trim().toLowerCase());
-                  });
-              });
+            assertAnyResultCardMatchesNetwork(option);
           }
         } else if ($body.text().includes('No Results Found')) {
           cy.contains('No Results Found', {timeout: 30000, matchCase: false})
@@ -193,31 +182,7 @@ describe('SideBar Filter Verification', () => {
 
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
 
-      cy.get('[data-testid="open-report"]', {timeout: 60000})
-        .should('have.length.at.least', 1)
-        .first()
-        .scrollIntoView()
-        .should('be.visible')
-        .click();
-
-      cy.contains('p', 'Network', {timeout: 30000})
-        .should('be.visible')
-        .parent()
-        .within(() => {
-          cy.get('span', {timeout: 30000})
-            .should('be.visible')
-            .invoke('text')
-            .then((text: string) => {
-              const normalizedText = text.trim().toLowerCase();
-              const normalizedOption = option.trim().toLowerCase();
-
-              if (normalizedOption === 'all') {
-                expect(normalizedText).to.not.equal('');
-              } else {
-                expect(normalizedText).to.equal(normalizedOption);
-              }
-            });
-        });
+      openAnyMatchingReport(option);
 
       cy.go('back');
 
@@ -283,30 +248,7 @@ describe('SideBar Filter Verification', () => {
 
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="open-report"]').length > 0) {
-          cy.get('[data-testid="open-report"]', {timeout: 60000})
-            .first()
-            .scrollIntoView()
-            .should('be.visible')
-            .click();
-
-          cy.contains('p', 'Network', {timeout: 30000})
-            .should('be.visible')
-            .parent()
-            .within(() => {
-              cy.get('span', {timeout: 30000})
-                .should('be.visible')
-                .invoke('text')
-                .then((text: string) => {
-                  const normalizedText = text.trim().toLowerCase();
-                  const normalizedOption = option.trim().toLowerCase();
-
-                  if (normalizedOption === 'all') {
-                    expect(normalizedText).to.not.equal('');
-                  } else {
-                    expect(normalizedText).to.equal(normalizedOption);
-                  }
-                });
-            });
+          openAnyMatchingReport(option);
 
           cy.go('back');
           cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
@@ -370,30 +312,7 @@ describe('SideBar Filter Verification', () => {
 
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="open-report"]').length > 0) {
-          cy.get('[data-testid="open-report"]', {timeout: 60000})
-            .first()
-            .scrollIntoView()
-            .should('be.visible')
-            .click();
-
-          cy.contains('p', 'Network', {timeout: 30000})
-            .should('be.visible')
-            .parent()
-            .within(() => {
-              cy.get('span', {timeout: 30000})
-                .should('be.visible')
-                .invoke('text')
-                .then((text: string) => {
-                  const normalizedText = text.trim().toLowerCase();
-                  const normalizedOption = option.trim().toLowerCase();
-
-                  if (normalizedOption === 'all') {
-                    expect(normalizedText).to.not.equal('');
-                  } else {
-                    expect(normalizedText).to.equal(normalizedOption);
-                  }
-                });
-            });
+          openAnyMatchingReport(option);
 
           cy.go('back');
 
@@ -452,30 +371,7 @@ describe('SideBar Filter Verification', () => {
 
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="open-report"]').length > 0) {
-          cy.get('[data-testid="open-report"]', {timeout: 60000})
-            .first()
-            .scrollIntoView()
-            .should('be.visible')
-            .click();
-
-          cy.contains('p', 'Network', {timeout: 30000})
-            .should('be.visible')
-            .parent()
-            .within(() => {
-              cy.get('span', {timeout: 30000})
-                .should('be.visible')
-                .invoke('text')
-                .then((text: string) => {
-                  const normalizedText = text.trim().toLowerCase();
-                  const normalizedOption = option.trim().toLowerCase();
-
-                  if (normalizedOption === 'all') {
-                    expect(normalizedText).to.not.equal('');
-                  } else {
-                    expect(normalizedText).to.equal(normalizedOption);
-                  }
-                });
-            });
+          openAnyMatchingReport(option);
 
           cy.go('back');
           cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
