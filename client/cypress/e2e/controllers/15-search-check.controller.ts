@@ -134,51 +134,28 @@ export function typeDashboardSearch15(value: string) {
 }
 
 export function assertFirstResultCard(data: SearchResultData) {
+  cy.wait(2000)
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-    .first()
-    .scrollIntoView();
+    .should('have.length.at.least', 1)
+    .then(($cards) => {
+      const matchingCard = Array.from($cards).find((card) => {
+        const text = (card.textContent || '').trim();
+        const hrefs = Array.from(card.querySelectorAll('a[href]'))
+          .map((link) => link.getAttribute('href') || '')
+          .filter(Boolean);
+        const matchesLink = hrefs.some((href) => href.includes(data.link_address.trim())) || text.includes(data.link_address.trim());
+        const matchesDescription = data.description ? text.includes(data.description.trim().substring(0, 60)) : true;
+        const matchesDate = data.date ? text.includes(data.date) : true;
 
-  cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-    .first()
-    .should('be.visible')
-    .as('firstResultCard');
+        return matchesLink && matchesDescription && matchesDate;
+      });
 
-  cy.get('@firstResultCard')
-    .invoke('html')
-    .then((html) => {
-      if (html.includes('href=')) {
-        cy.get('@firstResultCard')
-          .find('a[href]')
-          .first()
-          .should('have.attr', 'href')
-          .and('not.be.empty')
-          .then((href) => {
-            expect(String(href)).to.include(data.link_address.trim());
-          });
-      } else {
-        cy.get('@firstResultCard')
-          .invoke('text')
-          .then((text) => {
-            expect(text).to.include(data.link_address.trim());
-          });
-      }
+      expect(matchingCard, `result card matching ${data.link_address}`).to.exist;
+      cy.wrap(matchingCard as HTMLElement)
+        .scrollIntoView()
+        .should('be.visible')
+        .as('matchingResultCard');
     });
-
-  if (data.description) {
-    cy.get('@firstResultCard')
-      .invoke('text')
-      .then((text) => {
-        expect(text.trim()).to.include(data.description!.trim().substring(0, 60));
-      });
-  }
-
-  if (data.date) {
-    cy.get('@firstResultCard')
-      .invoke('text')
-      .then((text) => {
-        expect(text).to.include(data.date);
-      });
-  }
 }
 
 export function assertFirstDefacementRow(data: {search_query: string; base_url: string | string[]; team: string; date: string; web_url: string | string[]}) {

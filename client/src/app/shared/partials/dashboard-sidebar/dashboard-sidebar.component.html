@@ -159,13 +159,15 @@
         <span>Help &amp; Support</span>
       </div>
       <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
-      <a class="select-none p-0" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank">
-        <div class="my-[6px] rounded-[8px] select-none">
-          <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-            <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
+      @if (appService.getConfig().appSettings.s_onion) {
+        <a class="select-none p-0" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank">
+          <div class="my-[6px] rounded-[8px] select-none">
+            <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
+              <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">Onion Link
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
+      }
       <div class="my-[6px] rounded-[8px] select-none">
         <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
           <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">
@@ -341,11 +343,13 @@
         </li>
       </ng-container>
       <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)] w-[50px]"></div>
-      <li class="my-[6px] rounded-[8px] select-none">
-        <a appTooltip="Onion Link" href="http://o2k3sgzqpl3o6kmx22uqxhcz2bgb34kor46wmbqvsn7vzikfxn6y66ad.onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
-          <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
-        </a>
-      </li>
+      @if (appService.getConfig().appSettings.s_onion) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <a appTooltip="Onion Link" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
+            <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
+          </a>
+        </li>
+      }
       <li class="my-[6px] rounded-[8px] select-none">
         <div (click)="onSectionSelected(category.DIRECTORY)" appTooltip="Links" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" queryParamsHandling="merge">
           <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/directory.svg" width="20">

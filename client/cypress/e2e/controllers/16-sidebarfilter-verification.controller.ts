@@ -7,6 +7,7 @@ export function waitForSidebar() {
 }
 
 export function openSidebar() {
+  cy.scrollDashboardToTop()
   cy.get('body').then(($body) => {
     const isOpen =
       $body.find('.ui-filter-sidebar-panel.right-0').length > 0 &&

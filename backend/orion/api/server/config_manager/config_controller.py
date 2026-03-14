@@ -71,6 +71,7 @@ class config_controller:
             log.g().e(f"Error fetching config: {ex}")
             return config_data(settings={
                 "ai_endpoint": "1",
+                "s_onion": "",
                 "logo_url": "/api/s/static/system/logo_url_default.png",
                 "logo_wide_light": "/api/s/static/system/logo_wide_dark_default.png",
                 "logo_wide_dark": "/api/s/static/system/logo_wide_light_default.png",
@@ -84,6 +85,8 @@ class config_controller:
                 key = AllowedKeys.LOGO_URL
             elif key_str == "app_name":
                 key = AllowedKeys.APP_NAME
+            elif key_str == "s_onion":
+                key = AllowedKeys.S_ONION
             else:
                 continue
 
