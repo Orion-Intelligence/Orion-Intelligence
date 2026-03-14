@@ -39,6 +39,7 @@ describe('Filter Management', () => {
       cy.scrollDashboardToTop();
       cy.get('[data-testid="result-tools-searchby"]', {timeout: 20000}).click();
       cy.get(option === 'Match Semantic' ? '[data-testid="result-tools-searchby-semantic"]' : option === 'Match any term (OR)' ? '[data-testid="result-tools-searchby-or"]' : option === 'Match indivisual terms (AND)' ? '[data-testid="result-tools-searchby-and"]' : '[data-testid="result-tools-searchby-full"]', {timeout: 20000}).click();
+      cy.wait(1000)
       cy.scrollDashboardToTop()
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).filter(':visible').first().should('be.visible').clear().type('test query{enter}');
     });

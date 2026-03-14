@@ -56,7 +56,7 @@
       </div>
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Last checked on</p>
-        <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem?.m_creation_date | date: 'mediumDate' }}</span>
+        <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem?.m_update_date | date: 'mediumDate':'UTC' }}</span>
       </div>
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Tags</p>

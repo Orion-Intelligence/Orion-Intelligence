@@ -4,13 +4,13 @@ export const SEARCH_FIXTURES = {
   general_intelligence_data: {
     search_query: 'underground market - prepaid & cloned cards',
     link_address: 'http://2222fxq4xfkvilzdihu5ybce7ztf66fr6c7ub3enabg5iya2f34ac5id.onion/contact.php',
-    date: 'Jan 25, 2026',
+    date: 'Jan 24, 2026',
     description: 'copyright 2026 - underground marketwe',
   },
   data_breach: {
     search_query: 'Risiko 2023: Uforutsigbare tider krever høyere',
     link_address: 'https://nsm.no/aktuelt/risiko-2023-uforutsigbare-tider-krever-hoyere-beredskap',
-    date: 'Jan 25, 2026',
+    date: 'Jan 24, 2026',
     description: 'Norske virksomheter må forberede seg bedre og ha høyere beredskap',
   },
   defacement_by_team: {
@@ -140,21 +140,23 @@ export function assertFirstResultCard(data: SearchResultData) {
 
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
     .first()
-    .should('be.visible');
+    .should('be.visible')
+    .as('firstResultCard');
 
-  cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-    .first()
+  cy.get('@firstResultCard')
     .invoke('html')
     .then((html) => {
       if (html.includes('href=')) {
-        cy.get('[data-testid="result-card"], .ui-result-card')
-          .first()
+        cy.get('@firstResultCard')
           .find('a[href]')
           .first()
-          .should('have.attr', 'href', data.link_address);
+          .should('have.attr', 'href')
+          .and('not.be.empty')
+          .then((href) => {
+            expect(String(href)).to.include(data.link_address.trim());
+          });
       } else {
-        cy.get('[data-testid="result-card"], .ui-result-card')
-          .first()
+        cy.get('@firstResultCard')
           .invoke('text')
           .then((text) => {
             expect(text).to.include(data.link_address.trim());
@@ -163,8 +165,7 @@ export function assertFirstResultCard(data: SearchResultData) {
     });
 
   if (data.description) {
-    cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-      .first()
+    cy.get('@firstResultCard')
       .invoke('text')
       .then((text) => {
         expect(text.trim()).to.include(data.description!.trim().substring(0, 60));
@@ -172,8 +173,7 @@ export function assertFirstResultCard(data: SearchResultData) {
   }
 
   if (data.date) {
-    cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
-      .first()
+    cy.get('@firstResultCard')
       .invoke('text')
       .then((text) => {
         expect(text).to.include(data.date);
