@@ -134,7 +134,7 @@ export function typeDashboardSearch15(value: string) {
 }
 
 export function assertFirstResultCard(data: SearchResultData) {
-  cy.wait(10000)
+  cy.wait(2000)
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
     .should('have.length.at.least', 1)
     .then(($cards) => {
