@@ -108,6 +108,7 @@ describe('SideBar Filter Verification', () => {
       cy.get('.ui-filter-sidebar-overlay:visible', {timeout: 60000})
         .should('not.exist');
 
+      cy.scrollDashboardToTop()
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000})
         .should('be.visible');
     });
