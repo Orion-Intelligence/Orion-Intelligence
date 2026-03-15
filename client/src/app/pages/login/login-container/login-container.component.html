@@ -5,9 +5,9 @@
       <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-cy="login-page" data-testid="login-page">
         <div class="min-w-[500px] bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:flex-[0_0_100vw] max-[943px]:min-w-[350px]">
           <div class="w-full flex justify-center gap-6">
-            <a href="https://www.orionintelligence.org/sources" target="_blank" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Data Sources</a>
-            <a href="https://www.orionintelligence.org/adversaries" target="_blank" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Adversaries</a>
-            <a href="https://www.orionintelligence.org/pricing" target="_blank" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Pricing</a>
+            <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Data Sources</a>
+            <a [href]="appService.getConfig().appSettings.home_header_adversaries" target="_blank" rel="noopener noreferrer" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Adversaries</a>
+            <a [href]="appService.getConfig().appSettings.home_header_pricing" target="_blank" rel="noopener noreferrer" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Pricing</a>
           </div>
           <div class="flex flex-col mt-[100px] items-center flex-grow">
             <div class="w-full max-w-[500px] flex flex-col items-center">

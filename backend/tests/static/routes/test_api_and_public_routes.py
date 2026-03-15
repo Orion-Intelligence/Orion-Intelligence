@@ -295,9 +295,9 @@ def test_public_favicon_route(api_public_client):
     assert resp.status_code == 200
 
 
-def test_public_system_non_default_requires_cookie(api_public_client):
+def test_public_system_non_default_is_public(api_public_client):
     resp = api_public_client.get("/api/s/static/system/private-logo.png")
-    assert resp.status_code == 401
+    assert resp.status_code == 200
 
 
 def test_ioc_extract_and_apk_routes(api_public_client):

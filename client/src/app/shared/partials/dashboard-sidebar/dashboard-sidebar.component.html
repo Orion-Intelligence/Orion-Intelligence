@@ -174,13 +174,15 @@
           Links
         </div>
       </div>
-      <a class="select-none p-0" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
-        <div class="my-[6px] rounded-[8px] select-none">
-          <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-            <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
+      @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
+        <a class="select-none p-0" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+          <div class="my-[6px] rounded-[8px] select-none">
+            <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
+              <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">Documentation
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
+      }
     </ul>
   </nav>
 }
@@ -356,9 +358,11 @@
         </div>
       </li>
       <li class="my-[6px] rounded-[8px] select-none">
-        <a appTooltip="Documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
-          <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
-        </a>
+        @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
+          <a appTooltip="Documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+            <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
+          </a>
+        }
       </li>
     </ul>
   </nav>

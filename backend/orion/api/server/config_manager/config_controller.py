@@ -1,4 +1,5 @@
 import asyncio
+import json
 from pathlib import Path
 
 from fastapi import UploadFile, HTTPException
@@ -64,6 +65,12 @@ class config_controller:
             fresh_config["logo_url"] = asset("logo_url")
             fresh_config["logo_wide_light"] = asset("logo_wide_light")
             fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
+            fresh_config["meta_info"] = fresh_config.get("meta_info") or json.dumps({
+                "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
+                "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
+                "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
+                "S_HOME_HEADER_PRICING_ALLOWED": True
+            })
 
             return config_data(settings=fresh_config)
 
@@ -75,6 +82,12 @@ class config_controller:
                 "logo_url": "/api/s/static/system/logo_url_default.png",
                 "logo_wide_light": "/api/s/static/system/logo_wide_dark_default.png",
                 "logo_wide_dark": "/api/s/static/system/logo_wide_light_default.png",
+                "meta_info": json.dumps({
+                    "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
+                    "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
+                    "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
+                    "S_HOME_HEADER_PRICING_ALLOWED": True
+                }),
             })
 
     async def update_public_config(self, data: config_data):
@@ -85,6 +98,8 @@ class config_controller:
                 key = AllowedKeys.LOGO_URL
             elif key_str == "app_name":
                 key = AllowedKeys.APP_NAME
+            elif key_str == "meta_info":
+                key = AllowedKeys.META_INFO
             elif key_str == "s_onion":
                 key = AllowedKeys.S_ONION
             else:
