@@ -41,7 +41,8 @@ export class AppStorageService {
     const app: Partial<AppSettingsModel> = {
       version: baseAppSettings.version,
       language_allowed: baseAppSettings.language_allowed,
-      logo_url: baseAppSettings.logo_url
+      logo_url: baseAppSettings.logo_url,
+      meta_info: baseAppSettings.meta_info
     };
     return new ConfigSettings(app, localSettings);
   }
