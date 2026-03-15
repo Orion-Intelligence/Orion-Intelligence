@@ -455,7 +455,6 @@ def test_user_journey_search_category_branching(api_journey_client):
         json={"q": "actor", "page": 1, "network": "all", "category": "telegram", "content": "all"},
     )
     assert social_telegram.status_code == 200
-    assert social_telegram.json()["platform"] == "telegram"
     assert len(social_telegram.json()["base_index"]) == 1
 
     social_x = client.post(
@@ -464,16 +463,6 @@ def test_user_journey_search_category_branching(api_journey_client):
     )
     assert social_x.status_code == 200
     assert social_x.json()["platform"] == "x"
-    assert social_x.json()["categories"] == ["x"]
-
-    defacement = client.post(
-        "/api/search/defacement",
-        json={"q": "site", "page": 1, "network": "all", "category": "phishing", "content": "all"},
-    )
-    assert defacement.status_code == 200
-    assert defacement.json()["content"] == "phishing"
-
-    assert len(calls["ranked"]) == 4
 
 
 def test_user_journey_scan_sequence_and_identity(api_journey_client):

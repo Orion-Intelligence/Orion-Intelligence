@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 import shutil
 import sys
@@ -40,6 +41,26 @@ warnings.filterwarnings(
     category=DeprecationWarning,
 )
 logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _test_mailpit_host_override():
+    original_host = os.environ.get("ACCOUNTS_SMTP_SERVER")
+    original_port = os.environ.get("ACCOUNTS_SMTP_PORT")
+    os.environ["ACCOUNTS_SMTP_SERVER"] = "localhost"
+    os.environ["ACCOUNTS_SMTP_PORT"] = "1025"
+    try:
+        yield
+    finally:
+        if original_host is None:
+            os.environ.pop("ACCOUNTS_SMTP_SERVER", None)
+        else:
+            os.environ["ACCOUNTS_SMTP_SERVER"] = original_host
+
+        if original_port is None:
+            os.environ.pop("ACCOUNTS_SMTP_PORT", None)
+        else:
+            os.environ["ACCOUNTS_SMTP_PORT"] = original_port
 
 
 def pytest_configure(config):

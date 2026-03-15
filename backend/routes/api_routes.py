@@ -89,7 +89,6 @@ async def search_social(param: search_consolidated_param_model = Body(...)):
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
     else:
         if param.category == "telegram":
-            param.platform = "telegram"
             param.category = "all"
             base_index = [ELASTIC_INDEX.S_CHATS_INDEX]
             return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
@@ -97,7 +96,7 @@ async def search_social(param: search_consolidated_param_model = Body(...)):
             param.platform = param.category
             param.category = "all"
             base_index = [ELASTIC_INDEX.S_SOCIAL_INDEX]
-            return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.platform])
+            return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
 
 
 @api_routes.post(
