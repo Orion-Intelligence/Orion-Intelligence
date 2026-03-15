@@ -97,7 +97,7 @@ async def search_social(param: search_consolidated_param_model = Body(...)):
             param.platform = param.category
             param.category = "all"
             base_index = [ELASTIC_INDEX.S_SOCIAL_INDEX]
-            return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+            return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.platform])
 
 
 @api_routes.post(
