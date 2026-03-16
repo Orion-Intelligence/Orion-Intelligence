@@ -39,7 +39,7 @@ export class SelectionStoreService {
       const shouldRedirectToHome = !this.first_trigger &&
                 (!currentSection && !currentOption);
       this.first_trigger = false;
-      if ((!option && section !== 'home' && section !== 'directory') || (currentSection === section && currentOption === option)) {
+      if ((!option && section !== 'home' && section !== 'directory' && section !== 'netint') || (currentSection === section && currentOption === option)) {
         return;
       }
       if (this.router.url.includes('/profile/consolidated') || this.router.url.includes('/profile/alerts') || this.router.url.includes('/profile/addCustomAlert')) {
@@ -55,7 +55,9 @@ export class SelectionStoreService {
         this.scroll_service.resetOnReload(true);
         return;
       }
-      const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
+      const capitalizedSection = section === 'netint'
+        ? 'NETINT'
+        : section.charAt(0).toUpperCase() + section.slice(1);
       this.setSelectedSection(capitalizedSection);
       if (this.router.url.includes('profile') && option == "homepage") {
         option = "Homepage";
