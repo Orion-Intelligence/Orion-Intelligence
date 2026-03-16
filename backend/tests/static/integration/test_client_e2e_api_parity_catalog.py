@@ -112,6 +112,10 @@ def test_client_e2e_api_catalog_is_present_in_backend():
         ("GET", "/api/social/session/tabs"),
         ("POST", "/api/social/session/tab/add"),
         ("POST", "/api/crypto/scan"),
+        ("POST", "/api/netintel/resolve_ip"),
+        ("POST", "/api/netintel/scanner"),
+        ("POST", "/api/netintel/camera_detect"),
+        ("POST", "/api/netintel/camera_detect_ranges"),
     }
 
     actual = _collect_route_signatures()

@@ -1,0 +1,21 @@
+{
+  "result": {
+    "status": "success",
+    "ip": "8.8.8.8",
+    "ports": [
+      53,
+      80,
+      443,
+      853,
+      8080,
+      8443
+    ],
+    "hostnames": [
+      "dns.google",
+      "resolver1.google.com",
+      "public-dns-a.google.com"
+    ],
+    "org": "Google LLC",
+    "country": "United States"
+  }
+}

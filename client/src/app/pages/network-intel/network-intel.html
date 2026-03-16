@@ -1,86 +1,115 @@
-<div class="flex flex-nowrap items-center gap-3 overflow-auto rounded-xl border border-white/10 bg-[var(--color-blue-720)] px-4 py-3">
-  <div class="flex flex-nowrap items-center gap-1">
-    <button class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-bold tracking-wide border transition-all duration-150 whitespace-nowrap cursor-pointer hover:text-white hover:border-white/10 hover:bg-white/5" [ngClass]="activeTab==='dns' ? ['text-sky-400', 'border-sky-400/40', 'bg-sky-400/10'] : ['text-slate-400', 'border-transparent', 'bg-transparent']" (click)="setTab('dns')">Host Recon</button>
-    <button class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-bold tracking-wide border transition-all duration-150 whitespace-nowrap cursor-pointer hover:text-white hover:border-white/10 hover:bg-white/5" [ngClass]="activeTab==='shodan' ? ['text-sky-400', 'border-sky-400/40', 'bg-sky-400/10'] : ['text-slate-400', 'border-transparent', 'bg-transparent']" (click)="setTab('shodan')">Deep Scan</button>
-    <button class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-bold tracking-wide border transition-all duration-150 whitespace-nowrap cursor-pointer hover:text-white hover:border-white/10 hover:bg-white/5" [ngClass]="activeTab==='geo' ? ['text-sky-400', 'border-sky-400/40', 'bg-sky-400/10'] : ['text-slate-400', 'border-transparent', 'bg-transparent']" (click)="setTab('geo')">Geo Cameras</button>
+<div class="pb-[200px]">
+<div class="px-4 pt-4 md:px-6">
+  <div class="flex w-full flex-wrap items-center gap-3 bg-[var(--color-blue-760)] py-[15px] max-[640px]:gap-2">
+    <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
+      <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='dns' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('dns')">Host Recon</button>
+      <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='shodan' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">Deep Scan</button>
+      <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='geo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('geo')">Geo Cameras</button>
+    </div>
   </div>
 
-  <div class="hidden h-8 w-px shrink-0 bg-white/8 md:block"></div>
-
-  <div class="hidden flex-nowrap items-center gap-2 md:flex">
-    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"><img alt="" ngSrc="assets/images/shared/results_found.svg" width="20" height="20"></div>
-    <div class="text-xs font-semibold whitespace-nowrap text-slate-200" [class.text-sky-400]="isScanning()">
-      {{ isScanning() ? (scanHelper.progress() + '%') : (lastResultCount != null ? lastResultCount : '—') }}
-    </div>
-    <div class="text-xs uppercase tracking-wide whitespace-nowrap text-slate-500">{{ isScanning() ? 'Progress' : 'Results' }}</div>
+  <div class="mt-4">
+    @if (!(activeTab === 'geo' && geoMode === 'ranges')) {
+      <div class="w-full">
+        <form (submit)="$event.preventDefault(); runToolbarSearch()" class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="formError ? 'ring-1 ring-[var(--color-border-red)]' : ''">
+          <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
+          <input
+            [value]="getToolbarQuery()"
+            (input)="setToolbarQuery($any($event.target).value)"
+            (keyup.enter)="runToolbarSearch()"
+            type="text"
+            [placeholder]="getToolbarPlaceholder()"
+            class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45"
+            [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''"
+          />
+          @if (formError) {
+            <div class="pointer-events-none absolute right-2 top-1/2 inline-flex max-w-[240px] -translate-y-1/2 items-center gap-1 rounded-md bg-red-500/85 px-2 py-[3px] text-[12px] font-semibold text-white max-[900px]:max-w-[160px] max-[640px]:max-w-[28px]">
+              <i class="bi bi-exclamation-triangle-fill text-[12px] text-white"></i>
+              <span class="truncate max-[640px]:hidden">{{ formError }}</span>
+            </div>
+          }
+        </form>
+      </div>
+    }
   </div>
 
-  <div class="hidden h-8 w-px shrink-0 bg-white/8 lg:block"></div>
-
-  <div class="hidden flex-nowrap items-center gap-2 lg:flex">
-    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"><img alt="" ngSrc="assets/images/shared/search_elapsed_time.svg" width="20" height="20"></div>
-    <div class="flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap text-slate-200">
-      <span class="inline-block w-2 h-2 rounded-full" [ngClass]="{ 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]': isScanning(), 'bg-red-400': !isScanning() && !!scanHelper.onError(), 'bg-slate-600': !isScanning() && !scanHelper.onError() }"></span>
-      {{ isScanning() ? 'Scanning' : (scanHelper.onError() ? 'Error' : 'Idle') }}
+  <div class="mt-[30px] flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+    <div class="hidden items-center gap-2 md:flex">
+      <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+      <div class="text-sm font-semibold text-[var(--color-text1)]">{{ lastResultCount }}</div>
+      <div class="text-xs text-[var(--color-text4)]">Results</div>
     </div>
-    <div class="text-xs uppercase tracking-wide whitespace-nowrap text-slate-500">Status</div>
-  </div>
 
-  @if (geoLiveStats && isScanning()) {
-    <div class="hidden h-8 w-px shrink-0 bg-white/8 xl:block"></div>
-    <div class="hidden flex-nowrap items-center gap-2 xl:flex">
-      <div class="text-xs font-semibold text-emerald-400">{{ geoLiveStats.cameras_found }}</div>
-      <div class="text-xs uppercase tracking-wide text-slate-500">📷 Cameras</div>
+    <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+
+    <div class="hidden items-center gap-2 lg:flex">
+      <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+      <div class="text-sm font-semibold text-[var(--color-text1)]">{{ isScanning() ? 'Scanning' : (scanHelper.onError() ? 'Error' : 'Idle') }}</div>
+      <div class="text-xs text-[var(--color-text4)]">Status</div>
     </div>
-  }
 
-  <div class="ml-auto flex items-center">
-    <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
-      <i class="bi bi-stop-fill text-[18px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
-    </button>
+    @if (geoLiveStats && isScanning()) {
+      <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
+      <div class="hidden items-center gap-2 xl:flex">
+        <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+        <div class="text-sm font-semibold text-emerald-400">{{ geoLiveStats.cameras_found }}</div>
+        <div class="text-xs text-[var(--color-text4)]">Cameras</div>
+      </div>
+    }
+
+    <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
+      <button class="ui-cred-toolbar-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
+        <i class="bi bi-stop-fill text-[18px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
+      </button>
+    </div>
   </div>
 </div>
+@if (!hasSearched && !isScanning() && !scanHelper.onError()) {
+  <div class="px-4 md:px-6">
+    <app-empty-query></app-empty-query>
+  </div>
+}
 <ng-template #ipDetailTpl let-d="d">
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">General Information</div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5">
       @if (d.country) {
-        <div        class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Country</span>     <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.country }}</span></div>
+        <div        class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Country</span>     <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.country }}</span></div>
       }
       @if (d.city) {
-        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">City</span>         <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.city }}</span></div>
+        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">City</span>         <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.city }}</span></div>
       }
       @if (d.organization) {
-        <div   class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Org</span>          <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.organization }}</span></div>
+        <div   class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Org</span>          <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.organization }}</span></div>
       }
       @if (d.isp) {
-        <div            class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">ISP</span>          <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.isp }}</span></div>
+        <div            class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">ISP</span>          <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.isp }}</span></div>
       }
       @if (d.asn) {
-        <div            class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">ASN</span>          <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.asn }}</span></div>
+        <div            class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">ASN</span>          <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.asn }}</span></div>
       }
       @if (d.hosting_type) {
-        <div   class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Hosting</span>     <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.hosting_type }}</span></div>
+        <div   class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Hosting</span>     <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.hosting_type }}</span></div>
       }
       @if (d.cloud_provider) {
-        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Cloud</span>       <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.cloud_provider }}</span></div>
+        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Cloud</span>       <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.cloud_provider }}</span></div>
       }
       @if (d.cloud_region) {
-        <div   class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Region</span>      <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.cloud_region }}</span></div>
+        <div   class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Region</span>      <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.cloud_region }}</span></div>
       }
       @if (d.cloud_service) {
-        <div  class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Service</span>     <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.cloud_service }}</span></div>
+        <div  class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Service</span>     <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.cloud_service }}</span></div>
       }
       @if (d.web_server) {
-        <div     class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Web Server</span>  <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.web_server }}</span></div>
+        <div     class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Web Server</span>  <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.web_server }}</span></div>
       }
       @if (d.title) {
-        <div          class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Title</span>        <span class="text-[13px] font-medium text-slate-200 break-words">{{ d.title }}</span></div>
+        <div          class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Title</span>        <span class="text-[13px] font-medium text-[var(--color-text1)] break-words">{{ d.title }}</span></div>
       }
     </div>
   </div>
   @if (hasItems(d.open_ports)) {
-    <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+    <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
       <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Open Ports</div>
       <div class="flex flex-wrap gap-1.5">
         @for (p of d.open_ports; track p) {
@@ -90,14 +119,14 @@
     </div>
   }
   @if (hasItems(d.ports)) {
-    <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+    <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
       <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Port Details</div>
       <div class="flex flex-col gap-3">
         @for (p of d.ports; track p) {
-          <div class="bg-[var(--color-blue-850)] border border-white/8 rounded-lg overflow-hidden font-mono">
-            <div class="flex items-center gap-2.5 px-3.5 py-2 bg-[var(--color-blue-700)] border-b border-white/7">
+          <div class="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] font-mono">
+            <div class="flex items-center gap-2.5 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-2.5">
               <span class="text-[15px] font-bold text-sky-400 tracking-wide">{{ p.port }}</span>
-              <span class="text-slate-600 text-sm">/</span>
+              <span class="text-sm text-[var(--color-text4)]">/</span>
               @if (p.protocol || p.proto) {
                 <span class="px-2 py-0.5 text-[10px] font-bold bg-sky-400/15 text-sky-400 border border-sky-400/25 rounded uppercase">{{ p.protocol || p.proto }}</span>
               }
@@ -105,31 +134,31 @@
                 <span class="px-2 py-0.5 text-[10px] font-semibold bg-emerald-400/12 text-emerald-400 border border-emerald-400/20 rounded">{{ p.service }}</span>
               }
               @if (p.state) {
-                <span class="ml-auto px-2 py-0.5 text-[10px] font-semibold rounded border" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-white/5', 'text-slate-400', 'border-white/10']">{{ p.state }}</span>
+                <span class="ml-auto rounded border px-2 py-0.5 text-[10px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>
               }
             </div>
             <div class="p-3.5 flex flex-col gap-3">
               @if (p.banner) {
                 <div>
-                  <div class="text-[9px] font-bold tracking-widest uppercase text-slate-500 mb-1.5">Banner</div>
-                  <pre class="m-0 p-2.5 bg-[#030a14] border border-white/6 rounded text-[11px] text-slate-400 whitespace-pre-wrap break-all leading-relaxed max-h-56 overflow-y-auto">{{ p.banner }}</pre>
+                  <div class="mb-1.5 text-[9px] font-bold tracking-widest uppercase text-[var(--color-text4)]">Banner</div>
+                  <pre class="m-0 max-h-56 overflow-y-auto whitespace-pre-wrap break-all rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5 text-[11px] leading-relaxed text-[var(--color-text3)]">{{ p.banner }}</pre>
                 </div>
               }
               @if (p.tls) {
                 <div>
                   <div class="text-[9px] font-bold tracking-widest uppercase text-cyan-400 mb-2">SSL Certificate</div>
-                  <div class="bg-[#030a14] border border-cyan-400/12 rounded p-2.5 flex flex-col gap-1">
-                    <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Version</span><span class="text-slate-300">{{ p.tls.version }}</span></div>
+                  <div class="flex flex-col gap-1 rounded border border-cyan-400/18 bg-[var(--color-blue-830)] p-2.5">
+                    <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Version</span><span class="text-[var(--color-text2)]">{{ p.tls.version }}</span></div>
                     @if (p.tls.cipher) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Cipher Suite</span><span class="text-slate-300">{{ p.tls.cipher }}{{ p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '' }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Cipher Suite</span><span class="text-[var(--color-text2)]">{{ p.tls.cipher }}{{ p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '' }}</span></div>
                     }
                     @if (p.tls.cert_cn) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Subject CN</span><span class="text-slate-300">{{ p.tls.cert_cn }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Subject CN</span><span class="text-[var(--color-text2)]">{{ p.tls.cert_cn }}</span></div>
                     }
                     @if (p.tls.issuer) {
                       <div class="flex gap-2.5 text-[11px]">
                         <span class="text-sky-400 font-semibold w-32 flex-shrink-0">Issuer</span>
-                        <span class="text-slate-300">
+                        <span class="text-[var(--color-text2)]">
                           {{ p.tls.issuer.commonName || '' }}
                           @if (p.tls.issuer.organizationName) {
                             <ng-container> / {{ p.tls.issuer.organizationName }}</ng-container>
@@ -141,42 +170,42 @@
                       </div>
                     }
                     @if (p.tls.not_before) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Not Before</span><span class="text-slate-300">{{ p.tls.not_before }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not Before</span><span class="text-[var(--color-text2)]">{{ p.tls.not_before }}</span></div>
                     }
                     @if (p.tls.not_after || p.tls.cert_expires) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Not After</span><span class="text-slate-300">{{ p.tls.not_after || p.tls.cert_expires }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not After</span><span class="text-[var(--color-text2)]">{{ p.tls.not_after || p.tls.cert_expires }}</span></div>
                     }
                     @if (p.tls.is_self_signed) {
                       <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Self-Signed</span><span class="text-red-400 font-bold">⚠ Yes</span></div>
                     }
                     @if (p.tls.signature_algorithm) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Signature Algo</span><span class="text-slate-300">{{ p.tls.signature_algorithm }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Signature Algo</span><span class="text-[var(--color-text2)]">{{ p.tls.signature_algorithm }}</span></div>
                     }
                     @if (p.tls.public_key_algorithm) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Public Key</span><span class="text-slate-300">{{ p.tls.public_key_algorithm }}{{ p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '' }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Public Key</span><span class="text-[var(--color-text2)]">{{ p.tls.public_key_algorithm }}{{ p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '' }}</span></div>
                     }
                     @if (hasItems(p.tls.key_usage)) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Key Usage</span><span class="text-slate-300">{{ p.tls.key_usage?.join(', ') }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.key_usage?.join(', ') }}</span></div>
                     }
                     @if (hasItems(p.tls.extended_key_usage)) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Ext Key Usage</span><span class="text-slate-300">{{ p.tls.extended_key_usage?.join(', ') }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Ext Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.extended_key_usage?.join(', ') }}</span></div>
                     }
                     @if (p.tls.fingerprint_sha256) {
-                      <div class="flex gap-2.5 text-[11px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">SHA-256</span><span class="text-slate-300 text-[10px] break-all">{{ p.tls.fingerprint_sha256 }}</span></div>
+                      <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">SHA-256</span><span class="break-all text-[10px] text-[var(--color-text2)]">{{ p.tls.fingerprint_sha256 }}</span></div>
                     }
                   </div>
                   @if (hasItems(p.tls.supported_versions) || hasItems(p.tls.weak_protocols) || hasItems(p.tls.risk_flags)) {
                     <div class="mt-2">
                       <div class="text-[9px] font-bold tracking-widest uppercase text-violet-400 mb-2">TLS Configuration</div>
-                      <div class="bg-[#030a14] border border-violet-400/12 rounded p-2.5 flex flex-col gap-1">
+                      <div class="flex flex-col gap-1 rounded border border-violet-400/18 bg-[var(--color-blue-830)] p-2.5">
                         @if (hasItems(p.tls.supported_versions)) {
-                          <div class="flex gap-2.5 text-[11px]"><span class="text-violet-400 font-semibold w-32 flex-shrink-0">Supported</span><span class="text-slate-300">{{ p.tls.supported_versions?.join(', ') }}</span></div>
+                          <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Supported</span><span class="text-[var(--color-text2)]">{{ p.tls.supported_versions?.join(', ') }}</span></div>
                         }
                         @if (hasItems(p.tls.weak_protocols)) {
                           <div class="flex gap-2.5 text-[11px]"><span class="text-red-400 font-semibold w-32 flex-shrink-0">Weak Protocols</span><span class="text-red-400">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
                         }
                         @if (hasItems(p.tls.risk_flags)) {
-                          <div class="flex gap-2.5 text-[11px]"><span class="text-violet-400 font-semibold w-32 flex-shrink-0">Risk Flags</span><span class="text-slate-300">{{ p.tls.risk_flags?.join(', ') }}</span></div>
+                          <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Risk Flags</span><span class="text-[var(--color-text2)]">{{ p.tls.risk_flags?.join(', ') }}</span></div>
                         }
                       </div>
                     </div>
@@ -185,12 +214,12 @@
               }
             @if (p.http) {
               <div class="text-[9px] font-bold tracking-widest uppercase text-emerald-400 mb-2">HTTP</div>
-              <div class="bg-[#030a14] border border-emerald-400/12 rounded p-2.5 flex flex-col gap-1">
+              <div class="flex flex-col gap-1 rounded border border-emerald-400/18 bg-[var(--color-blue-830)] p-2.5">
                 @if (p.http.server) {
-                  <div class="flex gap-2.5 text-[11px]"><span class="text-emerald-400 font-semibold w-32 flex-shrink-0">Server</span><span class="text-slate-300">{{ p.http.server }}</span></div>
+                  <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Server</span><span class="text-[var(--color-text2)]">{{ p.http.server }}</span></div>
                 }
                 @if (p.http.title) {
-                  <div class="flex gap-2.5 text-[11px]"><span class="text-emerald-400 font-semibold w-32 flex-shrink-0">Title</span><span class="text-slate-300">{{ p.http.title }}</span></div>
+                  <div class="flex gap-2.5 text-[11px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Title</span><span class="text-[var(--color-text2)]">{{ p.http.title }}</span></div>
                 }
               </div>
             }
@@ -209,7 +238,7 @@
   </div>
 }
 @if (hasItems(d.web_technologies)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Web Technologies</div>
     <div class="flex flex-wrap gap-1.5">
       @for (t of d.web_technologies; track t) {
@@ -219,25 +248,25 @@
   </div>
 }
 @if (securityItems(d.security).length || d.cdn || d.waf || d.hsts || d.load_balancer) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Security &amp; CDN</div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5">
       @if (d.cdn) {
-        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">CDN</span><span class="text-[13px] font-medium text-slate-200">{{ d.cdn }}</span></div>
+        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">CDN</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ d.cdn }}</span></div>
       }
       @if (d.waf) {
-        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">WAF</span><span class="text-[13px] font-medium text-slate-200">{{ d.waf }}</span></div>
+        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">WAF</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ d.waf }}</span></div>
       }
       @if (d.load_balancer) {
-        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Load Balancer</span><span class="text-[13px] font-medium text-slate-200">{{ d.load_balancer }}</span></div>
+        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Load Balancer</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ d.load_balancer }}</span></div>
       }
       <div class="flex flex-col gap-0.5">
-        <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">HSTS</span>
-        <span class="text-[13px] font-bold" [class.text-green-400]="!!d.hsts" [class.text-slate-600]="!d.hsts">{{ d.hsts ? '✓ Yes' : '✕ No' }}</span>
+        <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">HSTS</span>
+        <span class="text-[13px] font-bold" [ngClass]="d.hsts ? 'text-green-400' : 'text-[var(--color-text4)]'">{{ d.hsts ? '✓ Yes' : '✕ No' }}</span>
       </div>
       @if (securityItems(d.security).length) {
         <div class="col-span-full flex flex-col gap-1.5">
-          <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Flags</span>
+          <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Flags</span>
           <div class="flex flex-wrap gap-1.5">
             @for (s of securityItems(d.security); track s) {
               <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-400/12 text-emerald-400 border border-emerald-400/25">{{ s }}</span>
@@ -249,7 +278,7 @@
   </div>
 }
 @if (hasItems(d.vulnerabilities)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-red-500/60 rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-red-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-red-400/30 after:to-transparent">⚠ Vulnerabilities ({{ d.vulnerabilities!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (v of d.vulnerabilities; track v) {
@@ -259,7 +288,7 @@
   </div>
 }
 @if (hasItems(d.misconfigurations)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-yellow-500/60 rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-yellow-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-yellow-400/30 after:to-transparent">⚡ Misconfigurations</div>
     <div class="flex flex-col gap-1.5">
       @for (m of d.misconfigurations; track m) {
@@ -269,33 +298,33 @@
   </div>
 }
 @if (hasData(d.http_headers)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">HTTP Headers</div>
     <div class="flex flex-col gap-1">
       @for (h of safeEntries(d.http_headers); track h) {
-        <div class="flex gap-3 px-2.5 py-1.5 bg-[var(--color-blue-720)] rounded text-[12px] flex-wrap">
+        <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
           <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
-          <span class="text-slate-300 break-all">{{ h[1] }}</span>
+          <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>
         </div>
       }
     </div>
   </div>
 }
 @if (hasData(d.cache_headers)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Cache Headers</div>
     <div class="flex flex-col gap-1">
       @for (h of safeEntries(d.cache_headers); track h) {
-        <div class="flex gap-3 px-2.5 py-1.5 bg-[var(--color-blue-720)] rounded text-[12px] flex-wrap">
+        <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
           <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
-          <span class="text-slate-300 break-all">{{ h[1] }}</span>
+          <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>
         </div>
       }
     </div>
   </div>
 }
 @if (hasItems(d.allowed_methods)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Allowed Methods</div>
     <div class="flex flex-wrap gap-1.5">
       @for (m of d.allowed_methods; track m) {
@@ -305,30 +334,30 @@
   </div>
 }
 @if (hasItems(d.hostnames)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-[var(--color-blue-600)] rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Hostnames ({{ d.hostnames!.length }})</div>
     <div class="flex flex-wrap gap-1.5">
       @for (h of d.hostnames; track h) {
-        <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-white/4 border border-white/9 text-slate-400">{{ h }}</span>
+        <span class="rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-0.5 text-xs font-mono text-[var(--color-text3)]">{{ h }}</span>
       }
     </div>
   </div>
 }
 @if (hasItems(d.cameras)) {
-  <div class="mx-3.5 my-2.5 bg-[var(--color-blue-700)] border border-white/7 border-l-[3px] border-l-emerald-500/60 rounded-lg p-3.5">
+  <div class="mx-4 my-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-emerald-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-emerald-400/30 after:to-transparent">📷 Cameras ({{ d.cameras!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (cam of d.cameras; track cam) {
-        <div class="flex items-center gap-2 flex-wrap py-1.5 border-b border-white/5 last:border-0">
-          <span class="font-mono text-[14px] font-semibold text-slate-200">{{ cam.ip }}</span>
+        <div class="flex items-center gap-2 flex-wrap border-b border-[var(--color-divider)] py-1.5 last:border-0">
+          <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ cam.ip }}</span>
           @if (cam.port) {
             <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">:{{ cam.port }}</span>
           }
           @if (cam.brand) {
-            <span class="text-[13px] text-slate-300">{{ cam.brand }}</span>
+            <span class="text-[13px] text-[var(--color-text2)]">{{ cam.brand }}</span>
           }
           @if (cam.model) {
-            <span class="text-[13px] text-slate-300">{{ cam.model }}</span>
+            <span class="text-[13px] text-[var(--color-text2)]">{{ cam.model }}</span>
           }
         </div>
       }
@@ -339,83 +368,56 @@
 </ng-template>
 @if (activeTab === 'dns') {
   <div class="px-4 py-4 md:px-6">
-    <div class="mb-4 text-[12px] font-bold uppercase tracking-[1.4px] text-slate-400">Host Recon</div>
-    <div class="flex items-end gap-2.5 flex-wrap mb-5">
-      <div class="flex flex-col gap-1.5 flex-1 min-w-40">
-        <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">TARGET DOMAIN</label>
-        <div class="flex h-[38px] items-center gap-2 rounded-lg border border-white/10 bg-[var(--color-blue-700)] px-3.5">
-          <i class="bi bi-search text-[14px] leading-none opacity-40 text-slate-400"></i>
-          <input class="h-full w-full bg-transparent text-[13px] text-slate-200 outline-none placeholder:text-slate-600 disabled:opacity-40" [(ngModel)]="dnsForm.domain" placeholder="e.g. netflix.com" [disabled]="isScanning()" (ngModelChange)="validateDns()" (keyup.enter)="startDnsScan()">
-        </div>
-        @if (formError) {
-          <div class="flex items-start gap-1.5 mt-1 px-2.5 py-1.5 bg-red-500/7 border border-red-500/20 border-l-[3px] border-l-red-500 rounded text-[11px] font-medium text-red-300 leading-snug">⚠ {{ formError }}</div>
-        }
-      </div>
-      <div class="flex flex-col gap-1.5 flex-shrink-0">
-        <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">&nbsp;</label>
-        @if (isScanning()) {
-          <button class="inline-flex items-center justify-center gap-2 px-5 h-[38px] rounded-lg text-xs font-bold uppercase tracking-wide border transition-all duration-150 cursor-pointer flex-shrink-0 bg-gradient-to-br from-emerald-950 to-emerald-900 border-emerald-400/45 text-emerald-400" [disabled]="true" (click)="startDnsScan()">
-            <span class="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin"></span>
-            Scanning…
-          </button>
-        } @else {
-          <button class="inline-flex items-center justify-center gap-2 px-5 h-[38px] rounded-lg text-xs font-bold uppercase tracking-wide border transition-all duration-150 cursor-pointer flex-shrink-0 bg-gradient-to-br from-[var(--color-blue-600)] to-[var(--color-blue-900)] border-sky-400/40 text-sky-400 hover:border-sky-400/70 hover:shadow-[0_0_16px_rgba(78,162,241,0.22)]" [disabled]="!dnsForm.domain.trim() || !!formError" (click)="startDnsScan()">
-            <i class="bi bi-play-fill text-[12px] leading-none"></i>
-            Scan
-          </button>
-        }
-      </div>
-    </div>
     @if (isScanning()) {
-      <div class="mb-5 p-3.5 bg-[var(--color-blue-720)] border border-white/7 border-l-4 border-l-sky-400 rounded-xl">
+      <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
         <div class="flex justify-between items-center mb-2.5">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">{{ currentStep || 'Resolving…' }}</span>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ currentStep || 'Resolving…' }}</span>
           <span class="text-xl font-bold text-sky-400 leading-none">{{ scanHelper.progress() }}%</span>
         </div>
         <div class="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-1">
           @for (_ of progressSegments; track _; let i = $index) {
-            <div class="h-1 rounded-full bg-white/6 transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
+            <div class="h-1 rounded-full bg-[var(--color-divider)] transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
             </div>
           }
         </div>
       </div>
     }
     @if (scanHelper.onError() && !isScanning()) {
-      <div class="flex items-center gap-2 px-3.5 py-2.5 mb-4 bg-red-500/8 border border-red-500/25 border-l-4 border-l-red-500 rounded-lg text-[13px] text-red-300">
+      <div class="mb-4 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">
         ✕ {{ scanHelper.onError()?.message || 'Scan failed' }}
       </div>
     }
     @if (dnsResult && ipRows.length) {
-      <div class="mb-4 mt-6 text-[12px] font-bold uppercase tracking-[1.4px] text-slate-400">
-        IPs for <strong class="text-slate-200 font-bold text-[13px] normal-case tracking-normal">{{ dnsResult.domain }}</strong>
+      <div class="mb-4 mt-6 text-[12px] font-bold uppercase tracking-[1.4px] text-[var(--color-text3)]">
+        IPs for <strong class="text-[13px] font-bold normal-case tracking-normal text-[var(--color-text1)]">{{ dnsResult.domain }}</strong>
         <span class="inline-flex items-center px-2.5 py-0.5 ml-1.5 bg-sky-400/15 border border-sky-400/30 rounded-full text-[11px] text-sky-400 font-semibold">{{ ipRows.length }}</span>
       </div>
-      <div class="overflow-hidden rounded-xl border border-white/7 bg-[var(--color-blue-720)]">
-        <div class="flex items-center justify-between px-3.5 py-2 bg-[var(--color-blue-700)] border-b border-white/7 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+      <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+        <div class="ui-ioc-table-head flex items-center justify-between border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
           <span>IP ADDRESS</span><span>DETAILS</span>
         </div>
         @for (row of ipRows; track trackByIp($index, row); let last = $last) {
-          <div class="flex items-center justify-between px-3.5 py-3 bg-[var(--color-blue-700)] border-b border-white/7 cursor-pointer transition-colors duration-150 hover:bg-[var(--color-blue-810)]" [ngClass]="{ 'bg-sky-400/6 border-b-transparent': row.expanded, 'border-b-0': last && !row.expanded }" (click)="toggleIpRow(row)">
-            <span class="font-mono text-[14px] font-semibold text-slate-200 tracking-wide">{{ row.ip }}</span>
+          <div class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-[filter] hover:brightness-105" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [ngClass]="{ 'credential_row_expand border-b-transparent': row.expanded, 'border-b-0': last && !row.expanded }" (click)="toggleIpRow(row)">
+            <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">{{ row.ip }}</span>
             <div class="flex items-center gap-2">
               @if (row.loading) {
                 <span class="w-3.5 h-3.5 border-2 border-sky-400/25 border-t-sky-400 rounded-full animate-spin"></span>
               }
-              <div class="flex h-6 w-6 items-center justify-center rounded border border-white/10 bg-white/5 text-slate-400 transition-colors duration-150" [ngClass]="{ 'bg-emerald-400/10 border-emerald-400/25': row.expanded }">
+              <div class="flex h-6 w-6 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors duration-150" [ngClass]="{ 'bg-emerald-400/10 border-emerald-400/25': row.expanded }">
                 <i class="bi bi-chevron-down text-[12px] leading-none transition-transform duration-150" [class.rotate-180]="row.expanded"></i>
               </div>
             </div>
           </div>
           @if (row.expanded) {
-            <div class="bg-[var(--color-blue-720)] border-b border-white/7 pb-2" [class.border-b-0]="last">
+            <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] pb-2" [class.border-b-0]="last">
               @if (row.loading && !row.detail) {
-                <div class="flex items-center gap-2.5 px-4 py-4 text-[13px] text-slate-500">
+                <div class="flex items-center gap-2.5 px-4 py-4 text-[13px] text-[var(--color-text4)]">
                   <span class="w-5 h-5 border-2 border-sky-400/25 border-t-sky-400 rounded-full animate-spin"></span>
                   Loading details for {{ row.ip }}…
                 </div>
               }
               @if (row.error) {
-                <div class="flex items-center gap-2 mx-3 my-3 px-3.5 py-2.5 bg-red-500/8 border border-red-500/25 border-l-4 border-l-red-500 rounded-lg text-[13px] text-red-300">✕ {{ row.error }}</div>
+                <div class="mx-4 my-3 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">✕ {{ row.error }}</div>
               }
               @if (row.detail) {
                 <ng-container *ngTemplateOutlet="ipDetailTpl; context: { d: row.detail }"></ng-container>
@@ -426,7 +428,7 @@
       </div>
     }
     @if (dnsResult && !ipRows.length) {
-      <div class="py-8 text-center text-[13px] text-slate-500 border border-dashed border-white/9 rounded-lg mb-4">
+      <div class="mb-4 rounded-lg border border-dashed border-[var(--color-border)] py-8 text-center text-[13px] text-[var(--color-text4)]">
         No IPs resolved for <strong>{{ dnsResult.domain }}</strong>
       </div>
     }
@@ -434,59 +436,32 @@
 }
 @if (activeTab === 'shodan') {
   <div class="px-4 py-4 md:px-6">
-    <div class="mb-4 text-[12px] font-bold uppercase tracking-[1.4px] text-slate-400">Deep Scan</div>
-    <div class="flex items-end gap-2.5 flex-wrap mb-5">
-      <div class="flex flex-col gap-1.5 flex-1 min-w-40">
-        <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">TARGET IP</label>
-        <div class="flex h-[38px] items-center gap-2 rounded-lg border border-white/10 bg-[var(--color-blue-700)] px-3.5">
-          <i class="bi bi-broadcast text-[14px] leading-none opacity-40 text-slate-400"></i>
-          <input class="h-full w-full bg-transparent text-[13px] text-slate-200 outline-none placeholder:text-slate-600 disabled:opacity-40" [(ngModel)]="shodanForm.ip" placeholder="e.g. 52.18.185.222" [disabled]="isScanning()" (ngModelChange)="validateShodan()" (keyup.enter)="startShodanScan()">
-        </div>
-        @if (formError) {
-          <div class="flex items-start gap-1.5 mt-1 px-2.5 py-1.5 bg-red-500/7 border border-red-500/20 border-l-[3px] border-l-red-500 rounded text-[11px] font-medium text-red-300 leading-snug">⚠ {{ formError }}</div>
-        }
-      </div>
-      <div class="flex flex-col gap-1.5 flex-shrink-0">
-        <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">&nbsp;</label>
-        @if (isScanning()) {
-          <button class="inline-flex items-center justify-center gap-2 px-5 h-[38px] rounded-lg text-xs font-bold uppercase tracking-wide border transition-all duration-150 cursor-pointer bg-gradient-to-br from-emerald-950 to-emerald-900 border-emerald-400/45 text-emerald-400" [disabled]="true" (click)="startShodanScan()">
-            <span class="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin"></span>
-            Scanning…
-          </button>
-        } @else {
-          <button class="inline-flex items-center justify-center gap-2 px-5 h-[38px] rounded-lg text-xs font-bold uppercase tracking-wide border transition-all duration-150 cursor-pointer bg-gradient-to-br from-[var(--color-blue-600)] to-[var(--color-blue-900)] border-sky-400/40 text-sky-400 hover:border-sky-400/70 hover:shadow-[0_0_16px_rgba(78,162,241,0.22)]" [disabled]="!shodanForm.ip.trim() || !!formError" (click)="startShodanScan()">
-            <i class="bi bi-play-fill text-[12px] leading-none"></i>
-            Scan
-          </button>
-        }
-      </div>
-    </div>
     @if (isScanning()) {
-      <div class="mb-5 p-3.5 bg-[var(--color-blue-720)] border border-white/7 border-l-4 border-l-sky-400 rounded-xl">
+      <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
         <div class="flex justify-between items-center mb-2.5">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">{{ currentStep || 'Scanning IP…' }}</span>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ currentStep || 'Scanning IP…' }}</span>
           <span class="text-xl font-bold text-sky-400 leading-none">{{ scanHelper.progress() }}%</span>
         </div>
         <div class="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-1">
           @for (_ of progressSegments; track _; let i = $index) {
-            <div class="h-1 rounded-full bg-white/6 transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
+            <div class="h-1 rounded-full bg-[var(--color-divider)] transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
             </div>
           }
         </div>
       </div>
     }
     @if (scanHelper.onError() && !isScanning()) {
-      <div class="flex items-center gap-2 px-3.5 py-2.5 mb-4 bg-red-500/8 border border-red-500/25 border-l-4 border-l-red-500 rounded-lg text-[13px] text-red-300">
+      <div class="mb-4 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">
         ✕ {{ scanHelper.onError()?.message || 'Scan failed' }}
       </div>
     }
     @if (shodanResult) {
-      <div class="mb-4 mt-6 text-[12px] font-bold uppercase tracking-[1.4px] text-slate-400">
-        Result for <strong class="text-slate-200 font-bold text-[13px] normal-case tracking-normal">{{ shodanResult.ip }}</strong>
+      <div class="mb-4 mt-6 text-[12px] font-bold uppercase tracking-[1.4px] text-[var(--color-text3)]">
+        Result for <strong class="text-[13px] font-bold normal-case tracking-normal text-[var(--color-text1)]">{{ shodanResult.ip }}</strong>
       </div>
-      <div class="overflow-hidden rounded-xl border border-white/7 bg-[var(--color-blue-720)]">
-        <div class="flex items-center justify-between px-3.5 py-3 bg-sky-400/6 border-b-0">
-          <span class="font-mono text-[14px] font-semibold text-slate-200">{{ shodanResult.ip }}</span>
+      <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+        <div class="ui-ioc-table-row credential_row_expand flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
+          <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ shodanResult.ip }}</span>
           <div class="flex items-center gap-2">
             @if (shodanResult.cloud_provider) {
               <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">☁ {{ shodanResult.cloud_provider }}</span>
@@ -496,7 +471,7 @@
             }
           </div>
         </div>
-        <div class="bg-[var(--color-blue-720)] pb-2">
+        <div class="bg-[var(--color-blue-700)] pb-2">
           <ng-container *ngTemplateOutlet="ipDetailTpl; context: { d: shodanResult }"></ng-container>
         </div>
       </div>
@@ -505,75 +480,51 @@
 }
 @if (activeTab === 'geo') {
   <div class="px-4 py-4 md:px-6">
-    <div class="mb-4 text-[12px] font-bold uppercase tracking-[1.4px] text-slate-400">Geo Cameras</div>
-    <div class="flex items-center gap-1 mb-4 p-1 bg-[var(--color-blue-720)] border border-white/7 rounded-lg w-fit">
-      <button class="flex items-center gap-2 px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all duration-150 cursor-pointer hover:text-slate-300" [ngClass]="geoMode === 'coords' ? ['bg-sky-400/15', 'border', 'border-sky-400/35', 'text-sky-400'] : ['border-transparent', 'text-slate-500']" [disabled]="isScanning()" (click)="setGeoMode('coords')">
+    <div class="flex w-fit items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1 mb-4">
+      <button class="flex items-center gap-2 rounded-md px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all duration-150 cursor-pointer" [ngClass]="geoMode === 'coords' ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white'] : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']" [disabled]="isScanning()" (click)="setGeoMode('coords')">
         <i class="bi bi-crosshair text-[12px] leading-none"></i>
         Coordinates
       </button>
-      <button class="flex items-center gap-2 px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all duration-150 cursor-pointer hover:text-slate-300" [ngClass]="geoMode === 'ranges' ? ['bg-sky-400/15', 'border', 'border-sky-400/35', 'text-sky-400'] : ['border-transparent', 'text-slate-500']" [disabled]="isScanning()" (click)="setGeoMode('ranges')">
+      <button class="flex items-center gap-2 rounded-md px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all duration-150 cursor-pointer" [ngClass]="geoMode === 'ranges' ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white'] : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']" [disabled]="isScanning()" (click)="setGeoMode('ranges')">
         <i class="bi bi-list-ul text-[12px] leading-none"></i>
         IP Ranges
       </button>
     </div>
     @if (geoMode === 'coords') {
-      <div class="flex items-end gap-2.5 flex-wrap mb-5">
-        <div class="flex flex-col gap-1.5 flex-[2] min-w-48">
-          <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">COORDINATES (lat, lon)</label>
-          <div class="flex h-[38px] items-center gap-2 rounded-lg border border-white/10 bg-[var(--color-blue-700)] px-3.5">
-            <i class="bi bi-geo-alt text-[14px] leading-none opacity-40 text-slate-400"></i>
-            <input class="h-full w-full bg-transparent text-[13px] text-slate-200 outline-none placeholder:text-slate-600 disabled:opacity-40" [(ngModel)]="geoForm.coordinates" placeholder="e.g. 31.48, 74.17" [disabled]="isScanning()" (ngModelChange)="validateGeo()">
-          </div>
-          @if (formError) {
-            <div class="flex items-start gap-1.5 mt-1 px-2.5 py-1.5 bg-red-500/7 border border-red-500/20 border-l-[3px] border-l-red-500 rounded text-[11px] font-medium text-red-300 leading-snug">⚠ {{ formError }}</div>
-          }
-        </div>
+      <div class="mb-5 flex items-end gap-2.5 flex-wrap">
         <div class="flex flex-col gap-1.5 w-44">
-          <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">RADIUS (km)</label>
-          <div class="flex items-stretch h-[38px] bg-[var(--color-blue-700)] border border-white/10 rounded-lg overflow-hidden" [class.opacity-40]="isScanning()" [class.pointer-events-none]="isScanning()">
-            <button class="w-9 flex-shrink-0 flex items-center justify-center bg-white/4 border-r border-white/7 text-sky-400 text-lg cursor-pointer hover:bg-sky-400/14 disabled:text-slate-700 disabled:cursor-default transition-colors" (click)="geoForm.radius_km = geoForm.radius_km - 5 <1 ? 1 : geoForm.radius_km - 5" [disabled]="isScanning() || geoForm.radius_km <= 1">−</button>
-            <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [(ngModel)]="geoForm.radius_km" min="1" max="500" [disabled]="isScanning()">
-            <button class="w-9 flex-shrink-0 flex items-center justify-center bg-white/4 border-l border-white/7 text-sky-400 text-lg cursor-pointer hover:bg-sky-400/14 disabled:text-slate-700 disabled:cursor-default transition-colors" (click)="geoForm.radius_km = geoForm.radius_km + 5 > 500 ? 500 : geoForm.radius_km + 5" [disabled]="isScanning() || geoForm.radius_km >= 500">+</button>
+          <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-[var(--color-text4)]">RADIUS (km)</label>
+          <div class="flex h-[38px] items-stretch overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)]" [class.opacity-40]="isScanning()" [class.pointer-events-none]="isScanning()">
+            <button class="w-9 flex-shrink-0 border-r border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" (click)="geoForm.radius_km = geoForm.radius_km - 5 <1 ? 1 : geoForm.radius_km - 5" [disabled]="isScanning() || geoForm.radius_km <= 1">−</button>
+            <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-[var(--color-text1)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [(ngModel)]="geoForm.radius_km" min="1" max="500" [disabled]="isScanning()">
+            <button class="w-9 flex-shrink-0 border-l border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" (click)="geoForm.radius_km = geoForm.radius_km + 5 > 500 ? 500 : geoForm.radius_km + 5" [disabled]="isScanning() || geoForm.radius_km >= 500">+</button>
           </div>
           <div class="flex gap-1 flex-wrap">
             @for (r of [5,10,25,50,100]; track r) {
-              <span class="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-all select-none hover:bg-sky-400/10 hover:text-sky-400 hover:border-sky-400/30" [ngClass]="geoForm.radius_km === r ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-white/4', 'border-white/8', 'text-slate-500']" (click)="!isScanning() && (geoForm.radius_km = r)">{{ r }}</span>
+              <span class="inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold transition-all select-none" [ngClass]="geoForm.radius_km === r ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-[var(--color-blue-720)]', 'border-[var(--color-border)]', 'text-[var(--color-text3)]', 'hover:bg-sky-400/10', 'hover:text-sky-400', 'hover:border-sky-400/30']" (click)="!isScanning() && (geoForm.radius_km = r)">{{ r }}</span>
             }
           </div>
         </div>
         <div class="flex flex-col gap-1.5 w-44">
-          <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">MAX IPs</label>
-          <div class="flex items-stretch h-[38px] bg-[var(--color-blue-700)] border border-white/10 rounded-lg overflow-hidden" [class.opacity-40]="isScanning()" [class.pointer-events-none]="isScanning()">
-            <button class="w-9 flex-shrink-0 flex items-center justify-center bg-white/4 border-r border-white/7 text-sky-400 text-lg cursor-pointer hover:bg-sky-400/14 disabled:text-slate-700 disabled:cursor-default transition-colors" (click)="geoForm.max_ips = geoForm.max_ips - 50 <10 ? 10 : geoForm.max_ips - 50" [disabled]="isScanning() || geoForm.max_ips <= 10">−</button>
-            <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [(ngModel)]="geoForm.max_ips" min="10" max="1000" [disabled]="isScanning()">
-            <button class="w-9 flex-shrink-0 flex items-center justify-center bg-white/4 border-l border-white/7 text-sky-400 text-lg cursor-pointer hover:bg-sky-400/14 disabled:text-slate-700 disabled:cursor-default transition-colors" (click)="geoForm.max_ips = geoForm.max_ips + 50 > 1000 ? 1000 : geoForm.max_ips + 50" [disabled]="isScanning() || geoForm.max_ips >= 1000">+</button>
+          <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-[var(--color-text4)]">MAX IPs</label>
+          <div class="flex h-[38px] items-stretch overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)]" [class.opacity-40]="isScanning()" [class.pointer-events-none]="isScanning()">
+            <button class="w-9 flex-shrink-0 border-r border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" (click)="geoForm.max_ips = geoForm.max_ips - 50 <10 ? 10 : geoForm.max_ips - 50" [disabled]="isScanning() || geoForm.max_ips <= 10">−</button>
+            <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-[var(--color-text1)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [(ngModel)]="geoForm.max_ips" min="10" max="1000" [disabled]="isScanning()">
+            <button class="w-9 flex-shrink-0 border-l border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" (click)="geoForm.max_ips = geoForm.max_ips + 50 > 1000 ? 1000 : geoForm.max_ips + 50" [disabled]="isScanning() || geoForm.max_ips >= 1000">+</button>
           </div>
           <div class="flex gap-1 flex-wrap">
             @for (n of [50,100,200,500]; track n) {
-              <span class="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-all select-none hover:bg-sky-400/10 hover:text-sky-400 hover:border-sky-400/30" [ngClass]="geoForm.max_ips === n ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-white/4', 'border-white/8', 'text-slate-500']" (click)="!isScanning() && (geoForm.max_ips = n)">{{ n }}</span>
+              <span class="inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold transition-all select-none" [ngClass]="geoForm.max_ips === n ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-[var(--color-blue-720)]', 'border-[var(--color-border)]', 'text-[var(--color-text3)]', 'hover:bg-sky-400/10', 'hover:text-sky-400', 'hover:border-sky-400/30']" (click)="!isScanning() && (geoForm.max_ips = n)">{{ n }}</span>
             }
           </div>
-        </div>
-        <div class="flex flex-col gap-1.5 flex-shrink-0 self-start mt-6">
-          @if (isScanning()) {
-            <button class="inline-flex items-center justify-center gap-2 px-5 h-[38px] rounded-lg text-xs font-bold uppercase tracking-wide border transition-all duration-150 cursor-pointer bg-gradient-to-br from-emerald-950 to-emerald-900 border-emerald-400/45 text-emerald-400" [disabled]="true" (click)="startGeoScan()">
-              <span class="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin"></span>
-              Scanning…
-            </button>
-          } @else {
-            <button class="inline-flex items-center justify-center gap-2 px-5 h-[38px] rounded-lg text-xs font-bold uppercase tracking-wide border transition-all duration-150 cursor-pointer bg-gradient-to-br from-[var(--color-blue-600)] to-[var(--color-blue-900)] border-sky-400/40 text-sky-400 hover:border-sky-400/70 hover:shadow-[0_0_16px_rgba(78,162,241,0.22)]" [disabled]="!geoForm.coordinates.trim() || !!formError" (click)="startGeoScan()">
-              <i class="bi bi-play-fill text-[12px] leading-none"></i>
-              Scan
-            </button>
-          }
         </div>
       </div>
     }
     @if (geoMode === 'ranges') {
       <div class="flex flex-col gap-4 mb-5">
-        <div class="flex items-start gap-2.5 px-3.5 py-2.5 bg-sky-400/5 border border-sky-400/15 rounded-lg">
+        <div class="flex items-start gap-2.5 rounded-lg border border-sky-400/15 bg-sky-400/5 px-4 py-3">
           <i class="bi bi-info-circle-fill mt-0.5 text-[13px] leading-none text-sky-400"></i>
-          <span class="text-[11px] text-slate-400 leading-relaxed">
+          <span class="text-[11px] leading-relaxed text-[var(--color-text3)]">
             Enter one CIDR block or IP range per line. Accepts <span class="text-sky-400 font-mono">192.168.1.0/24</span>,
             <span class="text-sky-400 font-mono">10.0.0.1-10.0.0.255</span>, or single IPs like
             <span class="text-sky-400 font-mono">203.0.113.5</span>. The scanner will find open camera ports across all IPs in each range.
@@ -582,18 +533,18 @@
         <div class="flex gap-3 flex-wrap items-start">
           <div class="flex flex-col gap-1.5 flex-1 min-w-64">
             <div class="flex items-center justify-between">
-              <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">IP RANGES / CIDR BLOCKS</label>
-              <span class="text-[10px] text-slate-600">{{ ipRangeCount }} range{{ ipRangeCount !== 1 ? 's' : '' }} entered</span>
+              <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-[var(--color-text4)]">IP RANGES / CIDR BLOCKS</label>
+              <span class="text-[10px] text-[var(--color-text4)]">{{ ipRangeCount }} range{{ ipRangeCount !== 1 ? 's' : '' }} entered</span>
             </div>
-            <textarea class="w-full bg-[var(--color-blue-700)] border border-white/10 rounded-lg px-3.5 py-2.5 text-[12px] font-mono text-slate-200 placeholder-slate-600 outline-none resize-none leading-relaxed transition-all duration-150 focus:border-sky-400/50 focus:shadow-[0_0_0_3px_rgba(78,162,241,0.1)] disabled:opacity-40" rows="5" placeholder="119.152.0.0/13&#10;39.32.0.0/11&#10;103.4.100.0-103.4.100.255&#10;203.0.113.5" [(ngModel)]="geoForm.ip_ranges" [disabled]="isScanning()" (ngModelChange)="validateIpRanges()"></textarea>
+            <textarea class="w-full resize-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-3 text-[12px] font-mono leading-relaxed text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] transition-all duration-150 focus:border-sky-400/50 focus:shadow-[0_0_0_3px_rgba(78,162,241,0.1)] disabled:opacity-40" rows="5" placeholder="119.152.0.0/13&#10;39.32.0.0/11&#10;103.4.100.0-103.4.100.255&#10;203.0.113.5" [(ngModel)]="geoForm.ip_ranges" [disabled]="isScanning()" (ngModelChange)="validateIpRanges()"></textarea>
             @if (formError) {
               <div class="flex items-start gap-1.5 px-2.5 py-1.5 bg-red-500/7 border border-red-500/20 border-l-[3px] border-l-red-500 rounded text-[11px] font-medium text-red-300 leading-snug">⚠ {{ formError }}</div>
             }
             <div class="flex flex-col gap-1.5">
-              <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-600">Quick add country ranges</span>
+              <span class="text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text4)]">Quick add country ranges</span>
               <div class="flex flex-wrap gap-1.5">
                 @for (c of countryPresets; track c) {
-                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-all select-none bg-white/4 border-white/8 text-slate-400 hover:bg-sky-400/10 hover:text-sky-400 hover:border-sky-400/30" (click)="!isScanning() && addCountryPreset(c.code)">
+                  <span class="inline-flex items-center gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text3)] transition-all select-none hover:border-sky-400/30 hover:bg-sky-400/10 hover:text-sky-400" (click)="!isScanning() && addCountryPreset(c.code)">
                     <span>{{ c.flag }}</span> {{ c.label }}
                   </span>
                 }
@@ -602,15 +553,15 @@
           </div>
           <div class="flex flex-col gap-3 flex-shrink-0 w-44">
             <div class="flex flex-col gap-1.5">
-              <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-slate-500">MAX IPs</label>
-              <div class="flex items-stretch h-[38px] bg-[var(--color-blue-700)] border border-white/10 rounded-lg overflow-hidden" [class.opacity-40]="isScanning()" [class.pointer-events-none]="isScanning()">
-                <button class="w-9 flex-shrink-0 flex items-center justify-center bg-white/4 border-r border-white/7 text-sky-400 text-lg cursor-pointer hover:bg-sky-400/14 disabled:text-slate-700 disabled:cursor-default transition-colors" (click)="geoForm.max_ips = geoForm.max_ips - 50 <10 ? 10 : geoForm.max_ips - 50" [disabled]="isScanning() || geoForm.max_ips <= 10">−</button>
-                <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [(ngModel)]="geoForm.max_ips" min="10" max="1000" [disabled]="isScanning()">
-                <button class="w-9 flex-shrink-0 flex items-center justify-center bg-white/4 border-l border-white/7 text-sky-400 text-lg cursor-pointer hover:bg-sky-400/14 disabled:text-slate-700 disabled:cursor-default transition-colors" (click)="geoForm.max_ips = geoForm.max_ips + 50 > 1000 ? 1000 : geoForm.max_ips + 50" [disabled]="isScanning() || geoForm.max_ips >= 1000">+</button>
+              <label class="text-[10px] font-bold uppercase tracking-[1.4px] text-[var(--color-text4)]">MAX IPs</label>
+              <div class="flex h-[38px] items-stretch overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)]" [class.opacity-40]="isScanning()" [class.pointer-events-none]="isScanning()">
+                <button class="w-9 flex-shrink-0 border-r border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" (click)="geoForm.max_ips = geoForm.max_ips - 50 <10 ? 10 : geoForm.max_ips - 50" [disabled]="isScanning() || geoForm.max_ips <= 10">−</button>
+                <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-[var(--color-text1)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [(ngModel)]="geoForm.max_ips" min="10" max="1000" [disabled]="isScanning()">
+                <button class="w-9 flex-shrink-0 border-l border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" (click)="geoForm.max_ips = geoForm.max_ips + 50 > 1000 ? 1000 : geoForm.max_ips + 50" [disabled]="isScanning() || geoForm.max_ips >= 1000">+</button>
               </div>
               <div class="flex gap-1 flex-wrap">
                 @for (n of [50,100,200,500]; track n) {
-                  <span class="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-all select-none hover:bg-sky-400/10 hover:text-sky-400 hover:border-sky-400/30" [ngClass]="geoForm.max_ips === n ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-white/4', 'border-white/8', 'text-slate-500']" (click)="!isScanning() && (geoForm.max_ips = n)">{{ n }}</span>
+                  <span class="inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold transition-all select-none" [ngClass]="geoForm.max_ips === n ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-[var(--color-blue-720)]', 'border-[var(--color-border)]', 'text-[var(--color-text3)]', 'hover:bg-sky-400/10', 'hover:text-sky-400', 'hover:border-sky-400/30']" (click)="!isScanning() && (geoForm.max_ips = n)">{{ n }}</span>
                 }
               </div>
             </div>
@@ -627,7 +578,7 @@
             }
             @if (parsedRanges.length) {
               <div class="flex flex-col gap-1">
-                <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-600">Parsed</span>
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text4)]">Parsed</span>
                 <div class="flex flex-wrap gap-1">
                   @for (r of parsedRanges; track r) {
                     <span class="px-2 py-0.5 rounded text-[10px] font-mono border" [ngClass]="r.valid ? ['bg-emerald-400/10', 'border-emerald-400/25', 'text-emerald-400'] : ['bg-red-400/10', 'border-red-400/25', 'text-red-400']">
@@ -642,51 +593,51 @@
       </div>
     }
     @if (isScanning()) {
-      <div class="mb-5 p-3.5 bg-[var(--color-blue-720)] border border-white/7 border-l-4 border-l-sky-400 rounded-xl">
+      <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
         <div class="flex justify-between items-center mb-2.5">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">{{ currentStep || 'Scanning area…' }}</span>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ currentStep || 'Scanning area…' }}</span>
           <span class="text-xl font-bold text-sky-400 leading-none">{{ scanHelper.progress() }}%</span>
         </div>
         <div class="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-1">
           @for (_ of progressSegments; track _; let i = $index) {
-            <div class="h-1 rounded-full bg-white/6 transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
+            <div class="h-1 rounded-full bg-[var(--color-divider)] transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
             </div>
           }
         </div>
         @if (geoLiveStats) {
-          <div class="flex items-center gap-4 mt-3 pt-2.5 border-t border-white/6 flex-wrap">
-            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-white">{{ geoLiveStats.ips_extracted }}</span><span class="text-[11px] text-slate-500">IPs Found</span></div>
-            <div class="w-px h-5 bg-white/8"></div>
-            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-white">{{ geoLiveStats.ips_scanned }}</span><span class="text-[11px] text-slate-500">Scanned</span></div>
-            <div class="w-px h-5 bg-white/8"></div>
-            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-emerald-400">{{ geoLiveStats.cameras_found }}</span><span class="text-[11px] text-slate-500">📷 Cameras</span></div>
+          <div class="mt-3 flex flex-wrap items-center gap-4 border-t border-[var(--color-divider)] pt-2.5">
+            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-[var(--color-text1)]">{{ geoLiveStats.ips_extracted }}</span><span class="text-[11px] text-[var(--color-text4)]">IPs Found</span></div>
+            <div class="h-5 w-px bg-[var(--color-divider)]"></div>
+            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-[var(--color-text1)]">{{ geoLiveStats.ips_scanned }}</span><span class="text-[11px] text-[var(--color-text4)]">Scanned</span></div>
+            <div class="h-5 w-px bg-[var(--color-divider)]"></div>
+            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-emerald-400">{{ geoLiveStats.cameras_found }}</span><span class="text-[11px] text-[var(--color-text4)]">📷 Cameras</span></div>
           </div>
         }
       </div>
     }
     @if (scanHelper.onError() && !isScanning()) {
-      <div class="flex items-center gap-2 px-3.5 py-2.5 mb-4 bg-red-500/8 border border-red-500/25 border-l-4 border-l-red-500 rounded-lg text-[13px] text-red-300">
+      <div class="mb-4 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">
         ✕ {{ scanHelper.onError()?.message || 'Scan failed' }}
       </div>
     }
     @if (geoResult) {
-      <div class="my-4 flex items-center gap-3 overflow-auto rounded-xl border border-white/10 bg-[var(--color-blue-720)] px-4 py-3">
+      <div class="ui-ioc-table-shell my-4 flex items-center gap-3 overflow-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-3">
         <div class="flex items-center gap-2">
-          <div class="text-[22px] font-bold text-white">{{ geoResult.ips_extracted }}</div>
-          <div class="text-[11px] uppercase tracking-wide text-slate-500">IPs Found</div>
+          <div class="text-[22px] font-bold text-[var(--color-text1)]">{{ geoResult.ips_extracted }}</div>
+          <div class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">IPs Found</div>
         </div>
-        <div class="h-8 w-px shrink-0 bg-white/8"></div>
+        <div class="h-8 w-px shrink-0 bg-[var(--color-divider)]"></div>
         <div class="flex items-center gap-2">
-          <div class="text-[22px] font-bold text-white">{{ geoResult.ips_scanned }}</div>
-          <div class="text-[11px] uppercase tracking-wide text-slate-500">Scanned</div>
+          <div class="text-[22px] font-bold text-[var(--color-text1)]">{{ geoResult.ips_scanned }}</div>
+          <div class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">Scanned</div>
         </div>
-        <div class="h-8 w-px shrink-0 bg-white/8"></div>
+        <div class="h-8 w-px shrink-0 bg-[var(--color-divider)]"></div>
         <div class="flex items-center gap-2">
           <div class="text-[22px] font-bold text-emerald-400">{{ geoResult.cameras_found }}</div>
-          <div class="text-[11px] uppercase tracking-wide text-slate-500">📷 Cameras</div>
+          <div class="text-[11px] uppercase tracking-wide text-[var(--color-text4)]">📷 Cameras</div>
         </div>
-        <div class="hidden h-8 w-px shrink-0 bg-white/8 lg:block"></div>
-        <div class="hidden items-center gap-1.5 text-[12px] text-slate-400 lg:flex">
+        <div class="hidden h-8 w-px shrink-0 bg-[var(--color-divider)] lg:block"></div>
+        <div class="hidden items-center gap-1.5 text-[12px] text-[var(--color-text3)] lg:flex">
           <span>{{ geoResult.query.latitude }}, {{ geoResult.query.longitude }}</span>
           <span class="opacity-30">|</span>
           <span>{{ geoResult.query.radius_km }} km</span>
@@ -694,30 +645,30 @@
           <span>{{ geoResult.query.country }}</span>
         </div>
       </div>
-      <div class="mb-4 mt-2 text-[12px] font-bold uppercase tracking-[1.4px] text-slate-400">
+      <div class="mb-4 mt-2 text-[12px] font-bold uppercase tracking-[1.4px] text-[var(--color-text3)]">
         Cameras Found
         <span class="inline-flex items-center px-2.5 py-0.5 ml-1.5 bg-sky-400/15 border border-sky-400/30 rounded-full text-[11px] text-sky-400 font-semibold">{{ geoResult.cameras_found }}</span>
       </div>
       @if (!geoResult.cameras?.length) {
-        <div class="py-8 text-center text-[13px] text-slate-500 border border-dashed border-white/9 rounded-lg mb-4">No cameras detected.</div>
+        <div class="mb-4 rounded-lg border border-dashed border-[var(--color-border)] py-8 text-center text-[13px] text-[var(--color-text4)]">No cameras detected.</div>
       }
       @if (geoResult.cameras?.length) {
-        <div class="overflow-hidden rounded-xl border border-white/7 bg-[var(--color-blue-720)]">
-          <div class="flex items-center px-3.5 py-2 bg-[var(--color-blue-700)] border-b border-white/7 text-[10px] font-bold uppercase tracking-widest text-slate-500 gap-4">
+        <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+          <div class="ui-ioc-table-head flex items-center gap-4 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
             <span class="flex-1">IP ADDRESS</span>
             <span class="w-40">LOCATION</span>
             <span class="w-24 text-right">DISTANCE</span>
           </div>
           @for (cam of geoResult.cameras; track cam; let i = $index; let last = $last) {
-            <div class="flex items-center px-3.5 py-3 bg-[var(--color-blue-700)] gap-4" [ngClass]="{ 'border-b border-white/7': !last }">
+            <div class="ui-ioc-table-row flex items-center gap-4 px-4 py-3 text-sm" [class.ui-ioc-row-even]="i % 2 === 0" [class.ui-ioc-row-odd]="i % 2 !== 0" [ngClass]="{ 'border-b border-[var(--color-divider)]': !last }">
               <div class="flex items-center gap-2 flex-1">
                 <span class="inline-flex items-center justify-center w-6 h-6 rounded text-[10px] font-bold bg-sky-400/12 border border-sky-400/25 text-sky-400 flex-shrink-0">{{ i + 1 }}</span>
-                <span class="font-mono text-[14px] font-semibold text-slate-200">📷 {{ cam.ip }}</span>
+                <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">📷 {{ cam.ip }}</span>
                 @if (cam.port) {
                   <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">:{{ cam.port }}</span>
                 }
               </div>
-              <div class="text-[13px] text-slate-400 w-40">{{ cam.city || '' }}{{ cam.city && cam.country ? ', ' : '' }}{{ cam.country || '—' }}</div>
+              <div class="w-40 text-[13px] text-[var(--color-text3)]">{{ cam.city || '' }}{{ cam.city && cam.country ? ', ' : '' }}{{ cam.country || '—' }}</div>
               <div class="w-24 text-right">
                 @if (cam.distance_km != null) {
                   <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">{{ cam.distance_km | number:'1.1-2' }} km</span>
@@ -725,28 +676,28 @@
               </div>
             </div>
             @if (cam.brand || cam.model || cam.url || cam.stream_url || cam.vulnerabilities?.length) {
-              <div class="px-4 py-3 bg-[var(--color-blue-720)]" [ngClass]="{ 'border-b border-white/7': !last }">
+              <div class="bg-[var(--color-blue-700)] px-4 py-3" [ngClass]="{ 'border-b border-[var(--color-divider)]': !last }">
                 @if (cam.brand || cam.model || cam.latitude != null) {
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2">
                     @if (cam.brand) {
-                      <div          class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Brand</span><span class="text-[13px] text-slate-200">{{ cam.brand }}</span></div>
+                      <div          class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Brand</span><span class="text-[13px] text-[var(--color-text1)]">{{ cam.brand }}</span></div>
                     }
                     @if (cam.model) {
-                      <div          class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Model</span><span class="text-[13px] text-slate-200">{{ cam.model }}</span></div>
+                      <div          class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Model</span><span class="text-[13px] text-[var(--color-text1)]">{{ cam.model }}</span></div>
                     }
                     @if (cam.latitude!=null) {
-                      <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Lat</span><span class="text-[13px] text-slate-200">{{ cam.latitude }}</span></div>
+                      <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Lat</span><span class="text-[13px] text-[var(--color-text1)]">{{ cam.latitude }}</span></div>
                     }
                     @if (cam.longitude!=null) {
-                      <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Lon</span><span class="text-[13px] text-slate-200">{{ cam.longitude }}</span></div>
+                      <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Lon</span><span class="text-[13px] text-[var(--color-text1)]">{{ cam.longitude }}</span></div>
                     }
                   </div>
                 }
                 @if (cam.url) {
-                  <div class="mt-2 flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">URL</span><a [href]="cam.url" target="_blank" class="break-all text-[12px] font-mono text-sky-400 underline underline-offset-2 hover:text-sky-300">{{ cam.url }}</a></div>
+                  <div class="mt-2 flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">URL</span><a [href]="cam.url" target="_blank" class="break-all text-[12px] font-mono text-sky-400 underline underline-offset-2 hover:text-sky-300">{{ cam.url }}</a></div>
                 }
                 @if (cam.stream_url) {
-                  <div class="mt-2 flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-slate-500">Stream</span><span class="text-[12px] font-mono text-slate-400 break-all">{{ cam.stream_url }}</span></div>
+                  <div class="mt-2 flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Stream</span><span class="break-all text-[12px] font-mono text-[var(--color-text3)]">{{ cam.stream_url }}</span></div>
                 }
                 @if (cam.vulnerabilities?.length) {
                   <div class="mt-2">
@@ -766,3 +717,4 @@
     }
   </div>
 }
+</div>

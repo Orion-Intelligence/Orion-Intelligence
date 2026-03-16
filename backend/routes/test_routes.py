@@ -8,6 +8,12 @@ from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, )
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
+from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
+    GeoCameraDetectRangesRequest,
+    GeoCameraDetectRequest,
+    IPScanRequest,
+    ResolveIPRequest,
+)
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
 
@@ -217,6 +223,62 @@ async def extract_crypto():
     if step:
         return step
     return json.loads((_MOCKS_DIR / f"dynamic_crypto_scan.json").read_text(encoding="utf-8"))
+
+
+@test_routes.post(
+    "/api/netintel/resolve_ip",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def test_netintel_resolve_ip(payload: ResolveIPRequest = Body(...)):
+    step = _mock_step("netintel_resolve_ip")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / "netintel_resolve_ip.json").read_text(encoding="utf-8"))
+
+
+@test_routes.post(
+    "/api/netintel/scanner",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def test_netintel_scanner(payload: IPScanRequest = Body(...)):
+    step = _mock_step("netintel_scanner")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / "netintel_scanner.json").read_text(encoding="utf-8"))
+
+
+@test_routes.post(
+    "/api/netintel/camera_detect",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def test_netintel_camera_detect(payload: GeoCameraDetectRequest = Body(...)):
+    step = _mock_step("netintel_camera_detect")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / "netintel_camera_detect.json").read_text(encoding="utf-8"))
+
+
+@test_routes.post(
+    "/api/netintel/camera_detect_ranges",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def test_netintel_camera_detect_ranges(payload: GeoCameraDetectRangesRequest = Body(...)):
+    step = _mock_step("netintel_camera_detect_ranges")
+    if step:
+        return step
+    return json.loads((_MOCKS_DIR / "netintel_camera_detect_ranges.json").read_text(encoding="utf-8"))
 
 
 @test_routes.post(

@@ -1,0 +1,38 @@
+{
+  "result": {
+    "status": "success",
+    "query": {
+      "ip_ranges": [
+        "192.168.1.0/24",
+        "10.10.0.0/24",
+        "172.16.5.0/24"
+      ],
+      "max_ips": 200
+    },
+    "ips_extracted": 15,
+    "ips_scanned": 15,
+    "cameras_found": 4,
+    "cameras": [
+      {
+        "ip": "192.168.1.25",
+        "port": 554,
+        "title": "RTSP Camera"
+      },
+      {
+        "ip": "10.10.0.18",
+        "port": 80,
+        "title": "Embedded Webcam"
+      },
+      {
+        "ip": "172.16.5.44",
+        "port": 8080,
+        "title": "IP Camera Admin"
+      },
+      {
+        "ip": "172.16.5.52",
+        "port": 8554,
+        "title": "ONVIF Camera Service"
+      }
+    ]
+  }
+}

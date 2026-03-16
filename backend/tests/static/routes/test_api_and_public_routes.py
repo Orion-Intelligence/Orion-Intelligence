@@ -91,6 +91,18 @@ class _FakeSearchModel:
     async def scan_apk(self, *args, **kwargs):
         return {"ok": True, "apk": {}}
 
+    async def network_intel(self, param, route_name, user_id=None):
+        result = {"ok": True, "route": route_name, "user_id": user_id}
+        if hasattr(param, "domain"):
+            result.update({"domain": param.domain, "ips": ["1.1.1.1"]})
+        if hasattr(param, "ip"):
+            result.update({"ip": param.ip})
+        if hasattr(param, "coordinates"):
+            result.update({"query": {"coordinates": param.coordinates}})
+        if hasattr(param, "ip_ranges"):
+            result.update({"query": {"ip_ranges": param.ip_ranges}})
+        return result
+
 
 class _FakeCrawlModel:
     async def scan_domain(self, *args, **kwargs):
@@ -247,6 +259,10 @@ def api_public_client(monkeypatch):
         ("post", "/api/urlscan/dns", {"domain": "example.com", "scanType": "dns", "checkLive": False}),
         ("post", "/api/urlscan/wayback", {"domain": "example.com", "scanType": "wayback", "checkLive": False}),
         ("post", "/api/urlscan/ip", {"ip": "8.8.8.8"}),
+        ("post", "/api/netintel/resolve_ip", {"domain": "example.com"}),
+        ("post", "/api/netintel/scanner", {"ip": "8.8.8.8"}),
+        ("post", "/api/netintel/camera_detect", {"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200}),
+        ("post", "/api/netintel/camera_detect_ranges", {"ip_ranges": ["192.168.1.0/24"], "max_ips": 200}),
         ("post", "/api/social/scrape", {"usernames": ["alice"], "platform": "instagram"}),
         ("get", "/api/search/breach/stix/doc1", None),
         ("get", "/api/search/breach/doc1", None),
@@ -315,6 +331,19 @@ def test_crypto_scan_route(api_public_client):
     assert resp.status_code == 200
 
 
+def test_network_intel_routes(api_public_client):
+    assert api_public_client.post("/api/netintel/resolve_ip", json={"domain": "example.com"}).status_code == 200
+    assert api_public_client.post("/api/netintel/scanner", json={"ip": "8.8.8.8"}).status_code == 200
+    assert api_public_client.post(
+        "/api/netintel/camera_detect",
+        json={"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200},
+    ).status_code == 200
+    assert api_public_client.post(
+        "/api/netintel/camera_detect_ranges",
+        json={"ip_ranges": ["192.168.1.0/24"], "max_ips": 200},
+    ).status_code == 200
+
+
 def test_system_info_endpoints(api_public_client):
     assert api_public_client.get("/api/directory").status_code == 200
     assert api_public_client.get("/api/dumps").status_code == 200
@@ -354,6 +383,7 @@ def api_journey_client(monkeypatch):
         "dynamic": [],
         "domain": [],
         "ip": [],
+        "network_intel": [],
         "social_scrape": [],
         "extract_ioc": [],
         "scan_apk": [],
@@ -392,6 +422,22 @@ def api_journey_client(monkeypatch):
         async def scan_apk(self, file_content, filename, user_id=None):
             calls["scan_apk"].append({"filename": filename, "bytes": len(file_content), "user_id": user_id})
             return {"ok": True, "filename": filename, "size": len(file_content), "user_id": user_id}
+
+        async def network_intel(self, param, route_name, user_id=None):
+            entry = {"route": route_name, "user_id": user_id}
+            if hasattr(param, "domain"):
+                entry["domain"] = param.domain
+            if hasattr(param, "ip"):
+                entry["ip"] = param.ip
+            if hasattr(param, "coordinates"):
+                entry["coordinates"] = param.coordinates
+                entry["radius_km"] = param.radius_km
+                entry["max_ips"] = param.max_ips
+            if hasattr(param, "ip_ranges"):
+                entry["ip_ranges"] = param.ip_ranges
+                entry["max_ips"] = param.max_ips
+            calls["network_intel"].append(entry)
+            return {"ok": True, **entry}
 
     class _JourneyCrawlModel(_FakeCrawlModel):
         async def scan_domain(self, payload, user_id=None):
@@ -521,3 +567,24 @@ def test_user_journey_file_crypto_and_stix_validation(api_journey_client):
     assert bad_single.json()["error"] == "Unsupported STIX kind"
     assert bad_batch.json()["error"] == "Unsupported STIX kind"
     assert "general" in bad_single.json()["supported_kinds"]
+
+
+def test_user_journey_network_intel_routes(api_journey_client):
+    client, calls = api_journey_client
+
+    resolve_ip = client.post("/api/netintel/resolve_ip", json={"domain": "example.com"})
+    shodan = client.post("/api/netintel/scanner", json={"ip": "8.8.8.8"})
+    geo = client.post("/api/netintel/camera_detect", json={"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200})
+    geo_ranges = client.post("/api/netintel/camera_detect_ranges", json={"ip_ranges": ["192.168.1.0/24"], "max_ips": 200})
+
+    assert resolve_ip.status_code == 200
+    assert shodan.status_code == 200
+    assert geo.status_code == 200
+    assert geo_ranges.status_code == 200
+    assert [call["route"] for call in calls["network_intel"]] == [
+        "resolve_ip",
+        "scanner",
+        "camera_detect",
+        "camera_detect_ranges",
+    ]
+    assert all(call["user_id"] == "u1" for call in calls["network_intel"])

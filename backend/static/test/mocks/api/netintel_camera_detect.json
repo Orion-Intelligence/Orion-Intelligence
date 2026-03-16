@@ -1,0 +1,40 @@
+{
+  "result": {
+    "status": "success",
+    "query": {
+      "coordinates": "24.8607,67.0011",
+      "radius_km": 25,
+      "max_ips": 200
+    },
+    "ips_extracted": 28,
+    "ips_scanned": 28,
+    "cameras_found": 5,
+    "cameras": [
+      {
+        "ip": "203.0.113.10",
+        "port": 8080,
+        "title": "IP Camera Web Client"
+      },
+      {
+        "ip": "203.0.113.11",
+        "port": 80,
+        "title": "Network Camera"
+      },
+      {
+        "ip": "203.0.113.12",
+        "port": 554,
+        "title": "RTSP Stream Endpoint"
+      },
+      {
+        "ip": "203.0.113.13",
+        "port": 8000,
+        "title": "DVR Login Panel"
+      },
+      {
+        "ip": "203.0.113.14",
+        "port": 8888,
+        "title": "Smart Camera Console"
+      }
+    ]
+  }
+}

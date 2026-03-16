@@ -77,7 +77,7 @@ export class ScanHelperMethodsService {
   }
 
   scanResolveIp(domain: string): Subscription {
-    const call      = () => this.api.post<ResolveIpResponse>('resolve_ip', { domain });
+    const call      = () => this.api.post<ResolveIpResponse>('netintel/resolve_ip', { domain });
     const getStatus = (res: ResolveIpResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: ResolveIpResponse) => {
       const p = (res as any)?.progress;
@@ -91,7 +91,7 @@ export class ScanHelperMethodsService {
   }
 
   scanShodanIp(ip: string): Subscription {
-    const call      = () => this.api.post<NetworkIntelScanResponse>('shodan/scanner', { ip });
+    const call      = () => this.api.post<NetworkIntelScanResponse>('netintel/scanner', { ip });
     const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: NetworkIntelScanResponse) => {
       const p = (res as any)?.progress;
@@ -105,7 +105,7 @@ export class ScanHelperMethodsService {
   }
 
   scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
-    const call      = () => this.api.post<GeoCameraResponse>('geo/camera_detect', { coordinates, radius_km, max_ips });
+    const call      = () => this.api.post<GeoCameraResponse>('netintel/camera_detect', { coordinates, radius_km, max_ips });
     const getStatus = (res: GeoCameraResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: GeoCameraResponse) => {
       const p = (res as any)?.progress;
@@ -119,7 +119,7 @@ export class ScanHelperMethodsService {
   }
 
   scanGeoCameraByRanges(ip_ranges: string[], max_ips = 200): Subscription {
-    const call      = () => this.api.post<GeoCameraResponse>('geo/camera_detect_ranges', { ip_ranges, max_ips });
+    const call      = () => this.api.post<GeoCameraResponse>('netintel/camera_detect_ranges', { ip_ranges, max_ips });
     const getStatus = (res: GeoCameraResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: GeoCameraResponse) => {
       const p = (res as any)?.progress;

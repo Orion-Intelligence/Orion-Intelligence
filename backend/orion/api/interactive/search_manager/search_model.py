@@ -355,3 +355,18 @@ class search_model:
             )
 
         return response.json()
+
+    async def network_intel(self, payload, route_name: str, user_id: str = "system"):
+        async with httpx.AsyncClient(timeout=120) as client:
+            response = await client.post(
+                f"http://trusted-micros-api:8010/netintel/{route_name}/{user_id}",
+                json=payload.model_dump()
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+
+        return response.json()

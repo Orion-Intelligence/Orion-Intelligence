@@ -5,12 +5,13 @@ import { NgOptimizedImage } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { ScanHelperMethodsService } from './network-intel-service.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../shared/model/network-intel/network-intel.model';
+import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  imports:     [CommonModule, FormsModule, NgOptimizedImage],
+  imports:     [CommonModule, FormsModule, NgOptimizedImage, EmptyQueryComponent],
 })
 export class NetworkIntel implements OnDestroy {
   private sub?: Subscription;
@@ -31,7 +32,8 @@ export class NetworkIntel implements OnDestroy {
   geoResult:       GeoResult | null    = null;
   geoLiveStats:    GeoLiveStats | null = null;
   currentStep      = '';
-  lastResultCount: number | null = null;
+  lastResultCount = 0;
+  hasSearched = false;
   isScanning = computed(() =>
     this.scanHelper.progress() > 0 &&
     this.scanHelper.progress() < 100 &&
@@ -136,6 +138,55 @@ export class NetworkIntel implements OnDestroy {
     this.parsedRanges  = [];
   }
 
+  getToolbarQuery(): string {
+    if (this.activeTab === 'dns') {
+      return this.dnsForm.domain;
+    }
+    if (this.activeTab === 'shodan') {
+      return this.shodanForm.ip;
+    }
+    return this.geoForm.coordinates;
+  }
+
+  setToolbarQuery(value: string): void {
+    if (this.activeTab === 'dns') {
+      this.dnsForm.domain = value;
+      this.validateDns();
+      return;
+    }
+    if (this.activeTab === 'shodan') {
+      this.shodanForm.ip = value;
+      this.validateShodan();
+      return;
+    }
+    this.geoForm.coordinates = value;
+    this.validateGeo();
+  }
+
+  getToolbarPlaceholder(): string {
+    if (this.activeTab === 'dns') {
+      return 'Search domain...';
+    }
+    if (this.activeTab === 'shodan') {
+      return 'Search IP...';
+    }
+    return 'Search coordinates...';
+  }
+
+  runToolbarSearch(): void {
+    if (this.activeTab === 'dns') {
+      this.startDnsScan();
+      return;
+    }
+    if (this.activeTab === 'shodan') {
+      this.startShodanScan();
+      return;
+    }
+    if (this.geoMode === 'coords') {
+      this.startGeoScan();
+    }
+  }
+
   get ipRangeCount(): number {
     return this.geoForm.ip_ranges
       .split('\n')
@@ -184,16 +235,19 @@ export class NetworkIntel implements OnDestroy {
       : null;
   }
 
-  private clearAll(): void {
+  private clearAll(resetSearchState = true): void {
     this.dnsResult       = null;
     this.ipRows          = [];
     this.shodanResult    = null;
     this.geoResult       = null;
     this.geoLiveStats    = null;
     this.currentStep     = '';
-    this.lastResultCount = null;
+    this.lastResultCount = 0;
     this.formError       = null;
     this.parsedRanges    = [];
+    if (resetSearchState) {
+      this.hasSearched = false;
+    }
     this.scanHelper.onDone.set(null);
     this.scanHelper.onError.set(null);
     this.scanHelper.progress.set(0);
@@ -212,7 +266,8 @@ export class NetworkIntel implements OnDestroy {
     if (this.formError || !this.dnsForm.domain.trim() || this.isScanning()) {
       return;
     }
-    this.clearAll();
+    this.hasSearched = true;
+    this.clearAll(false);
     this.sub = this.scanHelper.scanResolveIp(this.dnsForm.domain.trim());
     this.watchResult(this.parseDnsResult.bind(this));
   }
@@ -277,7 +332,8 @@ export class NetworkIntel implements OnDestroy {
     if (this.formError || !this.shodanForm.ip.trim() || this.isScanning()) {
       return;
     }
-    this.clearAll();
+    this.hasSearched = true;
+    this.clearAll(false);
     this.sub = this.scanHelper.scanShodanIp(this.shodanForm.ip.trim());
     this.watchResult(this.parseShodanResult.bind(this));
   }
@@ -300,7 +356,8 @@ export class NetworkIntel implements OnDestroy {
       if (this.formError || !this.geoForm.coordinates.trim() || this.isScanning()) {
         return;
       }
-      this.clearAll();
+      this.hasSearched = true;
+      this.clearAll(false);
       this.sub = this.scanHelper.scanGeoCamera(this.geoForm.coordinates.trim(),
         this.geoForm.radius_km,
         this.geoForm.max_ips);
@@ -312,7 +369,8 @@ export class NetworkIntel implements OnDestroy {
       }
       const ranges = this.geoForm.ip_ranges
         .split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      this.clearAll();
+      this.hasSearched = true;
+      this.clearAll(false);
       this.sub = this.scanHelper.scanGeoCameraByRanges(ranges,
         this.geoForm.max_ips);
     }
