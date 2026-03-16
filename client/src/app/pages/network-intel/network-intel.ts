@@ -1,19 +1,25 @@
-import { Component, OnDestroy, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ScanHelperMethodsService } from './network-intel-service.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../shared/model/network-intel/network-intel.model';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
+import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
+import { GeoCoordinatesModalComponent } from './geo-coordinates-modal/geo-coordinates-modal.component';
+import { GeoRangesModalComponent } from './geo-ranges-modal/geo-ranges-modal.component';
+import { GeoFeedComponent } from './geo-feed/geo-feed.component';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  imports:     [CommonModule, FormsModule, NgOptimizedImage, EmptyQueryComponent],
+  imports:     [CommonModule, FormsModule, NgOptimizedImage, EmptyQueryComponent, GeoCoordinatesModalComponent, GeoRangesModalComponent, GeoFeedComponent],
+  animations:  [fadeInDashboardItem],
 })
-export class NetworkIntel implements OnDestroy {
+export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private _intervals: ReturnType<typeof setInterval>[] = [];
 
@@ -25,7 +31,6 @@ export class NetworkIntel implements OnDestroy {
   geoForm    = { coordinates: '', radius_km: 25, max_ips: 200, ip_ranges: '' };
   formError: string | null = null;
   parsedRanges: { value: string; valid: boolean }[] = [];
-  readonly countryPresets = [ { code: 'PK', flag: '🇵🇰', label: 'Pakistan', ranges: ['39.32.0.0/11','103.4.0.0/14','111.68.0.0/14','119.152.0.0/13'] }, { code: 'US', flag: '🇺🇸', label: 'USA', ranges: ['3.0.0.0/8','4.0.0.0/8','8.0.0.0/8','12.0.0.0/8'] }, { code: 'GB', flag: '🇬🇧', label: 'UK', ranges: ['2.24.0.0/13','5.0.0.0/8','81.0.0.0/11'] }, { code: 'IN', flag: '🇮🇳', label: 'India', ranges: ['1.0.0.0/8','14.0.0.0/8','27.0.0.0/8','106.0.0.0/8'] }, { code: 'DE', flag: '🇩🇪', label: 'Germany', ranges: ['2.0.0.0/8','5.0.0.0/8','31.0.0.0/8'] }, { code: 'AE', flag: '🇦🇪', label: 'UAE', ranges: ['5.8.0.0/14','31.12.0.0/14','37.8.0.0/13'] }, { code: 'SA', flag: '🇸🇦', label: 'Saudi Arabia', ranges: ['31.168.0.0/12','78.100.0.0/14','188.48.0.0/13'] }, { code: 'CN', flag: '🇨🇳', label: 'China', ranges: ['14.0.0.0/8','27.0.0.0/8','36.0.0.0/8'] }, { code: 'RU', flag: '🇷🇺', label: 'Russia', ranges: ['5.0.0.0/8','31.0.0.0/8','37.0.0.0/8'] }, { code: 'TR', flag: '🇹🇷', label: 'Turkey', ranges: ['31.0.0.0/9','78.0.0.0/9','88.0.0.0/9'] }, ];
   dnsResult:       DnsResult | null = null;
   ipRows:          IpRowState[]     = [];
   shodanResult:    IpDetail | null  = null;
@@ -34,12 +39,64 @@ export class NetworkIntel implements OnDestroy {
   currentStep      = '';
   lastResultCount = 0;
   hasSearched = false;
+  showGeoCoordinatesModal = false;
+  showGeoRangesModal = false;
   isScanning = computed(() =>
     this.scanHelper.progress() > 0 &&
     this.scanHelper.progress() < 100 &&
     !this.scanHelper.onError());
 
-  constructor(public scanHelper: ScanHelperMethodsService) {}
+  private readonly sectionToTab: Record<string, 'dns' | 'shodan' | 'geo'> = {
+    'host-recon': 'dns',
+    'deep-scan': 'shodan',
+    'geo-cameras': 'geo',
+  };
+
+  private readonly tabToSection: Record<'dns' | 'shodan' | 'geo', string> = {
+    dns: 'host-recon',
+    shodan: 'deep-scan',
+    geo: 'geo-cameras',
+  };
+
+  constructor(
+    public scanHelper: ScanHelperMethodsService,
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    const section = this.route.snapshot.queryParamMap.get('section');
+    const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
+
+    if (section && this.sectionToTab[section]) {
+      this.activeTab = this.sectionToTab[section];
+    }
+
+    if (!q) {
+      this.syncUrl();
+      return;
+    }
+
+    if (this.activeTab === 'dns') {
+      this.dnsForm.domain = q;
+      this.validateDns();
+    }
+    else if (this.activeTab === 'shodan') {
+      this.shodanForm.ip = q;
+      this.validateShodan();
+    }
+    else {
+      this.geoForm.coordinates = q;
+      this.validateGeo();
+    }
+
+    if (!this.formError) {
+      queueMicrotask(() => this.runToolbarSearch());
+    }
+    else {
+      this.syncUrl();
+    }
+  }
 
   private isValidDomain(value: string): boolean {
 
@@ -127,6 +184,7 @@ export class NetworkIntel implements OnDestroy {
     }
     this.activeTab = id;
     this.clearAll();
+    this.syncUrl();
   }
 
   setGeoMode(mode: 'coords' | 'ranges'): void {
@@ -136,6 +194,24 @@ export class NetworkIntel implements OnDestroy {
     this.geoMode      = mode;
     this.formError    = null;
     this.parsedRanges  = [];
+  }
+
+  openGeoCoordinatesModal(): void {
+    if (this.isScanning()) {
+      return;
+    }
+    this.geoMode = 'coords';
+    this.showGeoRangesModal = false;
+    this.showGeoCoordinatesModal = true;
+  }
+
+  openGeoRangesModal(): void {
+    if (this.isScanning()) {
+      return;
+    }
+    this.geoMode = 'ranges';
+    this.showGeoCoordinatesModal = false;
+    this.showGeoRangesModal = true;
   }
 
   getToolbarQuery(): string {
@@ -152,15 +228,18 @@ export class NetworkIntel implements OnDestroy {
     if (this.activeTab === 'dns') {
       this.dnsForm.domain = value;
       this.validateDns();
+      this.syncUrl();
       return;
     }
     if (this.activeTab === 'shodan') {
       this.shodanForm.ip = value;
       this.validateShodan();
+      this.syncUrl();
       return;
     }
     this.geoForm.coordinates = value;
     this.validateGeo();
+    this.syncUrl();
   }
 
   getToolbarPlaceholder(): string {
@@ -192,17 +271,6 @@ export class NetworkIntel implements OnDestroy {
       .split('\n')
       .map(l => l.trim())
       .filter(l => l.length > 0).length;
-  }
-
-  addCountryPreset(code: string): void {
-    const preset = this.countryPresets.find(c => c.code === code);
-    if (!preset) {
-      return;
-    }
-    const existing  = this.geoForm.ip_ranges.trim();
-    const toAdd     = preset.ranges.join('\n');
-    this.geoForm.ip_ranges = existing ? existing + '\n' + toAdd : toAdd;
-    this.validateIpRanges();
   }
 
   validateIpRanges(): void {
@@ -268,6 +336,7 @@ export class NetworkIntel implements OnDestroy {
     }
     this.hasSearched = true;
     this.clearAll(false);
+    this.syncUrl();
     this.sub = this.scanHelper.scanResolveIp(this.dnsForm.domain.trim());
     this.watchResult(this.parseDnsResult.bind(this));
   }
@@ -334,6 +403,7 @@ export class NetworkIntel implements OnDestroy {
     }
     this.hasSearched = true;
     this.clearAll(false);
+    this.syncUrl();
     this.sub = this.scanHelper.scanShodanIp(this.shodanForm.ip.trim());
     this.watchResult(this.parseShodanResult.bind(this));
   }
@@ -358,6 +428,7 @@ export class NetworkIntel implements OnDestroy {
       }
       this.hasSearched = true;
       this.clearAll(false);
+      this.syncUrl();
       this.sub = this.scanHelper.scanGeoCamera(this.geoForm.coordinates.trim(),
         this.geoForm.radius_km,
         this.geoForm.max_ips);
@@ -371,6 +442,7 @@ export class NetworkIntel implements OnDestroy {
         .split('\n').map(l => l.trim()).filter(l => l.length > 0);
       this.hasSearched = true;
       this.clearAll(false);
+      this.syncUrl();
       this.sub = this.scanHelper.scanGeoCameraByRanges(ranges,
         this.geoForm.max_ips);
     }
@@ -433,6 +505,27 @@ export class NetworkIntel implements OnDestroy {
     return Array.isArray(arr) && arr.length > 0;
   }
 
+  hasPortDetail(port: any): boolean {
+    if (!port) {
+      return false;
+    }
+    return Boolean(
+      port.port ||
+      port.protocol ||
+      port.proto ||
+      port.service ||
+      port.state ||
+      port.banner ||
+      port.http ||
+      port.tls ||
+      (Array.isArray(port.risk_flags) && port.risk_flags.length)
+    );
+  }
+
+  renderablePorts(ports: any[] | undefined | null): any[] {
+    return (ports || []).filter(port => this.hasPortDetail(port));
+  }
+
   securityItems(sec: string[] | Record<string, boolean> | undefined | null): string[] {
     if (!sec) {
       return [];
@@ -449,6 +542,19 @@ export class NetworkIntel implements OnDestroy {
 
   isProgressSegmentActive(index: number): boolean {
     return index < Math.ceil(this.scanHelper.progress() / 5);
+  }
+
+  private syncUrl(): void {
+    const query = this.getToolbarQuery().trim();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        section: this.tabToSection[this.activeTab],
+        q: query || null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   ngOnDestroy(): void {

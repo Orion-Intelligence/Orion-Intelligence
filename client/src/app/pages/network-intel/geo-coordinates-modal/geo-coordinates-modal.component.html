@@ -1,0 +1,150 @@
+@if (isOpen) {
+  <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" (click)="onClose()">
+    <div class="ui-graph-popup-panel ui-popup-shell relative w-full max-w-[620px] rounded-2xl p-4" (click)="$event.stopPropagation()">
+      <button class="ui-popup-close absolute right-4 top-4 inline-flex items-center justify-center" type="button" aria-label="Close" title="Close" (click)="onClose()">×</button>
+      <div class="ui-popup-header flex items-center justify-between px-4 py-3 pr-12">
+        <div>
+          <div class="ui-popup-title text-lg font-semibold">Geo Cameras</div>
+          <div class="ui-popup-subtitle text-sm">Coordinates scan configuration</div>
+        </div>
+      </div>
+
+      <div class="space-y-4 px-4 py-3">
+        <div class="rounded-xl border border-sky-400/15 bg-sky-400/5 px-4 py-3">
+          <div class="text-sm font-medium text-[var(--color-text1)]">Choose the point to scan around</div>
+          <div class="mt-1 text-[12px] leading-relaxed text-[var(--color-text3)]">Choose a point from the world map, or switch to manual entry if you already know the coordinates.</div>
+        </div>
+
+        <div class="flex w-fit items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] p-1">
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all"
+            [ngClass]="coordinateInputMode === 'map'
+              ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]']
+              : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']"
+            (click)="setCoordinateInputMode('map')">
+            <i class="bi bi-globe-americas text-[13px] leading-none"></i>
+            World Map
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all"
+            [ngClass]="coordinateInputMode === 'manual'
+              ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]']
+              : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']"
+            (click)="setCoordinateInputMode('manual')">
+            <i class="bi bi-keyboard text-[13px] leading-none"></i>
+            Manual
+          </button>
+        </div>
+
+        @if (coordinateInputMode === 'map') {
+          <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+            <div class="flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-[1.4px] text-sky-400">Map Picker</div>
+                <div class="mt-1 text-[12px] text-[var(--color-text3)]">Click anywhere to set coordinates instantly.</div>
+              </div>
+              @if (parsedCoordinates; as point) {
+                <div class="rounded-full border border-sky-400/25 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold text-sky-300">
+                  {{ point.lat | number:'1.2-2' }}, {{ point.lon | number:'1.2-2' }}
+                </div>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="relative block h-[240px] w-full overflow-hidden bg-[radial-gradient(circle_at_30%_30%,rgba(87,165,235,0.18),transparent_28%),radial-gradient(circle_at_70%_35%,rgba(16,185,129,0.12),transparent_24%),linear-gradient(180deg,rgba(9,24,44,0.96),rgba(5,14,28,0.98))] text-left md:h-[280px]"
+              (click)="onMapSelect($event)"
+              (wheel)="onMapWheel($event)">
+              <div class="absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(160,184,209,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(160,184,209,0.08)_1px,transparent_1px)] [background-size:40px_40px]"></div>
+              <div class="absolute inset-x-0 top-1/2 border-t border-dashed border-sky-400/15"></div>
+              <div class="absolute inset-y-0 left-1/2 border-l border-dashed border-sky-400/15"></div>
+              <div #mapContainer class="absolute inset-0"></div>
+              <div class="absolute right-3 top-3 z-[2] flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[rgba(3,10,20,0.82)] shadow-[0_10px_24px_rgba(0,0,0,0.24)]">
+                <button
+                  type="button"
+                  class="inline-flex h-9 w-9 items-center justify-center text-[18px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-sky-400/12 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="zoomLevel >= maxZoomLevel"
+                  (click)="$event.stopPropagation(); zoomIn()">
+                  +
+                </button>
+                <div class="h-px bg-[var(--color-divider)]"></div>
+                <button
+                  type="button"
+                  class="inline-flex h-9 w-9 items-center justify-center text-[18px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-sky-400/12 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="zoomLevel <= minZoomLevel"
+                  (click)="$event.stopPropagation(); zoomOut()">
+                  −
+                </button>
+              </div>
+              <div class="absolute bottom-3 left-3 z-[2] rounded-full border border-[var(--color-border)] bg-[rgba(3,10,20,0.78)] px-3 py-1 text-[11px] font-medium text-[var(--color-text2)]">
+                Zoom {{ zoomLevel | number:'1.0-1' }}x
+              </div>
+
+              @if (mapMarkerStyle; as markerStyle) {
+                <div
+                  class="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-sky-400 shadow-[0_0_0_6px_rgba(87,165,235,0.2)]"
+                  [ngStyle]="markerStyle">
+                </div>
+              } @else {
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="rounded-full border border-[var(--color-border)] bg-[rgba(3,10,20,0.68)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]">
+                    Click map to choose coordinates
+                  </div>
+                </div>
+              }
+            </button>
+          </div>
+        } @else {
+          <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-4">
+            <div class="mb-1.5 flex items-center justify-between">
+              <label class="ui-popup-label block text-sm font-medium">Coordinates</label>
+              <span class="text-[11px] text-[var(--color-text4)]">Format: latitude, longitude</span>
+            </div>
+            <input class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm font-medium" type="text" [ngModel]="coordinates" (ngModelChange)="coordinatesChange.emit($event)" placeholder="31.48, 74.17" />
+          </div>
+        }
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-4">
+            <div class="mb-3">
+              <label class="ui-popup-label block text-sm font-medium">Radius</label>
+            </div>
+            <div class="flex h-[42px] items-stretch overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+              <button class="w-10 flex-shrink-0 border-r border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" type="button" (click)="radiusKmChange.emit(radiusKm - 5 < 1 ? 1 : radiusKm - 5)" [disabled]="isScanning || radiusKm <= 1">−</button>
+              <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-[var(--color-text1)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [ngModel]="radiusKm" (ngModelChange)="radiusKmChange.emit($event)" min="1" max="500" />
+              <button class="w-10 flex-shrink-0 border-l border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" type="button" (click)="radiusKmChange.emit(radiusKm + 5 > 500 ? 500 : radiusKm + 5)" [disabled]="isScanning || radiusKm >= 500">+</button>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              @for (r of radiusOptions; track r) {
+                <button type="button" class="inline-flex items-center justify-center rounded-md border px-2.5 py-1 text-[11px] font-bold transition-all" [ngClass]="radiusKm === r ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-[var(--color-blue-720)]', 'border-[var(--color-border)]', 'text-[var(--color-text3)]', 'hover:bg-sky-400/10', 'hover:text-sky-400', 'hover:border-sky-400/30']" (click)="radiusKmChange.emit(r)">{{ r }} km</button>
+              }
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-4">
+            <div class="mb-3">
+              <label class="ui-popup-label block text-sm font-medium">Max IPs</label>
+            </div>
+            <div class="flex h-[42px] items-stretch overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+              <button class="w-10 flex-shrink-0 border-r border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" type="button" (click)="maxIpsChange.emit(maxIps - 50 < 10 ? 10 : maxIps - 50)" [disabled]="isScanning || maxIps <= 10">−</button>
+              <input class="flex-1 min-w-0 bg-transparent border-0 outline-0 text-center text-[14px] font-bold font-mono text-[var(--color-text1)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" [ngModel]="maxIps" (ngModelChange)="maxIpsChange.emit($event)" min="10" max="1000" />
+              <button class="w-10 flex-shrink-0 border-l border-[var(--color-divider)] bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" type="button" (click)="maxIpsChange.emit(maxIps + 50 > 1000 ? 1000 : maxIps + 50)" [disabled]="isScanning || maxIps >= 1000">+</button>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              @for (n of maxIpOptions; track n) {
+                <button type="button" class="inline-flex items-center justify-center rounded-md border px-2.5 py-1 text-[11px] font-bold transition-all" [ngClass]="maxIps === n ? ['bg-sky-400/18', 'border-sky-400/50', 'text-sky-400'] : ['bg-[var(--color-blue-720)]', 'border-[var(--color-border)]', 'text-[var(--color-text3)]', 'hover:bg-sky-400/10', 'hover:text-sky-400', 'hover:border-sky-400/30']" (click)="maxIpsChange.emit(n)">{{ n }}</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui-popup-footer flex items-center justify-end gap-2 px-4 py-3">
+        <button class="ui-popup-btn-secondary px-[24px] text-[14px]" type="button" (click)="onClose()">Cancel</button>
+        <button class="ui-popup-btn-primary px-[24px] text-[14px] font-medium disabled:cursor-not-allowed disabled:bg-[var(--color-blue-810)] disabled:text-[var(--color-text4)]" type="button" (click)="onSearch()" [disabled]="isScanning">Start Scan</button>
+      </div>
+    </div>
+  </div>
+}
