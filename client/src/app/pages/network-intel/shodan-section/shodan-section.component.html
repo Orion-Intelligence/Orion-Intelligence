@@ -1,0 +1,49 @@
+<div class="px-4 py-4 md:px-6">
+  @if (isScanning) {
+    <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
+      <div class="mb-[6px] flex items-center justify-between gap-3">
+        <span class="text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
+        <span class="text-[12px] font-semibold text-sky-400">{{ progressValue }}%</span>
+      </div>
+      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+        <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
+      </div>
+    </div>
+  }
+
+  @if (errorMessage && !isScanning) {
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Request Failed</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
+    </div>
+  }
+
+  @if (hasSearched) {
+    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+      @if (!shodanResult && !errorMessage) {
+        <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
+          <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
+          <div class="flex items-center gap-2">
+            <div class="ui-shimmer h-5 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer h-5 w-20 rounded-full bg-[var(--color-blue-720)]"></div>
+          </div>
+        </div>
+      } @else if (shodanResult) {
+        <div class="ui-ioc-table-row ui-ioc-row-even flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
+          <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ shodanResult.ip }}</span>
+          <div class="flex items-center gap-2">
+            @if (shodanResult.cloud_provider) {
+              <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">☁ {{ shodanResult.cloud_provider }}</span>
+            }
+            @if (shodanResult.is_camera) {
+              <span class="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">📷 CAMERA</span>
+            }
+          </div>
+        </div>
+        <div class="bg-[var(--color-blue-700)] pb-2">
+          <app-ip-detail [detail]="shodanResult"></app-ip-detail>
+        </div>
+      }
+    </div>
+  }
+</div>

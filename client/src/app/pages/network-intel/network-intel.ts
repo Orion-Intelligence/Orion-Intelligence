@@ -1,27 +1,30 @@
 import { Component, OnDestroy, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgOptimizedImage } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScanHelperMethodsService } from './network-intel-service.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../shared/model/network-intel/network-intel.model';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
-import { GeoCoordinatesModalComponent } from './geo-coordinates-modal/geo-coordinates-modal.component';
-import { GeoRangesModalComponent } from './geo-ranges-modal/geo-ranges-modal.component';
-import { GeoFeedComponent } from './geo-feed/geo-feed.component';
+import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-coordinates-modal.component';
+import { GeoRangesModalComponent } from './modal/geo-ranges-modal/geo-ranges-modal.component';
+import { DnsSectionComponent } from './dns-section/dns-section.component';
+import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
+import { GeoSectionComponent } from './geo-section/geo-section.component';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  imports:     [CommonModule, FormsModule, NgOptimizedImage, EmptyQueryComponent, GeoCoordinatesModalComponent, GeoRangesModalComponent, GeoFeedComponent],
+  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, GeoRangesModalComponent, DnsSectionComponent, ShodanSectionComponent, GeoSectionComponent],
   animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private _intervals: ReturnType<typeof setInterval>[] = [];
+  private readonly sectionToTab: Record<string, 'dns' | 'shodan' | 'geo'> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'geo-cameras': 'geo', };
+  private readonly tabToSection: Record<'dns' | 'shodan' | 'geo', string> = { dns: 'host-recon', shodan: 'deep-scan', geo: 'geo-cameras', };
 
   readonly progressSegments = Array.from({ length: 20 }, (_, index) => index);
   activeTab: 'dns' | 'shodan' | 'geo' = 'dns';
@@ -46,25 +49,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.scanHelper.progress() < 100 &&
     !this.scanHelper.onError());
 
-  private readonly sectionToTab: Record<string, 'dns' | 'shodan' | 'geo'> = {
-    'host-recon': 'dns',
-    'deep-scan': 'shodan',
-    'geo-cameras': 'geo',
-  };
-
-  private readonly tabToSection: Record<'dns' | 'shodan' | 'geo', string> = {
-    dns: 'host-recon',
-    shodan: 'deep-scan',
-    geo: 'geo-cameras',
-  };
-
-  constructor(
-    public scanHelper: ScanHelperMethodsService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) {}
+  constructor( public scanHelper: ScanHelperMethodsService, private route: ActivatedRoute, private router: Router, ) {}
 
   ngOnInit(): void {
+    this.scanHelper.resetState();
+
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
 
@@ -98,84 +87,16 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
   }
 
-  private isValidDomain(value: string): boolean {
-
-    const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (ipPattern.test(value)) {
-      return false;
-    }
-    const domainPattern = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    return domainPattern.test(value);
-  }
-
-  private isValidIp(value: string): boolean {
-    const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipv4.test(value)) {
-      return false;
-    }
-    return value.split('.').every(octet => parseInt(octet, 10) <= 255);
-  }
-
-  private isValidCoordinates(value: string): boolean {
-
-    const parts = value.trim().split(/[\s,]+/);
-    if (parts.length !== 2) {
-      return false;
-    }
-    const lat = parseFloat(parts[0]);
-    const lon = parseFloat(parts[1]);
-    return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
-  }
-
   validateDns(): void {
-    const v = this.dnsForm.domain.trim();
-    if (!v) {
-      this.formError = null; return;
-    }
-    if (this.isValidIp(v))      {
-      this.formError = `"${v}" is an IP address — enter a domain like netflix.com`; return;
-    }
-    if (!this.isValidDomain(v)) {
-      this.formError = 'Enter a valid domain name e.g. netflix.com'; return;
-    }
-    this.formError = null;
+    this.formError = this.scanHelper.validateDnsInput(this.dnsForm.domain);
   }
 
   validateShodan(): void {
-    const v = this.shodanForm.ip.trim();
-    if (!v) {
-      this.formError = null; return;
-    }
-    if (!this.isValidIp(v)) {
-      if (this.isValidDomain(v)) {
-        this.formError = `"${v}" is a domain — use Host Recon to resolve it first, then scan an IP`;
-      }
-      else {
-        this.formError = 'Enter a valid IPv4 address e.g. 52.18.185.222';
-      }
-      return;
-    }
-    this.formError = null;
+    this.formError = this.scanHelper.validateShodanInput(this.shodanForm.ip);
   }
 
   validateGeo(): void {
-    const v = this.geoForm.coordinates.trim();
-    if (!v) {
-      this.formError = null; return;
-    }
-    if (this.isValidIp(v)) {
-      this.formError = `"${v}" is an IP address — enter coordinates like 31.48, 74.17`;
-      return;
-    }
-    if (this.isValidDomain(v)) {
-      this.formError = `"${v}" is a domain — enter coordinates like 31.48, 74.17`;
-      return;
-    }
-    if (!this.isValidCoordinates(v)) {
-      this.formError = 'Enter coordinates as: latitude, longitude — e.g. 31.48, 74.17';
-      return;
-    }
-    this.formError = null;
+    this.formError = this.scanHelper.validateGeoCoordinatesInput(this.geoForm.coordinates);
   }
 
   setTab(id: 'dns' | 'shodan' | 'geo'): void {
@@ -185,15 +106,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.activeTab = id;
     this.clearAll();
     this.syncUrl();
-  }
-
-  setGeoMode(mode: 'coords' | 'ranges'): void {
-    if (this.isScanning()) {
-      return;
-    }
-    this.geoMode      = mode;
-    this.formError    = null;
-    this.parsedRanges  = [];
   }
 
   openGeoCoordinatesModal(): void {
@@ -266,41 +178,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
   }
 
-  get ipRangeCount(): number {
-    return this.geoForm.ip_ranges
-      .split('\n')
-      .map(l => l.trim())
-      .filter(l => l.length > 0).length;
-  }
-
   validateIpRanges(): void {
-    const lines = this.geoForm.ip_ranges
-      .split('\n')
-      .map(l => l.trim())
-      .filter(l => l.length > 0);
-
-    if (lines.length === 0) {
-      this.formError = null; this.parsedRanges = []; return;
-    }
-
-    const cidr   = /^(\d{1,3}\.){3}\d{1,3}\/(\d|[12]\d|3[012])$/;
-    const range  = /^(\d{1,3}\.){3}\d{1,3}-(\d{1,3}\.){3}\d{1,3}$/;
-    const single = /^(\d{1,3}\.){3}\d{1,3}$/;
-
-    const isValidOctet = (ip: string) =>
-      ip.split('.').every(o => parseInt(o, 10) <= 255);
-
-    this.parsedRanges = lines.map(line => {
-      const base = line.split('/')[0].split('-')[0];
-      const valid = (cidr.test(line) || range.test(line) || single.test(line))
-                      && isValidOctet(base);
-      return { value: line, valid };
-    });
-
-    const invalid = this.parsedRanges.filter(r => !r.valid);
-    this.formError = invalid.length
-      ? `Invalid format: "${invalid[0].value}" — use CIDR (x.x.x.x/n), range (x.x.x.x-x.x.x.x), or single IP`
-      : null;
+    const result = this.scanHelper.validateIpRanges(this.geoForm.ip_ranges);
+    this.parsedRanges = result.parsedRanges;
+    this.formError = result.error;
   }
 
   private clearAll(resetSearchState = true): void {
@@ -346,6 +227,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
+    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
     const payload = done.result ?? done;
     if (payload?.domain != null && Array.isArray(payload.ips)) {
       this.dnsResult = { domain: payload.domain, ips: payload.ips };
@@ -413,6 +295,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
+    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
     const payload = done.result ?? done;
     if (payload?.ip) {
       this.shodanResult    = payload as IpDetail;
@@ -454,6 +337,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
+    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
     const payload = done.result ?? done;
 
     if (payload?.cameras !== undefined) {
@@ -462,9 +346,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.lastResultCount = payload.cameras_found;
     }
     else {
-      if (done.step) {
-        this.currentStep = done.step;
-      }
       if (done.ips_extracted != null || done.ips_scanned != null) {
         this.geoLiveStats = {
           ips_extracted: done.ips_extracted ?? 0,
@@ -489,61 +370,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this._intervals.push(id);
   }
 
-  safeEntries(obj: Record<string, any> | undefined | null): [string, any][] {
-    if (!obj) {
-      return [];
-    }
-    return Object.entries(obj).filter(([, v]) =>
-      v !== null && v !== undefined && v !== '' && v !== false);
-  }
-
-  hasData(obj: Record<string, any> | undefined | null): boolean {
-    return this.safeEntries(obj).length > 0;
-  }
-
-  hasItems(arr: any[] | undefined | null): boolean {
-    return Array.isArray(arr) && arr.length > 0;
-  }
-
-  hasPortDetail(port: any): boolean {
-    if (!port) {
-      return false;
-    }
-    return Boolean(
-      port.port ||
-      port.protocol ||
-      port.proto ||
-      port.service ||
-      port.state ||
-      port.banner ||
-      port.http ||
-      port.tls ||
-      (Array.isArray(port.risk_flags) && port.risk_flags.length)
-    );
-  }
-
-  renderablePorts(ports: any[] | undefined | null): any[] {
-    return (ports || []).filter(port => this.hasPortDetail(port));
-  }
-
-  securityItems(sec: string[] | Record<string, boolean> | undefined | null): string[] {
-    if (!sec) {
-      return [];
-    }
-    if (Array.isArray(sec)) {
-      return sec;
-    }
-    return Object.entries(sec).filter(([, v]) => v).map(([k]) => k);
-  }
-
-  trackByIp(_: number, row: IpRowState): string {
-    return row.ip;
-  }
-
-  isProgressSegmentActive(index: number): boolean {
-    return index < Math.ceil(this.scanHelper.progress() / 5);
-  }
-
   private syncUrl(): void {
     const query = this.getToolbarQuery().trim();
     this.router.navigate([], {
@@ -554,12 +380,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
-    });
+    }).then();
   }
 
   ngOnDestroy(): void {
     this._intervals.forEach(clearInterval);
     this.sub?.unsubscribe();
-    this.scanHelper.cancelCurrentScan();
+    this.scanHelper.resetState();
   }
 }

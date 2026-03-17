@@ -3,7 +3,7 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input
 import { FormsModule } from '@angular/forms';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
-import { AppService } from '../../../services/core/app/app.service';
+import { AppService } from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-geo-coordinates-modal',
@@ -13,6 +13,15 @@ import { AppService } from '../../../services/core/app/app.service';
 })
 export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
+  private projection: d3.GeoProjection | null = null;
+
+  readonly radiusOptions = [5, 10, 25, 50, 100];
+  readonly maxIpOptions = [50, 100, 200, 500];
+  readonly minZoomLevel = 1;
+  readonly maxZoomLevel = 4;
+  coordinateInputMode: 'map' | 'manual' = 'map';
+  zoomLevel = 1;
+
   @Input() isOpen = false;
   @Input() isScanning = false;
   @Input() coordinates = '';
@@ -24,14 +33,6 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   @Output() radiusKmChange = new EventEmitter<number>();
   @Output() maxIpsChange = new EventEmitter<number>();
   @Output() search = new EventEmitter<void>();
-
-  readonly radiusOptions = [5, 10, 25, 50, 100];
-  readonly maxIpOptions = [50, 100, 200, 500];
-  readonly minZoomLevel = 1;
-  readonly maxZoomLevel = 4;
-  coordinateInputMode: 'map' | 'manual' = 'map';
-  private projection: d3.GeoProjection | null = null;
-  zoomLevel = 1;
 
   get parsedCoordinates(): { lat: number; lon: number } | null {
     return this.parseCoordinates(this.coordinates);
@@ -50,7 +51,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  get mapMarkerStyle(): Record<string, string> | null {
+  get mapMarkerPoint(): { x: number; y: number } | null {
     const parsed = this.parsedCoordinates;
     if (!parsed || !this.projection) {
       return null;
@@ -61,9 +62,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
       return null;
     }
 
-    const left = `${point[0]}px`;
-    const top = `${point[1]}px`;
-    return { left, top };
+    return { x: point[0], y: point[1] };
   }
 
   onClose(): void {

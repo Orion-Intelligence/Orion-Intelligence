@@ -694,7 +694,6 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
 
-
 @api_routes.post(
     "/api/netintel/resolve_ip",
     summary="Resolve a domain to IP addresses",
@@ -706,7 +705,6 @@ async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_us
 async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().network_intel(param, "resolve_ip", user_id=str(current_user.id))
 
-
 @api_routes.post(
     "/api/netintel/scanner",
     summary="Scan an IP address for network intelligence",
@@ -717,7 +715,6 @@ async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(g
 )
 async def shodan_scanner(param: IPScanRequest = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().network_intel(param, "scanner", user_id=str(current_user.id))
-
 
 @api_routes.post(
     "/api/netintel/camera_detect",

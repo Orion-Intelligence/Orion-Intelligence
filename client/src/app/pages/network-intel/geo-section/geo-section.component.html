@@ -1,0 +1,41 @@
+<div class="px-4 py-4 md:px-6">
+  @if (isScanning) {
+    <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
+      <div class="mb-[6px] flex items-center justify-between gap-3">
+        <span class="text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
+        <span class="text-[12px] font-semibold text-sky-400">{{ progressValue }}%</span>
+      </div>
+      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+        <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
+      </div>
+      @if (geoLiveStats) {
+        <div class="mt-3 flex flex-wrap items-center gap-4 border-t border-[var(--color-divider)] pt-2.5">
+          <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-[var(--color-text1)]">{{ geoLiveStats.ips_extracted }}</span><span class="text-[11px] text-[var(--color-text4)]">IPs Found</span></div>
+          <div class="h-5 w-px bg-[var(--color-divider)]"></div>
+          <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-[var(--color-text1)]">{{ geoLiveStats.ips_scanned }}</span><span class="text-[11px] text-[var(--color-text4)]">Scanned</span></div>
+          <div class="h-5 w-px bg-[var(--color-divider)]"></div>
+          <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-emerald-400">{{ geoLiveStats.cameras_found }}</span><span class="text-[11px] text-[var(--color-text4)]">📷 Cameras</span></div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (errorMessage && !isScanning) {
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Request Failed</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
+    </div>
+  }
+
+  @if (hasSearched) {
+    @if (geoResult && !geoResult.cameras?.length) {
+      <div class="mb-4 rounded-lg border border-dashed border-[var(--color-border)] py-8 text-center text-[13px] text-[var(--color-text4)]">No cameras detected.</div>
+    }
+    @if (!geoResult && !errorMessage) {
+      <app-geo-feed [loading]="true"></app-geo-feed>
+    }
+    @if (geoResult?.cameras?.length) {
+      <app-geo-feed [cameras]="geoResult.cameras"></app-geo-feed>
+    }
+  }
+</div>

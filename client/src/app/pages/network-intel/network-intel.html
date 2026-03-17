@@ -1,591 +1,158 @@
 <div class="pb-[200px]">
-<div class="px-4 pt-4 md:px-6">
-  <div class="flex w-full flex-wrap items-center gap-3 bg-[var(--color-blue-760)] py-[15px] max-[640px]:gap-2">
-    <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
-      <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='dns' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('dns')">Host Recon</button>
-      <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='shodan' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">Deep Scan</button>
-      <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='geo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('geo')">Geo Cameras</button>
+  <div class="px-4 pt-4 md:px-6">
+    <div class="flex w-full flex-wrap items-center gap-3 bg-[var(--color-blue-760)] py-[15px] max-[640px]:gap-2">
+      <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
+        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='dns' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('dns')">Host Recon</button>
+        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='shodan' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">Deep Scan</button>
+        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab==='geo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('geo')">Geo Cameras</button>
+      </div>
     </div>
-  </div>
 
-  <div class="mt-4">
-    @if (!(activeTab === 'geo' && geoMode === 'ranges')) {
-      <div class="w-full">
-        <form (submit)="$event.preventDefault(); runToolbarSearch()" class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="formError ? 'ring-1 ring-[var(--color-border-red)]' : ''">
-          <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
-          <input [value]="getToolbarQuery()" (input)="setToolbarQuery($any($event.target).value)" (keyup.enter)="runToolbarSearch()" type="text" [placeholder]="getToolbarPlaceholder()" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" />
-          @if (formError) {
-            <div class="pointer-events-none absolute right-2 top-1/2 inline-flex max-w-[240px] -translate-y-1/2 items-center gap-1 rounded-md bg-red-500/85 px-2 py-[3px] text-[12px] font-semibold text-white max-[900px]:max-w-[160px] max-[640px]:max-w-[28px]">
-              <i class="bi bi-exclamation-triangle-fill text-[12px] text-white"></i>
-              <span class="truncate max-[640px]:hidden">{{ formError }}</span>
-            </div>
-          }
-        </form>
-      </div>
-    }
-  </div>
-
-  <div class="mt-[30px] flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
-    @if (activeTab === 'geo' && (geoResult || geoLiveStats)) {
-      <div class="hidden items-center gap-2 md:flex">
-        <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ geoResult?.ips_extracted ?? geoLiveStats?.ips_extracted ?? 0 }}</div>
-        <div class="text-xs text-[var(--color-text4)]">IPs Found</div>
-      </div>
-
-      <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
-
-      <div class="hidden items-center gap-2 lg:flex">
-        <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ geoResult?.ips_scanned ?? geoLiveStats?.ips_scanned ?? 0 }}</div>
-        <div class="text-xs text-[var(--color-text4)]">Scanned</div>
-      </div>
-
-      <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
-
-      <div class="hidden items-center gap-2 xl:flex">
-        <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-emerald-400">{{ geoResult?.cameras_found ?? geoLiveStats?.cameras_found ?? 0 }}</div>
-        <div class="text-xs text-[var(--color-text4)]">Cameras</div>
-      </div>
-    } @else {
-      <div class="hidden items-center gap-2 md:flex">
-        <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ lastResultCount }}</div>
-        <div class="text-xs text-[var(--color-text4)]">Results</div>
-      </div>
-
-      <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
-
-      <div class="hidden items-center gap-2 lg:flex">
-        <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ isScanning() ? 'Scanning' : (scanHelper.onError() ? 'Error' : 'Idle') }}</div>
-        <div class="text-xs text-[var(--color-text4)]">Status</div>
-      </div>
-    }
-
-    <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-      @if (activeTab === 'geo') {
-        <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openGeoCoordinatesModal()" [disabled]="isScanning()">
-          <i class="bi bi-crosshair text-[15px] leading-none"></i>
-        </button>
-        <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-        <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openGeoRangesModal()" [disabled]="isScanning()">
-          <i class="bi bi-list-ul text-[15px] leading-none"></i>
-        </button>
-        <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-      }
-      <button class="ui-cred-toolbar-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
-        <i class="bi bi-stop-fill text-[18px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
-      </button>
-    </div>
-  </div>
-</div>
-@if (!hasSearched && !isScanning() && !scanHelper.onError()) {
-  <div class="px-4 md:px-6" @fadeInDashboardItem>
-    <app-empty-query></app-empty-query>
-  </div>
-}
-<ng-template #ipDetailTpl let-d="d">
-  <div class="mx-4 my-3">
-    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">General Information</div>
-    <div class="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-4">
-      @if (d.country) {
-        <div        class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Country</span>     <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.country }}</span></div>
-      }
-      @if (d.city) {
-        <div           class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">City</span>         <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.city }}</span></div>
-      }
-      @if (d.organization) {
-        <div   class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Org</span>          <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.organization }}</span></div>
-      }
-      @if (d.isp) {
-        <div            class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">ISP</span>          <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.isp }}</span></div>
-      }
-      @if (d.asn) {
-        <div            class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">ASN</span>          <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.asn }}</span></div>
-      }
-      @if (d.hosting_type) {
-        <div   class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Hosting</span>     <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.hosting_type }}</span></div>
-      }
-      @if (d.cloud_provider) {
-        <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Cloud</span>       <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.cloud_provider }}</span></div>
-      }
-      @if (d.cloud_region) {
-        <div   class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Region</span>      <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.cloud_region }}</span></div>
-      }
-      @if (d.cloud_service) {
-        <div  class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Service</span>     <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.cloud_service }}</span></div>
-      }
-      @if (d.web_server) {
-        <div     class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Web Server</span>  <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.web_server }}</span></div>
-      }
-      @if (d.title) {
-        <div          class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Title</span>        <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ d.title }}</span></div>
-      }
-    </div>
-  </div>
-  @if (hasItems(d.open_ports)) {
-    <div class="mx-4 my-3">
-      <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Open Ports</div>
-      <div class="flex flex-wrap gap-1.5">
-        @for (p of d.open_ports; track p) {
-          <span class="rounded px-2.5 py-1 text-[14px] font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">{{ p }}</span>
-        }
-      </div>
-    </div>
-  }
-  @if (hasItems(d.ports)) {
-    <div class="mx-4 mb-3 mt-5">
-      <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Port Details</div>
-      <div class="flex flex-col gap-3">
-        @if (renderablePorts(d.ports).length) {
-          @for (p of renderablePorts(d.ports); track p) {
-            <div class="overflow-hidden rounded-xl bg-[var(--color-blue-760)] shadow-[0_10px_28px_rgba(0,0,0,0.16)] ring-1 ring-white/5 font-mono">
-              <div class="flex items-center gap-2.5 bg-[var(--color-blue-700)] px-4 py-2.5">
-                @if (p.port) {
-                  <span class="text-[17px] font-bold text-sky-400 tracking-wide">{{ p.port }}</span>
-                }
-                @if (p.protocol || p.proto) {
-                  <span class="text-[16px] text-[var(--color-text4)]">/</span>
-                  <span class="rounded border border-sky-400/25 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold uppercase text-sky-400">{{ p.protocol || p.proto }}</span>
-                }
-                @if (p.service) {
-                  <span class="rounded border border-emerald-400/20 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-semibold text-emerald-400">{{ p.service }}</span>
-                }
-                @if (p.state) {
-                  <span class="ml-auto rounded border px-2 py-0.5 text-[12px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>
-                }
-              </div>
-              <div class="border-t border-[var(--color-divider)]/60 p-3.5 flex flex-col gap-3">
-                @if (p.banner) {
-                  <div>
-                    <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text4)]">Banner</div>
-                    <pre class="m-0 max-h-56 overflow-y-auto whitespace-pre-wrap break-all rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5 text-[13px] leading-relaxed text-[var(--color-text3)]">{{ p.banner }}</pre>
-                  </div>
-                }
-                @if (p.tls) {
-                  <div>
-                    <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-cyan-400">SSL Certificate</div>
-                    <div class="flex flex-col gap-1 rounded border border-cyan-400/18 bg-[var(--color-blue-830)] p-2.5">
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Version</span><span class="text-[var(--color-text2)]">{{ p.tls.version }}</span></div>
-                      @if (p.tls.cipher) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Cipher Suite</span><span class="text-[var(--color-text2)]">{{ p.tls.cipher }}{{ p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '' }}</span></div>
-                      }
-                      @if (p.tls.cert_cn) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Subject CN</span><span class="text-[var(--color-text2)]">{{ p.tls.cert_cn }}</span></div>
-                      }
-                      @if (p.tls.issuer) {
-                        <div class="flex gap-2.5 text-[13px]">
-                          <span class="text-sky-400 font-semibold w-32 flex-shrink-0">Issuer</span>
-                          <span class="text-[var(--color-text2)]">
-                            {{ p.tls.issuer.commonName || '' }}
-                            @if (p.tls.issuer.organizationName) {
-                              <ng-container> / {{ p.tls.issuer.organizationName }}</ng-container>
-                            }
-                            @if (p.tls.issuer.countryName) {
-                              <ng-container> ({{ p.tls.issuer.countryName }})</ng-container>
-                            }
-                          </span>
-                        </div>
-                      }
-                      @if (p.tls.not_before) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not Before</span><span class="text-[var(--color-text2)]">{{ p.tls.not_before }}</span></div>
-                      }
-                      @if (p.tls.not_after || p.tls.cert_expires) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not After</span><span class="text-[var(--color-text2)]">{{ p.tls.not_after || p.tls.cert_expires }}</span></div>
-                      }
-                      @if (p.tls.is_self_signed) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Self-Signed</span><span class="text-red-400 font-bold">⚠ Yes</span></div>
-                      }
-                      @if (p.tls.signature_algorithm) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Signature Algo</span><span class="text-[var(--color-text2)]">{{ p.tls.signature_algorithm }}</span></div>
-                      }
-                      @if (p.tls.public_key_algorithm) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Public Key</span><span class="text-[var(--color-text2)]">{{ p.tls.public_key_algorithm }}{{ p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '' }}</span></div>
-                      }
-                      @if (hasItems(p.tls.key_usage)) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.key_usage?.join(', ') }}</span></div>
-                      }
-                      @if (hasItems(p.tls.extended_key_usage)) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Ext Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.extended_key_usage?.join(', ') }}</span></div>
-                      }
-                      @if (p.tls.fingerprint_sha256) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">SHA-256</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.fingerprint_sha256 }}</span></div>
-                      }
-                    </div>
-                    @if (hasItems(p.tls.supported_versions) || hasItems(p.tls.weak_protocols) || hasItems(p.tls.risk_flags)) {
-                      <div class="mt-2">
-                        <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">TLS Configuration</div>
-                        <div class="flex flex-col gap-1 rounded border border-violet-400/18 bg-[var(--color-blue-830)] p-2.5">
-                          @if (hasItems(p.tls.supported_versions)) {
-                            <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Supported</span><span class="text-[var(--color-text2)]">{{ p.tls.supported_versions?.join(', ') }}</span></div>
-                          }
-                          @if (hasItems(p.tls.weak_protocols)) {
-                            <div class="flex gap-2.5 text-[13px]"><span class="text-red-400 font-semibold w-32 flex-shrink-0">Weak Protocols</span><span class="text-red-400">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
-                          }
-                          @if (hasItems(p.tls.risk_flags)) {
-                            <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Risk Flags</span><span class="text-[var(--color-text2)]">{{ p.tls.risk_flags?.join(', ') }}</span></div>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-                }
-                @if (p.http) {
-                  <div>
-                    <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-emerald-400">HTTP</div>
-                    <div class="flex flex-col gap-1 rounded border border-emerald-400/18 bg-[var(--color-blue-830)] p-2.5">
-                      @if (p.http.server) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Server</span><span class="text-[var(--color-text2)]">{{ p.http.server }}</span></div>
-                      }
-                      @if (p.http.title) {
-                        <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Title</span><span class="text-[var(--color-text2)]">{{ p.http.title }}</span></div>
-                      }
-                    </div>
-                  </div>
-                }
-                @if (hasItems(p.risk_flags)) {
-                  <div>
-                    <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-orange-400">Risk Flags</div>
-                    <div class="flex flex-wrap gap-1.5">
-                      @for (r of p.risk_flags; track r) {
-                        <span class="rounded px-2.5 py-1 text-[13px] font-semibold bg-orange-400/12 text-orange-400 border border-orange-400/25">{{ r }}</span>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-        } @else {
-          <div class="bg-transparent px-1 pt-0.5 pb-1 text-[15px] font-medium text-[var(--color-text4)]">
-            No result found
-          </div>
-        }
-      </div>
-    </div>
-  }
-@if (hasItems(d.web_technologies)) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Web Technologies</div>
-    <div class="flex flex-wrap gap-1.5">
-      @for (t of d.web_technologies; track t) {
-        <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">{{ t }}</span>
-      }
-    </div>
-  </div>
-}
-@if (securityItems(d.security).length || d.cdn || d.waf || d.hsts || d.load_balancer) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Security &amp; CDN</div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5">
-      @if (d.cdn) {
-        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">CDN</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ d.cdn }}</span></div>
-      }
-      @if (d.waf) {
-        <div           class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">WAF</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ d.waf }}</span></div>
-      }
-      @if (d.load_balancer) {
-        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Load Balancer</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ d.load_balancer }}</span></div>
-      }
-      <div class="flex flex-col gap-0.5">
-        <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">HSTS</span>
-        <span class="text-[13px] font-bold" [ngClass]="d.hsts ? 'text-green-400' : 'text-[var(--color-text4)]'">{{ d.hsts ? '✓ Yes' : '✕ No' }}</span>
-      </div>
-      @if (securityItems(d.security).length) {
-        <div class="col-span-full flex flex-col gap-1.5">
-          <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Flags</span>
-          <div class="flex flex-wrap gap-1.5">
-            @for (s of securityItems(d.security); track s) {
-              <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-400/12 text-emerald-400 border border-emerald-400/25">{{ s }}</span>
-            }
-          </div>
-        </div>
-      }
-    </div>
-  </div>
-}
-@if (hasItems(d.vulnerabilities)) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-red-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-red-400/30 after:to-transparent">⚠ Vulnerabilities ({{ d.vulnerabilities!.length }})</div>
-    <div class="flex flex-col gap-1.5">
-      @for (v of d.vulnerabilities; track v) {
-        <div class="px-3 py-1.5 rounded bg-red-500/7 border border-red-500/18 border-l-[3px] border-l-red-500 text-[12px] font-medium text-red-300">{{ v }}</div>
-      }
-    </div>
-  </div>
-}
-@if (hasItems(d.misconfigurations)) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-yellow-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-yellow-400/30 after:to-transparent">⚡ Misconfigurations</div>
-    <div class="flex flex-col gap-1.5">
-      @for (m of d.misconfigurations; track m) {
-        <div class="px-3 py-1.5 rounded bg-yellow-500/7 border border-yellow-500/18 border-l-[3px] border-l-yellow-500 text-[12px] font-medium text-yellow-300">{{ m }}</div>
-      }
-    </div>
-  </div>
-}
-@if (hasData(d.http_headers)) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">HTTP Headers</div>
-    <div class="flex flex-col gap-1">
-      @for (h of safeEntries(d.http_headers); track h) {
-        <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
-          <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
-          <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>
-        </div>
-      }
-    </div>
-  </div>
-}
-@if (hasData(d.cache_headers)) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Cache Headers</div>
-    <div class="flex flex-col gap-1">
-      @for (h of safeEntries(d.cache_headers); track h) {
-        <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
-          <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
-          <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>
-        </div>
-      }
-    </div>
-  </div>
-}
-@if (hasItems(d.allowed_methods)) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Allowed Methods</div>
-    <div class="flex flex-wrap gap-1.5">
-      @for (m of d.allowed_methods; track m) {
-        <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-yellow-400/12 text-yellow-400 border border-yellow-400/25">{{ m }}</span>
-      }
-    </div>
-  </div>
-}
-@if (hasItems(d.hostnames)) {
-  <div class="mx-4 my-3">
-    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Hostnames ({{ d.hostnames!.length }})</div>
-    <div class="flex flex-wrap gap-1.5">
-      @for (h of d.hostnames; track h) {
-        <span class="rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[14px] font-mono text-[var(--color-text3)]">{{ h }}</span>
-      }
-    </div>
-  </div>
-}
-@if (hasItems(d.cameras)) {
-  <div class="mx-4 my-3">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-emerald-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-emerald-400/30 after:to-transparent">📷 Cameras ({{ d.cameras!.length }})</div>
-    <div class="flex flex-col gap-1.5">
-      @for (cam of d.cameras; track cam) {
-        <div class="flex items-center gap-2 flex-wrap border-b border-[var(--color-divider)] py-1.5 last:border-0">
-          <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ cam.ip }}</span>
-          @if (cam.port) {
-            <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">:{{ cam.port }}</span>
-          }
-          @if (cam.brand) {
-            <span class="text-[13px] text-[var(--color-text2)]">{{ cam.brand }}</span>
-          }
-          @if (cam.model) {
-            <span class="text-[13px] text-[var(--color-text2)]">{{ cam.model }}</span>
-          }
-        </div>
-      }
-    </div>
-  </div>
-}
-
-</ng-template>
-@if (activeTab === 'dns') {
-  <div class="px-4 py-4 md:px-6">
-    @if (isScanning()) {
-      <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
-        <div class="flex justify-between items-center mb-2.5">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ currentStep || 'Resolving…' }}</span>
-          <span class="text-xl font-bold text-sky-400 leading-none">{{ scanHelper.progress() }}%</span>
-        </div>
-        <div class="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-1">
-          @for (_ of progressSegments; track _; let i = $index) {
-            <div class="h-1 rounded-full bg-[var(--color-divider)] transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
-            </div>
-          }
-        </div>
-      </div>
-    }
-    @if (scanHelper.onError() && !isScanning()) {
-      <div class="mb-4 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">
-        ✕ {{ scanHelper.onError()?.message || 'Scan failed' }}
-      </div>
-    }
-    @if (hasSearched) {
-      <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
-        <div class="ui-ioc-table-head flex items-center justify-between border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
-          <span>IP ADDRESS</span><span>DETAILS</span>
-        </div>
-        @if (!dnsResult && !scanHelper.onError()) {
-          @for (_ of [1,2,3,4]; track $index; let last = $last) {
-            <div class="ui-ioc-table-row flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [class.border-b-0]="last">
-              <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
-              <div class="flex items-center gap-2">
-                <div class="ui-shimmer h-6 w-6 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)]"></div>
-              </div>
-            </div>
-          }
-        } @else if (dnsResult && ipRows.length) {
-          @for (row of ipRows; track trackByIp($index, row); let last = $last) {
-            <div class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-[filter] hover:brightness-105" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [ngClass]="{ 'credential_row_expand border-b-transparent': row.expanded, 'border-b-0': last && !row.expanded }" (click)="toggleIpRow(row)">
-              <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">{{ row.ip }}</span>
-              <div class="flex items-center gap-2">
-                @if (row.loading) {
-                  <span class="w-3.5 h-3.5 border-2 border-sky-400/25 border-t-sky-400 rounded-full animate-spin"></span>
-                }
-                <div class="flex h-6 w-6 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] text-[14px] font-bold leading-none transition-colors duration-150" [ngClass]="{ 'bg-emerald-400/10 border-emerald-400/25 text-[var(--color-text1)]': row.expanded }">
-                  <span>{{ row.expanded ? '−' : '+' }}</span>
-                </div>
-              </div>
-            </div>
-            @if (row.expanded) {
-              <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] pb-2" [class.border-b-0]="last">
-                @if (row.loading && !row.detail) {
-                  <div class="flex items-center gap-2.5 px-4 py-4 text-[13px] text-[var(--color-text4)]">
-                    <span class="w-5 h-5 border-2 border-sky-400/25 border-t-sky-400 rounded-full animate-spin"></span>
-                    Loading details for {{ row.ip }}…
-                  </div>
-                }
-                @if (row.error) {
-                  <div class="mx-4 my-3 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">✕ {{ row.error }}</div>
-                }
-                @if (row.detail) {
-                  <ng-container *ngTemplateOutlet="ipDetailTpl; context: { d: row.detail }"></ng-container>
-                }
+    <div class="mt-4">
+      @if (!(activeTab === 'geo' && geoMode === 'ranges')) {
+        <div class="w-full">
+          <form (submit)="$event.preventDefault(); runToolbarSearch()" class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="formError ? 'ring-1 ring-[var(--color-border-red)]' : ''">
+            <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
+            <input [value]="getToolbarQuery()" (input)="setToolbarQuery($any($event.target).value)" (keyup.enter)="runToolbarSearch()" type="text" [placeholder]="getToolbarPlaceholder()" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" />
+            @if (formError) {
+              <div class="pointer-events-none absolute right-2 top-1/2 inline-flex max-w-[240px] -translate-y-1/2 items-center gap-1 rounded-md bg-red-500/85 px-2 py-[3px] text-[12px] font-semibold text-white max-[900px]:max-w-[160px] max-[640px]:max-w-[28px]">
+                <i class="bi bi-exclamation-triangle-fill text-[12px] text-white"></i>
+                <span class="truncate max-[640px]:hidden">{{ formError }}</span>
               </div>
             }
-          }
-        } @else if (dnsResult) {
-          <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
-            <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">-</span>
-            <span class="text-[var(--color-text4)]">-</span>
-          </div>
-        }
-      </div>
-    }
-  </div>
-}
-@if (activeTab === 'shodan') {
-  <div class="px-4 py-4 md:px-6">
-    @if (isScanning()) {
-      <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
-        <div class="flex justify-between items-center mb-2.5">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ currentStep || 'Scanning IP…' }}</span>
-          <span class="text-xl font-bold text-sky-400 leading-none">{{ scanHelper.progress() }}%</span>
+          </form>
         </div>
-        <div class="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-1">
-          @for (_ of progressSegments; track _; let i = $index) {
-            <div class="h-1 rounded-full bg-[var(--color-divider)] transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
-            </div>
-          }
-        </div>
-      </div>
-    }
-    @if (scanHelper.onError() && !isScanning()) {
-      <div class="mb-4 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">
-        ✕ {{ scanHelper.onError()?.message || 'Scan failed' }}
-      </div>
-    }
-    @if (hasSearched) {
-      <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
-        @if (!shodanResult && !scanHelper.onError()) {
-          <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
-            <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="flex items-center gap-2">
-              <div class="ui-shimmer h-5 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
-              <div class="ui-shimmer h-5 w-20 rounded-full bg-[var(--color-blue-720)]"></div>
-            </div>
-          </div>
-        } @else if (shodanResult) {
-          <div class="ui-ioc-table-row ui-ioc-row-even flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
-            <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ shodanResult.ip }}</span>
-            <div class="flex items-center gap-2">
-              @if (shodanResult.cloud_provider) {
-                <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">☁ {{ shodanResult.cloud_provider }}</span>
-              }
-              @if (shodanResult.is_camera) {
-                <span class="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">📷 CAMERA</span>
-              }
-            </div>
-          </div>
-          <div class="bg-[var(--color-blue-700)] pb-2">
-            <ng-container *ngTemplateOutlet="ipDetailTpl; context: { d: shodanResult }"></ng-container>
-          </div>
-        }
-      </div>
-    }
-  </div>
-}
-@if (activeTab === 'geo') {
-  <div class="px-4 py-4 md:px-6">
-    @if (isScanning()) {
-      <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
-        <div class="flex justify-between items-center mb-2.5">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ currentStep || 'Scanning area…' }}</span>
-          <span class="text-xl font-bold text-sky-400 leading-none">{{ scanHelper.progress() }}%</span>
-        </div>
-        <div class="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-1">
-          @for (_ of progressSegments; track _; let i = $index) {
-            <div class="h-1 rounded-full bg-[var(--color-divider)] transition-colors duration-300" [ngClass]="{ 'bg-sky-400 shadow-[0_0_8px_rgba(78,162,241,0.5)]': isProgressSegmentActive(i) }">
-            </div>
-          }
-        </div>
-        @if (geoLiveStats) {
-          <div class="mt-3 flex flex-wrap items-center gap-4 border-t border-[var(--color-divider)] pt-2.5">
-            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-[var(--color-text1)]">{{ geoLiveStats.ips_extracted }}</span><span class="text-[11px] text-[var(--color-text4)]">IPs Found</span></div>
-            <div class="h-5 w-px bg-[var(--color-divider)]"></div>
-            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-[var(--color-text1)]">{{ geoLiveStats.ips_scanned }}</span><span class="text-[11px] text-[var(--color-text4)]">Scanned</span></div>
-            <div class="h-5 w-px bg-[var(--color-divider)]"></div>
-            <div class="flex items-baseline gap-1.5"><span class="text-[16px] font-bold text-emerald-400">{{ geoLiveStats.cameras_found }}</span><span class="text-[11px] text-[var(--color-text4)]">📷 Cameras</span></div>
-          </div>
-        }
-      </div>
-    }
-    @if (scanHelper.onError() && !isScanning()) {
-      <div class="mb-4 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">
-        ✕ {{ scanHelper.onError()?.message || 'Scan failed' }}
-      </div>
-    }
-    @if (hasSearched) {
-      @if (geoResult && !geoResult.cameras?.length) {
-        <div class="mb-4 rounded-lg border border-dashed border-[var(--color-border)] py-8 text-center text-[13px] text-[var(--color-text4)]">No cameras detected.</div>
       }
-      @if (!geoResult && !scanHelper.onError()) {
-        <app-geo-feed [loading]="true" @fadeInDashboardItem></app-geo-feed>
+    </div>
+
+    <div class="mt-[30px] flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+      @if (activeTab === 'geo' && (geoResult || geoLiveStats)) {
+        <div class="hidden items-center gap-2 md:flex">
+          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ geoResult?.ips_extracted ?? geoLiveStats?.ips_extracted ?? 0 }}</div>
+          <div class="text-xs text-[var(--color-text4)]">IPs Found</div>
+        </div>
+
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+
+        <div class="hidden items-center gap-2 lg:flex">
+          <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ geoResult?.ips_scanned ?? geoLiveStats?.ips_scanned ?? 0 }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Scanned</div>
+        </div>
+
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
+
+        <div class="hidden items-center gap-2 xl:flex">
+          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-emerald-400">{{ geoResult?.cameras_found ?? geoLiveStats?.cameras_found ?? 0 }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Cameras</div>
+        </div>
+      } @else {
+        <div class="hidden items-center gap-2 md:flex">
+          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ lastResultCount }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Results</div>
+        </div>
+
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+
+        <div class="hidden items-center gap-2 lg:flex">
+          <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ isScanning() ? 'Scanning' : (scanHelper.onError() ? 'Error' : 'Idle') }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Status</div>
+        </div>
       }
-      @if (geoResult?.cameras?.length) {
-        <app-geo-feed [cameras]="geoResult.cameras" @fadeInDashboardItem></app-geo-feed>
-      }
-    }
+
+      <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
+        @if (activeTab === 'geo') {
+          <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openGeoCoordinatesModal()" [disabled]="isScanning()">
+            <i class="bi bi-crosshair text-[15px] leading-none"></i>
+          </button>
+          <div class="h-6 w-px bg-[var(--color-divider)]"></div>
+          <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openGeoRangesModal()" [disabled]="isScanning()">
+            <i class="bi bi-list-ul text-[15px] leading-none"></i>
+          </button>
+          <div class="h-6 w-px bg-[var(--color-divider)]"></div>
+        }
+        <button class="ui-cred-toolbar-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
+          <i class="bi bi-stop-fill text-[18px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
+        </button>
+      </div>
+    </div>
   </div>
-}
-<app-geo-coordinates-modal
-  [isOpen]="showGeoCoordinatesModal"
-  [isScanning]="isScanning()"
-  [coordinates]="geoForm.coordinates"
-  [radiusKm]="geoForm.radius_km"
-  [maxIps]="geoForm.max_ips"
-  (close)="showGeoCoordinatesModal = false"
-  (coordinatesChange)="geoForm.coordinates = $event; validateGeo()"
-  (radiusKmChange)="geoForm.radius_km = $event"
-  (maxIpsChange)="geoForm.max_ips = $event"
-  (search)="showGeoCoordinatesModal = false; geoMode = 'coords'; startGeoScan()">
-</app-geo-coordinates-modal>
-<app-geo-ranges-modal
-  [isOpen]="showGeoRangesModal"
-  [isScanning]="isScanning()"
-  [ipRanges]="geoForm.ip_ranges"
-  [maxIps]="geoForm.max_ips"
-  [formError]="formError"
-  [parsedRanges]="parsedRanges"
-  (close)="showGeoRangesModal = false"
-  (ipRangesChange)="geoForm.ip_ranges = $event; validateIpRanges()"
-  (maxIpsChange)="geoForm.max_ips = $event"
-  (search)="showGeoRangesModal = false; geoMode = 'ranges'; startGeoScan()">
-</app-geo-ranges-modal>
+
+  @if (!hasSearched && !isScanning() && !scanHelper.onError()) {
+    <div class="px-4 md:px-6" @fadeInDashboardItem>
+      <app-empty-query></app-empty-query>
+    </div>
+  }
+
+  @if (activeTab === 'dns') {
+    <app-network-intel-dns-section
+      [isScanning]="isScanning()"
+      [progress]="scanHelper.progress()"
+      [currentStep]="currentStep"
+      [progressSegments]="progressSegments"
+      [errorMessage]="scanHelper.onError()?.message || null"
+      [hasSearched]="hasSearched"
+      [dnsResult]="dnsResult"
+      [ipRows]="ipRows"
+      @fadeInDashboardItem
+      (toggleRow)="toggleIpRow($event)">
+    </app-network-intel-dns-section>
+  }
+
+  @if (activeTab === 'shodan') {
+    <app-network-intel-shodan-section
+      [isScanning]="isScanning()"
+      [progress]="scanHelper.progress()"
+      [currentStep]="currentStep"
+      [progressSegments]="progressSegments"
+      [errorMessage]="scanHelper.onError()?.message || null"
+      [hasSearched]="hasSearched"
+      [shodanResult]="shodanResult"
+      @fadeInDashboardItem>
+    </app-network-intel-shodan-section>
+  }
+
+  @if (activeTab === 'geo') {
+    <app-network-intel-geo-section
+      [isScanning]="isScanning()"
+      [progress]="scanHelper.progress()"
+      [currentStep]="currentStep"
+      [progressSegments]="progressSegments"
+      [errorMessage]="scanHelper.onError()?.message || null"
+      [hasSearched]="hasSearched"
+      [geoResult]="geoResult"
+      [geoLiveStats]="geoLiveStats"
+      @fadeInDashboardItem>
+    </app-network-intel-geo-section>
+  }
+
+  <app-geo-coordinates-modal
+    [isOpen]="showGeoCoordinatesModal"
+    [isScanning]="isScanning()"
+    [coordinates]="geoForm.coordinates"
+    [radiusKm]="geoForm.radius_km"
+    [maxIps]="geoForm.max_ips"
+    (close)="showGeoCoordinatesModal = false"
+    (coordinatesChange)="geoForm.coordinates = $event; validateGeo()"
+    (radiusKmChange)="geoForm.radius_km = $event"
+    (maxIpsChange)="geoForm.max_ips = $event"
+    (search)="showGeoCoordinatesModal = false; geoMode = 'coords'; startGeoScan()">
+  </app-geo-coordinates-modal>
+
+  <app-geo-ranges-modal
+    [isOpen]="showGeoRangesModal"
+    [isScanning]="isScanning()"
+    [ipRanges]="geoForm.ip_ranges"
+    [maxIps]="geoForm.max_ips"
+    [formError]="formError"
+    [parsedRanges]="parsedRanges"
+    (close)="showGeoRangesModal = false"
+    (ipRangesChange)="geoForm.ip_ranges = $event; validateIpRanges()"
+    (maxIpsChange)="geoForm.max_ips = $event"
+    (search)="showGeoRangesModal = false; geoMode = 'ranges'; startGeoScan()">
+  </app-geo-ranges-modal>
 </div>

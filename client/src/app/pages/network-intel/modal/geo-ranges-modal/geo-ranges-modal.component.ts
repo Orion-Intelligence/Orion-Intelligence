@@ -9,6 +9,8 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './geo-ranges-modal.component.html',
 })
 export class GeoRangesModalComponent {
+  readonly maxIpOptions = [50, 100, 200, 500];
+
   @Input() isOpen = false;
   @Input() isScanning = false;
   @Input() ipRanges = '';
@@ -20,8 +22,6 @@ export class GeoRangesModalComponent {
   @Output() ipRangesChange = new EventEmitter<string>();
   @Output() maxIpsChange = new EventEmitter<number>();
   @Output() search = new EventEmitter<void>();
-
-  readonly maxIpOptions = [50, 100, 200, 500];
 
   get ipRangeCount(): number {
     return this.ipRanges

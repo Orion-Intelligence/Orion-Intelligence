@@ -49,6 +49,19 @@ export interface CameraInfo {
   city?:            string;
   url?:             string;
   stream_url?:      string;
+  camera_path?:     string;
+  camera_paths?:    string[];
+  cameras?:         Array<{
+    port?: number;
+    service?: string;
+    brand?: string;
+    model_hint?: string | null;
+    camera_path?: string;
+    path_status?: number;
+    is_camera?: boolean;
+    [key: string]: any;
+  }>;
+  ports?:           Array<number | IpPortData>;
   vulnerabilities?: string[];
 }
 

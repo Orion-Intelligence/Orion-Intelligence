@@ -1,0 +1,317 @@
+<div class="mx-4 my-3">
+  <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">General Information</div>
+  <div class="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-4">
+    @if (detail.country) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Country</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.country }}</span></div>
+    }
+    @if (detail.city) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">City</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.city }}</span></div>
+    }
+    @if (detail.organization) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Org</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.organization }}</span></div>
+    }
+    @if (detail.isp) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">ISP</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.isp }}</span></div>
+    }
+    @if (detail.asn) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">ASN</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.asn }}</span></div>
+    }
+    @if (detail.hosting_type) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Hosting</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.hosting_type }}</span></div>
+    }
+    @if (detail.cloud_provider) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Cloud</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_provider }}</span></div>
+    }
+    @if (detail.cloud_region) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Region</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_region }}</span></div>
+    }
+    @if (detail.cloud_service) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Service</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_service }}</span></div>
+    }
+    @if (detail.web_server) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Web Server</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.web_server }}</span></div>
+    }
+    @if (detail.title) {
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Title</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.title }}</span></div>
+    }
+  </div>
+</div>
+
+@if (ui.hasItems(detail.open_ports)) {
+  <div class="mx-4 my-3">
+    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Open Ports</div>
+    <div class="flex flex-wrap gap-1.5">
+      @for (p of detail.open_ports; track p) {
+        <span class="rounded px-2.5 py-1 text-[14px] font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">{{ p }}</span>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasItems(detail.ports)) {
+  <div class="mx-4 mb-3 mt-5">
+    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Port Details</div>
+    <div class="flex flex-col gap-3">
+      @if (ui.renderablePorts(detail.ports).length) {
+        @for (p of ui.renderablePorts(detail.ports); track p) {
+          <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_10px_28px_rgba(0,0,0,0.16)] font-mono">
+            <div class="flex items-center gap-2.5 bg-[var(--color-blue-700)] px-4 py-2.5">
+              @if (p.port) {
+                <span class="text-[17px] font-bold text-sky-400 tracking-wide">{{ p.port }}</span>
+              }
+              @if (p.protocol || p.proto) {
+                <span class="text-[16px] text-[var(--color-text4)]">/</span>
+                <span class="rounded border border-sky-400/25 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold uppercase text-sky-400">{{ p.protocol || p.proto }}</span>
+              }
+              @if (p.service) {
+                <span class="rounded border border-emerald-400/20 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-semibold text-emerald-400">{{ p.service }}</span>
+              }
+              @if (p.state) {
+                <span class="ml-auto rounded border px-2 py-0.5 text-[12px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>
+              }
+            </div>
+            <div class="border-t border-[var(--color-border)] p-3.5 flex flex-col gap-3">
+              @if (p.banner) {
+                <div>
+                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text4)]">Banner</div>
+                  <pre class="m-0 max-h-56 overflow-y-auto whitespace-pre-wrap break-all rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5 text-[13px] leading-relaxed text-[var(--color-text3)]">{{ p.banner }}</pre>
+                </div>
+              }
+              @if (p.tls) {
+                <div>
+                  <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-cyan-400">SSL Certificate</div>
+                  <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
+                    <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Version</span><span class="text-[var(--color-text2)]">{{ p.tls.version }}</span></div>
+                    @if (p.tls.cipher) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Cipher Suite</span><span class="text-[var(--color-text2)]">{{ p.tls.cipher }}{{ p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '' }}</span></div>
+                    }
+                    @if (p.tls.cert_cn) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Subject CN</span><span class="text-[var(--color-text2)]">{{ p.tls.cert_cn }}</span></div>
+                    }
+                    @if (p.tls.issuer) {
+                      <div class="flex gap-2.5 text-[13px]">
+                        <span class="text-sky-400 font-semibold w-32 flex-shrink-0">Issuer</span>
+                        <span class="text-[var(--color-text2)]">
+                          {{ p.tls.issuer.commonName || '' }}
+                          @if (p.tls.issuer.organizationName) {
+                            <ng-container> / {{ p.tls.issuer.organizationName }}</ng-container>
+                          }
+                          @if (p.tls.issuer.countryName) {
+                            <ng-container> ({{ p.tls.issuer.countryName }})</ng-container>
+                          }
+                        </span>
+                      </div>
+                    }
+                    @if (p.tls.not_before) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not Before</span><span class="text-[var(--color-text2)]">{{ p.tls.not_before }}</span></div>
+                    }
+                    @if (p.tls.not_after || p.tls.cert_expires) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not After</span><span class="text-[var(--color-text2)]">{{ p.tls.not_after || p.tls.cert_expires }}</span></div>
+                    }
+                    @if (p.tls.is_self_signed) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Self-Signed</span><span class="text-red-400 font-bold">⚠ Yes</span></div>
+                    }
+                    @if (p.tls.signature_algorithm) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Signature Algo</span><span class="text-[var(--color-text2)]">{{ p.tls.signature_algorithm }}</span></div>
+                    }
+                    @if (p.tls.public_key_algorithm) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Public Key</span><span class="text-[var(--color-text2)]">{{ p.tls.public_key_algorithm }}{{ p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '' }}</span></div>
+                    }
+                    @if (ui.hasItems(p.tls.key_usage)) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.key_usage?.join(', ') }}</span></div>
+                    }
+                    @if (ui.hasItems(p.tls.extended_key_usage)) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Ext Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.extended_key_usage?.join(', ') }}</span></div>
+                    }
+                    @if (p.tls.fingerprint_sha256) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">SHA-256</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.fingerprint_sha256 }}</span></div>
+                    }
+                  </div>
+                  @if (ui.hasItems(p.tls.supported_versions) || ui.hasItems(p.tls.weak_protocols) || ui.hasItems(p.tls.risk_flags)) {
+                    <div class="mt-2">
+                      <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">TLS Configuration</div>
+                      <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
+                        @if (ui.hasItems(p.tls.supported_versions)) {
+                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Supported</span><span class="text-[var(--color-text2)]">{{ p.tls.supported_versions?.join(', ') }}</span></div>
+                        }
+                        @if (ui.hasItems(p.tls.weak_protocols)) {
+                          <div class="flex gap-2.5 text-[13px]"><span class="text-red-400 font-semibold w-32 flex-shrink-0">Weak Protocols</span><span class="text-red-400">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
+                        }
+                        @if (ui.hasItems(p.tls.risk_flags)) {
+                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Risk Flags</span><span class="text-[var(--color-text2)]">{{ p.tls.risk_flags?.join(', ') }}</span></div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+              @if (p.http) {
+                <div>
+                  <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-emerald-400">HTTP</div>
+                  <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
+                    @if (p.http.server) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Server</span><span class="text-[var(--color-text2)]">{{ p.http.server }}</span></div>
+                    }
+                    @if (p.http.title) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Title</span><span class="text-[var(--color-text2)]">{{ p.http.title }}</span></div>
+                    }
+                  </div>
+                </div>
+              }
+              @if (ui.hasItems(p.risk_flags)) {
+                <div>
+                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-orange-400">Risk Flags</div>
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (r of p.risk_flags; track r) {
+                      <span class="rounded px-2.5 py-1 text-[13px] font-semibold bg-orange-400/12 text-orange-400 border border-orange-400/25">{{ r }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="bg-transparent px-1 pt-0.5 pb-1 text-[15px] font-medium text-[var(--color-text4)]">
+          No result found
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasItems(detail.web_technologies)) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Web Technologies</div>
+    <div class="flex flex-wrap gap-1.5">
+      @for (t of detail.web_technologies; track t) {
+        <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">{{ t }}</span>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.securityItems(detail.security).length || detail.cdn || detail.waf || detail.hsts || detail.load_balancer) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Security &amp; CDN</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5">
+      @if (detail.cdn) {
+        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">CDN</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ detail.cdn }}</span></div>
+      }
+      @if (detail.waf) {
+        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">WAF</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ detail.waf }}</span></div>
+      }
+      @if (detail.load_balancer) {
+        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Load Balancer</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ detail.load_balancer }}</span></div>
+      }
+      <div class="flex flex-col gap-0.5">
+        <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">HSTS</span>
+        <span class="text-[13px] font-bold" [ngClass]="detail.hsts ? 'text-green-400' : 'text-[var(--color-text4)]'">{{ detail.hsts ? '✓ Yes' : '✕ No' }}</span>
+      </div>
+      @if (ui.securityItems(detail.security).length) {
+        <div class="col-span-full flex flex-col gap-1.5">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Flags</span>
+          <div class="flex flex-wrap gap-1.5">
+            @for (s of ui.securityItems(detail.security); track s) {
+              <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-400/12 text-emerald-400 border border-emerald-400/25">{{ s }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasItems(detail.vulnerabilities)) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-red-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-red-400/30 after:to-transparent">⚠ Vulnerabilities ({{ detail.vulnerabilities!.length }})</div>
+    <div class="flex flex-col gap-1.5">
+      @for (v of detail.vulnerabilities; track v) {
+        <div class="px-3 py-1.5 rounded bg-red-500/7 border border-red-500/18 border-l-[3px] border-l-red-500 text-[12px] font-medium text-red-300">{{ v }}</div>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasItems(detail.misconfigurations)) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-yellow-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-yellow-400/30 after:to-transparent">⚡ Misconfigurations</div>
+    <div class="flex flex-col gap-1.5">
+      @for (m of detail.misconfigurations; track m) {
+        <div class="px-3 py-1.5 rounded bg-yellow-500/7 border border-yellow-500/18 border-l-[3px] border-l-yellow-500 text-[12px] font-medium text-yellow-300">{{ m }}</div>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasData(detail.http_headers)) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">HTTP Headers</div>
+    <div class="flex flex-col gap-1">
+      @for (h of ui.safeEntries(detail.http_headers); track h) {
+        <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
+          <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
+          <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasData(detail.cache_headers)) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Cache Headers</div>
+    <div class="flex flex-col gap-1">
+      @for (h of ui.safeEntries(detail.cache_headers); track h) {
+        <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
+          <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
+          <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasItems(detail.allowed_methods)) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Allowed Methods</div>
+    <div class="flex flex-wrap gap-1.5">
+      @for (m of detail.allowed_methods; track m) {
+        <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-yellow-400/12 text-yellow-400 border border-yellow-400/25">{{ m }}</span>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasItems(detail.hostnames)) {
+  <div class="mx-4 my-3">
+    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Hostnames ({{ detail.hostnames!.length }})</div>
+    <div class="flex flex-wrap gap-1.5">
+      @for (h of detail.hostnames; track h) {
+        <span class="rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[14px] font-mono text-[var(--color-text3)]">{{ h }}</span>
+      }
+    </div>
+  </div>
+}
+
+@if (ui.hasItems(detail.cameras)) {
+  <div class="mx-4 my-3">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-emerald-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-emerald-400/30 after:to-transparent">📷 Cameras ({{ detail.cameras!.length }})</div>
+    <div class="flex flex-col gap-1.5">
+      @for (cam of detail.cameras; track cam) {
+        <div class="flex items-center gap-2 flex-wrap border-b border-[var(--color-divider)] py-1.5 last:border-0">
+          <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ cam.ip }}</span>
+          @if (cam.port) {
+            <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">:{{ cam.port }}</span>
+          }
+          @if (cam.brand) {
+            <span class="text-[13px] text-[var(--color-text2)]">{{ cam.brand }}</span>
+          }
+          @if (cam.model) {
+            <span class="text-[13px] text-[var(--color-text2)]">{{ cam.model }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

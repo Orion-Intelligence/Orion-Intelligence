@@ -21,8 +21,8 @@
     @for (camera of pagedCameras; track trackCamera($index, camera)) {
       <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
         <div class="relative aspect-video overflow-hidden border-b border-[var(--color-divider)] bg-[linear-gradient(180deg,var(--color-blue-760),var(--color-blue-830))]">
-          @if (hasPreview(camera)) {
-            <iframe class="h-full w-full" [src]="previewUrl(camera)" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="Camera feed preview">
+          @if (hasPreview(camera) && !isPreviewFailed(camera)) {
+            <iframe class="h-full w-full" [src]="previewUrl(camera)" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="Camera feed preview" (load)="onPreviewLoad(camera)" (error)="onPreviewError(camera)">
             </iframe>
             <div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between bg-[linear-gradient(180deg,rgba(3,10,20,0.78),transparent)] p-3">
               <span class="rounded-full border border-emerald-400/30 bg-emerald-400/12 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.2px] text-emerald-400">Live Preview</span>
@@ -35,10 +35,17 @@
                 }
               </div>
             </div>
+            @if (!isPreviewLoaded(camera)) {
+              <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-[linear-gradient(180deg,rgba(8,16,30,0.42),rgba(8,16,30,0.22))] text-center">
+                <div class="rounded-xl border border-[var(--color-border)] bg-[rgba(8,16,30,0.72)] px-4 py-2 text-[12px] font-semibold text-[var(--color-text2)]">
+                  Connecting to camera...
+                </div>
+              </div>
+            }
           } @else {
             <div class="flex h-full flex-col justify-between p-4">
               <div class="flex items-center justify-between">
-                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.2px] text-[var(--color-text3)]">Feed Unavailable</span>
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.2px] text-[var(--color-text3)]">{{ hasPreview(camera) ? 'Unable to Connect' : 'Feed Unavailable' }}</span>
                 <div class="flex items-center gap-1.5">
                   @if (camera.port) {
                     <span class="rounded-full border border-sky-400/25 bg-sky-400/12 px-2.5 py-1 text-[10px] font-bold text-sky-400">:{{ camera.port }}</span>
@@ -49,8 +56,8 @@
                 </div>
               </div>
               <div class="space-y-2">
-                <div class="text-[11px] font-bold uppercase tracking-[1.4px] text-sky-400">Endpoint</div>
-                <div class="break-all font-mono text-[13px] text-[var(--color-text2)]">{{ endpointLabel(camera) }}</div>
+                <div class="text-[11px] font-bold uppercase tracking-[1.4px] text-sky-400">{{ hasPreview(camera) ? 'Connection Status' : 'Endpoint' }}</div>
+                <div class="break-all font-mono text-[13px] text-[var(--color-text2)]">{{ hasPreview(camera) ? 'Unable to connect to the preview stream.' : endpointLabel(camera) }}</div>
               </div>
               <div class="grid grid-cols-2 gap-2 text-[11px]">
                 <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">

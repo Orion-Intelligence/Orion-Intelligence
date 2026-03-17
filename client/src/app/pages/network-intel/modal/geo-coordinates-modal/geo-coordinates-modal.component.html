@@ -16,23 +16,11 @@
         </div>
 
         <div class="flex w-fit items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] p-1">
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all"
-            [ngClass]="coordinateInputMode === 'map'
-              ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]']
-              : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']"
-            (click)="setCoordinateInputMode('map')">
+          <button type="button" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all" [ngClass]="coordinateInputMode === 'map' ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']" (click)="setCoordinateInputMode('map')">
             <i class="bi bi-globe-americas text-[13px] leading-none"></i>
             World Map
           </button>
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all"
-            [ngClass]="coordinateInputMode === 'manual'
-              ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]']
-              : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']"
-            (click)="setCoordinateInputMode('manual')">
+          <button type="button" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all" [ngClass]="coordinateInputMode === 'manual' ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']" (click)="setCoordinateInputMode('manual')">
             <i class="bi bi-keyboard text-[13px] leading-none"></i>
             Manual
           </button>
@@ -52,29 +40,17 @@
               }
             </div>
 
-            <button
-              type="button"
-              class="relative block h-[240px] w-full overflow-hidden bg-[radial-gradient(circle_at_30%_30%,rgba(87,165,235,0.18),transparent_28%),radial-gradient(circle_at_70%_35%,rgba(16,185,129,0.12),transparent_24%),linear-gradient(180deg,rgba(9,24,44,0.96),rgba(5,14,28,0.98))] text-left md:h-[280px]"
-              (click)="onMapSelect($event)"
-              (wheel)="onMapWheel($event)">
+            <button type="button" class="relative block h-[240px] w-full overflow-hidden bg-[radial-gradient(circle_at_30%_30%,rgba(87,165,235,0.18),transparent_28%),radial-gradient(circle_at_70%_35%,rgba(16,185,129,0.12),transparent_24%),linear-gradient(180deg,rgba(9,24,44,0.96),rgba(5,14,28,0.98))] text-left md:h-[280px]" (click)="onMapSelect($event)" (wheel)="onMapWheel($event)">
               <div class="absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(160,184,209,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(160,184,209,0.08)_1px,transparent_1px)] [background-size:40px_40px]"></div>
               <div class="absolute inset-x-0 top-1/2 border-t border-dashed border-sky-400/15"></div>
               <div class="absolute inset-y-0 left-1/2 border-l border-dashed border-sky-400/15"></div>
               <div #mapContainer class="absolute inset-0"></div>
               <div class="absolute right-3 top-3 z-[2] flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[rgba(3,10,20,0.82)] shadow-[0_10px_24px_rgba(0,0,0,0.24)]">
-                <button
-                  type="button"
-                  class="inline-flex h-9 w-9 items-center justify-center text-[18px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-sky-400/12 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
-                  [disabled]="zoomLevel >= maxZoomLevel"
-                  (click)="$event.stopPropagation(); zoomIn()">
+                <button type="button" class="inline-flex h-9 w-9 items-center justify-center text-[18px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-sky-400/12 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-40" [disabled]="zoomLevel >= maxZoomLevel" (click)="$event.stopPropagation(); zoomIn()">
                   +
                 </button>
                 <div class="h-px bg-[var(--color-divider)]"></div>
-                <button
-                  type="button"
-                  class="inline-flex h-9 w-9 items-center justify-center text-[18px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-sky-400/12 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
-                  [disabled]="zoomLevel <= minZoomLevel"
-                  (click)="$event.stopPropagation(); zoomOut()">
+                <button type="button" class="inline-flex h-9 w-9 items-center justify-center text-[18px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-sky-400/12 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-40" [disabled]="zoomLevel <= minZoomLevel" (click)="$event.stopPropagation(); zoomOut()">
                   −
                 </button>
               </div>
@@ -82,11 +58,11 @@
                 Zoom {{ zoomLevel | number:'1.0-1' }}x
               </div>
 
-              @if (mapMarkerStyle; as markerStyle) {
-                <div
-                  class="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-sky-400 shadow-[0_0_0_6px_rgba(87,165,235,0.2)]"
-                  [ngStyle]="markerStyle">
-                </div>
+              @if (mapMarkerPoint; as markerPoint) {
+                <svg class="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+                  <circle [attr.cx]="markerPoint.x" [attr.cy]="markerPoint.y" r="10" fill="#38bdf8" stroke="#ffffff" stroke-width="2"></circle>
+                  <circle [attr.cx]="markerPoint.x" [attr.cy]="markerPoint.y" r="16" fill="rgba(87,165,235,0.2)"></circle>
+                </svg>
               } @else {
                 <div class="absolute inset-0 flex items-center justify-center">
                   <div class="rounded-full border border-[var(--color-border)] bg-[rgba(3,10,20,0.68)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]">
