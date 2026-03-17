@@ -697,8 +697,10 @@ async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_us
 @api_routes.post(
     "/api/netintel/resolve_ip",
     summary="Resolve a domain to IP addresses",
+    description=DYNAMIC_DOCS["ip_resolve"]["description"],
     tags=["Entity Scans"],
     operation_id="resolveIp",
+    response_description=DYNAMIC_DOCS["ip_resolve"]["description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
@@ -708,8 +710,10 @@ async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(g
 @api_routes.post(
     "/api/netintel/scanner",
     summary="Scan an IP address for network intelligence",
+    description=DYNAMIC_DOCS["deep_ip_scan"]["description"],
     tags=["Entity Scans"],
     operation_id="shodanScanner",
+    response_description=DYNAMIC_DOCS["deep_ip_scan"]["description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
@@ -719,8 +723,10 @@ async def shodan_scanner(param: IPScanRequest = Body(...), current_user=Depends(
 @api_routes.post(
     "/api/netintel/camera_detect",
     summary="Scan a geographic area for exposed cameras",
+    description=DYNAMIC_DOCS["geo_camera"]["description"],
     tags=["Entity Scans"],
     operation_id="geoCameraDetect",
+    response_description=DYNAMIC_DOCS["geo_camera"]["description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
@@ -731,8 +737,10 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
 @api_routes.post(
     "/api/netintel/camera_detect_ranges",
     summary="Scan IP ranges for exposed cameras",
+    description=DYNAMIC_DOCS["geo_camera_ranges"]["description"],
     tags=["Entity Scans"],
     operation_id="geoCameraDetectRanges",
+    response_description=DYNAMIC_DOCS["geo_camera_ranges"]["description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
