@@ -22,13 +22,12 @@
       <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
         <div class="relative aspect-video overflow-hidden border-b border-[var(--color-divider)] bg-[linear-gradient(180deg,var(--color-blue-760),var(--color-blue-830))]">
           @if (hasPreview(camera) && !isPreviewFailed(camera)) {
-            <iframe class="h-full w-full" [src]="previewUrl(camera)" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="Camera feed preview" (load)="onPreviewLoad(camera)" (error)="onPreviewError(camera)">
-            </iframe>
+            <img class="h-full w-full object-cover" [src]="previewUrl(camera)" loading="lazy" referrerpolicy="no-referrer" alt="Camera snapshot" (load)="onPreviewLoad(camera)" (error)="onPreviewError(camera)">
             <div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between bg-[linear-gradient(180deg,rgba(3,10,20,0.78),transparent)] p-3">
-              <span class="rounded-full border border-emerald-400/30 bg-emerald-400/12 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.2px] text-emerald-400">Live Preview</span>
+              <span class="rounded-full border border-emerald-400/30 bg-emerald-400/12 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.2px] text-emerald-400">Snapshot</span>
               <div class="flex items-center gap-1.5">
-                @if (camera.port) {
-                  <span class="rounded-full border border-sky-400/25 bg-sky-400/12 px-2.5 py-1 text-[10px] font-bold text-sky-400">:{{ camera.port }}</span>
+                @if (cameraPort(camera); as port) {
+                  <span class="rounded-full border border-sky-400/25 bg-sky-400/12 px-2.5 py-1 text-[10px] font-bold text-sky-400">:{{ port }}</span>
                 }
                 @if (camera.distance_km != null) {
                   <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)]/85 px-2.5 py-1 text-[10px] font-bold text-[var(--color-text2)]">{{ camera.distance_km | number:'1.1-2' }} km</span>
@@ -38,35 +37,49 @@
             @if (!isPreviewLoaded(camera)) {
               <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-[linear-gradient(180deg,rgba(8,16,30,0.42),rgba(8,16,30,0.22))] text-center">
                 <div class="rounded-xl border border-[var(--color-border)] bg-[rgba(8,16,30,0.72)] px-4 py-2 text-[12px] font-semibold text-[var(--color-text2)]">
-                  Connecting to camera...
+                  Loading snapshot...
                 </div>
               </div>
             }
           } @else {
-            <div class="flex h-full flex-col justify-between p-4">
-              <div class="flex items-center justify-between">
-                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.2px] text-[var(--color-text3)]">{{ hasPreview(camera) ? 'Unable to Connect' : 'Feed Unavailable' }}</span>
-                <div class="flex items-center gap-1.5">
-                  @if (camera.port) {
-                    <span class="rounded-full border border-sky-400/25 bg-sky-400/12 px-2.5 py-1 text-[10px] font-bold text-sky-400">:{{ camera.port }}</span>
+            <div class="geo-feed-noise flex h-full flex-col p-4">
+              <div class="relative z-[1] flex items-start justify-between gap-3">
+                <span class="rounded-full border border-amber-400/20 bg-amber-400/12 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[1.2px] text-amber-200">{{ hasEndpoint(camera) ? 'Preview Disabled' : 'Feed Unavailable' }}</span>
+                <div class="flex flex-wrap items-center justify-end gap-1.5">
+                  @if (cameraPort(camera); as port) {
+                    <span class="rounded-full border border-sky-400/25 bg-sky-400/12 px-2.5 py-1 text-[10px] font-bold text-sky-300">:{{ port }}</span>
                   }
                   @if (camera.distance_km != null) {
-                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[10px] font-bold text-[var(--color-text2)]">{{ camera.distance_km | number:'1.1-2' }} km</span>
+                    <span class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold text-[var(--color-text2)]">{{ camera.distance_km | number:'1.1-2' }} km</span>
                   }
                 </div>
               </div>
-              <div class="space-y-2">
-                <div class="text-[11px] font-bold uppercase tracking-[1.4px] text-sky-400">{{ hasPreview(camera) ? 'Connection Status' : 'Endpoint' }}</div>
-                <div class="break-all font-mono text-[13px] text-[var(--color-text2)]">{{ hasPreview(camera) ? 'Unable to connect to the preview stream.' : endpointLabel(camera) }}</div>
-              </div>
-              <div class="grid grid-cols-2 gap-2 text-[11px]">
-                <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
-                  <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Brand</div>
-                  <div class="mt-1 font-medium text-[var(--color-text1)]">{{ camera.brand || 'Unknown' }}</div>
+
+              <div class="relative z-[1] my-auto rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(6,18,30,0.78),rgba(5,12,22,0.58))] p-4 shadow-[0_18px_40px_rgba(2,8,16,0.28)] backdrop-blur-[2px]">
+                <div class="flex items-start gap-3">
+                  <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-400/10 text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <i class="bi bi-camera-video-off text-[18px] leading-none"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[11px] font-bold uppercase tracking-[1.4px] text-sky-300">{{ hasEndpoint(camera) ? 'Direct Feed Available' : 'No Reachable Feed' }}</div>
+                    <div class="mt-1 text-[14px] font-semibold leading-5 text-[var(--color-text1)]">
+                      {{ hasEndpoint(camera) ? 'Preview is intentionally hidden for this source.' : 'No preview or direct endpoint was detected.' }}
+                    </div>
+                    <div class="mt-2 break-all font-mono text-[12px] leading-5 text-[var(--color-text3)]">
+                      {{ hasEndpoint(camera) ? endpointLabel(camera) : 'Endpoint unavailable' }}
+                    </div>
+                  </div>
                 </div>
-                <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
+              </div>
+
+              <div class="relative z-[1] grid grid-cols-2 gap-2 text-[11px]">
+                <div class="rounded-2xl border border-white/10 bg-[rgba(9,19,31,0.68)] px-3 py-2.5 backdrop-blur-[2px]">
+                  <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Brand</div>
+                  <div class="mt-1 truncate font-medium text-[var(--color-text1)]">{{ cameraBrand(camera) || 'Unknown' }}</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-[rgba(9,19,31,0.68)] px-3 py-2.5 backdrop-blur-[2px]">
                   <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Port</div>
-                  <div class="mt-1 font-medium text-[var(--color-text1)]">{{ camera.port || '—' }}</div>
+                  <div class="mt-1 font-medium text-[var(--color-text1)]">{{ cameraPort(camera) || '—' }}</div>
                 </div>
               </div>
             </div>
@@ -88,20 +101,48 @@
             <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
               <div class="min-w-0">
                 <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Brand</div>
-                <div class="mt-1 truncate font-medium text-[var(--color-text1)]">{{ camera.brand || 'Unknown' }}</div>
+                <div class="mt-1 truncate font-medium text-[var(--color-text1)]">{{ cameraBrand(camera) || 'Unknown' }}</div>
               </div>
               <div class="min-w-0">
                 <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Model</div>
-                <div class="mt-1 truncate font-medium text-[var(--color-text1)]">{{ camera.model || 'Unknown' }}</div>
+                <div class="mt-1 truncate font-medium text-[var(--color-text1)]">{{ cameraModel(camera) || 'Unknown' }}</div>
               </div>
               <div class="min-w-0">
                 <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Port</div>
-                <div class="mt-1 font-medium text-[var(--color-text1)]">{{ camera.port || '—' }}</div>
+                <div class="mt-1 font-medium text-[var(--color-text1)]">{{ cameraPort(camera) || '—' }}</div>
               </div>
               <div class="min-w-0">
                 <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Distance</div>
                 <div class="mt-1 font-medium text-[var(--color-text1)]">{{ camera.distance_km != null ? (camera.distance_km | number:'1.1-2') + ' km' : '—' }}</div>
               </div>
+              <div class="min-w-0">
+                <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Country</div>
+                <div class="mt-1 truncate font-medium text-[var(--color-text1)]">{{ camera.country || '—' }}</div>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Coordinates</div>
+                <div class="mt-1 truncate font-medium text-[var(--color-text1)]">
+                  {{ camera.latitude != null && camera.longitude != null ? ((camera.latitude | number:'1.2-4') + ', ' + (camera.longitude | number:'1.2-4')) : '—' }}
+                </div>
+              </div>
+              @if (cameraPath(camera)) {
+                <div class="min-w-0 col-span-2">
+                  <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Camera Path</div>
+                  <div class="mt-1 truncate font-mono text-[var(--color-text1)]">{{ cameraPath(camera) }}</div>
+                </div>
+              }
+              @if (detectionMethod(camera)) {
+                <div class="min-w-0">
+                  <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Detection</div>
+                  <div class="mt-1 truncate font-medium text-[var(--color-text1)]">{{ detectionMethod(camera) }}</div>
+                </div>
+              }
+              @if (cameraStatus(camera) != null) {
+                <div class="min-w-0">
+                  <div class="text-[10px] uppercase tracking-[1.2px] text-[var(--color-text4)]">Path Status</div>
+                  <div class="mt-1 font-medium text-[var(--color-text1)]">{{ cameraStatus(camera) }}</div>
+                </div>
+              }
             </div>
           </div>
 

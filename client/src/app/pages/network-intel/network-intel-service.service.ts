@@ -251,7 +251,7 @@ export class ScanHelperMethodsService {
 
     const invalid = parsedRanges.find(rangeItem => !rangeItem.valid);
     return {
-      error: invalid ? `Invalid format: "${invalid.value}" — use CIDR (x.x.x.x/n), range (x.x.x.x-x.x.x.x), or single IP` : null,
+      error: invalid ? 'Invalid format: use CIDR (x.x.x.x/n)' : null,
       parsedRanges
     };
   }

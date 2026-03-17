@@ -13,6 +13,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 })
 export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('mapViewport') private mapViewport?: ElementRef<HTMLDivElement>;
   private projection: d3.GeoProjection | null = null;
 
   readonly radiusOptions = [5, 10, 25, 50, 100];
@@ -21,6 +22,16 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   readonly maxZoomLevel = 4;
   coordinateInputMode: 'map' | 'manual' = 'map';
   zoomLevel = 1;
+  mapCanvasWidth = 0;
+  mapCanvasHeight = 0;
+  isDraggingMap = false;
+
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private dragStartScrollLeft = 0;
+  private dragStartScrollTop = 0;
+  private hasDraggedMap = false;
+  private lastDragEndedAt = 0;
 
   @Input() isOpen = false;
   @Input() isScanning = false;
@@ -79,13 +90,18 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
   onMapSelect(event: MouseEvent): void {
     const projection = this.projection;
-    if (!projection || typeof projection.invert !== 'function' || !this.mapContainer?.nativeElement) {
+    const viewport = this.mapViewport?.nativeElement;
+    if (!projection || typeof projection.invert !== 'function' || !viewport) {
       return;
     }
 
-    const rect = this.mapContainer.nativeElement.getBoundingClientRect();
-    const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
-    const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
+    if (Date.now() - this.lastDragEndedAt < 150) {
+      return;
+    }
+
+    const rect = viewport.getBoundingClientRect();
+    const x = Math.min(Math.max((event.clientX - rect.left) + viewport.scrollLeft, 0), this.mapCanvasWidth);
+    const y = Math.min(Math.max((event.clientY - rect.top) + viewport.scrollTop, 0), this.mapCanvasHeight);
     const inverted = projection.invert([x, y]);
     if (!inverted) {
       return;
@@ -94,6 +110,20 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
     const [lon, lat] = inverted;
 
     this.coordinatesChange.emit(`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+  }
+
+  onMapDragStart(event: MouseEvent): void {
+    const viewport = this.mapViewport?.nativeElement;
+    if (!viewport || event.button !== 0) {
+      return;
+    }
+
+    this.isDraggingMap = true;
+    this.hasDraggedMap = false;
+    this.dragStartX = event.clientX;
+    this.dragStartY = event.clientY;
+    this.dragStartScrollLeft = viewport.scrollLeft;
+    this.dragStartScrollTop = viewport.scrollTop;
   }
 
   zoomIn(): void {
@@ -125,6 +155,39 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   onResize(): void {
     if (this.isOpen) {
       this.queueRenderMap();
+    }
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onDocumentMouseMove(event: MouseEvent): void {
+    const viewport = this.mapViewport?.nativeElement;
+    if (!this.isDraggingMap || !viewport) {
+      return;
+    }
+
+    const deltaX = event.clientX - this.dragStartX;
+    const deltaY = event.clientY - this.dragStartY;
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+      this.hasDraggedMap = true;
+      event.preventDefault();
+    }
+
+    viewport.scrollLeft = this.dragStartScrollLeft - deltaX;
+    viewport.scrollTop = this.dragStartScrollTop - deltaY;
+    if (this.hasDraggedMap) {
+      event.preventDefault();
+    }
+  }
+
+  @HostListener('document:mouseup')
+  onDocumentMouseUp(): void {
+    if (!this.isDraggingMap) {
+      return;
+    }
+
+    this.isDraggingMap = false;
+    if (this.hasDraggedMap) {
+      this.lastDragEndedAt = Date.now();
     }
   }
 
@@ -166,20 +229,31 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
     }
 
     const container = this.mapContainer.nativeElement;
-    const width = Math.max(container.clientWidth, 320);
-    const height = Math.max(container.clientHeight, 220);
+    const viewport = this.mapViewport?.nativeElement;
+    const viewportWidth = Math.max(viewport?.clientWidth ?? container.clientWidth, 320);
+    const viewportHeight = Math.max(viewport?.clientHeight ?? container.clientHeight, 220);
+    const previousWidth = this.mapCanvasWidth || viewportWidth;
+    const previousHeight = this.mapCanvasHeight || viewportHeight;
+    const centerRatioX = viewport ? (viewport.scrollLeft + (viewport.clientWidth / 2)) / previousWidth : 0.5;
+    const centerRatioY = viewport ? (viewport.scrollTop + (viewport.clientHeight / 2)) / previousHeight : 0.5;
+
+    this.mapCanvasWidth = Math.max(viewportWidth, Math.round(viewportWidth * this.zoomLevel));
+    this.mapCanvasHeight = Math.max(viewportHeight, Math.round(viewportHeight * this.zoomLevel));
+
     d3.select(container).selectAll('*').remove();
 
     const svg = d3.select(container)
       .append('svg')
-      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('viewBox', `0 0 ${this.mapCanvasWidth} ${this.mapCanvasHeight}`)
+      .attr('width', this.mapCanvasWidth)
+      .attr('height', this.mapCanvasHeight)
       .attr('class', 'h-full w-full');
 
-    const baseScale = width / (2 * Math.PI);
+    const baseScale = this.mapCanvasWidth / (2 * Math.PI);
     this.projection = d3
       .geoMercator()
-      .scale(baseScale * this.zoomLevel)
-      .translate([width / 2, height / 1.58]);
+      .scale(baseScale)
+      .translate([this.mapCanvasWidth / 2, this.mapCanvasHeight / 1.58]);
 
     const path = d3.geoPath(this.projection);
     const countries = topojson.feature(worldData, worldData.objects.countries) as any;
@@ -193,5 +267,12 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
       .attr('fill', 'rgba(87,165,235,0.16)')
       .attr('stroke', 'rgba(87,165,235,0.24)')
       .attr('stroke-width', 0.8);
+
+    if (viewport) {
+      const nextLeft = Math.max(0, Math.min(this.mapCanvasWidth - viewport.clientWidth, (this.mapCanvasWidth * centerRatioX) - (viewport.clientWidth / 2)));
+      const nextTop = Math.max(0, Math.min(this.mapCanvasHeight - viewport.clientHeight, (this.mapCanvasHeight * centerRatioY) - (viewport.clientHeight / 2)));
+      viewport.scrollLeft = nextLeft;
+      viewport.scrollTop = nextTop;
+    }
   }
 }

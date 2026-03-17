@@ -54,7 +54,7 @@
     <div class="flex flex-col gap-3">
       @if (ui.renderablePorts(detail.ports).length) {
         @for (p of ui.renderablePorts(detail.ports); track p) {
-          <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_10px_28px_rgba(0,0,0,0.16)] font-mono">
+          <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_4px_12px_rgba(0,0,0,0.10)] font-mono">
             <div class="flex items-center gap-2.5 bg-[var(--color-blue-700)] px-4 py-2.5">
               @if (p.port) {
                 <span class="text-[17px] font-bold text-sky-400 tracking-wide">{{ p.port }}</span>
@@ -227,7 +227,11 @@
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-red-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-red-400/30 after:to-transparent">⚠ Vulnerabilities ({{ detail.vulnerabilities!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (v of detail.vulnerabilities; track v) {
-        <div class="px-3 py-1.5 rounded bg-red-500/7 border border-red-500/18 border-l-[3px] border-l-red-500 text-[12px] font-medium text-red-300">{{ v }}</div>
+        @if (formatVulnerability(v)) {
+          <div class="rounded-lg border border-red-500/25 bg-red-500/8 px-3 py-2 text-[12px] font-medium text-red-300">
+            {{ formatVulnerability(v) }}
+          </div>
+        }
       }
     </div>
   </div>
@@ -238,17 +242,17 @@
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-yellow-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-yellow-400/30 after:to-transparent">⚡ Misconfigurations</div>
     <div class="flex flex-col gap-1.5">
       @for (m of detail.misconfigurations; track m) {
-        <div class="px-3 py-1.5 rounded bg-yellow-500/7 border border-yellow-500/18 border-l-[3px] border-l-yellow-500 text-[12px] font-medium text-yellow-300">{{ m }}</div>
+        <div class="rounded-lg border border-yellow-500/25 bg-yellow-500/8 px-3 py-2 text-[12px] font-medium text-yellow-300">{{ m }}</div>
       }
     </div>
   </div>
 }
 
-@if (ui.hasData(detail.http_headers)) {
+@if (renderHeaderEntries(detail.http_headers).length) {
   <div class="mx-4 my-3">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">HTTP Headers</div>
     <div class="flex flex-col gap-1">
-      @for (h of ui.safeEntries(detail.http_headers); track h) {
+      @for (h of renderHeaderEntries(detail.http_headers); track h[0]) {
         <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
           <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
           <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>
@@ -258,11 +262,11 @@
   </div>
 }
 
-@if (ui.hasData(detail.cache_headers)) {
+@if (renderHeaderEntries(detail.cache_headers).length) {
   <div class="mx-4 my-3">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Cache Headers</div>
     <div class="flex flex-col gap-1">
-      @for (h of ui.safeEntries(detail.cache_headers); track h) {
+      @for (h of renderHeaderEntries(detail.cache_headers); track h[0]) {
         <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
           <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ h[0] }}</span>
           <span class="break-all text-[var(--color-text2)]">{{ h[1] }}</span>

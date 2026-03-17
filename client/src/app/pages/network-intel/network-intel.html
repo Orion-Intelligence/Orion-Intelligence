@@ -9,7 +9,60 @@
     </div>
 
     <div class="mt-4">
-      @if (!(activeTab === 'geo' && geoMode === 'ranges')) {
+      @if (activeTab === 'geo') {
+        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              class="inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 hover:-translate-y-[1px]"
+              [ngClass]="geoMode === 'coords'
+                ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white']
+                : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text2)]', 'hover:border-[var(--color-blue-640)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
+              (click)="openGeoCoordinatesModal()"
+              [disabled]="isScanning()">
+              <i class="bi bi-crosshair text-[15px] leading-none"></i>
+              <span>Coordinates</span>
+            </button>
+            <button
+              class="inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 hover:-translate-y-[1px]"
+              [ngClass]="geoMode === 'ranges'
+                ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white']
+                : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text2)]', 'hover:border-[var(--color-blue-640)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
+              (click)="openGeoRangesModal()"
+              [disabled]="isScanning()">
+              <i class="bi bi-list-ul text-[15px] leading-none"></i>
+              <span>IP Ranges</span>
+            </button>
+          </div>
+          <div class="mt-3 h-px bg-[var(--color-divider)]"></div>
+          @if (geoMode === 'coords') {
+            <div class="mt-3 flex flex-wrap gap-2 text-xs">
+              <div class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-[var(--color-text2)] break-all [body.light-theme_&]:text-[#334155]">
+                {{ geoForm.coordinates.trim() || 'No coordinates selected' }}
+              </div>
+              <div class="rounded-full border border-sky-400/25 bg-sky-400/10 px-3 py-1 text-sky-300 [body.light-theme_&]:text-sky-700">
+                Radius {{ geoForm.radius_km }} km
+              </div>
+              <div class="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-emerald-300 [body.light-theme_&]:text-emerald-700">
+                Max IPs {{ geoForm.max_ips }}
+              </div>
+            </div>
+          } @else {
+            <div class="mt-3 flex flex-wrap gap-2 text-xs">
+              <div class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-[var(--color-text2)] break-all">
+                {{ getGeoRangePreview() }}
+              </div>
+              @if (getGeoRangeExtraCount() > 0) {
+                <div class="rounded-full border border-sky-400/25 bg-sky-400/10 px-3 py-1 text-sky-300">
+                  +{{ getGeoRangeExtraCount() }} more
+                </div>
+              }
+              <div class="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-emerald-300 [body.light-theme_&]:text-emerald-700">
+                Max IPs {{ geoForm.max_ips }}
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
         <div class="w-full">
           <form (submit)="$event.preventDefault(); runToolbarSearch()" class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="formError ? 'ring-1 ring-[var(--color-border-red)]' : ''">
             <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
@@ -65,16 +118,14 @@
       }
 
       <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-        @if (activeTab === 'geo') {
-          <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openGeoCoordinatesModal()" [disabled]="isScanning()">
-            <i class="bi bi-crosshair text-[15px] leading-none"></i>
-          </button>
-          <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-          <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openGeoRangesModal()" [disabled]="isScanning()">
-            <i class="bi bi-list-ul text-[15px] leading-none"></i>
-          </button>
-          <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-        }
+        <button
+          data-testid="network-intel-download-report"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40"
+          (click)="downloadReport()"
+          [disabled]="!canDownloadReport()">
+          <img alt="Download" src="assets/images/shared/theme/download.svg" class="h-4 w-4 ui-action-icon">
+        </button>
+        <div class="h-6 w-px bg-[var(--color-divider)]"></div>
         <button class="ui-cred-toolbar-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
           <i class="bi bi-stop-fill text-[18px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
         </button>
@@ -148,11 +199,11 @@
     [isScanning]="isScanning()"
     [ipRanges]="geoForm.ip_ranges"
     [maxIps]="geoForm.max_ips"
-    [formError]="formError"
+    [formError]="geoRangesSubmitAttempted ? formError : null"
     [parsedRanges]="parsedRanges"
-    (close)="showGeoRangesModal = false"
-    (ipRangesChange)="geoForm.ip_ranges = $event; validateIpRanges()"
+    (close)="showGeoRangesModal = false; geoRangesSubmitAttempted = false; formError = null; parsedRanges = []"
+    (ipRangesChange)="geoForm.ip_ranges = $event"
     (maxIpsChange)="geoForm.max_ips = $event"
-    (search)="showGeoRangesModal = false; geoMode = 'ranges'; startGeoScan()">
+    (search)="geoMode = 'ranges'; startGeoScan()">
   </app-geo-ranges-modal>
 </div>

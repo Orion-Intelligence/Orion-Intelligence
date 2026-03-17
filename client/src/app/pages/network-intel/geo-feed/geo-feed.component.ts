@@ -1,6 +1,6 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CameraInfo } from '../../../shared/model/network-intel/network-intel.model';
 import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
 
@@ -13,6 +13,7 @@ import { PaginationComponent } from '../../../shared/partials/pagination/paginat
 export class GeoFeedComponent implements OnChanges, OnDestroy {
   private previewState = new Map<string, 'loading' | 'loaded' | 'failed'>();
   private previewTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+  private expandedCameraList: CameraInfo[] = [];
 
   currentPage = 1;
   readonly pageSize = 10;
@@ -25,6 +26,7 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['cameras']) {
       this.currentPage = 1;
+      this.expandedCameraList = this.expandCameras(this.cameras);
       this.resetPreviewState();
     }
   }
@@ -35,25 +37,26 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
 
   get pagedCameras(): CameraInfo[] {
     const start = (this.currentPage - 1) * this.pageSize;
-    return this.cameras.slice(start, start + this.pageSize);
+    return this.expandedCameraList.slice(start, start + this.pageSize);
   }
 
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.cameras.length / this.pageSize));
+    return Math.max(1, Math.ceil(this.expandedCameraList.length / this.pageSize));
   }
 
-  previewUrl(camera: CameraInfo): SafeResourceUrl | null {
+  previewUrl(camera: CameraInfo): SafeUrl | null {
     const url = this.rawPreviewUrl(camera);
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+    return url ? this.sanitizer.bypassSecurityTrustUrl(url) : null;
   }
 
   rawPreviewUrl(camera: CameraInfo): string | null {
-    const nestedCamera = camera.cameras?.find(item => item?.camera_path || item?.port || item?.is_camera) || null;
-    const cameraPath = camera.camera_path || nestedCamera?.camera_path || camera.camera_paths?.[0] || null;
-    const port = camera.port || nestedCamera?.port || this.extractPort(camera.ports) || null;
-    const derivedPathUrl = cameraPath && port ? `http://${camera.ip}:${port}${cameraPath}` : null;
-    const derivedBaseUrl = port ? `http://${camera.ip}:${port}` : null;
-    const candidates = [camera.stream_url, camera.url, derivedPathUrl, derivedBaseUrl]
+    const candidates = [
+      camera.stream_url,
+      camera.url,
+      ...this.snapshotUrls(camera),
+      ...this.cameraPathUrls(camera),
+      ...this.cameraBaseUrls(camera)
+    ]
       .filter((value): value is string => !!value);
 
     for (const value of candidates) {
@@ -65,7 +68,9 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
   }
 
   endpointLabel(camera: CameraInfo): string {
-    return this.rawPreviewUrl(camera) || camera.ip;
+    const port = this.cameraPort(camera);
+    const path = this.cameraPath(camera);
+    return path && port ? `${camera.ip}:${port}${path}` : this.rawPreviewUrl(camera) || camera.ip;
   }
 
   locationLabel(camera: CameraInfo): string {
@@ -74,6 +79,13 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
   }
 
   hasPreview(camera: CameraInfo): boolean {
+    if (this.shouldSuppressSnapshot(camera)) {
+      return false;
+    }
+    return !!this.rawPreviewUrl(camera);
+  }
+
+  hasEndpoint(camera: CameraInfo): boolean {
     return !!this.rawPreviewUrl(camera);
   }
 
@@ -106,7 +118,7 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
   }
 
   trackCamera(index: number, camera: CameraInfo): string {
-    return `${camera.ip}-${camera.port ?? 'na'}-${index}`;
+    return `${camera.ip}-${this.cameraPort(camera) ?? 'na'}-${index}`;
   }
 
   onPageChange(page: number): void {
@@ -117,7 +129,7 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
     this.clearPreviewTimeouts();
     this.previewState.clear();
 
-    for (const camera of this.cameras) {
+    for (const camera of this.expandedCameraList) {
       if (!this.hasPreview(camera)) {
         continue;
       }
@@ -148,5 +160,118 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
       return first;
     }
     return first?.port ?? null;
+  }
+
+  primaryCamera(camera: CameraInfo): NonNullable<CameraInfo['cameras']>[number] | null {
+    return camera.cameras?.find(item => item?.camera_path || item?.port || item?.is_camera) || null;
+  }
+
+  cameraPort(camera: CameraInfo): number | null {
+    return camera.port || this.primaryCamera(camera)?.port || this.extractPort(camera.ports) || null;
+  }
+
+  cameraBrand(camera: CameraInfo): string | null {
+    return camera.brand || this.primaryCamera(camera)?.brand || null;
+  }
+
+  cameraModel(camera: CameraInfo): string | null {
+    return camera.model || this.primaryCamera(camera)?.model_hint || this.cameraBrand(camera) || null;
+  }
+
+  cameraPath(camera: CameraInfo): string | null {
+    return camera.camera_path || this.primaryCamera(camera)?.camera_path || this.preferredCameraPath(camera) || null;
+  }
+
+  cameraStatus(camera: CameraInfo): number | null {
+    return this.primaryCamera(camera)?.path_status ?? null;
+  }
+
+  detectionMethod(camera: CameraInfo): string | null {
+    return this.primaryCamera(camera)?.['detection_method'] || null;
+  }
+
+  private expandCameras(cameras: CameraInfo[]): CameraInfo[] {
+    return cameras.flatMap(camera => {
+      const nestedCameras = camera.cameras?.filter(item => item?.is_camera) || [];
+
+      if (!nestedCameras.length) {
+        return [camera];
+      }
+
+      return nestedCameras.map(item => ({
+        ...camera,
+        port: item.port ?? camera.port,
+        brand: item.brand || camera.brand,
+        model: item.model_hint || camera.model,
+        camera_path: item.camera_path || camera.camera_path,
+        cameras: [item],
+      }));
+    });
+  }
+
+  private snapshotUrls(camera: CameraInfo): string[] {
+    const ports = this.cameraPorts(camera);
+    if (!ports.length) {
+      return [];
+    }
+    const path = this.preferredSnapshotPath(camera);
+    const brand = (this.cameraBrand(camera) || '').toLowerCase();
+
+    if (path && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(path)) {
+      return ports.map(port => `http://${camera.ip}:${port}${path}`);
+    }
+
+    if (brand.includes('axis') || path?.includes('viewer_index.shtml')) {
+      return ports.map(port => `http://${camera.ip}:${port}/axis-cgi/jpg/image.cgi`);
+    }
+
+    return ports.map(port => path ? `http://${camera.ip}:${port}${path}` : `http://${camera.ip}:${port}`);
+  }
+
+  private preferredCameraPath(camera: CameraInfo): string | null {
+    const paths = camera.camera_paths || [];
+    return paths[0] || null;
+  }
+
+  private preferredSnapshotPath(camera: CameraInfo): string | null {
+    const paths = camera.camera_paths || [];
+    const imagePath = paths.find(path => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(path));
+    if (imagePath) {
+      return imagePath;
+    }
+    const camPath = paths.find(path => /\/cam_\d+(?:\.jpg)?(?:\?|$)/i.test(path));
+    if (camPath) {
+      return camPath.endsWith('.jpg') ? camPath : `${camPath}.jpg`;
+    }
+    return this.cameraPath(camera);
+  }
+
+  private cameraPathUrls(camera: CameraInfo): string[] {
+    const ports = this.cameraPorts(camera);
+    const paths = camera.camera_paths || [];
+    if (!ports.length || !paths.length) {
+      return [];
+    }
+    return ports.flatMap(port => paths.map(path => `http://${camera.ip}:${port}${path}`));
+  }
+
+  private cameraBaseUrls(camera: CameraInfo): string[] {
+    return this.cameraPorts(camera).map(port => `http://${camera.ip}:${port}`);
+  }
+
+  private cameraPorts(camera: CameraInfo): number[] {
+    const nestedPorts = camera.cameras?.map(item => item.port).filter((port): port is number => typeof port === 'number') || [];
+    const explicitPorts = (camera.ports || []).map(port => typeof port === 'number' ? port : port?.port).filter((port): port is number => typeof port === 'number');
+    const primaryPort = this.cameraPort(camera);
+    return Array.from(new Set([...(primaryPort ? [primaryPort] : []), ...nestedPorts, ...explicitPorts]));
+  }
+
+  private shouldSuppressSnapshot(camera: CameraInfo): boolean {
+    const brand = (this.cameraBrand(camera) || '').toLowerCase();
+    if (!brand.includes('webcamxp')) {
+      return false;
+    }
+    const snapshotPath = this.preferredSnapshotPath(camera);
+    return !snapshotPath || !/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(snapshotPath);
   }
 }

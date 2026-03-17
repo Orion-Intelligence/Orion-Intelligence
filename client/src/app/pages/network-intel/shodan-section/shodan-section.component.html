@@ -19,7 +19,7 @@
   }
 
   @if (hasSearched) {
-    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-transparent [body.light-theme_&]:bg-white">
       @if (!shodanResult && !errorMessage) {
         <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
           <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
@@ -40,7 +40,7 @@
             }
           </div>
         </div>
-        <div class="bg-[var(--color-blue-700)] pb-2">
+        <div class="bg-transparent pb-2 [body.light-theme_&]:bg-white">
           <app-ip-detail [detail]="shodanResult"></app-ip-detail>
         </div>
       }

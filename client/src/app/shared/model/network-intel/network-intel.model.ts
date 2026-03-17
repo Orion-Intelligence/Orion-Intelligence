@@ -42,8 +42,10 @@ export interface CameraInfo {
   latitude?:        number;
   longitude?:       number;
   port?:            number;
+  service?:         string;
   brand?:           string;
   model?:           string;
+  model_hint?:      string | null;
   distance_km?:     number;
   country?:         string;
   city?:            string;
@@ -100,6 +102,7 @@ export interface IpDetail {
   http_headers?:      Record<string, string | null>;
   cache_headers?:     Record<string, string | null>;
   link_headers?:      string[];
+  camera_paths?:      string[];
   cameras?:           CameraInfo[];
   is_camera?:         boolean;
   ports?:             IpPortData[];

@@ -1,0 +1,33 @@
+.geo-feed-noise {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(103, 232, 249, 0.16), transparent 0 32%),
+    radial-gradient(circle at 80% 18%, rgba(251, 191, 36, 0.12), transparent 0 24%),
+    linear-gradient(180deg, rgba(7, 17, 30, 0.92), rgba(4, 10, 19, 0.88));
+}
+
+.geo-feed-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+    repeating-linear-gradient(180deg, rgba(148, 163, 184, 0.08) 0 1px, transparent 1px 3px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.12) 0 0.9px, transparent 1px 100%);
+  background-size: auto, auto, 7px 7px;
+  background-position: 0 0, 0 0, 0 0;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+}
+
+.geo-feed-noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.12), transparent 38%, transparent 62%, rgba(245, 158, 11, 0.08)),
+    radial-gradient(circle at center, transparent 0 52%, rgba(255, 255, 255, 0.05) 70%, transparent 100%);
+  opacity: 0.7;
+  pointer-events: none;
+}

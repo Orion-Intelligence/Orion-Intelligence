@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScanHelperMethodsService } from './network-intel-service.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../shared/model/network-intel/network-intel.model';
+import { GraphReportPayload } from '../../shared/model/report/report-export.model';
+import { ReportExportService } from '../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-coordinates-modal.component';
@@ -44,12 +46,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
   hasSearched = false;
   showGeoCoordinatesModal = false;
   showGeoRangesModal = false;
+  geoRangesSubmitAttempted = false;
   isScanning = computed(() =>
     this.scanHelper.progress() > 0 &&
     this.scanHelper.progress() < 100 &&
     !this.scanHelper.onError());
 
-  constructor( public scanHelper: ScanHelperMethodsService, private route: ActivatedRoute, private router: Router, ) {}
+  constructor( public scanHelper: ScanHelperMethodsService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
 
   ngOnInit(): void {
     this.scanHelper.resetState();
@@ -123,6 +126,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
     this.geoMode = 'ranges';
     this.showGeoCoordinatesModal = false;
+    this.geoForm.ip_ranges = '';
+    this.formError = null;
+    this.parsedRanges = [];
+    this.geoRangesSubmitAttempted = false;
     this.showGeoRangesModal = true;
   }
 
@@ -162,6 +169,45 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return 'Search IP...';
     }
     return 'Search coordinates...';
+  }
+
+  getGeoRangePreview(): string {
+    const ranges = this.geoForm.ip_ranges
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    return ranges[0] || 'No IP ranges selected';
+  }
+
+  getGeoRangeExtraCount(): number {
+    const ranges = this.geoForm.ip_ranges
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    return Math.max(0, ranges.length - 1);
+  }
+
+  canDownloadReport(): boolean {
+    if (this.isScanning()) {
+      return false;
+    }
+    if (this.activeTab === 'dns') {
+      return Boolean(this.dnsResult?.ips?.length);
+    }
+    if (this.activeTab === 'shodan') {
+      return Boolean(this.shodanResult);
+    }
+    return Boolean(this.geoResult?.cameras?.length || this.geoResult || this.geoLiveStats);
+  }
+
+  downloadReport(): void {
+    const payload = this.buildReportPayload();
+    if (!payload) {
+      return;
+    }
+    this.reportExport.exportByType(payload, 'doc_pdf');
   }
 
   runToolbarSearch(): void {
@@ -317,12 +363,15 @@ export class NetworkIntel implements OnInit, OnDestroy {
         this.geoForm.max_ips);
     }
     else {
+      this.geoRangesSubmitAttempted = true;
       this.validateIpRanges();
       if (this.formError || !this.geoForm.ip_ranges.trim() || this.isScanning()) {
         return;
       }
       const ranges = this.geoForm.ip_ranges
         .split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      this.showGeoRangesModal = false;
+      this.geoRangesSubmitAttempted = false;
       this.hasSearched = true;
       this.clearAll(false);
       this.syncUrl();
@@ -387,5 +436,286 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this._intervals.forEach(clearInterval);
     this.sub?.unsubscribe();
     this.scanHelper.resetState();
+  }
+
+  private buildReportPayload(): GraphReportPayload | null {
+    if (this.activeTab === 'dns' && this.dnsResult) {
+      const now = new Date().toISOString();
+      const nodes = [
+        { id: `domain-${this.dnsResult.domain}`, label: this.dnsResult.domain, type: 'domain' },
+        ...this.dnsResult.ips.map(ip => ({ id: `ip-${ip}`, label: ip, type: 'ip' as const }))
+      ];
+      const edges = this.dnsResult.ips.map(ip => ({
+        id: `${this.dnsResult!.domain}-${ip}`,
+        from: `domain-${this.dnsResult!.domain}`,
+        to: `ip-${ip}`,
+        label: 'resolves_to'
+      }));
+
+      return {
+        graphKind: 'cti',
+        title: 'Host Recon Report',
+        sessionName: this.dnsResult.domain,
+        generatedAtIso: now,
+        nodes,
+        edges,
+        summary: {
+          domain: this.dnsResult.domain,
+          resolved_ips: this.dnsResult.ips.length,
+          exported_at: now
+        },
+        tables: [{
+          title: 'Resolved IPs',
+          values: this.dnsResult.ips.reduce((acc, ip, index) => {
+            acc[`IP ${index + 1}`] = ip;
+            return acc;
+          }, {} as Record<string, string>)
+        }]
+      };
+    }
+
+    if (this.activeTab === 'shodan' && this.shodanResult) {
+      const now = new Date().toISOString();
+      const detail = this.shodanResult;
+      const nodes = [{ id: `ip-${detail.ip}`, label: detail.ip, type: 'ip' }];
+      const edges: GraphReportPayload['edges'] = [];
+
+      const addNode = (id: string, label: string, type: string, edgeLabel: string) => {
+        if (!label) {
+          return;
+        }
+        nodes.push({ id, label, type });
+        edges.push({ id: `${nodes[0].id}-${id}`, from: nodes[0].id, to: id, label: edgeLabel });
+      };
+
+      addNode(`org-${detail.organization}`, detail.organization || '', 'organization', 'owned_by');
+      addNode(`country-${detail.country}`, detail.country || '', 'country', 'located_in');
+      addNode(`city-${detail.city}`, detail.city || '', 'city', 'city');
+
+      return {
+        graphKind: 'cti',
+        title: 'Deep Scan Report',
+        sessionName: detail.ip,
+        generatedAtIso: now,
+        nodes,
+        edges,
+        summary: {
+          ip: detail.ip,
+          country: detail.country || '-',
+          city: detail.city || '-',
+          organization: detail.organization || '-',
+          open_ports: detail.open_ports?.length ?? 0,
+          vulnerabilities: detail.vulnerabilities?.length ?? 0,
+          cameras: detail.cameras?.length ?? 0,
+          exported_at: now
+        },
+        tables: [
+          {
+            title: 'General Information',
+            values: {
+              Country: detail.country || '-',
+              City: detail.city || '-',
+              Organization: detail.organization || '-',
+              ISP: detail.isp || '-',
+              ASN: detail.asn || '-',
+              Hosting: detail.hosting_type || '-',
+              'Web Server': detail.web_server || '-',
+              Title: detail.title || '-',
+              Technologies: this.joinValues(detail.web_technologies),
+              Hostnames: this.joinValues(detail.hostnames)
+            }
+          },
+          {
+            title: 'Exposure Summary',
+            values: {
+              'Open Ports': this.joinValues(detail.open_ports),
+              Vulnerabilities: this.joinValues((detail.vulnerabilities as any[] | undefined)?.map(item => this.formatReportVulnerability(item))),
+              Misconfigurations: this.joinValues(detail.misconfigurations),
+              'Risk Flags': this.joinValues(detail.ports?.flatMap(port => port.risk_flags || [])),
+              Cameras: String(detail.cameras?.length ?? 0),
+              'Camera Paths': this.joinValues(detail.camera_paths as unknown[] | undefined)
+            }
+          },
+          {
+            title: 'HTTP Headers',
+            values: this.toStringRecord(detail.http_headers)
+          },
+          {
+            title: 'Cache Headers',
+            values: this.toStringRecord(detail.cache_headers)
+          },
+          {
+            title: 'Camera Findings',
+            values: (detail.cameras || []).slice(0, 30).reduce((acc, camera, index) => {
+              acc[`Camera ${index + 1}`] = [
+                detail.ip,
+                camera.port ? `:${camera.port}` : '',
+                camera.brand || camera.model_hint || camera.model || '',
+                camera.service ? `(${camera.service})` : ''
+              ].join(' ').trim() || '-';
+              return acc;
+            }, {} as Record<string, string>)
+          },
+          ...this.buildPortDetailTables(detail),
+          {
+            title: 'Detected Cameras',
+            values: (detail.cameras || []).slice(0, 20).reduce((acc, camera, index) => {
+              acc[`Camera ${index + 1}`] = `${detail.ip || 'Unknown IP'}${camera.port ? `:${camera.port}` : ''} ${camera.brand || camera.model_hint || camera.model || 'Unknown'}`.trim();
+              return acc;
+            }, {} as Record<string, string>)
+          }
+        ]
+      };
+    }
+
+    if (this.activeTab === 'geo' && (this.geoResult || this.geoLiveStats)) {
+      const now = new Date().toISOString();
+      const result = this.geoResult;
+      const stats = this.geoLiveStats;
+      const ranges = this.geoForm.ip_ranges.split('\n').map(line => line.trim()).filter(Boolean);
+      const sessionName = this.geoMode === 'coords'
+        ? (this.geoForm.coordinates.trim() || 'geo-coordinates')
+        : (ranges[0] || 'geo-ranges');
+      const cameras = result?.cameras || [];
+
+      return {
+        graphKind: 'cti',
+        title: 'Geo Cameras Report',
+        sessionName,
+        generatedAtIso: now,
+        nodes: cameras.slice(0, 100).map((camera, index) => ({
+          id: `camera-${camera.ip || index}-${camera.port || 0}`,
+          label: camera.ip || `Camera ${index + 1}`,
+          type: 'camera'
+        })),
+        edges: [],
+        summary: {
+          mode: this.geoMode === 'coords' ? 'coordinates' : 'ip_ranges',
+          query: this.geoMode === 'coords' ? (this.geoForm.coordinates.trim() || '-') : (ranges[0] || '-'),
+          radius_km: this.geoForm.radius_km,
+          max_ips: this.geoForm.max_ips,
+          ips_extracted: result?.ips_extracted ?? stats?.ips_extracted ?? 0,
+          ips_scanned: result?.ips_scanned ?? stats?.ips_scanned ?? 0,
+          cameras_found: result?.cameras_found ?? stats?.cameras_found ?? 0,
+          exported_at: now
+        },
+        tables: [
+          {
+            title: 'Query Configuration',
+            values: this.geoMode === 'coords'
+              ? {
+                Coordinates: this.geoForm.coordinates.trim() || '-',
+                'Radius (km)': String(this.geoForm.radius_km),
+                'Max IPs': String(this.geoForm.max_ips)
+              }
+              : {
+                'Range 1': ranges[0] || '-',
+                'Additional Ranges': String(Math.max(0, ranges.length - 1)),
+                'Max IPs': String(this.geoForm.max_ips)
+              }
+          },
+          {
+            title: 'Detected Cameras',
+            values: cameras.slice(0, 25).reduce((acc, camera, index) => {
+              acc[`Camera ${index + 1}`] = [
+                camera.ip || 'Unknown IP',
+                camera.port ? `:${camera.port}` : '',
+                camera.brand || camera.model || ''
+              ].join(' ').trim();
+              return acc;
+            }, {} as Record<string, string>)
+          }
+        ]
+      };
+    }
+
+    return null;
+  }
+
+  private joinValues(values: unknown[] | undefined | null): string {
+    const normalized = (values || [])
+      .map(value => `${value ?? ''}`.trim())
+      .filter(Boolean);
+
+    return normalized.length ? normalized.join(', ') : '-';
+  }
+
+  private toStringRecord(source: Record<string, unknown> | undefined | null): Record<string, string> {
+    const entries = Object.entries(source || {})
+      .map(([key, value]) => [key, this.normalizeReportValue(value)] as [string, string])
+      .filter(([, value]) => Boolean(value));
+
+    if (!entries.length) {
+      return { Status: '-' };
+    }
+
+    return Object.fromEntries(entries);
+  }
+
+  private buildPortDetailTables(detail: IpDetail): Array<{ title: string; values: Record<string, string> }> {
+    return (detail.ports || []).slice(0, 12).map((port, index) => ({
+      title: `Port ${port.port || index + 1} Details`,
+      values: {
+        Port: port.port ? String(port.port) : '-',
+        Protocol: port.protocol || port.proto || '-',
+        Service: port.service || '-',
+        State: port.state || '-',
+        Product: this.normalizeReportValue(port['product']),
+        Version: this.normalizeReportValue(port['version']),
+        Vendor: this.normalizeReportValue(port['vendor']),
+        'Risk Flags': this.joinValues(port.risk_flags),
+        Misconfigurations: this.joinValues(port.misconfigurations),
+        Banner: this.truncateReportText(port.banner),
+        'HTTP Server': this.normalizeReportValue(port.http?.server),
+        'HTTP Title': this.normalizeReportValue(port.http?.title),
+        'TLS Version': this.normalizeReportValue(port.tls?.version),
+        'TLS Cipher': this.normalizeReportValue(port.tls?.cipher),
+        'Certificate CN': this.normalizeReportValue(port.tls?.cert_cn),
+        'Certificate Expiry': this.normalizeReportValue(port.tls?.not_after || port.tls?.cert_expires),
+        'Discovered Paths': this.joinValues(port['discovered_paths']),
+      }
+    }));
+  }
+
+  private truncateReportText(value: unknown, maxLength = 1200): string {
+    const normalized = this.normalizeReportValue(value);
+    if (!normalized || normalized === '-') {
+      return '-';
+    }
+    return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}...` : normalized;
+  }
+
+  private normalizeReportValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value.trim();
+    }
+    if (Array.isArray(value)) {
+      return value.map(item => this.normalizeReportValue(item)).filter(Boolean).join(', ');
+    }
+    if (typeof value === 'object') {
+      return Object.entries(value as Record<string, unknown>)
+        .map(([key, nested]) => {
+          const normalized = this.normalizeReportValue(nested);
+          return normalized ? `${key}: ${normalized}` : '';
+        })
+        .filter(Boolean)
+        .join(', ');
+    }
+    return String(value).trim();
+  }
+
+  private formatReportVulnerability(value: any): string {
+    if (typeof value === 'string') {
+      return value.trim();
+    }
+    if (value && typeof value === 'object') {
+      const cve = typeof value.cve === 'string' ? value.cve.trim() : '';
+      const cvss = value.cvss !== null && value.cvss !== undefined ? `CVSS ${value.cvss}` : '';
+      return [cve, cvss].filter(Boolean).join(' • ');
+    }
+    return '';
   }
 }
