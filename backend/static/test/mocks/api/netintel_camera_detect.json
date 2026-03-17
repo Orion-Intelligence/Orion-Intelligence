@@ -3,8 +3,11 @@
     "status": "success",
     "query": {
       "coordinates": "24.8607,67.0011",
+      "latitude": 24.8607,
+      "longitude": 67.0011,
       "radius_km": 25,
-      "max_ips": 200
+      "max_ips": 200,
+      "country": "Pakistan"
     },
     "ips_extracted": 28,
     "ips_scanned": 28,
@@ -13,27 +16,72 @@
       {
         "ip": "203.0.113.10",
         "port": 8080,
-        "title": "IP Camera Web Client"
+        "title": "IP Camera Web Client",
+        "service": "http",
+        "latitude": 24.8609,
+        "longitude": 67.0014,
+        "city": "Karachi",
+        "country": "Pakistan",
+        "camera_paths": [
+          "/snapshot.jpg"
+        ],
+        "url": "http://203.0.113.10:8080"
       },
       {
         "ip": "203.0.113.11",
         "port": 80,
-        "title": "Network Camera"
+        "title": "Network Camera",
+        "service": "http",
+        "latitude": 24.8613,
+        "longitude": 67.0021,
+        "city": "Karachi",
+        "country": "Pakistan",
+        "camera_paths": [
+          "/image.jpg"
+        ],
+        "url": "http://203.0.113.11:80"
       },
       {
         "ip": "203.0.113.12",
         "port": 554,
-        "title": "RTSP Stream Endpoint"
+        "title": "RTSP Stream Endpoint",
+        "service": "rtsp",
+        "latitude": 24.8598,
+        "longitude": 67.0004,
+        "city": "Karachi",
+        "country": "Pakistan",
+        "camera_paths": [
+          "/Streaming/Channels/101"
+        ],
+        "url": "http://203.0.113.12:554"
       },
       {
         "ip": "203.0.113.13",
         "port": 8000,
-        "title": "DVR Login Panel"
+        "title": "DVR Login Panel",
+        "service": "http",
+        "latitude": 24.8621,
+        "longitude": 67.0032,
+        "city": "Karachi",
+        "country": "Pakistan",
+        "camera_paths": [
+          "/cam_1.jpg"
+        ],
+        "url": "http://203.0.113.13:8000"
       },
       {
         "ip": "203.0.113.14",
         "port": 8888,
-        "title": "Smart Camera Console"
+        "title": "Smart Camera Console",
+        "service": "http",
+        "latitude": 24.8587,
+        "longitude": 67.0018,
+        "city": "Karachi",
+        "country": "Pakistan",
+        "camera_paths": [
+          "/snapshot.cgi"
+        ],
+        "url": "http://203.0.113.14:8888"
       }
     ]
   }

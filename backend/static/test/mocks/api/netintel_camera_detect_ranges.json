@@ -16,22 +16,42 @@
       {
         "ip": "192.168.1.25",
         "port": 554,
-        "title": "RTSP Camera"
+        "title": "RTSP Camera",
+        "service": "rtsp",
+        "camera_paths": [
+          "/Streaming/Channels/101"
+        ],
+        "url": "http://192.168.1.25:554"
       },
       {
         "ip": "10.10.0.18",
         "port": 80,
-        "title": "Embedded Webcam"
+        "title": "Embedded Webcam",
+        "service": "http",
+        "camera_paths": [
+          "/snapshot.jpg"
+        ],
+        "url": "http://10.10.0.18:80"
       },
       {
         "ip": "172.16.5.44",
         "port": 8080,
-        "title": "IP Camera Admin"
+        "title": "IP Camera Admin",
+        "service": "http",
+        "camera_paths": [
+          "/cam_1.jpg"
+        ],
+        "url": "http://172.16.5.44:8080"
       },
       {
         "ip": "172.16.5.52",
         "port": 8554,
-        "title": "ONVIF Camera Service"
+        "title": "ONVIF Camera Service",
+        "service": "onvif",
+        "camera_paths": [
+          "/onvif/device_service"
+        ],
+        "url": "http://172.16.5.52:8554"
       }
     ]
   }

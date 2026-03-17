@@ -12,23 +12,11 @@
       @if (activeTab === 'geo') {
         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-3">
           <div class="flex flex-wrap items-center gap-3">
-            <button
-              class="inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 hover:-translate-y-[1px]"
-              [ngClass]="geoMode === 'coords'
-                ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white']
-                : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text2)]', 'hover:border-[var(--color-blue-640)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
-              (click)="openGeoCoordinatesModal()"
-              [disabled]="isScanning()">
+            <button class="inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 hover:-translate-y-[1px]" [ngClass]="geoMode === 'coords' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text2)]', 'hover:border-[var(--color-blue-640)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="openGeoCoordinatesModal()" [disabled]="isScanning()">
               <i class="bi bi-crosshair text-[15px] leading-none"></i>
               <span>Coordinates</span>
             </button>
-            <button
-              class="inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 hover:-translate-y-[1px]"
-              [ngClass]="geoMode === 'ranges'
-                ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white']
-                : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text2)]', 'hover:border-[var(--color-blue-640)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
-              (click)="openGeoRangesModal()"
-              [disabled]="isScanning()">
+            <button class="inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] font-medium transition-[background-color,border-color,transform] duration-150 hover:-translate-y-[1px]" [ngClass]="geoMode === 'ranges' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text2)]', 'hover:border-[var(--color-blue-640)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="openGeoRangesModal()" [disabled]="isScanning()">
               <i class="bi bi-list-ul text-[15px] leading-none"></i>
               <span>IP Ranges</span>
             </button>
@@ -118,11 +106,7 @@
       }
 
       <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-        <button
-          data-testid="network-intel-download-report"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40"
-          (click)="downloadReport()"
-          [disabled]="!canDownloadReport()">
+        <button data-testid="network-intel-download-report" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="downloadReport()" [disabled]="!canDownloadReport()">
           <img alt="Download" src="assets/images/shared/theme/download.svg" class="h-4 w-4 ui-action-icon">
         </button>
         <div class="h-6 w-px bg-[var(--color-divider)]"></div>

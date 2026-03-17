@@ -92,12 +92,12 @@
                       <div class="flex gap-2.5 text-[13px]">
                         <span class="text-sky-400 font-semibold w-32 flex-shrink-0">Issuer</span>
                         <span class="text-[var(--color-text2)]">
-                          {{ p.tls.issuer.commonName || '' }}
-                          @if (p.tls.issuer.organizationName) {
-                            <ng-container> / {{ p.tls.issuer.organizationName }}</ng-container>
+                          {{ p.tls.issuer['commonName'] || '' }}
+                          @if (p.tls.issuer['organizationName']) {
+                            <ng-container> / {{ p.tls.issuer['organizationName'] }}</ng-container>
                           }
-                          @if (p.tls.issuer.countryName) {
-                            <ng-container> ({{ p.tls.issuer.countryName }})</ng-container>
+                          @if (p.tls.issuer['countryName']) {
+                            <ng-container> ({{ p.tls.issuer['countryName'] }})</ng-container>
                           }
                         </span>
                       </div>

@@ -35,7 +35,7 @@
       <app-geo-feed [loading]="true"></app-geo-feed>
     }
     @if (geoResult?.cameras?.length) {
-      <app-geo-feed [cameras]="geoResult.cameras"></app-geo-feed>
+      <app-geo-feed [cameras]="geoResult?.cameras ?? []"></app-geo-feed>
     }
   }
 </div>

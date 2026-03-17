@@ -51,6 +51,23 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "form-action 'self'; "
                                                            "base-uri 'self'; "
                                                            "report-to csp-endpoint;")
+        elif request.url.path.startswith("/dashboard/social-intel"):
+            response.headers["Content-Security-Policy"] = ("default-src 'self'; "
+                                                           "script-src 'self'; "
+                                                           "script-src-elem 'self'; "
+                                                           "script-src-attr 'none'; "
+                                                           "style-src 'self'; "
+                                                           "style-src-elem 'self'; "
+                                                           "style-src-attr 'none'; "
+                                                           "img-src 'self' data: https:; "
+                                                           "font-src 'self'; "
+                                                           "connect-src 'self'; "
+                                                           "media-src 'self'; "
+                                                           "frame-ancestors 'self'; "
+                                                           "object-src 'none'; "
+                                                           "form-action 'self'; "
+                                                           "base-uri 'self'; "
+                                                           "report-to csp-endpoint;")
         else:
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "
                                                            "script-src 'self'; "

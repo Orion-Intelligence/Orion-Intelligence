@@ -15,9 +15,13 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('mapViewport') private mapViewport?: ElementRef<HTMLDivElement>;
   private projection: d3.GeoProjection | null = null;
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private dragStartScrollLeft = 0;
+  private dragStartScrollTop = 0;
+  private hasDraggedMap = false;
+  private lastDragEndedAt = 0;
 
-  readonly radiusOptions = [5, 10, 25, 50, 100];
-  readonly maxIpOptions = [50, 100, 200, 500];
   readonly minZoomLevel = 1;
   readonly maxZoomLevel = 4;
   coordinateInputMode: 'map' | 'manual' = 'map';
@@ -25,13 +29,6 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   mapCanvasWidth = 0;
   mapCanvasHeight = 0;
   isDraggingMap = false;
-
-  private dragStartX = 0;
-  private dragStartY = 0;
-  private dragStartScrollLeft = 0;
-  private dragStartScrollTop = 0;
-  private hasDraggedMap = false;
-  private lastDragEndedAt = 0;
 
   @Input() isOpen = false;
   @Input() isScanning = false;
