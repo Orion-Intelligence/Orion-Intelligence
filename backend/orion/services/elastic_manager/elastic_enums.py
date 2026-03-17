@@ -215,7 +215,7 @@ class ELASTIC_ENUMS:
         "m_user_agents": ["m_user_agents"],
         "m_asns": ["m_asns"],
         "m_team": ["m_team"],
-        "m_hashtag": ["m_hashtag"],
+        "m_hashtag": ["m_hashtag","m_hashtags"],
         "m_mention": ["m_mention"],
         "m_social_media_profiles": ["m_social_media_profiles"],
         "m_currencies": ["m_currencies"],
