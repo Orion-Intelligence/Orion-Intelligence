@@ -11,6 +11,8 @@ It is formatted for **Sphinx + MyST + Shibuya** (right-side “On this page” e
 
 ## Introduction
 
+ma
+
 let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to
 allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below
 illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized
@@ -57,12 +59,15 @@ It consists of the following main menu items:
    This feature helps identify early indicators of cyber threats, ongoing attacks, or planned activities by malicious
    actors.
 
-6. **Live APIs:** Offers real-time data streams through APIs, facilitating integration with external systems and tools.
-   This feature supports continuous monitoring and enables timely responses to evolving cybersecurity events.
+6. **Entity APIs:** The Entity APIs module provides powerful API-based access to entity intelligence and security data, enabling seamless integration with external systems and security tools. Orion allows users to query and analyze different entity types such as Email Breach, Social Scanner, Wanted List, National Identity, Playstore Scanner, Software Scanner, File Scanner, and Crypto Scanner. This module helps organizations automate investigations, enrich security workflows, and retrieve critical threat intelligence related to individuals, digital identities, applications, files, and cryptocurrency activities.
 
 7. **Exploit:** The Exploit module in Orion Intelligence enables users to identify, analyze, and simulate known vulnerabilities using CVE data and integrated exploit tools. With AI-powered suggestions, Orion assists in selecting relevant exploits based on system context, helping security teams assess real-world risk faster and more efficiently.
 8.  **Feed:** The Feed module delivers real-time updates on cybersecurity threats, CVEs, breaches, and industry trends from trusted global sources. Orion curates and prioritizes the most relevant news, keeping your team informed about emerging risks and developments that could impact your infrastructure or applications.
-9.  **Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
+
+9.  **Web Scans:** The Web Scans module enables automated security analysis of web-based assets to identify potential vulnerabilities and exposures. Orion performs structured scans across different scanning types such as Basic Scan, Port Scan, Repository Scan, SEO Scan, and APK Scan to detect weaknesses in web infrastructure, open ports, public code repositories, search engine exposure, and mobile application packages. This module helps security teams quickly uncover risks, monitor their attack surface, and strengthen the overall security posture of their digital assets.
+10.  **Social Intel:** Aggregates and correlates data from multiple social platforms to provide a unified view of digital identities and their connections. Visualizes relationships between entities through an interactive graph, enabling efficient investigation and pattern discovery. Continuously enriches entity data in real time from multiple sources, supporting timely and actionable intelligence insights.
+11.  **Whistleblowing:** Provides a secure and anonymous platform for reporting sensitive information while ensuring complete identity protection. Enables users to submit and track reports using encrypted channels and unique receipt codes for transparency. Supports maximum anonymity through advanced encryption and optional Tor-based access for zero-trace communication.
+12.  **Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
 These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
    In this module, the system actively collects data from:
@@ -116,6 +121,7 @@ This option shows results that contain all of the search terms, but not necessar
 This option only shows results that exactly match the full query entered. If such results exist, they will be displayed; otherwise, no results will appear.
 
 <img width="821" height="167" alt="filterbar" src="https://github.com/user-attachments/assets/d1974392-7a61-4e98-b98d-e16aa2ddd32b" />
+
 
 
 Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
@@ -474,7 +480,11 @@ company data, or proprietary tools that have been exposed.
 
 
 ## Data Breach
-The Data Breach section in the navigation bar includes six categories:
+The Data Breach section in the navigation bar includes three categories:
+
+### All
+
+Displays a complete overview of all data breach records, combining databases and tracking sources in a single unified view for quick analysis.
 
 <img width="1916" height="746" alt="databreach" src="https://github.com/user-attachments/assets/864f5b1c-7f61-433f-9824-0fe23fabff97" />
 
@@ -491,25 +501,6 @@ This section contains detailed records of actual data breaches, offering in-dept
  ![tracking](https://github.com/user-attachments/assets/b7719919-c665-4068-b382-bd4f73b959cc)
 
 
-## Discussion
-
-In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
-
-<img width="1913" height="650" alt="discussion" src="https://github.com/user-attachments/assets/f69db8d6-2305-488a-9eb5-46e6d93c2b16" />
-
-4. ### Warfare
-This section provides curated intelligence on cyber warfare activities, including attacks on critical infrastructure, state-sponsored campaigns, and geopolitical cyber threats. Orion continuously monitors sources for warfare-related incidents, offering organizations timely insights into high-level threats with global implications.
-
-5. ### Cloud
-The Cloud module focuses on identifying misconfigurations, leaked credentials, and potential vulnerabilities in cloud environments. Orion scans for exposed cloud assets, such as open buckets, API keys, or improperly secured services, helping teams secure their cloud infrastructure proactively.
-
-2. ### Tracking
-This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
-
-3. ### Logs
-The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
-
-
 ## Defacement
 
 The Defacement section provides access to an archive list of websites that have been compromised or defaced. 
@@ -518,6 +509,10 @@ The Defacement section provides access to an archive list of websites that have 
 
 
 In the Defacement menu, there are three main categories:
+
+### All
+
+Provides a consolidated view of all defacement-related incidents, including hacked, phishing, and database breaches, for comprehensive monitoring and analysis.
 
 **1- Hacked (Website Defacement / Unauthorized Access)**
 
@@ -566,17 +561,35 @@ information. This module integrates directly with selected Telegram channels, gr
 circulate cyber threat data, including leaked credentials, data dumps, malware samples, and discussions of planned
 cyberattacks. In addition, under the social category, there are three more platforms from which Orion Intelligence collects data. These include Twitter, various discussion forums, and Reddit.
 
-**Twitter (now called X)**
-A social media platform where people post short messages, news, updates, and opinions.
-Orion can collect data from here to monitor trending topics, public opinions, and potential threats being discussed in real-time.
+### All
 
-**Forums**
-Online discussion boards where people talk about specific topics (e.g., hacking, technology, politics, etc.).
-Orion can gather data from forums to track detailed conversations, underground discussions, and community insights that may not appear on mainstream platforms.
+Provides a unified view of intelligence collected from all supported social platforms, including Telegram, Twitter, Mastodon, Pastebin, forums, and Reddit.
+Enables comprehensive monitoring of discussions, leaks, and emerging threats across multiple sources in one place.
+Helps analysts quickly identify patterns, trends, and potential risks without switching between platforms.
+
+**Telegram**
+
+The Telegram view monitors intelligence gathered from selected channels, groups, and bots known to share cyber threat-related content. It helps analysts track leaked credentials, data dumps, malicious discussions, and other relevant activity in near real time.
+
+**Twitter**
+
+The Twitter view captures publicly available posts and discussions relevant to cyber threat monitoring. It supports the identification of trending topics, threat signals, and real-time conversations that may indicate emerging risks.
+
+**Mastodon**
+
+The Mastodon view collects intelligence from decentralized social communities where relevant discussions may surface outside mainstream platforms. It helps analysts monitor distributed conversations, niche communities, and early indicators of threat activity.
+
+**Pastebin**
+
+The Pastebin view tracks publicly shared text content that may include exposed credentials, leaked datasets, or other sensitive information. It supports rapid identification of potential breaches and suspicious disclosures.
+
+**Forum**
+
+The Forum view analyzes discussions from online forums associated with cybersecurity, hacking, and underground communities. It helps uncover detailed conversations, shared tactics, and intelligence that may not appear on mainstream platforms.
 
 **Reddit**
-A large online platform made up of “subreddits,” which are communities focused on different topics (like cybersecurity, news, technology, etc.).
-Orion can use Reddit to collect data on user discussions, emerging issues, and niche community insights that might highlight potential risks or trends.
+
+The Reddit view monitors discussions across relevant subreddits to identify emerging topics, community sentiment, and potential threat indicators. It provides visibility into user-driven conversations that may reveal risks, trends, or incident-related insights.
 
 <img width="1912" height="855" alt="social" src="https://github.com/user-attachments/assets/230e62db-50e4-4b09-baf7-cd274edee76b" />
 
@@ -620,23 +633,70 @@ You can also plot any result on the CTI graph to see its relationships and conte
 
 <img width="1913" height="907" alt="feed" src="https://github.com/user-attachments/assets/28ed9fa1-df82-4f31-97ad-3de95c1b26dc" />
 
-## Live APIs
+## Entity API
 
-The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
-It can also include many other features and possibilities. Within this section:
+The Entity API module provides real-time intelligence retrieval by allowing users to query and analyze different types of entities. Instead of relying on pre-fed data, this module performs live lookups to gather relevant information from multiple sources, supporting dynamic investigation workflows.
 
-### Email Lookup:
+### Email Breach
 
-By selecting the email option, users can input any email address to retrieve related breach information. This tool helps
-identify where and how the data associated with the entered email may have been leaked or exposed, offering valuable
-insights into potential security incidents or data breaches.
+The Email Breach feature allows users to input an email address and retrieve associated breach data. It helps identify where the email has been exposed, providing insights into potential data leaks and security risks.
 
-### Breach Records:
+### Social Scanner
 
-Below the lookup interface, a list of data breach records is displayed. These records offer additional context and
-reference points, allowing users to explore known breaches and validate the exposure of specific information.
+The Social Scanner collects and analyzes data from various social platforms linked to a specific entity. It assists in uncovering digital footprints, associated accounts, and cross-platform activity.
+
+### Wanted List
+
+The Wanted List feature checks entities against monitored watchlists and flagged records. It helps identify individuals or entities that may be associated with suspicious or high-risk activities.
+
+### National Identity
+
+The National Identity feature enables verification and lookup of identity-related information. It supports investigations by providing structured identity data where available.
+
+### Playstore Scanner
+
+The Playstore Scanner analyzes mobile applications associated with an entity. It helps detect potentially malicious apps, developer information, and related metadata.
+
+### Software Scanner
+
+The Software Scanner examines software-related data linked to an entity. It assists in identifying vulnerabilities, suspicious tools, or unsafe software usage.
+
+### File Scanner
+
+The File Scanner allows users to analyze files for potential threats or malicious content. It supports detection of malware, suspicious patterns, and file-based risks.
+
+### Crypto Scanner
+
+The Crypto Scanner tracks cryptocurrency addresses and related activity. It helps in identifying suspicious transactions, wallet associations, and financial traces.
 
 <img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
+
+
+## Web Scans
+
+The Web Scans module provides a set of tools for analyzing web assets, applications, and repositories. It enables users to identify vulnerabilities, exposed services, and potential security risks across different web-based targets.
+
+### Basic Scan
+
+The Basic Scan performs an initial analysis of a target to gather general information and identify common security issues. It provides a quick overview of the target’s exposure and potential risks.
+
+### Port Scan
+
+The Port Scan checks for open ports and running services on a target system. It helps identify exposed services that could be exploited or require further investigation.
+
+### Repository Scan
+
+The Repository Scan analyzes code repositories for sensitive information, misconfigurations, or exposed credentials. It assists in detecting security risks within publicly or privately accessible codebases.
+
+### SEO Scan
+
+The SEO Scan evaluates website metadata, indexing status, and search engine visibility. It helps identify misconfigurations and potential issues affecting online presence and discoverability.
+
+### APK Scan
+
+The APK Scan analyzes Android application packages for vulnerabilities and malicious behavior. It supports detection of security flaws, embedded threats, and risky permissions within mobile apps.
+
+
 
 
 ## Data Dump
@@ -662,12 +722,83 @@ the collected data.
 <img width="1903" height="886" alt="dump" src="https://github.com/user-attachments/assets/0b69b04d-4b84-4ddd-898b-b5727a9a9f3f" />
 
 
-## Stealerlogs
+## Stealer Logs
 
-Stealer logs are collections of data harvested by “info-stealer” malware. Credentials in these stealer logs typically consist of usernames, passwords, and sometimes session tokens taken from an infected device.
-When viewing credentials, you can often filter or group by domain to see which credentials are associated with a particular service. The typical record layout is: (1) a URL or domain in the first column, (2) the username or email in the second column, (3) the password in the third column — usually stored as a hash rather than the plaintext password — and (4) a timestamp indicating the date and time the credential was leaked.
+Stealer logs are collections of data harvested by information-stealing malware from infected systems. These logs typically contain sensitive information such as usernames, passwords, domains, and other identifiers that can be used for threat analysis and investigation.
+
+The module allows analysts to explore and analyze these logs through structured views, filters, and detailed record breakdowns.
+
+### IOCs (Indicators of Compromise)
+
+The IOCs view provides access to extracted indicators such as domains, emails, IP addresses, and credentials. Users can quickly search, filter, and analyze large volumes of stealer data to identify potential threats and compromised assets.
+
+### Search & Filters
+
+Users can perform quick searches across all records or filter results using predefined categories such as Domain, Email, Credit Card, and IP Address. This helps in narrowing down relevant data for faster investigation.
+
+### Advanced Filter Builder
+
+The Advanced option enables a powerful query builder for precise filtering. Users can create custom conditions (e.g., WHERE Domain = value) and combine multiple filters using logical operators (AND/OR) to refine results.
+
+### Stealer Log Details
+
+Each record provides a detailed breakdown of the compromised data, including:
+
+**Source Information:** Source domain, collection channel, file type, and year
+
+**Identity Intelligence:** Email/username, associated domain, IP address, and password (if available)
+
+**Metadata Telemetry Array:** Categorized indicators such as domain, email, file, and username counts
+
+**Raw Trace Buffer:** Raw extracted data showing how the credential appeared in the original log
+
+### Data Insights & Metrics
+
+The interface displays key metrics such as total results, assets, aggregated records, and search execution time. This provides quick visibility into the scale and performance of the query.
 
 <img width="1915" height="907" alt="stealerlogs" src="https://github.com/user-attachments/assets/11fba8d7-bfe3-4344-baf7-ec10f2a1a89c" />
+
+
+## Social Intel
+
+The Social Intel module provides advanced investigation capabilities by mapping and analyzing digital identities across multiple platforms. It enables users to perform username-based scans and visualize connections between entities using an interactive graph interface.
+
+### Username Scanning
+
+Users can input a username to discover associated accounts across various social platforms. The system performs real-time scanning to identify linked profiles and digital footprints.
+
+### Graph Visualization
+
+The module presents results in an interactive graph view, showing relationships between user profiles, platforms, and custom entities. This helps analysts easily understand connections and identify patterns.
+
+### Entity Relationship Mapping
+
+Automatically maps connections between entities such as social accounts, platforms, and external sources. It enables deep link analysis and investigation of how different entities are related.
+
+### Multi-Platform Integration
+
+Supports data collection from multiple platforms including Facebook, Twitter, Instagram, TikTok, Medium, Discord, and more. This ensures broad coverage of digital presence.
+
+### Scan History & Tracking
+
+Maintains a history of previous scans, allowing users to revisit, track, and manage investigations efficiently. Users can quickly reload past scans into the graph.
+
+### Entity Management
+
+Provides options to add and manage entities such as Email Breach, Social Scanner, Wanted List, National Identity, and more directly from the interface. This enhances investigation depth by linking additional intelligence sources.
+
+### Graph Controls & Views
+
+Includes multiple viewing options such as Graph view, List view, and Physics mode for better interaction and visualization.
+Users can also edit connections and explore relationships dynamically.
+
+### Legend & Node Classification
+
+Displays a legend to differentiate between entity types such as user profiles, social platforms, platform groups, and custom entities.
+This improves clarity and understanding of the graph structure.
+
+
+
 
 
 ## CTI Graph
