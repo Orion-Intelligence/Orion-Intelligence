@@ -1,11 +1,13 @@
 <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
   (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
-  [activeTab]="isIOC ? 'IOCs' : 'Deep Search'" [isLoading]="isLoading()" [searchQuery]="query"
+  [activeTab]="isIOC ? 'IOCs' : (isNetworkIntel ? 'Network Intelligence' : 'Deep Search')" [isLoading]="isLoading()" [searchQuery]="query"
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
 (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
 
 <div class="ui-consolidated-theme mt-4 mx-[30px] w-auto space-y-4 pb-16 max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]">
-  @if (!isIOC) {
+  @if (isNetworkIntel) {
+    <app-network-intel></app-network-intel>
+  } @else if (!isIOC) {
     @if (licenseService.canUseScanning()) {
       <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
     }

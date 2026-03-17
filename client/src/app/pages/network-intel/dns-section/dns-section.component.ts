@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import { DnsResult, IpRowState } from '../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
 
@@ -20,6 +21,12 @@ export class DnsSectionComponent {
   @Input() ipRows: IpRowState[] = [];
 
   @Output() toggleRow = new EventEmitter<IpRowState>();
+
+  constructor(private router: Router) {}
+
+  get isEmbeddedInConsolidated(): boolean {
+    return this.router.url.includes('/consolidated');
+  }
 
   get progressValue(): number {
     return Math.max(6, Math.min(100, Math.round(this.progress || 0)));

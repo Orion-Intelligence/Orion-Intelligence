@@ -1,4 +1,4 @@
-<div class="px-4 py-4 md:px-6">
+<div [ngClass]="isEmbeddedInConsolidated ? 'py-4' : 'px-4 py-4 md:px-6'">
   @if (isScanning) {
     <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
       <div class="mb-[6px] flex items-center justify-between gap-3">
@@ -19,7 +19,7 @@
   }
 
   @if (hasSearched) {
-    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-transparent [body.light-theme_&]:bg-white">
+    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[#131e30] [body.light-theme_&]:bg-white">
       @if (!shodanResult && !errorMessage) {
         <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
           <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>

@@ -51,6 +51,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.scanHelper.progress() > 0 &&
     this.scanHelper.progress() < 100 &&
     !this.scanHelper.onError());
+  get isEmbeddedInConsolidated(): boolean {
+    return this.router.url.includes('/consolidated');
+  }
 
   constructor( public scanHelper: ScanHelperMethodsService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
 

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { IpDetail } from '../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
 
@@ -17,6 +18,12 @@ export class ShodanSectionComponent {
   @Input() errorMessage: string | null = null;
   @Input() hasSearched = false;
   @Input() shodanResult: IpDetail | null = null;
+
+  constructor(private router: Router) {}
+
+  get isEmbeddedInConsolidated(): boolean {
+    return this.router.url.includes('/consolidated');
+  }
 
   get progressValue(): number {
     return Math.max(6, Math.min(100, Math.round(this.progress || 0)));

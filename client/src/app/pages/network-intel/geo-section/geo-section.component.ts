@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { GeoFeedComponent } from '../geo-feed/geo-feed.component';
 import { GeoLiveStats, GeoResult } from '../../../shared/model/network-intel/network-intel.model';
 
@@ -18,6 +19,12 @@ export class GeoSectionComponent {
   @Input() hasSearched = false;
   @Input() geoResult: GeoResult | null = null;
   @Input() geoLiveStats: GeoLiveStats | null = null;
+
+  constructor(private router: Router) {}
+
+  get isEmbeddedInConsolidated(): boolean {
+    return this.router.url.includes('/consolidated');
+  }
 
   get progressValue(): number {
     return Math.max(6, Math.min(100, Math.round(this.progress || 0)));

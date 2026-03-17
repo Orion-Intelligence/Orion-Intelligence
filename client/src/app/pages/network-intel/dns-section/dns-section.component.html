@@ -1,4 +1,4 @@
-<div class="px-4 py-4 md:px-6">
+<div [ngClass]="isEmbeddedInConsolidated ? 'py-4' : 'px-4 py-4 md:px-6'">
   @if (isScanning) {
     <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
       <div class="mb-[6px] flex items-center justify-between gap-3">
