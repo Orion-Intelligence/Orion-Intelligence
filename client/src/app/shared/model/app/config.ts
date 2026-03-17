@@ -11,6 +11,7 @@ export class AppSettingsModel {
   home_header_adversaries: string = '';
   home_header_pricing: string = '';
   home_header_pricing_allowed: boolean = true;
+  home_header_whistle_blowing_allowed: boolean = false;
   s_onion: string = '';
   api_allowed: string = '0';
 
@@ -40,6 +41,7 @@ export class AppSettingsModel {
       this.home_header_adversaries = typeof parsed.S_HOME_HEADER_ADVERSARIES === 'string' ? parsed.S_HOME_HEADER_ADVERSARIES : this.home_header_adversaries;
       this.home_header_pricing = typeof parsed.S_HOME_HEADER_PRICING === 'string' ? parsed.S_HOME_HEADER_PRICING : this.home_header_pricing;
       this.home_header_pricing_allowed = typeof parsed.S_HOME_HEADER_PRICING_ALLOWED === 'boolean' ? parsed.S_HOME_HEADER_PRICING_ALLOWED : this.home_header_pricing_allowed;
+      this.home_header_whistle_blowing_allowed = typeof parsed.S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED === 'boolean' ? parsed.S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED : this.home_header_whistle_blowing_allowed;
     }
     catch {
       return;

@@ -18,7 +18,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
   formError = '';
   systemData = { ai_endpoint: '', language_allowed: '', version: '', api_allowed: '0', app_name: '0', s_onion: '' };
-  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false };
+  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
@@ -53,6 +53,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.adversaries_url = typeof metaInfo['S_HOME_HEADER_ADVERSARIES'] === 'string' ? metaInfo['S_HOME_HEADER_ADVERSARIES'] : '';
     this.form.pricing_url = typeof metaInfo['S_HOME_HEADER_PRICING'] === 'string' ? metaInfo['S_HOME_HEADER_PRICING'] : '';
     this.form.documentation_allowed = metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] === true;
+    this.form.whistle_blowing_allowed = metaInfo['S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED'] === true;
     this.formError = '';
   }
 
@@ -132,7 +133,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         S_HOME_HEADER_DATA_SOURCES: this.form.data_sources_url,
         S_HOME_HEADER_ADVERSARIES: this.form.adversaries_url,
         S_HOME_HEADER_PRICING: this.form.pricing_url,
-        S_HOME_HEADER_PRICING_ALLOWED: this.form.documentation_allowed
+        S_HOME_HEADER_PRICING_ALLOWED: this.form.documentation_allowed,
+        S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED: this.form.whistle_blowing_allowed
       })
     };
     this.apiService.post<any>('public/update', { settings }).subscribe({
