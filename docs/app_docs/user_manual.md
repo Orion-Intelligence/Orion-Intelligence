@@ -79,15 +79,15 @@ These data dumps often include leaked databases, user credentials, email lists, 
 
 **Other open-source intelligence (OSINT) platforms:** Tracks and organizes dump-related information for quick
       analysis.
-10. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
+13. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
 
-11. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
+14. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
 
-12. **Onion Link:** The Onion Link feature allows secure access to Orion Intelligence through the Tor browser. By clicking the Orion Link, users can operate the tool anonymously over the dark web, ensuring privacy and resilience in restricted or high-risk environments. Ideal for sensitive investigations and secure threat intelligence operations.
+15. **Onion Link:** The Onion Link feature allows secure access to Orion Intelligence through the Tor browser. By clicking the Orion Link, users can operate the tool anonymously over the dark web, ensuring privacy and resilience in restricted or high-risk environments. Ideal for sensitive investigations and secure threat intelligence operations.
 
-13. **Links:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
+16. **Links:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
 
-14. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
+17. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
 
 ## Homepage
 
@@ -571,29 +571,41 @@ Helps analysts quickly identify patterns, trends, and potential risks without sw
 
 The Telegram view monitors intelligence gathered from selected channels, groups, and bots known to share cyber threat-related content. It helps analysts track leaked credentials, data dumps, malicious discussions, and other relevant activity in near real time.
 
+<img width="1912" height="855" alt="social" src="https://github.com/user-attachments/assets/230e62db-50e4-4b09-baf7-cd274edee76b" />
+
 **Twitter**
 
 The Twitter view captures publicly available posts and discussions relevant to cyber threat monitoring. It supports the identification of trending topics, threat signals, and real-time conversations that may indicate emerging risks.
+
+<img width="1835" height="786" alt="Twitter-modified" src="https://github.com/user-attachments/assets/54f6a104-ce90-414b-8454-21d1f7fd120c" />
+
 
 **Mastodon**
 
 The Mastodon view collects intelligence from decentralized social communities where relevant discussions may surface outside mainstream platforms. It helps analysts monitor distributed conversations, niche communities, and early indicators of threat activity.
 
+<img width="1833" height="872" alt="Mastodon-modified" src="https://github.com/user-attachments/assets/5bc39e21-82e5-4b7b-88b4-d8dfa3c370d8" />
+
+
 **Pastebin**
 
 The Pastebin view tracks publicly shared text content that may include exposed credentials, leaked datasets, or other sensitive information. It supports rapid identification of potential breaches and suspicious disclosures.
+
+<img width="1835" height="822" alt="Pastebin-modified" src="https://github.com/user-attachments/assets/ff486f43-c585-43ad-8085-3fce0d7cea68" />
+
 
 **Forum**
 
 The Forum view analyzes discussions from online forums associated with cybersecurity, hacking, and underground communities. It helps uncover detailed conversations, shared tactics, and intelligence that may not appear on mainstream platforms.
 
+<img width="1840" height="741" alt="Forum-modified" src="https://github.com/user-attachments/assets/99dd4ffd-d067-4291-982b-0cb82c352fb5" />
+
+
 **Reddit**
 
 The Reddit view monitors discussions across relevant subreddits to identify emerging topics, community sentiment, and potential threat indicators. It provides visibility into user-driven conversations that may reveal risks, trends, or incident-related insights.
 
-<img width="1912" height="855" alt="social" src="https://github.com/user-attachments/assets/230e62db-50e4-4b09-baf7-cd274edee76b" />
-
-
+<img width="1840" height="865" alt="Reddit-modified" src="https://github.com/user-attachments/assets/9c3cf674-39d9-4900-b41a-8993c75c8e03" />
 
 
 ## Exploit
@@ -641,36 +653,56 @@ The Entity API module provides real-time intelligence retrieval by allowing user
 
 The Email Breach feature allows users to input an email address and retrieve associated breach data. It helps identify where the email has been exposed, providing insights into potential data leaks and security risks.
 
+<img width="1840" height="844" alt="email breach-modified" src="https://github.com/user-attachments/assets/463fd362-a5dc-4d5e-9b9f-a1ca80b99896" />
+
+
 ### Social Scanner
 
 The Social Scanner collects and analyzes data from various social platforms linked to a specific entity. It assists in uncovering digital footprints, associated accounts, and cross-platform activity.
+
+<img width="1840" height="844" alt="social-modified" src="https://github.com/user-attachments/assets/af223b52-b609-4cb5-b601-f3a48f7962d4" />
+
 
 ### Wanted List
 
 The Wanted List feature checks entities against monitored watchlists and flagged records. It helps identify individuals or entities that may be associated with suspicious or high-risk activities.
 
+<img width="1840" height="844" alt="wanted list-modified" src="https://github.com/user-attachments/assets/ee61866b-3dcb-4cd5-b533-a10c569d7968" />
+
+
 ### National Identity
 
 The National Identity feature enables verification and lookup of identity-related information. It supports investigations by providing structured identity data where available.
+
+<img width="1840" height="844" alt="National Identity-modified" src="https://github.com/user-attachments/assets/e188595e-5eb7-41d3-97b2-c8c0142f2b53" />
+
 
 ### Playstore Scanner
 
 The Playstore Scanner analyzes mobile applications associated with an entity. It helps detect potentially malicious apps, developer information, and related metadata.
 
+<img width="1840" height="844" alt="Playstore-modified" src="https://github.com/user-attachments/assets/c70f8490-4e77-4f00-a07b-e59b89a781ae" />
+
+
 ### Software Scanner
 
 The Software Scanner examines software-related data linked to an entity. It assists in identifying vulnerabilities, suspicious tools, or unsafe software usage.
+
+<img width="1840" height="844" alt="Software Scanner-modified" src="https://github.com/user-attachments/assets/c3529eeb-404c-4dd8-81f5-80be05c315e8" />
+
 
 ### File Scanner
 
 The File Scanner allows users to analyze files for potential threats or malicious content. It supports detection of malware, suspicious patterns, and file-based risks.
 
+<img width="1840" height="473" alt="File scanner-modified" src="https://github.com/user-attachments/assets/f794903a-6e7f-4d71-8c04-e76ac4f97dfa" />
+
+
 ### Crypto Scanner
 
 The Crypto Scanner tracks cryptocurrency addresses and related activity. It helps in identifying suspicious transactions, wallet associations, and financial traces.
 
-<img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
-
+<img width="1840" height="844" alt="crypto scanner-modified" src="https://github.com/user-attachments/assets/169a0493-ffb0-4321-9b2b-90f343713616" />
 
 ## Web Scans
 
@@ -680,23 +712,35 @@ The Web Scans module provides a set of tools for analyzing web assets, applicati
 
 The Basic Scan performs an initial analysis of a target to gather general information and identify common security issues. It provides a quick overview of the target’s exposure and potential risks.
 
+<img width="1840" height="802" alt="Basic Scan-modified" src="https://github.com/user-attachments/assets/c720f6a7-04c9-47d1-9604-ef72f0a78e84" />
+
+
 ### Port Scan
 
 The Port Scan checks for open ports and running services on a target system. It helps identify exposed services that could be exploited or require further investigation.
+
+<img width="1840" height="802" alt="Port Scan-modified" src="https://github.com/user-attachments/assets/fcbcc477-497d-4842-96d2-d05d9e871b96" />
+
 
 ### Repository Scan
 
 The Repository Scan analyzes code repositories for sensitive information, misconfigurations, or exposed credentials. It assists in detecting security risks within publicly or privately accessible codebases.
 
+<img width="1840" height="802" alt="Repository Scan-modified" src="https://github.com/user-attachments/assets/39bf7557-c907-4fc9-b458-ddc925be25bc" />
+
+
 ### SEO Scan
 
 The SEO Scan evaluates website metadata, indexing status, and search engine visibility. It helps identify misconfigurations and potential issues affecting online presence and discoverability.
+
+<img width="1840" height="802" alt="Seo scan-modified" src="https://github.com/user-attachments/assets/9407a520-f33b-4223-8296-ffc30ba44cb9" />
+
 
 ### APK Scan
 
 The APK Scan analyzes Android application packages for vulnerabilities and malicious behavior. It supports detection of security flaws, embedded threats, and risky permissions within mobile apps.
 
-
+<img width="1840" height="391" alt="APK Scan-modified" src="https://github.com/user-attachments/assets/fd99d875-1cb9-443b-9bdb-3bf41efc09c8" />
 
 
 ## Data Dump
@@ -756,7 +800,8 @@ Each record provides a detailed breakdown of the compromised data, including:
 
 The interface displays key metrics such as total results, assets, aggregated records, and search execution time. This provides quick visibility into the scale and performance of the query.
 
-<img width="1915" height="907" alt="stealerlogs" src="https://github.com/user-attachments/assets/11fba8d7-bfe3-4344-baf7-ec10f2a1a89c" />
+<img width="1840" height="892" alt="Stealer Logs-modified" src="https://github.com/user-attachments/assets/4205f755-aa64-4f22-9a34-07b7a2b36800" />
+
 
 
 ## Social Intel
@@ -797,9 +842,7 @@ Users can also edit connections and explore relationships dynamically.
 Displays a legend to differentiate between entity types such as user profiles, social platforms, platform groups, and custom entities.
 This improves clarity and understanding of the graph structure.
 
-
-
-
+<img width="1840" height="912" alt="Social Intel-modified" src="https://github.com/user-attachments/assets/9cee88fe-9c93-4d9c-9c72-19617024ded7" />
 
 ## CTI Graph
 
@@ -811,8 +854,7 @@ with previous incidents. This enhances threat hunting, improves situational awar
 The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to
 provide contextual, actionable insights.
 
-<img width="1917" height="911" alt="image" src="https://github.com/user-attachments/assets/2510cf42-0cd7-4c30-825b-e9ca00f9b5b0" />
-
+<img width="1851" height="921" alt="CTI graph-modified" src="https://github.com/user-attachments/assets/923bf57b-ab85-42b1-b6d6-468f43bc5fbb" />
 
 When the CTI Graph module is clicked, it automatically opens in a new tab. This module displays a connection graph
 composed of various nodes, visually representing complex relationships between different cyber threat entities.
@@ -830,7 +872,8 @@ General, Leak, Defacement, and Chat.
 **Property** Similarly, if the Property filter is selected, the second-level filter asks the user to choose a property
 type—such as email, hashes, etc.—and then specify the property value for a more targeted query.
 
-<img width="757" height="658" alt="ctifilters" src="https://github.com/user-attachments/assets/6b46a285-8d27-4e27-ba19-41a8848f2686" />
+<img width="322" height="921" alt="Filter of cti-modified" src="https://github.com/user-attachments/assets/206ec6c5-7838-4d07-9d53-a56ad264a6b7" />
+
 
 
 On the rightmost side of the CTI Graph interface, there are several additional options:
@@ -846,7 +889,10 @@ On the rightmost side of the CTI Graph interface, there are several additional o
 - Finally, there is a Color Indicators section, which explains the meaning of different node colors used within the
   graph for easier interpretation.
 
-<img width="257" height="888" alt="togglebar" src="https://github.com/user-attachments/assets/5cf73e5a-6d3e-4da0-9695-ef9b13c412ee" />
+<img width="779" height="63" alt="search bar-modified" src="https://github.com/user-attachments/assets/2fe01c57-7b4e-4249-b709-f502bf2504e6" />
+<img width="178" height="254" alt="indicators-modified" src="https://github.com/user-attachments/assets/bd9e396f-50df-4139-a32b-254614ae97ef" />
+
+
 
 
 ## Fillter and Analytics
