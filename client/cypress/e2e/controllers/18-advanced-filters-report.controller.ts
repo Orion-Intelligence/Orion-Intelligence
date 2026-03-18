@@ -36,13 +36,12 @@ export let ADVANCED_FILTER_FIXTURES: AdvancedFilterFixture[] = [
   {
     section_title: 'Exploit',
     subitem_title: 'All',
-    filters: { domains: ['exploit-db.com'], organizations: ['Skyvern'] },
+    filters: {organizations: ['Skyvern']},
   },
   {
     section_title: 'Social',
     subitem_title: 'All',
     filters: { author: ['Wise'], domains: ['crackingx.com'] },
-    // filters: { hashtags:['combo'], ['Wise'], domains: ['crackingx.com'] },
 
   },
   {
