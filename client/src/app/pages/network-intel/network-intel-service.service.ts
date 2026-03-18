@@ -10,6 +10,7 @@ export class ScanHelperMethodsService {
   private currentCancel$?: Subject<boolean> = undefined;
 
   progress = signal(0);
+  isRunning = signal(false);
   onDone   = signal<any>(null);
   onError  = signal<any>(null);
 
@@ -18,6 +19,7 @@ export class ScanHelperMethodsService {
   resetState(): void {
     this.currentCancel$ = undefined;
     this.progress.set(0);
+    this.isRunning.set(false);
     this.onDone.set(null);
     this.onError.set(null);
   }
@@ -62,6 +64,7 @@ export class ScanHelperMethodsService {
 
   private runTask<T>(build: (cancel$: Subject<boolean>) => Observable<T>): Subscription {
     this.progress.set(0);
+    this.isRunning.set(true);
     this.onDone.set(null);
     this.onError.set(null);
 
@@ -70,6 +73,7 @@ export class ScanHelperMethodsService {
 
     const obs$ = build(cancel$).pipe(finalize(() => {
       this.progress.set(100);
+      this.isRunning.set(false);
       this.currentCancel$ = undefined;
     }));
 
@@ -88,12 +92,14 @@ export class ScanHelperMethodsService {
         this.onError.set(err); 
       },
       complete: ()      => {
+        this.isRunning.set(false);
         this.currentCancel$ = undefined; 
       }
     }));
     sub.add(() => {
       cancel$.next(true);
       cancel$.complete();
+      this.isRunning.set(false);
       this.currentCancel$ = undefined;
     });
 

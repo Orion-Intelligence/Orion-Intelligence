@@ -89,7 +89,9 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
         const cachedResult = sessionStorage.getItem(cacheKey);
         if (cachedResult && !this.hasResultData()) {
           try {
-            this.currentResultModel = JSON.parse(cachedResult);
+            const parsedCache = JSON.parse(cachedResult);
+            this.currentResultModel = parsedCache?.result ?? parsedCache;
+            this.maxPages = Number(parsedCache?.maxPages ?? 1) || 1;
             this.restoreSavedScroll();
           }
           catch {
@@ -122,7 +124,10 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
         if (response.success && response.data) {
           this.currentResultModel = response.data["Result"];
           this.maxPages = Number(response.data["Page_Count"] ?? 1) || 1;
-          sessionStorage.setItem(this.buildCacheKey(), JSON.stringify(this.currentResultModel));
+          sessionStorage.setItem(this.buildCacheKey(), JSON.stringify({
+            result: this.currentResultModel,
+            maxPages: this.maxPages,
+          }));
           this.restoreSavedScroll();
         }
         this.isResponseLoading.set(false);

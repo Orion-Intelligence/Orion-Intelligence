@@ -48,8 +48,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   showGeoRangesModal = false;
   geoRangesSubmitAttempted = false;
   isScanning = computed(() =>
-    this.scanHelper.progress() > 0 &&
-    this.scanHelper.progress() < 100 &&
+    this.scanHelper.isRunning() &&
     !this.scanHelper.onError());
 
   get isEmbeddedInConsolidated(): boolean {
@@ -254,6 +253,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.scanHelper.onDone.set(null);
     this.scanHelper.onError.set(null);
     this.scanHelper.progress.set(0);
+    this.scanHelper.isRunning.set(false);
   }
 
   cancel(): void {
@@ -403,11 +403,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.lastResultCount = payload.cameras_found;
     }
     else {
-      if (done.ips_extracted != null || done.ips_scanned != null) {
+      if (payload?.ips_extracted != null || payload?.ips_scanned != null || payload?.cameras_found != null) {
         this.geoLiveStats = {
-          ips_extracted: done.ips_extracted ?? 0,
-          ips_scanned:   done.ips_scanned   ?? 0,
-          cameras_found: done.cameras_found ?? 0,
+          ips_extracted: payload.ips_extracted ?? 0,
+          ips_scanned:   payload.ips_scanned   ?? 0,
+          cameras_found: payload.cameras_found ?? 0,
         };
       }
     }

@@ -16,7 +16,7 @@ export class GeoFeedComponent implements OnChanges, OnDestroy {
   private expandedCameraList: CameraInfo[] = [];
 
   currentPage = 1;
-  readonly pageSize = 10;
+  readonly pageSize = 50;
 
   @Input() cameras: CameraInfo[] = [];
   @Input() loading = false;
