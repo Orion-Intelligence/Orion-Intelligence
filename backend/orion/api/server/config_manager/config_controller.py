@@ -136,10 +136,10 @@ class config_controller:
 
     async def uploadSystemResource(self, file: UploadFile, current_user, key: str):
         contents = await file.read()
-        MAX_FILE_SIZE = 100 * 1024
+        MAX_FILE_SIZE = 1024 * 1024
 
         if len(contents) > MAX_FILE_SIZE:
-            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 100 KB.")
+            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 1 MB.")
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")

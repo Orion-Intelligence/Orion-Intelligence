@@ -734,11 +734,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
         'CA Issuers': this.joinValues(port.tls?.['ca_issuers']),
         'CRL Distribution Points': this.joinValues(port.tls?.['crl_distribution_points']),
         'SCTs': this.normalizeReportValue(port.tls?.['scts']),
-        'Public Key': this.normalizeReportValue(
-          port.tls?.public_key_algorithm
-            ? `${port.tls.public_key_algorithm}${port.tls?.public_key_size ? ` (${port.tls.public_key_size} bit)` : ''}`
-            : ''
-        ),
+        'Public Key': this.normalizeReportValue(port.tls?.public_key_algorithm
+          ? `${port.tls.public_key_algorithm}${port.tls?.public_key_size ? ` (${port.tls.public_key_size} bit)` : ''}`
+          : ''),
         'Signature Algorithm': this.normalizeReportValue(port.tls?.signature_algorithm),
         'Key Usage': this.joinValues(port.tls?.key_usage),
         'Extended Key Usage': this.joinValues(port.tls?.extended_key_usage),

@@ -134,9 +134,7 @@ export class ScanHelperMethodsService {
     const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
 
     try {
-      const response = await lastValueFrom(
-        this.poll<NetworkIntelScanResponse>(call, getStatus, () => {}, cancel$, 4000)
-      );
+      const response = await lastValueFrom(this.poll<NetworkIntelScanResponse>(call, getStatus, () => {}, cancel$, 4000));
       const responseError = this.getResponseError(response);
       if (responseError) {
         throw new Error(responseError.message);
