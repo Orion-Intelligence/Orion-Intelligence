@@ -3,6 +3,10 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.loginAsAdmin();
   });
 
+  after(() => {
+    cy.logout();
+  });
+
   it('runs host recon, deep scan, geo cameras, and triggers one export', () => {
     cy.visit('/dashboard/netint');
     cy.contains('button', /^Host Recon$/, { timeout: 30000 }).should('be.visible');
