@@ -37,7 +37,7 @@ export class IpDetailComponent {
       .filter(([key, value]) => Boolean(key && value));
   }
 
-  private formatDisplayValue(value: any): string {
+  formatDisplayValue(value: any): string {
     if (value === null || value === undefined) {
       return '';
     }

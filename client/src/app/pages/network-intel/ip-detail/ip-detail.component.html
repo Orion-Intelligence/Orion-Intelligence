@@ -108,8 +108,14 @@
                     @if (p.tls.not_after || p.tls.cert_expires) {
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not After</span><span class="text-[var(--color-text2)]">{{ p.tls.not_after || p.tls.cert_expires }}</span></div>
                     }
+                    @if (p.tls.serial_number) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Serial No.</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.serial_number }}</span></div>
+                    }
                     @if (p.tls.is_self_signed) {
                       <div class="flex gap-2.5 text-[13px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Self-Signed</span><span class="text-red-400 font-bold">⚠ Yes</span></div>
+                    }
+                    @if (p.tls.is_ca !== undefined) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Certificate CA</span><span class="text-[var(--color-text2)]">{{ p.tls.is_ca ? 'Yes' : 'No' }}</span></div>
                     }
                     @if (p.tls.signature_algorithm) {
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Signature Algo</span><span class="text-[var(--color-text2)]">{{ p.tls.signature_algorithm }}</span></div>
@@ -126,19 +132,51 @@
                     @if (p.tls.fingerprint_sha256) {
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">SHA-256</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.fingerprint_sha256 }}</span></div>
                     }
+                    @if (p.tls.subject_key_identifier) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Subject Key ID</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.subject_key_identifier }}</span></div>
+                    }
+                    @if (p.tls.authority_key_identifier) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Authority Key ID</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.authority_key_identifier }}</span></div>
+                    }
+                    @if (ui.hasItems(p.tls.ca_issuers)) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">CA Issuers</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.ca_issuers?.join(', ') }}</span></div>
+                    }
+                    @if (ui.hasItems(p.tls.crl_distribution_points)) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">CRL Points</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.crl_distribution_points?.join(', ') }}</span></div>
+                    }
+                    @if (ui.hasItems(p.tls.certificate_policies)) {
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Policies</span><span class="text-[var(--color-text2)]">{{ p.tls.certificate_policies?.join(', ') }}</span></div>
+                    }
                   </div>
-                  @if (ui.hasItems(p.tls.supported_versions) || ui.hasItems(p.tls.weak_protocols) || ui.hasItems(p.tls.risk_flags)) {
+                  @if (ui.hasItems(p.tls.supported_versions) || ui.hasItems(p.tls.weak_protocols) || ui.hasItems(p.tls.risk_flags) || renderHeaderEntries(p.tls.ciphers_by_version).length) {
                     <div class="mt-2">
                       <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">TLS Configuration</div>
                       <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
                         @if (ui.hasItems(p.tls.supported_versions)) {
                           <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Supported</span><span class="text-[var(--color-text2)]">{{ p.tls.supported_versions?.join(', ') }}</span></div>
                         }
+                        @if (renderHeaderEntries(p.tls.ciphers_by_version).length) {
+                          @for (entry of renderHeaderEntries(p.tls.ciphers_by_version); track entry[0]) {
+                            <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">{{ entry[0] }}</span><span class="text-[var(--color-text2)]">{{ entry[1] }}</span></div>
+                          }
+                        }
                         @if (ui.hasItems(p.tls.weak_protocols)) {
                           <div class="flex gap-2.5 text-[13px]"><span class="text-red-400 font-semibold w-32 flex-shrink-0">Weak Protocols</span><span class="text-red-400">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
                         }
                         @if (ui.hasItems(p.tls.risk_flags)) {
                           <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Risk Flags</span><span class="text-[var(--color-text2)]">{{ p.tls.risk_flags?.join(', ') }}</span></div>
+                        }
+                      </div>
+                    </div>
+                  }
+                  @if (ui.hasItems(p.tls.scts)) {
+                    <div class="mt-2">
+                      <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">Signed Certificate Timestamps</div>
+                      <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
+                        @for (entry of p.tls.scts; track $index) {
+                          <div class="rounded border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+                            {{ formatDisplayValue(entry) }}
+                          </div>
                         }
                       </div>
                     </div>

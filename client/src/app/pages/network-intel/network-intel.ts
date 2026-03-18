@@ -206,7 +206,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return Boolean(this.geoResult?.cameras?.length || this.geoResult || this.geoLiveStats);
   }
 
-  downloadReport(): void {
+  async downloadReport(): Promise<void> {
+    if (this.activeTab === 'dns') {
+      await this.loadAllDnsIpDetailsForExport();
+    }
+
     const payload = this.buildReportPayload();
     if (!payload) {
       return;
@@ -468,13 +472,18 @@ export class NetworkIntel implements OnInit, OnDestroy {
           resolved_ips: this.dnsResult.ips.length,
           exported_at: now
         },
-        tables: [{
-          title: 'Resolved IPs',
-          values: this.dnsResult.ips.reduce((acc, ip, index) => {
-            acc[`IP ${index + 1}`] = ip;
-            return acc;
-          }, {} as Record<string, string>)
-        }]
+        tables: [
+          {
+            title: 'Resolved IPs',
+            values: this.dnsResult.ips.reduce((acc, ip, index) => {
+              acc[`IP ${index + 1}`] = ip;
+              return acc;
+            }, {} as Record<string, string>)
+          },
+          ...this.ipRows
+            .filter(row => Boolean(row.detail))
+            .flatMap((row, index) => this.buildIpDetailTables(row.detail!, `IP ${index + 1}`))
+        ]
       };
     }
 
@@ -514,60 +523,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           exported_at: now
         },
         tables: [
-          {
-            title: 'General Information',
-            values: {
-              Country: detail.country || '-',
-              City: detail.city || '-',
-              Organization: detail.organization || '-',
-              ISP: detail.isp || '-',
-              ASN: detail.asn || '-',
-              Hosting: detail.hosting_type || '-',
-              'Web Server': detail.web_server || '-',
-              Title: detail.title || '-',
-              Technologies: this.joinValues(detail.web_technologies),
-              Hostnames: this.joinValues(detail.hostnames)
-            }
-          },
-          {
-            title: 'Exposure Summary',
-            values: {
-              'Open Ports': this.joinValues(detail.open_ports),
-              Vulnerabilities: this.joinValues((detail.vulnerabilities as any[] | undefined)?.map(item => this.formatReportVulnerability(item))),
-              Misconfigurations: this.joinValues(detail.misconfigurations),
-              'Risk Flags': this.joinValues(detail.ports?.flatMap(port => port.risk_flags || [])),
-              Cameras: String(detail.cameras?.length ?? 0),
-              'Camera Paths': this.joinValues(detail.camera_paths as unknown[] | undefined)
-            }
-          },
-          {
-            title: 'HTTP Headers',
-            values: this.toStringRecord(detail.http_headers)
-          },
-          {
-            title: 'Cache Headers',
-            values: this.toStringRecord(detail.cache_headers)
-          },
-          {
-            title: 'Camera Findings',
-            values: (detail.cameras || []).slice(0, 30).reduce((acc, camera, index) => {
-              acc[`Camera ${index + 1}`] = [
-                detail.ip,
-                camera.port ? `:${camera.port}` : '',
-                camera.brand || camera.model_hint || camera.model || '',
-                camera.service ? `(${camera.service})` : ''
-              ].join(' ').trim() || '-';
-              return acc;
-            }, {} as Record<string, string>)
-          },
-          ...this.buildPortDetailTables(detail),
-          {
-            title: 'Detected Cameras',
-            values: (detail.cameras || []).slice(0, 20).reduce((acc, camera, index) => {
-              acc[`Camera ${index + 1}`] = `${detail.ip || 'Unknown IP'}${camera.port ? `:${camera.port}` : ''} ${camera.brand || camera.model_hint || camera.model || 'Unknown'}`.trim();
-              return acc;
-            }, {} as Record<string, string>)
-          }
+          ...this.buildIpDetailTables(detail)
         ]
       };
     }
@@ -636,6 +592,24 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return null;
   }
 
+  private async loadAllDnsIpDetailsForExport(): Promise<void> {
+    for (const row of this.ipRows) {
+      if (row.detail || row.error) {
+        continue;
+      }
+
+      try {
+        const detail = await this.scanHelper.fetchShodanIpDetail(row.ip);
+        if (detail?.ip) {
+          row.detail = detail as IpDetail;
+        }
+      }
+      catch (error: any) {
+        row.error = error?.message || 'Failed to load details';
+      }
+    }
+  }
+
   private joinValues(values: unknown[] | undefined | null): string {
     const normalized = (values || [])
       .map(value => `${value ?? ''}`.trim())
@@ -656,9 +630,84 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return Object.fromEntries(entries);
   }
 
-  private buildPortDetailTables(detail: IpDetail): Array<{ title: string; values: Record<string, string> }> {
+  private buildIpDetailTables(detail: IpDetail, prefix = ''): Array<{ title: string; values: Record<string, string> }> {
+    const titlePrefix = prefix ? `${prefix} ` : '';
+
+    return [
+      {
+        title: `${titlePrefix}General Information`.trim(),
+        values: {
+          IP: detail.ip || '-',
+          Country: detail.country || '-',
+          City: detail.city || '-',
+          Organization: detail.organization || '-',
+          ISP: detail.isp || '-',
+          ASN: detail.asn || '-',
+          Hosting: detail.hosting_type || '-',
+          'Cloud Provider': detail.cloud_provider || '-',
+          'Cloud Region': detail.cloud_region || '-',
+          'Cloud Service': detail.cloud_service || '-',
+          'Web Server': detail.web_server || '-',
+          Title: detail.title || '-',
+        }
+      },
+      {
+        title: `${titlePrefix}Exposure Summary`.trim(),
+        values: {
+          'Open Ports': this.joinValues(detail.open_ports),
+          Technologies: this.joinValues(detail.web_technologies),
+          Hostnames: this.joinValues(detail.hostnames),
+          Vulnerabilities: this.joinValues((detail.vulnerabilities as any[] | undefined)?.map(item => this.formatReportVulnerability(item))),
+          Misconfigurations: this.joinValues(detail.misconfigurations),
+          Cameras: String(detail.cameras?.length ?? 0),
+          'Camera Paths': this.joinValues(detail.camera_paths as unknown[] | undefined)
+        }
+      },
+      {
+        title: `${titlePrefix}Security & CDN`.trim(),
+        values: {
+          CDN: this.normalizeReportValue(detail.cdn),
+          WAF: this.normalizeReportValue(detail.waf),
+          'Load Balancer': this.normalizeReportValue(detail.load_balancer),
+          HSTS: detail.hsts ? 'Yes' : 'No',
+          Flags: this.joinValues(this.securityItems(detail.security))
+        }
+      },
+      {
+        title: `${titlePrefix}HTTP Headers`.trim(),
+        values: this.toStringRecord(detail.http_headers)
+      },
+      {
+        title: `${titlePrefix}Cache Headers`.trim(),
+        values: this.toStringRecord(detail.cache_headers)
+      },
+      {
+        title: `${titlePrefix}Allowed Methods`.trim(),
+        values: {
+          Methods: this.joinValues(detail.allowed_methods)
+        }
+      },
+      {
+        title: `${titlePrefix}Detected Cameras`.trim(),
+        values: (detail.cameras || []).slice(0, 20).reduce((acc, camera, index) => {
+          acc[`Camera ${index + 1}`] = [
+            detail.ip || 'Unknown IP',
+            camera.port ? `:${camera.port}` : '',
+            camera.brand || camera.model_hint || camera.model || 'Unknown',
+            camera.service ? `(${camera.service})` : ''
+          ].join(' ').trim();
+          return acc;
+        }, {} as Record<string, string>)
+      },
+      ...this.buildPortDetailTables(detail, prefix)
+    ].filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
+  }
+
+  private buildPortDetailTables(detail: IpDetail, prefix = ''): Array<{ title: string; values: Record<string, string> }> {
+    const titlePrefix = prefix ? `${prefix} ` : '';
+
     return (detail.ports || []).slice(0, 12).map((port, index) => ({
-      title: `Port ${port.port || index + 1} Details`,
+      title: `${titlePrefix}Port ${port.port || index + 1} Details`.trim(),
       values: {
         Port: port.port ? String(port.port) : '-',
         Protocol: port.protocol || port.proto || '-',
@@ -674,11 +723,37 @@ export class NetworkIntel implements OnInit, OnDestroy {
         'HTTP Title': this.normalizeReportValue(port.http?.title),
         'TLS Version': this.normalizeReportValue(port.tls?.version),
         'TLS Cipher': this.normalizeReportValue(port.tls?.cipher),
+        'TLS Supported Versions': this.joinValues(port.tls?.supported_versions),
+        'TLS Ciphers By Version': this.normalizeReportValue(port.tls?.['ciphers_by_version']),
         'Certificate CN': this.normalizeReportValue(port.tls?.cert_cn),
+        'Certificate SAN': this.normalizeReportValue(port.tls?.san),
+        'Certificate Issuer': this.normalizeReportValue(port.tls?.issuer),
+        'Certificate Subject': this.normalizeReportValue(port.tls?.subject),
+        'Certificate Serial': this.normalizeReportValue(port.tls?.serial_number),
+        'Certificate Policies': this.joinValues(port.tls?.['certificate_policies']),
+        'CA Issuers': this.joinValues(port.tls?.['ca_issuers']),
+        'CRL Distribution Points': this.joinValues(port.tls?.['crl_distribution_points']),
+        'SCTs': this.normalizeReportValue(port.tls?.['scts']),
+        'Public Key': this.normalizeReportValue(
+          port.tls?.public_key_algorithm
+            ? `${port.tls.public_key_algorithm}${port.tls?.public_key_size ? ` (${port.tls.public_key_size} bit)` : ''}`
+            : ''
+        ),
+        'Signature Algorithm': this.normalizeReportValue(port.tls?.signature_algorithm),
+        'Key Usage': this.joinValues(port.tls?.key_usage),
+        'Extended Key Usage': this.joinValues(port.tls?.extended_key_usage),
+        'Subject Key ID': this.normalizeReportValue(port.tls?.['subject_key_identifier']),
+        'Authority Key ID': this.normalizeReportValue(port.tls?.['authority_key_identifier']),
+        'SHA-256 Fingerprint': this.normalizeReportValue(port.tls?.fingerprint_sha256),
+        'TLS Risk Flags': this.joinValues(port.tls?.risk_flags),
+        'Weak Protocols': this.joinValues(port.tls?.weak_protocols),
+        'Self Signed': port.tls?.is_self_signed === undefined ? '-' : (port.tls?.is_self_signed ? 'Yes' : 'No'),
+        'Certificate CA': port.tls?.['is_ca'] === undefined ? '-' : (port.tls?.['is_ca'] ? 'Yes' : 'No'),
         'Certificate Expiry': this.normalizeReportValue(port.tls?.not_after || port.tls?.cert_expires),
+        'Certificate Not Before': this.normalizeReportValue(port.tls?.not_before),
         'Discovered Paths': this.joinValues(port['discovered_paths']),
       }
-    }));
+    })).filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
 
   private truncateReportText(value: unknown, maxLength = 1200): string {
@@ -721,5 +796,15 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [cve, cvss].filter(Boolean).join(' • ');
     }
     return '';
+  }
+
+  private securityItems(sec: string[] | Record<string, boolean> | undefined | null): string[] {
+    if (!sec) {
+      return [];
+    }
+    if (Array.isArray(sec)) {
+      return sec;
+    }
+    return Object.entries(sec).filter(([, value]) => value).map(([key]) => key);
   }
 }

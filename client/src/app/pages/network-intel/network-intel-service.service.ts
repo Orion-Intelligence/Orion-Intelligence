@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { EMPTY, Observable, Subject, Subscription, timer } from 'rxjs';
+import { EMPTY, lastValueFrom, Observable, Subject, Subscription, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { ResolveIpResponse, NetworkIntelScanResponse, GeoCameraResponse } from '../../shared/model/network-intel/network-intel-api.models';
@@ -126,6 +126,27 @@ export class ScanHelperMethodsService {
     const build = (cancel$: Subject<boolean>) =>
       this.poll<NetworkIntelScanResponse>(call, getStatus, enhanced, cancel$, 4000);
     return this.runTask<NetworkIntelScanResponse>(build);
+  }
+
+  async fetchShodanIpDetail(ip: string): Promise<any> {
+    const cancel$ = new Subject<boolean>();
+    const call = () => this.api.post<NetworkIntelScanResponse>('netintel/scanner', { ip });
+    const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
+
+    try {
+      const response = await lastValueFrom(
+        this.poll<NetworkIntelScanResponse>(call, getStatus, () => {}, cancel$, 4000)
+      );
+      const responseError = this.getResponseError(response);
+      if (responseError) {
+        throw new Error(responseError.message);
+      }
+      return response?.result ?? response;
+    }
+    finally {
+      cancel$.next(true);
+      cancel$.complete();
+    }
   }
 
   scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {

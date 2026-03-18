@@ -9,8 +9,6 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './geo-ranges-modal.component.html',
 })
 export class GeoRangesModalComponent {
-  readonly maxIpOptions = [50, 100, 200, 500];
-
   @Input() isOpen = false;
   @Input() isScanning = false;
   @Input() ipRanges = '';
