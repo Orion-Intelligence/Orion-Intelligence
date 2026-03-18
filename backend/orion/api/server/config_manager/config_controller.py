@@ -65,6 +65,7 @@ class config_controller:
             fresh_config["logo_url"] = asset("logo_url")
             fresh_config["logo_wide_light"] = asset("logo_wide_light")
             fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
+            fresh_config["auth_dashboard_icon"] = asset("auth_dashboard_icon")
             fresh_config["meta_info"] = fresh_config.get("meta_info") or json.dumps({
                 "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
                 "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
@@ -168,4 +169,5 @@ class config_controller:
             AllowedKeys.LOGO_URL: prefix + record.value if key == AllowedKeys.LOGO_URL else None,
             AllowedKeys.LOGO_WIDE_LIGHT: prefix + record.value if key == AllowedKeys.LOGO_WIDE_LIGHT else None,
             AllowedKeys.LOGO_WIDE_DARK: prefix + record.value if key == AllowedKeys.LOGO_WIDE_DARK else None,
+            AllowedKeys.AUTH_DASHBOARD_ICON: prefix + record.value if key == AllowedKeys.AUTH_DASHBOARD_ICON else None,
         }

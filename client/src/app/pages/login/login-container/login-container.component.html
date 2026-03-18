@@ -66,7 +66,7 @@
           </div>
         </div>
         <div class="flex-1 relative overflow-hidden bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
-          <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
+          <img [src]="appService.getConfig().appSettings.auth_dashboard_icon" alt="Dashboard Preview" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
         </div>
       </div>
     </div>

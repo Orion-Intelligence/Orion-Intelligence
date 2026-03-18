@@ -5,6 +5,7 @@ export class AppSettingsModel {
   logo_url: string = '';
   logo_wide_light: string = '';
   logo_wide_dark: string = '';
+  auth_dashboard_icon:string='';
   app_name: string = '';
   meta_info: string = '';
   home_header_data_sources: string = '';
@@ -23,6 +24,7 @@ export class AppSettingsModel {
       this.logo_url = (data.logo_url as string) || this.logo_url;
       this.logo_wide_light = (data.logo_wide_light as string) || this.logo_wide_light;
       this.logo_wide_dark = (data.logo_wide_dark as string) || this.logo_wide_dark;
+      this.auth_dashboard_icon=(data.auth_dashboard_icon as string) || this.auth_dashboard_icon;
       this.api_allowed = (data.api_allowed as string) || this.api_allowed;
       this.app_name = (data.app_name as string) || this.app_name;
       this.meta_info = (data.meta_info as string) || this.meta_info;
