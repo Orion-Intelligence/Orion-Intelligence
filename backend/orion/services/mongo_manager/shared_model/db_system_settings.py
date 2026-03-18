@@ -17,6 +17,7 @@ class AllowedKeys(str, Enum):
     LOGO_URL = "logo_url"
     LOGO_WIDE_LIGHT = "logo_wide_light"
     LOGO_WIDE_DARK = "logo_wide_dark"
+    AUTH_DASHBOARD_ICON = "auth_dashboard_icon"
 
 VALID_LANGUAGE_CODES = {"en", "fr", "es", "de", "it", "pt", "ru", "zh", "ja", "ko", "ar", "hi", "bn", "tr", "nl", "sv",
     "pl", "cs"}

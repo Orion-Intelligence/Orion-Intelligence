@@ -69,7 +69,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.isEditing = false;
   }
 
-  updateUserResource(file: File,key: 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
+  updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
     const formData = new FormData();
     formData.append('file', file);
     return this.apiService
@@ -85,6 +85,9 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           if (res?.logo_wide_dark) {
             (this.appService.getConfig().appSettings as any).logo_wide_dark = res.logo_wide_dark;
           }
+          if(res?.auth_dashboard_icon){
+            (this.appService.getConfig().appSettings as any).auth_dashboard_icon = res.auth_dashboard_icon;
+          }
           if ((this.appService.getConfig().appSettings as any).logo_url) {
             this.appService.updateFavicon((this.appService.getConfig().appSettings as any).logo_url);
           }
@@ -96,13 +99,15 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       });
   }
 
-  deleteUserResource(key: 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
+  deleteUserResource(key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
     return this.apiService.delete<any>(`system/image?key=${key}`).subscribe(() => {
-      const fallback = key === 'logo_url'
-        ? '/api/s/static/system/logo_url_default.png'
-        : key === 'logo_wide_light'
-          ? '/api/s/static/system/logo_wide_light_default.png'
-          : '/api/s/static/system/logo_wide_dark_default.png';
+      const fallbackMap: Record<string, string> = {
+        logo_url: '/api/s/static/system/logo_url_default.png',
+        logo_wide_light: '/api/s/static/system/logo_wide_light_default.png',
+        logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png',
+        login_page_image: '/api/s/static/system/auth_dashboard_icon_default.png'
+      };
+      const fallback = fallbackMap[key];
       (this.appService.getConfig().appSettings as any)[key] = fallback;
       if (key === 'logo_url') {
         this.appService.updateFavicon(fallback);
