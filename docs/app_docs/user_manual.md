@@ -11,9 +11,8 @@ It is formatted for **Sphinx + MyST + Shibuya** (right-side “On this page” e
 
 ## Introduction
 
-ma
 
-let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to
+Let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to
 allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below
 illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized
 personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that
@@ -23,11 +22,12 @@ provide full control over the system's functionality, ensuring smooth and effici
 
 
 
-## Homepage Page
+## Homepage 
 
-The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlinedaccess to its wide range of features. When we  log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
+The Orion Platform features a modern and user-friendly interface that provides seamless access to its powerful intelligence tools. Upon logging in, users are presented with a visually rich dashboard that includes a global heatmap highlighting data leak activity across different regions. This interactive visualization allows users to quickly identify trends and geographic patterns in real time. The left-hand navigation panel organizes key modules such as General Intelligence, Data Breach, Defacement, Social, Exploit, and Feeds, enabling efficient access to various data sources. Advanced search and filtering options at the top of the dashboard further enhance usability, allowing users to refine queries and retrieve precise results. Powered by advanced analytics and machine learning capabilities, the platform delivers accurate insights and supports deep data exploration. Users can easily monitor, analyze, and interpret large datasets, making it a valuable tool for cybersecurity professionals and organizations seeking actionable intelligence. Orion’s intuitive design and robust functionality ensure efficient decision-making and enhanced situational awareness.
 
-<img width="1919" height="1079" alt="homepage" src="https://github.com/user-attachments/assets/022963ba-4c8e-41df-85aa-d719ca881edb" />
+<img width="1826" height="873" alt="maps-modified" src="https://github.com/user-attachments/assets/9f144e7f-1ead-49ba-ae42-3e0a8c37c4b0" />
+
 
 ## Directory Page
 
