@@ -29,11 +29,11 @@ import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.co
 import { scanAnimation } from '../../../shared/animations/scan.animations';
 import { DefacementCallbackModel } from '../../../shared/model/results/defacement/defacement.callback.model';
 import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manager.utils';
-import { countFilterValues } from '../../../shared/utils/filter-values.util';
+import { NetworkIntel } from '../../network-intel/network-intel';
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })
@@ -50,6 +50,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   public pageCounts: { [key: string]: number; } = {};
   isGrouped = false;
   isIOC = true;
+  isNetworkIntel = false;
   query: string = '';
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
@@ -118,12 +119,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         }
         this.firstTrigger = false;
       });
-    const categories = this.appService.configData().localSettings.entityfilterCategories;
-    const totalTags = countFilterValues(categories);
-    if (totalTags > 0) {
-      this.isIOC = false;
-      this.isGrouped = true;
-    }
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
       if (tab) {
@@ -348,8 +343,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   onToggleMenu(tab: string): void {
     this.dashboardService.consolidatedParamModel.tab = tab;
     this.query='';
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    }).then();
     const skipConsolidatedBackFetchOnce = sessionStorage.getItem('skipConsolidatedBackFetchOnce') === '1';
     if (tab == "Deep Search") {
+      this.isNetworkIntel = false;
       this.isGrouped = true;
       this.isIOC = false;
       if (skipConsolidatedBackFetchOnce) {
@@ -359,12 +361,19 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.fetchSearchResults();
     }
     else if (tab == "Ranked") {
+      this.isNetworkIntel = false;
       this.isGrouped = false;
       this.isIOC = false;
       this.fetchRanked();
     }
     else if (tab == "IOCs") {
+      this.isNetworkIntel = false;
       this.isIOC = true;
+      this.isGrouped = false;
+    }
+    else if (tab == "Network Intelligence") {
+      this.isNetworkIntel = true;
+      this.isIOC = false;
       this.isGrouped = false;
     }
   }

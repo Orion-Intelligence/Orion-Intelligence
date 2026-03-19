@@ -32,9 +32,10 @@ export class DashboardHeaderComponent implements OnInit {
   updateBreadcrumb(url: string) {
     const urlTree: UrlTree = this.router.parseUrl(url);
     const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) ?? [];
+    const formatLabel = (segment: string) => segment === 'netint' ? 'Network Intel' : segment;
     this.breadcrumb = segments.length > 1
-      ? segments.slice(1).map((segment) => ({ path: segment, label: segment }))
-      : segments.map((segment) => ({ path: segment, label: segment }));
+      ? segments.slice(1).map((segment) => ({ path: segment, label: formatLabel(segment) }))
+      : segments.map((segment) => ({ path: segment, label: formatLabel(segment) }));
   }
 
   goBack() {

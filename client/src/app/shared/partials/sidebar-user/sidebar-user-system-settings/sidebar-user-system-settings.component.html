@@ -1,4 +1,4 @@
-<div class="w-full p-3 md:p-4">
+<div class="mb-[200px] w-full p-3 md:p-4">
   <div class="ui-page-container w-full max-w-[2400px]" @fadeInDashboardItem>
     <div class="mb-4 flex items-start justify-between gap-3">
       <div class="flex items-center gap-3">
@@ -68,6 +68,19 @@
               (onClear)="deleteUserResource('logo_wide_dark')"
             ></app-user-image-picker>
           </div>
+
+          <div class="py-1 xl:pl-3">
+            <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Auth Dashboard Icon</div>
+            <div class="mt-0.5 text-xs text-[var(--color-text4)]">Used on login and sign up pages.</div>
+            <app-user-image-picker
+              class="mt-1 block h-20 w-full max-w-[250px] rounded-xl p-2 pl-0"
+              [wide]="true"
+              [imageUrl]="this.appService.getConfig().appSettings.auth_dashboard_icon || '/api/s/static/system/auth_dashboard_icon_default.png'"
+              [defaultImage]="'/api/s/static/system/auth_dashboard_icon_default.png'"
+              (onImageSelected)="updateUserResource($event,'auth_dashboard_icon')"
+              (onClear)="deleteUserResource('auth_dashboard_icon')"
+            ></app-user-image-picker>
+          </div>
         </div>
       </div>
 
@@ -117,6 +130,66 @@
             </label>
             <input data-testid="system-settings-onion-address" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.s_onion" [disabled]="!isEditing" placeholder="Enter onion site" />
           </div>
+
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              Data Sources URL
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+              }
+            </label>
+            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.data_sources_url" [disabled]="!isEditing" placeholder="Data Sources" />
+          </div>
+
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              Adversaries URL
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+              }
+            </label>
+            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.adversaries_url" [disabled]="!isEditing" placeholder="Adversaries" />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              Pricing URL
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+              }
+            </label>
+            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.pricing_url" [disabled]="!isEditing" placeholder="Pricing" />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
+              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Documentation Allowed</span>
+              <span class="relative inline-flex items-center">
+                <input type="checkbox" class="sr-only peer" [(ngModel)]="form.documentation_allowed" [disabled]="!isEditing" />
+                <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
+                  <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.documentation_allowed ? 'translate-x-[14px]' : 'translate-x-0'"></span>
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
+              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Whistle Blowing Allowed</span>
+              <span class="relative inline-flex items-center">
+                <input type="checkbox" class="sr-only peer" [(ngModel)]="form.whistle_blowing_allowed" [disabled]="!isEditing" />
+                <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
+                  <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.whistle_blowing_allowed ? 'translate-x-[14px]' : 'translate-x-0'"></span>
+                </span>
+              </span>
+            </label>
+          </div>
+
+          @if (formError) {
+            <div class="lg:col-span-2 rounded-[8px] border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300">
+              {{ formError }}
+            </div>
+          }
         </div>
       </div>
 

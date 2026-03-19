@@ -21,6 +21,7 @@ from orion.management.jobs.alert_job import alert_job
 from orion.management.jobs.insight_job import insight_job
 from orion.management.models.insight_model import InsightData
 from orion.services.encryption_manager.key_manager import KeyManager
+from orion.services.mail_manager.mail_manager import mail_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, TenantStatus
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
@@ -547,6 +548,10 @@ def test_tenant_manager_create_tenant_user_success(monkeypatch):
         async def register(self, *_args, **_kwargs):
             return "ok"
 
+    class _Mail:
+        async def send_verification_mail(self, *_args, **_kwargs):
+            return "ok"
+
     from orion.services.mongo_manager.mongo_controller import mongo_controller
     from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
     from orion.helper_manager.helper_controller import helper_controller
@@ -557,6 +562,7 @@ def test_tenant_manager_create_tenant_user_success(monkeypatch):
     monkeypatch.setattr(AccountManager, "get_instance", staticmethod(lambda: _Account()))
     monkeypatch.setattr(KeyManager, "get_instance", staticmethod(lambda: _Key()))
     monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _Audit()))
+    monkeypatch.setattr(mail_manager, "get_instance", staticmethod(lambda: _Mail()))
 
     data = SimpleNamespace(role="member", status="active", subscription=False, licenses=["free"])
     current_user = SimpleNamespace(tenant_uuid=tenant_id, role="admin", id="u1")

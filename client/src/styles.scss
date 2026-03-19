@@ -1,5 +1,6 @@
 @use 'assets/styles/fonts.scss';
 @use "./app/pages/credentials/expanded-row/expanded-row.component.scss";
+@use "./app/pages/network-intel/modal/geo-coordinates-modal/geo-coordinates-modal.component.scss";
 @use "./app/pages/tenant/tenant-management/view-tenant.component-shared.scss";
 @use "./app/shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.scss";
 @use "./app/shared/styles/alert-stagger-animations.scss";

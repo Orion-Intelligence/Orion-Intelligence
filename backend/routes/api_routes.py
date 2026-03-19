@@ -12,8 +12,17 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (search_credential_param_model, )
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, search_dynamic_crypto_model, )
 from orion.api.interactive.search_manager.search_model import search_model
-from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
-from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (IPScanRequest)
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
+    DomainScanRequest,
+    UrlVulnerabilityScanRequest,
+)
+from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
+    GeoCameraDetectRangesRequest,
+    GeoCameraDetectRequest,
+    IPScanRequest,
+    NetIntelDeepScanRequest,
+    ResolveIPRequest,
+)
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -688,6 +697,72 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
 )
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
+
+@api_routes.post(
+    "/api/netintel/resolve_ip",
+    summary="Resolve a domain to IP addresses",
+    description=DYNAMIC_DOCS["ip_resolve"]["description"],
+    tags=["Entity Scans"],
+    operation_id="resolveIp",
+    response_description=DYNAMIC_DOCS["ip_resolve"]["description"],
+    status_code=200,
+    dependencies=SCANNING_DEPS,
+)
+async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().network_intel(param, "resolve_ip", user_id=str(current_user.id))
+
+@api_routes.post(
+    "/api/netintel/ipscanner",
+    summary="Scan an IP address for network intelligence",
+    description=DYNAMIC_DOCS["deep_ip_scan"]["description"],
+    tags=["Entity Scans"],
+    operation_id="ipScanner",
+    response_description=DYNAMIC_DOCS["deep_ip_scan"]["description"],
+    status_code=200,
+    dependencies=SCANNING_DEPS,
+)
+async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().network_intel(param, "netintel_scanner", user_id=str(current_user.id))
+
+@api_routes.post(
+    "/api/netintel/url_vulnerability_scan",
+    summary="Scan a domain URL for web vulnerabilities",
+    description=DYNAMIC_DOCS["domain_scan"]["description"],
+    tags=["Entity Scans"],
+    operation_id="urlVulnerabilityScan",
+    response_description=DYNAMIC_DOCS["domain_scan"]["response_description"],
+    status_code=200,
+    dependencies=SCAN_WITH_LIMITER_DEPS,
+)
+async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().network_intel(param, "url_vulnerability_scan", user_id=str(current_user.id))
+
+@api_routes.post(
+    "/api/netintel/iot_detect",
+    summary="Scan a geographic area for exposed cameras",
+    description=DYNAMIC_DOCS["geo_camera"]["description"],
+    tags=["Entity Scans"],
+    operation_id="geoIotDetect",
+    response_description=DYNAMIC_DOCS["geo_camera"]["description"],
+    status_code=200,
+    dependencies=SCANNING_DEPS,
+)
+async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().network_intel(param, "iot_detect", user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/netintel/camera_detect_ranges",
+    summary="Scan IP ranges for exposed cameras",
+    description=DYNAMIC_DOCS["geo_camera"]["description"],
+    tags=["Entity Scans"],
+    operation_id="geoCameraDetectRanges",
+    response_description=DYNAMIC_DOCS["geo_camera"]["description"],
+    status_code=200,
+    dependencies=SCANNING_DEPS,
+)
+async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id))
 
 
 @api_routes.post(

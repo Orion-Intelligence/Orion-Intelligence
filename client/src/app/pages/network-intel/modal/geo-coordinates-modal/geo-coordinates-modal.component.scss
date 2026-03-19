@@ -1,0 +1,41 @@
+.light-theme .ui-graph-popup-panel input.geo-stepper-input,
+.light-theme .ui-graph-popup-panel textarea.geo-stepper-input,
+.light-theme .ui-graph-popup-panel select.geo-stepper-input,
+.ui-graph-popup-panel input.geo-stepper-input,
+.ui-graph-popup-panel textarea.geo-stepper-input,
+.ui-graph-popup-panel select.geo-stepper-input,
+.geo-stepper-input {
+  border: 0 !important;
+  border-color: transparent !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  appearance: textfield;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+.light-theme .ui-graph-popup-panel input.geo-stepper-input:focus,
+.light-theme .ui-graph-popup-panel input.geo-stepper-input:focus-visible,
+.light-theme .ui-graph-popup-panel input.geo-stepper-input:hover,
+.light-theme .ui-graph-popup-panel input.geo-stepper-input:active,
+.ui-graph-popup-panel input.geo-stepper-input:focus,
+.ui-graph-popup-panel input.geo-stepper-input:focus-visible,
+.ui-graph-popup-panel input.geo-stepper-input:hover,
+.ui-graph-popup-panel input.geo-stepper-input:active,
+.geo-stepper-input:focus,
+.geo-stepper-input:focus-visible,
+.geo-stepper-input:hover,
+.geo-stepper-input:active {
+  border: 0 !important;
+  border-color: transparent !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.geo-stepper-input::-webkit-outer-spin-button,
+.geo-stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

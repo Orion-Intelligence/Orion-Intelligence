@@ -13,7 +13,8 @@ export enum Category {
     STEALERLOGS = 'Stealerlogs',
     SCANNER = 'Scanner',
     TENANT = 'Tenant',
-    PROFILE = 'Profile'
+    PROFILE = 'Profile',
+    NETINT = 'NETINT'
 }
 export enum GeneralSubCategory {
     ALL = 'All',
@@ -80,6 +81,11 @@ export enum StealerlogsSubCategory {
     IOC = 'IOCS'
 }
 export enum TenantSubCategory {
+    VIEW_PROFILE = 'View-Profiles',
+    VIEW_TENANT = 'View-Tenants',
+    AUDITLOG = 'Auditlog'
+}
+export enum NETINTSubCategory {
     VIEW_PROFILE = 'View-Profiles',
     VIEW_TENANT = 'View-Tenants',
     AUDITLOG = 'Auditlog'

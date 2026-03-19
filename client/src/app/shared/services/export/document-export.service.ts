@@ -82,15 +82,15 @@ export class DocumentExportService extends GraphExportService {
         const sectionTitle = this.getReportSectionTitle(t, idx);
         const tableRows = this.buildReportSectionRows(t.values ?? {});
         let markerY = ((doc as any).lastAutoTable.finalY ?? 160) + 18;
-        markerY = this.resolveMarkerY(doc, markerY, 86);
+        markerY = this.resolveMarkerY(doc, markerY, 126);
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
         const reportSectionDidDrawPage = (data: any) => {
           hooks.didDrawPage(data);
-          this.drawInfoSectionMarker(data.doc as jsPDF, 86, contentW, sectionTitle || 'Info');
+          this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info');
         };
         autoTable(doc, {
           startY: markerY + 12,
-          margin: { top: 99, left: 40, right: 40, bottom: 58 },
+          margin: { top: 139, left: 40, right: 40, bottom: 58 },
           tableWidth: contentW,
           body: tableRows as RowInput[],
           styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
@@ -186,6 +186,7 @@ export class DocumentExportService extends GraphExportService {
   private makeHeaderFooterHooks(payload: GraphReportPayload, meta: GraphReportMeta): {
     didDrawPage: (data: any) => void;
   } {
+    const drawnPages = new Set<number>();
     const drawHeader = (doc: jsPDF, section: string) => {
       this.drawStandardPageHeader(doc, payload.title || 'Network Report', section, 54);
     };
@@ -205,6 +206,10 @@ export class DocumentExportService extends GraphExportService {
     };
     const didDrawPage = (data: any) => {
       const pageNo = data?.pageNumber ?? docPageNumberSafe(data?.doc);
+      if (drawnPages.has(pageNo)) {
+        return;
+      }
+      drawnPages.add(pageNo);
       const section = pageNo === 1 ? 'Overview' : 'Details';
       const d = data?.doc as jsPDF;
       drawHeader(d, section);

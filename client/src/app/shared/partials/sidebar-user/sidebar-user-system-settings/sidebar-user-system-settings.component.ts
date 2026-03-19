@@ -16,10 +16,12 @@ import { MessageNotificationService } from '../../../../services/message_notific
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
+  formError = '';
   systemData = { ai_endpoint: '', language_allowed: '', version: '', api_allowed: '0', app_name: '0', s_onion: '' };
-  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', s_onion: '' };
+  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
+  urlPattern = /^https?:\/\/.+/i;
 
   constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService,private messageNotificationService: MessageNotificationService) {
   }
@@ -33,6 +35,13 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     if (!settings) {
       return;
     }
+    let metaInfo: Record<string, string | boolean> = {};
+    try {
+      metaInfo = settings.meta_info ? JSON.parse(settings.meta_info) : {};
+    }
+    catch {
+      metaInfo = {};
+    }
     this.systemData = settings as typeof this.systemData;
     this.form.language = settings.language_allowed;
     this.form.version = settings.version;
@@ -40,6 +49,12 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.app_name = settings.app_name;
     this.form.ai_endpoint = settings.ai_endpoint;
     this.form.s_onion = settings.s_onion;
+    this.form.data_sources_url = typeof metaInfo['S_HOME_HEADER_DATA_SOURCES'] === 'string' ? metaInfo['S_HOME_HEADER_DATA_SOURCES'] : '';
+    this.form.adversaries_url = typeof metaInfo['S_HOME_HEADER_ADVERSARIES'] === 'string' ? metaInfo['S_HOME_HEADER_ADVERSARIES'] : '';
+    this.form.pricing_url = typeof metaInfo['S_HOME_HEADER_PRICING'] === 'string' ? metaInfo['S_HOME_HEADER_PRICING'] : '';
+    this.form.documentation_allowed = metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] === true;
+    this.form.whistle_blowing_allowed = metaInfo['S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED'] === true;
+    this.formError = '';
   }
 
   toggleEdit() {
@@ -50,16 +65,11 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   }
 
   cancelEdit() {
-    this.form.language = this.systemData.language_allowed;
-    this.form.version = this.systemData.version;
-    this.form.api_allowed = this.systemData.api_allowed;
-    this.form.app_name = this.systemData.app_name;
-    this.form.ai_endpoint = this.systemData.ai_endpoint;
-    this.form.s_onion = this.systemData.s_onion;
+    this.loadSettings();
     this.isEditing = false;
   }
 
-  updateUserResource(file: File,key: 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
+  updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
     const formData = new FormData();
     formData.append('file', file);
     return this.apiService
@@ -75,6 +85,9 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           if (res?.logo_wide_dark) {
             (this.appService.getConfig().appSettings as any).logo_wide_dark = res.logo_wide_dark;
           }
+          if(res?.auth_dashboard_icon){
+            (this.appService.getConfig().appSettings as any).auth_dashboard_icon = res.auth_dashboard_icon;
+          }
           if ((this.appService.getConfig().appSettings as any).logo_url) {
             this.appService.updateFavicon((this.appService.getConfig().appSettings as any).logo_url);
           }
@@ -86,13 +99,15 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       });
   }
 
-  deleteUserResource(key: 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
+  deleteUserResource(key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
     return this.apiService.delete<any>(`system/image?key=${key}`).subscribe(() => {
-      const fallback = key === 'logo_url'
-        ? '/api/s/static/system/logo_url_default.png'
-        : key === 'logo_wide_light'
-          ? '/api/s/static/system/logo_wide_light_default.png'
-          : '/api/s/static/system/logo_wide_dark_default.png';
+      const fallbackMap: Record<string, string> = {
+        logo_url: '/api/s/static/system/logo_url_default.png',
+        logo_wide_light: '/api/s/static/system/logo_wide_light_default.png',
+        logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png',
+        login_page_image: '/api/s/static/system/auth_dashboard_icon_default.png'
+      };
+      const fallback = fallbackMap[key];
       (this.appService.getConfig().appSettings as any)[key] = fallback;
       if (key === 'logo_url') {
         this.appService.updateFavicon(fallback);
@@ -101,11 +116,33 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   }
 
   save() {
+    this.formError = '';
     if (this.form.s_onion && !this.onionPattern.test(this.form.s_onion)) {
       this.messageNotificationService.show('Invalid onion address');
       return;
     }
-    this.apiService.post<any>('public/update', { settings: this.form }).subscribe({
+    if ((this.form.data_sources_url && !this.urlPattern.test(this.form.data_sources_url)) ||
+      (this.form.adversaries_url && !this.urlPattern.test(this.form.adversaries_url)) ||
+      (this.form.pricing_url && !this.urlPattern.test(this.form.pricing_url))) {
+      this.formError = 'Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://';
+      return;
+    }
+    const settings = {
+      language: this.form.language,
+      version: this.form.version,
+      api_allowed: this.form.api_allowed,
+      app_name: this.form.app_name,
+      ai_endpoint: this.form.ai_endpoint,
+      s_onion: this.form.s_onion,
+      meta_info: JSON.stringify({
+        S_HOME_HEADER_DATA_SOURCES: this.form.data_sources_url,
+        S_HOME_HEADER_ADVERSARIES: this.form.adversaries_url,
+        S_HOME_HEADER_PRICING: this.form.pricing_url,
+        S_HOME_HEADER_PRICING_ALLOWED: this.form.documentation_allowed,
+        S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED: this.form.whistle_blowing_allowed
+      })
+    };
+    this.apiService.post<any>('public/update', { settings }).subscribe({
       next: (response) => {
         if (response?.settings) {
           const current = this.appService.configData();
@@ -121,6 +158,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
               s_onion: s.s_onion
             };
             document.title = s.app_name;
+            this.loadSettings();
           }
         }
       },

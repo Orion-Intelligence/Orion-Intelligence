@@ -105,6 +105,11 @@ USER_JOURNEY_01_15_API_MAP: dict[str, set[tuple[str, str]]] = {
         ("POST", "/api/urlscan/subdomains"),
         ("POST", "/api/urlscan/dns"),
         ("POST", "/api/urlscan/wayback"),
+        ("POST", "/api/netintel/resolve_ip"),
+        ("POST", "/api/netintel/ipscanner"),
+        ("POST", "/api/netintel/url_vulnerability_scan"),
+        ("POST", "/api/netintel/iot_detect"),
+        ("POST", "/api/netintel/camera_detect_ranges"),
         ("POST", "/api/crypto/scan"),
     },
     "08-tenant-management": {
@@ -167,6 +172,11 @@ USER_JOURNEY_01_15_API_MAP: dict[str, set[tuple[str, str]]] = {
         ("POST", "/api/ioc/extract"),
         ("POST", "/api/apk/scan"),
         ("POST", "/api/crypto/scan"),
+        ("POST", "/api/netintel/resolve_ip"),
+        ("POST", "/api/netintel/ipscanner"),
+        ("POST", "/api/netintel/url_vulnerability_scan"),
+        ("POST", "/api/netintel/iot_detect"),
+        ("POST", "/api/netintel/camera_detect_ranges"),
     },
     "15-support": {
         ("POST", "/api/support"),

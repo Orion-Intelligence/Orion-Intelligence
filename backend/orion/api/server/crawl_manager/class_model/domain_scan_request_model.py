@@ -9,3 +9,10 @@ class DomainScanRequest(BaseModel):
 
     model_config = ConfigDict(
         json_schema_extra={"example": {"domain": "www.bbc.com", "scanType": "basic","checkLive": False}})
+
+
+class UrlVulnerabilityScanRequest(BaseModel):
+    domain: str
+
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"domain": "example.com"}})

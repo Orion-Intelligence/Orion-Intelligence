@@ -1,0 +1,35 @@
+{
+  "result": {
+    "status": "success",
+    "ip": "8.8.8.8",
+    "organization": "Google LLC",
+    "ports": [
+      53,
+      80,
+      443,
+      853,
+      8080,
+      8443
+    ],
+    "open_ports": [
+      53,
+      80,
+      443,
+      853,
+      8080,
+      8443
+    ],
+    "hostnames": [
+      "dns.google",
+      "resolver1.google.com",
+      "public-dns-a.google.com"
+    ],
+    "org": "Google LLC",
+    "city": "Mountain View",
+    "camera_paths": [],
+    "cameras": [],
+    "vulnerabilities": [],
+    "misconfigurations": [],
+    "country": "United States"
+  }
+}

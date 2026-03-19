@@ -1,4 +1,5 @@
 import asyncio
+import json
 from pathlib import Path
 
 from fastapi import UploadFile, HTTPException
@@ -64,6 +65,13 @@ class config_controller:
             fresh_config["logo_url"] = asset("logo_url")
             fresh_config["logo_wide_light"] = asset("logo_wide_light")
             fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
+            fresh_config["auth_dashboard_icon"] = asset("auth_dashboard_icon")
+            fresh_config["meta_info"] = fresh_config.get("meta_info") or json.dumps({
+                "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
+                "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
+                "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
+                "S_HOME_HEADER_PRICING_ALLOWED": True
+            })
 
             return config_data(settings=fresh_config)
 
@@ -75,6 +83,12 @@ class config_controller:
                 "logo_url": "/api/s/static/system/logo_url_default.png",
                 "logo_wide_light": "/api/s/static/system/logo_wide_dark_default.png",
                 "logo_wide_dark": "/api/s/static/system/logo_wide_light_default.png",
+                "meta_info": json.dumps({
+                    "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
+                    "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
+                    "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
+                    "S_HOME_HEADER_PRICING_ALLOWED": True
+                }),
             })
 
     async def update_public_config(self, data: config_data):
@@ -85,6 +99,8 @@ class config_controller:
                 key = AllowedKeys.LOGO_URL
             elif key_str == "app_name":
                 key = AllowedKeys.APP_NAME
+            elif key_str == "meta_info":
+                key = AllowedKeys.META_INFO
             elif key_str == "s_onion":
                 key = AllowedKeys.S_ONION
             else:
@@ -120,10 +136,10 @@ class config_controller:
 
     async def uploadSystemResource(self, file: UploadFile, current_user, key: str):
         contents = await file.read()
-        MAX_FILE_SIZE = 100 * 1024
+        MAX_FILE_SIZE = 1024 * 1024
 
         if len(contents) > MAX_FILE_SIZE:
-            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 100 KB.")
+            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 1 MB.")
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
@@ -153,4 +169,5 @@ class config_controller:
             AllowedKeys.LOGO_URL: prefix + record.value if key == AllowedKeys.LOGO_URL else None,
             AllowedKeys.LOGO_WIDE_LIGHT: prefix + record.value if key == AllowedKeys.LOGO_WIDE_LIGHT else None,
             AllowedKeys.LOGO_WIDE_DARK: prefix + record.value if key == AllowedKeys.LOGO_WIDE_DARK else None,
+            AllowedKeys.AUTH_DASHBOARD_ICON: prefix + record.value if key == AllowedKeys.AUTH_DASHBOARD_ICON else None,
         }

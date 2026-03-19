@@ -26,7 +26,13 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
     search_dynamic_social_model,
 )
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
-from orion.api.server.crawl_manager.class_model.ip_scan_request_model import IPScanRequest
+from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
+    GeoCameraDetectRangesRequest,
+    GeoCameraDetectRequest,
+    IPScanRequest,
+    NetIntelDeepScanRequest,
+    ResolveIPRequest,
+)
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from routes import api_routes as ar
@@ -78,6 +84,10 @@ def test_mock_search_routes_return_expected_payloads_direct():
             "social_entity",
             "social_session_upsert_social",
             "social_session_tab_add_social",
+            "netintel_resolve_ip",
+            "netintel_ipscanner",
+            "netintel_camera_detect",
+            "netintel_camera_detect_ranges",
         ]
     )
 
@@ -147,6 +157,30 @@ def test_mock_search_routes_return_expected_payloads_direct():
             )
         )
     ) == json.loads((API_MOCKS / "urlscan_domain_iplookup.json").read_text(encoding="utf-8"))
+
+    assert asyncio.run(
+        _await_non_pending(lambda: tr.test_netintel_resolve_ip(ResolveIPRequest(domain="example.com")))
+    ) == json.loads((API_MOCKS / "netintel_resolve_ip.json").read_text(encoding="utf-8"))
+
+    assert asyncio.run(
+        _await_non_pending(lambda: tr.test_netintel_ipscanner(NetIntelDeepScanRequest(ip="8.8.8.8")))
+    ) == json.loads((API_MOCKS / "netintel_ipscanner.json").read_text(encoding="utf-8"))
+
+    assert asyncio.run(
+        _await_non_pending(
+            lambda: tr.test_netintel_camera_detect(
+                GeoCameraDetectRequest(coordinates="24.8607,67.0011", radius_km=25, max_ips=200)
+            )
+        )
+    ) == json.loads((API_MOCKS / "netintel_camera_detect.json").read_text(encoding="utf-8"))
+
+    assert asyncio.run(
+        _await_non_pending(
+            lambda: tr.test_netintel_camera_detect_ranges(
+                GeoCameraDetectRangesRequest(ip_ranges=["192.168.1.0/24"], max_ips=200)
+            )
+        )
+    ) == json.loads((API_MOCKS / "netintel_camera_detect_ranges.json").read_text(encoding="utf-8"))
 
     # Elastic-backed mock routes
     assert asyncio.run(_await_non_pending(lambda: tr.test_social_recon({"query": "alice"}))) == json.loads(
@@ -234,6 +268,9 @@ class _FakeSearchModel:
 
     async def scan_apk(self, *args, **kwargs):
         return {"ok": True, "apk": {}}
+
+    async def network_intel(self, *args, **kwargs):
+        return {"ok": True, "netintel": True}
 
 
 class _FakeCrawlModel:
@@ -387,6 +424,16 @@ def test_live_mock_data_api_routes_cover_all_handlers(mock_api_routes_backends):
     assert isinstance(_run(ar.search_dynamic_social(search_dynamic_social_model(text={"query": "alice"}), current_user=user)), dict)
     assert isinstance(_run(ar.search_dynamic_wanted(search_dynamic_social_model(text={"query": "alice"}))), dict)
     assert isinstance(_run(ar.search_dynamic_national_identity(search_dynamic_crack_model(text={"query": "12345-1234567-1"}), current_user=user)), dict)
+    assert isinstance(_run(ar.resolve_ip(ResolveIPRequest(domain="example.com"), current_user=user)), dict)
+    assert isinstance(_run(ar.ipscanner(NetIntelDeepScanRequest(ip="8.8.8.8"), current_user=user)), dict)
+    assert isinstance(
+        _run(ar.geo_camera_detect(GeoCameraDetectRequest(coordinates="24.8607,67.0011", radius_km=25, max_ips=200), current_user=user)),
+        dict,
+    )
+    assert isinstance(
+        _run(ar.geo_camera_detect_ranges(GeoCameraDetectRangesRequest(ip_ranges=["192.168.1.0/24"], max_ips=200), current_user=user)),
+        dict,
+    )
 
     assert isinstance(_run(ar.get_breach_stix_document("doc1", lang=None)), dict)
     assert isinstance(_run(ar.get_strategic_stix_document("doc1", lang=None)), dict)
@@ -477,6 +524,11 @@ def test_live_mock_data_api_route_list_stays_complete():
         ("POST", "/api/ioc/extract"),
         ("POST", "/api/apk/scan"),
         ("POST", "/api/crypto/scan"),
+        ("POST", "/api/netintel/resolve_ip"),
+        ("POST", "/api/netintel/ipscanner"),
+        ("POST", "/api/netintel/url_vulnerability_scan"),
+        ("POST", "/api/netintel/iot_detect"),
+        ("POST", "/api/netintel/camera_detect_ranges"),
     }
 
     actual = set()

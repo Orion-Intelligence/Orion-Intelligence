@@ -43,6 +43,7 @@ import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { FileScannerComponent } from './pages/intel-panel/ioc-extractor/file-scanner.component';
 import { SocialMapperComponent } from './pages/graphs/social-graph/social-mapper.component';
 import { NotificationGuard } from './shared/guards/notification.guard';
+import { NetworkIntel } from './pages/network-intel/network-intel';
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -680,6 +681,12 @@ export const routes: Routes = [
             data: { type: 'auditlog', animation: 'CategoryPage' }
           }
         ]
+      },
+      {
+        path: 'netint',
+        canActivate: [subscriptionGuard],
+        component: NetworkIntel,
+        data: { animation: 'CategoryPage' }
       },
       {
         path: 'profile',

@@ -414,6 +414,25 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
+    @staticmethod
+    def build_date_filter(from_date, to_date, date_fields):
+        return {
+            "bool": {
+                "should": [
+                    {
+                        "bool": {
+                            "filter": [
+                                {"exists": {"field": field}},
+                                {"range": {field: {"gte": from_date, "lte": to_date}}}
+                            ]
+                        }
+                    }
+                    for field in date_fields
+                ],
+                "minimum_should_match": 1
+            }
+        }
+
     def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories,search_type=""):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
@@ -433,31 +452,23 @@ class elastic_request_generator:
         must_clauses = []
         must_not_clause = []
 
+        date_fields = ["m_message_date", "m_leak_date", "m_creation_date"]
+        if base_index and any(idx in ["chat_model", "social_model"] for idx in base_index):
+            date_fields = ["m_message_date"]
+
         if m_date_range:
             try:
                 parts = m_date_range.split(",")
                 if len(parts) == 2:
                     from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
                     to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
-                    must_clauses.append(
-                        {"bool": {"should": [{"bool": {"filter": [{"exists": {"field": "m_message_date"}},
-                            {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}}]}},
-                            {"bool": {"filter": [{"exists": {"field": "m_leak_date"}},
-                                {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}}]}},
-                            {"bool": {"filter": [{"exists": {"field": "m_creation_date"}},
-                                {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}}]}}], "minimum_should_match": 1}})
+                    must_clauses.append(elastic_request_generator.build_date_filter(from_date, to_date, date_fields))
             except ValueError:
                 pass
         elif m_date_range != "":
             to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
             from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
-            must_clauses.append(
-                {"bool": {"should": [{"bool": {"filter": [{"exists": {"field": "m_message_date"}},
-                    {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}}]}},
-                    {"bool": {"filter": [{"exists": {"field": "m_leak_date"}},
-                        {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}}]}},
-                    {"bool": {"filter": [{"exists": {"field": "m_creation_date"}},
-                        {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}}]}}], "minimum_should_match": 1}})
+            must_clauses.append(elastic_request_generator.build_date_filter(from_date, to_date, date_fields))
 
         if p_query_model.category:
             m_ctype = p_query_model.category
