@@ -85,6 +85,14 @@ export class DnsSectionComponent {
     return this.ipRows.slice(start, start + this.pageSize);
   }
 
+  get currentPageStart(): number {
+    return this.ipRows.length ? ((this.currentPage - 1) * this.pageSize) + 1 : 0;
+  }
+
+  get currentPageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.ipRows.length);
+  }
+
   goToPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage -= 1;
