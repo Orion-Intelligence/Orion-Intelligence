@@ -722,7 +722,7 @@ async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(g
     dependencies=SCANNING_DEPS,
 )
 async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Depends(get_current_user)):
-    return await search_model.getInstance().network_intel(param, "ipscanner", user_id=str(current_user.id))
+    return await search_model.getInstance().network_intel(param, "netintel_scanner", user_id=str(current_user.id))
 
 @api_routes.post(
     "/api/netintel/url_vulnerability_scan",
