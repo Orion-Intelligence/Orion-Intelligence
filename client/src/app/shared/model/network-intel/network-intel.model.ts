@@ -113,6 +113,8 @@ export interface IpRowState {
   ip:       string;
   expanded: boolean;
   loading:  boolean;
+  progress?: number;
+  step?:    string | null;
   detail:   IpDetail | null;
   error:    string | null;
 }

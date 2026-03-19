@@ -42,11 +42,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
   geoResult:       GeoResult | null    = null;
   geoLiveStats:    GeoLiveStats | null = null;
   currentStep      = '';
+  exportCurrentStep = '';
   lastResultCount = 0;
   hasSearched = false;
   showGeoCoordinatesModal = false;
   showGeoRangesModal = false;
   geoRangesSubmitAttempted = false;
+  isExportingReport = false;
+  exportProgress = 0;
   isScanning = computed(() =>
     this.scanHelper.isRunning() &&
     !this.scanHelper.onError());
@@ -193,7 +196,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   canDownloadReport(): boolean {
-    if (this.isScanning()) {
+    if (this.isScanning() || this.isExportingReport) {
       return false;
     }
     if (this.activeTab === 'dns') {
@@ -206,15 +209,30 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   async downloadReport(): Promise<void> {
-    if (this.activeTab === 'dns') {
-      await this.loadAllDnsIpDetailsForExport();
-    }
+    try {
+      this.isExportingReport = true;
+      this.exportProgress = 6;
+      this.exportCurrentStep = 'Preparing export...';
+      await this.waitForPaint();
 
-    const payload = this.buildReportPayload();
-    if (!payload) {
-      return;
+      if (this.activeTab === 'dns') {
+        await this.loadAllDnsIpDetailsForExport();
+      }
+
+      this.exportProgress = Math.max(this.exportProgress, 96);
+      this.exportCurrentStep = 'Generating report...';
+      await this.waitForPaint();
+
+      const payload = this.buildReportPayload();
+      if (!payload) {
+        return;
+      }
+      this.reportExport.exportByType(payload, 'doc_pdf');
+    } finally {
+      this.isExportingReport = false;
+      this.exportProgress = 0;
+      this.exportCurrentStep = '';
     }
-    this.reportExport.exportByType(payload, 'doc_pdf');
   }
 
   runToolbarSearch(): void {
@@ -269,6 +287,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.formError || !this.dnsForm.domain.trim() || this.isScanning()) {
       return;
     }
+    this.resetActiveWork();
     this.hasSearched = true;
     this.clearAll(false);
     this.syncUrl();
@@ -286,7 +305,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (payload?.domain != null && Array.isArray(payload.ips)) {
       this.dnsResult = { domain: payload.domain, ips: payload.ips };
       this.ipRows = payload.ips.map((ip: string) => ({
-        ip, expanded: false, loading: false, detail: null, error: null,
+        ip, expanded: false, loading: false, progress: 0, step: null, detail: null, error: null,
       }));
       this.lastResultCount = payload.ips.length;
     }
@@ -302,34 +321,24 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
 
     row.loading = true;
+    row.progress = 5;
+    row.step = 'queued';
     row.error   = null;
 
-    const sub = this.scanHelper.scanShodanIp(row.ip);
-
-    const interval = setInterval(() => {
-      const done = this.scanHelper.onDone();
-      const err  = this.scanHelper.onError();
-
-      if (err) {
-        row.loading = false;
-        row.error   = err?.message ?? 'Failed to load details';
-        clearInterval(interval);
-        sub.unsubscribe();
-        return;
+    this.scanHelper.fetchShodanIpDetail(row.ip, (response) => {
+      row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
+      row.step = response?.['step'] || response?.result?.['step'] || response?.status || response?.result?.status || row.step;
+    }).then((detail) => {
+      if (detail?.ip) {
+        row.detail = detail as IpDetail;
+        row.progress = 100;
+        row.step = 'Done';
       }
-
-      if (done) {
-        const payload = done.result ?? done;
-        if (payload?.ip) {
-          row.detail  = payload as IpDetail;
-          row.loading = false;
-          clearInterval(interval);
-          sub.unsubscribe();
-        }
-      }
-    }, 400);
-
-    this._intervals.push(interval);
+      row.loading = false;
+    }).catch((error: any) => {
+      row.loading = false;
+      row.error = error?.message ?? 'Failed to load details';
+    });
   }
 
   startShodanScan(): void {
@@ -337,6 +346,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.formError || !this.shodanForm.ip.trim() || this.isScanning()) {
       return;
     }
+    this.resetActiveWork();
     this.hasSearched = true;
     this.clearAll(false);
     this.syncUrl();
@@ -358,6 +368,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   startGeoScan(): void {
+    this.resetActiveWork();
     if (this.geoMode === 'coords') {
       this.validateGeo();
       if (this.formError || !this.geoForm.coordinates.trim() || this.isScanning()) {
@@ -593,7 +604,20 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private async loadAllDnsIpDetailsForExport(): Promise<void> {
-    for (const row of this.ipRows) {
+    const pendingRows = this.ipRows.filter(row => !row.detail && !row.error);
+    const total = pendingRows.length;
+
+    if (!total) {
+      this.exportProgress = 100;
+      this.exportCurrentStep = 'Export is ready...';
+      return;
+    }
+
+    let completed = 0;
+    for (const row of pendingRows) {
+      this.exportCurrentStep = `Loading details for ${row.ip}...`;
+      this.exportProgress = Math.max(6, Math.min(95, Math.round((completed / total) * 100)));
+
       if (row.detail || row.error) {
         continue;
       }
@@ -607,7 +631,23 @@ export class NetworkIntel implements OnInit, OnDestroy {
       catch (error: any) {
         row.error = error?.message || 'Failed to load details';
       }
+
+      completed += 1;
+      this.exportProgress = Math.max(6, Math.min(100, Math.round((completed / total) * 100)));
     }
+
+    this.exportCurrentStep = 'Export is ready...';
+  }
+
+  private resetActiveWork(): void {
+    this._intervals.forEach(clearInterval);
+    this._intervals = [];
+    this.sub?.unsubscribe();
+    this.sub = undefined;
+  }
+
+  private waitForPaint(): Promise<void> {
+    return new Promise(resolve => requestAnimationFrame(() => resolve()));
   }
 
   private joinValues(values: unknown[] | undefined | null): string {

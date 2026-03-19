@@ -107,7 +107,11 @@
 
       <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
         <button data-testid="network-intel-download-report" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="downloadReport()" [disabled]="!canDownloadReport()">
-          <img alt="Download" src="assets/images/shared/theme/download.svg" class="h-4 w-4 ui-action-icon">
+          @if (isExportingReport) {
+            <span class="h-4 w-4 rounded-full border-2 border-sky-400/25 border-t-sky-400 animate-spin"></span>
+          } @else {
+            <img alt="Download" src="assets/images/shared/theme/download.svg" class="h-4 w-4 ui-action-icon">
+          }
         </button>
         <div class="h-6 w-px bg-[var(--color-divider)]"></div>
         <button class="ui-cred-toolbar-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
@@ -125,9 +129,9 @@
 
   @if (activeTab === 'dns') {
     <app-network-intel-dns-section
-      [isScanning]="isScanning()"
-      [progress]="scanHelper.progress()"
-      [currentStep]="currentStep"
+      [isScanning]="isScanning() || isExportingReport"
+      [progress]="isExportingReport ? exportProgress : scanHelper.progress()"
+      [currentStep]="isExportingReport ? exportCurrentStep : currentStep"
       [progressSegments]="progressSegments"
       [errorMessage]="scanHelper.onError()?.message || null"
       [hasSearched]="hasSearched"

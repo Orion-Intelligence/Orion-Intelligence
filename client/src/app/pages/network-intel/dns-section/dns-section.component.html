@@ -48,9 +48,14 @@
           @if (row.expanded) {
             <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] pb-2" [class.border-b-0]="last">
               @if (row.loading && !row.detail) {
-                <div class="flex items-center gap-2.5 px-4 py-4 text-[13px] text-[var(--color-text4)]">
-                  <span class="w-5 h-5 border-2 border-sky-400/25 border-t-sky-400 rounded-full animate-spin"></span>
-                  Loading details for {{ row.ip }}…
+                <div class="px-4 py-4">
+                  <div class="mb-[6px] flex items-center justify-between gap-3">
+                    <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ row.step || ('Loading details for ' + row.ip + '...') }}</span>
+                    <span class="text-[12px] font-semibold text-sky-400">{{ row.progress || 5 }}%</span>
+                  </div>
+                  <div class="ui-progress-track h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+                    <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + (row.progress || 5)"></div>
+                  </div>
                 </div>
               }
               @if (row.error) {

@@ -134,13 +134,13 @@ export class ScanHelperMethodsService {
     return this.runTask<NetworkIntelScanResponse>(build);
   }
 
-  async fetchShodanIpDetail(ip: string): Promise<any> {
+  async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<any> {
     const cancel$ = new Subject<boolean>();
     const call = () => this.api.post<NetworkIntelScanResponse>('netintel/scanner', { ip });
     const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
 
     try {
-      const response = await lastValueFrom(this.poll<NetworkIntelScanResponse>(call, getStatus, () => {}, cancel$, 4000));
+      const response = await lastValueFrom(this.poll<NetworkIntelScanResponse>(call, getStatus, value => onEach?.(value), cancel$, 4000));
       const responseError = this.getResponseError(response);
       if (responseError) {
         throw new Error(responseError.message);
