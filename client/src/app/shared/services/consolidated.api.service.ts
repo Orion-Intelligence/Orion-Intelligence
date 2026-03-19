@@ -63,29 +63,39 @@ export class ConsolidatedApiService {
   }
 
   public runLiveApiSearch(inputs: ConsolidatedLiveApis[]): Observable<ConsolidatedLiveApiResults[]> {
-    const searchObservables = inputs.map(input => this.fetchLiveApiResults(input).pipe(map(res => {
-      let data: SearchDynamicEmailCallbackModel | null = null;
-      if (Array.isArray(res?.result)) {
-        data = { cards_data: res.result } as SearchDynamicEmailCallbackModel;
-      }
-      else if (res?.success && res?.data) {
-        data = res.data;
-      }
-      else if ((res as SearchDynamicEmailCallbackModel)?.cards_data) {
-        data = res as SearchDynamicEmailCallbackModel;
-      }
-      return {
-        input,
-        status: data && data.cards_data?.length ? 'success' : 'error',
-        resultData: data,
-        errorMessage: null,
-      } as ConsolidatedLiveApiResults;
-    }), catchError(_ => of({
-      input,
-      status: 'error',
-      resultData: null,
-      errorMessage: 'API request failed or data not found.',
-    } as ConsolidatedLiveApiResults))));
+    const searchObservables = inputs.map(input =>
+      this.fetchLiveApiResults(input).pipe(map(res => {
+        let data: SearchDynamicEmailCallbackModel | null = null;
+        if (Array.isArray(res?.result?.result)) {
+          data = new SearchDynamicEmailCallbackModel({
+            cards_data: res.result.result
+          });
+        }
+        else if (Array.isArray(res?.result)) {
+          data = new SearchDynamicEmailCallbackModel({
+            cards_data: res.result
+          });
+        }
+        else if (res?.success && res?.data) {
+          data = res.data;
+        }
+        else if ((res as SearchDynamicEmailCallbackModel)?.cards_data) {
+          data = res as SearchDynamicEmailCallbackModel;
+        }
+        return {
+          input,
+          status: data && data.cards_data?.length ? 'success' : 'error',
+          resultData: data,
+          errorMessage: null,
+        } as ConsolidatedLiveApiResults;
+      }),
+      catchError(_ =>
+        of({
+          input,
+          status: 'error',
+          resultData: null,
+          errorMessage: 'API request failed or data not found.',
+        } as ConsolidatedLiveApiResults))));
     return forkJoin(searchObservables);
   }
 
