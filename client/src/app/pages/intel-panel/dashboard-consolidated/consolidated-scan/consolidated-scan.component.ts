@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, merge, Subscription } from 'rxjs';
+import { Observable, Subscription, concat } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { ConsolidatedApiService } from '../../../../shared/services/consolidated.api.service';
 import { ConsolidatedScanResults, ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../shared/model/results/consolidated/consolidated.callback.model';
@@ -98,10 +98,10 @@ export class ConsolidatedScanComponent {
     else {
       this.progressByType.liveapi = 100;
     }
-    this.scanSub = merge(...scans.map(({ t, o }) => o.pipe(map(v => ({ t, v })))))
+    this.scanSub = concat(...scans.map(({ t, o }) =>o.pipe(map(v => ({ t, v })))))
       .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({
-        next: ( { t, v }: { t: ScanKey; v: any; } ) => {
+        next: ({ t, v }: { t: ScanKey; v: any }) => {
           if (this.isPending(v)) {
             this.progressByType[t] = this.clamp(Number(v.progress ?? 0), 0, 100);
             return;
