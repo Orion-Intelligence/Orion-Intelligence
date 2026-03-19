@@ -113,8 +113,9 @@ def test_client_e2e_api_catalog_is_present_in_backend():
         ("POST", "/api/social/session/tab/add"),
         ("POST", "/api/crypto/scan"),
         ("POST", "/api/netintel/resolve_ip"),
-        ("POST", "/api/netintel/scanner"),
-        ("POST", "/api/netintel/camera_detect"),
+        ("POST", "/api/netintel/ipscanner"),
+        ("POST", "/api/netintel/url_vulnerability_scan"),
+        ("POST", "/api/netintel/iot_detect"),
         ("POST", "/api/netintel/camera_detect_ranges"),
     }
 

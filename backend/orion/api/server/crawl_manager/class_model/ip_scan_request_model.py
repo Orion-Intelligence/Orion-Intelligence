@@ -9,6 +9,13 @@ class IPScanRequest(BaseModel):
         json_schema_extra={"example": {"ip": "8.8.8.8"}})
 
 
+class NetIntelDeepScanRequest(BaseModel):
+    ip: str
+
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"ip": "8.8.8.8"}})
+
+
 class ResolveIPRequest(BaseModel):
     domain: str
 

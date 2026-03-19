@@ -1,5 +1,15 @@
 <div class="mx-4 my-3">
   <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">General Information</div>
+  @if (hasCameraSignals || iotPortCount > 0) {
+    <div class="mb-3 flex flex-wrap gap-2">
+      @if (hasCameraSignals) {
+        <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2.5 py-1 text-[12px] font-bold text-sky-300">Camera Detected{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
+      }
+      @if (iotPortCount > 0) {
+        <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2.5 py-1 text-[12px] font-bold text-emerald-300">IoT Ports {{ iotPortCount }}</span>
+      }
+    </div>
+  }
   <div class="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-4">
     @if (detail.country) {
       <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Country</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.country }}</span></div>
@@ -65,6 +75,12 @@
               }
               @if (p.service) {
                 <span class="rounded border border-emerald-400/20 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-semibold text-emerald-400">{{ p.service }}</span>
+              }
+              @if (p['is_camera'] || p['device_type'] === 'camera') {
+                <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold text-sky-300">CAMERA</span>
+              }
+              @if (p['is_iot']) {
+                <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-bold text-emerald-300">IoT</span>
               }
               @if (p.state) {
                 <span class="ml-auto rounded border px-2 py-0.5 text-[12px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>

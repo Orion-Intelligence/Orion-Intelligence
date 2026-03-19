@@ -14,6 +14,18 @@ export class IpDetailComponent {
 
   constructor(public ui: ScanHelperMethodsService) {}
 
+  get cameraPortCount(): number {
+    return (this.detail?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;
+  }
+
+  get iotPortCount(): number {
+    return (this.detail?.ports || []).filter((port: any) => port && port.is_iot).length;
+  }
+
+  get hasCameraSignals(): boolean {
+    return !!this.detail?.is_camera || this.cameraPortCount > 0 || (this.detail?.cameras?.length ?? 0) > 0;
+  }
+
   formatVulnerability(value: any): string {
     if (typeof value === 'string') {
       return value.trim();

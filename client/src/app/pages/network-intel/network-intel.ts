@@ -10,35 +10,38 @@ import { ReportExportService } from '../../shared/services/report-export.service
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-coordinates-modal.component';
-import { GeoRangesModalComponent } from './modal/geo-ranges-modal/geo-ranges-modal.component';
 import { DnsSectionComponent } from './dns-section/dns-section.component';
 import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
-import { GeoSectionComponent } from './geo-section/geo-section.component';
+import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerability-section.component';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, GeoRangesModalComponent, DnsSectionComponent, ShodanSectionComponent, GeoSectionComponent],
+  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
   animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private _intervals: ReturnType<typeof setInterval>[] = [];
-  private readonly sectionToTab: Record<string, 'dns' | 'shodan' | 'geo'> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'geo-cameras': 'geo', };
-  private readonly tabToSection: Record<'dns' | 'shodan' | 'geo', string> = { dns: 'host-recon', shodan: 'deep-scan', geo: 'geo-cameras', };
+  private readonly sectionToTab: Record<string, 'dns' | 'shodan' | 'vuln' | 'geo'> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'vulnerability-scan': 'vuln', 'geo-cameras': 'geo', };
+  private readonly tabToSection: Record<'dns' | 'shodan' | 'vuln' | 'geo', string> = { dns: 'host-recon', shodan: 'deep-scan', vuln: 'vulnerability-scan', geo: 'geo-cameras', };
 
   readonly progressSegments = Array.from({ length: 20 }, (_, index) => index);
-  activeTab: 'dns' | 'shodan' | 'geo' = 'dns';
+  activeTab: 'dns' | 'shodan' | 'vuln' | 'geo' = 'dns';
   geoMode:   'coords' | 'ranges'      = 'coords';
   dnsForm    = { domain: '' };
   shodanForm = { ip: '' };
+  vulnForm   = { ip: '' };
   geoForm    = { coordinates: '', radius_km: 25, max_ips: 200, ip_ranges: '' };
   formError: string | null = null;
   parsedRanges: { value: string; valid: boolean }[] = [];
   dnsResult:       DnsResult | null = null;
   ipRows:          IpRowState[]     = [];
   shodanResult:    IpDetail | null  = null;
+  vulnerabilityResult: any | null   = null;
+  geoIpListResult: DnsResult | null = null;
+  geoIpRows:       IpRowState[]     = [];
   geoResult:       GeoResult | null    = null;
   geoLiveStats:    GeoLiveStats | null = null;
   currentStep      = '';
@@ -56,6 +59,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   get isEmbeddedInConsolidated(): boolean {
     return this.router.url.includes('/consolidated');
+  }
+
+  get vulnerabilityElapsedLabel(): string {
+    const elapsed = this.vulnerabilityResult?.elapsed_seconds;
+    if (typeof elapsed === 'number' && Number.isFinite(elapsed)) {
+      return `${elapsed.toFixed(1)}s`;
+    }
+    return '-';
   }
 
   constructor( public scanHelper: ScanHelperMethodsService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
@@ -83,6 +94,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.shodanForm.ip = q;
       this.validateShodan();
     }
+    else if (this.activeTab === 'vuln') {
+      this.vulnForm.ip = q;
+      this.validateVulnerability();
+    }
     else {
       this.geoForm.coordinates = q;
       this.validateGeo();
@@ -104,11 +119,15 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.formError = this.scanHelper.validateShodanInput(this.shodanForm.ip);
   }
 
+  validateVulnerability(): void {
+    this.formError = this.scanHelper.validateVulnerabilityInput(this.vulnForm.ip);
+  }
+
   validateGeo(): void {
     this.formError = this.scanHelper.validateGeoCoordinatesInput(this.geoForm.coordinates);
   }
 
-  setTab(id: 'dns' | 'shodan' | 'geo'): void {
+  setTab(id: 'dns' | 'shodan' | 'vuln' | 'geo'): void {
     if (this.isScanning()) {
       return;
     }
@@ -121,6 +140,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.isScanning()) {
       return;
     }
+    this.geoMode = 'coords';
+    this.showGeoRangesModal = false;
+    this.showGeoCoordinatesModal = true;
+  }
+
+  openGeoCoordinatesModalFromStatus(): void {
     this.geoMode = 'coords';
     this.showGeoRangesModal = false;
     this.showGeoCoordinatesModal = true;
@@ -146,6 +171,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.activeTab === 'shodan') {
       return this.shodanForm.ip;
     }
+    if (this.activeTab === 'vuln') {
+      return this.vulnForm.ip;
+    }
     return this.geoForm.coordinates;
   }
 
@@ -162,6 +190,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.syncUrl();
       return;
     }
+    if (this.activeTab === 'vuln') {
+      this.vulnForm.ip = value;
+      this.validateVulnerability();
+      this.syncUrl();
+      return;
+    }
     this.geoForm.coordinates = value;
     this.validateGeo();
     this.syncUrl();
@@ -173,6 +207,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
     if (this.activeTab === 'shodan') {
       return 'Search IP...';
+    }
+    if (this.activeTab === 'vuln') {
+      return 'Search domain...';
     }
     return 'Search coordinates...';
   }
@@ -205,7 +242,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.activeTab === 'shodan') {
       return Boolean(this.shodanResult);
     }
-    return Boolean(this.geoResult?.cameras?.length || this.geoResult || this.geoLiveStats);
+    if (this.activeTab === 'vuln') {
+      return Boolean(this.vulnerabilityResult);
+    }
+    return Boolean(this.geoIpListResult?.ips?.length || this.geoResult?.cameras?.length || this.geoResult || this.geoLiveStats);
   }
 
   async downloadReport(): Promise<void> {
@@ -228,7 +268,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
         return;
       }
       this.reportExport.exportByType(payload, 'doc_pdf');
-    } finally {
+    }
+    finally {
       this.isExportingReport = false;
       this.exportProgress = 0;
       this.exportCurrentStep = '';
@@ -242,6 +283,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
     if (this.activeTab === 'shodan') {
       this.startShodanScan();
+      return;
+    }
+    if (this.activeTab === 'vuln') {
+      this.startVulnerabilityScan();
       return;
     }
     if (this.geoMode === 'coords') {
@@ -259,6 +304,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.dnsResult       = null;
     this.ipRows          = [];
     this.shodanResult    = null;
+    this.vulnerabilityResult = null;
+    this.geoIpListResult = null;
+    this.geoIpRows       = [];
     this.geoResult       = null;
     this.geoLiveStats    = null;
     this.currentStep     = '';
@@ -354,6 +402,19 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.watchResult(this.parseShodanResult.bind(this));
   }
 
+  startVulnerabilityScan(): void {
+    this.validateVulnerability();
+    if (this.formError || !this.vulnForm.ip.trim() || this.isScanning()) {
+      return;
+    }
+    this.resetActiveWork();
+    this.hasSearched = true;
+    this.clearAll(false);
+    this.syncUrl();
+    this.sub = this.scanHelper.scanUrlVulnerability(this.vulnForm.ip.trim());
+    this.watchResult(this.parseVulnerabilityResult.bind(this));
+  }
+
   private parseShodanResult(): void {
     const done = this.scanHelper.onDone();
     if (!done) {
@@ -367,7 +428,36 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
   }
 
+  private parseVulnerabilityResult(): void {
+    const done = this.scanHelper.onDone();
+    if (!done) {
+      return;
+    }
+    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
+    const payload = done.result ?? done;
+    const status = String(payload?.status || done?.status || '').toLowerCase();
+    const hasRenderablePayload =
+      !!payload &&
+      (
+        typeof payload?.url === 'string' ||
+        typeof payload?.host === 'string' ||
+        !!payload?.summary ||
+        Array.isArray(payload?.findings) ||
+        Array.isArray(payload?.top_findings)
+      );
+
+    if (status === 'pending' || status === 'busy' || !hasRenderablePayload) {
+      return;
+    }
+
+    if (payload) {
+      this.vulnerabilityResult = payload;
+      this.lastResultCount = payload?.summary?.total ?? payload?.findings?.length ?? payload?.top_findings?.length ?? 0;
+    }
+  }
+
   startGeoScan(): void {
+    this.activeTab = 'geo';
     this.resetActiveWork();
     if (this.geoMode === 'coords') {
       this.validateGeo();
@@ -408,7 +498,19 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
     const payload = done.result ?? done;
 
-    if (payload?.cameras !== undefined) {
+    if (Array.isArray(payload?.ips)) {
+      this.geoIpListResult = {
+        domain: payload.domain || this.geoForm.coordinates.trim() || 'geo-results',
+        ips: payload.ips,
+      };
+      this.geoIpRows = payload.ips.map((ip: string) => ({
+        ip, expanded: false, loading: false, progress: 0, step: null, detail: null, error: null,
+      }));
+      this.geoResult = null;
+      this.geoLiveStats = null;
+      this.lastResultCount = payload.count ?? payload.ips.length;
+    }
+    else if (payload?.cameras !== undefined) {
       this.geoResult       = payload as GeoResult;
       this.geoLiveStats    = null;
       this.lastResultCount = payload.cameras_found;
@@ -518,7 +620,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
       return {
         graphKind: 'cti',
-        title: 'Deep Scan Report',
+        title: 'IP Scan Report',
         sessionName: detail.ip,
         generatedAtIso: now,
         nodes,
@@ -539,8 +641,38 @@ export class NetworkIntel implements OnInit, OnDestroy {
       };
     }
 
-    if (this.activeTab === 'geo' && (this.geoResult || this.geoLiveStats)) {
+    if (this.activeTab === 'geo' && (this.geoIpListResult || this.geoResult || this.geoLiveStats)) {
       const now = new Date().toISOString();
+      if (this.geoIpListResult) {
+        return {
+          graphKind: 'cti',
+          title: 'Geo IP Scan Report',
+          sessionName: this.geoIpListResult.domain || 'geo-results',
+          generatedAtIso: now,
+          nodes: this.geoIpRows.slice(0, 100).map((row) => ({
+            id: `ip-${row.ip}`,
+            label: row.ip,
+            type: 'ip'
+          })),
+          edges: [],
+          summary: {
+            mode: this.geoMode === 'coords' ? 'coordinates' : 'ip_ranges',
+            query: this.geoMode === 'coords' ? (this.geoForm.coordinates.trim() || '-') : 'range_scan',
+            total_ips: this.geoIpRows.length,
+            exported_at: now
+          },
+          tables: [
+            {
+              title: 'Resolved IPs',
+              values: this.geoIpRows.slice(0, 25).reduce((acc, row, index) => {
+                acc[`IP ${index + 1}`] = row.ip;
+                return acc;
+              }, {} as Record<string, string>)
+            }
+          ]
+        };
+      }
+
       const result = this.geoResult;
       const stats = this.geoLiveStats;
       const ranges = this.geoForm.ip_ranges.split('\n').map(line => line.trim()).filter(Boolean);
@@ -597,6 +729,122 @@ export class NetworkIntel implements OnInit, OnDestroy {
             }, {} as Record<string, string>)
           }
         ]
+      };
+    }
+
+    if (this.activeTab === 'vuln' && this.vulnerabilityResult) {
+      const now = new Date().toISOString();
+      const result = this.vulnerabilityResult;
+      const host = result.host || result.url || 'url-vulnerability-scan';
+      const scannedUrls = Array.isArray(result.scanned_urls) ? result.scanned_urls : [];
+      const findings = Array.isArray(result.findings)
+        ? result.findings
+        : Array.isArray(result.top_findings)
+          ? result.top_findings
+          : [];
+
+      const nodes = [
+        { id: `host-${host}`, label: host, type: 'domain' as const },
+        ...scannedUrls.slice(0, 25).map((url: string, index: number) => ({
+          id: `url-${index}`,
+          label: url,
+          type: 'url' as const
+        }))
+      ];
+      const edges = scannedUrls.slice(0, 25).map((url: string, index: number) => ({
+        id: `host-${host}-url-${index}`,
+        from: `host-${host}`,
+        to: `url-${index}`,
+        label: 'scanned'
+      }));
+
+      return {
+        graphKind: 'cti',
+        title: 'URL Vulnerability Report',
+        sessionName: host,
+        generatedAtIso: now,
+        nodes,
+        edges,
+        summary: {
+          host: result.host || '-',
+          url: result.url || '-',
+          final_url: result.final_url || '-',
+          request_mode: result.request_mode || '-',
+          elapsed_seconds: typeof result.elapsed_seconds === 'number' ? result.elapsed_seconds.toFixed(1) : '-',
+          total_findings: result.summary?.total ?? findings.length,
+          critical: result.summary?.critical ?? 0,
+          high: result.summary?.high ?? 0,
+          medium: result.summary?.medium ?? 0,
+          low: result.summary?.low ?? 0,
+          informational: result.summary?.informational ?? 0,
+          exported_at: now
+        },
+        tables: [
+          {
+            title: 'Request Information',
+            values: {
+              Host: result.host || '-',
+              URL: result.url || '-',
+              'Final URL': result.final_url || '-',
+              'Request Mode': result.request_mode || '-',
+              Elapsed: typeof result.elapsed_seconds === 'number' ? `${result.elapsed_seconds.toFixed(1)}s` : '-',
+              'Max Minutes': this.normalizeReportValue(result.max_minutes)
+            }
+          },
+          {
+            title: 'Severity Summary',
+            values: {
+              Critical: String(result.summary?.critical ?? 0),
+              High: String(result.summary?.high ?? 0),
+              Medium: String(result.summary?.medium ?? 0),
+              Low: String(result.summary?.low ?? 0),
+              Informational: String(result.summary?.informational ?? 0),
+              Total: String(result.summary?.total ?? findings.length)
+            }
+          },
+          {
+            title: 'Response Details',
+            values: {
+              'Status Code': this.normalizeReportValue(result.extracted?.status_code),
+              Server: this.normalizeReportValue(result.extracted?.server),
+              'Content Type': this.normalizeReportValue(result.extracted?.content_type),
+              'Content Length': this.normalizeReportValue(result.extracted?.content_length),
+              Redirect: this.normalizeReportValue(result.extracted?.redirect_location),
+              Title: this.normalizeReportValue(result.extracted?.title)
+            }
+          },
+          {
+            title: 'Security Headers',
+            values: this.toStringRecord(result.extracted?.security_headers)
+          },
+          {
+            title: 'Interesting Headers',
+            values: this.toStringRecord(result.extracted?.interesting_headers)
+          },
+          {
+            title: 'Scanned URLs',
+            values: scannedUrls.slice(0, 25).reduce((acc: Record<string, string>, url: string, index: number) => {
+              acc[`URL ${index + 1}`] = url;
+              return acc;
+            }, {})
+          },
+          ...findings.slice(0, 20).map((finding: any, index: number) => ({
+            title: `Finding ${index + 1}`,
+            values: {
+              Title: this.normalizeReportValue(finding?.title || finding?.header),
+              Category: this.normalizeReportValue(finding?.category),
+              Risk: this.normalizeReportValue(finding?.risk),
+              Confidence: this.normalizeReportValue(finding?.confidence),
+              Description: this.truncateReportText(finding?.description, 1000),
+              URL: this.normalizeReportValue(finding?.url),
+              Source: this.normalizeReportValue(finding?.source),
+              Evidence: this.truncateReportText(finding?.evidence, 1000)
+            }
+          }))
+        ].filter(table => Object.values(table.values).some((value) => {
+          const normalized = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
+          return Boolean(normalized) && normalized !== '-';
+        }))
       };
     }
 
@@ -672,6 +920,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private buildIpDetailTables(detail: IpDetail, prefix = ''): Array<{ title: string; values: Record<string, string> }> {
     const titlePrefix = prefix ? `${prefix} ` : '';
+    const cameraPorts = this.countCameraPorts(detail);
+    const iotPorts = this.countIotPorts(detail);
 
     return [
       {
@@ -689,6 +939,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
           'Cloud Service': detail.cloud_service || '-',
           'Web Server': detail.web_server || '-',
           Title: detail.title || '-',
+          'Camera Detected': cameraPorts > 0 || !!detail.is_camera || (detail.cameras?.length ?? 0) > 0 ? 'Yes' : 'No',
+          'Camera Ports': cameraPorts ? String(cameraPorts) : '-',
+          'IoT Ports': iotPorts ? String(iotPorts) : '-',
         }
       },
       {
@@ -700,6 +953,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
           Vulnerabilities: this.joinValues((detail.vulnerabilities as any[] | undefined)?.map(item => this.formatReportVulnerability(item))),
           Misconfigurations: this.joinValues(detail.misconfigurations),
           Cameras: String(detail.cameras?.length ?? 0),
+          'Camera Ports': cameraPorts ? String(cameraPorts) : '-',
+          'IoT Ports': iotPorts ? String(iotPorts) : '-',
           'Camera Paths': this.joinValues(detail.camera_paths as unknown[] | undefined)
         }
       },
@@ -753,6 +1008,20 @@ export class NetworkIntel implements OnInit, OnDestroy {
         Protocol: port.protocol || port.proto || '-',
         Service: port.service || '-',
         State: port.state || '-',
+        'Is Camera': port['is_camera'] || port['device_type'] === 'camera' ? 'Yes' : 'No',
+        'Is IoT': port['is_iot'] ? 'Yes' : 'No',
+        'Device Type': this.normalizeReportValue(port['device_type']),
+        'Device Category': this.normalizeReportValue(port['device_category']),
+        'Device Vendor': this.normalizeReportValue(port['device_vendor']),
+        'Device Family': this.normalizeReportValue(port['device_family']),
+        'Device Model': this.normalizeReportValue(port['device_model']),
+        'Device Version': this.normalizeReportValue(port['device_version']),
+        'Device Tags': this.joinValues(port['device_tags']),
+        'Device Confidence': this.normalizeReportValue(port['device_confidence']),
+        'Fingerprint Source': this.normalizeReportValue(port['fingerprint_source']),
+        'Fingerprint Match': this.normalizeReportValue(port['fingerprint_match']),
+        'Protocol Verified': port['protocol_verified'] === undefined ? '-' : (port['protocol_verified'] ? 'Yes' : 'No'),
+        CPE: this.normalizeReportValue(port['cpe']),
         Product: this.normalizeReportValue(port['product']),
         Version: this.normalizeReportValue(port['version']),
         Vendor: this.normalizeReportValue(port['vendor']),
@@ -844,5 +1113,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return sec;
     }
     return Object.entries(sec).filter(([, value]) => value).map(([key]) => key);
+  }
+
+  private countCameraPorts(detail: IpDetail | null | undefined): number {
+    return (detail?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;
+  }
+
+  private countIotPorts(detail: IpDetail | null | undefined): number {
+    return (detail?.ports || []).filter((port: any) => port && port.is_iot).length;
   }
 }

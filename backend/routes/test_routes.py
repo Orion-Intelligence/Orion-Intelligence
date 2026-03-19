@@ -7,11 +7,14 @@ from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, )
-from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (DomainScanRequest, )
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
+    DomainScanRequest,
+    UrlVulnerabilityScanRequest,
+)
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
     GeoCameraDetectRangesRequest,
     GeoCameraDetectRequest,
-    IPScanRequest,
+    NetIntelDeepScanRequest,
     ResolveIPRequest,
 )
 from orion.helper_manager.env_handler import env_handler
@@ -240,21 +243,32 @@ async def test_netintel_resolve_ip(payload: ResolveIPRequest = Body(...)):
 
 
 @test_routes.post(
-    "/api/netintel/scanner",
+    "/api/netintel/ipscanner",
     include_in_schema=False,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
 )
-async def test_netintel_scanner(payload: IPScanRequest = Body(...)):
-    step = _mock_step("netintel_scanner")
+async def test_netintel_ipscanner(payload: NetIntelDeepScanRequest = Body(...)):
+    step = _mock_step("netintel_ipscanner")
     if step:
         return step
-    return json.loads((_MOCKS_DIR / "netintel_scanner.json").read_text(encoding="utf-8"))
+    return json.loads((_MOCKS_DIR / "netintel_ipscanner.json").read_text(encoding="utf-8"))
 
 
 @test_routes.post(
-    "/api/netintel/camera_detect",
+    "/api/netintel/url_vulnerability_scan",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def test_netintel_url_vulnerability_scan(payload: UrlVulnerabilityScanRequest = Body(...)):
+    return _pending_or_dynamic_scan("basic")
+
+
+@test_routes.post(
+    "/api/netintel/iot_detect",
     include_in_schema=False,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),

@@ -24,6 +24,10 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
   readonly minZoomLevel = 1;
   readonly maxZoomLevel = 4;
+  readonly minRadiusKm = 1;
+  readonly maxRadiusKm = 50000;
+  readonly minMaxIps = 10;
+  readonly maxMaxIps = 10000;
   coordinateInputMode: 'map' | 'manual' = 'map';
   zoomLevel = 1;
   mapCanvasWidth = 0;
@@ -79,6 +83,14 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
   onSearch(): void {
     this.search.emit();
+  }
+
+  onRadiusKmChange(value: number | string | null | undefined): void {
+    this.radiusKmChange.emit(this.clampWholeNumber(value, this.minRadiusKm, this.maxRadiusKm, this.radiusKm));
+  }
+
+  onMaxIpsChange(value: number | string | null | undefined): void {
+    this.maxIpsChange.emit(this.clampWholeNumber(value, this.minMaxIps, this.maxMaxIps, this.maxIps));
   }
 
   setCoordinateInputMode(mode: 'map' | 'manual'): void {
@@ -201,6 +213,16 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
     }
 
     return { lat, lon };
+  }
+
+  private clampWholeNumber(value: number | string | null | undefined, min: number, max: number, fallback: number): number {
+    const numeric = typeof value === 'number' ? value : Number(String(value ?? '').replace(/[^\d.-]/g, ''));
+    if (!Number.isFinite(numeric)) {
+      return fallback;
+    }
+
+    const whole = Math.trunc(numeric);
+    return Math.min(max, Math.max(min, whole));
   }
 
   @HostListener('document:keydown.escape')

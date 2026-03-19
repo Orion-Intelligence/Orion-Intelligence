@@ -1,4 +1,4 @@
-# Dynamic: geo_camera_detect
+# Dynamic: geo_iot_detect
 
 ## Description
 

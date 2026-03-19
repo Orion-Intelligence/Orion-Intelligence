@@ -20,7 +20,7 @@
 
   @if (hasSearched) {
     <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[#131e30] [body.light-theme_&]:bg-white">
-      @if (!shodanResult && !errorMessage) {
+      @if (showLoadingSkeleton) {
         <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
           <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
           <div class="flex items-center gap-2">
@@ -29,19 +29,21 @@
           </div>
         </div>
       } @else if (shodanResult) {
-        <div class="ui-ioc-table-row ui-ioc-row-even flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
-          <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ shodanResult.ip }}</span>
-          <div class="flex items-center gap-2">
-            @if (shodanResult.cloud_provider) {
-              <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">☁ {{ shodanResult.cloud_provider }}</span>
-            }
-            @if (shodanResult.is_camera) {
-              <span class="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">📷 CAMERA</span>
-            }
+        <div @fadeInDashboardItem>
+          <div class="ui-ioc-table-row ui-ioc-row-even flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
+            <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ shodanResult.ip }}</span>
+            <div class="flex items-center gap-2">
+              @if (shodanResult.cloud_provider) {
+                <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">☁ {{ shodanResult.cloud_provider }}</span>
+              }
+              @if (hasCameraSignals) {
+                <span class="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">📷 CAMERA{{ cameraPortCount > 0 ? ' ' + cameraPortCount : '' }}</span>
+              }
+            </div>
           </div>
-        </div>
-        <div class="bg-transparent pb-2 [body.light-theme_&]:bg-white">
-          <app-ip-detail [detail]="shodanResult"></app-ip-detail>
+          <div class="bg-transparent pb-2 [body.light-theme_&]:bg-white">
+            <app-ip-detail [detail]="shodanResult"></app-ip-detail>
+          </div>
         </div>
       }
     </div>
