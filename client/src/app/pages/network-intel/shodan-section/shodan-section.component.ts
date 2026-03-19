@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { IpDetail } from '../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
 
@@ -9,6 +10,7 @@ import { IpDetailComponent } from '../ip-detail/ip-detail.component';
   standalone: true,
   imports: [CommonModule, IpDetailComponent],
   templateUrl: './shodan-section.component.html',
+  animations: [fadeInDashboardItem],
 })
 export class ShodanSectionComponent {
   @Input() isScanning = false;
@@ -39,6 +41,18 @@ export class ShodanSectionComponent {
       return 'Queued: waiting for scanner availability...';
     }
     return raw;
+  }
+
+  get showLoadingSkeleton(): boolean {
+    return this.hasSearched && !this.shodanResult && !this.errorMessage && (this.isScanning || this.progress > 0);
+  }
+
+  get cameraPortCount(): number {
+    return (this.shodanResult?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;
+  }
+
+  get hasCameraSignals(): boolean {
+    return !!this.shodanResult?.is_camera || this.cameraPortCount > 0 || (this.shodanResult?.cameras?.length ?? 0) > 0;
   }
 
   isProgressSegmentActive(index: number): boolean {

@@ -260,8 +260,9 @@ def api_public_client(monkeypatch):
         ("post", "/api/urlscan/wayback", {"domain": "example.com", "scanType": "wayback", "checkLive": False}),
         ("post", "/api/urlscan/ip", {"ip": "8.8.8.8"}),
         ("post", "/api/netintel/resolve_ip", {"domain": "example.com"}),
-        ("post", "/api/netintel/scanner", {"ip": "8.8.8.8"}),
-        ("post", "/api/netintel/camera_detect", {"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200}),
+        ("post", "/api/netintel/ipscanner", {"ip": "8.8.8.8"}),
+        ("post", "/api/netintel/url_vulnerability_scan", {"domain": "example.com"}),
+        ("post", "/api/netintel/iot_detect", {"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200}),
         ("post", "/api/netintel/camera_detect_ranges", {"ip_ranges": ["192.168.1.0/24"], "max_ips": 200}),
         ("post", "/api/social/scrape", {"usernames": ["alice"], "platform": "instagram"}),
         ("get", "/api/search/breach/stix/doc1", None),
@@ -333,9 +334,10 @@ def test_crypto_scan_route(api_public_client):
 
 def test_network_intel_routes(api_public_client):
     assert api_public_client.post("/api/netintel/resolve_ip", json={"domain": "example.com"}).status_code == 200
-    assert api_public_client.post("/api/netintel/scanner", json={"ip": "8.8.8.8"}).status_code == 200
+    assert api_public_client.post("/api/netintel/ipscanner", json={"ip": "8.8.8.8"}).status_code == 200
+    assert api_public_client.post("/api/netintel/url_vulnerability_scan", json={"domain": "example.com"}).status_code == 200
     assert api_public_client.post(
-        "/api/netintel/camera_detect",
+        "/api/netintel/iot_detect",
         json={"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200},
     ).status_code == 200
     assert api_public_client.post(
@@ -573,18 +575,21 @@ def test_user_journey_network_intel_routes(api_journey_client):
     client, calls = api_journey_client
 
     resolve_ip = client.post("/api/netintel/resolve_ip", json={"domain": "example.com"})
-    shodan = client.post("/api/netintel/scanner", json={"ip": "8.8.8.8"})
-    geo = client.post("/api/netintel/camera_detect", json={"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200})
+    ipscanner = client.post("/api/netintel/ipscanner", json={"ip": "8.8.8.8"})
+    vuln = client.post("/api/netintel/url_vulnerability_scan", json={"domain": "example.com"})
+    geo = client.post("/api/netintel/iot_detect", json={"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200})
     geo_ranges = client.post("/api/netintel/camera_detect_ranges", json={"ip_ranges": ["192.168.1.0/24"], "max_ips": 200})
 
     assert resolve_ip.status_code == 200
-    assert shodan.status_code == 200
+    assert ipscanner.status_code == 200
+    assert vuln.status_code == 200
     assert geo.status_code == 200
     assert geo_ranges.status_code == 200
     assert [call["route"] for call in calls["network_intel"]] == [
         "resolve_ip",
-        "scanner",
-        "camera_detect",
+        "ipscanner",
+        "url_vulnerability_scan",
+        "iot_detect",
         "camera_detect_ranges",
     ]
     assert all(call["user_id"] == "u1" for call in calls["network_intel"])

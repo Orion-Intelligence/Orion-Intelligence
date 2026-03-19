@@ -60,7 +60,7 @@ Payload examples:
 
 ## Workflow
 
-The scan operates asynchronously with real-time progress tracking — identical polling pattern to `/geo/camera_detect`:
+The scan operates asynchronously with real-time progress tracking — identical polling pattern to `/geo/iot_detect`:
 
 1. **Initial Request** — Submit IP ranges and parameters
    - Returns immediately with `{"status": "pending", "progress": 0, "step": "queued"}`

@@ -30,6 +30,7 @@ from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
     GeoCameraDetectRangesRequest,
     GeoCameraDetectRequest,
     IPScanRequest,
+    NetIntelDeepScanRequest,
     ResolveIPRequest,
 )
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
@@ -84,7 +85,7 @@ def test_mock_search_routes_return_expected_payloads_direct():
             "social_session_upsert_social",
             "social_session_tab_add_social",
             "netintel_resolve_ip",
-            "netintel_scanner",
+            "netintel_ipscanner",
             "netintel_camera_detect",
             "netintel_camera_detect_ranges",
         ]
@@ -162,8 +163,8 @@ def test_mock_search_routes_return_expected_payloads_direct():
     ) == json.loads((API_MOCKS / "netintel_resolve_ip.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
-        _await_non_pending(lambda: tr.test_netintel_scanner(IPScanRequest(ip="8.8.8.8")))
-    ) == json.loads((API_MOCKS / "netintel_scanner.json").read_text(encoding="utf-8"))
+        _await_non_pending(lambda: tr.test_netintel_ipscanner(NetIntelDeepScanRequest(ip="8.8.8.8")))
+    ) == json.loads((API_MOCKS / "netintel_ipscanner.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
@@ -424,7 +425,7 @@ def test_live_mock_data_api_routes_cover_all_handlers(mock_api_routes_backends):
     assert isinstance(_run(ar.search_dynamic_wanted(search_dynamic_social_model(text={"query": "alice"}))), dict)
     assert isinstance(_run(ar.search_dynamic_national_identity(search_dynamic_crack_model(text={"query": "12345-1234567-1"}), current_user=user)), dict)
     assert isinstance(_run(ar.resolve_ip(ResolveIPRequest(domain="example.com"), current_user=user)), dict)
-    assert isinstance(_run(ar.shodan_scanner(IPScanRequest(ip="8.8.8.8"), current_user=user)), dict)
+    assert isinstance(_run(ar.ipscanner(NetIntelDeepScanRequest(ip="8.8.8.8"), current_user=user)), dict)
     assert isinstance(
         _run(ar.geo_camera_detect(GeoCameraDetectRequest(coordinates="24.8607,67.0011", radius_km=25, max_ips=200), current_user=user)),
         dict,
@@ -524,8 +525,9 @@ def test_live_mock_data_api_route_list_stays_complete():
         ("POST", "/api/apk/scan"),
         ("POST", "/api/crypto/scan"),
         ("POST", "/api/netintel/resolve_ip"),
-        ("POST", "/api/netintel/scanner"),
-        ("POST", "/api/netintel/camera_detect"),
+        ("POST", "/api/netintel/ipscanner"),
+        ("POST", "/api/netintel/url_vulnerability_scan"),
+        ("POST", "/api/netintel/iot_detect"),
         ("POST", "/api/netintel/camera_detect_ranges"),
     }
 

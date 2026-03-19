@@ -121,7 +121,7 @@ export class ScanHelperMethodsService {
   }
 
   scanShodanIp(ip: string): Subscription {
-    const call      = () => this.api.post<NetworkIntelScanResponse>('netintel/scanner', { ip });
+    const call      = () => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip });
     const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: NetworkIntelScanResponse) => {
       const p = (res as any)?.progress;
@@ -134,13 +134,27 @@ export class ScanHelperMethodsService {
     return this.runTask<NetworkIntelScanResponse>(build);
   }
 
-  async fetchShodanIpDetail(ip: string): Promise<any> {
+  scanUrlVulnerability(domain: string): Subscription {
+    const call = () => this.api.post<any>('netintel/url_vulnerability_scan', { domain });
+    const getStatus = (res: any) => (res?.result?.status || res?.status) as any;
+    const enhanced = (res: any) => {
+      const p = res?.result?.progress ?? res?.progress;
+      if (typeof p === 'number') {
+        this.progress.set(Math.min(99, p));
+      }
+    };
+    const build = (cancel$: Subject<boolean>) =>
+      this.poll<any>(call, getStatus, enhanced, cancel$, 4000);
+    return this.runTask<any>(build);
+  }
+
+  async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<any> {
     const cancel$ = new Subject<boolean>();
-    const call = () => this.api.post<NetworkIntelScanResponse>('netintel/scanner', { ip });
+    const call = () => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip });
     const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
 
     try {
-      const response = await lastValueFrom(this.poll<NetworkIntelScanResponse>(call, getStatus, () => {}, cancel$, 4000));
+      const response = await lastValueFrom(this.poll<NetworkIntelScanResponse>(call, getStatus, value => onEach?.(value), cancel$, 4000));
       const responseError = this.getResponseError(response);
       if (responseError) {
         throw new Error(responseError.message);
@@ -154,7 +168,7 @@ export class ScanHelperMethodsService {
   }
 
   scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
-    const call      = () => this.api.post<GeoCameraResponse>('netintel/camera_detect', { coordinates, radius_km, max_ips });
+    const call      = () => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips });
     const getStatus = (res: GeoCameraResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: GeoCameraResponse) => {
       const p = (res as any)?.progress;
@@ -234,6 +248,23 @@ export class ScanHelperMethodsService {
       return 'Enter a valid IPv4 address e.g. 52.18.185.222';
     }
     return null;
+  }
+
+  validateVulnerabilityInput(value: string): string | null {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    if (this.isValidDomain(trimmed)) {
+      return null;
+    }
+    if (this.isValidIp(trimmed)) {
+      return `"${trimmed}" is an IP address. Enter a domain like bbc.com`;
+    }
+    if (trimmed.includes(',')) {
+      return `"${trimmed}" looks like coordinates. Enter a domain like bbc.com`;
+    }
+    return 'Enter a valid domain e.g. bbc.com';
   }
 
   validateGeoCoordinatesInput(value: string): string | null {
