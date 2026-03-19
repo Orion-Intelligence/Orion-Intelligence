@@ -19,6 +19,7 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_cal
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import search_social_callback_model
+from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
@@ -357,9 +358,11 @@ class search_model:
         return response.json()
 
     async def network_intel(self, payload, route_name: str, user_id: str = "system"):
+        base_url = env_handler.get_instance().env("NETWORK_API_BASE")
+
         async with httpx.AsyncClient(timeout=120) as client:
             response = await client.post(
-                f"http://trusted-micros-api:8010/netintel/{route_name}/{user_id}",
+                f"{base_url.rstrip('/')}/netintel/{route_name}/{user_id}",
                 json=payload.model_dump()
             )
 
