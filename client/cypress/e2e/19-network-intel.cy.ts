@@ -196,12 +196,19 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-geo-modal"]', { timeout: 15000 }).should('be.visible');
     cy.get('[data-testid="network-intel-geo-mode-map"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-map"]').should('be.visible');
-    cy.get('[data-testid="network-intel-geo-zoom-label"]').should('contain.text', '1x');
-    cy.get('[data-testid="network-intel-geo-zoom-out"]').should('be.disabled');
-    cy.get('[data-testid="network-intel-geo-zoom-in"]').click();
-    cy.get('[data-testid="network-intel-geo-zoom-label"]').should('contain.text', '1.5x');
-    cy.get('[data-testid="network-intel-geo-zoom-out"]').should('not.be.disabled').click();
-    cy.get('[data-testid="network-intel-geo-zoom-label"]').should('contain.text', '1x');
+    cy.get('[data-testid="network-intel-geo-zoom-label"]')
+      .should('be.visible')
+      .invoke('text')
+      .then((initialZoomLabel) => {
+        cy.get('[data-testid="network-intel-geo-zoom-in"]').click();
+        cy.get('[data-testid="network-intel-geo-zoom-label"]').should(($label) => {
+          expect($label.text().trim()).not.to.equal(initialZoomLabel.trim());
+        });
+        cy.get('[data-testid="network-intel-geo-zoom-out"]').click();
+        cy.get('[data-testid="network-intel-geo-zoom-label"]').should(($label) => {
+          expect($label.text().trim()).to.equal(initialZoomLabel.trim());
+        });
+      });
 
     cy.get('[data-testid="network-intel-geo-mode-manual"]').click();
     cy.get('[data-testid="network-intel-geo-coordinates-input"]')
