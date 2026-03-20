@@ -45,7 +45,7 @@
               <div class="absolute inset-x-0 top-1/2 border-t border-dashed border-sky-400/15"></div>
               <div class="absolute inset-y-0 left-1/2 border-l border-dashed border-sky-400/15"></div>
               <div #mapViewport data-testid="network-intel-geo-map" class="absolute inset-0 overflow-auto select-none" [ngClass]="isDraggingMap ? 'cursor-grabbing' : 'cursor-grab'" (mousedown)="onMapDragStart($event)" (click)="onMapSelect($event)" (wheel)="onMapWheel($event)">
-                <div #mapContainer class="relative"></div>
+                <div #mapContainer class="relative" [style.width.px]="mapCanvasWidth" [style.height.px]="mapCanvasHeight"></div>
                 @if (mapMarkerPoint; as markerPoint) {
                   <svg class="pointer-events-none absolute left-0 top-0" [attr.width]="mapCanvasWidth" [attr.height]="mapCanvasHeight" aria-hidden="true">
                     <circle [attr.cx]="markerPoint.x" [attr.cy]="markerPoint.y" r="10" fill="#38bdf8" stroke="#ffffff" stroke-width="2"></circle>
