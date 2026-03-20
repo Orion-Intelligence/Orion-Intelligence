@@ -21,15 +21,17 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   private dragStartScrollTop = 0;
   private hasDraggedMap = false;
   private lastDragEndedAt = 0;
+  private readonly zoomStep = 0.5;
+  private readonly mapAspectRatio = 1380 / 700;
 
-  readonly minZoomLevel = 1;
-  readonly maxZoomLevel = 4;
+  readonly minZoomLevel = 1.5;
+  readonly maxZoomLevel = 12;
   readonly minRadiusKm = 1;
   readonly maxRadiusKm = 50000;
   readonly minMaxIps = 10;
   readonly maxMaxIps = 10000;
   coordinateInputMode: 'map' | 'manual' = 'map';
-  zoomLevel = 1;
+  zoomLevel = 1.5;
   mapCanvasWidth = 0;
   mapCanvasHeight = 0;
   isDraggingMap = false;
@@ -95,6 +97,10 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
   setCoordinateInputMode(mode: 'map' | 'manual'): void {
     this.coordinateInputMode = mode;
+
+    if (mode === 'map' && this.isOpen) {
+      this.queueRenderMap();
+    }
   }
 
   onMapSelect(event: MouseEvent): void {
@@ -136,28 +142,18 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   }
 
   zoomIn(): void {
-    if (this.zoomLevel >= this.maxZoomLevel) {
-      return;
-    }
-    this.zoomLevel = Math.min(this.maxZoomLevel, this.zoomLevel + 0.5);
-    this.renderMap();
+    this.applyZoom(this.zoomLevel + this.zoomStep, this.getViewportCenterAnchor());
   }
 
   zoomOut(): void {
-    if (this.zoomLevel <= this.minZoomLevel) {
-      return;
-    }
-    this.zoomLevel = Math.max(this.minZoomLevel, this.zoomLevel - 0.5);
-    this.renderMap();
+    this.applyZoom(this.zoomLevel - this.zoomStep, this.getViewportCenterAnchor());
   }
 
   onMapWheel(event: WheelEvent): void {
     event.preventDefault();
-    if (event.deltaY < 0) {
-      this.zoomIn();
-      return;
-    }
-    this.zoomOut();
+
+    const direction = event.deltaY < 0 ? 1 : -1;
+    this.applyZoom(this.zoomLevel + (direction * this.zoomStep), this.getPointerAnchor(event));
   }
 
   @HostListener('window:resize')
@@ -236,7 +232,55 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
     setTimeout(() => this.renderMap(), 0);
   }
 
-  private renderMap(): void {
+  private applyZoom(nextZoomLevel: number, anchor: ZoomAnchor | null): void {
+    const clampedZoomLevel = Math.min(this.maxZoomLevel, Math.max(this.minZoomLevel, nextZoomLevel));
+    if (clampedZoomLevel === this.zoomLevel) {
+      return;
+    }
+
+    this.zoomLevel = clampedZoomLevel;
+    this.renderMap(anchor);
+  }
+
+  private getViewportCenterAnchor(): ZoomAnchor | null {
+    const viewport = this.mapViewport?.nativeElement;
+    if (!viewport) {
+      return null;
+    }
+
+    return this.createAnchor(viewport.clientWidth / 2, viewport.clientHeight / 2);
+  }
+
+  private getPointerAnchor(event: MouseEvent | WheelEvent): ZoomAnchor | null {
+    const viewport = this.mapViewport?.nativeElement;
+    if (!viewport) {
+      return null;
+    }
+
+    const rect = viewport.getBoundingClientRect();
+    return this.createAnchor(event.clientX - rect.left, event.clientY - rect.top);
+  }
+
+  private createAnchor(viewportX: number, viewportY: number): ZoomAnchor | null {
+    const viewport = this.mapViewport?.nativeElement;
+    if (!viewport) {
+      return null;
+    }
+
+    const safeViewportX = Math.min(Math.max(viewportX, 0), viewport.clientWidth);
+    const safeViewportY = Math.min(Math.max(viewportY, 0), viewport.clientHeight);
+    const currentWidth = this.mapCanvasWidth || viewport.clientWidth || 1;
+    const currentHeight = this.mapCanvasHeight || viewport.clientHeight || 1;
+
+    return {
+      ratioX: (viewport.scrollLeft + safeViewportX) / currentWidth,
+      ratioY: (viewport.scrollTop + safeViewportY) / currentHeight,
+      viewportX: safeViewportX,
+      viewportY: safeViewportY,
+    };
+  }
+
+  private renderMap(anchor: ZoomAnchor | null = null): void {
     if (!this.isOpen || !this.mapContainer?.nativeElement) {
       return;
     }
@@ -251,31 +295,28 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
     const viewport = this.mapViewport?.nativeElement;
     const viewportWidth = Math.max(viewport?.clientWidth ?? container.clientWidth, 320);
     const viewportHeight = Math.max(viewport?.clientHeight ?? container.clientHeight, 220);
-    const previousWidth = this.mapCanvasWidth || viewportWidth;
-    const previousHeight = this.mapCanvasHeight || viewportHeight;
-    const centerRatioX = viewport ? (viewport.scrollLeft + (viewport.clientWidth / 2)) / previousWidth : 0.5;
-    const centerRatioY = viewport ? (viewport.scrollTop + (viewport.clientHeight / 2)) / previousHeight : 0.5;
+    const baseCanvasWidth = Math.max(viewportWidth, Math.round(viewportHeight * this.mapAspectRatio));
+    const baseCanvasHeight = Math.max(viewportHeight, Math.round(baseCanvasWidth / this.mapAspectRatio));
 
-    this.mapCanvasWidth = Math.max(viewportWidth, Math.round(viewportWidth * this.zoomLevel));
-    this.mapCanvasHeight = Math.max(viewportHeight, Math.round(viewportHeight * this.zoomLevel));
+    this.mapCanvasWidth = Math.round(baseCanvasWidth * this.zoomLevel);
+    this.mapCanvasHeight = Math.round(baseCanvasHeight * this.zoomLevel);
 
     d3.select(container).selectAll('*').remove();
+
+    const countries = topojson.feature(worldData, worldData.objects.countries) as any;
 
     const svg = d3.select(container)
       .append('svg')
       .attr('viewBox', `0 0 ${this.mapCanvasWidth} ${this.mapCanvasHeight}`)
       .attr('width', this.mapCanvasWidth)
       .attr('height', this.mapCanvasHeight)
-      .attr('class', 'h-full w-full');
+      .attr('class', 'block max-w-none');
 
-    const baseScale = this.mapCanvasWidth / (2 * Math.PI);
     this.projection = d3
       .geoMercator()
-      .scale(baseScale)
-      .translate([this.mapCanvasWidth / 2, this.mapCanvasHeight / 1.58]);
+      .fitSize([this.mapCanvasWidth, this.mapCanvasHeight], countries);
 
     const path = d3.geoPath(this.projection);
-    const countries = topojson.feature(worldData, worldData.objects.countries) as any;
 
     svg.append('g')
       .selectAll('path')
@@ -288,10 +329,24 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
       .attr('stroke-width', 0.8);
 
     if (viewport) {
-      const nextLeft = Math.max(0, Math.min(this.mapCanvasWidth - viewport.clientWidth, (this.mapCanvasWidth * centerRatioX) - (viewport.clientWidth / 2)));
-      const nextTop = Math.max(0, Math.min(this.mapCanvasHeight - viewport.clientHeight, (this.mapCanvasHeight * centerRatioY) - (viewport.clientHeight / 2)));
+      const fallbackAnchor = {
+        ratioX: 0.5,
+        ratioY: 0.5,
+        viewportX: viewport.clientWidth / 2,
+        viewportY: viewport.clientHeight / 2,
+      };
+      const nextAnchor = anchor ?? fallbackAnchor;
+      const nextLeft = Math.max(0, Math.min(this.mapCanvasWidth - viewport.clientWidth, (this.mapCanvasWidth * nextAnchor.ratioX) - nextAnchor.viewportX));
+      const nextTop = Math.max(0, Math.min(this.mapCanvasHeight - viewport.clientHeight, (this.mapCanvasHeight * nextAnchor.ratioY) - nextAnchor.viewportY));
       viewport.scrollLeft = nextLeft;
       viewport.scrollTop = nextTop;
     }
   }
+}
+
+interface ZoomAnchor {
+  ratioX: number;
+  ratioY: number;
+  viewportX: number;
+  viewportY: number;
 }
