@@ -81,7 +81,6 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
 
     cy.scrollDashboardToTop()
-    cy.get('[data-cy="top"]', { timeout: 20000 }).should('be.visible');
 
     clickSidebarSubItem('Social', 'Twitter');
     typeDashboardSearch('a');

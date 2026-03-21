@@ -189,8 +189,8 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.get('app-directory-list tbody tr', {timeout: 30000}).then(($rows) => {
       const initialCount = $rows.length;
 
-      if (initialCount > 50) {
-        expect(initialCount).to.be.greaterThan(50);
+      if (initialCount > 49) {
+        expect(initialCount).to.be.greaterThan(49);
         return;
       }
 

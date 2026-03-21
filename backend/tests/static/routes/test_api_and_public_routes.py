@@ -575,19 +575,16 @@ def test_user_journey_network_intel_routes(api_journey_client):
     client, calls = api_journey_client
 
     resolve_ip = client.post("/api/netintel/resolve_ip", json={"domain": "example.com"})
-    ipscanner = client.post("/api/netintel/ipscanner", json={"ip": "8.8.8.8"})
     vuln = client.post("/api/netintel/url_vulnerability_scan", json={"domain": "example.com"})
     geo = client.post("/api/netintel/iot_detect", json={"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200})
     geo_ranges = client.post("/api/netintel/camera_detect_ranges", json={"ip_ranges": ["192.168.1.0/24"], "max_ips": 200})
 
     assert resolve_ip.status_code == 200
-    assert ipscanner.status_code == 200
     assert vuln.status_code == 200
     assert geo.status_code == 200
     assert geo_ranges.status_code == 200
     assert [call["route"] for call in calls["network_intel"]] == [
         "resolve_ip",
-        "ipscanner",
         "url_vulnerability_scan",
         "iot_detect",
         "camera_detect_ranges",

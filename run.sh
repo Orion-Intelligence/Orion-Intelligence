@@ -63,7 +63,8 @@ wait_for_server() {
 
 wait_for_test_service() {
     local url="http://127.0.0.1:8080/api/public"
-    until curl -fsS -o /dev/null "$url"; do
+    echo "Waiting for test service to become ready..."
+    until curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
         sleep 2
     done
 }

@@ -11,7 +11,7 @@ documentation = "https://orion-search.readthedocs.io/en/latest/"
 readme = "https://orion-search.readthedocs.io/en/latest/"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "~3.12"
 fastapi = "0.135.1"
 starlette = "0.52.1"
 pydantic = "2.12.5"
@@ -31,6 +31,7 @@ starlette-admin = "0.16.0"
 email-validator = "2.3.0"
 pymongo = "4.16.0"
 passlib = "1.7.4"
+bcrypt = "^4.2.1"
 PyJWT = "2.12.1"
 
 [tool.pytest.ini_options]

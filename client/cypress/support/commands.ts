@@ -63,33 +63,34 @@ Cypress.Commands.add("logout", () => {
 });
 Cypress.Commands.add("scrollDashboardToTop", () => {
     cy.window({ log: false }).then((win) => {
-        const doc = win.document;
-        const elements = Array.from(doc.querySelectorAll<HTMLElement>('*'));
+        const containers = Array.from(
+            win.document.querySelectorAll<HTMLElement>('#dashboard-container, [data-testid="dashboard-container"], [data-testid="dashboard-body"]')
+        );
 
-        win.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-        doc.documentElement.scrollTop = 0;
-        doc.body.scrollTop = 0;
-
-        elements.forEach((el) => {
-            if (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) {
-                el.scrollTop = 0;
-                el.scrollLeft = 0;
-            }
+        containers.forEach((el) => {
+            el.scrollTop = 0;
         });
     });
+    cy.get('#dashboard-container, [data-testid="dashboard-container"], [data-testid="dashboard-body"]', { timeout: 30000, log: false })
+        .each(($container) => {
+            expect(($container[0] as HTMLElement).scrollTop).to.equal(0);
+        });
 });
 Cypress.Commands.add("openSideFilter", () => {
     cy.scrollDashboardToTop();
     cy.get('body').then(($body) => {
         const isOpen = $body.find('.ui-filter-sidebar-panel.right-0').length > 0;
         if (!isOpen) {
+            cy.scrollDashboardToTop();
             cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
                 .filter(':visible')
                 .first()
+                .scrollIntoView()
                 .should('be.visible');
             cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
                 .filter(':visible')
                 .first()
+                .scrollIntoView()
                 .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
             cy.get('body').then(($retryBody) => {
                 if ($retryBody.find('.ui-filter-sidebar-panel.right-0').length === 0) {
@@ -97,6 +98,7 @@ Cypress.Commands.add("openSideFilter", () => {
                     cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
                         .filter(':visible')
                         .first()
+                        .scrollIntoView()
                         .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
                 }
             });
