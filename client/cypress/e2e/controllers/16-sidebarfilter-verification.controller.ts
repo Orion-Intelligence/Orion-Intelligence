@@ -3,7 +3,7 @@ export {
 } from './12-filter-management.controller';
 
 export function waitForSidebar() {
-  cy.get('[data-testid="side-filter-apply"]', {timeout: 20000})
+  cy.get('[data-testid="side-filter-apply"]')
     .filter(':visible')
     .first()
     .should('be.visible');
@@ -15,10 +15,10 @@ export function openSidebar() {
 }
 
 export function selectAndApply(selectTestId: string, option: string) {
-  cy.get(`[data-testid="${selectTestId}"]`, {timeout: 60000})
+  cy.get(`[data-testid="${selectTestId}"]`)
     .select(option);
 
-  cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
+  cy.get('[data-testid="side-filter-apply"]')
     .click();
   cy.scrollDashboardToTop()
 }
@@ -35,7 +35,7 @@ function assertNetworkValue(text: string, option: string) {
 }
 
 export function assertAnyResultCardMatchesNetwork(option: string) {
-  cy.get('[data-testid="result-card"]', {timeout: 60000}).should('have.length.at.least', 1).then(($cards) => {
+  cy.get('[data-testid="result-card"]').should('have.length.at.least', 1).then(($cards) => {
     const matchingCard = [...$cards].find((card) => {
       const networkLabel = [...card.querySelectorAll('span')].find((span) => (span.textContent || '').trim() === 'Network:');
       const networkValue = networkLabel?.parentElement?.querySelector('span.font-medium')?.textContent || '';
@@ -51,10 +51,10 @@ export function assertAnyResultCardMatchesNetwork(option: string) {
 }
 
 export function openAnyMatchingReport(option: string) {
-  cy.get('[data-testid="open-report"]', {timeout: 60000}).should('have.length.at.least', 1);
+  cy.get('[data-testid="open-report"]').should('have.length.at.least', 1);
 
   const tryAt = (index: number): void => {
-    cy.get('[data-testid="open-report"]', {timeout: 60000}).then(($reports) => {
+    cy.get('[data-testid="open-report"]').then(($reports) => {
       if (index >= $reports.length) {
         throw new Error(`No report matched network ${option}`);
       }

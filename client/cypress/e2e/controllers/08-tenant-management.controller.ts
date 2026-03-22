@@ -1,7 +1,7 @@
 function scrollTenantTableToBottomLeft() {
-  cy.get('[data-testid="tenant-page-header"]', {timeout: 150000}).should('be.visible');
+  cy.get('[data-testid="tenant-page-header"]').should('be.visible');
 
-  cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 150000})
+  cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
     .filter(':visible')
     .first()
     .then(($dashboard) => {
@@ -11,7 +11,7 @@ function scrollTenantTableToBottomLeft() {
       el.dispatchEvent(new Event('scroll', {bubbles: true}));
     });
 
-  cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block', {timeout: 150000})
+  cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
     .filter(':visible')
     .first()
     .as('tenantDesktopScroller')
@@ -23,7 +23,7 @@ function scrollTenantTableToBottomLeft() {
     });
 
   cy.get('@tenantDesktopScroller')
-    .find('tbody:visible tr:last', {timeout: 150000})
+    .find('tbody:visible tr:last')
     .scrollIntoView();
 
   cy.get('@tenantDesktopScroller').then(($scroller) => {
@@ -55,7 +55,7 @@ export function exportFromModal(modalTestId: string, optionTestId: string) {
         .click({waitForAnimations: false, animationDistanceThreshold: 0});
     }
   });
-  cy.get(`[data-testid="${modalTestId}"]`, {timeout: 60000}).should('not.exist');
+  cy.get(`[data-testid="${modalTestId}"]`).should('not.exist');
 }
 
 export function closeNotificationSidebar() {
@@ -92,7 +92,7 @@ export function closeFilterSidebar() {
         .click({waitForAnimations: false, animationDistanceThreshold: 0});
     }
   });
-  cy.get('body', {timeout: 60000}).should($body => {
+  cy.get('body').should($body => {
     expect($body.find('.ui-filter-sidebar-overlay:visible').length).to.eq(0);
     expect($body.find('[data-testid="side-filter-close"]:visible').length).to.eq(0);
   });
@@ -157,25 +157,25 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
       .should('be.visible')
       .click();
     cy.wrap(false).as('changed');
-    cy.get('[data-testid="tenant-edit-panel"]', {timeout: 150000}).filter(':visible').first().as('tenantEditPanel').should('be.visible');
+    cy.get('[data-testid="tenant-edit-panel"]').filter(':visible').first().as('tenantEditPanel').should('be.visible');
 
-    cy.get('[data-testid="tenant-verified-toggle"]', {timeout: 150000}).first().scrollIntoView().should('exist').then(($btn) => {
+    cy.get('[data-testid="tenant-verified-toggle"]').first().scrollIntoView().should('exist').then(($btn) => {
       if (($btn.text() || '').toLowerCase().includes('not verified')) {
         cy.wrap($btn).scrollIntoView().should('be.visible').click();
         cy.wrap(true).as('changed');
       }
     });
 
-    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 150000})
+    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
       .filter(':visible')
       .first()
       .scrollTo('bottom', {ensureScrollable: false});
-    cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block', {timeout: 150000})
+    cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
       .filter(':visible')
       .first()
       .scrollTo('bottomRight', {ensureScrollable: false});
 
-    cy.get('[data-testid="tenant-license-enterprise"]', {timeout: 150000}).first().scrollIntoView().should('exist').then(($card) => {
+    cy.get('[data-testid="tenant-license-enterprise"]').first().scrollIntoView().should('exist').then(($card) => {
       const $cb = $card.find('input[type="checkbox"], input.license-checkbox').first();
       if (!$cb.prop('checked')) {
         const cardEl = $card.get(0) as HTMLElement;
@@ -187,17 +187,17 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
     cy.get('@changed').then((changed: any) => {
       if (changed) {
-        cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 150000})
+        cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
           .filter(':visible')
           .first()
           .scrollTo('bottom', {ensureScrollable: false});
 
-        cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block', {timeout: 150000})
+        cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
           .filter(':visible')
           .first()
           .scrollTo('bottomRight', {ensureScrollable: false});
 
-        cy.get('[data-testid="tenant-save-changes"]', {timeout: 150000})
+        cy.get('[data-testid="tenant-save-changes"]')
           .filter(':visible')
           .first()
           .then(($btn) => {
@@ -227,7 +227,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 export function openTenantsPage() {
   cy.viewport(1440, 900);
   cy.get('[data-testid="sidebar-subitem-profile-tenant"]').filter(':visible').first().scrollIntoView().click();
-  cy.location('pathname', {timeout: 150000}).then((path) => {
+  cy.location('pathname').then((path) => {
     if (!path.includes('/dashboard/profile/tenant')) {
       cy.visit('/dashboard/profile/tenant');
     }
@@ -293,7 +293,7 @@ export function addIOCForAllTabs() {
   });
 
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="tenant-home-scan-all"]', {timeout: 40000}).scrollIntoView().should('be.visible').and('not.be.disabled').click();
+  cy.get('[data-testid="tenant-home-scan-all"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
 }
 
 export function waitForBlockingOverlayToClose() {

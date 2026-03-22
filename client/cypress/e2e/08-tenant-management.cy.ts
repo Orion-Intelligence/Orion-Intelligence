@@ -102,18 +102,18 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
           .clear()
           .type('1');
       });
-    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]', {timeout: 35000})
+    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
       .filter(':visible')
       .first()
       .scrollTo('bottom', {ensureScrollable: false});
 
-    cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block', {timeout: 35000})
+    cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
       .filter(':visible')
       .first()
       .scrollTo('bottomRight', {ensureScrollable: false});
 
-    cy.get('@tenantEditFormPanel', {timeout: 35000})
-      .find('[data-testid="tenant-save-changes"]', {timeout: 35000})
+    cy.get('@tenantEditFormPanel')
+      .find('[data-testid="tenant-save-changes"]')
       .first()
       .then(($btn) => {
         const btn = $btn.get(0) as HTMLElement;
@@ -156,7 +156,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="login-button"]').click();
     cy.get('[data-testid="dashboard-main"]').should('be.visible');
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
-    cy.location('pathname', {timeout: 20000}).should('include', '/dashboard/profile/homepage');
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
   });
 
   it('handles tenant alerts and notifications end-to-end', () => {
@@ -168,16 +168,16 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="dashboard-main"]').should('be.visible');
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
 
-    cy.get('app-alert-scan-loading', {timeout: 10000}).should('not.exist');
+    cy.get('app-alert-scan-loading').should('not.exist');
     cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
 
     cy.get('[data-testid="profile-notification-bell"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="tenant-notification-see-details"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-notification-see-details"]').first().scrollIntoView().should('be.visible').click();
     exportFromModal('notification-alert-export-modal', 'notification-alert-export-option-report');
     closeNotificationSidebar();
 
-    cy.get('[data-testid="tenant-home-alert-category-card"]', {timeout: 40000}).first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-home-alert-category-card"]').first().scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-report-see-details"]').first().scrollIntoView().should('be.visible').click();
     exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
 

@@ -1,16 +1,16 @@
 export function openAndAssertReportModal(title: string) {
-  cy.get('[data-testid="cti-tab-session-menu"], [data-testid="social-tab-session-menu"]', {timeout: 15000}).filter(':visible').first().click();
-  cy.contains('button', 'Export Report', {timeout: 15000}).then(($button) => {
+  cy.get('[data-testid="cti-tab-session-menu"], [data-testid="social-tab-session-menu"]').filter(':visible').first().click();
+  cy.contains('button', 'Export Report').then(($button) => {
     ($button[0] as HTMLButtonElement).click();
   });
-  cy.contains(title, {timeout: 10000}).should('be.visible');
-  cy.get('[data-testid="graph-report-export-modal"]', {timeout: 10000}).filter(':visible').first().should('be.visible');
+  cy.contains(title).should('be.visible');
+  cy.get('[data-testid="graph-report-export-modal"]').filter(':visible').first().should('be.visible');
   cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().should('exist');
   cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().should('exist');
 }
 
 export function invokeVisibleTabBarMethod(methodName: 'createNewTab' | 'exportCurrentSession') {
-  cy.get('app-tab-bar', {timeout: 15000})
+  cy.get('app-tab-bar')
     .filter(':visible')
     .first()
     .then(($host) => {

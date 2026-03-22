@@ -172,7 +172,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
     searchDeepFromTop('example.com');
 
-    cy.get('[data-testid="consolidated-scan-title"]', {timeout: 60000}).should('contain.text', 'Threats Scans Report:');
+    cy.get('[data-testid="consolidated-scan-title"]').should('contain.text', 'Threats Scans Report:');
     cy.get('[data-testid="consolidated-scan-openweb-title"]').should('be.visible');
     cy.get('[data-testid="consolidated-scan-liveapi-title"]').should('be.visible');
 
@@ -190,7 +190,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     switchToDeepSearchTab();
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
     searchDeepFromTop('example.com');
-    cy.get('[data-testid="consolidated-scan-title"]', {timeout: 60000}).should('contain.text', 'Threats Scans Report:');
+    cy.get('[data-testid="consolidated-scan-title"]').should('contain.text', 'Threats Scans Report:');
 
     cy.get('[data-testid="consolidated-section-social"]').scrollIntoView().should('be.visible');
     openFirstReportAndGoBack();

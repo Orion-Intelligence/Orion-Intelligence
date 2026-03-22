@@ -132,7 +132,7 @@ export function openReportDetail18(sectionTitle: string) {
 export function assertValuesInMetadata18(category: FilterCategoryKey, values: string[]) {
   const primaryTabLabel = CATEGORY_TO_TAB_TEXT[category];
 
-  cy.contains('span', 'Metadata', { timeout: 20000 }).should('be.visible');
+  cy.contains('span', 'Metadata').should('be.visible');
 
   values.forEach((val) => {
     const targetVal = val.replace(/^#/, '').toLowerCase();
@@ -166,7 +166,7 @@ export function assertValuesInMetadata18(category: FilterCategoryKey, values: st
      cy.contains('span', 'Metadata')
   .closest('.ui-result-card')
   .within(() => {
-    cy.get('li', { timeout: 10000 })
+    cy.get('li')
       .should('exist')
       .should(($els) => {
         const text = $els.text().toLowerCase();

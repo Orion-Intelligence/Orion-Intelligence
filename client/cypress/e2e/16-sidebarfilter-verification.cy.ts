@@ -23,17 +23,17 @@ describe('SideBar Filter Verification', () => {
   it('applies all filter options in Data Breach', () => {
     cy.intercept('POST', '**/api/search/breach').as('dataBreachSearch');
 
-    cy.get('[data-testid="sidebar-group-breach"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-group-breach"]')
       .scrollIntoView()
       .should('be.visible')
       .click();
 
-    cy.get('[data-testid="sidebar-subitem-breach-all"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-subitem-breach-all"]')
       .scrollIntoView()
       .should('be.visible')
       .click();
 
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000})
+    cy.get('[data-testid="dashboard-general-input"]')
 
 
     cy.scrollDashboardToTop()
@@ -46,20 +46,20 @@ describe('SideBar Filter Verification', () => {
       cy.scrollDashboardToTop()
       openSidebar();
 
-      cy.get('[data-testid="side-filter-reset"]', {timeout: 60000})
+      cy.get('[data-testid="side-filter-reset"]')
         .filter(':visible')
         .first()
         .should('be.visible')
         .click();
 
       openSidebar();
-      cy.get('[data-testid="side-filter-select-network"]', {timeout: 60000})
+      cy.get('[data-testid="side-filter-select-network"]')
         .filter(':visible')
         .first()
         .should('be.visible')
         .select(option);
 
-      cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
+      cy.get('[data-testid="side-filter-apply"]')
         .filter(':visible')
         .first()
         .should('be.visible')
@@ -68,7 +68,7 @@ describe('SideBar Filter Verification', () => {
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="result-card"]').length > 0) {
           if (option.trim().toLowerCase() === 'all') {
-            cy.get('[data-testid="result-card"]', {timeout: 60000})
+            cy.get('[data-testid="result-card"]')
               .should('exist')
               .and('be.visible');
           } else {
@@ -85,13 +85,13 @@ describe('SideBar Filter Verification', () => {
       cy.closeSideFilter()
       openSidebar();
 
-      cy.get('[data-testid="side-filter-select-safe"]', {timeout: 60000})
+      cy.get('[data-testid="side-filter-select-safe"]')
         .filter(':visible')
         .first()
         .should('be.visible')
         .select(option);
 
-      cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
+      cy.get('[data-testid="side-filter-apply"]')
         .filter(':visible')
         .first()
         .should('be.visible')
@@ -100,7 +100,7 @@ describe('SideBar Filter Verification', () => {
 
     openSidebar();
 
-    cy.get('[data-testid="side-filter-reset"]', {timeout: 60000})
+    cy.get('[data-testid="side-filter-reset"]')
       .filter(':visible')
       .first()
       .should('be.visible')
@@ -111,13 +111,13 @@ describe('SideBar Filter Verification', () => {
       cy.scrollDashboardToTop()
       openSidebar();
 
-      cy.get('[data-testid="side-filter-select-content"]', {timeout: 60000})
+      cy.get('[data-testid="side-filter-select-content"]')
         .filter(':visible')
         .first()
         .should('be.visible')
         .select(option);
 
-      cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
+      cy.get('[data-testid="side-filter-apply"]')
         .filter(':visible')
         .first()
         .should('be.visible')
@@ -128,7 +128,7 @@ describe('SideBar Filter Verification', () => {
         .should('eq', 200);
 
       cy.scrollDashboardToTop()
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000})
+      cy.get('[data-testid="dashboard-general-input"]')
         .should('be.visible');
     });
 
@@ -158,12 +158,12 @@ describe('SideBar Filter Verification', () => {
   it('applies all filters in Social with auto-apply and verifies selected network in report', () => {
     cy.intercept('POST', '**/api/search/social').as('socialSearch');
 
-    cy.get('[data-testid="sidebar-group-social"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-group-social"]')
       .scrollIntoView()
       .should('be.visible')
       .click();
 
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+    cy.get('[data-testid="dashboard-general-input"]');
 
     openSidebar();
 
@@ -195,12 +195,12 @@ describe('SideBar Filter Verification', () => {
   it('applies all filters in Exploit with auto-apply', () => {
     cy.intercept('POST', '**/api/search/exploit').as('exploitSearch');
 
-    cy.get('[data-testid="sidebar-group-exploit"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-group-exploit"]')
       .scrollIntoView()
       .should('be.visible')
       .click();
 
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+    cy.get('[data-testid="dashboard-general-input"]');
 
     openSidebar();
 
@@ -230,7 +230,7 @@ describe('SideBar Filter Verification', () => {
       });
 
 
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+      cy.get('[data-testid="dashboard-general-input"]');
     });
 
     cy.get('[data-testid="dashboard-search-submit"]')
@@ -243,17 +243,17 @@ describe('SideBar Filter Verification', () => {
   it('applies all filters in Feed News with auto-apply', () => {
     cy.intercept('POST', '**/api/search/breach').as('feedNewsSearch');
 
-    cy.get('[data-testid="sidebar-group-feed"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-group-feed"]')
       .scrollIntoView()
       .should('be.visible')
       .click();
 
-    cy.get('[data-testid="sidebar-subitem-feed-news"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-subitem-feed-news"]')
       .scrollIntoView()
       .should('be.visible')
       .click();
 
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+    cy.get('[data-testid="dashboard-general-input"]');
 
     openSidebar();
     selectDateRangeResetAndReopen();
@@ -276,7 +276,7 @@ describe('SideBar Filter Verification', () => {
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="open-report"]').length > 0) {
           openAnyMatchingReport(option);
-          cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+          cy.get('[data-testid="dashboard-general-input"]');
         }
       });
     });
@@ -290,15 +290,15 @@ describe('SideBar Filter Verification', () => {
   it('applies all filters in General Intelligence with auto-apply', () => {
     cy.intercept('POST', '**/api/search/strategic').as('strategicSearch');
 
-    cy.get('[data-testid="sidebar-group-strategic"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-group-strategic"]')
       .scrollIntoView()
       .should('be.visible')
       .click();
 
-    cy.get('[data-testid="sidebar-subitem-strategic-all"]', {timeout: 60000})
+    cy.get('[data-testid="sidebar-subitem-strategic-all"]')
 
 
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+    cy.get('[data-testid="dashboard-general-input"]');
 
     cy.scrollDashboardToTop()
     openSidebar();

@@ -21,7 +21,7 @@ Cypress.Commands.add("loginAsAdmin", () => {
         cy.get('[data-testid="login-user"]').type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
-        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 35000 })
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -38,7 +38,7 @@ Cypress.Commands.add("loginAsTest1", () => {
         cy.get('input[name="username"]').type(user.username);
         cy.get('input[name="password"]').type(user.password, { log: false });
         cy.get('[data-cy="login-button"], input.login-button').first().click();
-        cy.get('[data-testid="profile-menu"], [data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 35000 })
+        cy.get('[data-testid="profile-menu"], [data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -57,8 +57,8 @@ Cypress.Commands.add("logout", () => {
             }
             cy.scrollTo("top", { ensureScrollable: false });
             cy.wrap(profileMenu).scrollIntoView().should('be.visible').click();
-            cy.get('[data-testid="signout-btn"]', { timeout: 10000 }).filter(':visible').first().scrollIntoView().should('be.visible').click();
-            cy.get('[data-testid="login-user"]', { timeout: 10000 }).should('exist');
+            cy.get('[data-testid="signout-btn"]').filter(':visible').first().scrollIntoView().should('be.visible').click();
+            cy.get('[data-testid="login-user"]').should('exist');
         });
     });
 });
@@ -76,8 +76,8 @@ Cypress.Commands.add("scrollDashboardToTop", () => {
 
 Cypress.Commands.add("openSideFilter", () => {
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="side-filter-open"]', { timeout: 20000 }).filter(':visible').first().should('be.visible').click();
-    cy.get('[data-testid="side-filter-apply"]', { timeout: 20000 }).filter(':visible').first().should('be.visible');
+    cy.get('[data-testid="side-filter-open"]').filter(':visible').first().should('be.visible').click();
+    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
 });
 Cypress.Commands.add("closeSideFilter", () => {
     cy.window().then((win) => {
@@ -94,7 +94,7 @@ Cypress.Commands.add("closeSideFilter", () => {
     });
 });
 Cypress.Commands.add("applySideFilter", () => {
-    cy.get('[data-testid="side-filter-apply"]', { timeout: 20000 })
+    cy.get('[data-testid="side-filter-apply"]')
         .filter(':visible')
         .first()
         .should('be.visible')
