@@ -63,12 +63,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         y: number;
         size: number;
     }[]>([]);
-  relationshipOverlayNodes = signal<{
-        nodeId: string;
-        x: number;
-        y: number;
-        size: number;
-    }[]>([]);
   loadingNodeIds = computed(() => {
     const loadingIds = new Set<string>();
     const statesToProcess = [
@@ -546,31 +540,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         }
         this.iconOverlayNodes.set(overlays);
       }
-      const relationshipOverlays: {
-                nodeId: string;
-                x: number;
-                y: number;
-                size: number;
-            }[] = [];
-      const relationshipNodes = this.data().nodes.filter(node => node.id.toString().startsWith('relationship-node-'));
-      for (const relationshipNode of relationshipNodes) {
-        const nodeId = relationshipNode.id.toString();
-        const nodePosition = network.getPosition(nodeId);
-        if (!nodePosition) {
-          continue;
-        }
-        const domPosition = network.canvasToDOM(nodePosition);
-        const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId);
-        const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 18;
-        const overlaySize = Math.max(18, Math.round(baseSize * 1.2));
-        relationshipOverlays.push({
-          nodeId,
-          x: domPosition.x,
-          y: domPosition.y,
-          size: overlaySize
-        });
-      }
-      this.relationshipOverlayNodes.set(relationshipOverlays);
       const selectedEdgeId = this.selectedEdgeId();
       if (selectedEdgeId) {
         this.updateDeleteButtonPosition(network, selectedEdgeId);
@@ -726,11 +695,6 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   onFollowersShortcutClick(event: MouseEvent, nodeId: string) {
     event.stopPropagation();
     this.followersShortcutClicked.emit(nodeId);
-  }
-
-  onRelationshipShortcutClick(event: MouseEvent, nodeId: string) {
-    event.stopPropagation();
-    this.relationshipNodeClicked.emit(nodeId);
   }
 
   toPositionValue(rawValue: number): number {

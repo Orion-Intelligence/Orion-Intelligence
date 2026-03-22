@@ -734,7 +734,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username);
         this.tabManager.scheduleSave();
       },
-      deleteProfile: () => this.state.openDeleteConfirmation(username),
+      deleteProfile: () => {
+        this.graphOrchestrator.removeUserFromGraph(this.activeTabState()!, username);
+        this.tabManager.scheduleSave();
+      },
       setAlias: () => {
         if (!nodeId.startsWith('user-')) {
           return;
@@ -749,6 +752,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         this.tabManager.scheduleSave();
       },
       deleteEntity: () => this.deleteCustomEntity(nodeId),
+      openRelationship: () => this.onRelationshipNodeClicked(nodeId),
     };
     handlers[action]();
     this.state.closeContextMenu();

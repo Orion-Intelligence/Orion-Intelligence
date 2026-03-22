@@ -413,22 +413,9 @@ export class GraphOrchestratorService {
                 : mentionsAtoB
                   ? `${userA} mentioned ${userB}`
                   : `${userB} mentioned ${userA}`;
+        const relationshipTitle = `${directionTitle}\nDetected by ${detectorProfileCount} social profile(s)\nPlatforms: ${matchedPlatformsText}`;
         newRelationshipNodes.push({
-          id: relationshipNodeId,
-          label: '',
-          relationshipCount: detectorProfileCount,
-          shape: 'dot',
-          size: 2,
-          font: { color: this.getGraphLabelColor(), size: 1 },
-          color: {
-            border: 'rgba(0,0,0,0)',
-            background: 'rgba(0,0,0,0)',
-            highlight: { border: 'rgba(0,0,0,0)', background: 'rgba(0,0,0,0)' },
-            hover: { border: 'rgba(0,0,0,0)', background: 'rgba(0,0,0,0)' }
-          },
-          borderWidth: 0,
-          borderWidthSelected: 0,
-          title: `${directionTitle}\nDetected by ${detectorProfileCount} social profile(s)\nPlatforms: ${matchedPlatformsText}`
+          ...this.graphManager.createRelationshipNode(relationshipNodeId, detectorProfileCount, relationshipTitle)
         });
         const edgeStyle = {
           color: { color: '#f59e0b', highlight: '#fbbf24', hover: '#f59e0b' },

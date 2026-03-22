@@ -231,6 +231,9 @@ export class SocialMapperStateService {
     else if (nodeId.startsWith('group-')) {
       type = 'group';
     }
+    else if (nodeId.startsWith('relationship-node-')) {
+      type = 'relationship';
+    }
     else if (customEntities.some(e => e.id === nodeId)) {
       type = 'customEntity';
     }
