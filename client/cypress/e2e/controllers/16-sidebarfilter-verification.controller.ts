@@ -10,6 +10,8 @@ export function waitForSidebar() {
 }
 
 export function openSidebar() {
+  cy.wait(500)
+  cy.scrollDashboardToTop()
   cy.openSideFilter();
   waitForSidebar();
 }
