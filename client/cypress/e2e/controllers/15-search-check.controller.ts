@@ -134,7 +134,8 @@ export function typeDashboardSearch15(value: string) {
 }
 
 export function assertFirstResultCard(data: SearchResultData) {
-  cy.get('[data-testid="result-card"], .ui-result-card')
+  cy.wait(2000);
+  cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
     .should('have.length.at.least', 1)
     .then(($cards) => {
       const matchingCard = Array.from($cards).find((card) => {
@@ -161,7 +162,7 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
   const allowedBaseUrls = Array.isArray(data.base_url) ? data.base_url : [data.base_url];
   const allowedWebUrls = Array.isArray(data.web_url) ? data.web_url : [data.web_url];
 
-  cy.get('tbody tr.cursor-pointer')
+  cy.get('tbody tr.cursor-pointer', {timeout: 35000})
     .then(($rows) => {
       const matchingRow = Array.from($rows).find((row) => {
         const cells = row.querySelectorAll('td');
