@@ -2642,6 +2642,14 @@ app-world-heatmap .country:not(.is-clickable) {
   opacity: 0;
 }
 
+@for $i from 0 through 256 {
+  $size: $i * 2;
+  .network-graph-relationship-test-trigger[data-size="#{$size}"] {
+    width: #{$size}px;
+    height: #{$size}px;
+  }
+}
+
 @keyframes network-delete-edge-appear {
   0% {
     opacity: 0;

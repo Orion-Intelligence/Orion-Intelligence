@@ -16,7 +16,7 @@
     }
     @if (isCypressEnvironment && relationshipOverlayNodes().length > 0) {
       @for (overlay of relationshipOverlayNodes(); track trackByOverlayNodeId($index, overlay)) {
-        <button data-testid="social-relationship-node-trigger" type="button" class="network-graph-relationship-test-trigger pointer-events-auto" [attr.data-node-id]="overlay.nodeId" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" [style.width.px]="overlay.size" [style.height.px]="overlay.size" (click)="onRelationshipShortcutClick($event, overlay.nodeId)"></button>
+        <button data-testid="social-relationship-node-trigger" type="button" class="network-graph-relationship-test-trigger pointer-events-auto" [attr.data-node-id]="overlay.nodeId" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" [attr.data-size]="toSizeValue(overlay.size)" (click)="onRelationshipShortcutClick($event, overlay.nodeId)"></button>
       }
     }
   </div>
