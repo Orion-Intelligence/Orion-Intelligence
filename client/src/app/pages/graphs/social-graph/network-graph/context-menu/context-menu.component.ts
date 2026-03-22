@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-export type ContextMenuType = 'user' | 'platform' | 'customEntity' | 'group';
+export type ContextMenuType = 'user' | 'platform' | 'customEntity' | 'group' | 'relationship';
 export interface ContextMenuData {
     x: number;
     y: number;
     nodeId: string;
     type: ContextMenuType;
 }
-export type ContextMenuAction = 'fetchLinks' | 'clearConnections' | 'deleteProfile' | 'removeNode' | 'deleteEntity' | 'setAlias';
+export type ContextMenuAction = 'fetchLinks' | 'clearConnections' | 'deleteProfile' | 'removeNode' | 'deleteEntity' | 'setAlias' | 'openRelationship';
 @Component({
   selector: 'app-context-menu',
   standalone: true,
@@ -32,6 +32,9 @@ export class ContextMenuComponent {
     if (data.type === 'group') {
       return 'Group Actions';
     }
+    if (data.type === 'relationship') {
+      return 'Relationship Actions';
+    }
     return 'Entity Actions';
   });
   menuSubtitle = computed(() => {
@@ -52,6 +55,9 @@ export class ContextMenuComponent {
     }
     if (data.type === 'group') {
       return 'Grouped platform node';
+    }
+    if (data.type === 'relationship') {
+      return data.nodeId.replace('relationship-node-', '').replace('--', ' / ');
     }
     return 'Custom entity';
   });

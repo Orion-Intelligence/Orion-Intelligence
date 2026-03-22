@@ -11,63 +11,62 @@ describe('Filter Management', () => {
   });
 
   it('applies all filters, tools, and auto-apply options in General Intelligence', () => {
-    cy.get('[data-testid="sidebar-group-strategic"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="sidebar-group-strategic"]').should('be.visible').scrollIntoView().click();
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).should('be.visible').click();
-    cy.get('[data-testid="dashboard-advance-toggle"]', {timeout: 30000}).should('exist').then(($toggle) => {
+    cy.get('[data-testid="dashboard-general-input"]').should('be.visible').click();
+    cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').then(($toggle) => {
       cy.wrap($toggle).closest('label').click();
       cy.wrap($toggle).closest('label').click();
     });
-    cy.get('app-search-filters', {timeout: 20000}).should('be.visible');
+    cy.get('app-search-filters').should('be.visible');
 
     ENTITY_FILTERS.forEach(([name, value]) => applyEntityFilter(name, value));
 
-    cy.get('[data-testid="entity-filter-clear-selection"]', {timeout: 20000}).scrollIntoView().click();
+    cy.get('[data-testid="entity-filter-clear-selection"]').scrollIntoView().click();
     cy.get('body').click(0, 0);
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="dashboard-tools-toggle"]', {timeout: 20000}).click();
-    cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).should('exist');
+    cy.get('[data-testid="dashboard-tools-toggle"]').click();
+    cy.get('[data-testid="result-tools-sort"]').should('exist');
 
     SORT_OPTIONS.forEach((option) => {
       cy.scrollDashboardToTop();
-      cy.get('[data-testid="result-tools-sort"]', {timeout: 20000}).click();
-      cy.get(option === 'Newest first' ? '[data-testid="result-tools-sort-newest"]' : '[data-testid="result-tools-sort-oldest"]', {timeout: 20000}).click();
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).type('{enter}');
+      cy.get('[data-testid="result-tools-sort"]').click();
+      cy.get(option === 'Newest first' ? '[data-testid="result-tools-sort-newest"]' : '[data-testid="result-tools-sort-oldest"]').click();
+      cy.get('[data-testid="dashboard-general-input"]').type('{enter}');
     });
 
     SEARCH_BY_OPTIONS.forEach((option) => {
       cy.scrollDashboardToTop();
-      cy.get('[data-testid="result-tools-searchby"]', {timeout: 20000}).click();
-      cy.get(option === 'Match Semantic' ? '[data-testid="result-tools-searchby-semantic"]' : option === 'Match any term (OR)' ? '[data-testid="result-tools-searchby-or"]' : option === 'Match indivisual terms (AND)' ? '[data-testid="result-tools-searchby-and"]' : '[data-testid="result-tools-searchby-full"]', {timeout: 20000}).click();
-      cy.wait(1000)
+      cy.get('[data-testid="result-tools-searchby"]').click();
+      cy.get(option === 'Match Semantic' ? '[data-testid="result-tools-searchby-semantic"]' : option === 'Match any term (OR)' ? '[data-testid="result-tools-searchby-or"]' : option === 'Match indivisual terms (AND)' ? '[data-testid="result-tools-searchby-and"]' : '[data-testid="result-tools-searchby-full"]').click();
       cy.scrollDashboardToTop()
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 20000}).filter(':visible').first().should('be.visible').clear().type('test query{enter}');
+      cy.get('[data-testid="dashboard-general-input"]').filter(':visible').first().should('be.visible').clear().type('test query{enter}');
     });
 
     cy.openSideFilter();
 
     SAFE_SEARCH_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-safe"]', {timeout: 30000}).scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-safe"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).should('be.visible').click();
-    cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 20000}).filter(':visible').first().click();
-    cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 20000}).filter(':visible').first().click();
+    cy.get('[data-testid="side-filter-date-toggle"]').should('be.visible').click();
+    cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().click();
+    cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().click();
     cy.get('[data-testid="side-filter-apply"]').click();
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]', {timeout: 30000}).scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
     cy.closeSideFilter();
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 20000}).first().should('be.visible').click();
+    cy.get('[data-testid="dashboard-search-submit"]').first().should('be.visible').click();
   });
   it('applies all filter options in Data Breach', () => {
     cy.scrollDashboardToTop()
@@ -81,14 +80,14 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-network"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
     SAFE_SEARCH_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-safe"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-safe"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
@@ -98,8 +97,8 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
@@ -116,7 +115,7 @@ describe('Filter Management', () => {
 
     cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-select-network"]').select(option);
       cy.applySideFilter();
       cy.openSideFilter();
     });
@@ -134,14 +133,14 @@ describe('Filter Management', () => {
 
     cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-network"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
@@ -157,14 +156,14 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-network"]').select(option);
+      cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 

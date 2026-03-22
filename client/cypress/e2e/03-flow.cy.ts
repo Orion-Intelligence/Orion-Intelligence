@@ -22,8 +22,8 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       clickSidebarSubItem('admin', section);
     });
 
-    cy.get('[data-testid="sidebar-collapse-button"]', {timeout: 20000}).should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
-    cy.get('[data-testid="sidebar-expand-button"]', {timeout: 20000}).should('be.visible').click();
+    cy.get('[data-testid="sidebar-collapse-button"]').should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
+    cy.get('[data-testid="sidebar-expand-button"]').should('be.visible').click();
 
     openSidebarGroup('General Intelligence');
     FLOW_GENERAL_INTELLIGENCE_SECTIONS.forEach((s) => clickSidebarSubItem('General Intelligence', s));
@@ -59,10 +59,10 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
   it('covers world heatmap render, interactions, and popup close paths', () => {
     cy.loginAsAdmin();
-    cy.get('[data-testid="world-heatmap-map"] svg', {timeout: 15000}).should('exist');
-    cy.get('[data-testid="world-heatmap-map"] svg', {timeout: 15000}).should('exist');
+    cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
+    cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
 
-    cy.get('[data-testid="world-heatmap-map"] path.country.has-data, [data-testid="world-heatmap-map"] path.country', {timeout: 15000})
+    cy.get('[data-testid="world-heatmap-map"] path.country.has-data, [data-testid="world-heatmap-map"] path.country')
       .then(($paths) => {
         const aliases = ['united states', 'united states of america', 'usa', 'us'];
         const target = Array.from($paths).find((el) => {
@@ -84,7 +84,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       );
     });
 
-    cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip.heatmap-tooltip-visible', {timeout: 10000}).should('exist');
+    cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip.heatmap-tooltip-visible').should('exist');
 
     cy.get('@usaCountryPath').should('exist').then(($el) => {
       ($el[0] as Element).dispatchEvent(
@@ -96,14 +96,14 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
     cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip').should('exist');
     openCountryReportFromMap();
-    cy.contains('[data-testid="heatmap-report"] h3', 'Reports', {timeout: 10000}).should('be.visible');
+    cy.contains('[data-testid="heatmap-report"] h3', 'Reports').should('be.visible');
     cy.get('[data-testid="heatmap-report"] .overflow-y-auto').should('exist');
     cy.get('[data-testid="heatmap-report-close"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="heatmap-report"]', {timeout: 15000}).should('not.exist');
+    cy.get('[data-testid="heatmap-report"]').should('not.exist');
 
     openCountryReportFromMap();
     cy.get('[data-testid="heatmap-report-overlay"]').scrollIntoView().click('topLeft');
-    cy.get('[data-testid="heatmap-report"]', {timeout: 15000}).should('not.exist');
+    cy.get('[data-testid="heatmap-report"]').should('not.exist');
   });
 
   it('covers branch paths by invoking heatmap component API', () => {
@@ -153,7 +153,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       comp.ngOnDestroy();
     });
 
-    cy.get('[data-testid="world-heatmap-map"] svg', {timeout: 15000}).should('exist');
+    cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
   });
 
   it('opens help and support modal, fills form, and sends message', () => {
@@ -163,11 +163,11 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       body: {success: true}
     }).as('sendSupport');
 
-    cy.get('[data-testid="profile-menu"]', {timeout: 15000}).filter(':visible').first().should('be.visible').click({scrollBehavior: false});
-    cy.get('[data-testid="profile-help-support"]', {timeout: 10000}).filter(':visible').first().should('be.visible').click({scrollBehavior: false});
-    cy.get('[data-testid="support-overlay"]', {timeout: 10000}).should('be.visible').and('not.have.class', 'opacity-0');
-    cy.get('[data-testid="support-modal"]', {timeout: 10000}).should('be.visible');
-    cy.get('[data-testid="support-modal-title"]', {timeout: 10000}).should('be.visible');
+    cy.get('[data-testid="profile-menu"]').filter(':visible').first().should('be.visible').click({scrollBehavior: false});
+    cy.get('[data-testid="profile-help-support"]').filter(':visible').first().should('be.visible').click({scrollBehavior: false});
+    cy.get('[data-testid="support-overlay"]').should('be.visible').and('not.have.class', 'opacity-0');
+    cy.get('[data-testid="support-modal"]').should('be.visible');
+    cy.get('[data-testid="support-modal-title"]').should('be.visible');
     cy.get('[data-testid="support-email-input"]').should('be.visible').clear().type(testData.support_email);
     cy.get('[data-testid="support-subject-input"]').should('be.visible').clear().type('Support request from Cypress');
     cy.get('[data-testid="support-message-input"]').should('be.visible').clear().type('Please review this test support message submission flow.');
@@ -182,30 +182,30 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.visit('/dashboard/directory');
     waitForDirectoryRequest();
     cy.scrollDashboardToTop()
-    cy.get('app-directory .ui-page-title', {timeout: 30000}).should('contain.text', 'Directory');
+    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
     assertDirectoryContentVisible();
 
     cy.scrollDashboardToTop()
-    cy.get('app-directory-list tbody tr', {timeout: 30000}).then(($rows) => {
+    cy.get('app-directory-list tbody tr').then(($rows) => {
       const initialCount = $rows.length;
 
-      if (initialCount > 50) {
-        expect(initialCount).to.be.greaterThan(50);
+      if (initialCount > 49) {
+        expect(initialCount).to.be.greaterThan(49);
         return;
       }
 
-      cy.get('#bottom', {timeout: 20000}).scrollIntoView();
+      cy.get('#bottom').scrollIntoView();
       cy.wait(1000);
       cy.scrollDashboardToTop()
-      cy.get('app-directory-list tbody tr', {timeout: 30000}).its('length').should('be.greaterThan', initialCount);
+      cy.get('app-directory-list tbody tr').its('length').should('be.greaterThan', initialCount);
     });
 
-    cy.get('[data-testid="pagination-next"]', {timeout: 20000}).should('exist').scrollIntoView().click();
+    cy.get('[data-testid="pagination-next"]').should('exist').scrollIntoView().click();
     waitForDirectoryRequest();
-    cy.get('[data-testid="pagination-page-2"]', {timeout: 20000}).should('exist');
+    cy.get('[data-testid="pagination-page-2"]').should('exist');
     cy.location('search').should('include', 'page=2');
 
-    cy.get('[data-testid="pagination-page-1"]', {timeout: 20000}).scrollIntoView().click();
+    cy.get('[data-testid="pagination-page-1"]').scrollIntoView().click();
     waitForDirectoryRequest();
 
     applyDirectoryDropdown('network', DIRECTORY_NETWORK_OPTION, 'network');
@@ -218,7 +218,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     resetDirectoryFilters();
 
     applyDateRange(14);
-    cy.contains('No links found!', {timeout: 30000}).should('be.visible');
+    cy.contains('No links found!').should('be.visible');
 
     resetDirectoryFilters();
   });

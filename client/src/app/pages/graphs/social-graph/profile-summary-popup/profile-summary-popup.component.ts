@@ -37,7 +37,14 @@ export class ProfileSummaryPopupComponent {
   selectedPlatform = signal<PlatformResult | 'all' | null>('all');
   selectedPlatformDetails = computed((): PlatformResult | null => {
     const selection = this.selectedPlatform();
-    return (selection && selection !== 'all') ? selection : null;
+    if (!selection || selection === 'all') {
+      return null;
+    }
+
+    return this.platforms().find(platform =>
+      platform.platform === selection.platform
+      && platform.username === selection.username
+      && platform.keyUsername === selection.keyUsername) ?? selection;
   });
   isAllPlatformsSelected = computed((): boolean => {
     return this.selectedPlatform() === 'all';
@@ -73,11 +80,11 @@ export class ProfileSummaryPopupComponent {
   }
 
   onSearchTermChange(event: Event) {
-    this.platformSearchTerm.set((event.target as HTMLInputElement).value); 
+    this.platformSearchTerm.set((event.target as HTMLInputElement).value);
   }
 
   clearSearch() {
-    this.platformSearchTerm.set(''); 
+    this.platformSearchTerm.set('');
   }
 
   onClose() {

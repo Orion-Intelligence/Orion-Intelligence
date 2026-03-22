@@ -23,20 +23,20 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
 
     it('updates avatar/theme/2FA and validates reset password journey', () => {
         const resolvedNewPassword = newPassword ?? '';
-        cy.get('[data-testid="sidebar-group-profile"]', {timeout: 20000}).should('be.visible').click({scrollBehavior: false});
-        cy.get('[data-testid="sidebar-subitem-profile-account"]', {timeout: 20000}).should('be.visible').click({scrollBehavior: false});
-        cy.location('pathname', {timeout: 20000}).should('include', '/dashboard/profile/account');
-        cy.get('[data-testid="account-settings-form"]', {timeout: 20000}).should('be.visible');
-        cy.get('[data-testid="account-settings-title"]', {timeout: 20000}).should('be.visible');
+        cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click({scrollBehavior: false});
+        cy.get('[data-testid="sidebar-subitem-profile-account"]').should('be.visible').click({scrollBehavior: false});
+        cy.location('pathname').should('include', '/dashboard/profile/account');
+        cy.get('[data-testid="account-settings-form"]').should('be.visible');
+        cy.get('[data-testid="account-settings-title"]').should('be.visible');
 
-        cy.get('[data-testid="account-settings-title"]', {timeout: 20000}).invoke('text').then((t) => {
+        cy.get('[data-testid="account-settings-title"]').invoke('text').then((t) => {
             expect(t.trim()).to.match(/Admin Profile|User Profile Form/);
         });
 
-        cy.get('app-user-image-picker', {timeout: 20000}).should('exist');
+        cy.get('app-user-image-picker').should('exist');
 
         cy.fixture('avatar.png', 'base64').then((content) => {
-            cy.get('app-user-image-picker input[type="file"]', {timeout: 20000}).first().should('exist').invoke('removeAttr', 'hidden').invoke('css', 'display', 'block').invoke('css', 'visibility', 'visible').invoke('css', 'position', 'fixed').invoke('css', 'left', '0').invoke('css', 'top', '0').invoke('css', 'width', '1px').invoke('css', 'height', '1px').invoke('css', 'opacity', '1').selectFile({
+            cy.get('app-user-image-picker input[type="file"]').first().should('exist').invoke('removeAttr', 'hidden').invoke('css', 'display', 'block').invoke('css', 'visibility', 'visible').invoke('css', 'position', 'fixed').invoke('css', 'left', '0').invoke('css', 'top', '0').invoke('css', 'width', '1px').invoke('css', 'height', '1px').invoke('css', 'opacity', '1').selectFile({
                 contents: Cypress.Blob.base64StringToBlob(content, 'image/png'),
                 fileName: 'avatar.png',
                 mimeType: 'image/png',
@@ -44,8 +44,8 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             });
         });
 
-        cy.get('[data-testid="account-settings-theme-toggle"]', {timeout: 20000}).click().wait(200).click();
-        cy.get('[data-testid="account-settings-twofa-toggle"]', {timeout: 20000}).click();
+        cy.get('[data-testid="account-settings-theme-toggle"]').click().wait(200).click();
+        cy.get('[data-testid="account-settings-twofa-toggle"]').click();
         cy.logout();
 
         cy.visit('/login');
@@ -63,7 +63,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
         cy.get('[data-testid="reset-companymail"]').clear().type(resetEmail);
         cy.get('[data-testid="reset-submit"]').click();
 
-        cy.get('body', {timeout: 20000}).then(($body) => {
+        cy.get('body').then(($body) => {
             if ($body.text().includes('Password Reset Email Sent')) {
                 cy.contains('Password Reset Email Sent').should('be.visible');
             }

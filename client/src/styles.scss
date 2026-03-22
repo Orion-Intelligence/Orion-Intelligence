@@ -2633,6 +2633,23 @@ app-world-heatmap .country:not(.is-clickable) {
   animation: network-delete-edge-appear 160ms ease-out;
 }
 
+.network-graph-relationship-test-trigger {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border: 0;
+  border-radius: 9999px;
+  opacity: 0;
+}
+
+@for $i from 0 through 256 {
+  $size: $i * 2;
+  .network-graph-relationship-test-trigger[data-size="#{$size}"] {
+    width: #{$size}px;
+    height: #{$size}px;
+  }
+}
+
 @keyframes network-delete-edge-appear {
   0% {
     opacity: 0;
@@ -2642,34 +2659,6 @@ app-world-heatmap .country:not(.is-clickable) {
   100% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-.network-graph-relationship-overlay {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: #fcd34d;
-  border: 0;
-  border-radius: 9999px;
-  box-shadow: none;
-}
-
-.network-graph-relationship-overlay i {
-  font-size: 10px !important;
-  line-height: 1 !important;
-}
-
-@for $i from 0 through 256 {
-  $size: $i * 2;
-  .network-graph-relationship-overlay[data-size="#{$size}"] {
-    width: #{$size}px;
-    height: #{$size}px;
   }
 }
 

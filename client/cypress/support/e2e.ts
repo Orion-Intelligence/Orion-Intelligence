@@ -14,13 +14,19 @@ Cypress.on("window:before:load", (win) => {
       *,
       *::before,
       *::after {
-        transition-duration: 0.0001s !important;
+        transition-duration: 0s !important;
         transition-delay: 0s !important;
-        animation-duration: 0.0001s !important;
+        animation-duration: 0s !important;
         animation-delay: 0s !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
         caret-color: auto !important;
+      }
+
+      #dashboard-container,
+      [data-testid="dashboard-container"],
+      [data-testid="dashboard-body"] {
+        overflow-x: hidden !important;
       }
     `;
     doc.head.appendChild(style);

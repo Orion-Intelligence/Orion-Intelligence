@@ -56,7 +56,7 @@ describe('Orion Intelligence – Search Result Validation', () => {
     openSidebarGroup15('Exploit');
     clickSidebarSubItem15('Exploit', 'All');
 
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000})
+    cy.get('input[data-cy="dashboard-general-input"][name="q"]')
       .first()
       .scrollIntoView()
       .should('be.visible')
@@ -71,7 +71,7 @@ describe('Orion Intelligence – Search Result Validation', () => {
     openSidebarGroup15('Feed');
     waitForSearchReady15();
 
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000})
+    cy.get('input[data-cy="dashboard-general-input"][name="q"]')
       .first()
       .scrollIntoView()
       .should('be.visible')

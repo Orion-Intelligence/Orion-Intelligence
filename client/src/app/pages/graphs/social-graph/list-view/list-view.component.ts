@@ -179,7 +179,8 @@ export class ListViewComponent {
       }
       if (connectedNodeId) {
         const connectedNode = this.getNodeById(connectedNodeId);
-        if (connectedNode) {
+        const nodeLabel = typeof connectedNode?.label === 'string' ? connectedNode.label.trim() : '';
+        if (connectedNode && nodeLabel.length > 0) {
           connections.push({ node: connectedNode, edge });
         }
       }
