@@ -323,6 +323,65 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     return false;
   }
 
+  private drawLoadingRing(ctx: CanvasRenderingContext2D, network: Network, nodeId: string, pos: { x: number; y: number; }, elapsedTime: number): void {
+    const boundingBox = network.getBoundingBox(nodeId);
+    const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId);
+    const renderedDiameter = Math.max(boundingBox.right - boundingBox.left, boundingBox.bottom - boundingBox.top);
+    const configuredDiameter = typeof nodeData?.size === 'number' ? nodeData.size : renderedDiameter;
+    const borderWidth = typeof nodeData?.borderWidth === 'number' ? nodeData.borderWidth : 2;
+    const radius = Math.max((configuredDiameter / 2) + borderWidth - 1.25, (renderedDiameter / 2) - 0.75);
+    const trackWidth = Math.max(2.5, Math.min(4.5, radius * 0.11));
+    const glowWidth = trackWidth + 2;
+    const pulse = (Math.sin(elapsedTime / 320) + 1) / 2;
+    const rotation = elapsedTime * 0.0032;
+    const arcStart = rotation;
+    const arcLength = Math.PI * (0.92 + pulse * 0.35);
+    const arcEnd = arcStart + arcLength;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+    ctx.lineWidth = Math.max(1.5, trackWidth - 1.25);
+    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    const glowGradient = ctx.createConicGradient(arcStart - Math.PI * 0.18, pos.x, pos.y);
+    glowGradient.addColorStop(0, 'rgba(34, 211, 238, 0)');
+    glowGradient.addColorStop(0.18, 'rgba(34, 211, 238, 0.5)');
+    glowGradient.addColorStop(0.55, 'rgba(56, 189, 248, 0.9)');
+    glowGradient.addColorStop(0.82, 'rgba(129, 140, 248, 0.7)');
+    glowGradient.addColorStop(1, 'rgba(129, 140, 248, 0)');
+    ctx.beginPath();
+    ctx.strokeStyle = glowGradient;
+    ctx.lineWidth = glowWidth;
+    ctx.globalAlpha = 0.35 + pulse * 0.15;
+    ctx.arc(pos.x, pos.y, radius, arcStart, arcEnd);
+    ctx.stroke();
+
+    const ringGradient = ctx.createLinearGradient(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius);
+    ringGradient.addColorStop(0, '#22d3ee');
+    ringGradient.addColorStop(0.5, '#38bdf8');
+    ringGradient.addColorStop(1, '#818cf8');
+    ctx.beginPath();
+    ctx.strokeStyle = ringGradient;
+    ctx.lineWidth = trackWidth;
+    ctx.globalAlpha = 0.95;
+    ctx.arc(pos.x, pos.y, radius, arcStart, arcEnd);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.fillStyle = '#e0f2fe';
+    ctx.globalAlpha = 0.95;
+    const headX = pos.x + Math.cos(arcEnd) * radius;
+    const headY = pos.y + Math.sin(arcEnd) * radius;
+    ctx.arc(headX, headY, Math.max(1.75, trackWidth * 0.52), 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   ngOnInit(): void {
     this.startAnimationLoop();
   }
@@ -465,7 +524,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       }
     };
     const network = new Network(containerEl, data, options);
-    network.on('afterDrawing', (ctx) => {
+    network.on('beforeDrawing', (ctx) => {
       const loadingIds = this.loadingNodeIds();
       if (loadingIds.size > 0) {
         const timestamp = performance.now();
@@ -477,36 +536,15 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         for (const nodeId of loadingIds) {
           const pos = positions[nodeId];
           if (pos) {
-            const boundingBox = network.getBoundingBox(nodeId);
-            const radius = (boundingBox.right - boundingBox.left) / 2 + 5;
-            const lineWidth = 4;
-            const gradient = ctx.createConicGradient(0, pos.x, pos.y);
-            gradient.addColorStop(0, 'rgba(34, 211, 238, 0)');
-            gradient.addColorStop(0.15, 'rgba(34, 211, 238, 1)');
-            gradient.addColorStop(0.6, 'rgba(129, 140, 248, 1)');
-            gradient.addColorStop(1, 'rgba(129, 140, 248, 0)');
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = lineWidth;
-            ctx.lineCap = 'round';
-            const baseArcLength = Math.PI * 1.3;
-            const pulse = Math.sin(elapsedTime / 450) * 0.5;
-            const arcLength = baseArcLength + pulse;
-            const rotationSpeed = 0.0025;
-            const rotation = (elapsedTime * rotationSpeed);
-            ctx.save();
-            ctx.translate(pos.x, pos.y);
-            ctx.rotate(rotation);
-            ctx.translate(-pos.x, -pos.y);
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, radius, 0, arcLength);
-            ctx.stroke();
-            ctx.restore();
+            this.drawLoadingRing(ctx, network, nodeId, pos, elapsedTime);
           }
         }
       }
       else {
         this.animationStartTime = null;
       }
+    });
+    network.on('afterDrawing', (_ctx) => {
       const nodesToDraw = this.nodesWithFollows();
       if (nodesToDraw.size === 0) {
         if (this.iconOverlayNodes().length > 0) {
