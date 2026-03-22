@@ -29,6 +29,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   readonly progressSegments = Array.from({ length: 20 }, (_, index) => index);
   activeTab: 'dns' | 'shodan' | 'vuln' | 'geo' = 'dns';
+  lastPrimaryTab: 'dns' | 'shodan' | 'vuln' = 'dns';
   geoMode:   'coords' | 'ranges'      = 'coords';
   dnsForm    = { domain: '' };
   shodanForm = { ip: '' };
@@ -79,6 +80,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
     if (section && this.sectionToTab[section]) {
       this.activeTab = this.sectionToTab[section];
+      if (this.activeTab !== 'geo') {
+        this.lastPrimaryTab = this.activeTab;
+      }
     }
 
     if (!q) {
@@ -132,6 +136,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return;
     }
     this.activeTab = id;
+    if (id !== 'geo') {
+      this.lastPrimaryTab = id;
+    }
     this.clearAll();
     this.syncUrl();
   }

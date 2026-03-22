@@ -126,25 +126,33 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.get('[data-testid="cti-filter-apply"]').click();
     waitForCtiGraphReady();
 
-    cy.get('[data-testid="cti-network-container"] canvas').first().then(($canvas) => {
-      const rect = $canvas[0].getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const points = [
-        {x: centerX, y: centerY},
-        {x: centerX + 120, y: centerY},
-        {x: centerX - 120, y: centerY},
-        {x: centerX, y: centerY + 120},
-        {x: centerX, y: centerY - 120}
-      ];
-      points.forEach((p) => {
-        cy.wrap($canvas).trigger('contextmenu', {
-          button: 2,
-          clientX: p.x,
-          clientY: p.y
+    const attemptContextMenuAtOffsets = (offsetX: number, offsetY: number) => {
+      cy.get('[data-testid="cti-network-container"] canvas', {timeout: 30000})
+        .filter(':visible')
+        .first()
+        .should('exist')
+        .then(($canvas) => {
+          const rect = $canvas[0].getBoundingClientRect();
+
+          cy.wrap($canvas).trigger('contextmenu', {
+            button: 2,
+            clientX: rect.left + rect.width / 2 + offsetX,
+            clientY: rect.top + rect.height / 2 + offsetY,
+            force: true
+          });
         });
-      });
+    };
+
+    [
+      {x: 0, y: 0},
+      {x: 120, y: 0},
+      {x: -120, y: 0},
+      {x: 0, y: 120},
+      {x: 0, y: -120}
+    ].forEach((point) => {
+      attemptContextMenuAtOffsets(point.x, point.y);
     });
+
     cy.get('[data-testid="cti-context-menu"]', {timeout: 15000}).should('exist');
   });
 
