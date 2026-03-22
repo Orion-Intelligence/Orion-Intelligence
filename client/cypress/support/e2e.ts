@@ -22,6 +22,12 @@ Cypress.on("window:before:load", (win) => {
         scroll-behavior: auto !important;
         caret-color: auto !important;
       }
+
+      #dashboard-container,
+      [data-testid="dashboard-container"],
+      [data-testid="dashboard-body"] {
+        overflow-x: hidden !important;
+      }
     `;
     doc.head.appendChild(style);
 });

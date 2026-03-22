@@ -6,7 +6,7 @@
     "ng": "ng",
     "build": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
     "production": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
-    "test": "node scripts/run-cypress.js",
+    "test": "cypress",
     "lint": "npx eslint src/app --ext .ts,.html --max-warnings=1000",
     "lint:fix": "npx eslint src/app --ext .ts,.html --fix",
     "lint:watch": "npx eslint src/app --ext .ts,.html --watch",
