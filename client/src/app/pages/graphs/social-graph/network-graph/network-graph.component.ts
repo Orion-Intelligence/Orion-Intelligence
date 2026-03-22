@@ -23,6 +23,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   private animationStartTime: number | null = null;
   private readonly minZoomScale = 0.35;
   private minZoomLockPosition: Position | null = null;
+
   protected readonly isCypressEnvironment = typeof window !== 'undefined' && !!(window as any).Cypress;
 
   data = input.required<NetworkData>();
