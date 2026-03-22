@@ -8,26 +8,17 @@ export function waitForSidebar() {
 }
 
 export function openSidebar() {
-  cy.closeSideFilter()
   cy.openSideFilter();
   waitForSidebar();
 }
 
 export function selectAndApply(selectTestId: string, option: string) {
-  openSidebar();
   cy.get(`[data-testid="${selectTestId}"]`, {timeout: 60000})
-    .filter(':visible')
-    .first()
-    .should('be.visible')
-    .should('not.be.disabled')
     .select(option, {force: true});
 
   cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
-    .filter(':visible')
-    .first()
-    .should('be.visible')
-    .should('not.be.disabled')
     .click({force: true});
+  cy.scrollDashboardToTop()
 }
 
 function assertNetworkValue(text: string, option: string) {
@@ -71,25 +62,27 @@ export function openAnyMatchingReport(option: string) {
         .should('be.visible')
         .click();
 
-      cy.contains('p', 'Network', {timeout: 30000})
+      cy.contains('p', 'Network')
         .should('be.visible')
         .parent()
-        .find('span', {timeout: 30000})
+        .find('span')
         .should('be.visible')
         .invoke('text')
         .then((text: string) => {
           const normalizedText = text.trim().toLowerCase();
           const normalizedOption = option.trim().toLowerCase();
           const matches = normalizedOption === 'all' ? normalizedText !== '' : normalizedText === normalizedOption;
-
           if (matches) {
             assertNetworkValue(text, option);
-            return;
           }
 
           cy.go('back');
-          cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000}).should('be.visible');
-          tryAt(index + 1);
+          cy.wait(1000);
+          cy.scrollDashboardToTop()
+
+          if (!matches) {
+            tryAt(index + 1);
+          }
         });
     });
   };

@@ -11,10 +11,10 @@ describe('Filter Management', () => {
   });
 
   it('applies all filters, tools, and auto-apply options in General Intelligence', () => {
-    cy.get('[data-testid="sidebar-group-strategic"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="sidebar-group-strategic"]').should('be.visible').scrollIntoView().click();
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="dashboard-general-input"]', {timeout: 30000}).should('be.visible').click();
-    cy.get('[data-testid="dashboard-advance-toggle"]', {timeout: 30000}).should('exist').then(($toggle) => {
+    cy.get('[data-testid="dashboard-general-input"]').should('be.visible').click();
+    cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').then(($toggle) => {
       cy.wrap($toggle).closest('label').click();
       cy.wrap($toggle).closest('label').click();
     });
@@ -46,20 +46,20 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     SAFE_SEARCH_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-safe"]', {timeout: 30000}).select(option, {force: true});
+      cy.get('[data-testid="side-filter-select-safe"]').select(option, {force: true});
       cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).should('be.visible').click();
+    cy.get('[data-testid="side-filter-date-toggle"]').should('be.visible').click();
     cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 20000}).filter(':visible').first().click();
     cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 20000}).filter(':visible').first().click();
     cy.get('[data-testid="side-filter-apply"]').click({force: true});
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]', {timeout: 30000}).select(option, {force: true});
+      cy.get('[data-testid="side-filter-select-content"]').select(option, {force: true});
       cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });

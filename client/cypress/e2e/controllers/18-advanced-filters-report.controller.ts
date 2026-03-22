@@ -76,17 +76,17 @@ export function visitDashboard18() {
 
 export function openSidebarGroup18(title: string) {
   const testId = SIDEBAR_GROUP_TESTID[title];
-  cy.get(`[data-testid="${testId}"]`, { timeout: 30000 }).scrollIntoView().should('be.visible').click();
+  cy.get(`[data-testid="${testId}"]`).scrollIntoView().should('be.visible').click();
 }
 
 export function clickSidebarSubItem18(groupTitle: string, itemTitle: string) {
   const prefix = SIDEBAR_SUBITEM_PREFIX[groupTitle];
   const testId = groupTitle === 'Feed' ? 'sidebar-subitem-feed-news' : `sidebar-subitem-${prefix}-${itemTitle.toLowerCase()}`;
-  cy.get(`[data-testid="${testId}"]`, { timeout: 30000 }).scrollIntoView().should('be.visible').click();
+  cy.get(`[data-testid="${testId}"]`).scrollIntoView().should('be.visible').click();
 }
 
 export function openAdvancedFiltersPanel18() {
-  cy.get('input[data-testid="dashboard-general-input"][name="q"]', { timeout: 30000 }).first().click();
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().click();
 }
 
 export function clearAdvancedFilters18() {
@@ -113,7 +113,7 @@ export function submitSearchByEnter18() {
 
 
 export function guardAgainstEmptyResults18() {
-  cy.get('body', { timeout: 30000 }).then(($body) => {
+  cy.get('body').then(($body) => {
     if ($body.find('.empty-result-card').length > 0) {
       throw new Error('DATA NOT FOUND: The search returned no documents for these filter values.');
     }
@@ -123,9 +123,9 @@ export function guardAgainstEmptyResults18() {
 export function openReportDetail18(sectionTitle: string) {
   guardAgainstEmptyResults18();
   if (sectionTitle === 'Defacement') {
-    cy.get('tbody tr.cursor-pointer', { timeout: 30000 }).first().click();
+    cy.get('tbody tr.cursor-pointer').first().click();
   } else {
-    cy.get('[data-testid="open-report"]', { timeout: 30000 }).first().click();
+    cy.get('[data-testid="open-report"]').first().click();
   }
 }
 
@@ -195,7 +195,7 @@ export function runSectionFilters18(
 
   submitSearchByEnter18();
 
-  cy.get('app-loading-form', { timeout: 30000 }).should('not.exist');
+  cy.get('app-loading-form').should('not.exist');
 
   openReportDetail18(sectionTitle);
 

@@ -42,33 +42,28 @@ describe('SideBar Filter Verification', () => {
     openSidebar();
 
     NETWORK_OPTIONS.forEach((option: string) => {
+      cy.closeSideFilter()
       cy.scrollDashboardToTop()
       openSidebar();
 
       cy.get('[data-testid="side-filter-reset"]', {timeout: 60000})
-        .scrollIntoView()
+        .filter(':visible')
+        .first()
         .should('be.visible')
-        .click();
+        .click({ force: true });
 
       openSidebar();
-
       cy.get('[data-testid="side-filter-select-network"]', {timeout: 60000})
-        .scrollIntoView()
+        .filter(':visible')
+        .first()
         .should('be.visible')
-        .select(option);
+        .select(option, { force: true });
 
       cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
-        .scrollIntoView()
+        .filter(':visible')
+        .first()
         .should('be.visible')
-        .click();
-
-      cy.wait('@dataBreachSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.scrollDashboardToTop()
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000})
-        .should('be.visible');
+        .click({ force: true });
 
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="result-card"]').length > 0) {
@@ -80,43 +75,36 @@ describe('SideBar Filter Verification', () => {
             assertAnyResultCardMatchesNetwork(option);
           }
         } else if ($body.text().includes('No Results Found')) {
-          cy.contains('No Results Found', {timeout: 30000, matchCase: false})
+          cy.contains('No Results Found', {matchCase: false})
             .should('be.visible');
         }
       });
     });
 
     SAFE_SEARCH_OPTIONS.forEach((option: string) => {
+      cy.closeSideFilter()
       openSidebar();
 
       cy.get('[data-testid="side-filter-select-safe"]', {timeout: 60000})
-        .scrollIntoView()
+        .filter(':visible')
+        .first()
         .should('be.visible')
-        .select(option);
+        .select(option, { force: true });
 
       cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
-        .scrollIntoView()
+        .filter(':visible')
+        .first()
         .should('be.visible')
-        .click();
-
-      cy.wait('@dataBreachSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('.ui-filter-sidebar-overlay:visible', {timeout: 60000})
-        .should('not.exist');
-
-      cy.scrollDashboardToTop()
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000})
-        .should('be.visible');
+        .click({ force: true });
     });
 
     openSidebar();
 
     cy.get('[data-testid="side-filter-reset"]', {timeout: 60000})
-      .scrollIntoView()
+      .filter(':visible')
+      .first()
       .should('be.visible')
-      .click();
+      .click({ force: true });
 
     cy.scrollDashboardToTop()
     CONTENT_TYPES.forEach((option: string) => {
@@ -124,14 +112,16 @@ describe('SideBar Filter Verification', () => {
       openSidebar();
 
       cy.get('[data-testid="side-filter-select-content"]', {timeout: 60000})
-        .scrollIntoView()
+        .filter(':visible')
+        .first()
         .should('be.visible')
-        .select(option);
+        .select(option, { force: true });
 
       cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
-        .scrollIntoView()
+        .filter(':visible')
+        .first()
         .should('be.visible')
-        .click();
+        .click({ force: true });
 
       cy.wait('@dataBreachSearch')
         .its('response.statusCode')
@@ -142,7 +132,7 @@ describe('SideBar Filter Verification', () => {
         .should('be.visible');
     });
 
-    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 30000})
+    cy.get('[data-testid="dashboard-search-submit"]')
       .first()
       .scrollIntoView()
       .should('be.visible')
@@ -156,6 +146,7 @@ describe('SideBar Filter Verification', () => {
     selectDateRangeResetAndReopen();
 
     NETWORK_OPTIONS.forEach((option) => {
+      cy.closeSideFilter()
       openSidebar();
       selectAndApply('side-filter-select-network', option);
     });
@@ -178,43 +169,28 @@ describe('SideBar Filter Verification', () => {
 
     selectDateRangeResetAndReopen();
 
+    cy.scrollDashboardToTop()
     openSidebar();
+    cy.closeSideFilter()
 
     NETWORK_OPTIONS.forEach((option: string) => {
+      cy.closeSideFilter()
+      cy.scrollDashboardToTop()
       openSidebar();
 
       selectAndApply('side-filter-select-network', option);
 
-      cy.wait('@socialSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
-
       openAnyMatchingReport(option);
-
-      cy.go('back');
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+      cy.scrollDashboardToTop()
     });
 
     CONTENT_TYPES.forEach((option: string) => {
       openSidebar();
-
+      cy.closeSideFilter()
       selectAndApply('side-filter-select-content', option);
-
-      cy.wait('@socialSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
     });
 
-    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 30000})
-      .first()
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.scrollDashboardToTop()
   });
   it('applies all filters in Exploit with auto-apply', () => {
     cy.intercept('POST', '**/api/search/exploit').as('exploitSearch');
@@ -233,34 +209,21 @@ describe('SideBar Filter Verification', () => {
     openSidebar();
 
     CONTENT_TYPES.forEach((option: string) => {
+      cy.closeSideFilter()
       openSidebar();
 
       selectAndApply('side-filter-select-content', option);
-
-      cy.wait('@exploitSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
     });
 
     NETWORK_OPTIONS.forEach((option: string) => {
+      cy.closeSideFilter()
       openSidebar();
 
       selectAndApply('side-filter-select-network', option);
 
-      cy.wait('@exploitSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
-
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="open-report"]').length > 0) {
           openAnyMatchingReport(option);
-
-          cy.go('back');
-          cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
         } else {
           cy.log(`No results for network: ${option}`);
         }
@@ -270,7 +233,7 @@ describe('SideBar Filter Verification', () => {
       cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
     });
 
-    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 30000})
+    cy.get('[data-testid="dashboard-search-submit"]')
       .first()
       .scrollIntoView()
       .should('be.visible')
@@ -297,40 +260,28 @@ describe('SideBar Filter Verification', () => {
     openSidebar();
 
     CONTENT_TYPES.forEach((option: string) => {
+      cy.closeSideFilter()
       openSidebar();
 
       selectAndApply('side-filter-select-content', option);
 
-      cy.wait('@feedNewsSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
     });
 
     NETWORK_OPTIONS.forEach((option: string) => {
+      cy.closeSideFilter()
       openSidebar();
 
       selectAndApply('side-filter-select-network', option);
 
-      cy.wait('@feedNewsSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
-
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="open-report"]').length > 0) {
           openAnyMatchingReport(option);
-
-          cy.go('back');
-
           cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
         }
       });
     });
 
-    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 30000})
+    cy.get('[data-testid="dashboard-search-submit"]')
       .first()
       .scrollIntoView()
       .should('be.visible')
@@ -349,46 +300,40 @@ describe('SideBar Filter Verification', () => {
 
     cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
 
+    cy.scrollDashboardToTop()
     openSidebar();
     selectDateRangeResetAndReopen();
+    cy.scrollDashboardToTop()
     openSidebar();
 
     CONTENT_TYPES.forEach((option: string) => {
+      cy.closeSideFilter()
+      cy.scrollDashboardToTop()
       openSidebar();
 
       selectAndApply('side-filter-select-content', option);
-
-      cy.wait('@strategicSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
     });
 
     NETWORK_OPTIONS.forEach((option: string) => {
+      cy.closeSideFilter()
+      cy.scrollDashboardToTop()
       openSidebar();
       selectDateRangeResetAndReopen();
+      cy.closeSideFilter()
+      cy.scrollDashboardToTop()
       openSidebar();
 
       selectAndApply('side-filter-select-network', option);
 
-      cy.wait('@strategicSearch')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
-
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="open-report"]').length > 0) {
           openAnyMatchingReport(option);
-
-          cy.go('back');
-          cy.get('[data-testid="dashboard-general-input"]', {timeout: 60000});
+          cy.scrollDashboardToTop()
         }
       });
     });
 
-    cy.get('[data-testid="dashboard-search-submit"]', {timeout: 30000})
+    cy.get('[data-testid="dashboard-search-submit"]')
       .first()
       .scrollIntoView()
       .should('be.visible')

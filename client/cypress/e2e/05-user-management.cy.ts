@@ -26,10 +26,10 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.loginAsAdmin();
     cy.intercept('POST', '**/api/users').as('usersApi');
     cy.visit('/dashboard/profile/homepage');
-    cy.get('[data-testid="sidebar-group-profile"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-    cy.get('[data-testid="sidebar-subitem-profile-users"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-    cy.url({timeout: 30000}).should('include', '/dashboard/profile/users');
-    cy.wait('@usersApi', {timeout: 30000});
+    cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="sidebar-subitem-profile-users"]').should('be.visible').scrollIntoView().click();
+    cy.url().should('include', '/dashboard/profile/users');
+    cy.wait('@usersApi');
 
     CREATE_USERS.forEach((u) => addUser(u));
     cy.logout();
@@ -47,11 +47,11 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     loginAsUser(testUsers.testing2.username, testUsers.testing2.password);
     cy.intercept('POST', '**/api/update/current/user').as('updateCurrentUser');
     cy.visit('/dashboard/profile/account');
-    cy.get('[data-testid="account-settings-form"]', {timeout: 30000}).should('be.visible');
-    cy.get('[data-testid="account-settings-twofa-toggle"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    cy.wait('@updateCurrentUser', {timeout: 30000});
-    cy.get('[data-testid="account-settings-theme-toggle"]', {timeout: 30000}).scrollIntoView().should('be.visible').click();
-    cy.wait('@updateCurrentUser', {timeout: 30000});
+    cy.get('[data-testid="account-settings-form"]').should('be.visible');
+    cy.get('[data-testid="account-settings-twofa-toggle"]').scrollIntoView().should('be.visible').click();
+    cy.wait('@updateCurrentUser');
+    cy.get('[data-testid="account-settings-theme-toggle"]').scrollIntoView().should('be.visible').click();
+    cy.wait('@updateCurrentUser');
     cy.logout();
   });
 
@@ -70,7 +70,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
       openSidebarGroup('Stealer logs');
       openSidebarSubItem('stealerlogs', 'iocs');
     });
-    cy.url({timeout: 30000}).should('match', /\/($|homepage)/);
+    cy.url().should('match', /\/($|homepage)/);
     cy.logout();
   });
 
@@ -87,9 +87,9 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     }).as('trialSession');
 
     loginAsUser(testUsers.testing1.username, testUsers.testing1.password);
-    cy.wait('@trialSession', {timeout: 30000});
-    cy.get('[data-testid="trial-subscription-banner"]', {timeout: 30000}).should('be.visible');
-    cy.contains('[data-testid="trial-subscription-banner"]', 'Your subscription is about to expire in 10 days.', {timeout: 30000}).should('be.visible');
+    cy.wait('@trialSession');
+    cy.get('[data-testid="trial-subscription-banner"]').should('be.visible');
+    cy.contains('[data-testid="trial-subscription-banner"]', 'Your subscription is about to expire in 10 days.').should('be.visible');
     cy.logout();
   });
 });

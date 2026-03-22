@@ -18,8 +18,8 @@ function getSidebarGroupTestId(title: string): string {
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
-  cy.get(`[data-testid="${groupTestId}"]`, {timeout: 30000}).should('be.visible').click();
-  cy.get(`[data-testid="${groupTestId}"]`, {timeout: 30000}).closest('li').find('> ul', {timeout: 30000}).should(($ul) => {
+  cy.get(`[data-testid="${groupTestId}"]`).should('be.visible').click();
+  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   });
 }
@@ -27,20 +27,20 @@ export function openSidebarGroup(title: string) {
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
   const groupTestId = getSidebarGroupTestId(groupTitle);
-  cy.get(`[data-testid="${groupTestId}"]`, {timeout: 30000}).closest('li').find('> ul', {timeout: 30000}).should(($ul) => {
+  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   }).find(`[data-testid^="sidebar-subitem-${routePrefix}-"]`).contains('div', new RegExp(`^\\s*${itemTitle}\\s*$`)).click();
 }
 
 export function waitForSearchReady() {
-  cy.get('app-loading-form', {timeout: 30000}).should('not.exist');
+  cy.get('app-loading-form').should('not.exist');
 }
 
 export function typeDashboardSearch(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
   cy.scrollDashboardToTop();
-  cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().should('be.visible').and('be.enabled').then(($input) => {
+  cy.get('input[data-cy="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').then(($input) => {
     const currentValue = String($input.val() ?? '').trim();
     if (currentValue.length > 0) {
       cy.wrap($input).clear();
@@ -57,7 +57,7 @@ export function typeExploitSearch(value: string) {
 }
 
 export function clickOpenReport() {
-  cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').filter(':has(img[src*="redirect.svg"])').first().should('be.visible').click();
+  cy.get('[data-testid="open-report"]').filter(':visible').filter(':has(img[src*="redirect.svg"])').first().should('be.visible').click();
 }
 
 export function exerciseJsonViewerOnce() {
@@ -69,34 +69,34 @@ export function exerciseJsonViewerOnce() {
     }
   });
 
-  cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').and('be.visible');
-  cy.contains('app-json-api-viewer span', 'Json Response', {timeout: 30000}).should('be.visible').click();
-  cy.get('app-json-api-viewer app-json-viewer', {timeout: 30000}).should('exist');
+  cy.get('app-json-api-viewer').should('exist').and('be.visible');
+  cy.contains('app-json-api-viewer span', 'Json Response').should('be.visible').click();
+  cy.get('app-json-api-viewer app-json-viewer').should('exist');
 
   const expandableRowSelector = 'app-json-api-viewer app-json-viewer li:has(> div.group + div.ml-5)';
 
-  cy.get(expandableRowSelector, {timeout: 30000}).first().scrollIntoView().should('be.visible').find('> div.ml-5').should('exist');
-  cy.get(expandableRowSelector, {timeout: 30000}).first().find('> div.group .text-\\[14px\\]').invoke('text').then((keyText) => {
+  cy.get(expandableRowSelector).first().scrollIntoView().should('be.visible').find('> div.ml-5').should('exist');
+  cy.get(expandableRowSelector).first().find('> div.group .text-\\[14px\\]').invoke('text').then((keyText) => {
     const normalizedKey = keyText.trim();
 
-    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey)
       .closest('li')
       .as('jsonExpandableRow');
 
     cy.get('@jsonExpandableRow').scrollIntoView().find('> div.group').should('be.visible').click();
-    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey)
       .closest('li')
       .find('> div.ml-5')
       .should('not.exist');
 
-    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey)
       .closest('li')
       .scrollIntoView()
       .find('> div.group')
       .should('be.visible')
       .click();
 
-    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey, {timeout: 30000})
+    cy.contains('app-json-api-viewer app-json-viewer li > div.group .text-\\[14px\\]', normalizedKey)
       .closest('li')
       .find('> div.ml-5')
       .should('exist');

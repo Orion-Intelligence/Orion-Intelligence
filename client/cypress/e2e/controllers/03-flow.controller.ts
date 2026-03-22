@@ -63,16 +63,16 @@ export function getHeatmapComponent() {
 
 export function openHomepage() {
   cy.loginAsAdmin();
-  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/homepage');
-  cy.get('app-world-heatmap', {timeout: 30000}).should('be.visible');
-  cy.get('[data-testid="world-heatmap-map"] svg', {timeout: 30000}).should('exist');
-  cy.get('[data-testid="world-heatmap-map"] path.country', {timeout: 30000}).should('have.length.greaterThan', 0);
+  cy.location('pathname').should('include', '/dashboard/profile/homepage');
+  cy.get('app-world-heatmap').should('be.visible');
+  cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
+  cy.get('[data-testid="world-heatmap-map"] path.country').should('have.length.greaterThan', 0);
 }
 
 export function openCountryReportFromMap() {
-  cy.get('[data-testid="world-heatmap-map"] path.country', {timeout: 30000}).should('have.length.greaterThan', 0);
+  cy.get('[data-testid="world-heatmap-map"] path.country').should('have.length.greaterThan', 0);
 
-  cy.get('[data-testid="world-heatmap-map"] path.country.has-data', {timeout: 30000})
+  cy.get('[data-testid="world-heatmap-map"] path.country.has-data')
     .should('have.length.greaterThan', 0)
     .first()
     .scrollIntoView()
@@ -101,14 +101,14 @@ export function openCountryReportFromMap() {
 }
 
 export function waitForDirectoryRequest() {
-  cy.wait('@getDirectory', {timeout: 30000}).then((interception) => {
+  cy.wait('@getDirectory').then((interception) => {
     expect(interception.response?.statusCode).to.eq(200);
   });
 }
 
 export function assertDirectoryContentVisible() {
   cy.scrollDashboardToTop();
-  cy.get('app-directory', {timeout: 30000}).should('be.visible');
+  cy.get('app-directory').should('be.visible');
   cy.get('body').then(($body) => {
     cy.scrollDashboardToTop();
     const hasTable = $body.find('app-directory-list table tbody tr').length > 0;

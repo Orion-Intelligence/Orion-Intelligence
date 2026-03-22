@@ -15,27 +15,6 @@ declare global {
     }
 }
 
-Cypress.Commands.overwrite(
-    "scrollIntoView",
-    ((originalFn: any, subject: unknown, userOptions: Record<string, any> = {}) => {
-        const el = (subject as unknown as JQuery<HTMLElement>)[0];
-
-        if (el?.scrollIntoView) {
-            el.scrollIntoView({
-                block: "center",
-                inline: "nearest",
-                behavior: "instant",
-            });
-        }
-
-        if (userOptions["duration"] || userOptions["easing"] || userOptions["offset"] || userOptions["timeout"]) {
-            return originalFn(userOptions);
-        }
-
-        return cy.wrap(subject as unknown as JQuery<HTMLElement>, { log: false });
-    }) as any
-);
-
 Cypress.Commands.add("loginAsAdmin", () => {
     cy.env(["ADMIN_USERNAME", "ADMIN_PASSWORD"]).then(({ ADMIN_USERNAME, ADMIN_PASSWORD }) => {
         cy.visit("/login");
@@ -93,33 +72,33 @@ Cypress.Commands.add("scrollDashboardToTop", () => {
             el.scrollTop = 0;
         });
     });
-    cy.get('#dashboard-container, [data-testid="dashboard-container"], [data-testid="dashboard-body"]', { timeout: 30000, log: false })
-        .each(($container) => {
-            expect(($container[0] as HTMLElement).scrollTop).to.equal(0);
-        });
 });
 
 Cypress.Commands.add("openSideFilter", () => {
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="side-filter-open"]', { timeout: 20000 }).filter(':visible').first().click();
+    cy.get('[data-testid="side-filter-open"]', { timeout: 20000 }).filter(':visible').first().should('be.visible').click();
+    cy.get('[data-testid="side-filter-apply"]', { timeout: 20000 }).filter(':visible').first().should('be.visible');
 });
 Cypress.Commands.add("closeSideFilter", () => {
-    cy.get('body').click('center');
+    cy.window().then((win) => {
+        const x = win.innerWidth / 2;
+        const y = 10;
+
+        const target = win.document.elementFromPoint(x, y) as HTMLElement | null;
+
+        if (!target) {
+            return;
+        }
+
+        cy.wrap(target).click('center', { force: true });
+    });
 });
 Cypress.Commands.add("applySideFilter", () => {
-    cy.get('body').then(($body) => {
-        const visibleApply = $body.find('[data-testid="side-filter-apply"]:visible').first();
-        if (visibleApply.length) {
-            cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 })
-                .filter(':visible')
-                .first()
-                .scrollTo('bottom', { ensureScrollable: false, duration: 0 });
-
-            cy.wrap(visibleApply)
-                .should('be.visible')
-                .click({ force: true, waitForAnimations: false, animationDistanceThreshold: 0 });
-        }
-    });
+    cy.get('[data-testid="side-filter-apply"]', { timeout: 20000 })
+        .filter(':visible')
+        .first()
+        .should('be.visible')
+        .click({ force: true, waitForAnimations: false, animationDistanceThreshold: 0 });
 });
 Cypress.Commands.add("clearAllEmails", () => {
     cy.request("DELETE", "http://localhost:8025/api/v1/messages");

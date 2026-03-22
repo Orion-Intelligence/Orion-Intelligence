@@ -182,11 +182,11 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.visit('/dashboard/directory');
     waitForDirectoryRequest();
     cy.scrollDashboardToTop()
-    cy.get('app-directory .ui-page-title', {timeout: 30000}).should('contain.text', 'Directory');
+    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
     assertDirectoryContentVisible();
 
     cy.scrollDashboardToTop()
-    cy.get('app-directory-list tbody tr', {timeout: 30000}).then(($rows) => {
+    cy.get('app-directory-list tbody tr').then(($rows) => {
       const initialCount = $rows.length;
 
       if (initialCount > 49) {
@@ -197,7 +197,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       cy.get('#bottom', {timeout: 20000}).scrollIntoView();
       cy.wait(1000);
       cy.scrollDashboardToTop()
-      cy.get('app-directory-list tbody tr', {timeout: 30000}).its('length').should('be.greaterThan', initialCount);
+      cy.get('app-directory-list tbody tr').its('length').should('be.greaterThan', initialCount);
     });
 
     cy.get('[data-testid="pagination-next"]', {timeout: 20000}).should('exist').scrollIntoView().click();
@@ -218,7 +218,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     resetDirectoryFilters();
 
     applyDateRange(14);
-    cy.contains('No links found!', {timeout: 30000}).should('be.visible');
+    cy.contains('No links found!').should('be.visible');
 
     resetDirectoryFilters();
   });

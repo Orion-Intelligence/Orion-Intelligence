@@ -41,17 +41,17 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
 }
 
 export function exportFromModal(modalTestId: string, optionTestId: string) {
-  cy.get(`[data-testid="${modalTestId}"]`, {timeout: 30000}).should('be.visible');
+  cy.get(`[data-testid="${modalTestId}"]`).should('be.visible');
   cy.get('body').then($body => {
     if ($body.find(`[data-testid="${optionTestId}"]`).length > 0) {
       clickWhenVisible(`[data-testid="${optionTestId}"]`);
     }
     else {
-      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)')
         .scrollIntoView();
-      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)')
         .should('be.visible');
-      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)', {timeout: 30000})
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)')
         .click({waitForAnimations: false, animationDistanceThreshold: 0});
     }
   });
@@ -65,28 +65,28 @@ export function closeNotificationSidebar() {
         clickWhenVisible('[data-testid="tenant-notification-close"]');
       }
       else {
-        cy.contains('[data-testid="tenant-notification-sidebar"] button', 'Close', {timeout: 30000})
+        cy.contains('[data-testid="tenant-notification-sidebar"] button', 'Close')
           .scrollIntoView()
           .should('be.visible')
           .click({waitForAnimations: false, animationDistanceThreshold: 0});
       }
     }
   });
-  cy.get('[data-testid="tenant-notification-sidebar"]', {timeout: 30000}).should('not.exist');
+  cy.get('[data-testid="tenant-notification-sidebar"]').should('not.exist');
 }
 
 export function closeFilterSidebar() {
   cy.get('body').then($body => {
     if ($body.find('[data-testid="side-filter-close"]:visible').length > 0) {
-      cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+      cy.get('[data-testid="side-filter-close"]')
         .filter(':visible')
         .first()
         .scrollIntoView();
-      cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+      cy.get('[data-testid="side-filter-close"]')
         .filter(':visible')
         .first()
         .should('be.visible');
-      cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+      cy.get('[data-testid="side-filter-close"]')
         .filter(':visible')
         .first()
         .click({waitForAnimations: false, animationDistanceThreshold: 0});
@@ -104,7 +104,7 @@ export function openFilterSidebar() {
       clickWhenVisible('[data-testid="tenant-alert-open-sidebar"]');
     }
   });
-  cy.get('[data-testid="side-filter-close"]', {timeout: 30000})
+  cy.get('[data-testid="side-filter-close"]')
     .filter(':visible')
     .first()
     .should('be.visible');
@@ -115,7 +115,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
   scrollTenantTableToBottomLeft();
 
-  cy.get('tbody:visible tr', {timeout: 30000}).should(($rows) => {
+  cy.get('tbody:visible tr').should(($rows) => {
     expect($rows.length, 'tenant rows rendered').to.be.greaterThan(0);
     const hasNotVerified = $rows.toArray().some((row) =>
       Cypress.$(row).find('span:contains("Not Verified")').length > 0
@@ -226,65 +226,65 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
 export function openTenantsPage() {
   cy.viewport(1440, 900);
-  cy.get('[data-testid="sidebar-subitem-profile-tenant"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="sidebar-subitem-profile-tenant"]').filter(':visible').first().scrollIntoView().click();
   cy.location('pathname', {timeout: 150000}).then((path) => {
     if (!path.includes('/dashboard/profile/tenant')) {
       cy.visit('/dashboard/profile/tenant');
     }
   });
-  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
+  cy.location('pathname').should('include', '/dashboard/profile/tenant');
 }
 
 export function openAuditLogPage() {
   cy.viewport(1440, 900);
   cy.visit('/dashboard/profile/auditlog');
-  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/auditlog');
-  cy.get('app-auditlog .ui-page-title', {timeout: 30000}).should('contain.text', 'Audit Logs');
+  cy.location('pathname').should('include', '/dashboard/profile/auditlog');
+  cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
 }
 
 export function openAuditLogFilter() {
-  cy.get('app-auditlog #top', {timeout: 30000}).scrollIntoView();
-  cy.contains('button', 'Filter', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-close"]', {timeout: 30000}).filter(':visible').first().should('be.visible');
+  cy.get('app-auditlog #top').scrollIntoView();
+  cy.contains('button', 'Filter').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-close"]').filter(':visible').first().should('be.visible');
 }
 
 export function applyAuditLogDateRange(monthsBack: number) {
   openAuditLogFilter();
-  cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click();
 
   for (let i = 0; i < monthsBack; i += 1) {
-    cy.get('[data-testid="side-filter-date-prev-month"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-prev-month"]').filter(':visible').first().scrollIntoView().click();
   }
 
-  cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-apply"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
 }
 
 export function resetAuditLogFilters() {
   openAuditLogFilter();
-  cy.get('[data-testid="side-filter-reset"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-reset"]').filter(':visible').first().scrollIntoView().click();
 }
 
 export function openManageIOCs() {
-  cy.get('[data-testid="sidebar-subitem-profile-ioc"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
-  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/ioc');
+  cy.get('[data-testid="sidebar-subitem-profile-ioc"]').filter(':visible').first().scrollIntoView().click();
+  cy.location('pathname').should('include', '/dashboard/profile/ioc');
 }
 
 export function addIOCForAllTabs() {
-  cy.get('[data-testid^="tenant-ioc-tab-"]', {timeout: 30000}).then(($tabs) => {
+  cy.get('[data-testid^="tenant-ioc-tab-"]').then(($tabs) => {
     const tabs = Cypress._.take($tabs.toArray(), 5);
     tabs.forEach((tab, index) => {
       cy.wrap(tab).scrollIntoView().should('be.visible').click();
-      cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 30000}).should('be.visible').clear().type(`test-${index}`);
-      cy.get('[data-testid="tenant-ioc-add-button"]', {timeout: 30000}).should('be.visible').and('not.be.disabled').click();
+      cy.get('[data-testid="tenant-ioc-value-input"]').should('be.visible').clear().type(`test-${index}`);
+      cy.get('[data-testid="tenant-ioc-add-button"]').should('be.visible').and('not.be.disabled').click();
 
       if ((tab.textContent || '').trim() === 'Emails') {
-        cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 30000})
+        cy.get('[data-testid="tenant-ioc-value-input"]')
           .should('be.visible')
           .clear()
           .type('laverdure700@mail.com');
-        cy.get('[data-testid="tenant-ioc-add-button"]', {timeout: 30000})
+        cy.get('[data-testid="tenant-ioc-add-button"]')
           .should('be.visible')
           .and('not.be.disabled')
           .click();
@@ -292,7 +292,7 @@ export function addIOCForAllTabs() {
     });
   });
 
-  cy.get('[data-testid="sidebar-subitem-profile-homepage"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="tenant-home-scan-all"]', {timeout: 40000}).scrollIntoView().should('be.visible').and('not.be.disabled').click();
 }
 
