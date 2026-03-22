@@ -2633,6 +2633,15 @@ app-world-heatmap .country:not(.is-clickable) {
   animation: network-delete-edge-appear 160ms ease-out;
 }
 
+.network-graph-relationship-test-trigger {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border: 0;
+  border-radius: 9999px;
+  opacity: 0;
+}
+
 @keyframes network-delete-edge-appear {
   0% {
     opacity: 0;

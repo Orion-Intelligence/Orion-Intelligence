@@ -22,6 +22,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   private animationFrameId: number | null = null;
   private animationStartTime: number | null = null;
   private readonly minZoomScale = 0.35;
+  readonly isCypressEnvironment = typeof window !== 'undefined' && !!(window as any).Cypress;
   private minZoomLockPosition: Position | null = null;
 
   data = input.required<NetworkData>();
@@ -58,6 +59,12 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   });
   isManipulating = signal(false);
   iconOverlayNodes = signal<{
+        nodeId: string;
+        x: number;
+        y: number;
+        size: number;
+    }[]>([]);
+  relationshipOverlayNodes = signal<{
         nodeId: string;
         x: number;
         y: number;
@@ -578,6 +585,36 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         }
         this.iconOverlayNodes.set(overlays);
       }
+      if (this.isCypressEnvironment) {
+        const relationshipOverlays: {
+                nodeId: string;
+                x: number;
+                y: number;
+                size: number;
+            }[] = [];
+        const relationshipNodes = this.data().nodes.filter(node => node.id.toString().startsWith('relationship-node-'));
+        const scale = network.getScale();
+        for (const relationshipNode of relationshipNodes) {
+          const nodeId = relationshipNode.id.toString();
+          const nodePosition = network.getPosition(nodeId);
+          if (!nodePosition) {
+            continue;
+          }
+          const domPosition = network.canvasToDOM(nodePosition);
+          const nodeData = (network as any)?.body?.data?.nodes?.get(nodeId);
+          const baseSize = typeof nodeData?.size === 'number' ? nodeData.size : 28;
+          relationshipOverlays.push({
+            nodeId,
+            x: domPosition.x,
+            y: domPosition.y,
+            size: Math.max(18, Math.round(baseSize * scale))
+          });
+        }
+        this.relationshipOverlayNodes.set(relationshipOverlays);
+      }
+      else if (this.relationshipOverlayNodes().length > 0) {
+        this.relationshipOverlayNodes.set([]);
+      }
       const selectedEdgeId = this.selectedEdgeId();
       if (selectedEdgeId) {
         this.updateDeleteButtonPosition(network, selectedEdgeId);
@@ -733,6 +770,11 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   onFollowersShortcutClick(event: MouseEvent, nodeId: string) {
     event.stopPropagation();
     this.followersShortcutClicked.emit(nodeId);
+  }
+
+  onRelationshipShortcutClick(event: MouseEvent, nodeId: string) {
+    event.stopPropagation();
+    this.relationshipNodeClicked.emit(nodeId);
   }
 
   toPositionValue(rawValue: number): number {
