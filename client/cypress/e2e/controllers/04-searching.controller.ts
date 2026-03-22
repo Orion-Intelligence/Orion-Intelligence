@@ -18,7 +18,7 @@ function getSidebarGroupTestId(title: string): string {
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
-  cy.get(`[data-testid="${groupTestId}"]`, {timeout: 30000}).scrollIntoView().should('be.visible').click();
+  cy.get(`[data-testid="${groupTestId}"]`, {timeout: 30000}).should('be.visible').click();
   cy.get(`[data-testid="${groupTestId}"]`, {timeout: 30000}).closest('li').find('> ul', {timeout: 30000}).should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   });
@@ -29,7 +29,7 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const groupTestId = getSidebarGroupTestId(groupTitle);
   cy.get(`[data-testid="${groupTestId}"]`, {timeout: 30000}).closest('li').find('> ul', {timeout: 30000}).should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  }).find(`[data-testid^="sidebar-subitem-${routePrefix}-"]`).contains('div', new RegExp(`^\\s*${itemTitle}\\s*$`)).scrollIntoView().click();
+  }).find(`[data-testid^="sidebar-subitem-${routePrefix}-"]`).contains('div', new RegExp(`^\\s*${itemTitle}\\s*$`)).click();
 }
 
 export function waitForSearchReady() {
@@ -57,7 +57,7 @@ export function typeExploitSearch(value: string) {
 }
 
 export function clickOpenReport() {
-  cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
+  cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').filter(':has(img[src*="redirect.svg"])').first().should('be.visible').click();
 }
 
 export function exerciseJsonViewerOnce() {

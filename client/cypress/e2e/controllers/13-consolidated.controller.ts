@@ -184,13 +184,11 @@ export function applyDateRangeFilter(monthLabel: string, startDay: number, endDa
 }
 
 export function clearSideFilters() {
-  cy.wait(1000)
   openIocFilterPanel()
   cy.get('[data-testid="side-filter-reset"]', {timeout: 30000}).filter(':visible').first().scrollIntoView().click();
   cy.get('body', {timeout: 30000}).then(($body) => {
     const $apply = $body.find('[data-testid="side-filter-apply"]:visible').first();
     if ($apply.length > 0) {
-      cy.wait(1000)
       openIocFilterPanel()
       cy.wrap($apply).scrollIntoView().click();
     }

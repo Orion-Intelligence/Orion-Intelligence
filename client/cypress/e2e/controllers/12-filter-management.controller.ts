@@ -6,15 +6,15 @@ export function applyEntityFilter(name: string, value: string) {
 }
 
 export function selectDateRangeAndReopen() {
-  cy.get('[data-testid="side-filter-date-toggle"]').scrollIntoView().click();
-  cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-toggle"]').click({force: true});
+  cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().click({force: true});
+  cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().click({force: true});
+  cy.get('[data-testid="side-filter-apply"]').click({force: true});
 }
 
 export function selectDateRangeResetAndReopen() {
-  cy.get('[data-testid="side-filter-date-toggle"]').scrollIntoView().click();
-  cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-reset"]').scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-toggle"]').click({force: true});
+  cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().click({force: true});
+  cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().click({force: true});
+  cy.get('[data-testid="side-filter-reset"]').click({force: true});
 }

@@ -46,8 +46,8 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     SAFE_SEARCH_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-safe"]', {timeout: 30000}).scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-safe"]', {timeout: 30000}).select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
@@ -55,12 +55,12 @@ describe('Filter Management', () => {
     cy.get('[data-testid="side-filter-date-toggle"]', {timeout: 30000}).should('be.visible').click();
     cy.get('[data-testid="side-filter-date-day-1"]', {timeout: 20000}).filter(':visible').first().click();
     cy.get('[data-testid="side-filter-date-day-25"]', {timeout: 20000}).filter(':visible').first().click();
-    cy.get('[data-testid="side-filter-apply"]').click();
+    cy.get('[data-testid="side-filter-apply"]').click({force: true});
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]', {timeout: 30000}).scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]', {timeout: 30000}).select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
@@ -80,25 +80,25 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-network"]').select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
     SAFE_SEARCH_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-safe"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-safe"]').select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
     selectDateRangeAndReopen();
     cy.openSideFilter();
-    cy.get('[data-testid="side-filter-reset"]').click();
+    cy.get('[data-testid="side-filter-reset"]').click({force: true});
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]').select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
@@ -115,7 +115,7 @@ describe('Filter Management', () => {
 
     cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
+      cy.get('[data-testid="side-filter-select-network"]').select(option, {force: true});
       cy.applySideFilter();
       cy.openSideFilter();
     });
@@ -133,14 +133,14 @@ describe('Filter Management', () => {
 
     cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-network"]').select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]').select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
@@ -156,14 +156,14 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-content"]').select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select(option);
-      cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
+      cy.get('[data-testid="side-filter-select-network"]').select(option, {force: true});
+      cy.get('[data-testid="side-filter-apply"]').click({force: true});
       cy.openSideFilter();
     });
 

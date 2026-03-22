@@ -98,6 +98,7 @@ Cypress.Commands.add("scrollDashboardToTop", () => {
             expect(($container[0] as HTMLElement).scrollTop).to.equal(0);
         });
 });
+
 Cypress.Commands.add("openSideFilter", () => {
     cy.scrollDashboardToTop();
     cy.get('[data-testid="side-filter-open"]', { timeout: 20000 }).filter(':visible').first().click();
