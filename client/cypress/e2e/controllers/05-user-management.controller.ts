@@ -141,8 +141,8 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
   cy.get('input#email').clear().type('invalid-email').blur();
   cy.contains('span', 'Invalid').should('exist');
 
-  cy.get('input[type="radio"][name="subscription"][value="monthly"]').check({force: true}).should('be.checked');
-  cy.get('input[type="radio"][name="subscription"][value="annual"]').check({force: true}).should('be.checked');
+  cy.get('input[type="radio"][name="subscription"][value="monthly"]').check().should('be.checked');
+  cy.get('input[type="radio"][name="subscription"][value="annual"]').check().should('be.checked');
 
   cy.get('input#name').should('be.visible').clear().type(testData.stealer_upgrade_name);
   cy.get('input#phone').should('be.visible').clear().type('03001234567');

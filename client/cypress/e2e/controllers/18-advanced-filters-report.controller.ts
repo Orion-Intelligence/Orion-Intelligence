@@ -150,7 +150,7 @@ export function assertValuesInMetadata18(category: FilterCategoryKey, values: st
       if (primaryTabLabel) {
         getMetadataTabs().each(($btn) => {
           if ($btn.text().trim().toLowerCase() === primaryTabLabel.toLowerCase()) {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
           }
         });
       }
@@ -158,7 +158,7 @@ export function assertValuesInMetadata18(category: FilterCategoryKey, values: st
       cy.get('body').then(($newBody) => {
         if (!$newBody.text().toLowerCase().includes(targetVal)) {
           getMetadataTabs().each(($btn) => {
-            cy.wrap($btn).click({ force: true });
+            cy.wrap($btn).click();
           });
         }
       });

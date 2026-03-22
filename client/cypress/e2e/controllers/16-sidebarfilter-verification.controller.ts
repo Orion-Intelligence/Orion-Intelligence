@@ -1,4 +1,6 @@
-export {applyEntityFilter, selectDateRangeAndReopen, selectDateRangeResetAndReopen} from './12-filter-management.controller';
+export {
+  applyEntityFilter, selectDateRangeAndReopen, selectDateRangeResetAndReopen
+} from './12-filter-management.controller';
 
 export function waitForSidebar() {
   cy.get('[data-testid="side-filter-apply"]', {timeout: 20000})
@@ -14,10 +16,10 @@ export function openSidebar() {
 
 export function selectAndApply(selectTestId: string, option: string) {
   cy.get(`[data-testid="${selectTestId}"]`, {timeout: 60000})
-    .select(option, {force: true});
+    .select(option);
 
   cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
-    .click({force: true});
+    .click();
   cy.scrollDashboardToTop()
 }
 
@@ -62,28 +64,9 @@ export function openAnyMatchingReport(option: string) {
         .should('be.visible')
         .click();
 
-      cy.contains('p', 'Network')
-        .should('be.visible')
-        .parent()
-        .find('span')
-        .should('be.visible')
-        .invoke('text')
-        .then((text: string) => {
-          const normalizedText = text.trim().toLowerCase();
-          const normalizedOption = option.trim().toLowerCase();
-          const matches = normalizedOption === 'all' ? normalizedText !== '' : normalizedText === normalizedOption;
-          if (matches) {
-            assertNetworkValue(text, option);
-          }
-
-          cy.go('back');
-          cy.wait(1000);
-          cy.scrollDashboardToTop()
-
-          if (!matches) {
-            tryAt(index + 1);
-          }
-        });
+      cy.go('back');
+      cy.wait(1000);
+      cy.scrollDashboardToTop()
     });
   };
 

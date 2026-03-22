@@ -137,8 +137,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
           cy.wrap($canvas).trigger('contextmenu', {
             button: 2,
             clientX: rect.left + rect.width / 2 + offsetX,
-            clientY: rect.top + rect.height / 2 + offsetY,
-            force: true
+            clientY: rect.top + rect.height / 2 + offsetY
           });
         });
     };
@@ -233,7 +232,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
       .invoke('css', 'width', '1px')
       .invoke('css', 'height', '1px')
       .invoke('css', 'opacity', '1')
-      .selectFile('cypress/fixtures/profile.png', {force: true});
+      .selectFile('cypress/fixtures/profile.png');
     cy.wait('@imageRecon');
     cy.get('[data-testid="social-manage-profiles-modal"]', {timeout: 90000}).should('be.visible');
     cy.get('[data-testid="social-manage-profiles-filter"]').should('be.visible').type('twit');
@@ -257,23 +256,23 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
         .scrollIntoView()
         .should('be.visible')
         .and('not.be.disabled')
-        .click({force: true});
+        .click();
       cy.get('[data-testid="social-manage-profiles-update-graph"]')
         .scrollIntoView()
         .should('be.visible')
-        .click({force: true});
+        .click();
     });
     cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
 
-    cy.get('[data-cy="social-graph-search-trigger"]').click({force: true});
+    cy.get('[data-cy="social-graph-search-trigger"]').click();
     cy.get('[data-testid="social-graph-search-input"]').should('be.visible').type('image');
-    cy.get('[data-testid="social-graph-search-clear"]').click({force: true});
+    cy.get('[data-testid="social-graph-search-clear"]').click();
     cy.get('[data-testid="social-graph-search-input"]').should('have.value', '');
     cy.get('body').then(($body) => {
       const editToggle = $body.find('[data-cy="graph-toolbar-edit-toggle"]:visible').first();
       if (editToggle.length) {
-        cy.wrap(editToggle).click({force: true});
-        cy.wrap(editToggle).click({force: true});
+        cy.wrap(editToggle).click();
+        cy.wrap(editToggle).click();
       }
     });
 
@@ -282,8 +281,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
       cy.wrap($canvas).trigger('contextmenu', {
         button: 2,
         clientX: rect.left + rect.width / 2,
-        clientY: rect.top + rect.height / 2,
-        force: true
+        clientY: rect.top + rect.height / 2
       });
     });
     cy.get('body').then(($body) => {
@@ -292,7 +290,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
         return;
       }
       cy.wrap(contextMenu).should('be.visible');
-      cy.contains('[data-testid="social-context-menu-panel"] button', 'Set Alias').click({force: true});
+      cy.contains('[data-testid="social-context-menu-panel"] button', 'Set Alias').click();
       cy.get('[data-testid="social-alias-modal"]', {timeout: 15000}).should('be.visible');
       cy.get('[data-testid="social-alias-input"]').clear().type('Alias User');
       cy.get('[data-testid="social-alias-save"]').click();
@@ -305,7 +303,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
       const text = $el.text();
       expect(text).to.match(/Alias User|image_scan_user/);
     });
-    cy.get('[data-testid="social-list-platform-row"]').first().click({force: true});
+    cy.get('[data-testid="social-list-platform-row"]').first().click();
     cy.get('[data-testid="social-list-platform-visit-profile"]')
       .should('have.attr', 'href')
       .and('match', /^https?:\/\//);
@@ -339,7 +337,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
       }
     });
     cy.get('[data-testid="social-summary-popup"]').within(() => {
-      cy.get('button[title="Re-scan profile"]').click({force: true});
+      cy.get('button[title="Re-scan profile"]').click();
     });
     cy.wait('@socialRecon');
     cy.get('[data-testid="social-summary-popup"]').should('not.exist');
@@ -358,16 +356,16 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.get('[data-testid="social-follower-scan-popup"]').within(() => {
       cy.contains('button', 'Fetch Followers').then(($button) => {
         if ($button.length) {
-          cy.wrap($button).click({force: true});
+          cy.wrap($button).click();
         }
       });
     });
     cy.wait('@socialFollowers');
     cy.get('[data-testid="social-follower-scan-popup"]').within(() => {
       cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).should('have.length.greaterThan', 1);
-      cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).eq(0).click({force: true});
-      cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).eq(1).click({force: true});
-      cy.get('[data-testid="social-follower-scan-confirm"]').should('not.be.disabled').click({force: true});
+      cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).eq(0).click();
+      cy.get('button').filter((_, el) => (el.textContent || '').includes('@')).eq(1).click();
+      cy.get('[data-testid="social-follower-scan-confirm"]').should('not.be.disabled').click();
     });
     cy.wait('@socialRecon');
     cy.wait('@socialRecon');
@@ -378,11 +376,11 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
         .scrollIntoView()
         .should('be.visible')
         .and('not.be.disabled')
-        .click({force: true});
+        .click();
       cy.get('[data-testid="social-manage-profiles-update-graph"]')
         .scrollIntoView()
         .should('be.visible')
-        .click({force: true});
+        .click();
     });
     cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
     cy.contains('.home-menu-created-item', 'ally_two', {timeout: 90000}).should('contain.text', 'Completed').click();
@@ -392,11 +390,11 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
         .scrollIntoView()
         .should('be.visible')
         .and('not.be.disabled')
-        .click({force: true});
+        .click();
       cy.get('[data-testid="social-manage-profiles-update-graph"]')
         .scrollIntoView()
         .should('be.visible')
-        .click({force: true});
+        .click();
     });
     cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
 
@@ -404,12 +402,12 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     cy.get('[data-testid="social-relationship-node-trigger"]')
       .should('have.length.greaterThan', 0)
       .first()
-      .click({force: true});
+      .click();
     cy.get('[data-testid="social-relationship-popup"]').should('be.visible');
     cy.get('[data-testid="social-relationship-open-account"]').first()
       .should('have.attr', 'href')
       .and('match', /^https?:\/\//);
-    cy.get('[data-testid="social-relationship-close"]').click({force: true});
+    cy.get('[data-testid="social-relationship-close"]').click();
     cy.get('[data-testid="social-relationship-popup"]').should('not.exist');
   });
 });

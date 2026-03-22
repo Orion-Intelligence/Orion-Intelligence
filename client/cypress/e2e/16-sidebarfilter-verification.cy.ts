@@ -50,20 +50,20 @@ describe('SideBar Filter Verification', () => {
         .filter(':visible')
         .first()
         .should('be.visible')
-        .click({ force: true });
+        .click();
 
       openSidebar();
       cy.get('[data-testid="side-filter-select-network"]', {timeout: 60000})
         .filter(':visible')
         .first()
         .should('be.visible')
-        .select(option, { force: true });
+        .select(option);
 
       cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
         .filter(':visible')
         .first()
         .should('be.visible')
-        .click({ force: true });
+        .click();
 
       cy.get('body').then(($body) => {
         if ($body.find('[data-testid="result-card"]').length > 0) {
@@ -89,13 +89,13 @@ describe('SideBar Filter Verification', () => {
         .filter(':visible')
         .first()
         .should('be.visible')
-        .select(option, { force: true });
+        .select(option);
 
       cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
         .filter(':visible')
         .first()
         .should('be.visible')
-        .click({ force: true });
+        .click();
     });
 
     openSidebar();
@@ -104,7 +104,7 @@ describe('SideBar Filter Verification', () => {
       .filter(':visible')
       .first()
       .should('be.visible')
-      .click({ force: true });
+      .click();
 
     cy.scrollDashboardToTop()
     CONTENT_TYPES.forEach((option: string) => {
@@ -115,13 +115,13 @@ describe('SideBar Filter Verification', () => {
         .filter(':visible')
         .first()
         .should('be.visible')
-        .select(option, { force: true });
+        .select(option);
 
       cy.get('[data-testid="side-filter-apply"]', {timeout: 60000})
         .filter(':visible')
         .first()
         .should('be.visible')
-        .click({ force: true });
+        .click();
 
       cy.wait('@dataBreachSearch')
         .its('response.statusCode')
@@ -185,8 +185,8 @@ describe('SideBar Filter Verification', () => {
     });
 
     CONTENT_TYPES.forEach((option: string) => {
-      openSidebar();
       cy.closeSideFilter()
+      openSidebar();
       selectAndApply('side-filter-select-content', option);
     });
 

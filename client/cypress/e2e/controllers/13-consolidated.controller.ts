@@ -59,7 +59,7 @@ export function ensureDomainScannerModalOpen() {
       cy.get('[data-testid="consolidated-open-domain-scanner"]')
         .scrollIntoView()
         .should('be.visible')
-        .click({force: true});
+        .click();
     }
   });
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('exist');
@@ -106,7 +106,7 @@ export function runDomainScannerFlow() {
   cy.get(DOMAIN_SCANNER_INPUT_SELECTOR).should('be.visible').clear().type('example.com');
   cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('exist').within(() => {
-    cy.get('button[aria-label="Close"]').click({force: true});
+    cy.get('button[aria-label="Close"]').click();
   });
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('not.exist');
 }
@@ -146,7 +146,7 @@ function moveDatePickerToMonth(targetLabel: string, attempts = 0): void {
     const targetDate = new Date(`${targetLabel} 1`);
     const goPrev = currentDate.getTime() > targetDate.getTime();
     const navSelector = goPrev ? '[data-testid="side-filter-date-prev-month"]' : '[data-testid="side-filter-date-next-month"]';
-    cy.get(navSelector).first().scrollIntoView().click({force: true});
+    cy.get(navSelector).first().scrollIntoView().click();
     moveDatePickerToMonth(targetLabel, attempts + 1);
   });
 }
@@ -159,10 +159,10 @@ export function applyDateRangeFilter(monthLabel: string, startDay: number, endDa
   cy.get('[data-testid="side-filter-date-toggle"]')
     .filter(':visible')
     .first()
-    .click({force: true});
+    .click();
   moveDatePickerToMonth(monthLabel);
-  cy.get(`[data-testid="side-filter-date-day-${startDay}"]`).filter(':visible').first().scrollIntoView().click({force: true});
-  cy.get(`[data-testid="side-filter-date-day-${endDay}"]`).filter(':visible').first().scrollIntoView().click({force: true});
+  cy.get(`[data-testid="side-filter-date-day-${startDay}"]`).filter(':visible').first().scrollIntoView().click();
+  cy.get(`[data-testid="side-filter-date-day-${endDay}"]`).filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
 }
 
