@@ -12,6 +12,45 @@ import { ScanHelperMethodsService } from '../network-intel-service.service';
 export class IpDetailComponent {
   @Input({ required: true }) detail!: IpDetail;
 
+  private readonly renderedTopLevelKeys = new Set([
+    'ip',
+    'status',
+    'ip_info',
+    'hostnames',
+    'country',
+    'city',
+    'organization',
+    'isp',
+    'asn',
+    'cloud_provider',
+    'cloud_region',
+    'cloud_service',
+    'hosting_type',
+    'web_technologies',
+    'vulnerabilities',
+    'misconfigurations',
+    'security',
+    'cdn',
+    'waf',
+    'paas',
+    'amazon_s3',
+    'load_balancer',
+    'hsts',
+    'web_server',
+    'favicon_hash',
+    'allowed_methods',
+    'cookies',
+    'title',
+    'http_headers',
+    'cache_headers',
+    'link_headers',
+    'camera_paths',
+    'cameras',
+    'is_camera',
+    'ports',
+    'open_ports',
+  ]);
+
   constructor(public ui: ScanHelperMethodsService) {}
 
   get cameraPortCount(): number {
@@ -24,6 +63,20 @@ export class IpDetailComponent {
 
   get hasCameraSignals(): boolean {
     return !!this.detail?.is_camera || this.cameraPortCount > 0 || (this.detail?.cameras?.length ?? 0) > 0;
+  }
+
+  get extraDetailEntries(): Array<[string, string]> {
+    return this.ui.safeEntries(this.detail)
+      .filter(([key, value]) => !this.renderedTopLevelKeys.has(key) && this.hasRenderableValue(value))
+      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
+      .filter(([, value]) => Boolean(value));
+  }
+
+  get generalInfoExtraEntries(): Array<[string, string]> {
+    return this.ui.safeEntries(this.detail?.ip_info)
+      .filter(([key, value]) => !this.isDuplicateGeneralInfoField(key, value) && this.hasRenderableValue(value))
+      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
+      .filter(([, value]) => Boolean(value));
   }
 
   formatVulnerability(value: any): string {
@@ -66,5 +119,39 @@ export class IpDetailComponent {
         .join(', ');
     }
     return String(value).trim();
+  }
+
+  private hasRenderableValue(value: any): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    if (typeof value === 'object') {
+      return Object.keys(value).length > 0;
+    }
+    return true;
+  }
+
+  private formatLabel(value: string): string {
+    return value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  private isDuplicateGeneralInfoField(key: string, value: any): boolean {
+    const duplicateFields: Record<string, any> = {
+      country: this.detail?.country,
+      city: this.detail?.city,
+      org: this.detail?.organization,
+      isp: this.detail?.isp,
+      as: this.detail?.asn,
+    };
+
+    return key in duplicateFields && this.formatDisplayValue(duplicateFields[key]) === this.formatDisplayValue(value);
   }
 }

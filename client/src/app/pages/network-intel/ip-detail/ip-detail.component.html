@@ -1,4 +1,4 @@
-<div class="mx-4 my-3">
+<div class="mx-4 mt-3 mb-7">
   <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">General Information</div>
   @if (hasCameraSignals || iotPortCount > 0) {
     <div class="mb-3 flex flex-wrap gap-2">
@@ -44,11 +44,17 @@
     @if (detail.title) {
       <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Title</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.title }}</span></div>
     }
+    @for (entry of generalInfoExtraEntries; track entry[0]) {
+      <div class="flex flex-col gap-1">
+        <span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ entry[0] }}</span>
+        <span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ entry[1] }}</span>
+      </div>
+    }
   </div>
 </div>
 
 @if (ui.hasItems(detail.open_ports)) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Open Ports</div>
     <div class="flex flex-wrap gap-1.5">
       @for (p of detail.open_ports; track p) {
@@ -59,7 +65,7 @@
 }
 
 @if (ui.hasItems(detail.ports)) {
-  <div class="mx-4 mb-3 mt-5">
+  <div class="mx-4 mt-5 mb-7">
     <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Port Details</div>
     <div class="flex flex-col gap-3">
       @if (ui.renderablePorts(detail.ports).length) {
@@ -235,7 +241,7 @@
 }
 
 @if (ui.hasItems(detail.web_technologies)) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Web Technologies</div>
     <div class="flex flex-wrap gap-1.5">
       @for (t of detail.web_technologies; track t) {
@@ -246,7 +252,7 @@
 }
 
 @if (ui.securityItems(detail.security).length || detail.cdn || detail.waf || detail.hsts || detail.load_balancer) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Security &amp; CDN</div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5">
       @if (detail.cdn) {
@@ -277,7 +283,7 @@
 }
 
 @if (ui.hasItems(detail.vulnerabilities)) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-red-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-red-400/30 after:to-transparent">⚠ Vulnerabilities ({{ detail.vulnerabilities!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (v of detail.vulnerabilities; track v) {
@@ -292,7 +298,7 @@
 }
 
 @if (ui.hasItems(detail.misconfigurations)) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-yellow-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-yellow-400/30 after:to-transparent">⚡ Misconfigurations</div>
     <div class="flex flex-col gap-1.5">
       @for (m of detail.misconfigurations; track m) {
@@ -303,7 +309,7 @@
 }
 
 @if (renderHeaderEntries(detail.http_headers).length) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">HTTP Headers</div>
     <div class="flex flex-col gap-1">
       @for (h of renderHeaderEntries(detail.http_headers); track h[0]) {
@@ -317,7 +323,7 @@
 }
 
 @if (renderHeaderEntries(detail.cache_headers).length) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Cache Headers</div>
     <div class="flex flex-col gap-1">
       @for (h of renderHeaderEntries(detail.cache_headers); track h[0]) {
@@ -331,7 +337,7 @@
 }
 
 @if (ui.hasItems(detail.allowed_methods)) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Allowed Methods</div>
     <div class="flex flex-wrap gap-1.5">
       @for (m of detail.allowed_methods; track m) {
@@ -342,7 +348,7 @@
 }
 
 @if (ui.hasItems(detail.hostnames)) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Hostnames ({{ detail.hostnames!.length }})</div>
     <div class="flex flex-wrap gap-1.5">
       @for (h of detail.hostnames; track h) {
@@ -353,7 +359,7 @@
 }
 
 @if (ui.hasItems(detail.cameras)) {
-  <div class="mx-4 my-3">
+  <div class="mx-4 mt-3 mb-7">
     <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-emerald-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-emerald-400/30 after:to-transparent">📷 Cameras ({{ detail.cameras!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (cam of detail.cameras; track cam) {
@@ -368,6 +374,20 @@
           @if (cam.model) {
             <span class="text-[13px] text-[var(--color-text2)]">{{ cam.model }}</span>
           }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (extraDetailEntries.length) {
+  <div class="mx-4 mt-3 mb-7">
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Additional Details</div>
+    <div class="flex flex-col gap-1">
+      @for (entry of extraDetailEntries; track entry[0]) {
+        <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
+          <span class="text-cyan-400 font-semibold font-mono min-w-[160px] flex-shrink-0">{{ entry[0] }}</span>
+          <span class="break-all text-[var(--color-text2)]">{{ entry[1] }}</span>
         </div>
       }
     </div>

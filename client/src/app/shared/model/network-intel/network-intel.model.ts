@@ -74,6 +74,8 @@ export interface DnsResult {
 
 export interface IpDetail {
   ip:                 string;
+  status?:            string | null;
+  ip_info?:           Record<string, any> | null;
   hostnames?:         string[];
   country?:           string | null;
   city?:              string | null;
@@ -107,6 +109,7 @@ export interface IpDetail {
   is_camera?:         boolean;
   ports?:             IpPortData[];
   open_ports?:        number[];
+  [key: string]:      any;
 }
 
 export interface IpRowState {
