@@ -10,46 +10,9 @@ import { ScanHelperMethodsService } from '../network-intel-service.service';
   templateUrl: './ip-detail.component.html',
 })
 export class IpDetailComponent {
-  @Input({ required: true }) detail!: IpDetail;
+  private readonly renderedTopLevelKeys = new Set([ 'ip', 'status', 'ip_info', 'hostnames', 'country', 'city', 'organization', 'isp', 'asn', 'cloud_provider', 'cloud_region', 'cloud_service', 'hosting_type', 'web_technologies', 'vulnerabilities', 'misconfigurations', 'security', 'cdn', 'waf', 'paas', 'amazon_s3', 'load_balancer', 'hsts', 'web_server', 'favicon_hash', 'allowed_methods', 'cookies', 'title', 'http_headers', 'cache_headers', 'link_headers', 'camera_paths', 'cameras', 'is_camera', 'ports', 'open_ports', ]);
 
-  private readonly renderedTopLevelKeys = new Set([
-    'ip',
-    'status',
-    'ip_info',
-    'hostnames',
-    'country',
-    'city',
-    'organization',
-    'isp',
-    'asn',
-    'cloud_provider',
-    'cloud_region',
-    'cloud_service',
-    'hosting_type',
-    'web_technologies',
-    'vulnerabilities',
-    'misconfigurations',
-    'security',
-    'cdn',
-    'waf',
-    'paas',
-    'amazon_s3',
-    'load_balancer',
-    'hsts',
-    'web_server',
-    'favicon_hash',
-    'allowed_methods',
-    'cookies',
-    'title',
-    'http_headers',
-    'cache_headers',
-    'link_headers',
-    'camera_paths',
-    'cameras',
-    'is_camera',
-    'ports',
-    'open_ports',
-  ]);
+  @Input({ required: true }) detail!: IpDetail;
 
   constructor(public ui: ScanHelperMethodsService) {}
 
