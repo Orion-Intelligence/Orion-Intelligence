@@ -65,9 +65,11 @@ It consists of the following main menu items:
 8.  **Feed:** The Feed module delivers real-time updates on cybersecurity threats, CVEs, breaches, and industry trends from trusted global sources. Orion curates and prioritizes the most relevant news, keeping your team informed about emerging risks and developments that could impact your infrastructure or applications.
 
 9.  **Web Scans:** The Web Scans module enables automated security analysis of web-based assets to identify potential vulnerabilities and exposures. Orion performs structured scans across different scanning types such as Basic Scan, Port Scan, Repository Scan, SEO Scan, and APK Scan to detect weaknesses in web infrastructure, open ports, public code repositories, search engine exposure, and mobile application packages. This module helps security teams quickly uncover risks, monitor their attack surface, and strengthen the overall security posture of their digital assets.
-10.  **Social Intel:** Aggregates and correlates data from multiple social platforms to provide a unified view of digital identities and their connections. Visualizes relationships between entities through an interactive graph, enabling efficient investigation and pattern discovery. Continuously enriches entity data in real time from multiple sources, supporting timely and actionable intelligence insights.
-11.  **Whistleblowing:** Provides a secure and anonymous platform for reporting sensitive information while ensuring complete identity protection. Enables users to submit and track reports using encrypted channels and unique receipt codes for transparency. Supports maximum anonymity through advanced encryption and optional Tor-based access for zero-trace communication.
-12.  **Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
+10.  **Network Intel:** The Network Intel module enables automated reconnaissance and analysis of domains and IP addresses to gather critical network-level intelligence. Orion performs structured operations such as Host Recon, IP Scan, and Vulnerability Scan to identify associated IP addresses, hosting details, open ports, geographic information, and potential security weaknesses. This module helps security teams understand the infrastructure behind a target, detect exposed services, and assess risks effectively, improving visibility into the attack surface and strengthening overall security posture.
+
+11.  **Social Intel:** Aggregates and correlates data from multiple social platforms to provide a unified view of digital identities and their connections. Visualizes relationships between entities through an interactive graph, enabling efficient investigation and pattern discovery. Continuously enriches entity data in real time from multiple sources, supporting timely and actionable intelligence insights.
+12.  **Whistleblowing:** Provides a secure and anonymous platform for reporting sensitive information while ensuring complete identity protection. Enables users to submit and track reports using encrypted channels and unique receipt codes for transparency. Supports maximum anonymity through advanced encryption and optional Tor-based access for zero-trace communication.
+13.  **Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
 These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
    In this module, the system actively collects data from:
@@ -79,15 +81,15 @@ These data dumps often include leaked databases, user credentials, email lists, 
 
 **Other open-source intelligence (OSINT) platforms:** Tracks and organizes dump-related information for quick
       analysis.
-13. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
+14. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
 
-14. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
+15. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
 
-15. **Onion Link:** The Onion Link feature allows secure access to Orion Intelligence through the Tor browser. By clicking the Orion Link, users can operate the tool anonymously over the dark web, ensuring privacy and resilience in restricted or high-risk environments. Ideal for sensitive investigations and secure threat intelligence operations.
+16. **Onion Link:** The Onion Link feature allows secure access to Orion Intelligence through the Tor browser. By clicking the Orion Link, users can operate the tool anonymously over the dark web, ensuring privacy and resilience in restricted or high-risk environments. Ideal for sensitive investigations and secure threat intelligence operations.
 
-16. **Links:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
+17. **Links:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
 
-17. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
+18. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
 
 ## Homepage
 
@@ -741,6 +743,30 @@ The SEO Scan evaluates website metadata, indexing status, and search engine visi
 The APK Scan analyzes Android application packages for vulnerabilities and malicious behavior. It supports detection of security flaws, embedded threats, and risky permissions within mobile apps.
 
 <img width="1840" height="391" alt="APK Scan-modified" src="https://github.com/user-attachments/assets/fd99d875-1cb9-443b-9bdb-3bf41efc09c8" />
+
+
+## Network Intel
+
+The Network Intel module provides a comprehensive set of tools for gathering and analyzing network-level intelligence related to domains and IP addresses. It enables users to perform reconnaissance, identify infrastructure details, detect exposed services, and uncover potential vulnerabilities across target systems.
+
+### Host Recon
+
+The Host Recon feature allows users to search for a domain (e.g., bbc.com) and retrieve associated IP addresses along with detailed network information. It provides insights such as geographic location, organization (ISP), ASN, hosting provider, and infrastructure details. Additionally, it highlights open ports (e.g., 80, 443) and service information, helping users understand how a domain is hosted and exposed on the internet.
+
+<img width="1839" height="850" alt="host recon-modified" src="https://github.com/user-attachments/assets/ddcbf67d-6efa-4693-9571-ddfe8dbab5cf" />
+
+### IP Scan
+
+The IP Scan focuses on analyzing a specific IP address in detail. It provides structured information such as country, city, region, timezone, ISP, and cloud provider (e.g., Fastly). It also identifies whether the IP is part of a CDN or hosting service and confirms open ports and running services. This helps security teams assess the exposure of a particular IP and understand its role within the network infrastructure.
+
+<img width="1839" height="886" alt="IP scan-modified" src="https://github.com/user-attachments/assets/25fd0638-1d76-479f-b492-96c48c88215f" />
+
+### Vulnerability Scan
+
+The Vulnerability Scan analyzes a domain for potential security weaknesses and misconfigurations. It provides a categorized summary of findings (e.g., Critical, High, Medium, Low, Info) and highlights issues such as missing security headers (COEP, COOP, CORP, Permissions Policy), redirect behavior, and caching configurations. It also includes response details like status codes, server type (e.g., Varnish), and security headers, helping users identify and prioritize risks effectively.
+
+<img width="1839" height="886" alt="vulnerability scan-modified" src="https://github.com/user-attachments/assets/0c89dc50-38ab-4e76-b05a-76465ad79807" />
+
 
 
 ## Data Dump
