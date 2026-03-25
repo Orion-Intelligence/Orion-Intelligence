@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { EMPTY, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { catchError, concatMap, tap } from 'rxjs/operators';
 import { ScanHelperMethodsService } from './network-intel-service.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../shared/model/network-intel/network-intel.model';
 import { GraphReportPayload } from '../../shared/model/report/report-export.model';
@@ -24,6 +25,8 @@ import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerabi
 export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private _intervals: ReturnType<typeof setInterval>[] = [];
+  private readonly dnsIpDetailQueue$ = new Subject<IpRowState>();
+  private dnsIpDetailQueueSub?: Subscription;
   private readonly sectionToTab: Record<string, 'dns' | 'shodan' | 'vuln' | 'geo'> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'vulnerability-scan': 'vuln', 'geo-cameras': 'geo', };
   private readonly tabToSection: Record<'dns' | 'shodan' | 'vuln' | 'geo', string> = { dns: 'host-recon', shodan: 'deep-scan', vuln: 'vulnerability-scan', geo: 'geo-cameras', };
 
@@ -74,6 +77,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.scanHelper.resetState();
+    this.bindDnsIpDetailQueue();
 
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
@@ -379,21 +383,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     row.progress = 5;
     row.step = 'queued';
     row.error   = null;
-
-    this.scanHelper.fetchShodanIpDetail(row.ip, (response) => {
-      row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
-      row.step = response?.['step'] || response?.result?.['step'] || response?.status || response?.result?.status || row.step;
-    }).then((detail) => {
-      if (detail?.ip) {
-        row.detail = detail as IpDetail;
-        row.progress = 100;
-        row.step = 'Done';
-      }
-      row.loading = false;
-    }).catch((error: any) => {
-      row.loading = false;
-      row.error = error?.message ?? 'Failed to load details';
-    });
+    this.enqueueDnsIpDetail(row);
   }
 
   startShodanScan(): void {
@@ -561,8 +551,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this._intervals.forEach(clearInterval);
-    this.sub?.unsubscribe();
+    this.resetActiveWork();
+    this.dnsIpDetailQueueSub?.unsubscribe();
     this.scanHelper.resetState();
   }
 
@@ -899,6 +889,42 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this._intervals = [];
     this.sub?.unsubscribe();
     this.sub = undefined;
+  }
+
+  private enqueueDnsIpDetail(row: IpRowState): void {
+    this.dnsIpDetailQueue$.next(row);
+  }
+
+  private bindDnsIpDetailQueue(): void {
+    this.dnsIpDetailQueueSub?.unsubscribe();
+    this.dnsIpDetailQueueSub = this.dnsIpDetailQueue$.pipe(
+      concatMap((row) => {
+        if (!row || row.detail || row.error) {
+          return EMPTY;
+        }
+
+        row.step = 'processing';
+
+        return this.scanHelper.fetchShodanIpDetail$(row.ip, (response) => {
+          row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
+          row.step = response?.['step'] || response?.result?.['step'] || response?.status || response?.result?.status || row.step;
+        }).pipe(
+          tap((detail) => {
+            if (detail?.ip) {
+              row.detail = detail as IpDetail;
+              row.progress = 100;
+              row.step = 'Done';
+            }
+            row.loading = false;
+          }),
+          catchError((error: any) => {
+            row.loading = false;
+            row.error = error?.message ?? 'Failed to load details';
+            return EMPTY;
+          })
+        );
+      })
+    ).subscribe();
   }
 
   private waitForPaint(): Promise<void> {

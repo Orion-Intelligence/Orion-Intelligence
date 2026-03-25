@@ -28,6 +28,11 @@ export class CredentialListComponent {
     return index;
   }
 
+  getDisplayIndex(index: number): number {
+    const currentPage = Number(this.currentPage || 1);
+    return ((Math.max(currentPage, 1) - 1) * this.pageSize) + index + 1;
+  }
+
   toggleRow(index: number, expandedSet: Set<number>) {
     if (expandedSet.has(index)) {
       expandedSet.clear();

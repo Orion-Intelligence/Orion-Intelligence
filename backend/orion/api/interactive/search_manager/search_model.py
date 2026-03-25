@@ -160,7 +160,7 @@ class search_model:
         return await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
     @staticmethod
-    def _build_ranked_response(response, query, default_size: int):
+    def _build_ranked_response(response, query, default_size: int, approximate_page_count: bool = False):
         ranked_results = []
         if response and "hits" in response and "hits" in response["hits"]:
             for rank, hit in enumerate(response["hits"]["hits"]):
@@ -177,9 +177,15 @@ class search_model:
             total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
 
         size = int(query.get("size", default_size))
+        from_ = int(query.get("from", 0) or 0)
+        current_page = (from_ // size) + 1 if size > 0 else 1
         total_pages = (total + size - 1) // size if size > 0 else 0
+        if not approximate_page_count:
+            return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
 
-        return {"Result": ranked_results, "Page_Count": total_pages, "Total_Hits": total}
+        has_next = len(ranked_results) >= size if size > 0 else False
+        page_count = current_page + 1 if has_next else (current_page if ranked_results else max(1, current_page - 1))
+        return {"Result": ranked_results, "Page_Count": page_count if ranked_results or current_page > 1 else total_pages, "Total_Hits": total}
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
@@ -207,7 +213,7 @@ class search_model:
             indices, query, indices_boost
         )
 
-        return search_model._build_ranked_response(response, query, 15)
+        return search_model._build_ranked_response(response, query, 15, approximate_page_count=True)
 
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
@@ -292,8 +298,13 @@ class search_model:
             if param.category != "credential" and "mapping" in src:
                 src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
 
-        return await self.__search_callback.search_handler(
+        response = await self.__search_callback.search_handler(
             m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
+        page = getattr(param, "page", 1) or 1
+        size = getattr(param, "size", 500) or 500
+        result_count = len(response.Result or [])
+        response.Page_Count = page + 1 if result_count >= size else (page if result_count > 0 else max(1, page - 1))
+        return response
 
     async def search_stealer_iocs(self, param: search_credential_param_model):
 
@@ -304,6 +315,7 @@ class search_model:
 
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         response = await self.__search_callback.search_handler( m_status, m_documents,search_stealerlog_callback_model, {}, data_limit=False)
+        raw_result_count = len(response.Result or [])
 
 
         password_filter = getattr(param, "password_schema", None)
@@ -314,6 +326,10 @@ class search_model:
                helper_controller.password_matches_schema(item.password, password_filter)
             ]
             response.Result = filtered_results
+
+        page = getattr(param, "page", 1) or 1
+        size = getattr(param, "size", None) or (100 if not param.ioc else 500)
+        response.Page_Count = page + 1 if raw_result_count >= size else (page if raw_result_count > 0 else max(1, page - 1))
 
         return response
 

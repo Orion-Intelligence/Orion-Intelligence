@@ -290,8 +290,10 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   get maxPages(): number {
-    const stealerPages = this.stealerlogCallbackModel.Result.length || 0;
-    const rankedPages = this.rankedResult.result.length || 0;
-    return Math.max(stealerPages, rankedPages);
+    return Math.max(
+      Number(this.stealerlogCallbackModel.Page_Count || 0),
+      Number(this.rankedResult.pageCount || 0),
+      1
+    );
   }
 }

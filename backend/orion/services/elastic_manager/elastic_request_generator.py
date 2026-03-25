@@ -680,7 +680,7 @@ class elastic_request_generator:
                 frm = 0
 
             query = {"query": {"bool": {"must": must_should if must_should else [
-                {"match_all": {}}]}}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "terminate_after": 3000, "sort": [
+                {"match_all": {}}]}}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "sort": [
                 {"_shard_doc": "asc"}], "_source": ["url", "username", "domain", "email", "password", "ip", "channel",
                 "type", "raw", "file"]}
 
