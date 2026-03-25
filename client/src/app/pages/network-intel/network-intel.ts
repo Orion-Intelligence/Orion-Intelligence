@@ -897,34 +897,30 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private bindDnsIpDetailQueue(): void {
     this.dnsIpDetailQueueSub?.unsubscribe();
-    this.dnsIpDetailQueueSub = this.dnsIpDetailQueue$.pipe(
-      concatMap((row) => {
-        if (!row || row.detail || row.error) {
-          return EMPTY;
+    this.dnsIpDetailQueueSub = this.dnsIpDetailQueue$.pipe(concatMap((row) => {
+      if (!row || row.detail || row.error) {
+        return EMPTY;
+      }
+
+      row.step = 'processing';
+
+      return this.scanHelper.fetchShodanIpDetail$(row.ip, (response) => {
+        row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
+        row.step = response?.['step'] || response?.result?.['step'] || response?.status || response?.result?.status || row.step;
+      }).pipe(tap((detail) => {
+        if (detail?.ip) {
+          row.detail = detail as IpDetail;
+          row.progress = 100;
+          row.step = 'Done';
         }
-
-        row.step = 'processing';
-
-        return this.scanHelper.fetchShodanIpDetail$(row.ip, (response) => {
-          row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
-          row.step = response?.['step'] || response?.result?.['step'] || response?.status || response?.result?.status || row.step;
-        }).pipe(
-          tap((detail) => {
-            if (detail?.ip) {
-              row.detail = detail as IpDetail;
-              row.progress = 100;
-              row.step = 'Done';
-            }
-            row.loading = false;
-          }),
-          catchError((error: any) => {
-            row.loading = false;
-            row.error = error?.message ?? 'Failed to load details';
-            return EMPTY;
-          })
-        );
-      })
-    ).subscribe();
+        row.loading = false;
+      }),
+      catchError((error: any) => {
+        row.loading = false;
+        row.error = error?.message ?? 'Failed to load details';
+        return EMPTY;
+      }));
+    })).subscribe();
   }
 
   private waitForPaint(): Promise<void> {
