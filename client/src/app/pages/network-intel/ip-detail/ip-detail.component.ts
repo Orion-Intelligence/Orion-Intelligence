@@ -16,6 +16,7 @@ export class IpDetailComponent {
 
   constructor(public ui: ScanHelperMethodsService) {}
 
+  
   get cameraPortCount(): number {
     return (this.detail?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;
   }
