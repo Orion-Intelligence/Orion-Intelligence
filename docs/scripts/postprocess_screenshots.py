@@ -101,7 +101,7 @@ def process_image(
     crop_bottom: int = 22,
     radius: int = 14,
     final_trim: int = 2,
-    border_width: int = 3,
+    border_width: int = 5,
 ) -> None:
     image = Image.open(path).convert("RGBA")
     width, height = image.size
