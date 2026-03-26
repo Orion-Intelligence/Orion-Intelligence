@@ -708,43 +708,217 @@ The listings panel provides a document-oriented summary of the current graph sta
 
 Social Intel is a graph-based username and profile mapping workspace.
 
-It supports:
-
-- username scanning
-- graph view
-- list view
-- graph search
-- image-based workflows
-- editable connections
-- custom entity management
-- scan history and jobs
-- metadata and profile popups
+It is designed for operators who need to move from a single username, image, or related profile into a richer relationship map of platforms, related accounts, and extracted profile evidence.
 
 #### Social Intel Layout
 
 The workspace includes:
 
-- a tab bar
-- a collapsible left home menu
-- a graph toolbar
-- a central graph or list panel
-- a right-side entity manager
+- a tab bar for multiple social-analysis sessions
+- a collapsible left home menu for created scans and saved jobs
+- a graph toolbar for search, mode switching, export, and scan actions
+- a central graph canvas or list view
+- modal workflows for profile management, metadata, aliases, and follower scans
 
-#### Graph Functions
+This is not a single-screen graph. It is a multi-state workspace where the user can move among:
 
-Users can:
+- graph view
+- list view
+- summary popups
+- profile-management modals
+- follower/following import popups
+- metadata search results
 
-- scan a username
-- switch between graph and list views
-- enable or disable graph physics
-- search nodes directly on the graph
-- inspect profile summaries
-- open metadata popups
-- fetch profiles, posts, images, followers, and following data
-- manage custom entities
-- rename graph aliases for display
+#### Core Entry Points
 
-The legend distinguishes user profiles, platforms, platform groups, custom entities, and connection types.
+Social Intel supports several starting paths:
+
+- direct username scanning
+- image-based profile discovery
+- manual custom-entity entry
+- API-backed entity submission from the add-entity modal
+- reopening previously created scan jobs from the left home menu
+
+This makes Social Intel useful for both:
+
+- known-profile investigations
+- unknown-profile discovery from an uploaded image
+
+#### Graph and List Views
+
+The graph view is intended for structural relationship analysis. The list view is intended for profile-by-profile inspection and management.
+
+Common view actions include:
+
+- switching between graph and list views
+- searching within the graph toolbar
+- clearing graph search input
+- enabling or disabling graph physics where available
+- opening relationship popups directly from graph nodes
+- opening list rows to review platform-specific detail
+
+Use graph view when you want to understand how entities connect. Use list view when you want a more structured review of profiles, links, summaries, and platform records.
+
+#### Session Management
+
+Social Intel supports multiple sessions in the same way the CTI workspace supports multiple investigative tabs.
+
+Covered session actions include:
+
+- creating a new session
+- renaming a session
+- exporting a social report from the current session
+
+Sessions are useful when you want to separate different investigations, keep one graph focused on one target, or compare multiple usernames without overwriting the previous workspace.
+
+#### Add-Entity Workflow
+
+The add-entity modal supports more than one submission mode.
+
+Available tested behavior includes:
+
+- opening an entity type such as `Phone`
+- using an API query mode
+- validating that the submit button stays disabled until a valid input is present
+- switching from API mode to manual mode
+- entering a manual value
+- submitting the new entity into the social workspace
+
+This matters because Social Intel is not limited to scraped social accounts. It can also be used to place analyst-defined entities into the investigative graph.
+
+#### Image-Based Profile Discovery
+
+The image-based workflow is one of the more advanced Social Intel paths.
+
+It supports:
+
+- uploading an image
+- waiting for image-recon processing
+- opening the manage-profiles modal
+- filtering candidate platforms
+- reviewing discovered usernames
+- opening direct profile links for discovered accounts
+- fetching the selected profile into the workspace
+- reopening completed profile jobs from the left home menu
+- selecting multiple discovered profiles and updating the graph with them
+
+Use this workflow when a screenshot, avatar, or reused profile image is the starting point instead of a known handle.
+
+#### Manage Profiles Modal
+
+The manage-profiles modal is the main control surface for discovered or queued profile candidates.
+
+From this modal, users can:
+
+- filter platforms
+- search usernames
+- review discovered profile links
+- fetch profile data
+- select all fetched profiles
+- update the graph with the selected profiles
+- cancel without applying changes
+
+This modal is central to the Social Intel workflow and should be treated as part of the main graph system, not as a secondary helper.
+
+#### Summary Popup and Metadata Search
+
+The summary popup provides deeper profile inspection beyond the main graph or list node.
+
+Supported summary actions include:
+
+- opening the summary popup from a list entry
+- reviewing all detected platforms for the selected subject
+- opening `Profile Metadata Results`
+- entering metadata search tokens
+- validating no-token error states
+- running metadata searches with terms such as leaked email or other keywords
+- reviewing returned external links
+- pivoting into a selected platform from within the popup
+- reopening external profile links
+
+This popup is where profile-level enrichment becomes operationally useful. It combines raw profile context with searchable metadata and quick pivots.
+
+#### Followers, Following, and Connections
+
+The followers/following workflow is more than a read-only count view.
+
+Covered actions include:
+
+- opening the followers-and-following popup
+- switching among `Followers`, `Following`, and `Connections`
+- filtering discovered related accounts
+- fetching more followers from inside the popup
+- selecting discovered related accounts
+- confirming selection to import those accounts back into the main workflow
+- reopening created follow-based jobs from the left home menu
+- selecting all imported results and updating the graph
+
+In practice, this means Social Intel can expand an investigation outward from one profile into a broader relationship set rather than staying limited to the original target.
+
+#### Images, Followers, and Re-Scan Controls
+
+Within the summary popup, the suite covers several enrichment actions:
+
+- `Fetch Followers`
+- `Fetch Following`
+- `Fetch Images`
+- `Re-scan profile`
+
+These actions make the popup a live enrichment console rather than only a static summary.
+
+#### Aliases and Context Menus
+
+The graph canvas supports right-click or context-menu style interaction paths.
+
+Covered behavior includes:
+
+- triggering a context menu from the canvas
+- opening the `Set Alias` action
+- editing an alias value
+- saving the alias
+- seeing the alias reflected in later list or summary views
+
+Aliases are useful when the analyst wants a cleaner investigation label than the raw discovered username.
+
+#### Relationship Popups
+
+Social Intel also supports relationship-specific popups from graph nodes.
+
+These popups can expose:
+
+- related-account information
+- external account links
+- quick-close controls
+
+This makes it possible to inspect a connection without leaving the graph canvas.
+
+#### What the Legend Represents
+
+The legend distinguishes visual object types such as:
+
+- user profiles
+- platforms
+- platform groups
+- custom entities
+- relationship or connection types
+
+Understanding the legend is important when the graph becomes dense. It tells the user whether they are looking at:
+
+- a discovered profile
+- a platform wrapper
+- a manually added entity
+- or a relationship generated by enrichment
+
+#### Recommended Social Intel Workflow
+
+1. Start with a known username or an uploaded image.
+2. Fetch the initial profile set into the workspace.
+3. Review the manage-profiles modal and push selected profiles into the graph.
+4. Switch between graph and list views as needed.
+5. Open the summary popup for metadata and platform review.
+6. Fetch followers, following, or images where useful.
+7. Rename aliases or add custom entities if the graph needs cleanup.
+8. Export the session when the relationship picture is complete.
 
 ## Result and Report Workflows
 
@@ -1165,6 +1339,506 @@ Depending on deployment data, this area may also function as a quick verificatio
 
 Administrative settings and platform-management view.
 ```
+
+## Detailed UI Coverage Appendix
+
+This appendix documents the exact user-visible behaviors covered by the automated Cypress suite. It is intended to close the gap between a feature overview and the concrete interactions that an operator, tenant user, or administrator can perform in the current product.
+
+### Authentication and Session Lifecycle
+
+The tested authentication lifecycle includes:
+
+- loading the login page from the root route
+- signing in as an administrator
+- opening the profile menu and signing out
+- requesting a password-reset email
+- opening a tokenized reset-password route
+- validating that the new password cannot match the old password
+- applying a new password successfully
+- signing in again with the updated password
+- encountering a two-factor prompt after enabling `2FA`
+- viewing the 2FA QR image and OTP input state
+
+### Sidebar and Global Navigation States
+
+The automation covers both content navigation and structural sidebar behavior.
+
+Supported navigation behaviors include:
+
+- expanding and collapsing sidebar groups
+- collapsing the whole sidebar
+- re-expanding the whole sidebar
+- visiting all major search, scan, graph, tenant, and admin groups that are available to the current role
+- opening external or support-oriented entries from the main navigation where configured
+
+For user documentation purposes, that means the sidebar is not only a static menu. It is expected to support:
+
+- nested group expansion
+- condensed and expanded display modes
+- role-based visibility
+- license-based visibility
+
+The profile menu is also part of this navigation model. Tested behavior includes:
+
+- opening the profile menu
+- reaching help and support from the profile menu
+- signing out from the profile menu
+
+### Homepage, Heatmap, and Support Interactions
+
+The homepage is validated as more than a search landing page. The automated flow covers:
+
+- world heatmap rendering
+- tooltip visibility on country hover
+- tooltip hide behavior on pointer leave
+- opening a country-level report from the map
+- closing the country report with the close button
+- closing the same report by clicking the overlay
+- internal branch behavior when heatmap data or world data changes
+
+The support workflow is also covered directly from the profile menu:
+
+- opening the help and support modal
+- filling email, subject, and message fields
+- submitting the support request
+
+### Search Behavior and Result Expectations
+
+The test suite validates that indexed modules are not only searchable but also return stable, inspectable result structures.
+
+Covered search behavior includes:
+
+- general keyword searching
+- module-specific searching
+- result opening from cards and table rows
+- returning from a report to the original listing
+- opening reports in both modal-style and page-style layouts
+- validating first-result content against fixtures in key modules
+
+The search-result verification suite explicitly checks stable first-result expectations for:
+
+- `General Intelligence`
+- `Data Breach`
+- `Defacement`
+- `Social`
+- `Exploit`
+- `Feed`
+
+This means the manual should treat these modules as search-first experiences with expected, stable result-card or row-based layouts, not as experimental views.
+
+### Indexed Module and Tab Coverage
+
+The suite covers more module variations than the earlier manual described explicitly.
+
+`General Intelligence` coverage includes:
+
+- `All`
+- `General`
+- `Forums`
+- `News`
+- `Stolen`
+- `Drugs`
+- `Hacking`
+- `Marketplaces`
+- `Cryptocurrency`
+- `Leaks`
+
+`Data Breach` coverage includes:
+
+- `All`
+- `Databases`
+- `Tracking`
+
+`Defacement` coverage includes:
+
+- `All`
+- `Hacked`
+- `Phishing`
+- `Databases`
+
+`Social` coverage includes:
+
+- `All`
+- `Telegram`
+- `Twitter`
+- `Mastodon`
+- `Pastebin`
+- `Forum`
+- `Reddit`
+
+`Exploit` coverage includes:
+
+- `All`
+- `CVE`
+- `Tools`
+- `ZeroDay`
+
+`Feed` coverage includes:
+
+- `News`
+
+`Stealer Logs` coverage includes:
+
+- `IOCS`
+
+`Dump` coverage includes:
+
+- `Listing`
+
+### Report Opening, JSON Review, and Chat Workflows
+
+Report handling is one of the most deeply exercised areas of the suite.
+
+Covered behaviors include:
+
+- opening the first available report from multiple modules
+- verifying that a report can open as a route or modal, depending on module layout
+- opening JSON-backed report viewers
+- closing modal reports with escape
+- opening chat from a report
+- sending a chat message
+- verifying that a chat response area renders messages
+
+The manual should therefore treat chat and JSON review as first-class report features, not optional side notes.
+
+### Search Tools and Advanced Filters
+
+The suite covers two layers of filtering:
+
+- toolbar-level search tools
+- sidebar filter drawers
+
+Toolbar-level coverage includes:
+
+- toggling `Advance`
+- opening `Tools`
+- changing result sort order
+- switching search behavior between semantic, OR, AND, and full-query modes
+- clearing entity-filter selections
+
+Sidebar-filter coverage includes:
+
+- network filtering
+- safe-search filtering
+- content-type filtering
+- date-range filtering
+- reset
+- apply
+- auto-apply and manual-apply variations
+
+The tests also verify these filters across multiple modules, including:
+
+- `General Intelligence`
+- `Data Breach`
+- `Defacement`
+- `Social`
+- `Exploit`
+- `Feed`
+
+Advanced resilient filter validation also scans report detail and metadata after filtering, which means filtering is expected to affect downstream report inspection, not just the list page.
+
+### Pagination, Load More, and Result Expansion
+
+The suite validates navigation through large result sets rather than assuming a single-page result view.
+
+Covered pagination and expansion behaviors include:
+
+- next-page navigation in `General Intelligence`
+- next-page navigation in `Data Breach`
+- next-page navigation in `Defacement`
+- next-page navigation in `Social`
+- next-page navigation in `Exploit`
+- next-page navigation in `Feed`
+- directory pagination
+- directory page-number navigation
+- directory lazy expansion by scrolling to the bottom
+- stealer-log row expansion
+- IOC row expansion in consolidated tables
+- consolidated `See More` and `See Less` toggles where present
+
+### Stealer Logs: Full Tested Behaviors
+
+In addition to the broader description above, the stealer-log suite covers:
+
+- tag-based basic searching
+- advanced row-based condition building
+- validation of empty or invalid search states
+- result download initiation
+- password-scheme modal opening
+- password-length and character-class filtering
+- helper-driven pivots from results
+- expansion of matched credential rows
+- review of email and telemetry fields inside expanded rows
+
+This means Stealer Logs should be understood as a full hunting workspace with both simple and compound-query modes.
+
+### Consolidated: Full Tested Behaviors
+
+The consolidated area is one of the deepest tested surfaces in the application.
+
+Covered behaviors include:
+
+- opening `Deep Search`
+- opening `IOCs`
+- using the profile-scoped consolidated route
+- searching from the homepage into consolidated
+- reviewing defacement-style threat cards inside deep search
+- expanding and collapsing grouped threat cards
+- inspecting keyword and coverage insight sections
+- expanding all insight sections
+- searching inside the threat-actor insight panel
+- testing no-match behavior inside insight search
+- opening report details from consolidated results and returning
+- filtering consolidated results by network
+- validating that filtered result cards reflect the chosen network
+- opening the domain-scanner modal
+- running subdomain scans
+- running IP lookup when available
+- running wayback-style scans when available
+- closing the domain-scanner modal
+- opening IOC tables for stealer and threat entries
+- expanding the first several IOC rows
+- switching IOC search terms and validating both non-empty and empty states
+- downloading IOC results
+- applying password-scheme filters from the consolidated IOC context
+- applying date filters that produce both non-empty and empty results
+
+The consolidated right-side insight panel should therefore be considered part of the documented workflow, not an ancillary convenience.
+
+### CTI Graph: Full Tested Behaviors
+
+The CTI suite covers substantially more than opening the graph.
+
+Covered CTI behaviors include:
+
+- switching graph filter type to `Cluster`
+- applying CTI filters
+- searching the graph toolbar
+- validating highlighted results
+- opening export-report modals
+- switching between graph and list views
+- collapsing and expanding the listings panel
+- toggling physics simulation
+- creating a new CTI session
+- renaming a CTI session
+- exporting the current session through the `Export Current Session` action
+- importing a session from JSON
+- closing a session tab
+- selecting export format options such as JSON and graph PDF
+- opening a context menu from the graph canvas
+
+There is also component-level branch coverage for:
+
+- graph-change handling
+- empty category handling
+- rotated category sets
+- report retrieval by country
+
+Those internal branches are not a normal operator workflow, but they confirm the presence of fallback and re-render logic in the current UI.
+
+### Social Intel: Full Tested Behaviors
+
+The social graph area is also extensively exercised.
+
+Covered behaviors include:
+
+- scanning a username
+- switching between graph and list views
+- clearing graph search
+- creating and renaming a social session
+- exporting a social report
+- opening the add-entity modal
+- validating disabled and enabled submit states
+- submitting both API-backed and manual entity entries
+- triggering a graph context-menu path
+- opening image-based profile search
+- uploading an image for recon
+- reviewing the manage-profiles modal
+- filtering discovered platforms
+- fetching profiles
+- selecting all discovered profiles and pushing them into the graph
+- opening summary popups
+- searching profile metadata with tokens
+- opening external profile links
+- fetching followers
+- fetching following
+- fetching images
+- rescanning a profile
+- reopening manage-profiles and cancelling
+- opening follower/following scan popups
+- switching among followers, following, and connections tabs
+- selecting discovered related accounts
+- confirming follower/following imports
+- opening relationship popups from graph nodes
+- opening related account links
+- setting an alias through the context menu
+
+This is one of the richest modules in the product and should be documented as a multi-step graph, list, and modal workflow rather than only as a graph view.
+
+### Entity API and Scan Modules: Full Tested Behaviors
+
+The test suite covers every documented live lookup route currently present in the main product:
+
+- `Email Breach`
+- `Social Scanner`
+- `Wanted List`
+- `National Identity`
+- `Playstore Scanner`
+- `Software Scanner`
+- `File Scanner`
+- `Crypto Scanner`
+
+It also covers the web-scan routes:
+
+- `Basic Scan`
+- `Port Scan`
+- `Repository Scan`
+- `SEO Scan`
+- `APK Scan`
+
+Specific validated actions include:
+
+- submitting text lookups
+- submitting file uploads
+- showing success badges
+- downloading reports
+- printing reports
+- resetting file-upload flows with `Analyze Another File`
+- re-uploading and re-running the same scanner after reset
+
+### Network Intel: Full Tested Behaviors
+
+The Network Intel suite covers:
+
+- host recon search
+- IP scan search
+- vulnerability scan search
+- detail row expansion and collapse
+- downloading reports from each main network-intel tab
+- export-trigger validation
+
+The Geo IoT modal is also covered end to end, including:
+
+- opening the modal
+- closing with the close control
+- closing with the cancel control
+- switching between map mode and manual mode
+- zooming in and out on the map
+- editing coordinates manually
+- editing radius
+- editing max-IP count
+- switching back to map mode
+- starting a geo scan
+- reusing the selected coordinates as the active network-intel query
+
+### Directory: Full Tested Behaviors
+
+The directory workflow is covered as an operational browsing surface rather than a search-first module.
+
+Covered behaviors include:
+
+- initial page load
+- table and empty-state validation
+- progressive loading by scrolling
+- pagination to page two and back to page one
+- filtering by network
+- filtering by index
+- filtering by content type
+- applying and clearing date ranges
+- full filter reset
+
+### Account Settings, Preferences, and Reset Journey
+
+The suite covers more account behavior than the current summary described.
+
+Covered account behaviors include:
+
+- avatar upload
+- theme toggle
+- two-factor toggle
+- post-update persistence
+- returning to login after logout
+- viewing the 2FA challenge screen
+- requesting password reset from login
+- reading the reset email flow
+- submitting an invalid reused password
+- submitting a valid new password
+- logging in again with the updated password
+
+### User Management, License Visibility, and Subscription States
+
+The user-management suite covers both admin and non-admin behavior.
+
+Covered behaviors include:
+
+- creating multiple users with different roles
+- assigning licenses during creation
+- logging in as those users
+- verifying sidebar visibility based on assigned licenses
+- verifying that some users see only indexed modules
+- verifying that some users also see breach, social, exploit, feed, dump, or scanner modules
+- updating account preferences as a non-admin user
+- triggering the stealer-logs subscription or paywall flow for a demo user
+- showing a near-expiry trial banner for a member user
+- deleting managed users until only protected system users remain
+
+This means license-aware UI visibility and paywall/subscription behavior are part of the documented product behavior.
+
+### Tenant Provisioning and Tenant Operations
+
+The tenant suite covers the full tenant lifecycle, including both admin-side and tenant-side workflows.
+
+Covered provisioning and onboarding behaviors include:
+
+- tenant signup
+- email verification
+- admin review of tenants
+- tenant verification state changes
+- enterprise-license assignment
+- tenant onboarding wizard completion
+- tenant IOC initialization during onboarding
+- creating a tenant sub-user
+- editing tenant user quota
+
+Covered tenant-home behaviors include:
+
+- tenant homepage navigation
+- alert export
+- notification sidebar opening
+- opening alert details from notifications
+- exporting alert reports from multiple alert contexts
+- opening category alert cards
+- creating a custom alert
+- date filtering for tenant alerts
+- flushing all alerts after confirmation through the `Flush All` workflow
+
+The tenant-alert workflow therefore includes both content review and alert-maintenance controls, not only passive monitoring.
+
+### Audit Logs and Administrative Operations
+
+Administrative audit coverage includes:
+
+- opening the audit-log page
+- exporting audit records
+- applying a date range that intentionally yields no rows
+- resetting filters to return to populated records
+- using the audit-log page in both tenant-management and standalone admin contexts
+
+### System Settings and Error States
+
+System Settings coverage includes both successful edits and validation failures.
+
+Covered behaviors include:
+
+- opening the system settings page
+- entering edit mode
+- changing the application name
+- editing external URLs such as data sources, adversaries, and pricing
+- saving the updated configuration
+- attempting to upload an oversized authentication-dashboard icon
+- showing the `File too large` validation error for files above `1 MB`
+
+This should be documented explicitly because it is one of the tested administrative guardrails in the platform.
 
 ## Practical Workflows
 

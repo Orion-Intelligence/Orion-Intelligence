@@ -99,11 +99,15 @@ generate_docs() {
     local target_dir="../docs/screenshots"
     local browser="${DOC_SCREENSHOT_BROWSER:-electron}"
     local temp_spec="cypress/e2e/.tmp-user-manual-screenshots-docs-runner.cy.ts"
+    local nested_dir="$target_dir/.tmp-user-manual-screenshots-docs-runner.cy.ts"
+    local legacy_nested_dir="$target_dir/tmp-user-manual-screenshots-runner.cy.ts"
 
     cd client || exit
     npm test -- run --browser electron --spec cypress/e2e/08-tenant-management.cy.ts
     mkdir -p "$target_dir"
     rm -rf "$target_dir"/20-user-manual-screenshots-docs-runner.cy.ts
+    rm -rf "$nested_dir"
+    rm -rf "$legacy_nested_dir"
     cat > "$temp_spec" <<'EOF'
 import '../../../docs/e2e/user-manual-screenshots.cy';
 EOF
@@ -114,6 +118,8 @@ EOF
     trap - EXIT
 
     find "$target_dir" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -exec cp {} "$target_dir"/ \;
+    rm -rf "$nested_dir"
+    rm -rf "$legacy_nested_dir"
 
     cd ..
 }

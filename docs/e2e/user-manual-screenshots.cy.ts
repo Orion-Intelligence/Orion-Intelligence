@@ -11,7 +11,66 @@ describe('User Manual Screenshot Flow', () => {
   let adminPassword = '';
   let hasAdminSession = false;
 
+  const applyScreenshotChrome = () => {
+    cy.document().then((doc) => {
+      let style = doc.getElementById('docs-screenshot-style') as HTMLStyleElement | null;
+      if (!style) {
+        style = doc.createElement('style');
+        style.id = 'docs-screenshot-style';
+        doc.head.appendChild(style);
+      }
+
+      style.textContent = `
+        html, body {
+          scrollbar-width: none !important;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        *::-webkit-scrollbar {
+          width: 0 !important;
+          height: 0 !important;
+          display: none !important;
+          background: transparent !important;
+        }
+
+        body {
+          background: #eef3f8 !important;
+          padding: 14px !important;
+          box-sizing: border-box !important;
+        }
+
+        #dashboard-container,
+        [data-cy="dashboard-sub-container"],
+        [data-testid="dashboard-main"],
+        [data-testid="login-page"],
+        [data-testid="reset-password-page"],
+        app-json-api-viewer,
+        app-directory,
+        app-auditlog,
+        app-system-settings,
+        app-user-management,
+        app-tenant-users,
+        app-tenant-homepage,
+        app-account,
+        app-network-intel,
+        app-scans-management,
+        app-dump-list,
+        app-report,
+        .ui-page-card,
+        .ui-page-panel,
+        .ui-report-card,
+        .ui-report-layout,
+        .ui-auth-card {
+          border-radius: 16px !important;
+          overflow: hidden !important;
+        }
+      `;
+    });
+  };
+
   const capture = (name: string, options: Partial<Cypress.ScreenshotOptions> = {}) => {
+    applyScreenshotChrome();
     cy.wait(300);
     cy.screenshot(`user-manual/${name}`, {
       capture: 'viewport',
