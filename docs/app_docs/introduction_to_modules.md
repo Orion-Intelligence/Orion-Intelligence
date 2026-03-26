@@ -378,4 +378,3 @@ Use:
 - [Introduction To Platform](./introduction_to_platform.md)
 - [User Manual](./user_manual.md)
 - [Developer Documentation](./developer_documentation.md)
-- [Orion Android Application](./orion_android_application.md)

@@ -554,7 +554,7 @@ Available lookup types:
 Entity API interface for live lookup workflows.
 ```
 
-Typical use cases:
+#### Common Entity API Use Cases
 
 - breach validation for a single email
 - identity enrichment
@@ -564,12 +564,18 @@ Typical use cases:
 
 ### File Scanner
 
-The file-scanner workflow supports two related use cases:
+File Scanner is the upload-based analysis area inside `Entity API`.
+
+#### Main Modes
+
+The workflow supports two related use cases:
 
 - file IOC extraction
 - APK analysis
 
-Supported behavior includes:
+#### Supported Behavior
+
+The File Scanner workflow includes:
 
 - file-type validation
 - size validation
@@ -577,13 +583,15 @@ Supported behavior includes:
 - grouped IOC output
 - export and print for supported scan types
 
+#### IOC Extraction Output
+
 For file IOC extraction, Orion groups indicators into categories such as URLs, packages, permissions, tampering markers, and other extracted values based on the uploaded content.
 
 ### Web Scans
 
 Web Scans is the live scanning area for web-facing targets.
 
-Available scan types:
+#### Available Scan Types
 
 - `Basic Scan`
 - `Port Scan`
@@ -591,14 +599,18 @@ Available scan types:
 - `SEO Scan`
 - `APK Scan`
 
-The standard web-scan workflow includes:
+#### Standard Workflow
+
+The standard web-scan flow is:
 
 1. enter a target domain or repository-style URL
 2. run the scan
 3. wait for loading-step progress
 4. review the generated report
 
-The report commonly includes:
+#### Report Structure
+
+The resulting report commonly includes:
 
 - a security grade
 - host and port
@@ -607,6 +619,8 @@ The report commonly includes:
 - categorized findings
 - evidence or proof blocks
 - download and print actions
+
+#### Findings and Error States
 
 Finding sections also show severity and confidence labels, so the report can be used for quick triage as well as export.
 

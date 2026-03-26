@@ -42,7 +42,6 @@ actionable insights.<br>
 | [Orion Crawler](https://github.com/Orion-Intelligence/Orion-Crawler) | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ddf7febc17424d967e34b3afa8ad8c)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Crawler/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Crawler/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
 | [Orion Collector](https://github.com/Orion-Intelligence/Orion-Collector) | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3e52faaeda504a518f0b675984f9af21)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Collector/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Collector/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
 | [Orion Micros](https://github.com/Orion-Intelligence/Orion-Micros) | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/5737f50b6feb4069b95e208bde905fcc)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Micros/dashboard) | - | - | - | - |
-| [Orion Browser](https://github.com/Orion-Intelligence/Orion-Browser) | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/37df35b2d275406e9fe466818bc7d779)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Browser/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Browser/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
 
 ## Technology Stack
 
@@ -56,8 +55,6 @@ is the list of libraries and frameworks used:
 ![Tor](https://badgen.net/badge/search-crawler/Tor/purple)
 ![Traefik](https://badgen.net/badge/search/Traefik/orange)
 ![elastic](https://badgen.net/badge/search/elastic/pink)
-![java](https://badgen.net/badge/browser/java/cyan)
-![kotlin](https://badgen.net/badge/browser/kotlin/yellow)
 
 ## Associated Repositories
 
@@ -67,7 +64,6 @@ is the list of libraries and frameworks used:
 | [Orion Crawler](https://github.com/Orion-Intelligence/Orion-Crawler)     | Used for monitoring and continuously crawling the hidden web.                  | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Crawler?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Crawler?style=social)         |
 | [Orion Collector](https://github.com/Orion-Intelligence/Orion-Collector) | Simplifies the task of creating custom crawling scripts for multiple websites. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Collector?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Collector?style=social)     |
 | [Orion Micros](https://github.com/Orion-Intelligence/Orion-Micros)       | Lightweight modular microservices supporting Orion components.                 | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Micros?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Micros?style=social)           |
-| [Orion Browser](https://github.com/Orion-Intelligence/Orion-Browser)     | A harvester-based browser used to scrape data as you browse.                   | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Browser?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Browser?style=social)         |
 ## Data Extraction Techniques
 
 This is a comprehensive flow diagram illustrating the functioning of the multithreaded crawler. It outlines the entire
@@ -87,14 +83,6 @@ development, scalability enhancements, and feature expansions aimed at providing
 data insight and linting
 
 ![linting(2)](https://github.com/user-attachments/assets/ce1885dc-e701-45f6-89ab-9f412b057373)
-
-## Browser Support
-
-Orion Browser is an Android application designed to provide a secure, private browsing experience by leveraging onion
-routing technology. This browser empowers users to access hidden web content anonymously, unblock restricted sites, and
-browse freely while safeguarding their online identity.
-
-![JPJ pdf](https://github.com/user-attachments/assets/399fd130-988d-4e0d-acef-2f60d6220a81)
 
 ## Contribution
 
