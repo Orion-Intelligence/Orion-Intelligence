@@ -92,6 +92,7 @@ export default defineConfig({
     e2e: {
         specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
         supportFile: "cypress/support/e2e.ts",
+        screenshotsFolder: "../docs/screenshots",
         testIsolation: true,
         setupNodeEvents(on, config) {
             if (isCi) {

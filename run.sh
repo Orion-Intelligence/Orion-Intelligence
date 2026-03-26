@@ -95,6 +95,29 @@ run_test_task() {
     exit 0
 }
 
+generate_docs() {
+    local target_dir="../docs/screenshots"
+    local browser="${DOC_SCREENSHOT_BROWSER:-electron}"
+    local temp_spec="cypress/e2e/.tmp-user-manual-screenshots-docs-runner.cy.ts"
+
+    cd client || exit
+    npm test -- run --browser electron --spec cypress/e2e/08-tenant-management.cy.ts
+    mkdir -p "$target_dir"
+    rm -rf "$target_dir"/20-user-manual-screenshots-docs-runner.cy.ts
+    cat > "$temp_spec" <<'EOF'
+import '../../../docs/e2e/user-manual-screenshots.cy';
+EOF
+
+    trap 'rm -f "$temp_spec"' EXIT
+    npm test -- run --browser "$browser" --spec "$temp_spec"
+    rm -f "$temp_spec"
+    trap - EXIT
+
+    find "$target_dir" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -exec cp {} "$target_dir"/ \;
+
+    cd ..
+}
+
 set_testing_enabled() {
     sed -i '/^TESTING_ENABLED=/d' "$ENV_FILE" 2>/dev/null || true
     if [ "$1" = "-t" ] || [ "$1" = "-tb" ]; then
@@ -104,12 +127,19 @@ set_testing_enabled() {
     fi
 }
 
-stop_docker
-
 if [ "$1" = "stop" ]; then
+    stop_docker
     echo "Orion Intelligence service stopped"
     exit 0
 fi
+
+if [ "$1" = "-doc" ] || [ "$1" = "-docs" ]; then
+    "$0" build -t
+    generate_docs
+    exit 0
+fi
+
+stop_docker
 
 create_parser_zip
 
