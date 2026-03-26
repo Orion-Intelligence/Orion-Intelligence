@@ -362,10 +362,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
     const payload = done.result ?? done;
     if (payload?.domain != null && Array.isArray(payload.ips)) {
+      const existingRows = new Map(this.ipRows.map((row) => [row.ip, row]));
       this.dnsResult = { domain: payload.domain, ips: payload.ips };
-      this.ipRows = payload.ips.map((ip: string) => ({
+      this.ipRows = payload.ips.map((ip: string) => existingRows.get(ip) ?? {
         ip, expanded: false, loading: false, progress: 0, step: null, detail: null, error: null,
-      }));
+      });
       this.lastResultCount = payload.ips.length;
     }
   }
@@ -912,8 +913,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
           row.detail = detail as IpDetail;
           row.progress = 100;
           row.step = 'Done';
+          row.loading = false;
         }
-        row.loading = false;
       }),
       catchError((error: any) => {
         row.loading = false;
