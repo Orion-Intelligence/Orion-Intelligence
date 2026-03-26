@@ -38,6 +38,7 @@ describe('User Manual Screenshot Flow', () => {
         html,
         body {
           overflow-x: hidden !important;
+          transform-origin: top left !important;
         }
 
         #dashboard-container,
@@ -68,8 +69,55 @@ describe('User Manual Screenshot Flow', () => {
     });
   };
 
+  const ensureDashboardReady = () => {
+    cy.get('[data-testid="dashboard-body"], [data-testid="dashboard-main"], [data-testid="profile-menu"]')
+      .filter(':visible')
+      .should('have.length.greaterThan', 0);
+  };
+
+  const fitFullWidthInViewport = () => {
+    cy.window().then((win) => {
+      const doc = win.document;
+      doc.body.style.zoom = '1';
+      doc.documentElement.style.zoom = '1';
+
+      const selectors = [
+        '[data-testid="side-filter-panel"]',
+        'app-system-settings',
+        'app-tenant-settings',
+        'app-auditlog',
+        'app-user-management',
+        'app-report',
+        '#dashboard-container',
+        '[data-cy="dashboard-sub-container"]',
+        '[data-testid="dashboard-main"]',
+        '[data-testid="dashboard-body"]',
+      ];
+
+      let widestWidth = win.innerWidth;
+
+      for (const selector of selectors) {
+        doc.querySelectorAll(selector).forEach((el) => {
+          const node = el as HTMLElement;
+          if (!node || node.offsetParent === null) {
+            return;
+          }
+
+          widestWidth = Math.max(widestWidth, node.scrollWidth, node.getBoundingClientRect().width);
+        });
+      }
+
+      const viewportWidth = Math.max(win.innerWidth, 1);
+      const targetZoom = Math.min(1, Math.max(0.7, (viewportWidth - 24) / widestWidth));
+      doc.body.style.zoom = `${targetZoom}`;
+      doc.documentElement.style.zoom = `${targetZoom}`;
+      win.scrollTo(0, 0);
+    });
+  };
+
   const capture = (name: string, options: Partial<Cypress.ScreenshotOptions> = {}) => {
     applyScreenshotChrome();
+    fitFullWidthInViewport();
     cy.wait(300);
     cy.screenshot(`user-manual/${name}`, {
       capture: 'viewport',
@@ -77,12 +125,6 @@ describe('User Manual Screenshot Flow', () => {
       disableTimersAndAnimations: false,
       ...options,
     });
-  };
-
-  const ensureDashboardReady = () => {
-    cy.get('[data-testid="dashboard-body"], [data-testid="dashboard-main"], [data-testid="profile-menu"]')
-      .filter(':visible')
-      .should('have.length.greaterThan', 0);
   };
 
   const stubNetworkIntelApis = () => {

@@ -98,26 +98,51 @@ run_test_task() {
 generate_docs() {
     local target_dir="../docs/screenshots"
     local browser="${DOC_SCREENSHOT_BROWSER:-electron}"
-    local temp_spec="cypress/e2e/.tmp-user-manual-screenshots-docs-runner.cy.ts"
-    local nested_dir="$target_dir/.tmp-user-manual-screenshots-docs-runner.cy.ts"
+    local temp_spec_dir="cypress/doc"
+    local temp_spec="$temp_spec_dir/tmp-user-manual-screenshots-docs-runner.cy.ts"
+    local nested_dir="$target_dir/tmp-user-manual-screenshots-docs-runner.cy.ts"
     local legacy_nested_dir="$target_dir/tmp-user-manual-screenshots-runner.cy.ts"
+    local postprocess_python="python3"
+    local chromium_binary=""
+
+    if [ -x "/tmp/codex-tts-venv/bin/python" ]; then
+        postprocess_python="/tmp/codex-tts-venv/bin/python"
+    fi
+
+    if [ -x "/snap/chromium/current/usr/lib/chromium-browser/chrome" ]; then
+        chromium_binary="/snap/chromium/current/usr/lib/chromium-browser/chrome"
+    elif [ -x "/snap/chromium/3390/usr/lib/chromium-browser/chrome" ]; then
+        chromium_binary="/snap/chromium/3390/usr/lib/chromium-browser/chrome"
+    fi
+
+    if [ -n "$chromium_binary" ]; then
+        browser="$chromium_binary"
+    fi
 
     cd client || exit
     npm test -- run --browser electron --spec cypress/e2e/08-tenant-management.cy.ts
     mkdir -p "$target_dir"
+    rm -f "$target_dir"/*.png
+    rm -f "$target_dir"/*.jpg
+    rm -f "$target_dir"/*.jpeg
+    rm -f "$target_dir"/*.webp
     rm -rf "$target_dir"/20-user-manual-screenshots-docs-runner.cy.ts
     rm -rf "$nested_dir"
     rm -rf "$legacy_nested_dir"
+    mkdir -p "$temp_spec_dir"
     cat > "$temp_spec" <<'EOF'
 import '../../../docs/e2e/user-manual-screenshots.cy';
 EOF
 
     trap 'rm -f "$temp_spec"' EXIT
-    npm test -- run --browser "$browser" --spec "$temp_spec"
+    npm test -- run --browser "$browser" \
+        --config 'specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
+        --spec "$temp_spec"
     rm -f "$temp_spec"
     trap - EXIT
 
     find "$target_dir" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -exec cp {} "$target_dir"/ \;
+    "$postprocess_python" ../docs/scripts/postprocess_screenshots.py "$target_dir"/*.png
     rm -rf "$nested_dir"
     rm -rf "$legacy_nested_dir"
 

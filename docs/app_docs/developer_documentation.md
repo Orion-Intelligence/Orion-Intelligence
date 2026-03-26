@@ -37,7 +37,7 @@ At a high level, the system includes:
 - a build-and-run entry script in `run.sh`
 - generated and maintained documentation under `docs/`
 
-The wider Orion ecosystem also references adjacent projects such as crawler, collector, and mobile/browser components, but this repository is centered on the search and investigation platform itself.
+The wider Orion ecosystem also references adjacent projects such as crawlers, collectors, and other supporting components, but this repository is centered on the search and investigation platform itself.
 
 ## Core Architecture
 
@@ -218,7 +218,6 @@ Application-facing documentation lives under `docs/app_docs/`. These files descr
 - the platform
 - major modules
 - the user manual
-- mobile/browser behavior
 - developer workflows
 
 Docs in this area should be written for scannability:
