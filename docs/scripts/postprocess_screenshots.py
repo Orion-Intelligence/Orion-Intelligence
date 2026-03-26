@@ -94,7 +94,7 @@ def add_label(image: Image.Image, label: str) -> Image.Image:
     return image
 
 
-def process_image(path: Path, crop_right: int = 14, crop_bottom: int = 14, radius: int = 14) -> None:
+def process_image(path: Path, crop_right: int = 18, crop_bottom: int = 22, radius: int = 14) -> None:
     image = Image.open(path).convert("RGBA")
     width, height = image.size
 
