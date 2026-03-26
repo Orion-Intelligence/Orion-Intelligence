@@ -142,7 +142,16 @@ EOF
     trap - EXIT
 
     find "$target_dir" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -exec cp {} "$target_dir"/ \;
-    "$postprocess_python" ../docs/scripts/postprocess_screenshots.py "$target_dir"/*.png
+    (
+        cd "$target_dir" || exit 1
+        rm -f *-20260326.png
+        for f in *.png; do
+            [ -e "$f" ] || continue
+            cp "$f" "${f%.png}-20260326.png"
+        done
+        "$postprocess_python" ../scripts/postprocess_screenshots.py *-20260326.png
+        rm -f *.png
+    )
     rm -rf "$nested_dir"
     rm -rf "$legacy_nested_dir"
 
