@@ -34,6 +34,13 @@ The standard entry point is the login screen. Depending on deployment settings, 
 - welcome or notification screens
 - password reset flows
 
+```{figure} ../screenshots/login-page.png
+:alt: Orion login page
+:width: 90%
+
+Login screen used for standard account access.
+```
+
 ```{admonition} Role-aware experience
 :class: note
 
@@ -49,6 +56,13 @@ The reset flow supports two stages:
 
 The new-password form includes password-strength guidance and confirmation validation.
 
+```{figure} ../screenshots/password-reset.png
+:alt: Password reset request page
+:width: 90%
+
+Password reset workflow entry point.
+```
+
 ### Tenant Onboarding
 
 New tenant users may be routed through a multi-step onboarding flow before using the main dashboard. The onboarding wizard includes:
@@ -63,7 +77,7 @@ During onboarding, users can define monitored IOC values by category before ente
 
 After authentication, Orion opens inside the `dashboard` workspace.
 
-```{figure} ../screenshots/homepage.png
+```{figure} ../screenshots/homepage-overview.png
 :alt: Orion homepage
 :width: 100%
 
@@ -81,9 +95,9 @@ The main UI is centered around four areas:
 
 The left sidebar is the primary navigation system. It groups features by investigation area and by operational purpose.
 
-```{figure} ../screenshots/navbar.png
+```{figure} ../screenshots/homepage-overview.png
 :alt: Orion sidebar
-:width: 45%
+:width: 100%
 
 Expanded sidebar with major modules and support links.
 ```
@@ -105,7 +119,7 @@ Most data-driven modules share the same search pattern:
 - optional search tools
 - an optional right-side filter drawer
 
-```{figure} ../screenshots/searchbar.png
+```{figure} ../screenshots/homepage-searchbar.png
 :alt: Global search bar
 :width: 90%
 
@@ -139,11 +153,11 @@ The `Advance` toggle enables the filter overlay below the search bar. When enabl
 
 The `Tools` section provides search behavior controls and, in some contexts, sorting options.
 
-```{figure} ../screenshots/searchtype.png
+```{figure} ../screenshots/homepage-searchbar.png
 :alt: Search type controls
-:width: 70%
+:width: 90%
 
-Search mode options available from the tools menu.
+Search entry area with search mode and tools controls.
 ```
 
 Available search modes in the main result workflow include:
@@ -159,7 +173,7 @@ These modes affect how broadly or narrowly Orion interprets the query.
 
 When advanced mode is enabled, users can add indexed filters to refine the result set.
 
-```{figure} ../screenshots/filter.png
+```{figure} ../screenshots/search-filters.png
 :alt: Search filters
 :width: 80%
 
@@ -182,13 +196,6 @@ When entity filters, sidebar filters, or non-default search tools are active, Or
 
 The homepage is the default overview for many users and acts as a search-first dashboard.
 
-```{figure} ../screenshots/index.png
-:alt: Homepage dashboard
-:width: 100%
-
-Homepage overview with summary panels and search-first layout.
-```
-
 The homepage typically includes:
 
 - the global search entry point
@@ -205,34 +212,34 @@ For some privileged roles, the homepage also includes a draggable insight panel 
 - `Recent or featured results`: direct pivots into current records.
 - `Insight blocks`: charts and counts used for quick triage.
 
-```{figure} ../screenshots/generalindex.png
-:alt: General index summary
+```{figure} ../screenshots/homepage-overview.png
+:alt: Homepage dashboard
 :width: 100%
 
-Example of a general index overview.
+Homepage overview with summary panels and search-first layout.
 ```
 
-```{figure} ../screenshots/leakedindex.png
-:alt: Leaked index summary
+```{figure} ../screenshots/tenant-homepage.png
+:alt: Tenant homepage dashboard
 :width: 100%
 
-Example of a leaked index overview.
+Tenant-oriented homepage with alert and monitoring summaries.
 ```
 
 ## Analytics and Result Insights
 
 Orion exposes analytics alongside search results to help analysts understand the composition of the returned dataset.
 
-```{figure} ../screenshots/keywordinsight.png
+```{figure} ../screenshots/consolidated-insights.png
 :alt: Keyword insights
-:width: 55%
+:width: 75%
 
 Keyword-level insight and result analysis.
 ```
 
-```{figure} ../screenshots/resultgeneral.png
+```{figure} ../screenshots/consolidated-results.png
 :alt: General result analytics
-:width: 75%
+:width: 100%
 
 Expanded result insight and breakdown panels.
 ```
@@ -291,7 +298,7 @@ Depending on the query and license state, this view can combine:
 
 Use consolidated search for first-pass triage when you want breadth before moving into a dedicated module.
 
-```{figure} ../screenshots/searchresult.png
+```{figure} ../screenshots/consolidated-results.png
 :alt: Consolidated investigation results
 :width: 100%
 
@@ -315,7 +322,7 @@ Subcategories:
 - `Cryptocurrency`
 - `Leaks`
 
-```{figure} ../screenshots/genericresults.png
+```{figure} ../screenshots/general-intelligence-results.png
 :alt: General intelligence results
 :width: 100%
 
@@ -341,7 +348,7 @@ Subcategories:
 
 Use `Databases` when you want structured breach records. Use `Tracking` when checking whether a specific email or identity appears in known breach data.
 
-```{figure} ../screenshots/email.png
+```{figure} ../screenshots/data-breach-tracking.png
 :alt: Email breach tracking
 :width: 100%
 
@@ -369,6 +376,13 @@ The detail view commonly exposes:
 - breach or source reference
 - IP and location
 
+```{figure} ../screenshots/defacement-report.png
+:alt: Defacement report view
+:width: 100%
+
+Defacement result detail with target and attacker context.
+```
+
 ### Social
 
 The Social module aggregates intelligence from social and community platforms.
@@ -390,7 +404,7 @@ Use this module for:
 - discussion tracking
 - platform-specific searches
 
-```{figure} ../screenshots/news.png
+```{figure} ../screenshots/social-report.png
 :alt: Social or feed-style intelligence results
 :width: 100%
 
@@ -428,6 +442,13 @@ Common usage patterns include:
 - browsing leak or dump listings with page-level filters
 - pivoting directly from a known leak URL
 - reviewing channel-style or site-style dump references without opening a broader module first
+
+```{figure} ../screenshots/dump-listing.png
+:alt: Dump listing workflow
+:width: 100%
+
+Dump listing view with direct leak URL search.
+```
 
 ## Stealer Logs
 
@@ -502,7 +523,7 @@ The results area is designed for:
 Use Stealer Logs when you already have a domain, email, or IP and need to confirm whether it appears in infostealer-derived material.
 :::
 
-```{figure} ../screenshots/foundresults.png
+```{figure} ../screenshots/stealer-logs-results.png
 :alt: Credential and stealer-log results
 :width: 100%
 
@@ -526,7 +547,7 @@ Available lookup types:
 - `File Scanner`
 - `Crypto Scanner`
 
-```{figure} ../screenshots/APIs.png
+```{figure} ../screenshots/entity-api-email-breach.png
 :alt: Entity API view
 :width: 100%
 
@@ -591,6 +612,13 @@ Finding sections also show severity and confidence labels, so the report can be 
 
 Scan failures are handled with retry guidance and error messaging.
 
+```{figure} ../screenshots/web-scan-report.png
+:alt: Web scan report
+:width: 100%
+
+Web scan report with security posture, findings, and metadata.
+```
+
 ### Network Intel
 
 Network Intel provides live recon workflows for domains and IPs.
@@ -601,7 +629,7 @@ Tabs:
 - `IP Scan`
 - `Vulnerability Scan`
 
-```{figure} ../screenshots/networklink.png
+```{figure} ../screenshots/network-intel-host-recon.png
 :alt: Network intelligence view
 :width: 100%
 
@@ -639,6 +667,13 @@ The Network Intel toolbar can include:
 
 Geo support is especially relevant when working from host-oriented results and wanting to pivot from a location or coordinates into nearby IP discovery.
 
+```{figure} ../screenshots/network-intel-geo-modal.png
+:alt: Network Intel geo modal
+:width: 80%
+
+Geo-assisted pivot modal used from network results.
+```
+
 ## Graph Investigation Modules
 
 ### CTI Graph
@@ -646,13 +681,6 @@ Geo support is especially relevant when working from host-oriented results and w
 CTI Graph is the relationship-mapping module for cyber threat intelligence pivots.
 
 It opens in its own tabbed workspace and supports multiple sessions.
-
-```{figure} ../screenshots/linktab.png
-:alt: CTI graph-related investigation view
-:width: 100%
-
-Relationship-focused graph investigation.
-```
 
 Key concepts:
 
@@ -756,7 +784,7 @@ In practice, it helps answer three questions quickly:
 - whether actor- or URL-based pivots are available
 - which extracted sections are worth opening in full reports
 
-```{figure} ../screenshots/uniqueurls.png
+```{figure} ../screenshots/consolidated-insights.png
 :alt: Result insights side panel
 :width: 75%
 
@@ -779,7 +807,7 @@ The general report view commonly includes:
 
 Some report layouts also expose quick links, downloadable record output, or direct pivot actions to graph and sharing tools from the same header.
 
-```{figure} ../screenshots/content.png
+```{figure} ../screenshots/social-report.png
 :alt: Report content view
 :width: 100%
 
@@ -798,7 +826,7 @@ The metadata panel is expandable and lets users browse extracted values by categ
 
 This is the main place to inspect structured extraction results from the record.
 
-```{figure} ../screenshots/sections.png
+```{figure} ../screenshots/report-json-viewer.png
 :alt: Report metadata sections
 :width: 90%
 
@@ -814,6 +842,13 @@ For relevant breach records, the report may also include:
 - report mapping
 
 The JSON viewer is useful for raw structured inspection, while report mapping helps users navigate relationships and related record context.
+
+```{figure} ../screenshots/report-json-viewer.png
+:alt: Report JSON viewer
+:width: 90%
+
+JSON inspection view for raw structured report data.
+```
 
 ### AI Chat and Summary
 
@@ -862,7 +897,7 @@ Common behaviors include:
 - monitoring-status style browsing
 - service and reference review across monitored live entries
 
-```{figure} ../screenshots/monitor.png
+```{figure} ../screenshots/directory-monitoring.png
 :alt: Directory and monitoring view
 :width: 85%
 
@@ -889,8 +924,8 @@ The `Documentation` entry opens the published documentation site in a new tab.
 
 The user profile area at the top of the sidebar contains user-specific and tenant-specific pages.
 
-```{figure} ../screenshots/settings.png
-:alt: Account and settings
+```{figure} ../screenshots/account-settings.png
+:alt: Account settings page
 :width: 100%
 
 Profile, settings, and administrative workspace.
@@ -909,6 +944,13 @@ The account page allows the current user to review and manage:
 - theme preference
 
 The page also shows the currently running platform version. It is focused on the current user rather than the tenant as a whole.
+
+```{figure} ../screenshots/account-settings.png
+:alt: Account settings form
+:width: 100%
+
+Current-user profile and account settings form.
+```
 
 ### Tenant Homepage
 
@@ -942,6 +984,13 @@ The profile area also supports alert-focused routes such as:
 
 - `alerts/<type>` for category-specific alert reports
 - `addcustomalert` for creating custom alert definitions where enabled
+
+```{figure} ../screenshots/tenant-homepage.png
+:alt: Tenant homepage alerts view
+:width: 100%
+
+Tenant homepage with alert and monitoring summary cards.
+```
 
 ### Manage IOCs
 
@@ -981,6 +1030,13 @@ Depending on permissions, users can:
 
 Some fields remain read-only depending on role. The page also acts as a tenant overview by summarizing the tenant name, status-style badges, location, assigned quota, and current license list.
 
+```{figure} ../screenshots/tenant-settings.png
+:alt: Tenant settings page
+:width: 100%
+
+Tenant settings and tenant-level license summary.
+```
+
 ## User and Tenant Administration
 
 ### Tenant Users
@@ -1006,6 +1062,13 @@ Displayed information commonly includes:
 - licenses
 
 The page also respects quota-based restrictions.
+
+```{figure} ../screenshots/tenant-users.png
+:alt: Tenant users page
+:width: 100%
+
+Tenant user-management view with quotas, roles, and licenses.
+```
 
 ### Tenant Administration
 
@@ -1046,6 +1109,13 @@ The audit-log page supports:
 - filtering
 - pagination
 - desktop and mobile layouts
+
+```{figure} ../screenshots/audit-logs.png
+:alt: Audit log page
+:width: 100%
+
+Audit log workspace with filters and export actions.
+```
 
 ## System Administration
 
@@ -1089,7 +1159,7 @@ The page also shows read-only runtime flags such as:
 
 Depending on deployment data, this area may also function as a quick verification point for platform version, enabled services, and branding visibility choices.
 
-```{figure} ../screenshots/adminpage.png
+```{figure} ../screenshots/system-settings.png
 :alt: Administrative and system settings workspace
 :width: 100%
 
