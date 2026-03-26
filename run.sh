@@ -190,6 +190,7 @@ set_testing_enabled "$FLAG"
 
 if [ "$COMMAND" = "build" ]; then
     docker pull python:3.11-slim
+    npm --prefix client install
     npm --prefix client run lint
 
     case "$FLAG" in
