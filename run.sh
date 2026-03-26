@@ -120,7 +120,7 @@ generate_docs() {
     fi
 
     cd client || exit
-    npm test -- run --browser electron --spec cypress/e2e/08-tenant-management.cy.ts
+    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:8080" --spec cypress/e2e/08-tenant-management.cy.ts
     mkdir -p "$target_dir"
     rm -f "$target_dir"/*.png
     rm -f "$target_dir"/*.jpg
@@ -135,7 +135,7 @@ import '../../../docs/e2e/user-manual-screenshots.cy';
 EOF
 
     trap 'rm -f "$temp_spec"' EXIT
-    npm test -- run --browser "$browser" \
+    npm test -- run --browser "$browser" --config baseUrl="http://127.0.0.1:8080" \
         --config 'specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
         --spec "$temp_spec"
     rm -f "$temp_spec"
