@@ -5,7 +5,7 @@ import re
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -40,6 +40,46 @@ def load_caption_map() -> dict[str, str]:
 
 
 CAPTION_MAP = load_caption_map()
+
+
+def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
+    mask = Image.new("L", size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.rounded_rectangle((0, 0, size[0] - 1, size[1] - 1), radius=max(0, radius), fill=255)
+    return mask
+
+
+def render_top_accent(
+    size: tuple[int, int],
+    radius: int,
+    border_width: int,
+    color: tuple[int, int, int, int],
+    scale: int = 4,
+) -> Image.Image:
+    width, height = size
+    hi_size = (width * scale, height * scale)
+    hi_radius = max(1, radius * scale)
+    hi_border = max(1, border_width * scale)
+
+    outer_mask = rounded_mask(hi_size, hi_radius)
+
+    inner_mask = Image.new("L", hi_size, 0)
+    inner_width = max(1, hi_size[0] - (hi_border * 2))
+    inner_height = max(1, hi_size[1] - (hi_border * 2))
+    inner_radius = max(0, hi_radius - hi_border)
+    inner_shape = rounded_mask((inner_width, inner_height), inner_radius)
+    inner_mask.paste(inner_shape, (hi_border, hi_border))
+
+    border_mask = ImageChops.subtract(outer_mask, inner_mask)
+
+    top_clip = Image.new("L", hi_size, 0)
+    clip_height = min(hi_size[1], hi_radius + hi_border)
+    ImageDraw.Draw(top_clip).rectangle((0, 0, hi_size[0], clip_height), fill=255)
+    top_border_mask = ImageChops.multiply(border_mask, top_clip)
+
+    accent = Image.new("RGBA", hi_size, color)
+    accent.putalpha(ImageChops.multiply(accent.getchannel("A"), top_border_mask))
+    return accent.resize(size, Image.Resampling.LANCZOS)
 
 
 def load_font(size: int) -> ImageFont.ImageFont:
@@ -111,45 +151,26 @@ def process_image(
     image = image.crop((0, crop_top, new_width, crop_top + new_height))
     image = add_label(image, CAPTION_MAP.get(path.name, ""))
 
-    mask = Image.new("L", image.size, 0)
-    draw = ImageDraw.Draw(mask)
-    draw.rounded_rectangle((0, 0, image.size[0], image.size[1]), radius=radius, fill=255)
+    effective_radius = max(1, radius - final_trim)
+    if final_trim > 0 and image.size[0] > final_trim * 2 and image.size[1] > final_trim * 2:
+        image = image.crop((final_trim, final_trim, image.size[0] - final_trim, image.size[1] - final_trim))
+
+    mask = rounded_mask(image.size, effective_radius)
 
     rounded = Image.new("RGBA", image.size, (0, 0, 0, 0))
     rounded.paste(image, (0, 0), mask)
-    if final_trim > 0 and rounded.size[0] > final_trim * 2 and rounded.size[1] > final_trim * 2:
-        rounded = rounded.crop((final_trim, final_trim, rounded.size[0] - final_trim, rounded.size[1] - final_trim))
 
     canvas = Image.new("RGBA", rounded.size, (0, 0, 0, 0))
     canvas.paste(rounded, (0, 0), rounded)
 
     if border_width > 0:
-        border_draw = ImageDraw.Draw(canvas)
-        inset = max(1, border_width // 2)
-        effective_radius = max(1, radius - final_trim)
-        left = inset
-        right = canvas.size[0] - inset - 1
-        top = inset
-
-        border_draw.arc(
-            (left, top, left + (effective_radius * 2), top + (effective_radius * 2)),
-            start=180,
-            end=270,
-            fill=(58, 130, 246, 210),
-            width=border_width,
+        accent = render_top_accent(
+            size=canvas.size,
+            radius=effective_radius,
+            border_width=border_width,
+            color=(102, 169, 255, 210),
         )
-        border_draw.line(
-            (left + effective_radius, top, right - effective_radius, top),
-            fill=(58, 130, 246, 210),
-            width=border_width,
-        )
-        border_draw.arc(
-            (right - (effective_radius * 2), top, right, top + (effective_radius * 2)),
-            start=270,
-            end=360,
-            fill=(58, 130, 246, 210),
-            width=border_width,
-        )
+        canvas.alpha_composite(accent)
 
     canvas.save(path)
 
