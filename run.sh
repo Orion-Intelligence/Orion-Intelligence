@@ -95,6 +95,17 @@ run_test_task() {
     exit 0
 }
 
+clear_docs_screenshots() {
+    local target_dir="docs/screenshots"
+    rm -f "$target_dir"/*.png
+    rm -f "$target_dir"/*.jpg
+    rm -f "$target_dir"/*.jpeg
+    rm -f "$target_dir"/*.webp
+    rm -rf "$target_dir"/20-user-manual-screenshots-docs-runner.cy.ts
+    rm -rf "$target_dir"/tmp-user-manual-screenshots-docs-runner.cy.ts
+    rm -rf "$target_dir"/tmp-user-manual-screenshots-runner.cy.ts
+}
+
 generate_docs() {
     local target_dir="../docs/screenshots"
     local browser="${DOC_SCREENSHOT_BROWSER:-electron}"
@@ -126,11 +137,6 @@ generate_docs() {
     cd client || exit
     npm test -- run --browser electron --config baseUrl="http://127.0.0.1:8080" --spec cypress/e2e/08-tenant-management.cy.ts
     mkdir -p "$target_dir"
-    rm -f "$target_dir"/*.png
-    rm -f "$target_dir"/*.jpg
-    rm -f "$target_dir"/*.jpeg
-    rm -f "$target_dir"/*.webp
-    rm -rf "$target_dir"/20-user-manual-screenshots-docs-runner.cy.ts
     rm -rf "$nested_dir"
     rm -rf "$legacy_nested_dir"
     mkdir -p "$temp_spec_dir"
@@ -179,6 +185,7 @@ fi
 
 if [ "$1" = "-doc" ] || [ "$1" = "-docs" ]; then
     "$0" build -t
+    clear_docs_screenshots
     generate_docs
     exit 0
 fi
