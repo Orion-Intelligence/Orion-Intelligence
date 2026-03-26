@@ -94,7 +94,7 @@ def add_label(image: Image.Image, label: str) -> Image.Image:
     return image
 
 
-def process_image(path: Path, crop_right: int = 18, crop_bottom: int = 22, radius: int = 14) -> None:
+def process_image(path: Path, crop_right: int = 18, crop_bottom: int = 22, radius: int = 14, final_trim: int = 2) -> None:
     image = Image.open(path).convert("RGBA")
     width, height = image.size
 
@@ -109,6 +109,8 @@ def process_image(path: Path, crop_right: int = 18, crop_bottom: int = 22, radiu
 
     rounded = Image.new("RGBA", image.size, (0, 0, 0, 0))
     rounded.paste(image, (0, 0), mask)
+    if final_trim > 0 and rounded.size[0] > final_trim * 2 and rounded.size[1] > final_trim * 2:
+        rounded = rounded.crop((final_trim, final_trim, rounded.size[0] - final_trim, rounded.size[1] - final_trim))
     rounded.save(path)
 
 
