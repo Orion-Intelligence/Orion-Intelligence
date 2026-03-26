@@ -135,8 +135,8 @@ import '../../../docs/e2e/user-manual-screenshots.cy';
 EOF
 
     trap 'rm -f "$temp_spec"' EXIT
-    npm test -- run --browser "$browser" --config baseUrl="http://127.0.0.1:8080" \
-        --config 'specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
+    npm test -- run --browser "$browser" \
+        --config 'baseUrl=http://127.0.0.1:8080,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
         --spec "$temp_spec"
     rm -f "$temp_spec"
     trap - EXIT
