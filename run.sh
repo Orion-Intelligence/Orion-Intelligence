@@ -109,6 +109,10 @@ generate_docs() {
         postprocess_python="/tmp/codex-tts-venv/bin/python"
     fi
 
+    if [ "$postprocess_python" = "python3" ]; then
+        python3 -m pip install --quiet Pillow
+    fi
+
     if [ -x "/snap/chromium/current/usr/lib/chromium-browser/chrome" ]; then
         chromium_binary="/snap/chromium/current/usr/lib/chromium-browser/chrome"
     elif [ -x "/snap/chromium/3390/usr/lib/chromium-browser/chrome" ]; then
