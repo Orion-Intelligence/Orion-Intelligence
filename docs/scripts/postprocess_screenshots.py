@@ -94,13 +94,21 @@ def add_label(image: Image.Image, label: str) -> Image.Image:
     return image
 
 
-def process_image(path: Path, crop_right: int = 18, crop_bottom: int = 22, radius: int = 14, final_trim: int = 2) -> None:
+def process_image(
+    path: Path,
+    crop_top: int = 3,
+    crop_right: int = 18,
+    crop_bottom: int = 22,
+    radius: int = 14,
+    final_trim: int = 2,
+    border_width: int = 3,
+) -> None:
     image = Image.open(path).convert("RGBA")
     width, height = image.size
 
     new_width = max(1, width - crop_right)
-    new_height = max(1, height - crop_bottom)
-    image = image.crop((0, 0, new_width, new_height))
+    new_height = max(1, height - crop_top - crop_bottom)
+    image = image.crop((0, crop_top, new_width, crop_top + new_height))
     image = add_label(image, CAPTION_MAP.get(path.name, ""))
 
     mask = Image.new("L", image.size, 0)
@@ -111,7 +119,39 @@ def process_image(path: Path, crop_right: int = 18, crop_bottom: int = 22, radiu
     rounded.paste(image, (0, 0), mask)
     if final_trim > 0 and rounded.size[0] > final_trim * 2 and rounded.size[1] > final_trim * 2:
         rounded = rounded.crop((final_trim, final_trim, rounded.size[0] - final_trim, rounded.size[1] - final_trim))
-    rounded.save(path)
+
+    canvas = Image.new("RGBA", rounded.size, (0, 0, 0, 0))
+    canvas.paste(rounded, (0, 0), rounded)
+
+    if border_width > 0:
+        border_draw = ImageDraw.Draw(canvas)
+        inset = max(1, border_width // 2)
+        effective_radius = max(1, radius - final_trim)
+        left = inset
+        right = canvas.size[0] - inset - 1
+        top = inset
+
+        border_draw.arc(
+            (left, top, left + (effective_radius * 2), top + (effective_radius * 2)),
+            start=180,
+            end=270,
+            fill=(58, 130, 246, 210),
+            width=border_width,
+        )
+        border_draw.line(
+            (left + effective_radius, top, right - effective_radius, top),
+            fill=(58, 130, 246, 210),
+            width=border_width,
+        )
+        border_draw.arc(
+            (right - (effective_radius * 2), top, right, top + (effective_radius * 2)),
+            start=270,
+            end=360,
+            fill=(58, 130, 246, 210),
+            width=border_width,
+        )
+
+    canvas.save(path)
 
 
 def main() -> int:

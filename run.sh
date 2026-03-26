@@ -150,7 +150,7 @@ EOF
             cp "$f" "${f%.png}-20260326.png"
         done
         "$postprocess_python" ../scripts/postprocess_screenshots.py *-20260326.png
-        rm -f *.png
+        find . -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
     )
     rm -rf "$nested_dir"
     rm -rf "$legacy_nested_dir"
