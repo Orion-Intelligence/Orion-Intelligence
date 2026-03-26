@@ -23,6 +23,7 @@ describe('User Manual Screenshot Flow', () => {
       style.textContent = `
         html, body {
           scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
         }
 
         html::-webkit-scrollbar,
@@ -34,10 +35,9 @@ describe('User Manual Screenshot Flow', () => {
           background: transparent !important;
         }
 
+        html,
         body {
-          background: #eef3f8 !important;
-          padding: 14px !important;
-          box-sizing: border-box !important;
+          overflow-x: hidden !important;
         }
 
         #dashboard-container,
@@ -62,8 +62,7 @@ describe('User Manual Screenshot Flow', () => {
         .ui-report-card,
         .ui-report-layout,
         .ui-auth-card {
-          border-radius: 16px !important;
-          overflow: hidden !important;
+          border-radius: 12px !important;
         }
       `;
     });
