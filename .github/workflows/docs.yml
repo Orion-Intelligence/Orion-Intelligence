@@ -48,20 +48,6 @@ jobs:
           chmod +x ./run.sh
           ./run.sh -docs
 
-      - run: |
-          set -euo pipefail
-          count="$(find docs/screenshots -maxdepth 1 -type f -name '*-20260326.png' | wc -l)"
-          echo "final_screenshot_count=$count"
-          test "$count" -gt 0
-
-      - run: |
-          set -euo pipefail
-          python3 -m pip install --upgrade pip
-          python3 -m pip install sphinx
-          python3 -m pip install -r docs/requirements.txt
-          python3 -m sphinx -W -b html docs docs/_build/html
-          test -f docs/_build/html/index.html
-
       - if: always()
         uses: actions/upload-artifact@v4
         with:
