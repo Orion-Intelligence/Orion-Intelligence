@@ -30,7 +30,8 @@ export class DashboardSidebarItemsComponent {
     this.sectionSelected.emit(this.category);
   }
 
-  selectOption(item: string) {
+  selectOption(event: Event, item: string) {
+    event.stopPropagation();
     this.optionSelected.emit(item);
   }
 
