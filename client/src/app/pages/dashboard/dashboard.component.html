@@ -10,7 +10,7 @@
     <div id="top" data-cy="top" class="block h-px w-full"></div>
     <div class="flex h-screen min-h-[800px] overflow-x-hidden overflow-y-visible bg-[var(--color-blue-900)]" id="dashboard__sidebar-main" data-cy="dashboard-sidebar-main">
       <input class="hidden" id="dashboard__menu-toggle" name="menu-input" type="radio" data-cy="menu-toggle">
-      <div [ngClass]="{ 'p-0 overflow-y-auto': isMenuOpen, 'px-[7px] py-[8px] overflow-hidden': !isMenuOpen, 'transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[900px]:transition-none': isMenuOpen, 'transition-none': !isMenuOpen }" [style.width]="isMenuOpen ? (isCompactViewport() ? '100vw' : '300px') : (isCompactViewport() ? '56px' : '70px')" [style.min-width]="isMenuOpen ? (isCompactViewport() ? '100vw' : '300px') : (isCompactViewport() ? '56px' : '70px')" class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] [scrollbar-color:var(--color-blue-880)_transparent]" data-cy="dashboard-sidebar">
+      <div [ngClass]="{ 'p-0 overflow-y-auto': isMenuOpen, 'px-[7px] py-[8px] overflow-hidden': !isMenuOpen, 'transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[900px]:transition-none': isMenuOpen, 'transition-none': !isMenuOpen, 'w-screen min-w-screen': isMenuOpen && isCompactViewport(), 'w-[300px] min-w-[300px]': isMenuOpen && !isCompactViewport(), 'w-[56px] min-w-[56px]': !isMenuOpen && isCompactViewport(), 'w-[70px] min-w-[70px]': !isMenuOpen && !isCompactViewport() }" class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] [scrollbar-color:var(--color-blue-880)_transparent]" data-cy="dashboard-sidebar">
         <app-dashboard-sidebar
           (menuToggle)="toggleNavigation()"
           data-cy="dashboard-sidebar-component">
@@ -20,7 +20,7 @@
         <div class="pointer-events-none absolute inset-x-0 top-0 h-[220px] bg-[var(--color-mono)]"></div>
         <div class="relative z-[1] flex h-[1vh] min-h-full min-w-0 flex-col overflow-y-auto overflow-x-hidden" id="dashboard-container" data-cy="dashboard-sub-container" data-testid="dashboard-container">
           <app-dashboard-header data-cy="dashboard-header"></app-dashboard-header>
-          <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="ui-dashboard-grid-bg m-0 block flex-1 overflow-x-hidden" [style.width]="authService.getIsMobileDemo() ? '100vw' : null" data-cy="dashboard-body" data-testid="dashboard-body">
+          <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" [ngClass]="{ 'w-screen': authService.getIsMobileDemo() }" class="ui-dashboard-grid-bg m-0 block flex-1 overflow-x-hidden" data-cy="dashboard-body" data-testid="dashboard-body">
             <router-outlet #routerOutlet="outlet" data-cy="router-outlet"></router-outlet>
           </span>
         </div>
