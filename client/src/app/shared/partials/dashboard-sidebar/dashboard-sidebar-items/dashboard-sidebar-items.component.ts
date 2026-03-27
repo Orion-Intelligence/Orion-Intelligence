@@ -35,7 +35,7 @@ export class DashboardSidebarItemsComponent {
   }
 
   requestSubscription(moduleName: string) {
-    if (!this.licenseService.canAccess(moduleName)) {
+    if (!this.licenseService.canAccess(moduleName) && typeof window !== 'undefined' && window.innerWidth < 900) {
       window.dispatchEvent(new CustomEvent('close-dashboard-sidebar'));
     }
     this.licenseService.demoSubscription(moduleName);

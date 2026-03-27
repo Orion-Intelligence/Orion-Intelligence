@@ -171,6 +171,41 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.mobile_menu_status = mobile_menu_status;
   }
 
+  canAccessNetworkIntel(): boolean {
+    return this.isAdmin() || this.licenseService.getLicenses().includes('osint_advanced');
+  }
+
+  canAccessSocialIntel(): boolean {
+    return this.isAdmin() || (!this.isDemo() && this.licenseService.canUseModule('social_mapper'));
+  }
+
+  canAccessStandaloneDataCollection(): boolean {
+    return this.canAccessNetworkIntel() || this.licenseService.canUseCtiGraph() || this.canAccessSocialIntel() || this.canAccessWhistleBlowing() || this.isDemo();
+  }
+
+  canAccessWhistleBlowing(): boolean {
+    return this.isAdmin() || !this.authService.getIsMobileDemo();
+  }
+
+  requestStandaloneSubscription(event: Event, accessAllowed: boolean) {
+    if (!accessAllowed) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (accessAllowed) {
+      return;
+    }
+    if (typeof window !== 'undefined' && window.innerWidth < 900) {
+      window.dispatchEvent(new CustomEvent('close-dashboard-sidebar'));
+    }
+    this.dashboardService.showSubscription.set(true);
+    if (this.authService.getIsMobileDemo()) {
+      this.router.navigate(['/dashboard/strategic/all'], { queryParams: { page: 1 } }).then();
+      return;
+    }
+    this.router.navigate(['/']).then();
+  }
+
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
     if (this.isAdmin()) {
