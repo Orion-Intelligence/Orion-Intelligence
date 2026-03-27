@@ -133,7 +133,7 @@ def process_image(
     crop_top: int = 3,
     crop_right: int = 18,
     crop_bottom: int = 22,
-    radius: int = 14,
+    radius: int = 18,
     final_trim: int = 2,
     border_width: int = 3,
 ) -> None:
