@@ -156,7 +156,7 @@
   }
 
   @if (showNoResult && !isLoading && result_count === 0) {
-    <div class="ml-[30px] w-full max-w-[910px] max-[1000px]:ml-[15px]" @fadeInDashboardItem>
+    <div class="mx-[30px] w-[calc(100%-60px)] max-w-[910px] box-border max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]" @fadeInDashboardItem>
       <app-empty-result [searchQuery]="searchQuery"></app-empty-result>
     </div>
   }

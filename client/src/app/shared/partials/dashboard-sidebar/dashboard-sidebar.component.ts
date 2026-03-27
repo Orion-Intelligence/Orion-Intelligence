@@ -180,11 +180,15 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   canAccessStandaloneDataCollection(): boolean {
-    return this.canAccessNetworkIntel() || this.licenseService.canUseCtiGraph() || this.canAccessSocialIntel() || this.canAccessWhistleBlowing() || this.isDemo();
+    return this.canAccessNetworkIntel() || this.licenseService.canUseCtiGraph() || this.canAccessSocialIntel() || this.shouldShowWhistleBlowing() || this.isDemo();
   }
 
   canAccessWhistleBlowing(): boolean {
     return this.isAdmin() || !this.authService.getIsMobileDemo();
+  }
+
+  shouldShowWhistleBlowing(): boolean {
+    return !!this.appService.getConfig().appSettings.home_header_whistle_blowing_allowed;
   }
 
   requestStandaloneSubscription(event: Event, accessAllowed: boolean) {
