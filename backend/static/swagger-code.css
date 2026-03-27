@@ -435,10 +435,6 @@
     margin: 0 !important;
 }
 
-.swagger-ui .information-container .title::before {
-        content: "Orion Intelligence〡" !important;
-}
-
 .swagger-ui .information-container .title span {
     display: none !important;
 }
@@ -920,4 +916,3 @@ html, body {
 .swagger-ui .auth-container #client_id_password:required {
     required: false !important;
 }
-

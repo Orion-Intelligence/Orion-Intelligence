@@ -41,7 +41,7 @@ async def lifespan(p_app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
+app = FastAPI(title="API Access", lifespan=lifespan, docs_url=None, redoc_url=None)
 setup_middlewares(app)
 
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
@@ -51,7 +51,7 @@ app.mount("/static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="static")
 @app.get("/docs", include_in_schema=False)
 def custom_swagger_ui():
     return get_swagger_ui_html(
-        openapi_url=app.openapi_url, title="API Docs", swagger_css_url="/static/swagger-code.css")
+        openapi_url=app.openapi_url, title="API Access", swagger_css_url="/static/swagger-code.css")
 
 
 configure_swagger(app)

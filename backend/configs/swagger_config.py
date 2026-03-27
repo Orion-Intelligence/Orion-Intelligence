@@ -7,13 +7,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 
 def configure_swagger(app: FastAPI):
-    app.swagger_ui_init_oauth = {"appName": "Orion Intelligence OpenAPI", }
+    app.swagger_ui_init_oauth = {"appName": "API Access", }
 
     @app.get("/docs", include_in_schema=False)
     async def custom_swagger_ui():
         swagger_ui_html = get_swagger_ui_html(
             openapi_url="/openapi.json",
-            title="Orion Intelligence OpenAPI",
+            title="Api Access",
             oauth2_redirect_url="/docs/oauth2-redirect", ).body.decode("utf-8")
 
         swagger_ui_html += '<script src="/static/swagger-auth.js"></script>'
