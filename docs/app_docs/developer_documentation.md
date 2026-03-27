@@ -120,12 +120,33 @@ Do not place real credentials in documentation, examples, screenshots, or commit
 
 ### Build Modes
 
-`run.sh` supports multiple build and startup paths. The two most important developer-facing modes are:
+`run.sh` is the main local orchestration entry point. It always stops any previous stack first, recreates parser assets, selects the correct compose file, starts Docker services, and then applies additional behavior based on the command and flag.
 
-- `build -t` for the testing/instrumented workflow
-- default or production-oriented build flags for standard deployment paths
+### `run.sh` Command Reference
 
-In testing mode, the script enables the application’s testing flag, builds the client, prepares backend assets, builds the containers, and waits for test services to become reachable before Cypress or protected backend tests run.
+| Command | Purpose | What it does |
+| --- | --- | --- |
+| `./run.sh` | start default local stack | uses `docker-compose.yml` and starts the application without rebuilding images |
+| `./run.sh stop` | stop local stack | runs compose shutdown, removes orphans, clears `staticfiles`, and removes the standalone nginx container if present |
+| `./run.sh production` | start production-oriented runtime | uses `docker-compose-production.yml` and starts the stack without rebuilding |
+| `./run.sh -doc` | generate documentation screenshots | aliases the docs workflow by first running `./run.sh build -t`, then clearing old screenshots and running the Cypress screenshot job |
+| `./run.sh -docs` | generate documentation screenshots | same behavior as `-doc` |
+| `./run.sh build <flag>` | rebuild application containers for a specific mode | runs dependency install and linting, applies the selected frontend/backend mode, then executes `docker compose build` before starting services |
+
+### `build` Flags
+
+All supported `build` flags are listed below.
+
+| Flag | Primary use | Key behavior |
+| --- | --- | --- |
+| `-t` | frontend and Cypress test workflow | sets `TESTING_ENABLED="1"`, builds the Angular client with the `instrumented` configuration, uses `docker-compose-testing.yml`, starts the stack, and waits for `http://127.0.0.1:8080/api/public` before tests |
+| `-tb` | protected backend test workflow | same stack setup as `-t`, then runs containerized backend pytest through `run_backend_tests_protected` |
+| `-c` | rebuild client only for default local mode | builds the production client bundle, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
+| `-b` | rebuild backend and containers without rebuilding the client bundle | copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
+| `-d` | general default-mode rebuild | builds the production client bundle, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
+| `-p` | production-oriented rebuild | builds the production client bundle, copies `nginx/nginx-prod.conf`, uses `docker-compose-production.yml`, prepares `/srv/elasticsearch/data`, sets `ELASTIC_ROOT_IP`, rebuilds images, and waits for `https://try.orionintelligence.org` |
+
+Testing mode is the path most developers will use day to day. It enables the application testing flag, creates the instrumented frontend bundle, starts the testing compose stack, and blocks until the test service is reachable before Cypress is launched.
 
 ### Compose Variants
 
@@ -146,9 +167,19 @@ For most application work, the practical loop is:
 
 1. update code in `client/`, `backend/`, or docs
 2. run `./run.sh build -t`
-3. wait for the test service to become ready
-4. run targeted Cypress or backend tests
+3. wait for the script to finish the readiness check against `http://127.0.0.1:8080/api/public`
+4. run targeted Cypress tests from `client/`
 5. inspect the UI or generated docs output
+
+The Cypress entry point is the `test` script in `client/package.json`, which maps to the Cypress CLI. After `./run.sh build -t` completes, targeted tests should be run with `npm test run ...` from `client/`.
+
+Common examples:
+
+- `cd client && npm test run --browser electron`
+- `cd client && npm test run --browser electron --spec cypress/e2e/08-tenant-management.cy.ts`
+- `cd client && npm test run --browser electron --config baseUrl="http://127.0.0.1:8080"`
+
+This is important because `./run.sh build -t` prepares and starts the instrumented application stack, but it does not automatically execute Cypress. The test run is a second explicit step.
 
 ### Frontend Work
 
@@ -192,9 +223,21 @@ The main UI verification layer is Cypress. The test suite covers:
 
 Tests live under `client/cypress/e2e/`. Reusable actions are extracted into controller files so large specs remain readable and less brittle.
 
+The expected developer sequence is:
+
+1. run `./run.sh build -t`
+2. wait for the readiness check to finish
+3. run `cd client && npm test run --browser <browser> --spec <spec>`
+
+`npm test run` works because the `test` script is defined as `cypress`, so the command expands to the Cypress CLI with the `run` subcommand. This should be the default way to execute a specific Cypress spec after a `build -t` rebuild.
+
 ### Backend Tests
 
 Protected backend tests can run in a dedicated containerized path. The repository already includes a helper in `run.sh` that executes pytest in an isolated service context when the appropriate build mode is selected.
+
+Use `./run.sh build -tb` when the goal is to run the protected backend pytest path. That mode starts the testing stack, waits for readiness, and then runs:
+
+- `python -m pytest -q tests --maxfail=1 --disable-warnings`
 
 This is the preferred path for:
 
