@@ -8,6 +8,9 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { ConfigSettings } from '../../../model/app/config';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
+
+const DEFAULT_APP_NAME = 'Orion Intelligence';
+
 @Component({
   selector: 'app-sidebar-user-system-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent],
@@ -15,7 +18,6 @@ import { MessageNotificationService } from '../../../../services/message_notific
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
-  private readonly defaultAppName = 'Orion Intelligence';
   isEditing = false;
   formError = '';
   systemData = { ai_endpoint: '', language_allowed: '', version: '', api_allowed: '0', app_name: '0', s_onion: '' };
@@ -45,12 +47,12 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     }
     this.systemData = {
       ...(settings as typeof this.systemData),
-      app_name: settings.app_name?.trim() || this.defaultAppName
+      app_name: settings.app_name?.trim() || DEFAULT_APP_NAME
     };
     this.form.language = settings.language_allowed;
     this.form.version = settings.version;
     this.form.api_allowed = settings.api_allowed;
-    this.form.app_name = settings.app_name?.trim() || this.defaultAppName;
+    this.form.app_name = settings.app_name?.trim() || DEFAULT_APP_NAME;
     this.form.ai_endpoint = settings.ai_endpoint;
     this.form.s_onion = settings.s_onion;
     this.form.data_sources_url = typeof metaInfo['S_HOME_HEADER_DATA_SOURCES'] === 'string' ? metaInfo['S_HOME_HEADER_DATA_SOURCES'] : '';
@@ -135,7 +137,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         return;
       }
     }
-    this.form.app_name = this.form.app_name.trim() || this.defaultAppName;
+    this.form.app_name = this.form.app_name.trim() || DEFAULT_APP_NAME;
     this.form.language = this.form.language.trim();
     this.form.s_onion = this.form.s_onion.trim();
     this.form.data_sources_url = this.form.data_sources_url.trim();
@@ -178,10 +180,10 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
               language_allowed: s.language_allowed,
               version: s.version,
               api_allowed: s.api_allowed,
-              app_name: s.app_name?.trim() || this.defaultAppName,
+              app_name: s.app_name?.trim() || DEFAULT_APP_NAME,
               s_onion: s.s_onion
             };
-            document.title = s.app_name?.trim() || this.defaultAppName;
+            document.title = s.app_name?.trim() || DEFAULT_APP_NAME;
             this.loadSettings();
           }
         }
