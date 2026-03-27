@@ -36,7 +36,7 @@ The standard entry point is the login screen. Depending on deployment settings, 
 
 ```{figure} ../screenshots/login-page-20260326.png
 :alt: Orion login page
-:width: 90%
+:width: 100%
 
 Login screen used for standard account access.
 ```
@@ -58,7 +58,7 @@ The new-password form includes password-strength guidance and confirmation valid
 
 ```{figure} ../screenshots/password-reset-20260326.png
 :alt: Password reset request page
-:width: 90%
+:width: 100%
 
 Password reset workflow entry point.
 ```
@@ -130,7 +130,7 @@ Most data-driven modules share the same search pattern:
 
 ```{figure} ../screenshots/homepage-searchbar-20260326.png
 :alt: Global search bar
-:width: 90%
+:width: 100%
 
 Search bar with search, advanced mode, and tools controls.
 ```
@@ -164,7 +164,7 @@ The `Tools` section provides search behavior controls and, in some contexts, sor
 
 ```{figure} ../screenshots/homepage-searchbar-20260326.png
 :alt: Search type controls
-:width: 90%
+:width: 100%
 
 Search entry area with search mode and tools controls.
 ```
@@ -184,7 +184,7 @@ When advanced mode is enabled, users can add indexed filters to refine the resul
 
 ```{figure} ../screenshots/search-filters-20260326.png
 :alt: Search filters
-:width: 80%
+:width: 100%
 
 Filter controls for refining indexed search.
 ```
@@ -248,7 +248,7 @@ Orion exposes analytics alongside search results to help analysts understand the
 
 ```{figure} ../screenshots/consolidated-insights-20260326.png
 :alt: Keyword insights
-:width: 75%
+:width: 100%
 
 Keyword-level insight and result analysis.
 ```
@@ -487,7 +487,7 @@ Covered user-visible behavior includes:
 
 ```{figure} ../screenshots/support-modal-20260326.png
 :alt: Help and support modal
-:width: 90%
+:width: 100%
 
 Support modal used for direct in-app support requests.
 ```
@@ -772,7 +772,7 @@ Geo support is especially relevant when working from host-oriented results and w
 
 ```{figure} ../screenshots/network-intel-geo-modal-20260326.png
 :alt: Network Intel geo modal
-:width: 80%
+:width: 100%
 
 Geo-assisted pivot modal used from network results.
 ```
@@ -835,14 +835,14 @@ CTI list-view mode used when investigators want structured row-based review inst
 
 ```{figure} ../screenshots/cti-export-modal-20260326.png
 :alt: CTI export modal
-:width: 90%
+:width: 100%
 
 CTI export modal with tested report-export options such as JSON and graph PDF.
 ```
 
 ```{figure} ../screenshots/cti-context-menu-20260326.png
 :alt: CTI context menu
-:width: 90%
+:width: 100%
 
 CTI graph context-menu actions opened directly from the graph canvas.
 ```
@@ -1145,7 +1145,7 @@ In practice, it helps answer three questions quickly:
 
 ```{figure} ../screenshots/consolidated-insights-20260326.png
 :alt: Result insights side panel
-:width: 75%
+:width: 100%
 
 Result insights side panel with URL and extracted-data pivots.
 ```
@@ -1187,7 +1187,7 @@ This is the main place to inspect structured extraction results from the record.
 
 ```{figure} ../screenshots/report-json-viewer-20260326.png
 :alt: Report metadata sections
-:width: 90%
+:width: 100%
 
 Expandable metadata and extracted-section review.
 ```
@@ -1204,7 +1204,7 @@ The JSON viewer is useful for raw structured inspection, while report mapping he
 
 ```{figure} ../screenshots/report-json-viewer-20260326.png
 :alt: Report JSON viewer
-:width: 90%
+:width: 100%
 
 JSON inspection view for raw structured report data.
 ```
@@ -1265,7 +1265,7 @@ Common behaviors include:
 
 ```{figure} ../screenshots/directory-monitoring-20260326.png
 :alt: Directory and monitoring view
-:width: 85%
+:width: 100%
 
 Monitoring-oriented directory workflow.
 ```
@@ -2103,7 +2103,7 @@ Covered user-visible behavior includes:
 
 ```{figure} ../screenshots/report-chatbot-20260326.png
 :alt: Report chatbot widget
-:width: 90%
+:width: 100%
 
 Report-level chatbot workflow used for conversational follow-up on an opened record.
 ```
