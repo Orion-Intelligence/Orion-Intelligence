@@ -130,7 +130,9 @@ export class AuthService {
   }
 
   getIsMobileDemo(): boolean {
-    return localStorage.getItem('mobileDemo') === 'true';
+    return localStorage.getItem('mobileDemo') === 'true' &&
+      typeof window !== 'undefined' &&
+      window.innerWidth <= 900;
   }
 
   isAuthenticated(): boolean {

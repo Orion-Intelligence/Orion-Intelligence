@@ -82,7 +82,7 @@ class mongo_controller:
             role=user_role.DEMO,
             status=UserStatus.ACTIVE,
             subscription=True,
-            licenses=[LicenseName.FREE],
+            licenses=[LicenseName.FREE, LicenseName.OSINT_BASIC],
             tenant_uuid=str(default_tenant.id), ))
 
     async def initialize(self):

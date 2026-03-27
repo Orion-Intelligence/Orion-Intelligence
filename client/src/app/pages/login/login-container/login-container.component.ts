@@ -28,6 +28,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   otpDataUrl: string | null = null;
   otpSecret: string | null = null;
   isMobile = false;
+  autoDemoLogin = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
 
@@ -51,6 +52,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         mode = tree.queryParams['mode'];
       }
       if (mode === 'free') {
+        this.autoDemoLogin = true;
         this.demoLogin();
       }
     });

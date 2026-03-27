@@ -1,6 +1,6 @@
 <div class="dark-theme min-h-[100dvh] bg-[#0E1626]">
 
-  @if (!twofaRequired) {
+  @if (!twofaRequired && !autoDemoLogin) {
     <div id="content">
       <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-cy="login-page" data-testid="login-page">
         <div class="min-w-[500px] bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:flex-[0_0_100vw] max-[943px]:min-w-[350px]">

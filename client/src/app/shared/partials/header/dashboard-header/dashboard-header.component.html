@@ -28,7 +28,7 @@
   @if (authService.getIsMobileDemo()) {
     <div class="ml-0 flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-0 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-0">
       <span class="ml-3 font-[Inter,sans-serif] text-[19px] font-medium text-[var(--color-text1)]">
-        {{ this.appService.getConfig().appSettings.app_name }}
+        {{ this.appService.getConfig().appSettings.app_name || 'Orion Intelligence' }}
       </span>
     </div>
   }

@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { LowerPipe } from '../../../pipes/lower.pipe';
 import { sidebarItemTooltips } from '../../../constants/shared-enums';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
   standalone: true,
@@ -23,6 +24,8 @@ export class SidebarSectionComponent {
 
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
+
+  constructor(protected licenseService: LicenseService) {}
 
   selectSection() {
     this.sectionSelected.emit(this.category);
