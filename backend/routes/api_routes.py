@@ -49,6 +49,11 @@ async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_
     return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
 
 
+def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user) -> None:
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO:
+        param.safe = True
+
+
 @api_routes.post(
     "/api/search/strategic",
     summary="Search strategic reports",
@@ -58,7 +63,8 @@ async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
-async def search_general(param: search_consolidated_param_model = Body(...)):
+async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
 
@@ -72,7 +78,8 @@ async def search_general(param: search_consolidated_param_model = Body(...)):
     response_description=SEARCH_DOCS["breach"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach"))])
-async def search_leak(param: search_consolidated_param_model = Body(...)):
+async def search_leak(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
     if param.category in ["all"]:
         base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ["news"], ["leaks", "tracking"])
@@ -92,7 +99,8 @@ async def search_leak(param: search_consolidated_param_model = Body(...)):
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
-async def search_social(param: search_consolidated_param_model = Body(...)):
+async def search_social(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
     if param.category == "all":
         base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
@@ -118,7 +126,8 @@ async def search_social(param: search_consolidated_param_model = Body(...)):
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
-async def search_exploit(param: search_consolidated_param_model = Body(...)):
+async def search_exploit(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_EXPLOIT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
 
@@ -132,7 +141,8 @@ async def search_exploit(param: search_consolidated_param_model = Body(...)):
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
-async def search_defacement(param: search_consolidated_param_model = Body(...)):
+async def search_defacement(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
     param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
@@ -241,7 +251,8 @@ async def search_stealer_iocs(param: search_credential_param_model = Body(...)):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), ], )
-async def search_consolidated(param: search_consolidated_param_model = Body(...)):
+async def search_consolidated(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
     return await search_model.getInstance().search_consolidated_result(param)
 
 
