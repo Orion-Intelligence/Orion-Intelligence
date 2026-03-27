@@ -1,7 +1,7 @@
 function scrollTenantTableToBottomLeft() {
   cy.get('[data-testid="tenant-page-header"]').should('be.visible');
 
-  cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
+  cy.get('#dashboard-container, [data-testid="dashboard-container"]')
     .filter(':visible')
     .first()
     .then(($dashboard) => {
@@ -166,7 +166,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
       }
     });
 
-    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
+    cy.get('#dashboard-container, [data-testid="dashboard-container"]')
       .filter(':visible')
       .first()
       .scrollTo('bottom', {ensureScrollable: false});
@@ -187,7 +187,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
     cy.get('@changed').then((changed: any) => {
       if (changed) {
-        cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
+        cy.get('#dashboard-container, [data-testid="dashboard-container"]')
           .filter(':visible')
           .first()
           .scrollTo('bottom', {ensureScrollable: false});

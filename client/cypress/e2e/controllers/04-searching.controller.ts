@@ -40,7 +40,7 @@ export function typeDashboardSearch(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
   cy.scrollDashboardToTop();
-  cy.get('input[data-cy="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').then(($input) => {
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').then(($input) => {
     const currentValue = String($input.val() ?? '').trim();
     if (currentValue.length > 0) {
       cy.wrap($input).clear();

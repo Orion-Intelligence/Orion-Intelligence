@@ -102,7 +102,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
           .clear()
           .type('1');
       });
-    cy.get('#dashboard-container, [data-cy="dashboard-sub-container"]')
+    cy.get('#dashboard-container, [data-testid="dashboard-container"]')
       .filter(':visible')
       .first()
       .scrollTo('bottom', {ensureScrollable: false});

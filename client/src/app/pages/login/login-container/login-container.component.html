@@ -2,7 +2,7 @@
 
   @if (!twofaRequired && !autoDemoLogin) {
     <div id="content">
-      <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-cy="login-page" data-testid="login-page">
+      <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-testid="login-page">
         <div class="min-w-[500px] bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:flex-[0_0_100vw] max-[943px]:min-w-[350px]">
           <div class="w-full flex justify-center gap-6">
             <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Data Sources</a>
@@ -29,14 +29,14 @@
                 <label for="username" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">Email</label>
                 <div class="relative w-full">
                   <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
-                  <input [(ngModel)]="user.mail" placeholder="Enter email" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" data-cy="login-user" data-testid="login-user" required type="text" />
+                  <input [(ngModel)]="user.mail" placeholder="Enter email" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" data-testid="login-user" required type="text" />
                 </div>
                 <label for=" word" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">Password</label>
                 <div class="relative w-full">
                   <img src="/assets/images/shared/lock.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
-                  <input [(ngModel)]="user.password" placeholder="Enter password" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" data-cy="login-pass" data-testid="login-pass" required type="password" />
+                  <input [(ngModel)]="user.password" placeholder="Enter password" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" data-testid="login-pass" required type="password" />
                 </div>
-                <span (click)="goToForgot()" class="text-[#a0b8d1] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-cy="reset-password">Reset password?</span>
+                <span (click)="goToForgot()" class="text-[#a0b8d1] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-testid="reset-password-link">Reset password?</span>
                 @if (errorMessage == 'verification pending') {
                   <div class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm">
                     <span class="text-left"><b>{{ errorMessage }}</b></span>
@@ -52,7 +52,7 @@
                   </div>
                 }
                 <div>
-                  <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-cy="login-button" data-testid="login-button" type="submit" value="Sign In" />
+                  <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-testid="login-button" type="submit" value="Sign In" />
                 </div>
               </form>
               <p class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[14px] mt-[-16px]">
@@ -91,7 +91,7 @@
                 <p class="text-left text-[#ffc107]"><b>{{ errorMessage }}</b></p>
               }
               @if (otpDataUrl) {
-                <div class="grid justify-items-start text-left" data-cy="twofa-center">
+                <div class="grid justify-items-start text-left" data-testid="twofa-center">
                   <img [src]="otpDataUrl" alt="2FA QR" width="200" height="200">
                   <div class="mt-[10px] text-[13px] font-semibold text-white/70">Scan QR in your authenticator app</div>
                 </div>
@@ -113,7 +113,7 @@
                 </div>
               }
               <div>
-                <div class="text-center text-[16px] font-extrabold text-white" data-cy="twofa_title">Enter 2FA code</div>
+                <div class="text-center text-[16px] font-extrabold text-white" data-testid="twofa-title">Enter 2FA code</div>
                 <div class="mt-[6px] text-center text-[13px] font-medium text-white/70">Type the 6-digit code from your authenticator app</div>
               </div>
               <form (ngSubmit)="submitOtp()" class="space-y-[14px]">

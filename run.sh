@@ -183,9 +183,15 @@ if [ "$1" = "stop" ]; then
     exit 0
 fi
 
-if [ "$1" = "-doc" ] || [ "$1" = "-docs" ]; then
+if [ "$1" = "-doc" ]; then
     "$0" build -t
     clear_docs_screenshots
+    generate_docs
+    exit 0
+fi
+
+if [ "$1" = "-docs" ]; then
+    "$0" build -t
     generate_docs
     exit 0
 fi

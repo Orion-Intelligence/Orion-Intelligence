@@ -9,7 +9,7 @@ if (Cypress.expose("coverage")) {
 Cypress.on("window:before:load", (win) => {
     const doc = win.document;
     const style = doc.createElement("style");
-    style.setAttribute("data-cy", "instant-animations");
+    style.setAttribute("data-testid", "instant-animations");
     style.innerHTML = `
       *,
       *::before,

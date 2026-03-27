@@ -157,14 +157,14 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     waitForSearchReady();
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]').first().should('exist');
+    cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('exist');
   });
 
   it('runs Feed search flow and opens a report', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Feed');
     waitForSearchReady();
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]').first().as('q');
+    cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
     cy.get('@q').clear();
 

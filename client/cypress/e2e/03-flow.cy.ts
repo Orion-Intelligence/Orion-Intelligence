@@ -1,5 +1,5 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_DATA_BREACH_SECTIONS, FLOW_DEFACEMENT_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_EXPLOIT_SECTIONS, FLOW_GENERAL_INTELLIGENCE_SECTIONS, FLOW_SOCIAL_SECTIONS, FLOW_WEB_SCANS_SECTIONS} from '../support/constants';
-import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
+import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
   let testData: any = {};
@@ -55,6 +55,14 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
     openSidebarGroup('Entity API');
     FLOW_ENTITY_API_SECTIONS.forEach((item) => clickSidebarSubItem('Entity API', item));
+  });
+
+  it('verifies free mode opens the simplified mobile dashboard chrome', () => {
+    cy.viewport(430, 932);
+    cy.visit('/login?mode=free');
+
+    cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
+    assertFreeModeDashboardChrome();
   });
 
   it('covers world heatmap render, interactions, and popup close paths', () => {

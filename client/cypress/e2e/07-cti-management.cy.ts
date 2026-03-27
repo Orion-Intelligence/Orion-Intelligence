@@ -52,8 +52,8 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
       }
     });
     cy.get('[data-testid="graph-toolbar-root"]').filter(':visible').first().within(() => {
-      cy.get('[data-testid="graph-toolbar-physics-toggle"], [data-cy="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
-      cy.get('[data-testid="graph-toolbar-physics-toggle"], [data-cy="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
+      cy.get('[data-testid="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
+      cy.get('[data-testid="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
     });
   });
 
@@ -265,12 +265,12 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
     });
     cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
 
-    cy.get('[data-cy="social-graph-search-trigger"]').click();
+    cy.get('[data-testid="social-graph-search-trigger"]').click();
     cy.get('[data-testid="social-graph-search-input"]').should('be.visible').type('image');
     cy.get('[data-testid="social-graph-search-clear"]').click();
     cy.get('[data-testid="social-graph-search-input"]').should('have.value', '');
     cy.get('body').then(($body) => {
-      const editToggle = $body.find('[data-cy="graph-toolbar-edit-toggle"]:visible').first();
+      const editToggle = $body.find('[data-testid="graph-toolbar-edit-toggle"]:visible').first();
       if (editToggle.length) {
         cy.wrap(editToggle).click();
         cy.wrap(editToggle).click();

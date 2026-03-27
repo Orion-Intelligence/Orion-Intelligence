@@ -66,7 +66,7 @@
                 <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isListingsCollapsed" [class.w-0]="isListingsCollapsed" [class.opacity-0]="isListingsCollapsed">
                   <h2 class="whitespace-nowrap text-md font-semibold text-[var(--color-text2)]">Listings</h2>
                 </div>
-                <button data-cy="cti-listings-toggle" data-testid="cti-listings-toggle" type="button" (click)="toggleListingsCollapsed()" class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="isListingsCollapsed ? 'Expand listings' : 'Collapse listings'">
+                <button data-testid="cti-listings-toggle" type="button" (click)="toggleListingsCollapsed()" class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="isListingsCollapsed ? 'Expand listings' : 'Collapse listings'">
                   <i class="bi bi-list text-xl leading-none"></i>
                 </button>
               </div>

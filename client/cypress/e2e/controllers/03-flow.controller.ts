@@ -159,3 +159,23 @@ export function applyDateRange(monthsBack: number) {
   waitForDirectoryRequest();
   cy.location('search').should('include', 'daterange=');
 }
+
+export function assertFreeModeDashboardChrome() {
+  cy.location('pathname').should('eq', '/dashboard/strategic/all');
+
+  cy.window().then((win) => {
+    expect(win.localStorage.getItem('mobileDemo')).to.equal('true');
+  });
+
+  cy.get('[data-testid="dashboard-header"]').should('be.visible');
+  cy.get('[data-testid="dashboard-header"] img[alt="Logo"]').should('be.visible');
+  cy.get('[data-testid="dashboard-header"]').within(() => {
+    cy.get('[data-testid="dashboard-header-back"]').should('not.exist');
+    cy.get('img[alt="breadcrumb"]').should('not.exist');
+    cy.get('[data-testid="profile-menu"]').should('not.exist');
+  });
+
+  cy.get('[data-testid="dashboard-main"]').should('be.visible');
+  cy.get('[data-testid="dashboard-container"]').should('be.visible');
+  cy.get('[data-testid="dashboard-body"]').should('be.visible');
+}

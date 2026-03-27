@@ -52,14 +52,14 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
         cy.get('[data-testid="login-user"]').clear().type(defaultUser.username);
         cy.get('[data-testid="login-pass"]').clear().type(defaultUser.password, {log: false});
         cy.get('[data-testid="login-button"]').click();
-        cy.get('[data-cy="twofa-center"], .twofa-center').should('be.visible');
+        cy.get('[data-testid="twofa-center"], .twofa-center').should('be.visible');
         cy.get('img[alt="2FA QR"]').should('exist');
         cy.get('input[name="otpCode"]').should('exist');
-        cy.get('[data-cy="twofa_title"], .twofa_title').should('contain.text', 'Enter 2FA code');
+        cy.get('[data-testid="twofa-title"], .twofa_title').should('contain.text', 'Enter 2FA code');
 
         cy.visit('/');
         cy.clearAllEmails();
-        cy.contains('[data-cy="reset-password"], span.reset-password', 'Reset password?').click();
+        cy.contains('[data-testid="reset-password-link"], span.reset-password', 'Reset password?').click();
         cy.get('[data-testid="reset-companymail"]').clear().type(resetEmail);
         cy.get('[data-testid="reset-submit"]').click();
 

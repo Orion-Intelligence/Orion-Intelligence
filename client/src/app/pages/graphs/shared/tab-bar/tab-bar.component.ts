@@ -217,10 +217,6 @@ export class TabBarComponent {
     return `${this.mode()}-${prefix}`;
   }
 
-  testCy(prefix: string): string {
-    return `${this.mode()}-${prefix}`;
-  }
-
   visibleTabs(): Array<{ id: string; name: string; }> {
     return this.currentTabs();
   }

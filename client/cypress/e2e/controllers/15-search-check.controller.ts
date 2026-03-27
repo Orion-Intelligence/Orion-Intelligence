@@ -119,7 +119,7 @@ export function waitForSearchReady15() {
 export function typeDashboardSearch15(value: string) {
   waitForSearchReady15();
 
-  cy.get('input[data-cy="dashboard-general-input"][name="q"]')
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]')
     .first()
     .scrollIntoView()
     .should('be.visible')

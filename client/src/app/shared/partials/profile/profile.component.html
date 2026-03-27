@@ -15,7 +15,7 @@
       }
     }
     @if (router.url !== '/login') {
-      <a (click)="toggleDropdown($event)" appTooltip="" data-cy="profile-menu" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+      <a (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
         <img alt="Logout" height="24" [ngSrc]="isDarkTheme ? 'assets/images/shared/theme/profile-icon.svg' : 'assets/images/shared/profile-icon-dark.svg'" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
       </a>
     }
@@ -79,7 +79,7 @@
           <span class="text-[14px] font-medium text-[#172235]">Help & Support</span>
         </li>
         <li class="my-[6px] h-[1px] bg-[#e5e7eb]"></li>
-        <li data-cy="signout-btn" data-testid="signout-btn" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#fff1f2]" (click)="logout();closeDropdown($event)">
+        <li data-testid="signout-btn" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#fff1f2]" (click)="logout();closeDropdown($event)">
           <img src="assets/images/shared/logout.svg" alt="Sign out" class="h-[18px] w-[18px]" />
           <span class="text-[14px] font-medium text-[#172235]">Sign out</span>
         </li>
