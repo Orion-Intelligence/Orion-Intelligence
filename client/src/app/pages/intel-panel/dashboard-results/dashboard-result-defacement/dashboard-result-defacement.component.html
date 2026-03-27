@@ -70,7 +70,7 @@
 } @else {
   <div class="space-y-4">
     @for (item of (isExpandAble && isCollapsed ? searchResults.slice(0,2) : searchResults).slice(0,30); track item.m_hash || item.m_source_url?.[0] || $index) {
-      <div data-testid="result-card" [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]">
+      <div data-testid="result-card" [id]="'item-' + item.m_hash" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-sm transition hover:bg-[var(--color-blue-720)]" (click)="authService.getIsMobileDemo() && item?.m_source_url?.length ? window.open(item.m_source_url[0], '_blank') : null">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap gap-2">
             @if (item.m_ioc_type?.length) {
@@ -81,7 +81,7 @@
               <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-xs font-semibold text-[var(--color-text3)]">unknown</span>
             }
           </div>
-          @if (!isMobileMode()) {
+          @if (!authService.getIsMobileDemo()) {
             <div class="flex items-center gap-2">
               <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]">
                 <img height="18" src="/assets/images/sidebar/theme/graph.svg" width="18" alt="graph" class="ui-action-icon" />

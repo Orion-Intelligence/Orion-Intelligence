@@ -6,6 +6,7 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
@@ -27,7 +28,7 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   @Input() searchResults: ChatResultItem[] = [];
   @Input() isExpandAble: boolean = false;
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {
@@ -56,4 +57,5 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
       };
     });
   }
+
 }

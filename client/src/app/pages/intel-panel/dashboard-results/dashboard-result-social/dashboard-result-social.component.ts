@@ -7,6 +7,7 @@ import { SocialResultItem } from '../../../../shared/model/results/social/social
 import { fadeInDashboardItem } from "../../../../shared/animations/dashboard.item.animation";
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 @Component({
   selector: 'app-dashboard-result-social',
   standalone: true,
@@ -30,7 +31,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   @Input() searchResults: SocialResultItem[] = [];
   @Input() isExpandAble: boolean = false;
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {
@@ -77,4 +78,5 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
       };
     });
   }
+
 }

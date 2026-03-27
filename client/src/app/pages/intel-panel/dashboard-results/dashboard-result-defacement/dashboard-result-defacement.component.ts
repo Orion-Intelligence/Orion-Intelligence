@@ -7,6 +7,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 @Component({
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
@@ -25,7 +26,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   @Input() isList: boolean = true;
   @Input() isLoading: boolean = true;
 
-  constructor(private activatedRoute: ActivatedRoute, public appService: AppService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, public appService: AppService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngOnInit() {
@@ -92,7 +93,4 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     return 'sort-default';
   }
 
-  isMobileMode(): boolean {
-    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
-  }
 }
