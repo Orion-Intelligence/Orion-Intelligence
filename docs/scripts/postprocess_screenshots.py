@@ -49,15 +49,31 @@ def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
     return mask
 
 
-def render_top_accent(
+def render_border(
     size: tuple[int, int],
+    radius: int,
     border_width: int,
     color: tuple[int, int, int, int],
+    scale: int = 4,
 ) -> Image.Image:
-    accent = Image.new("RGBA", size, (0, 0, 0, 0))
-    line_height = min(size[1], max(1, border_width))
-    ImageDraw.Draw(accent).rectangle((0, 0, size[0], line_height - 1), fill=color)
-    return accent
+    width, height = size
+    hi_size = (width * scale, height * scale)
+    hi_radius = max(1, radius * scale)
+    hi_border = max(1, border_width * scale)
+
+    outer_mask = rounded_mask(hi_size, hi_radius)
+
+    inner_mask = Image.new("L", hi_size, 0)
+    inner_width = max(1, hi_size[0] - (hi_border * 2))
+    inner_height = max(1, hi_size[1] - (hi_border * 2))
+    inner_radius = max(0, hi_radius - hi_border)
+    inner_shape = rounded_mask((inner_width, inner_height), inner_radius)
+    inner_mask.paste(inner_shape, (hi_border, hi_border))
+
+    border_mask = ImageChops.subtract(outer_mask, inner_mask)
+    border = Image.new("RGBA", hi_size, color)
+    border.putalpha(ImageChops.multiply(border.getchannel("A"), border_mask))
+    return border.resize(size, Image.Resampling.LANCZOS)
 
 
 def load_font(size: int) -> ImageFont.ImageFont:
@@ -119,7 +135,7 @@ def process_image(
     crop_bottom: int = 22,
     radius: int = 14,
     final_trim: int = 2,
-    border_width: int = 0,
+    border_width: int = 3,
 ) -> None:
     image = Image.open(path).convert("RGBA")
     width, height = image.size
@@ -142,10 +158,11 @@ def process_image(
     canvas.paste(rounded, (0, 0), rounded)
 
     if border_width > 0:
-        accent = render_top_accent(
+        accent = render_border(
             size=canvas.size,
+            radius=effective_radius,
             border_width=border_width,
-            color=(102, 169, 255, 210),
+            color=(255, 255, 255, 255),
         )
         canvas.alpha_composite(accent)
 

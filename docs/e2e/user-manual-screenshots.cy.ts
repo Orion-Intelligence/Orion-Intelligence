@@ -1,7 +1,15 @@
-import { openSidebarGroup, clickSidebarSubItem, waitForDirectoryRequest } from '../../client/cypress/e2e/controllers/03-flow.controller';
+import { openSidebarGroup, clickSidebarSubItem, openCountryReportFromMap, waitForDirectoryRequest } from '../../client/cypress/e2e/controllers/03-flow.controller';
 import { typeDashboardSearch, clickOpenReport, exerciseJsonViewerOnce } from '../../client/cypress/e2e/controllers/04-searching.controller';
+import {
+  setupSocialGraphInterceptors,
+  visitCtiGraph,
+  visitSocialGraph,
+  waitForCtiGraphReady,
+  waitForToolbarSearchReady
+} from '../../client/cypress/e2e/controllers/07-cti-management.controller';
+import { openManageIOCs } from '../../client/cypress/e2e/controllers/08-tenant-management.controller';
 import { switchToDeepSearchTab, searchDeepFromTop, setAllInsightsExpanded } from '../../client/cypress/e2e/controllers/13-consolidated.controller';
-import { fillPrimaryScanInput, fillSecondaryScanInput, clickSearch } from '../../client/cypress/e2e/controllers/14-scans-management.controller';
+import { fillPrimaryScanInput, fillSecondaryScanInput, clickSearch, makeFileInputInteractable } from '../../client/cypress/e2e/controllers/14-scans-management.controller';
 import { openSystemSettings } from '../../client/cypress/e2e/controllers/09-system-management.controller';
 
 describe('User Manual Screenshot Flow', () => {
@@ -57,6 +65,12 @@ describe('User Manual Screenshot Flow', () => {
         app-network-intel,
         app-scans-management,
         app-dump-list,
+        [data-testid="graph-toolbar-root"],
+        [data-testid="cti-network-container"],
+        [data-testid="social-graph-root"],
+        [data-testid="social-manage-profiles-modal"],
+        [data-testid="tenant-ioc-page"],
+        [data-testid="tenant-onboarding-page"],
         app-report,
         .ui-page-card,
         .ui-page-panel,
@@ -237,9 +251,20 @@ describe('User Manual Screenshot Flow', () => {
     ensureDashboardReady();
     cy.get('[data-testid="homepage-search-input"]').should('be.visible');
     capture('homepage-overview');
+    openCountryReportFromMap();
+    cy.get('[data-testid="heatmap-report"]').should('be.visible');
+    capture('heatmap-report');
+    cy.get('[data-testid="heatmap-report-close"]').click();
     cy.get('[data-testid="homepage-search-input"]').click().type('orion');
     capture('homepage-searchbar');
     cy.get('[data-testid="homepage-search-input"]').clear();
+
+    cy.get('[data-testid="profile-menu"]').filter(':visible').first().should('be.visible').click({ scrollBehavior: false });
+    cy.get('[data-testid="profile-help-support"]').filter(':visible').first().should('be.visible').click({ scrollBehavior: false });
+    cy.get('[data-testid="support-modal"]').should('be.visible');
+    capture('support-modal');
+    cy.get('[data-testid="support-close"]').should('be.visible').click({ force: true });
+    cy.get('[data-testid="support-overlay"]').should('not.exist');
 
     openSidebarGroup('General Intelligence');
     clickSidebarSubItem('General Intelligence', 'All');
@@ -287,6 +312,31 @@ describe('User Manual Screenshot Flow', () => {
     capture('social-report');
     exerciseJsonViewerOnce();
     capture('report-json-viewer');
+    cy.get('[data-testid="chat-widget-open"]').filter(':visible').first().click();
+    cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.visible').type('hey');
+    cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();
+    cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().find('div').should('exist');
+    capture('report-chatbot');
+    cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first()
+      .closest('.fixed.inset-0.z-50')
+      .click('topLeft', { force: true });
+    cy.get('[data-testid="chat-widget-messages"]').should('not.exist');
+    cy.get('body').type('{esc}');
+
+    openSidebarGroup('Exploit');
+    clickSidebarSubItem('Exploit', 'All');
+    typeDashboardSearch('exploit');
+    cy.get('[data-testid="open-report"], [data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]')
+      .filter(':visible')
+      .should('have.length.greaterThan', 0);
+    capture('exploit-results');
+
+    openSidebarGroup('Feed');
+    clickSidebarSubItem('Feed', 'News');
+    typeDashboardSearch('police');
+    clickOpenReport();
+    cy.get('app-json-api-viewer').should('exist').and('be.visible');
+    capture('feed-report');
     cy.get('body').type('{esc}');
 
     openSidebarGroup('Stealer logs');
@@ -321,6 +371,24 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="scan-security-posture"]').should('exist');
     capture('web-scan-report');
 
+    cy.visit('/dashboard/scanner/apk-scan');
+    ensureDashboardReady();
+    makeFileInputInteractable();
+    cy.get('[data-testid="scan-file-input"]').first().selectFile('cypress/fixtures/1MB_1.0_APKPure.apk');
+    cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    capture('apk-scan-report');
+
+    cy.visit('/dashboard/api/file-scanner');
+    ensureDashboardReady();
+    makeFileInputInteractable();
+    cy.get('[data-testid="scan-file-input"]').first().selectFile({
+      contents: 'cypress/fixtures/resume-sample.pdf',
+      fileName: 'resume-sample.pdf',
+      mimeType: 'application/pdf'
+    });
+    cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    capture('file-scanner-report');
+
     stubNetworkIntelApis();
     cy.visit('/dashboard/netint');
     ensureDashboardReady();
@@ -335,6 +403,18 @@ describe('User Manual Screenshot Flow', () => {
     capture('network-intel-geo-modal');
     cy.get('[data-testid="network-intel-geo-close"]').click();
 
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('8.8.8.8{enter}');
+    cy.wait('@ipScanner');
+    cy.get('[data-testid="network-intel-ip-result"]').should('be.visible');
+    capture('network-intel-ip-scan');
+
+    cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
+    cy.wait('@vulnerabilityScan');
+    cy.get('[data-testid="network-intel-vulnerability-result"]').should('be.visible');
+    capture('network-intel-vulnerability-scan');
+
     cy.intercept('GET', '**/api/directory*').as('getDirectory');
     cy.visit('/dashboard/directory');
     waitForDirectoryRequest();
@@ -345,6 +425,112 @@ describe('User Manual Screenshot Flow', () => {
     ensureDashboardReady();
     cy.get('[data-testid="account-settings-form"]').should('be.visible');
     capture('account-settings');
+
+    visitCtiGraph();
+    cy.get('[data-testid="cti-filter-type-select"]').select('Cluster');
+    cy.get('[data-testid="cti-filter-apply"]').click();
+    waitForCtiGraphReady();
+    waitForToolbarSearchReady();
+    capture('cti-graph');
+    cy.get('[data-testid="graph-toolbar-view-list"]').filter(':visible').first().click();
+    capture('cti-list-view');
+    cy.get('[data-testid="graph-toolbar-view-graph"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
+    cy.contains('button', 'Export Report').scrollIntoView().click({ force: true });
+    cy.get('[data-testid="graph-report-export-modal"]').filter(':visible').first().should('be.visible');
+    capture('cti-export-modal');
+    cy.get('body').click(20, 20);
+    cy.get('[data-testid="cti-network-container"] canvas').filter(':visible').first().then(($canvas) => {
+      const rect = $canvas[0].getBoundingClientRect();
+      cy.wrap($canvas).trigger('contextmenu', {
+        button: 2,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+        force: true
+      });
+    });
+    cy.get('[data-testid="cti-context-menu"]').should('exist');
+    capture('cti-context-menu');
+    cy.get('body').click(20, 20);
+
+    visitSocialGraph();
+    setupSocialGraphInterceptors();
+    waitForToolbarSearchReady();
+    cy.get('[data-testid="graph-toolbar-search-input"]').clear().type(testData.cti_social_username || 'orion_demo_actor');
+    cy.get('[data-testid="graph-toolbar-search-button"]').click();
+    cy.get('[data-testid="social-graph-root"]').should('be.visible');
+    capture('social-intel');
+
+    cy.get('[data-testid="graph-toolbar-image-search"]').click();
+    cy.get('[data-testid="social-graph-root"] input[type="file"][accept*="image/png"]').first()
+      .invoke('removeClass', 'hidden')
+      .invoke('css', 'display', 'block')
+      .invoke('css', 'visibility', 'visible')
+      .invoke('css', 'position', 'fixed')
+      .invoke('css', 'left', '0')
+      .invoke('css', 'top', '0')
+      .invoke('css', 'width', '1px')
+      .invoke('css', 'height', '1px')
+      .invoke('css', 'opacity', '1')
+      .selectFile('cypress/fixtures/profile.png');
+    cy.wait('@imageRecon');
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
+    capture('social-manage-profiles');
+    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
+      cy.contains('button', 'Fetch profile').first().click();
+    });
+    cy.wait('@socialRecon');
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+    cy.contains('.home-menu-created-item', 'image_scan_user').should('contain.text', 'Completed').click();
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
+    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
+      cy.get('[data-testid="social-manage-profiles-select-all"]').scrollIntoView().click();
+      cy.get('[data-testid="social-manage-profiles-update-graph"]').scrollIntoView().click();
+    });
+    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+    cy.get('[data-testid="graph-toolbar-view-list"]').click();
+    cy.get('[data-testid="social-list-manage-profiles"]').should('be.visible');
+    capture('social-intel-list-view');
+    cy.get('[data-testid="social-list-user-summary-trigger"]').first().click();
+    cy.get('[data-testid="social-summary-popup"]').should('be.visible');
+    capture('social-summary-popup');
+    capture('social-metadata-results');
+    cy.get('[data-testid="social-summary-popup-overlay"]').click('topLeft', { force: true });
+    cy.get('[data-testid="social-summary-popup"]').should('not.exist');
+    cy.get('[data-testid="social-list-followers-following"]').first().click();
+    cy.get('[data-testid="social-follower-scan-popup"]').should('be.visible');
+    capture('social-followers-popup');
+    cy.get('[data-testid="social-follower-scan-cancel"]').click();
+    cy.get('[data-testid="social-follower-scan-popup"]').should('not.exist');
+    cy.get('[data-testid="graph-toolbar-view-graph"]').click();
+    cy.get('[data-testid="social-network-container"] canvas').first().then(($canvas) => {
+      const rect = $canvas[0].getBoundingClientRect();
+      cy.wrap($canvas).trigger('contextmenu', {
+        button: 2,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2
+      });
+    });
+    cy.get('body').then(($body) => {
+      const panel = $body.find('[data-testid="social-context-menu-panel"]:visible').first();
+      if (panel.length) {
+        cy.wrap(panel).should('be.visible');
+        capture('social-context-menu');
+        cy.contains('[data-testid="social-context-menu-panel"] button', 'Set Alias').click();
+        cy.get('[data-testid="social-alias-modal"]').should('be.visible');
+        capture('social-alias-modal');
+        cy.get('[data-testid="social-alias-cancel"]').click();
+      }
+    });
+    cy.get('body').then(($body) => {
+      const relationshipTrigger = $body.find('[data-testid="social-relationship-node-trigger"]').first();
+      if (relationshipTrigger.length) {
+        cy.wrap(relationshipTrigger).click();
+        cy.get('[data-testid="social-relationship-popup"]').should('be.visible');
+        capture('social-relationship-popup');
+        cy.get('[data-testid="social-relationship-close"]').click();
+      }
+    });
 
     cy.then(() => {
       if (!hasAdminSession) {
@@ -360,6 +546,11 @@ describe('User Manual Screenshot Flow', () => {
       ensureDashboardReady();
       cy.contains('h1', 'Tenant Data').should('be.visible');
       capture('tenant-settings');
+
+      cy.visit('/dashboard/profile/tenant');
+      ensureDashboardReady();
+      cy.get('[data-testid="tenant-page-header"], tbody tr').should('have.length.greaterThan', 0);
+      capture('tenant-administration');
 
       cy.visit('/dashboard/profile/auditlog');
       ensureDashboardReady();
@@ -390,6 +581,12 @@ describe('User Manual Screenshot Flow', () => {
         cy.get('app-alert-scan-loading').should('not.exist');
         cy.get('[data-testid="tenant-home-alert-category-card"], [data-testid="tenant-home-print-alerts"]')
           .should('have.length.greaterThan', 0);
+        openManageIOCs();
+        cy.get('[data-testid="tenant-ioc-value-input"], [data-testid^="tenant-ioc-tab-"]').should('have.length.greaterThan', 0);
+        capture('tenant-manage-iocs');
+        cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+        cy.location('pathname').should('include', '/dashboard/profile/homepage');
+        cy.get('app-alert-scan-loading').should('not.exist');
         capture('tenant-homepage');
       });
     }

@@ -73,6 +73,15 @@ New tenant users may be routed through a multi-step onboarding flow before using
 
 During onboarding, users can define monitored IOC values by category before entering the main application.
 
+The tested tenant flow confirms that onboarding is part of a larger tenant lifecycle rather than a standalone form. Covered user-visible behavior includes:
+
+- tenant signup and verification email delivery
+- admin-side tenant review and verification changes
+- enterprise-license assignment before first tenant login
+- onboarding wizard completion
+- IOC seeding during onboarding
+- tenant sub-user creation immediately after onboarding
+
 ## Main Application Layout
 
 After authentication, Orion opens inside the `dashboard` workspace.
@@ -219,12 +228,19 @@ For some privileged roles, the homepage also includes a draggable insight panel 
 Homepage overview with summary panels and search-first layout.
 ```
 
-```{figure} ../screenshots/tenant-homepage-20260326.png
-:alt: Tenant homepage dashboard
+```{figure} ../screenshots/heatmap-report-20260326.png
+:alt: Homepage heatmap country report
 :width: 100%
 
-Tenant-oriented homepage with alert and monitoring summaries.
+Country-level heatmap report opened directly from the homepage world map.
 ```
+
+The tested homepage workflow also includes:
+
+- hovering countries to reveal tooltip state
+- opening country-level report panels from the heatmap
+- closing the report by close control and by overlay
+- keeping homepage search and heatmap pivots available in the same workspace
 
 ## Analytics and Result Insights
 
@@ -427,9 +443,54 @@ This module is useful when starting from:
 - a product or platform with public exploit coverage
 - a threat report mentioning exploit tooling
 
+The E2E workflow covers all tested exploit entry points:
+
+- `All`
+- `CVE`
+- `Tools`
+- `ZeroDay`
+
+```{figure} ../screenshots/exploit-results-20260326.png
+:alt: Exploit module results
+:width: 100%
+
+Exploit search workflow across the tested vulnerability and tooling views.
+```
+
 ### Feed
 
 Feed is the stream-oriented intelligence area for news-style content and current reporting. It is useful for users who want a curated readout without first building a structured query.
+
+The tested feed workflow covers:
+
+- opening the `News` feed view
+- submitting a live query
+- opening a report
+- reviewing JSON-backed detail inside the report
+
+```{figure} ../screenshots/feed-report-20260326.png
+:alt: Feed report view
+:width: 100%
+
+Feed report workflow with structured detail and raw response inspection.
+```
+
+### Help and Support
+
+The profile menu exposes a support workflow that is part of the tested navigation model.
+
+Covered user-visible behavior includes:
+
+- opening help and support from the profile menu
+- filling email, subject, and message fields
+- submitting the support request
+
+```{figure} ../screenshots/support-modal-20260326.png
+:alt: Help and support modal
+:width: 90%
+
+Support modal used for direct in-app support requests.
+```
 
 ### Dump
 
@@ -587,6 +648,13 @@ The File Scanner workflow includes:
 
 For file IOC extraction, Orion groups indicators into categories such as URLs, packages, permissions, tampering markers, and other extracted values based on the uploaded content.
 
+```{figure} ../screenshots/file-scanner-report-20260326.png
+:alt: File scanner result
+:width: 100%
+
+File-scanner workflow after upload and successful analysis.
+```
+
 ### Web Scans
 
 Web Scans is the live scanning area for web-facing targets.
@@ -633,6 +701,13 @@ Scan failures are handled with retry guidance and error messaging.
 Web scan report with security posture, findings, and metadata.
 ```
 
+```{figure} ../screenshots/apk-scan-report-20260326.png
+:alt: APK scan result
+:width: 100%
+
+APK scan workflow after file upload, analysis, and report generation.
+```
+
 ### Network Intel
 
 Network Intel provides live recon workflows for domains and IPs.
@@ -658,6 +733,13 @@ Host Recon is used to resolve a domain into infrastructure and network informati
 
 IP Scan focuses on a specific IP and can expose service or infrastructure context derived from the target address.
 
+```{figure} ../screenshots/network-intel-ip-scan-20260326.png
+:alt: Network Intel IP scan
+:width: 100%
+
+IP-scan result view with service and infrastructure context for a resolved address.
+```
+
 #### Vulnerability Scan
 
 Vulnerability Scan reviews security issues for a supplied target and includes:
@@ -666,6 +748,13 @@ Vulnerability Scan reviews security issues for a supplied target and includes:
 - elapsed time
 - downloadable report output
 - cancel support during scanning
+
+```{figure} ../screenshots/network-intel-vulnerability-scan-20260326.png
+:alt: Network Intel vulnerability scan
+:width: 100%
+
+Vulnerability-scan result view with severity summary and findings.
+```
 
 #### Common Toolbar Features
 
@@ -718,6 +807,46 @@ Key concepts:
 
 The listings panel provides a document-oriented summary of the current graph state, while the legend explains node and edge types.
 
+```{figure} ../screenshots/cti-graph-20260326.png
+:alt: CTI graph workspace
+:width: 100%
+
+CTI graph workspace with filter controls, graph canvas, listings, and session actions.
+```
+
+The tested CTI workflow also confirms the following operator-visible actions:
+
+- switching filter type to `Cluster`
+- applying graph filters
+- searching and highlighting matching nodes
+- switching between graph and list views
+- collapsing and reopening the listings panel
+- toggling physics simulation
+- creating, renaming, importing, exporting, and closing sessions
+- exporting report options such as JSON and graph PDF
+- opening canvas context-menu actions
+
+```{figure} ../screenshots/cti-list-view-20260326.png
+:alt: CTI list view
+:width: 100%
+
+CTI list-view mode used when investigators want structured row-based review instead of the graph canvas.
+```
+
+```{figure} ../screenshots/cti-export-modal-20260326.png
+:alt: CTI export modal
+:width: 90%
+
+CTI export modal with tested report-export options such as JSON and graph PDF.
+```
+
+```{figure} ../screenshots/cti-context-menu-20260326.png
+:alt: CTI context menu
+:width: 90%
+
+CTI graph context-menu actions opened directly from the graph canvas.
+```
+
 ### Social Intel
 
 Social Intel is a graph-based username and profile mapping workspace.
@@ -757,6 +886,13 @@ This makes Social Intel useful for both:
 
 - known-profile investigations
 - unknown-profile discovery from an uploaded image
+
+```{figure} ../screenshots/social-intel-20260326.png
+:alt: Social Intel workspace
+:width: 100%
+
+Social Intel graph workspace used for username and relationship mapping.
+```
 
 #### Graph and List Views
 
@@ -834,6 +970,20 @@ From this modal, users can:
 
 This modal is central to the Social Intel workflow and should be treated as part of the main graph system, not as a secondary helper.
 
+```{figure} ../screenshots/social-manage-profiles-20260326.png
+:alt: Social Intel manage profiles modal
+:width: 100%
+
+Manage-profiles modal used to filter, inspect, fetch, and push discovered accounts into the graph.
+```
+
+```{figure} ../screenshots/social-intel-list-view-20260326.png
+:alt: Social Intel list view
+:width: 100%
+
+Social Intel list-view mode for profile-by-profile review after graph ingestion.
+```
+
 #### Summary Popup and Metadata Search
 
 The summary popup provides deeper profile inspection beyond the main graph or list node.
@@ -852,6 +1002,20 @@ Supported summary actions include:
 
 This popup is where profile-level enrichment becomes operationally useful. It combines raw profile context with searchable metadata and quick pivots.
 
+```{figure} ../screenshots/social-summary-popup-20260326.png
+:alt: Social Intel summary popup
+:width: 100%
+
+Summary popup used for platform review, enrichment actions, and detailed subject inspection.
+```
+
+```{figure} ../screenshots/social-metadata-results-20260326.png
+:alt: Social Intel metadata results
+:width: 100%
+
+Metadata-search results inside the Social Intel summary workflow.
+```
+
 #### Followers, Following, and Connections
 
 The followers/following workflow is more than a read-only count view.
@@ -868,6 +1032,13 @@ Covered actions include:
 - selecting all imported results and updating the graph
 
 In practice, this means Social Intel can expand an investigation outward from one profile into a broader relationship set rather than staying limited to the original target.
+
+```{figure} ../screenshots/social-followers-popup-20260326.png
+:alt: Social Intel followers and following popup
+:width: 100%
+
+Followers/following popup used to filter, inspect, and import related accounts.
+```
 
 #### Images, Followers, and Re-Scan Controls
 
@@ -1058,6 +1229,13 @@ For chat-style and social-style records, report pages can also include:
 
 This makes the report page suitable for both analyst review and downstream sharing.
 
+The tested chatbot flow specifically confirms:
+
+- opening the chat widget from a report
+- entering a prompt
+- sending a message
+- rendering a visible message thread in the chat area
+
 ### Defacement Report Page
 
 The defacement report is a streamlined variant focused on target and attacker context. It includes:
@@ -1133,6 +1311,14 @@ The account page allows the current user to review and manage:
 
 The page also shows the currently running platform version. It is focused on the current user rather than the tenant as a whole.
 
+The tested account workflow also includes:
+
+- avatar upload
+- theme toggle and persistence
+- enabling `2FA`
+- logging out and reaching the two-factor challenge screen on next login
+- viewing the QR image and OTP input state for 2FA setup/verification
+
 ```{figure} ../screenshots/account-settings-20260326.png
 :alt: Account settings form
 :width: 100%
@@ -1173,13 +1359,6 @@ The profile area also supports alert-focused routes such as:
 - `alerts/<type>` for category-specific alert reports
 - `addcustomalert` for creating custom alert definitions where enabled
 
-```{figure} ../screenshots/tenant-homepage-20260326.png
-:alt: Tenant homepage alerts view
-:width: 100%
-
-Tenant homepage with alert and monitoring summary cards.
-```
-
 ### Manage IOCs
 
 The IOC management page allows tenants to maintain the set of monitored values used in searches and alerting.
@@ -1193,6 +1372,14 @@ Capabilities include:
 - clearing all IOC values
 
 This page is especially important for tenant-driven monitoring workflows.
+
+The tested tenant IOC workflow includes:
+
+- opening the IOC page from the tenant profile area
+- switching across IOC category tabs
+- adding values in multiple categories
+- adding monitored email values for downstream alerting
+- returning to the tenant homepage and triggering follow-up scanning actions
 
 ### Statistics
 
@@ -1251,6 +1438,13 @@ Displayed information commonly includes:
 
 The page also respects quota-based restrictions.
 
+The broader tested user-management lifecycle also covers:
+
+- creating multiple users with different roles and license mixes
+- verifying role- and license-based sidebar visibility after login
+- triggering subscription or paywall behavior for limited-license users
+- showing near-expiry trial state messaging where applicable
+
 ```{figure} ../screenshots/tenant-users-20260326.png
 :alt: Tenant users page
 :width: 100%
@@ -1280,6 +1474,13 @@ Displayed fields include:
 - user quota
 - status
 - license assignments
+
+```{figure} ../screenshots/tenant-administration-20260326.png
+:alt: Tenant administration page
+:width: 100%
+
+Administrative tenant-management table used for verification, licensing, and quota updates.
+```
 
 ### Audit Logs
 
@@ -1551,6 +1752,14 @@ The tests also verify these filters across multiple modules, including:
 
 Advanced resilient filter validation also scans report detail and metadata after filtering, which means filtering is expected to affect downstream report inspection, not just the list page.
 
+For users, that means the filtering model should be understood as end-to-end rather than cosmetic. The tested behavior confirms:
+
+- search-tool mode changes affect the actual returned result set
+- sort order changes are preserved into refreshed searches
+- side filters can be applied repeatedly across different modules
+- date filters support both matching and intentionally empty result windows
+- filtered state is expected to remain meaningful when opening report detail and metadata panels
+
 ### Pagination, Load More, and Result Expansion
 
 The suite validates navigation through large result sets rather than assuming a single-page result view.
@@ -1569,6 +1778,13 @@ Covered pagination and expansion behaviors include:
 - stealer-log row expansion
 - IOC row expansion in consolidated tables
 - consolidated `See More` and `See Less` toggles where present
+
+This matters operationally because the interface is tested as a browsing workspace, not only a single-query landing page. Users should expect:
+
+- multi-page navigation in indexed modules
+- progressive loading where directory-style surfaces support it
+- expandable rows and cards in result-heavy modules
+- persistence of the browsing context while moving in and out of details
 
 ### Stealer Logs: Full Tested Behaviors
 
@@ -1720,6 +1936,18 @@ Specific validated actions include:
 - resetting file-upload flows with `Analyze Another File`
 - re-uploading and re-running the same scanner after reset
 
+The tested scan and lookup journeys are therefore more specific than a single generic “scan” action. They include:
+
+- email-driven breach validation
+- social handle lookups
+- wanted-person lookups
+- national identity checks
+- Playstore package lookups
+- software-name searches
+- file-upload IOC extraction
+- cryptocurrency address or hash lookups
+- web-target scans for basic, port, repository, SEO, and APK workflows
+
 ### Network Intel: Full Tested Behaviors
 
 The Network Intel suite covers:
@@ -1798,6 +2026,14 @@ Covered behaviors include:
 
 This means license-aware UI visibility and paywall/subscription behavior are part of the documented product behavior.
 
+In practical terms, the tested product states include:
+
+- users whose sidebar is limited to core indexed modules only
+- users who gain additional breach, social, exploit, feed, dump, or stealer visibility through license assignment
+- users whose role grants scanner and entity-API access
+- demo or limited users who are redirected into subscription/paywall flows instead of full module access
+- expiring users who receive warning banners before access changes
+
 ### Tenant Provisioning and Tenant Operations
 
 The tenant suite covers the full tenant lifecycle, including both admin-side and tenant-side workflows.
@@ -1853,6 +2089,24 @@ Covered behaviors include:
 - showing the `File too large` validation error for files above `1 MB`
 
 This should be documented explicitly because it is one of the tested administrative guardrails in the platform.
+
+### Chatbot and Report Conversation Flow
+
+The report workspace also includes a tested conversational path when the chat widget is enabled.
+
+Covered user-visible behavior includes:
+
+- opening the chat widget from a report
+- typing a prompt into the report chat input
+- sending the message
+- seeing the chat thread render inside the report workspace
+
+```{figure} ../screenshots/report-chatbot-20260326.png
+:alt: Report chatbot widget
+:width: 90%
+
+Report-level chatbot workflow used for conversational follow-up on an opened record.
+```
 
 ## Practical Workflows
 
