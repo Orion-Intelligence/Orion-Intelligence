@@ -88,6 +88,25 @@ def load_font(size: int) -> ImageFont.ImageFont:
     return ImageFont.load_default()
 
 
+def normalize_canvas(
+    image: Image.Image,
+    target_size: tuple[int, int],
+) -> Image.Image:
+    target_width, target_height = target_size
+    width, height = image.size
+
+    scale = min(target_width / max(1, width), target_height / max(1, height))
+    resized_width = max(1, round(width * scale))
+    resized_height = max(1, round(height * scale))
+    resized = image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
+
+    canvas = Image.new("RGBA", target_size, (0, 0, 0, 0))
+    offset_x = max(0, (target_width - resized_width) // 2)
+    offset_y = max(0, (target_height - resized_height) // 2)
+    canvas.alpha_composite(resized, (offset_x, offset_y))
+    return canvas
+
+
 def add_label(image: Image.Image, label: str) -> Image.Image:
     if not label:
         return image
@@ -136,6 +155,7 @@ def process_image(
     radius: int = 18,
     final_trim: int = 2,
     border_width: int = 3,
+    target_size: tuple[int, int] = (1418, 871),
 ) -> None:
     image = Image.open(path).convert("RGBA")
     width, height = image.size
@@ -166,6 +186,7 @@ def process_image(
         )
         canvas.alpha_composite(accent)
 
+    canvas = normalize_canvas(canvas, target_size)
     canvas.save(path)
 
 
