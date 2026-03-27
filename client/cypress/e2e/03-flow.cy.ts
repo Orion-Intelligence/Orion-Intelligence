@@ -57,14 +57,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     FLOW_ENTITY_API_SECTIONS.forEach((item) => clickSidebarSubItem('Entity API', item));
   });
 
-  it('verifies free mode opens the simplified mobile dashboard chrome', () => {
-    cy.viewport(430, 932);
-    cy.visit('/login?mode=free');
-
-    cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
-    assertFreeModeDashboardChrome();
-  });
-
   it('covers world heatmap render, interactions, and popup close paths', () => {
     cy.loginAsAdmin();
     cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
@@ -229,5 +221,27 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.contains('No links found!').should('be.visible');
 
     resetDirectoryFilters();
+  });
+});
+
+describe('Orion Intelligence - Free Mode Flow', () => {
+  beforeEach(() => {
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    cy.window().then((win) => {
+      win.sessionStorage.clear();
+    });
+  });
+
+  it('verifies free mode opens the simplified mobile dashboard chrome', () => {
+    cy.viewport(430, 932);
+    cy.intercept('POST', '**/api/token/demo').as('demoLogin');
+    cy.visit('/login?mode=free');
+
+    cy.wait('@demoLogin').then((interception) => {
+      expect(interception.response?.statusCode).to.eq(200);
+    });
+    cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
+    assertFreeModeDashboardChrome();
   });
 });

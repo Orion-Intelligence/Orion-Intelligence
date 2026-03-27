@@ -10,6 +10,7 @@ from odmantic import ObjectId
 from elasticsearch import AsyncElasticsearch, helpers as es_helpers, NotFoundError
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
+from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.session_manager.session_enums import admin_mock, admin_user, crawler_mock, crawler_user
@@ -130,6 +131,8 @@ class test_manager:
 
         if docs:
             await db["db_user_account"].insert_many(docs, ordered=False)
+
+        await mongo_controller.get_instance().ensure_demo_user()
 
     async def reset_test_elastic_and_import_mocks(self):
         print("reset_test_elastic_and_import_mocks: start", flush=True)

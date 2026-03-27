@@ -95,6 +95,7 @@ services:
       - xpack.security.transport.ssl.enabled=false
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
+      - ES_JAVA_OPTS=-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m
     env_file:
       - .env
     ports:
@@ -107,12 +108,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-    command:
-      - bash
-      - -c
-      - |
-        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m"
-        exec /usr/local/bin/docker-entrypoint.sh eswrapper
     networks:
       backend:
         ipv4_address: 172.20.1.11

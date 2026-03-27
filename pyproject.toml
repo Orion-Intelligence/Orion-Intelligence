@@ -31,7 +31,7 @@ starlette-admin = "0.16.0"
 email-validator = "2.3.0"
 pymongo = "4.16.0"
 passlib = "1.7.4"
-bcrypt = "^4.2.1"
+bcrypt = "4.0.1"
 PyJWT = "2.12.1"
 
 [tool.pytest.ini_options]

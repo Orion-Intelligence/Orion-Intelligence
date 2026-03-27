@@ -28,8 +28,8 @@ class UserStatus(str, Enum):
 
 class LicenseName(str, Enum):
     FREE = "free"
-    ONSIT_BASIC = "osint_basic"
-    ONSIT_ADVANCED = "osint_advanced"
+    OSINT_BASIC = "osint_basic"
+    OSINT_ADVANCED = "osint_advanced"
     SOCIAL_MAPPER = 'social_mapper'
     PENTESTER = "pentester"
     MAINTAINER = "maintainer"
@@ -112,7 +112,7 @@ class db_user_account(Model):
             if LicenseName.FREE in licenses and len(licenses) > 1:
                 raise HTTPException(status_code=400, detail="Free license cannot be combined with other licenses")
 
-            if LicenseName.ONSIT_BASIC in licenses and LicenseName.ONSIT_ADVANCED in licenses:
+            if LicenseName.OSINT_BASIC in licenses and LicenseName.OSINT_ADVANCED in licenses:
                 raise HTTPException(status_code=400, detail="osint_basic and osint_advanced cannot both be assigned")
 
             if LicenseName.ENTERPRISE in licenses:
