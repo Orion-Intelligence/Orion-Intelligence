@@ -23,6 +23,12 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
   animations: [sidebarModeAnimation],
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
+  private readonly closeForSubscriptionHandler = () => {
+    if (this.sidebar_default) {
+      this.onToggleSidebar(this.mobile_menu_status);
+    }
+  };
+
   sidebar_default = true;
   min_detected = false;
   mobile_menu_status = false;
@@ -54,6 +60,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         this.handleProfileRoute(e.urlAfterRedirects);
       });
     window.addEventListener('resize', this.checkScreenWidth.bind(this));
+    window.addEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
     this.checkScreenWidth();
   }
 
@@ -69,6 +76,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     window.removeEventListener('resize', this.checkScreenWidth.bind(this));
+    window.removeEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
   }
 
   checkScreenWidth() {

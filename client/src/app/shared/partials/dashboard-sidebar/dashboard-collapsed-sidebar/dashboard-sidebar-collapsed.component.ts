@@ -35,6 +35,13 @@ export class SidebarSectionComponent {
     this.optionSelected.emit(item);
   }
 
+  requestSubscription(moduleName: string) {
+    if (!this.licenseService.canAccess(moduleName)) {
+      window.dispatchEvent(new CustomEvent('close-dashboard-sidebar'));
+    }
+    this.licenseService.demoSubscription(moduleName);
+  }
+
   getItemTooltip(item: string): string {
     const mapped = this.itemTooltips[item];
     if (mapped) {

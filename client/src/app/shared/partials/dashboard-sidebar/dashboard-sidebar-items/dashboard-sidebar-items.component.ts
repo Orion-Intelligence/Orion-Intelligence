@@ -34,6 +34,13 @@ export class DashboardSidebarItemsComponent {
     this.optionSelected.emit(item);
   }
 
+  requestSubscription(moduleName: string) {
+    if (!this.licenseService.canAccess(moduleName)) {
+      window.dispatchEvent(new CustomEvent('close-dashboard-sidebar'));
+    }
+    this.licenseService.demoSubscription(moduleName);
+  }
+
   replaceDashWithSpace(value: string): string {
     if (!value) {
       return '';

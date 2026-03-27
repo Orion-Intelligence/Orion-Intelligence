@@ -39,6 +39,10 @@ export class DashboardComponent implements AfterViewInit, OnInit {
     this.appService.set('isSidebarOpen', this.isMenuOpen);
   }
 
+  isCompactViewport(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= 900;
+  }
+
   prepareRoute(outlet: RouterOutlet) {
     this.animationState = outlet?.activatedRouteData?.['animation'] || null;
     return this.animationState;

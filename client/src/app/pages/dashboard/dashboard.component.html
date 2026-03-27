@@ -10,7 +10,7 @@
     <div id="top" data-cy="top" class="block h-px w-full"></div>
     <div class="flex h-screen min-h-[800px] overflow-x-hidden overflow-y-visible bg-[var(--color-blue-900)]" id="dashboard__sidebar-main" data-cy="dashboard-sidebar-main">
       <input class="hidden" id="dashboard__menu-toggle" name="menu-input" type="radio" data-cy="menu-toggle">
-      <div [ngClass]="{ 'w-[300px] max-[900px]:w-full p-0 overflow-y-auto': isMenuOpen, 'w-[70px] max-[900px]:w-[56px] px-[7px] py-[8px] overflow-hidden': !isMenuOpen, 'transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[900px]:transition-none': isMenuOpen, 'transition-none': !isMenuOpen }" class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] [scrollbar-color:var(--color-blue-880)_transparent]" data-cy="dashboard-sidebar">
+      <div [ngClass]="{ 'p-0 overflow-y-auto': isMenuOpen, 'px-[7px] py-[8px] overflow-hidden': !isMenuOpen, 'transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[900px]:transition-none': isMenuOpen, 'transition-none': !isMenuOpen }" [style.width]="isMenuOpen ? (isCompactViewport() ? '100vw' : '300px') : (isCompactViewport() ? '56px' : '70px')" [style.min-width]="isMenuOpen ? (isCompactViewport() ? '100vw' : '300px') : (isCompactViewport() ? '56px' : '70px')" class="h-full border-r border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-900)] [scrollbar-color:var(--color-blue-880)_transparent]" data-cy="dashboard-sidebar">
         <app-dashboard-sidebar
           (menuToggle)="toggleNavigation()"
           data-cy="dashboard-sidebar-component">

@@ -6,6 +6,7 @@ import { SubscriptionService } from '../dashboard/subscription.service';
 import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AppService } from '../core/app/app.service';
+import { AuthService } from '../authetication/auth.service';
 type CombinedRule = {
     modules: Set<string> | 'all';
     cti_graph: boolean;
@@ -17,7 +18,13 @@ type CombinedRule = {
   providedIn: 'root'
 })
 export class LicenseService {
-  constructor(protected dashboardService: DashboardService, private appService: AppService, private subscriptionService: SubscriptionService, private router: Router) { }
+  constructor(
+    protected dashboardService: DashboardService,
+    private appService: AppService,
+    private subscriptionService: SubscriptionService,
+    private router: Router,
+    private authService: AuthService
+  ) { }
 
   getLicenses(): string[] {
     return this.appService.userSessionData().user.license ?? [];
@@ -60,6 +67,13 @@ export class LicenseService {
   demoSubscription(moduleName: string) {
     if (!this.canAccess(moduleName)) {
       this.dashboardService.showSubscription.set(true);
+      if (this.authService.getIsMobileDemo()) {
+        this.router.navigate(
+          ['/dashboard/strategic/all'],
+          { queryParams: { page: 1 } }
+        ).then();
+        return;
+      }
       this.router.navigate(['/']).then();
     }
   }
