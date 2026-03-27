@@ -93,4 +93,12 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     return 'sort-default';
   }
 
+  openExternalUrl(url?: string | null) {
+    if (!this.authService.getIsMobileDemo() || !url) {
+      return;
+    }
+
+    window.open(url, '_blank');
+  }
+
 }

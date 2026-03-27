@@ -79,4 +79,12 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     });
   }
 
+  openExternalUrl(url?: string | null) {
+    if (!this.authService.getIsMobileDemo() || !url) {
+      return;
+    }
+
+    window.open(url, '_blank');
+  }
+
 }
