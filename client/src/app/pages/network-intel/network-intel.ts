@@ -591,9 +591,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
               return acc;
             }, {} as Record<string, string>)
           },
+          ...this.buildRawJsonTables(this.dnsResult, 'DNS Raw Result'),
           ...this.ipRows
             .filter(row => Boolean(row.detail))
-            .flatMap((row, index) => this.buildIpDetailTables(row.detail!, `IP ${index + 1}`))
+            .flatMap((row, index) => [
+              ...this.buildIpDetailTables(row.detail!, `IP ${index + 1}`),
+              ...this.buildRawJsonTables(row.detail!, `IP ${index + 1} Raw Result`)
+            ])
         ]
       };
     }
@@ -634,7 +638,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
           exported_at: now
         },
         tables: [
-          ...this.buildIpDetailTables(detail)
+          ...this.buildIpDetailTables(detail),
+          ...this.buildRawJsonTables(detail, 'IP Raw Result')
         ]
       };
     }
@@ -666,7 +671,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
                 acc[`IP ${index + 1}`] = row.ip;
                 return acc;
               }, {} as Record<string, string>)
-            }
+            },
+            ...this.buildRawJsonTables(this.geoIpListResult, 'Geo IP Raw Result')
           ]
         };
       }
@@ -725,7 +731,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
               ].join(' ').trim();
               return acc;
             }, {} as Record<string, string>)
-          }
+          },
+          ...this.buildRawJsonTables(result, 'Geo Cameras Raw Result'),
+          ...this.buildRawJsonTables(stats, 'Geo Cameras Live Stats')
         ]
       };
     }
@@ -838,7 +846,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
               Source: this.normalizeReportValue(finding?.source),
               Evidence: this.truncateReportText(finding?.evidence, 1000)
             }
-          }))
+          })),
+          ...this.buildRawJsonTables(result, 'Vulnerability Raw Result')
         ].filter(table => Object.values(table.values).some((value) => {
           const normalized = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
           return Boolean(normalized) && normalized !== '-';
@@ -1091,6 +1100,36 @@ export class NetworkIntel implements OnInit, OnDestroy {
         'Discovered Paths': this.joinValues(port['discovered_paths']),
       }
     })).filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
+  }
+
+  private buildRawJsonTables(source: unknown, title: string, chunkSize = 3500): Array<{ title: string; values: Record<string, string> }> {
+    if (source === null || source === undefined) {
+      return [];
+    }
+
+    let json = '';
+    try {
+      json = JSON.stringify(source, null, 2);
+    }
+    catch {
+      json = String(source);
+    }
+
+    if (!json.trim()) {
+      return [];
+    }
+
+    const tables: Array<{ title: string; values: Record<string, string> }> = [];
+    for (let offset = 0, part = 1; offset < json.length; offset += chunkSize, part += 1) {
+      tables.push({
+        title: `${title} ${part}`.trim(),
+        values: {
+          JSON: json.slice(offset, offset + chunkSize)
+        }
+      });
+    }
+
+    return tables;
   }
 
   private truncateReportText(value: unknown, maxLength = 1200): string {

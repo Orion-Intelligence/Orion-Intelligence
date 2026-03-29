@@ -685,6 +685,9 @@ export class GraphExportService {
     if (!raw) {
       return '';
     }
+    if (key.trim().toLowerCase() === 'json') {
+      return String(input ?? '');
+    }
     const normalizedKey = key.toLowerCase();
     if (normalizedKey.includes('date')) {
       const asDate = new Date(raw);
