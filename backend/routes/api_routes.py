@@ -66,6 +66,13 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
 async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and param.category == "all":
+        base_index = [
+            ELASTIC_INDEX.S_GENERIC_INDEX,
+            ELASTIC_INDEX.S_LEAK_INDEX,
+            ELASTIC_INDEX.S_CHATS_INDEX,
+            ELASTIC_INDEX.S_SOCIAL_INDEX,
+        ]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
 
 
