@@ -32,7 +32,10 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
-    this.isMenuOpen = this.appService.getConfig().localSettings.isSidebarOpen !== false;
+    const hasSavedSidebarPreference = typeof window !== 'undefined' && localStorage.getItem('isSidebarOpen') !== null;
+    this.isMenuOpen = hasSavedSidebarPreference
+      ? this.appService.getConfig().localSettings.isSidebarOpen !== false
+      : !this.isCompactViewport();
     this.appService.set('isSidebarOpen', this.isMenuOpen);
     this.redirectMobileDemoDashboardEntry(this.router.url);
     this.router.events
