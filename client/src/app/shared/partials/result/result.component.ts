@@ -101,12 +101,11 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(_: SimpleChanges): void {
-    if (!this.local_query) {
-      this.local_query = this.searchQuery
-        ?.replace(/"/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim() || '';
-    }
+    this.searchQuery = this.searchQuery
+      ?.replace(/"/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim() || '';
+    this.local_query = this.searchQuery;
     this.init_domains();
   }
 
