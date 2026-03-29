@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
@@ -9,6 +9,7 @@ import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
 import { AuthService } from '../../services/authetication/auth.service';
+import { filter } from 'rxjs';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -32,6 +33,21 @@ export class DashboardComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.appService.set('isSidebarOpen', this.isMenuOpen);
+    this.redirectMobileDemoDashboardEntry(this.router.url);
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.redirectMobileDemoDashboardEntry(event.urlAfterRedirects);
+      });
+  }
+
+  private redirectMobileDemoDashboardEntry(url: string): void {
+    if (!this.authService.getIsMobileDemo() || url.startsWith('/dashboard/strategic/all')) {
+      return;
+    }
+    if (url === '/dashboard' || url === '/dashboard/home' || url.startsWith('/dashboard/profile')) {
+      this.router.navigate(['/dashboard/strategic/all'], { queryParams: { page: 1 }, replaceUrl: true }).then();
+    }
   }
 
   toggleNavigation() {
