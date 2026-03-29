@@ -32,6 +32,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
+    this.isMenuOpen = this.appService.getConfig().localSettings.isSidebarOpen !== false;
     this.appService.set('isSidebarOpen', this.isMenuOpen);
     this.redirectMobileDemoDashboardEntry(this.router.url);
     this.router.events
@@ -46,7 +47,8 @@ export class DashboardComponent implements AfterViewInit, OnInit {
       return;
     }
     if (url === '/dashboard' || url === '/dashboard/home' || url.startsWith('/dashboard/profile')) {
-      this.router.navigate(['/dashboard/strategic/all'], { queryParams: { page: 1 }, replaceUrl: true }).then();
+      const queryParams = this.router.parseUrl(url).queryParams;
+      this.router.navigate(['/dashboard/strategic/all'], { queryParams: { ...queryParams, page: 1 }, replaceUrl: true }).then();
     }
   }
 
