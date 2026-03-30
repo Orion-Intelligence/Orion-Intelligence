@@ -179,7 +179,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   canAccessNetworkIntel(): boolean {
-    return this.isAdmin() || this.licenseService.getLicenses().includes('osint_advanced');
+    return this.isAdmin() || this.licenseService.canUseModule('osint_advanced');
   }
 
   canAccessSocialIntel(): boolean {

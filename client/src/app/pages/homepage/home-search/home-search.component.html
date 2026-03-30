@@ -5,7 +5,7 @@
         <div class="fixed inset-0 z-[50] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]"></div>
       }
 
-      @if (app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise') ||
+      @if (app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') ||
         app_service.userSessionData().user.role === 'analyst') {
         <div class="relative">
           <div class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-[calc(100vw-90px)] max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay }">
