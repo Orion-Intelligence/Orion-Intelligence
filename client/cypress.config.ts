@@ -23,6 +23,8 @@ export default defineConfig({
         pgp: false,
         ADMIN_USERNAME: "admin_test_username",
         ADMIN_PASSWORD: "Zq9M#rX@e7W^B0T+f(ysG!kJc1d2mC&N%hAUEP)6Y4n$R8VbHS",
+        ADMIN_USERNAME_FOR_LIVE: "demo0001",
+        ADMIN_PASSWORD_FOR_LIVE: "1qaz!QAZ",
         TEST_USERS: {
             testing1: { username: "testing1", email: "a@hotmail.com", password: "1qaz!QAZ", role: "Member", licenses: ["Free"] },
             testing2: { username: "testing2", email: "b@hotmail.com", password: "1qaz!QAZ", role: "Analyst", licenses: ["Free", "OSINT Basic"] },

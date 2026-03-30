@@ -3,6 +3,7 @@ declare global {
     namespace Cypress {
         interface Chainable {
             loginAsAdmin(): Chainable<void>;
+            loginAsAdminLive(): Chainable<void>;
             loginAsTest1(): Chainable<void>;
             logout(): Chainable<void>;
             openSideFilter(): Chainable<void>;
@@ -21,6 +22,27 @@ Cypress.Commands.add("loginAsAdmin", () => {
         cy.get('[data-testid="login-user"]').type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+            .filter(':visible')
+            .should('have.length.greaterThan', 0);
+    });
+});
+Cypress.Commands.add("loginAsAdminLive", () => {
+    cy.env(["ADMIN_USERNAME_FOR_LIVE", "ADMIN_PASSWORD_FOR_LIVE"])
+        .then(({ ADMIN_USERNAME_FOR_LIVE, ADMIN_PASSWORD_FOR_LIVE }) => {
+
+        cy.visit("https://try.orionintelligence.org/login");
+
+        cy.get('[data-testid="login-user"]')
+            .type(ADMIN_USERNAME_FOR_LIVE);
+
+        cy.get('[data-testid="login-pass"]')
+            .type(ADMIN_PASSWORD_FOR_LIVE, { log: false });
+
+        cy.get('[data-testid="login-button"], input.login-button')
+            .first()
+            .click();
+
         cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
