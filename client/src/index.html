@@ -9,24 +9,24 @@
       <title>Initializing ...</title>
       <base href="/">
 
-      
+
       <link rel="preload" as="image" href="/assets/images/shared/auth_dashboard_icon.svg" />
       <link rel="icon" type="image/x-icon" href="api/s/static/favicon">
 
 
-      
+
       <meta content="website" property="og:type">
       <meta content="Trustly Search Engine | Dark Web Based Search Engine" property="og:title">
       <meta content="Darkweb or Deepweb Search Engine working on multiple layered networks including i2p, onion, and riddle. Optimized Searches with mobile support and separate Mobile Apps" property="og:description">
       <meta content="/assets/images/shared/og-image.png" property="og:image">
 
-      
+
       <meta content="summary_large_image" property="twitter:card">
       <meta content="Trustly Search Engine | Dark Web Based Search Engine" property="twitter:title">
       <meta content="Darkweb or Deepweb Search Engine working on multiple layered networks including i2p, onion, and riddle. Optimized Searches with mobile support and separate Mobile Apps" property="twitter:description">
       <meta content="/assets/images/shared/twitter-card.png" property="twitter:image">
 
-      
+
       <meta content="Dark Web, Deep Web, Hidden Web, Onion, Tor, i2p, Black Market, Bitcoin, Leak Documents, Darkweb Links, Deepweb Links, Onion Links" name="keywords">
       <meta content="Darkweb search engine optimized for layered networks, privacy, and in-depth indexing of multiple sources including onion, i2p, and riddle." name="description">
       <meta content="Trustly Search Engine" name="author">
@@ -35,8 +35,43 @@
 
 <body class="dark-theme">
       <noscript>
-            <div class="blocked-media">
-                  This site may not function properly because <b>JavaScript</b> appears to be disabled or blocked.
+            <div class="ui-dashboard-grid-bg flex min-h-screen items-center justify-center px-6 py-10 font-[Inter,sans-serif] text-[var(--color-text1)] lg:pb-24 lg:pt-6">
+                  <div class="w-full max-w-[680px] rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(23,34,53,0.98)_0%,rgba(14,22,38,0.98)_100%)] shadow-[0_18px_48px_rgba(0,0,0,0.34),0_0_0_1px_rgba(87,165,235,0.05),0_0_42px_rgba(87,165,235,0.08)] lg:-translate-y-8">
+                        <div class="border-b border-[var(--color-border)] px-6 py-5 sm:px-8">
+                              <div class="inline-flex items-center rounded-full border border-[rgba(87,165,235,0.22)] bg-[rgba(87,165,235,0.1)] px-3 py-1 text-[12px] font-semibold text-[var(--color-blue-640)]">
+                                    Browser Requirement
+                              </div>
+                              <h1 class="mt-4 text-[28px] font-semibold leading-tight text-[var(--color-text1)] sm:text-[34px]">
+                                    JavaScript is turned off or being blocked
+                              </h1>
+                              <p class="mt-3 max-w-[50ch] text-[15px] leading-7 text-[var(--color-text4)]">
+                                    Orion needs JavaScript to sign in, load data, and render the application. Your browser, extension set, or network policy is currently preventing scripts from running.
+                              </p>
+                        </div>
+
+                        <div class="grid gap-5 px-6 py-6 sm:px-8 sm:py-7">
+                              <div class="grid gap-3 sm:grid-cols-3">
+                                    <div class="rounded-[16px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.03)] px-4 py-4">
+                                          <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--color-blue-640)]">1. Browser</p>
+                                          <p class="mt-2 text-[14px] leading-6 text-[var(--color-text2)]">Enable JavaScript for this site in your browser settings.</p>
+                                    </div>
+                                    <div class="rounded-[16px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.03)] px-4 py-4">
+                                          <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--color-blue-640)]">2. Extensions</p>
+                                          <p class="mt-2 text-[14px] leading-6 text-[var(--color-text2)]">Review script blockers, privacy tools, or hardened profiles.</p>
+                                    </div>
+                                    <div class="rounded-[16px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.03)] px-4 py-4">
+                                          <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--color-blue-640)]">3. Retry</p>
+                                          <p class="mt-2 text-[14px] leading-6 text-[var(--color-text2)]">Reload the page after updating your settings.</p>
+                                    </div>
+                              </div>
+
+                              <div class="flex border-t border-[var(--color-border)] pt-5">
+                                    <a href="." class="inline-flex min-h-[48px] items-center justify-center rounded-[12px] bg-[var(--color-blue-640)] px-5 text-[14px] font-semibold text-white transition hover:bg-[var(--color-blue-630)]">
+                                          Reload Page
+                                    </a>
+                              </div>
+                        </div>
+                  </div>
             </div>
       </noscript>
       <app-root></app-root>
