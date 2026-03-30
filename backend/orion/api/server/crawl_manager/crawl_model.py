@@ -4,10 +4,12 @@ import os
 from datetime import datetime, timezone
 import httpx
 import requests
+from fastapi import HTTPException, Request
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
+from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -389,3 +391,21 @@ class crawl_model:
         response.raise_for_status()
 
         return response.json()["result"]
+
+    @staticmethod
+    def _get_swarm_proxy_url(request: Request) -> str:
+        swarm_url = env_handler.get_instance().env("SWARM_URL")
+        if not swarm_url:
+            raise HTTPException(
+                status_code=500,
+                detail="SWARM_URL is not configured.",
+            )
+
+        return f"{swarm_url.rstrip('/')}/user-dumps"
+
+    async def proxy_swarm_index(self, request: Request):
+        target_url = self._get_swarm_proxy_url(request)
+        payload = await request.json()
+        async with httpx.AsyncClient(timeout=120) as client:
+            proxy_response = await client.post(target_url, json=payload)
+        return JSONResponse(content=proxy_response.json(), status_code=proxy_response.status_code)

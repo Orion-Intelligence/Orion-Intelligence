@@ -118,6 +118,11 @@ async def index_social_data(request: Request):
     return await crawl_model.getInstance().invoke_social_index(social_data_model(**body))
 
 
+@crawl_routes.post("/api/index/swarm", dependencies=_leak_deps)
+async def index_swarm_data(request: Request):
+    return await crawl_model.getInstance().proxy_swarm_index(request)
+
+
 @crawl_routes.post("/api/index/sanctions", dependencies=_leak_deps)
 async def index_sanctions_data(request: Request):
     instance = crawl_model.getInstance()
