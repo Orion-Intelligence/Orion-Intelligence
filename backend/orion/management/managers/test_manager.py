@@ -110,6 +110,7 @@ class test_manager:
 
         admin_src = await db["db_user_account"].find_one({"role": "admin"})
         crawler_src = await db["db_user_account"].find_one({"role": crawler_user["role"]})
+        await mongo_controller.get_instance().ensure_demo_user()
 
         await db["db_user_account"].delete_many({})
 
@@ -132,7 +133,6 @@ class test_manager:
         if docs:
             await db["db_user_account"].insert_many(docs, ordered=False)
 
-        await mongo_controller.get_instance().ensure_demo_user()
 
     async def reset_test_elastic_and_import_mocks(self):
         print("reset_test_elastic_and_import_mocks: start", flush=True)

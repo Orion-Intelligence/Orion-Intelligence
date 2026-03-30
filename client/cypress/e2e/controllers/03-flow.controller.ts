@@ -167,15 +167,24 @@ export function assertFreeModeDashboardChrome() {
     expect(win.localStorage.getItem('mobileDemo')).to.equal('true');
   });
 
-  cy.get('[data-testid="dashboard-header"]').should('be.visible');
-  cy.get('[data-testid="dashboard-header"] img[alt="Logo"]').should('be.visible');
-  cy.get('[data-testid="dashboard-header"]').within(() => {
-    cy.get('[data-testid="dashboard-header-back"]').should('not.exist');
-    cy.get('img[alt="breadcrumb"]').should('not.exist');
-    cy.get('[data-testid="profile-menu"]').should('not.exist');
-  });
-
   cy.get('[data-testid="dashboard-main"]').should('be.visible');
+  cy.get('[data-testid="dashboard-sidebar"]').should('be.visible');
+  cy.get('[data-testid="dashboard-sidebar-component"]').should('be.visible');
   cy.get('[data-testid="dashboard-container"]').should('be.visible');
   cy.get('[data-testid="dashboard-body"]').should('be.visible');
+  cy.get('[data-testid="dashboard-header"]').should('not.exist');
+  cy.get('[data-testid="profile-menu"]').should('not.exist');
+  cy.get('[data-testid="sidebar-expand-button"], [data-testid="sidebar-collapse-button"]')
+    .filter(':visible')
+    .should('have.length.at.least', 1);
+
+  cy.get('[data-testid="dashboard-sidebar"] ul')
+    .first()
+    .scrollTo('bottom', { ensureScrollable: false });
+
+  cy.get('[data-testid="dashboard-sidebar"]').within(() => {
+    cy.get('.opacity-20')
+      .filter(':visible')
+      .should('have.length.at.least', 1);
+  });
 }

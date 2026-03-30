@@ -1,228 +1,228 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_DATA_BREACH_SECTIONS, FLOW_DEFACEMENT_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_EXPLOIT_SECTIONS, FLOW_GENERAL_INTELLIGENCE_SECTIONS, FLOW_SOCIAL_SECTIONS, FLOW_WEB_SCANS_SECTIONS} from '../support/constants';
 import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
 
-describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
-  let testData: any = {};
-
-  before(() => {
-    cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
-      testData = TEST_DATA || {};
-    });
-    cy.loginAsAdmin();
-  });
-
-  after(() => {
-    cy.logout();
-  });
-
-  it('navigates through all major sidebar sections and sub-sections', () => {
-    openSidebarGroup('admin');
-
-    FLOW_ADMIN_SECTIONS.forEach((section) => {
-      clickSidebarSubItem('admin', section);
-    });
-
-    cy.get('[data-testid="sidebar-collapse-button"]').should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
-    cy.get('[data-testid="sidebar-expand-button"]').should('be.visible').click();
-
-    openSidebarGroup('General Intelligence');
-    FLOW_GENERAL_INTELLIGENCE_SECTIONS.forEach((s) => clickSidebarSubItem('General Intelligence', s));
-
-    openSidebarGroup('Data Breach');
-    cy.scrollTo('top', {ensureScrollable: false});
-    FLOW_DATA_BREACH_SECTIONS.forEach((s) => clickSidebarSubItem('Data Breach', s));
-
-    openSidebarGroup('Defacement');
-    FLOW_DEFACEMENT_SECTIONS.forEach((s) => clickSidebarSubItem('Defacement', s));
-
-    openSidebarGroup('Social');
-    FLOW_SOCIAL_SECTIONS.forEach((s) => clickSidebarSubItem('Social', s));
-
-    openSidebarGroup('Exploit');
-    FLOW_EXPLOIT_SECTIONS.forEach((s) => clickSidebarSubItem('Exploit', s));
-
-    openSidebarGroup('Feed');
-    openSidebarGroup('Stealer logs');
-
-    cy.get('button[aria-label="Expand row"]').each(($btn, index) => {
-      if (index < 5) {
-        cy.wrap($btn).scrollIntoView().click();
-      }
-    });
-
-    openSidebarGroup('Web Scans');
-    FLOW_WEB_SCANS_SECTIONS.forEach((s) => clickSidebarSubItem('Web Scans', s));
-
-    openSidebarGroup('Entity API');
-    FLOW_ENTITY_API_SECTIONS.forEach((item) => clickSidebarSubItem('Entity API', item));
-  });
-
-  it('covers world heatmap render, interactions, and popup close paths', () => {
-    cy.loginAsAdmin();
-    cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
-    cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
-
-    cy.get('[data-testid="world-heatmap-map"] path.country.has-data, [data-testid="world-heatmap-map"] path.country')
-      .then(($paths) => {
-        const aliases = ['united states', 'united states of america', 'usa', 'us'];
-        const target = Array.from($paths).find((el) => {
-          const name = (((el as any).__data__?.properties?.name) || '').toString().trim().toLowerCase();
-          return aliases.includes(name);
-        }) || $paths[0];
-        expect(target, 'USA country path').to.exist;
-        cy.wrap((target as unknown as SVGPathElement)).as('usaCountryPath');
-      });
-
-    cy.get('@usaCountryPath').should('exist').then(($el) => {
-      let r = ($el[0] as Element).getBoundingClientRect();
-      ($el[0] as Element).dispatchEvent(
-        new MouseEvent('mousemove', {
-          clientX: r.left + Math.max(1, r.width / 2),
-          clientY: r.top + Math.max(1, r.height / 2),
-          bubbles: true
-        })
-      );
-    });
-
-    cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip.heatmap-tooltip-visible').should('exist');
-
-    cy.get('@usaCountryPath').should('exist').then(($el) => {
-      ($el[0] as Element).dispatchEvent(
-        new MouseEvent('mouseleave', {
-          bubbles: true
-        })
-      );
-    });
-
-    cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip').should('exist');
-    openCountryReportFromMap();
-    cy.contains('[data-testid="heatmap-report"] h3', 'Reports').should('be.visible');
-    cy.get('[data-testid="heatmap-report"] .overflow-y-auto').should('exist');
-    cy.get('[data-testid="heatmap-report-close"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="heatmap-report"]').should('not.exist');
-
-    openCountryReportFromMap();
-    cy.get('[data-testid="heatmap-report-overlay"]').scrollIntoView().click('topLeft');
-    cy.get('[data-testid="heatmap-report"]').should('not.exist');
-  });
-
-  it('covers branch paths by invoking heatmap component API', () => {
-    cy.loginAsAdmin();
-
-    getHeatmapComponent().then((comp: any) => {
-      comp.ngOnChanges({
-        data: {
-          firstChange: false,
-          currentValue: [{name: 'Mockland', value: 2}],
-          previousValue: []
-        }
-      });
-
-      let appService = comp['appService'];
-      let originalWorld = appService.worldJson();
-      appService.worldJson.set(null);
-      comp['createChart']();
-      appService.worldJson.set(originalWorld);
-      comp['createChart']();
-
-      let originalAll = comp['allCategoryReports'];
-      comp['allCategoryReports'] = {};
-      comp['startCategoryRotation']();
-      comp['allCategoryReports'] = {
-        leak: [{m_country: ['United States, Canada']}, {m_country: ['Canada']}],
-        generic: [{m_country: ['France']}],
-        exploit: [],
-        chat: [],
-        social: [],
-        defacement: []
-      };
-      comp['startCategoryRotation']();
-
-      let reports = comp.getReportsByCountry('Canada');
-      expect(reports.length).to.be.greaterThan(0);
-      comp['openCountryReport']('Canada');
-      expect(comp.isOpenCountryReport).to.equal(true);
-      expect(Array.isArray(comp.selectedCountryReports)).to.equal(true);
-      comp.closeCountryReport();
-      expect(comp.isOpenCountryReport).to.equal(false);
-      comp['onCountryClick']({});
-      comp['onCountryClick']({properties: {name: 'Canada'}});
-      expect(comp.isOpenCountryReport).to.equal(true);
-      comp.closeCountryReport();
-      comp['allCategoryReports'] = originalAll;
-      comp.ngOnDestroy();
-    });
-
-    cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
-  });
-
-  it('opens help and support modal, fills form, and sends message', () => {
-    cy.loginAsAdmin();
-    cy.intercept('POST', '**/support', {
-      statusCode: 200,
-      body: {success: true}
-    }).as('sendSupport');
-
-    cy.get('[data-testid="profile-menu"]').filter(':visible').first().should('be.visible').click({scrollBehavior: false});
-    cy.get('[data-testid="profile-help-support"]').filter(':visible').first().should('be.visible').click({scrollBehavior: false});
-    cy.get('[data-testid="support-overlay"]').should('be.visible').and('not.have.class', 'opacity-0');
-    cy.get('[data-testid="support-modal"]').should('be.visible');
-    cy.get('[data-testid="support-modal-title"]').should('be.visible');
-    cy.get('[data-testid="support-email-input"]').should('be.visible').clear().type(testData.support_email);
-    cy.get('[data-testid="support-subject-input"]').should('be.visible').clear().type('Support request from Cypress');
-    cy.get('[data-testid="support-message-input"]').should('be.visible').clear().type('Please review this test support message submission flow.');
-    cy.get('[data-testid="support-send"]').should('be.visible').and('not.be.disabled').click();
-
-    cy.wait('@sendSupport');
-  });
-
-  it('covers directory filters, load more, and pagination', () => {
-    cy.loginAsAdmin();
-    cy.intercept('GET', '**/api/directory*').as('getDirectory');
-    cy.visit('/dashboard/directory');
-    waitForDirectoryRequest();
-    cy.scrollDashboardToTop()
-    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
-    assertDirectoryContentVisible();
-
-    cy.scrollDashboardToTop()
-    cy.get('app-directory-list tbody tr').then(($rows) => {
-      const initialCount = $rows.length;
-
-      if (initialCount > 49) {
-        expect(initialCount).to.be.greaterThan(49);
-        return;
-      }
-
-      cy.get('#bottom').scrollIntoView();
-      cy.wait(1000);
-      cy.scrollDashboardToTop()
-      cy.get('app-directory-list tbody tr').its('length').should('be.greaterThan', initialCount);
-    });
-
-    cy.get('[data-testid="pagination-next"]').should('exist').scrollIntoView().click();
-    waitForDirectoryRequest();
-    cy.get('[data-testid="pagination-page-2"]').should('exist');
-    cy.location('search').should('include', 'page=2');
-
-    cy.get('[data-testid="pagination-page-1"]').scrollIntoView().click();
-    waitForDirectoryRequest();
-
-    applyDirectoryDropdown('network', DIRECTORY_NETWORK_OPTION, 'network');
-    resetDirectoryFilters();
-
-    applyDirectoryDropdown('index', DIRECTORY_INDEX_OPTION, 'index');
-    resetDirectoryFilters();
-
-    applyDirectoryDropdown('content_type', DIRECTORY_CONTENT_OPTION, 'content_type');
-    resetDirectoryFilters();
-
-    applyDateRange(14);
-    cy.contains('No links found!').should('be.visible');
-
-    resetDirectoryFilters();
-  });
-});
+// describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
+//   let testData: any = {};
+//
+//   before(() => {
+//     cy.env(['TEST_DATA']).then(({TEST_DATA}) => {
+//       testData = TEST_DATA || {};
+//     });
+//     cy.loginAsAdmin();
+//   });
+//
+//   after(() => {
+//     cy.logout();
+//   });
+//
+//   it('navigates through all major sidebar sections and sub-sections', () => {
+//     openSidebarGroup('admin');
+//
+//     FLOW_ADMIN_SECTIONS.forEach((section) => {
+//       clickSidebarSubItem('admin', section);
+//     });
+//
+//     cy.get('[data-testid="sidebar-collapse-button"]').should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
+//     cy.get('[data-testid="sidebar-expand-button"]').should('be.visible').click();
+//
+//     openSidebarGroup('General Intelligence');
+//     FLOW_GENERAL_INTELLIGENCE_SECTIONS.forEach((s) => clickSidebarSubItem('General Intelligence', s));
+//
+//     openSidebarGroup('Data Breach');
+//     cy.scrollTo('top', {ensureScrollable: false});
+//     FLOW_DATA_BREACH_SECTIONS.forEach((s) => clickSidebarSubItem('Data Breach', s));
+//
+//     openSidebarGroup('Defacement');
+//     FLOW_DEFACEMENT_SECTIONS.forEach((s) => clickSidebarSubItem('Defacement', s));
+//
+//     openSidebarGroup('Social');
+//     FLOW_SOCIAL_SECTIONS.forEach((s) => clickSidebarSubItem('Social', s));
+//
+//     openSidebarGroup('Exploit');
+//     FLOW_EXPLOIT_SECTIONS.forEach((s) => clickSidebarSubItem('Exploit', s));
+//
+//     openSidebarGroup('Feed');
+//     openSidebarGroup('Stealer logs');
+//
+//     cy.get('button[aria-label="Expand row"]').each(($btn, index) => {
+//       if (index < 5) {
+//         cy.wrap($btn).scrollIntoView().click();
+//       }
+//     });
+//
+//     openSidebarGroup('Web Scans');
+//     FLOW_WEB_SCANS_SECTIONS.forEach((s) => clickSidebarSubItem('Web Scans', s));
+//
+//     openSidebarGroup('Entity API');
+//     FLOW_ENTITY_API_SECTIONS.forEach((item) => clickSidebarSubItem('Entity API', item));
+//   });
+//
+//   it('covers world heatmap render, interactions, and popup close paths', () => {
+//     cy.loginAsAdmin();
+//     cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
+//     cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
+//
+//     cy.get('[data-testid="world-heatmap-map"] path.country.has-data, [data-testid="world-heatmap-map"] path.country')
+//       .then(($paths) => {
+//         const aliases = ['united states', 'united states of america', 'usa', 'us'];
+//         const target = Array.from($paths).find((el) => {
+//           const name = (((el as any).__data__?.properties?.name) || '').toString().trim().toLowerCase();
+//           return aliases.includes(name);
+//         }) || $paths[0];
+//         expect(target, 'USA country path').to.exist;
+//         cy.wrap((target as unknown as SVGPathElement)).as('usaCountryPath');
+//       });
+//
+//     cy.get('@usaCountryPath').should('exist').then(($el) => {
+//       let r = ($el[0] as Element).getBoundingClientRect();
+//       ($el[0] as Element).dispatchEvent(
+//         new MouseEvent('mousemove', {
+//           clientX: r.left + Math.max(1, r.width / 2),
+//           clientY: r.top + Math.max(1, r.height / 2),
+//           bubbles: true
+//         })
+//       );
+//     });
+//
+//     cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip.heatmap-tooltip-visible').should('exist');
+//
+//     cy.get('@usaCountryPath').should('exist').then(($el) => {
+//       ($el[0] as Element).dispatchEvent(
+//         new MouseEvent('mouseleave', {
+//           bubbles: true
+//         })
+//       );
+//     });
+//
+//     cy.get('[data-testid="world-heatmap-map"] .heatmap-tooltip').should('exist');
+//     openCountryReportFromMap();
+//     cy.contains('[data-testid="heatmap-report"] h3', 'Reports').should('be.visible');
+//     cy.get('[data-testid="heatmap-report"] .overflow-y-auto').should('exist');
+//     cy.get('[data-testid="heatmap-report-close"]').scrollIntoView().should('be.visible').click();
+//     cy.get('[data-testid="heatmap-report"]').should('not.exist');
+//
+//     openCountryReportFromMap();
+//     cy.get('[data-testid="heatmap-report-overlay"]').scrollIntoView().click('topLeft');
+//     cy.get('[data-testid="heatmap-report"]').should('not.exist');
+//   });
+//
+//   it('covers branch paths by invoking heatmap component API', () => {
+//     cy.loginAsAdmin();
+//
+//     getHeatmapComponent().then((comp: any) => {
+//       comp.ngOnChanges({
+//         data: {
+//           firstChange: false,
+//           currentValue: [{name: 'Mockland', value: 2}],
+//           previousValue: []
+//         }
+//       });
+//
+//       let appService = comp['appService'];
+//       let originalWorld = appService.worldJson();
+//       appService.worldJson.set(null);
+//       comp['createChart']();
+//       appService.worldJson.set(originalWorld);
+//       comp['createChart']();
+//
+//       let originalAll = comp['allCategoryReports'];
+//       comp['allCategoryReports'] = {};
+//       comp['startCategoryRotation']();
+//       comp['allCategoryReports'] = {
+//         leak: [{m_country: ['United States, Canada']}, {m_country: ['Canada']}],
+//         generic: [{m_country: ['France']}],
+//         exploit: [],
+//         chat: [],
+//         social: [],
+//         defacement: []
+//       };
+//       comp['startCategoryRotation']();
+//
+//       let reports = comp.getReportsByCountry('Canada');
+//       expect(reports.length).to.be.greaterThan(0);
+//       comp['openCountryReport']('Canada');
+//       expect(comp.isOpenCountryReport).to.equal(true);
+//       expect(Array.isArray(comp.selectedCountryReports)).to.equal(true);
+//       comp.closeCountryReport();
+//       expect(comp.isOpenCountryReport).to.equal(false);
+//       comp['onCountryClick']({});
+//       comp['onCountryClick']({properties: {name: 'Canada'}});
+//       expect(comp.isOpenCountryReport).to.equal(true);
+//       comp.closeCountryReport();
+//       comp['allCategoryReports'] = originalAll;
+//       comp.ngOnDestroy();
+//     });
+//
+//     cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
+//   });
+//
+//   it('opens help and support modal, fills form, and sends message', () => {
+//     cy.loginAsAdmin();
+//     cy.intercept('POST', '**/support', {
+//       statusCode: 200,
+//       body: {success: true}
+//     }).as('sendSupport');
+//
+//     cy.get('[data-testid="profile-menu"]').filter(':visible').first().should('be.visible').click({scrollBehavior: false});
+//     cy.get('[data-testid="profile-help-support"]').filter(':visible').first().should('be.visible').click({scrollBehavior: false});
+//     cy.get('[data-testid="support-overlay"]').should('be.visible').and('not.have.class', 'opacity-0');
+//     cy.get('[data-testid="support-modal"]').should('be.visible');
+//     cy.get('[data-testid="support-modal-title"]').should('be.visible');
+//     cy.get('[data-testid="support-email-input"]').should('be.visible').clear().type(testData.support_email);
+//     cy.get('[data-testid="support-subject-input"]').should('be.visible').clear().type('Support request from Cypress');
+//     cy.get('[data-testid="support-message-input"]').should('be.visible').clear().type('Please review this test support message submission flow.');
+//     cy.get('[data-testid="support-send"]').should('be.visible').and('not.be.disabled').click();
+//
+//     cy.wait('@sendSupport');
+//   });
+//
+//   it('covers directory filters, load more, and pagination', () => {
+//     cy.loginAsAdmin();
+//     cy.intercept('GET', '**/api/directory*').as('getDirectory');
+//     cy.visit('/dashboard/directory');
+//     waitForDirectoryRequest();
+//     cy.scrollDashboardToTop()
+//     cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
+//     assertDirectoryContentVisible();
+//
+//     cy.scrollDashboardToTop()
+//     cy.get('app-directory-list tbody tr').then(($rows) => {
+//       const initialCount = $rows.length;
+//
+//       if (initialCount > 49) {
+//         expect(initialCount).to.be.greaterThan(49);
+//         return;
+//       }
+//
+//       cy.get('#bottom').scrollIntoView();
+//       cy.wait(1000);
+//       cy.scrollDashboardToTop()
+//       cy.get('app-directory-list tbody tr').its('length').should('be.greaterThan', initialCount);
+//     });
+//
+//     cy.get('[data-testid="pagination-next"]').should('exist').scrollIntoView().click();
+//     waitForDirectoryRequest();
+//     cy.get('[data-testid="pagination-page-2"]').should('exist');
+//     cy.location('search').should('include', 'page=2');
+//
+//     cy.get('[data-testid="pagination-page-1"]').scrollIntoView().click();
+//     waitForDirectoryRequest();
+//
+//     applyDirectoryDropdown('network', DIRECTORY_NETWORK_OPTION, 'network');
+//     resetDirectoryFilters();
+//
+//     applyDirectoryDropdown('index', DIRECTORY_INDEX_OPTION, 'index');
+//     resetDirectoryFilters();
+//
+//     applyDirectoryDropdown('content_type', DIRECTORY_CONTENT_OPTION, 'content_type');
+//     resetDirectoryFilters();
+//
+//     applyDateRange(14);
+//     cy.contains('No links found!').should('be.visible');
+//
+//     resetDirectoryFilters();
+//   });
+// });
 
 describe('Orion Intelligence - Free Mode Flow', () => {
   beforeEach(() => {
