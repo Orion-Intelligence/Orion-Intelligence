@@ -62,7 +62,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.router.url.startsWith('/dashboard/profile/homepage')) {
+    if (this.authService.getIsMobileDemo() && this.router.url.startsWith('/dashboard/profile/homepage')) {
       const queryParams = this.router.parseUrl(this.router.url).queryParams;
       this.router.navigate(['/dashboard/strategic/all'], { queryParams: { ...queryParams, page: 1 }, replaceUrl: true }).then();
       return;
