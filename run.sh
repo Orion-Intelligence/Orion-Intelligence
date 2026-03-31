@@ -4,6 +4,9 @@ set -o pipefail
 
 PROJECT_NAME="trusted-search"
 ENV_FILE=".env"
+LOCAL_SSL_DIR="backend/.ssl"
+LOCAL_SSL_CERT="$LOCAL_SSL_DIR/localhost-cert.pem"
+LOCAL_SSL_KEY="$LOCAL_SSL_DIR/localhost-key.pem"
 
 stop_docker() {
     docker compose -p "$PROJECT_NAME" down --remove-orphans
@@ -24,6 +27,19 @@ create_parser_zip() {
     if [ -d "$PARSER_DIR" ]; then
         (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .) || exit 1
     fi
+}
+
+ensure_local_ssl_cert() {
+    mkdir -p "$LOCAL_SSL_DIR"
+    if [ -f "$LOCAL_SSL_CERT" ] && [ -f "$LOCAL_SSL_KEY" ]; then
+        return 0
+    fi
+
+    openssl req -x509 -newkey rsa:2048 -nodes \
+        -keyout "$LOCAL_SSL_KEY" \
+        -out "$LOCAL_SSL_CERT" \
+        -days 365 \
+        -subj "/CN=localhost"
 }
 
 client_build() {
@@ -177,6 +193,18 @@ set_testing_enabled() {
     fi
 }
 
+set_swarm_url_to_local_ip() {
+    local local_ip
+    local_ip="$(hostname -I | awk '{print $1}')"
+    sed -i '/^SWARM_URL=/d' "$ENV_FILE" 2>/dev/null || true
+    echo "SWARM_URL=http://$local_ip:5132" >> "$ENV_FILE"
+}
+
+if [ "$1" = "-ip" ]; then
+    set_swarm_url_to_local_ip
+    shift
+fi
+
 if [ "$1" = "stop" ]; then
     stop_docker
     echo "Orion Intelligence service stopped"
@@ -227,12 +255,16 @@ if [ "$COMMAND" = "build" ]; then
             use_compose_file "default"
             ;;
         -b)
-            cp nginx/nginx-dev.conf nginx/nginx.conf
+            set_swarm_url_to_local_ip
+            ensure_local_ssl_cert
+            cp nginx/nginx-dev-ssl.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
         -d)
+            set_swarm_url_to_local_ip
+            ensure_local_ssl_cert
             client_build "$FLAG"
-            cp nginx/nginx-dev.conf nginx/nginx.conf
+            cp nginx/nginx-dev-ssl.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
         -p)

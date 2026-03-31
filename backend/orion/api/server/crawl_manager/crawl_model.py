@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import os
+import asyncio
 from datetime import datetime, timezone
 import httpx
 import requests
@@ -395,17 +396,15 @@ class crawl_model:
     @staticmethod
     def _get_swarm_proxy_url(request: Request) -> str:
         swarm_url = env_handler.get_instance().env("SWARM_URL")
-        if not swarm_url:
-            raise HTTPException(
-                status_code=500,
-                detail="SWARM_URL is not configured.",
-            )
-
         return f"{swarm_url.rstrip('/')}/user-dumps"
+
+    @staticmethod
+    async def _post_swarm_payload(target_url: str, payload: dict):
+        async with httpx.AsyncClient(timeout=120) as client:
+            await client.post(target_url, json=payload)
 
     async def proxy_swarm_index(self, request: Request):
         target_url = self._get_swarm_proxy_url(request)
         payload = await request.json()
-        async with httpx.AsyncClient(timeout=120) as client:
-            proxy_response = await client.post(target_url, json=payload)
-        return JSONResponse(content=proxy_response.json(), status_code=proxy_response.status_code)
+        asyncio.create_task(self._post_swarm_payload(target_url, payload))
+        return JSONResponse(content={"status": "accepted"}, status_code=202)

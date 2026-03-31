@@ -67,6 +67,7 @@ services:
       - web
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/.ssl:/etc/nginx/local-certs:ro
       - ./backend/static:/app/static:cached
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
