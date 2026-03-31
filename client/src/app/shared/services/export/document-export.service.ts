@@ -7,13 +7,14 @@ import { GraphExportService } from './graph-export.service';
 @Injectable({ providedIn: 'root' })
 export class DocumentExportService extends GraphExportService {
   exportDocumentPdf(payload: GraphReportPayload): void {
-    void this.exportDocumentPdfAsync(payload);
+    this.exportDocumentPdfStream(payload);
   }
 
-  private async exportDocumentPdfAsync(payload: GraphReportPayload): Promise<void> {
-    const libs = await this.getPdfLibs();
-    const bytes = this.buildDocPdfBytes(payload, libs.jsPDF, libs.autoTable);
-    this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-doc-report.pdf`);
+  private exportDocumentPdfStream(payload: GraphReportPayload): void {
+    this.getPdfLibs().subscribe((libs) => {
+      const bytes = this.buildDocPdfBytes(payload, libs.jsPDF, libs.autoTable);
+      this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-doc-report.pdf`);
+    });
   }
 
   private buildDocPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default): Uint8Array {

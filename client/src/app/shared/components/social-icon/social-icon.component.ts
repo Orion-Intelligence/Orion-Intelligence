@@ -20,7 +20,7 @@ export class SocialIconComponent {
   constructor() {
     effect(() => {
       const platform = this.platformName();
-      this.iconService.getWhiteIconDataUrl(platform).then(url => {
+      this.iconService.getWhiteIconDataUrl(platform).subscribe(url => {
         this.iconDataUrl.set(url);
       });
     });

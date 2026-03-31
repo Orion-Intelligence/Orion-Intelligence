@@ -125,7 +125,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     return this.copiedKey === key;
   }
 
-  async copyText(text: any, key: string, e?: MouseEvent) {
+  copyText(text: any, key: string, e?: MouseEvent) {
     if (e) {
       e.stopPropagation();
     }
@@ -133,11 +133,12 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     if (!value || value === '-') {
       return;
     }
-    const ok = await this.rowHelper.copyToClipboard(value);
-    if (!ok) {
-      return;
-    }
-    this.setCopied(key);
+    this.rowHelper.copyToClipboard(value).subscribe((ok) => {
+      if (!ok) {
+        return;
+      }
+      this.setCopied(key);
+    });
   }
 
   private setCopied(key: string) {

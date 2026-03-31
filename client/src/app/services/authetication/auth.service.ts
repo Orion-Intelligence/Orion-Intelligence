@@ -105,7 +105,7 @@ export class AuthService {
       localStorage.setItem('onboarding', String(false));
       this.appStorageService.clearStorage();
       this.appService.clearAll();
-      this.appService.loadConfig();
+      this.appService.loadConfig().subscribe();
     });
   }
 

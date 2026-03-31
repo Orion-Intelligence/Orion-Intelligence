@@ -36,12 +36,12 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
 
   ngOnInit() {
-    this.appService.loadConfig().finally(() => {
+    this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
     });
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.appService.loadSession(true).then(() => {
+        this.appService.loadSession(true).subscribe(() => {
           this.router.navigate(['dashboard'], { replaceUrl: true }).then();
         });
       }

@@ -30,7 +30,7 @@ export class SignupComponent implements OnInit {
   constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute, protected appService: AppService) { }
 
   ngOnInit(): void {
-    this.appService.loadConfig().finally(() => {
+    this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
     });
     this.route.queryParams.subscribe(() => {

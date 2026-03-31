@@ -4,12 +4,12 @@ import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../s
 import { AppStorageService } from './app-storage.service';
 import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { catchError, finalize, mapTo, shareReplay, tap } from 'rxjs/operators';
 import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
 import { userSessionData } from '../../../shared/model/company-profile/node.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
-import { firstValueFrom } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 type IdleWindow = Window & {
   requestIdleCallback?: (callback: () => void) => number;
@@ -20,7 +20,8 @@ type IdleWindow = Window & {
 })
 export class AppService {
   private entitiesCache: any[] | null = null;
-  private sessionLoadPromise: Promise<void> | null = null;
+  private sessionLoad$: Observable<void> | null = null;
+  private configLoad$: Observable<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
@@ -87,7 +88,6 @@ export class AppService {
     this.runWhenIdle(() => {
       this.loadEntities();
       this.loadLicenseRules();
-      this.loadWorldJson();
     });
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
@@ -99,48 +99,47 @@ export class AppService {
     this.appStorageService.setupWatcher(this.configData);
   }
 
-  async loadSession(forced = false): Promise<void> {
-    if (this.sessionLoadPromise) {
-      return this.sessionLoadPromise;
+  loadSession(forced = false): Observable<void> {
+    if (this.sessionLoad$) {
+      return this.sessionLoad$;
     }
 
-    let token = localStorage.getItem('token');
-    if (token || forced) {
-      this.sessionLoadPromise = (async () => {
-        try {
-          const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
-          if (session) {
-            this.userSessionData.set(session);
-          }
-        }
-        catch {
-          this.userSessionData.set(this.createEmptyUserSessionData());
-        }
-        finally {
-          this.sessionLoadPromise = null;
-        }
-      })();
-      return this.sessionLoadPromise;
+    const token = localStorage.getItem('token');
+    if (!token && !forced) {
+      return of(void 0);
     }
+
+    this.sessionLoad$ = this.apiService.post<userSessionData>('get/tenant/node', {}).pipe(tap((session) => {
+      if (session) {
+        this.userSessionData.set(session);
+      }
+    }), catchError(() => {
+      this.userSessionData.set(this.createEmptyUserSessionData());
+      return of(null);
+    }), mapTo(void 0), finalize(() => {
+      this.sessionLoad$ = null;
+    }), shareReplay(1));
+
+    return this.sessionLoad$;
   }
 
-  loadConfig(): Promise<void> {
-    return new Promise((resolve) => {
-      this.apiService.get<any>('public').subscribe({
-        next: (response) => {
-          if (response?.settings) {
-            const current = this.configData();
-            this.configData.set(new ConfigSettings(response.settings, current.localSettings));
-            this.updateFavicon(this.configData().appSettings.logo_url);
-            this.title.setTitle(this.configData().appSettings.app_name || 'Orion Intelligence');
-          }
-          resolve();
-        },
-        error: () => {
-          resolve();
-        }
-      });
-    });
+  loadConfig(): Observable<void> {
+    if (this.configLoad$) {
+      return this.configLoad$;
+    }
+
+    this.configLoad$ = this.apiService.get<any>('public').pipe(tap((response) => {
+      if (response?.settings) {
+        const current = this.configData();
+        this.configData.set(new ConfigSettings(response.settings, current.localSettings));
+        this.updateFavicon(this.configData().appSettings.logo_url);
+        this.title.setTitle(this.configData().appSettings.app_name || 'Orion Intelligence');
+      }
+    }), catchError(() => of(null)), mapTo(void 0), finalize(() => {
+      this.configLoad$ = null;
+    }), shareReplay(1));
+
+    return this.configLoad$;
   }
 
   loadStaticConfig(): void {

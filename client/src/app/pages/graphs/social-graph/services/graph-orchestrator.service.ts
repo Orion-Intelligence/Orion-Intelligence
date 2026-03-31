@@ -6,6 +6,7 @@ import { FetchingStateService } from './fetching-state.service';
 import { PlatformResult, TabState, NetworkNode } from '../../../../shared/model/social/social-scan.models';
 import { RelationshipResolverService } from './relationship-resolver.service';
 import { getSocialGraphLabelColor } from './theme-color.util';
+import { firstValueFrom, forkJoin } from 'rxjs';
 const INITIAL_GRAPH_NODES = 30;
 const GROUPING_THRESHOLD = 30;
 const MAX_GROUP_SIZE = 25;
@@ -71,7 +72,7 @@ export class GraphOrchestratorService {
     const platformsToDisplay = batchInfo ? batchInfo.all.slice(0, batchInfo.visibleCount) : [];
     const iconUrlMap = new Map<string, string>();
     if (platformsToDisplay.length > 0) {
-      const iconUrls = await Promise.all(platformsToDisplay.map(p => this.iconService.getWhiteIconDataUrl(p.platform, { type: 'graph' })));
+      const iconUrls = await firstValueFrom(forkJoin(platformsToDisplay.map(p => this.iconService.getWhiteIconDataUrl(p.platform, { type: 'graph' }))));
       platformsToDisplay.forEach((p, i) => iconUrlMap.set(p.platform, iconUrls[i]));
     }
     state.networkData.update(currentData => {
@@ -308,7 +309,7 @@ export class GraphOrchestratorService {
       const groupNodeToExpand = state.networkData().nodes.find(n => n.id === nodeId);
       if (groupNodeToExpand?.groupedPlatforms) {
         const platformsToAdd = groupNodeToExpand.groupedPlatforms;
-        const iconUrls = await Promise.all(platformsToAdd.map(p => this.iconService.getWhiteIconDataUrl(p.platform, { type: 'graph' })));
+        const iconUrls = await firstValueFrom(forkJoin(platformsToAdd.map(p => this.iconService.getWhiteIconDataUrl(p.platform, { type: 'graph' }))));
         const iconUrlMap = new Map<string, string>(platformsToAdd.map((p, i) => [p.platform, iconUrls[i]]));
         const expandedGroupNode = this.getExpandedGroupNode(groupNodeToExpand);
         state.networkData.update(d => ({

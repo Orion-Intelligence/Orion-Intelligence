@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ResultRowHelperService {
@@ -49,15 +50,22 @@ export class ResultRowHelperService {
     return text;
   }
 
-  async copyToClipboard(value: string): Promise<boolean> {
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-        return true;
-      }
+  copyToClipboard(value: string): Observable<boolean> {
+    if (navigator?.clipboard?.writeText) {
+      return new Observable<boolean>((observer) => {
+        navigator.clipboard.writeText(value).then(() => {
+          observer.next(true);
+          observer.complete();
+        }).catch(() => {
+          observer.next(this.copyWithExecCommand(value));
+          observer.complete();
+        });
+      });
     }
-    catch {
-    }
+    return of(this.copyWithExecCommand(value));
+  }
+
+  private copyWithExecCommand(value: string): boolean {
     try {
       const ta = document.createElement('textarea');
       ta.value = value;

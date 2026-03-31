@@ -83,8 +83,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   ngAfterViewInit(): void {
-    this.createChart();
-    this.startCategoryRotation();
+    window.requestAnimationFrame(() => {
+      this.appService.loadWorldJson();
+      this.waitForWorldJsonAndRender();
+    });
   }
 
   ngOnDestroy(): void {
@@ -97,6 +99,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && !changes['data'].firstChange) {
       this.buildIndex();
+      if (!this.mapG || !this.svg) {
+        return;
+      }
       this.updateColors();
       this.updateLegend();
       this.updateActiveCategoryLabel();
@@ -105,7 +110,19 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
 
   @HostListener('window:resize')
   onResize(): void {
+    if (!this.appService.worldJson()) {
+      return;
+    }
     this.createChart();
+  }
+
+  private waitForWorldJsonAndRender(): void {
+    if (this.appService.worldJson()) {
+      this.createChart();
+      this.startCategoryRotation();
+      return;
+    }
+    window.setTimeout(() => this.waitForWorldJsonAndRender(), 50);
   }
 
   private getAvailableCategories(): string[] {

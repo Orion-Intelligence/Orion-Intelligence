@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import type jsPDF from 'jspdf';
 import type { RowInput } from 'jspdf-autotable';
+import { from, Observable } from 'rxjs';
+import { map, shareReplay, tap } from 'rxjs/operators';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
-  private pdfLibsPromise: Promise<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
+  private pdfLibs$: Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
   private loadedAutoTable: typeof import('jspdf-autotable').default | null = null;
 
   protected readonly SECTION_RADIUS = 4;
@@ -22,23 +24,22 @@ export class GraphExportService {
     if (type !== 'graph_pdf') {
       throw new Error(`GraphExportService only supports graph exports. Received: ${type}`);
     }
-    void this.exportGraphPdf(payload);
+    this.exportGraphPdf(payload);
   }
 
-  protected getPdfLibs(): Promise<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> {
-    if (!this.pdfLibsPromise) {
-      this.pdfLibsPromise = Promise.all([
+  protected getPdfLibs(): Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> {
+    if (!this.pdfLibs$) {
+      this.pdfLibs$ = from(Promise.all([
         import('jspdf'),
         import('jspdf-autotable')
-      ]).then(([jspdfModule, autoTableModule]) => ({
+      ])).pipe(tap(([_, autoTableModule]) => {
+        this.loadedAutoTable = autoTableModule.default;
+      }), map(([jspdfModule, autoTableModule]) => ({
         jsPDF: jspdfModule.default,
         autoTable: autoTableModule.default
-      })).then((libs) => {
-        this.loadedAutoTable = libs.autoTable;
-        return libs;
-      });
+      })), shareReplay(1));
     }
-    return this.pdfLibsPromise;
+    return this.pdfLibs$;
   }
 
   protected requireAutoTable(): typeof import('jspdf-autotable').default {
@@ -48,10 +49,11 @@ export class GraphExportService {
     return this.loadedAutoTable;
   }
 
-  private async exportGraphPdf(payload: GraphReportPayload): Promise<void> {
-    const libs = await this.getPdfLibs();
-    const bytes = this.buildGraphPdfBytes(payload, libs.jsPDF, libs.autoTable);
-    this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
+  private exportGraphPdf(payload: GraphReportPayload): void {
+    this.getPdfLibs().subscribe((libs) => {
+      const bytes = this.buildGraphPdfBytes(payload, libs.jsPDF, libs.autoTable);
+      this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
+    });
   }
 
   private exportGraphJson(payload: GraphReportPayload): void {

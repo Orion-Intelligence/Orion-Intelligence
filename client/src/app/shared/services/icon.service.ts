@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWhatsapp, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
 const iconMap: {
     [key: string]: string;
@@ -182,10 +183,10 @@ export class IconService {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="${fillColor}">${firstLetter}</text></svg>`;
   }
 
-  async getWhiteIconDataUrl(platformName: string, options: IconOptions = { type: 'default' }): Promise<string> {
+  getWhiteIconDataUrl(platformName: string, options: IconOptions = { type: 'default' }): Observable<string> {
     const cacheKey = `${platformName}-${options.type}`;
     if (this.iconCache.has(cacheKey)) {
-      return this.iconCache.get(cacheKey)!;
+      return of(this.iconCache.get(cacheKey)!);
     }
     const lowerCasePlatform = platformName.toLowerCase();
     const slug = iconMap[lowerCasePlatform] || lowerCasePlatform.replace(/[\s.]+/g, '');
@@ -195,7 +196,7 @@ export class IconService {
       : this.buildFallbackSvg(platformName, options);
     const dataUrl = `data:image/svg+xml;base64,${btoa(svgText)}`;
     this.iconCache.set(cacheKey, dataUrl);
-    return dataUrl;
+    return of(dataUrl);
   }
 
   getPlatformBrandColor(platformName: string): string {

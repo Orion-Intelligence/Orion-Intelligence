@@ -213,7 +213,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return 'bi-tag-fill';
   }
 
-  async copyText(text: any, key: string, e?: MouseEvent) {
+  copyText(text: any, key: string, e?: MouseEvent) {
     if (e) {
       e.stopPropagation();
     }
@@ -221,14 +221,15 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     if (!value || value === '-') {
       return;
     }
-    const ok = await this.rowHelper.copyToClipboard(value);
-    if (!ok) {
-      return;
-    }
-    this.setCopied(key);
+    this.rowHelper.copyToClipboard(value).subscribe((ok) => {
+      if (!ok) {
+        return;
+      }
+      this.setCopied(key);
+    });
   }
 
-  async copyAll(e?: MouseEvent) {
+  copyAll(e?: MouseEvent) {
     if (e) {
       e.stopPropagation();
     }
@@ -236,11 +237,12 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     if (!payload.trim()) {
       return;
     }
-    const ok = await this.rowHelper.copyToClipboard(payload);
-    if (!ok) {
-      return;
-    }
-    this.setCopied('copy-all');
+    this.rowHelper.copyToClipboard(payload).subscribe((ok) => {
+      if (!ok) {
+        return;
+      }
+      this.setCopied('copy-all');
+    });
   }
 
   downloadReport(e?: MouseEvent) {
