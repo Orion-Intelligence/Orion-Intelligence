@@ -4,14 +4,15 @@ import type { RowInput } from 'jspdf-autotable';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
+  private pdfLibsPromise: Promise<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
+  private loadedAutoTable: typeof import('jspdf-autotable').default | null = null;
+
   protected readonly SECTION_RADIUS = 4;
   protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
   protected readonly TABLE_ROW_BG_RGB: [number, number, number] = [236, 242, 250];
   protected readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [224, 233, 245];
   protected readonly TABLE_BORDER_RGB: [number, number, number] = [194, 212, 238];
   protected readonly TABLE_BORDER_WIDTH = 0.2;
-  private pdfLibsPromise: Promise<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
-  private loadedAutoTable: typeof import('jspdf-autotable').default | null = null;
 
   exportByType(payload: GraphReportPayload, type: GraphReportExportType): void {
     if (type === 'json') {
