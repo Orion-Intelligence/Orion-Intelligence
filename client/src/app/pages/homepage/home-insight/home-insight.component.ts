@@ -3,10 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, NgOptimizedImage } from '@angular/common';
 import { DefacementModel, GenericModel, InsightCallbackModel, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
-import { ScrollService } from '../../../shared/services/scroll.service';
 import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { ApiService } from '../../../shared/services/api.service';
 @Component({
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
@@ -16,16 +16,24 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 export class HomeInsightComponent implements OnInit {
   protected readonly String = String;
 
-  insights!: InsightCallbackModel;
-  latestDocuments!: LatestDocumentCallbackModel;
+  insights: any = { general: {}, leak: {}, defacement: {} };
+  latestDocuments: LatestDocumentCallbackModel = { generic_model: [], leak_model: [], defacement_model: [], chat_model: [], exploit_model: [] };
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
   latestDocumentModelKeys: string[] = [];
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, public appService: AppService, protected licenseService: LicenseService) {
+  constructor(private router: Router, private route: ActivatedRoute, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService) {
   }
 
   ngOnInit() {
     const data = this.route.snapshot.data['insights'];
+    if (data) {
+      this.applyInsightData(data);
+      return;
+    }
+    this.apiService.get<any>('insight').subscribe(data => this.applyInsightData(data));
+  }
+
+  private applyInsightData(data: any): void {
     this.insights = data.insights;
     this.latestDocuments = data.latestDocument;
     this.latestDocumentModelKeys = (Object.keys(this.latestDocuments) as (keyof LatestDocumentCallbackModel)[]).filter(key => ['leak_model', 'chat_model', 'defacement_model'].includes(key) &&

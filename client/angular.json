@@ -92,9 +92,10 @@
                 "fonts": true
               },
               "sourceMap": {
+                "hidden": false,
                 "scripts": true,
                 "styles": true,
-                "vendor": false
+                "vendor": true
               },
               "extractLicenses": true,
               "namedChunks": false,

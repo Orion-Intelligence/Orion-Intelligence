@@ -339,30 +339,34 @@
       }
       @if (isAdmin() || licenseService.canUseCtiGraph() || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, isAdmin() || licenseService.canUseCtiGraph())" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || licenseService.canUseCtiGraph()) }" appTooltip="CTI Graph" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || licenseService.canUseCtiGraph() ? '/dashboard/ctigraph' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, isAdmin() || licenseService.canUseCtiGraph())" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || licenseService.canUseCtiGraph()) }" appTooltip="CTI Graph" aria-label="Open CTI Graph" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || licenseService.canUseCtiGraph() ? '/dashboard/ctigraph' : null" target="_blank">
             <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/graph.svg" width="20">
+            <span class="sr-only">Open CTI Graph</span>
           </a>
         </li>
       }
       @if (canAccessSocialIntel() || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, canAccessSocialIntel())" [ngClass]="{ 'opacity-20': isDemo() && !canAccessSocialIntel() }" appTooltip="Social Intel" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="canAccessSocialIntel() ? '/dashboard/social-intel' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, canAccessSocialIntel())" [ngClass]="{ 'opacity-20': isDemo() && !canAccessSocialIntel() }" appTooltip="Social Intel" aria-label="Open Social Intel" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="canAccessSocialIntel() ? '/dashboard/social-intel' : null" target="_blank">
             <img alt="Social Intel" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/social.svg" width="20">
+            <span class="sr-only">Open Social Intel</span>
           </a>
         </li>
       }
       @if (shouldShowWhistleBlowing()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, canAccessWhistleBlowing())" appTooltip="Whistle Blowing" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="canAccessWhistleBlowing() ? 'https://orionleaks.com/#/' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, canAccessWhistleBlowing())" appTooltip="Whistle Blowing" aria-label="Open Whistle Blowing" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="canAccessWhistleBlowing() ? 'https://orionleaks.com/#/' : null" target="_blank">
             <img alt="Links" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/whistle.svg" width="20">
+            <span class="sr-only">Open Whistle Blowing</span>
           </a>
         </li>
       }
       <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)] w-[50px]"></div>
       @if (appService.getConfig().appSettings.s_onion) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a appTooltip="Onion Link" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
+          <a appTooltip="Onion Link" aria-label="Open Onion Link" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
             <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/tor.svg" width="20">
+            <span class="sr-only">Open Onion Link</span>
           </a>
         </li>
       }
@@ -373,8 +377,9 @@
       </li>
       <li class="my-[6px] rounded-[8px] select-none">
         @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
-          <a appTooltip="Documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+          <a appTooltip="Documentation" aria-label="Open documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
             <img alt="Documentation" class="opacity-100" height="20" ngSrc="/assets/images/sidebar/documentation.svg" width="20">
+            <span class="sr-only">Open documentation</span>
           </a>
         }
       </li>

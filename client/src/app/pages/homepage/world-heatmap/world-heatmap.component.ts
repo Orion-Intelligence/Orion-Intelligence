@@ -78,9 +78,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
 
   ngOnInit(): void {
     const data = this.route.snapshot.data['insights'];
-    this.allCategoryReports = data.country_insight;
-    this.activeCategoryKey = null;
-    this.buildIndex();
+    if (data) {
+      this.applyInsightData(data);
+      return;
+    }
+    this.apiService.get<any>('insight').subscribe(data => this.applyInsightData(data));
   }
 
   ngAfterViewInit(): void {
@@ -130,6 +132,15 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private getAvailableCategories(): string[] {
     return this.categoryOrder.filter(cat => this.allCategoryReports?.[cat] &&
           this.allCategoryReports[cat].length > 0);
+  }
+
+  private applyInsightData(data: any): void {
+    this.allCategoryReports = data.country_insight;
+    this.activeCategoryKey = null;
+    this.buildIndex();
+    if (this.mapG && this.svg) {
+      this.startCategoryRotation();
+    }
   }
 
   private buildIndex(): void {

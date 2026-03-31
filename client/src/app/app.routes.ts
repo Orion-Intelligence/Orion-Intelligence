@@ -172,7 +172,6 @@ export const routes: Routes = [
       {
         path: 'home',
         loadComponent: loadHomepageComponent,
-        resolve: { insights: InsightResolver },
         data: { animation: 'HomePage' }
       },
       {
@@ -718,7 +717,6 @@ export const routes: Routes = [
           {
             path: 'homepage',
             loadComponent: loadSidebarUserHomepageComponent,
-            resolve: { insights: InsightResolver },
             data: { type: 'homepage', animation: 'HomepagePage' },
           },
           {
