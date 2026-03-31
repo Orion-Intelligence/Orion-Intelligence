@@ -2,6 +2,8 @@ import base64
 import hashlib
 import os
 import asyncio
+import json
+import random
 from datetime import datetime, timezone
 import httpx
 import requests
@@ -396,7 +398,28 @@ class crawl_model:
     @staticmethod
     def _get_swarm_proxy_url(request: Request) -> str:
         swarm_url = env_handler.get_instance().env("SWARM_URL")
-        return f"{swarm_url.rstrip('/')}/user-dumps"
+        swarm_urls = [swarm_url]
+
+        if isinstance(swarm_url, str):
+            stripped_value = swarm_url.strip()
+            if stripped_value.startswith("["):
+                try:
+                    parsed_value = json.loads(stripped_value)
+                    if isinstance(parsed_value, list):
+                        swarm_urls = parsed_value
+                except json.JSONDecodeError:
+                    swarm_urls = [item.strip() for item in stripped_value.split(",") if item.strip()]
+            elif "," in stripped_value:
+                swarm_urls = [item.strip() for item in stripped_value.split(",") if item.strip()]
+            else:
+                swarm_urls = [stripped_value]
+
+        available_swarm_urls = [url.rstrip("/") for url in swarm_urls if url]
+        if not available_swarm_urls:
+            raise ValueError("SWARM_URL is not configured")
+
+        target_base_url = random.choice(available_swarm_urls)
+        return f"{target_base_url}/user-dumps"
 
     @staticmethod
     async def _post_swarm_payload(target_url: str, payload: dict):
