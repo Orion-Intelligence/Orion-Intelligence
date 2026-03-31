@@ -1,5 +1,14 @@
 <div class="w-full">
-  <div #mapContainer data-testid="world-heatmap-map" class="map-container relative max-h-[80vh] min-h-[340px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:min-h-[400px] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]"></div>
+  <div #mapContainer data-testid="world-heatmap-map" class="map-container relative aspect-[100/52] max-h-[80vh] min-h-[400px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]">
+    @if (isMapLoading) {
+      <div class="absolute inset-0 z-[2] grid place-items-center bg-[rgba(14,22,38,0.82)] [body.light-theme_&]:bg-[rgba(255,255,255,0.88)]">
+        <div class="flex flex-col items-center gap-3">
+          <div class="h-9 w-9 rounded-full border-2 border-[rgba(255,255,255,0.14)] border-t-[var(--color-blue-640)] animate-spin [body.light-theme_&]:border-[rgba(15,23,42,0.10)]"></div>
+          <p class="m-0 text-[13px] font-medium tracking-[0.08em] text-[var(--color-text3)]">Loading heatmap</p>
+        </div>
+      </div>
+    }
+  </div>
 
   @if (isOpenCountryReport) {
     <app-heatmap-report data-testid="heatmap-report" [reports]="selectedCountryReports" [loading]="isCountryReportLoading" [loadingMore]="isCountryReportLoadingMore" [hasMore]="hasMoreCountryReports" (loadMore)="loadMoreCountryReports()" (close)="closeCountryReport()"></app-heatmap-report>

@@ -46,6 +46,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   public isCountryReportLoading = false;
   public isCountryReportLoadingMore = false;
   public hasMoreCountryReports = false;
+  public isMapLoading = true;
 
   private isLightTheme(): boolean {
     if (typeof document === 'undefined') {
@@ -120,6 +121,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (this.appService.worldJson()) {
       this.createChart();
       this.startCategoryRotation();
+      this.isMapLoading = false;
       return;
     }
     window.setTimeout(() => this.waitForWorldJsonAndRender(), 50);
@@ -326,7 +328,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     }
     const el = this.chartContainer.nativeElement as HTMLElement;
     const width = el.offsetWidth || 800;
-    const height = Math.max(Math.round(width * 0.52), 400);
+    const height = el.offsetHeight || Math.min(Math.max(Math.round(width * 0.52), 400), Math.round(window.innerHeight * 0.8));
     d3.select(el).selectAll('*').remove();
     this.tooltip = d3
       .select(el)
