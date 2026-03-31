@@ -58,7 +58,6 @@
             ],
             "styles": [
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/vis-network/styles/vis-network.css",
               "src/styles.scss",
               {
                 "input": "src/tailwind.css",
@@ -107,7 +106,6 @@
               ],
               "styles": [
                 "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-                "node_modules/vis-network/styles/vis-network.css",
                 "src/styles.scss",
                 {
                   "input": "src/tailwind.css",
@@ -183,7 +181,6 @@
             ],
             "styles": [
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/vis-network/styles/vis-network.css",
               "src/styles.scss",
               {
                 "input": "src/tailwind.css",

@@ -18,6 +18,7 @@ import { ExtendedNode, GraphResultItem, GraphSessionState, GraphSessionTab, Node
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
 @Component({
   selector: 'app-graphs',
   standalone: true,
@@ -173,6 +174,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
       document.addEventListener('pointerdown', this.globalPointerDownListener, true);
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }

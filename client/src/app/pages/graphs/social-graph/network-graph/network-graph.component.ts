@@ -5,6 +5,7 @@ import { DataSet } from 'vis-data';
 import { NetworkData, PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
+import { ensureStylesheet } from '../../../../shared/utils/ensure-stylesheet.util';
 @Component({
   selector: 'app-network-graph',
   templateUrl: './network-graph.component.html',
@@ -391,6 +392,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
     this.startAnimationLoop();
   }
 
