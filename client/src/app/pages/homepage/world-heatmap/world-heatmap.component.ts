@@ -145,6 +145,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!available.length) {
       return;
     }
+    if (this.rotationTimer) {
+      clearInterval(this.rotationTimer);
+      this.rotationTimer = null;
+    }
     let index = 0;
     const switchCategory = () => {
       this.activeCategoryKey = available[index];
@@ -163,6 +167,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private ensureLegendDefs(): void {
+    if (!this.svg) {
+      return;
+    }
     const defs = this.svg.select('defs').empty()
       ? this.svg.append('defs')
       : this.svg.select('defs');
@@ -188,6 +195,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private updateLegend(): void {
+    if (!this.svg || !this.chartContainer) {
+      return;
+    }
     const el = this.chartContainer.nativeElement as HTMLElement;
     const width = el.offsetWidth || 800;
     const isMobile = width <= 768;
@@ -283,6 +293,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private updateActiveCategoryLabel(): void {
+    if (!this.svg || !this.chartContainer) {
+      return;
+    }
     const el = this.chartContainer.nativeElement as HTMLElement;
     const width = el.offsetWidth || 800;
     const isMobile = width <= 768;
