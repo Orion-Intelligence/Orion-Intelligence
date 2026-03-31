@@ -14,7 +14,7 @@
               @if (!twofaRequired) {
                 <div class="mb-[14px] h-[54px] w-[300px]">
                   @if (getLoginLogoSrc()) {
-                    <img [src]="getLoginLogoSrc()" width="300" height="54" alt="logo" class="h-[54px] w-[300px] object-contain" />
+                    <img [src]="getLoginLogoSrc()" width="300" height="54" alt="logo" loading="eager" fetchpriority="high" decoding="async" class="h-[54px] w-[300px] object-contain" />
                   } @else {
                     <div class="flex h-[54px] w-[300px] items-center justify-center text-[28px] text-[#5a6f85]">-</div>
                   }
