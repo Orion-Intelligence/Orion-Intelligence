@@ -141,8 +141,6 @@ html:has(body.dark-theme) {
   pointer-events: none;
 }
 
-.app-background-dark {}
-
 .ui-see-more-btn {
   display: inline-flex;
   align-items: center;
@@ -203,11 +201,6 @@ html:has(body.dark-theme) {
     transparent 1px,
     transparent 12px
   ) !important;
-}
-
-.ui-consolidated-inner {
-  background: var(--ui-consolidated-inner-bg, #f7f9fc) !important;
-  border-color: var(--ui-consolidated-border, #d7e2ef) !important;
 }
 
 .dark-theme .ui-consolidated-theme {
