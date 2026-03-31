@@ -10,6 +10,11 @@ import { userSessionData } from '../../../shared/model/company-profile/node.mode
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
+
+type IdleWindow = Window & {
+  requestIdleCallback?: (callback: () => void) => number;
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -27,6 +32,15 @@ export class AppService {
     iocs: []
   });
   public userImageUrl = signal<string | null>(null);
+
+  private runWhenIdle(callback: () => void): void {
+    const idleWindow = window as IdleWindow;
+    if (typeof idleWindow.requestIdleCallback === 'function') {
+      idleWindow.requestIdleCallback(callback);
+      return;
+    }
+    window.setTimeout(callback, 1500);
+  }
 
   private createEmptyUserSessionData(): userSessionData {
     return {
@@ -70,9 +84,11 @@ export class AppService {
   }
 
   constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
-    this.loadEntities();
-    this.loadLicenseRules();
-    this.loadWorldJson();
+    this.runWhenIdle(() => {
+      this.loadEntities();
+      this.loadLicenseRules();
+      this.loadWorldJson();
+    });
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) {

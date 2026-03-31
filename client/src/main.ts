@@ -2,6 +2,11 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/pages/app/app.component';
 import '@angular/localize/init';
+
+type IdleWindow = Window & {
+    requestIdleCallback?: (callback: () => void) => number;
+};
+
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
 const SEARCH_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
@@ -26,10 +31,22 @@ const preloadAuth = new Image();
 preloadAuth.src = AUTH_ICON_SRC;
 const preloadSearch = new Image();
 preloadSearch.src = SEARCH_LOGO_SRC;
-const css = document.createElement('link');
-css.rel = 'stylesheet';
-css.href = '/assets/placeholder.css';
-document.head.appendChild(css);
+
+const runWhenIdle = (callback: () => void) => {
+    const idleWindow = window as IdleWindow;
+    if (typeof idleWindow.requestIdleCallback === 'function') {
+        idleWindow.requestIdleCallback(callback);
+        return;
+    }
+    window.setTimeout(callback, 1500);
+};
+
+runWhenIdle(() => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = '/assets/placeholder.css';
+    document.head.appendChild(css);
+});
 const mark = (img: HTMLImageElement) => {
     if (img.dataset['ph'] === '1') {
         return;
@@ -94,7 +111,9 @@ Promise.allSettled([
     preloadAuth.decode(),
     preloadSearch.decode()
 ]).finally(() => {
-    preloadAllImagesFromManifest().then();
+    runWhenIdle(() => {
+        preloadAllImagesFromManifest().then();
+    });
 });
 
 bootstrapApplication(AppComponent, appConfig).then();
