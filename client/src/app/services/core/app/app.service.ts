@@ -10,16 +10,13 @@ import { userSessionData } from '../../../shared/model/company-profile/node.mode
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
-
-type IdleWindow = Window & {
-  requestIdleCallback?: (callback: () => void) => number;
-};
+import entitiesData from '../../../../assets/data/entities_data/entities.json';
+import licenseRulesData from '../../../../assets/data/licenses/license_rules.json';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
-  private entitiesCache: any[] | null = null;
   private sessionLoad$: Observable<void> | null = null;
   private configLoad$: Observable<void> | null = null;
 
@@ -33,15 +30,6 @@ export class AppService {
     iocs: []
   });
   public userImageUrl = signal<string | null>(null);
-
-  private runWhenIdle(callback: () => void): void {
-    const idleWindow = window as IdleWindow;
-    if (typeof idleWindow.requestIdleCallback === 'function') {
-      idleWindow.requestIdleCallback(callback);
-      return;
-    }
-    window.setTimeout(callback, 1500);
-  }
 
   private createEmptyUserSessionData(): userSessionData {
     return {
@@ -85,10 +73,8 @@ export class AppService {
   }
 
   constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
-    this.runWhenIdle(() => {
-      this.loadEntities();
-      this.loadLicenseRules();
-    });
+    this.initializeEntities();
+    this.initializeLicenseRules();
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) {
@@ -178,33 +164,29 @@ export class AppService {
       .then();
   }
 
-  loadEntities(): void {
-    if (this.entitiesCache) {
-      this.entities.set(this.entitiesCache);
-      return;
+  private initializeEntities(): void {
+    this.entities.set(entitiesData);
+    for (const e of entitiesData) {
+      const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
+      search_filter_labels[key] = e.title;
     }
-    this.http
-      .get<any[]>('assets/data/entities_data/entities.json')
-      .pipe(tap(data => {
-        this.entitiesCache = data;
-        this.entities.set(data);
-        for (const e of data) {
-          const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
-          search_filter_labels[key] = e.title;
-        }
-      }))
-      .subscribe();
   }
 
-  loadLicenseRules(): void {
-    this.http
-      .get<any>('assets/data/licenses/license_rules.json')
-      .pipe(tap(data => {
-        for (const key in data) {
-          license_rules[key] = data[key];
-        }
-      }))
-      .subscribe();
+  loadEntities(): Observable<void> {
+    this.initializeEntities();
+    return of(void 0);
+  }
+
+  private initializeLicenseRules(): void {
+    const bundledRules = licenseRulesData as Record<string, any>;
+    for (const key in bundledRules) {
+      license_rules[key] = bundledRules[key];
+    }
+  }
+
+  loadLicenseRules(): Observable<void> {
+    this.initializeLicenseRules();
+    return of(void 0);
   }
 
   loadWorldJson(): void {
