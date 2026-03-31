@@ -124,12 +124,22 @@ export class AppService {
     }
   }
 
-  loadConfig(): void {
-    this.apiService.get<any>('public').subscribe(response => {
-      if (response?.settings) {
-        const current = this.configData();
-        this.configData.set(new ConfigSettings(response.settings, current.localSettings));
-      }
+  loadConfig(): Promise<void> {
+    return new Promise((resolve) => {
+      this.apiService.get<any>('public').subscribe({
+        next: (response) => {
+          if (response?.settings) {
+            const current = this.configData();
+            this.configData.set(new ConfigSettings(response.settings, current.localSettings));
+            this.updateFavicon(this.configData().appSettings.logo_url);
+            this.title.setTitle(this.configData().appSettings.app_name || 'Orion Intelligence');
+          }
+          resolve();
+        },
+        error: () => {
+          resolve();
+        }
+      });
     });
   }
 

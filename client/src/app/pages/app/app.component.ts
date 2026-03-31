@@ -38,7 +38,15 @@ export class AppComponent {
   }
 
   shouldAnimate(): boolean {
-    return !this.currentRoute().startsWith('/dashboard');
+    const route = this.currentRoute();
+    return ![
+      '/login',
+      '/signup',
+      '/reset',
+      '/welcome',
+      '/notification',
+      '/paymentGateway'
+    ].some(path => route.startsWith(path));
   }
 
   private applyTheme(theme: 'light-theme' | 'dark-theme'): void {

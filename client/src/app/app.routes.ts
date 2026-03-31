@@ -104,7 +104,6 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    resolve: { config: ConfigResolver },
     component: LoginComponent,
     data: { animation: 'LoginPage' }
   },

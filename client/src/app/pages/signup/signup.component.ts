@@ -13,6 +13,8 @@ import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameS
   templateUrl: './signup.component.html'
 })
 export class SignupComponent implements OnInit {
+  private static readonly DEFAULT_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
+  private static readonly DEFAULT_AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
   user = { username: '', mail: '', password: '' };
   errorMessage: string | null = null;
   passwordStrength: PasswordStrength = null;
@@ -22,13 +24,39 @@ export class SignupComponent implements OnInit {
   isMobile = false;
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
   usernameSuggestion: string = '';
+  brandingResolved = false;
 
   constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute, protected appService: AppService) { }
 
   ngOnInit(): void {
+    this.appService.loadConfig().finally(() => {
+      this.brandingResolved = true;
+    });
     this.route.queryParams.subscribe(() => {
       this.isMobile = window.innerWidth <= 480;
     });
+  }
+
+  getSignupLogoSrc(): string {
+    if (!this.brandingResolved) {
+      return '';
+    }
+    const logo = this.appService.getConfig().appSettings.logo_wide_light;
+    if (!logo || logo === '/api/s/static/system/logo_wide_light_default.png') {
+      return SignupComponent.DEFAULT_LOGO_SRC;
+    }
+    return logo;
+  }
+
+  getDashboardPreviewSrc(): string {
+    if (!this.brandingResolved) {
+      return '';
+    }
+    const authDashboardIcon = this.appService.getConfig().appSettings.auth_dashboard_icon;
+    if (!authDashboardIcon || authDashboardIcon === '/api/s/static/system/auth_dashboard_icon_default.png') {
+      return SignupComponent.DEFAULT_AUTH_DASHBOARD_SRC;
+    }
+    return authDashboardIcon;
   }
 
   validateUsername(): boolean {
