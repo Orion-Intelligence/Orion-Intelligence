@@ -6,7 +6,7 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
 import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { ApiService } from '../../../shared/services/api.service';
+import { InsightCacheService } from '../../../shared/services/insight-cache.service';
 @Component({
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
@@ -21,7 +21,7 @@ export class HomeInsightComponent implements OnInit {
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
   latestDocumentModelKeys: string[] = [];
 
-  constructor(private router: Router, private route: ActivatedRoute, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService) {
+  constructor(private router: Router, private route: ActivatedRoute, public appService: AppService, protected licenseService: LicenseService, private insightCacheService: InsightCacheService) {
   }
 
   ngOnInit() {
@@ -30,7 +30,7 @@ export class HomeInsightComponent implements OnInit {
       this.applyInsightData(data);
       return;
     }
-    this.apiService.get<any>('insight').subscribe(data => this.applyInsightData(data));
+    this.insightCacheService.getInsight().subscribe(data => this.applyInsightData(data));
   }
 
   private applyInsightData(data: any): void {

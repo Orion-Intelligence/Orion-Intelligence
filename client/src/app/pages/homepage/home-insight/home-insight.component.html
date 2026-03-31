@@ -89,7 +89,7 @@
           <div class="ui-home-insight-metric-card flex min-h-[132px] w-full items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[18px] text-[var(--color-text1)] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_3px_rgba(0,0,0,0.1)] transition-shadow hover:shadow-[0_3px_6px_rgba(0,0,0,0.11),_0_3px_6px_rgba(0,0,0,0.16)]">
             <div class="grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-[10px]">
               <div class="w-[40px] flex-shrink-0">
-                <img [attr.alt]="key" class="ui-home-insight-stat-icon" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
+                <img [attr.alt]="insights[model][key].key || key || 'Statistic icon'" class="ui-home-insight-stat-icon" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
               </div>
               <div class="min-w-0">
                 <div class="truncate text-[28px] font-bold leading-[1.1] text-[var(--color-text1)] max-[460px]:text-[22px]">

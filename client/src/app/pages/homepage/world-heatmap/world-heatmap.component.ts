@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HeatmapReportComponent } from './heatmap-report/heatmap-report.component';
 import { AppService } from '../../../services/core/app/app.service';
 import { ApiService } from '../../../shared/services/api.service';
+import { InsightCacheService } from '../../../shared/services/insight-cache.service';
 import { CountryData, CountryInsightPageResponse } from '../../../shared/model/homepage/country-insight.model';
 @Component({
   selector: 'app-world-heatmap',
@@ -73,7 +74,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     };
   }
 
-  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService) {
+  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService) {
   }
 
   ngOnInit(): void {
@@ -82,7 +83,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       this.applyInsightData(data);
       return;
     }
-    this.apiService.get<any>('insight').subscribe(data => this.applyInsightData(data));
+    this.insightCacheService.getInsight().subscribe(data => this.applyInsightData(data));
   }
 
   ngAfterViewInit(): void {

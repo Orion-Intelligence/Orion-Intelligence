@@ -38,7 +38,13 @@ class homepage_model:
     @staticmethod
     async def insight_consolidated_result():
         redis_instance = redis_controller.getInstance()
-        redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}"
+        redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}:latest_document_v1"
+        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+        if cached:
+            try:
+                return json.loads(cached)
+            except json.JSONDecodeError:
+                pass
 
         indices, queries = elastic_insight_generator().on_insight_consolidated_data()
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
@@ -74,7 +80,7 @@ class homepage_model:
             homepage_model.transform_for_display("defacement_model", hit["_source"]) for hit in defacement_hits if
             "m_hash" in hit.get("_source", {})], }
 
-        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(display_data), 1])
+        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(display_data), 300])
 
         return display_data
 

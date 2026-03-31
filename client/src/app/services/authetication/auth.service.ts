@@ -13,12 +13,6 @@ export class AuthService {
 
   constructor(private appService: AppService, private appStorageService: AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
     if (this.isAuthenticated()) {
-      const needsSession = !this.appService.userSessionData().user.username &&
-                !this.appService.userSessionData().user.role &&
-                !this.appService.userSessionData().user.verificationDate;
-      if (needsSession) {
-        this.refreshToken().subscribe();
-      }
       this.startTokenRefresh();
     }
   }
