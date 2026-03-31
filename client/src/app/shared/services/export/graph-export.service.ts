@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import jsPDF from 'jspdf';
-import autoTable, { RowInput } from 'jspdf-autotable';
+import type jsPDF from 'jspdf';
+import type { RowInput } from 'jspdf-autotable';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
@@ -10,6 +10,8 @@ export class GraphExportService {
   protected readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [224, 233, 245];
   protected readonly TABLE_BORDER_RGB: [number, number, number] = [194, 212, 238];
   protected readonly TABLE_BORDER_WIDTH = 0.2;
+  private pdfLibsPromise: Promise<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
+  private loadedAutoTable: typeof import('jspdf-autotable').default | null = null;
 
   exportByType(payload: GraphReportPayload, type: GraphReportExportType): void {
     if (type === 'json') {
@@ -19,7 +21,35 @@ export class GraphExportService {
     if (type !== 'graph_pdf') {
       throw new Error(`GraphExportService only supports graph exports. Received: ${type}`);
     }
-    const bytes = this.buildGraphPdfBytes(payload);
+    void this.exportGraphPdf(payload);
+  }
+
+  protected getPdfLibs(): Promise<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> {
+    if (!this.pdfLibsPromise) {
+      this.pdfLibsPromise = Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable')
+      ]).then(([jspdfModule, autoTableModule]) => ({
+        jsPDF: jspdfModule.default,
+        autoTable: autoTableModule.default
+      })).then((libs) => {
+        this.loadedAutoTable = libs.autoTable;
+        return libs;
+      });
+    }
+    return this.pdfLibsPromise;
+  }
+
+  protected requireAutoTable(): typeof import('jspdf-autotable').default {
+    if (!this.loadedAutoTable) {
+      throw new Error('PDF export library not loaded');
+    }
+    return this.loadedAutoTable;
+  }
+
+  private async exportGraphPdf(payload: GraphReportPayload): Promise<void> {
+    const libs = await this.getPdfLibs();
+    const bytes = this.buildGraphPdfBytes(payload, libs.jsPDF, libs.autoTable);
     this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
   }
 
@@ -28,8 +58,8 @@ export class GraphExportService {
     this.downloadText(jsonString, 'application/json', `${this.buildSafeFilename(payload)}-graph.json`);
   }
 
-  private buildGraphPdfBytes(payload: GraphReportPayload): Uint8Array {
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
+  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default): Uint8Array {
+    const doc = new JsPdfCtor({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
     const meta = this.makeMeta(payload);
     const sectionsByPage: Record<number, string> = { 1: 'Overview' };
     this.drawGraphCover(doc, payload, meta);
@@ -82,7 +112,7 @@ export class GraphExportService {
       theme: 'plain' as const
     };
     this.drawInfoSectionMarker(doc, 220, contentW, 'Graph Summary');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: 232,
       body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]) as RowInput[],
       columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
@@ -97,7 +127,7 @@ export class GraphExportService {
     this.drawRoundedTableContainer(doc, 40, contentW, 220, (doc as any).lastAutoTable?.finalY ?? 220);
     const compositionMarkerY = (doc as any).lastAutoTable.finalY + 12;
     this.drawInfoSectionMarker(doc, compositionMarkerY, contentW, 'Node Type Distribution');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: compositionMarkerY + 12,
       body: composition.map(x => [x.type, String(x.count)]) as RowInput[],
       ...analysisTableBase
@@ -111,7 +141,7 @@ export class GraphExportService {
       sectionsByPage[platformPageNo] = 'Platform Inventory';
       this.drawConnectionMatrixHeader(doc, 'Platform Inventory', 'Detected social platforms in current graph');
       this.drawInfoSectionMarker(doc, 126, contentW, 'Platform Inventory');
-      autoTable(doc, {
+      this.requireAutoTable()(doc, {
         startY: 138,
         margin: { top: 126, left: 40, right: 40, bottom: 58 },
         tableWidth: contentW,
@@ -191,7 +221,7 @@ export class GraphExportService {
     sectionsByPage[edgesPageNo] = 'Connection Matrix';
     this.drawConnectionMatrixHeader(doc, 'Connection Matrix', 'Relationship listing from current graph state');
     this.drawInfoSectionMarker(doc, 126, contentW, 'Connection Matrix');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: 138,
       margin: { top: 126, left: 40, right: 40, bottom: 58 },
       tableWidth: contentW,
@@ -315,7 +345,7 @@ export class GraphExportService {
     const composition = this.buildTypeComposition(payload.nodes).slice(0, 7);
     const compositionStartY = tocY + (sectionItems.length * rowH) + 24;
     this.drawInfoSectionMarker(doc, compositionStartY, W - 80, 'Top Node Types');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: compositionStartY + 12,
       margin: { left: 40, right: 40 },
       tableWidth: W - 80,
@@ -336,7 +366,7 @@ export class GraphExportService {
       const platformCounts = this.extractSocialPlatformCounts(payload);
       const platformMarkerY = (doc as any).lastAutoTable.finalY + 10;
       this.drawInfoSectionMarker(doc, platformMarkerY, W - 80, `Found Social Platforms (${platformCounts.length})`);
-      autoTable(doc, {
+      this.requireAutoTable()(doc, {
         startY: platformMarkerY + 12,
         margin: { left: 40, right: 40 },
         tableWidth: W - 80,

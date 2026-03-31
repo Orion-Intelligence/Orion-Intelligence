@@ -50,9 +50,6 @@ export class SignupComponent implements OnInit {
   }
 
   getDashboardPreviewSrc(): string {
-    if (!this.brandingResolved) {
-      return '';
-    }
     const authDashboardIcon = this.appService.getConfig().appSettings.auth_dashboard_icon;
     if (!authDashboardIcon || authDashboardIcon === '/api/s/static/system/auth_dashboard_icon_default.png') {
       return SignupComponent.DEFAULT_AUTH_DASHBOARD_SRC;

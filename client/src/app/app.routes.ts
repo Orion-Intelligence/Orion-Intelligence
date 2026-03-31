@@ -2,48 +2,49 @@ import { Route, Routes } from '@angular/router';
 import { AuthGuard } from './shared/guards/auth-guard.guard';
 import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { ReportResolver } from './shared/resolvers/report.resolver';
-import { LoginComponent } from './pages/login/login.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { HomepageComponent } from './pages/homepage/homepage.component';
-import { DirectoryComponent } from './pages/directory/directory.component';
-import { DashboardApiComponent } from './pages/intel-panel/dashboard-api/dashboard-api.component';
-import { DashboardResultContainer } from './pages/intel-panel/dashboard-result-container/dashboard-result-container.component';
-import { ReportComponent } from './shared/partials/report/report_general/report.component';
-import { ReportDefacementComponent } from './shared/partials/report/report-defacement/report-defacement.component';
-import { ReportChatComponent } from './shared/partials/report/report-chat/report-chat.component';
-import { DumpComponent } from './pages/dump/dump.component';
-import { CredentialComponent } from './pages/credentials/credential.component';
-import { ErrorHandlerComponent } from './shared/partials/error-handler/error-handler.component';
-import { DashboardConsolidatedComponent } from './pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component';
 import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.resolver';
 import { subscriptionGuard } from './shared/guards/subscription.guard';
-import { SecurityScanComponent } from './pages/security-scan/security-scan.component';
-import { SignupComponent } from './pages/signup/signup.component';
-import { TenantComponent } from './pages/tenant/tenant.component';
-import { WelcomeComponent } from './pages/welcome/welcome.component';
-import { ResetPasswordComponent } from './shared/partials/forgot-password/reset-password.component';
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
-import { SidebarUserStatisticsComponent } from './shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component';
-import { SidebarUserIocComponent } from './shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component';
-import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
 import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
-import { NotificationComponent } from './shared/partials/notification/notification.component';
-import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
-import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/account-settings.component';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
-import { SidebarUserHomepageComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component';
-import { CategoryAlertReportComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component';
-import { AddCustomAlertComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component';
-import { ManageProfileComponent } from './pages/tenant/tenant-management/view-profile/manage-profile.component';
-import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
-import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
-import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
-import { FileScannerComponent } from './pages/intel-panel/ioc-extractor/file-scanner.component';
-import { SocialMapperComponent } from './pages/graphs/social-graph/social-mapper.component';
 import { NotificationGuard } from './shared/guards/notification.guard';
-import { NetworkIntel } from './pages/network-intel/network-intel';
+
+const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
+const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
+const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
+const loadHomepageComponent = () => import('./pages/homepage/homepage.component').then(m => m.HomepageComponent);
+const loadDirectoryComponent = () => import('./pages/directory/directory.component').then(m => m.DirectoryComponent);
+const loadDashboardApiComponent = () => import('./pages/intel-panel/dashboard-api/dashboard-api.component').then(m => m.DashboardApiComponent);
+const loadDashboardResultContainer = () => import('./pages/intel-panel/dashboard-result-container/dashboard-result-container.component').then(m => m.DashboardResultContainer);
+const loadReportComponent = () => import('./shared/partials/report/report_general/report.component').then(m => m.ReportComponent);
+const loadReportDefacementComponent = () => import('./shared/partials/report/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
+const loadReportChatComponent = () => import('./shared/partials/report/report-chat/report-chat.component').then(m => m.ReportChatComponent);
+const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => m.DumpComponent);
+const loadCredentialComponent = () => import('./pages/credentials/credential.component').then(m => m.CredentialComponent);
+const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
+const loadDashboardConsolidatedComponent = () => import('./pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
+const loadSecurityScanComponent = () => import('./pages/security-scan/security-scan.component').then(m => m.SecurityScanComponent);
+const loadTenantComponent = () => import('./pages/tenant/tenant.component').then(m => m.TenantComponent);
+const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent);
+const loadResetPasswordComponent = () => import('./shared/partials/forgot-password/reset-password.component').then(m => m.ResetPasswordComponent);
+const loadSidebarUserStatisticsComponent = () => import('./shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
+const loadSidebarUserIocComponent = () => import('./shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
+const loadAuditlogComponent = () => import('./pages/admin/auditlog/auditlog.component').then(m => m.AuditlogComponent);
+const loadNotificationComponent = () => import('./shared/partials/notification/notification.component').then(m => m.NotificationComponent);
+const loadTrailNotificationComponent = () => import('./shared/partials/trail-notification/trail-notification.component').then(m => m.TrailNotificationComponent);
+const loadAccountSettingsComponent = () => import('./shared/partials/sidebar-user/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
+const loadSidebarUserHomepageComponent = () => import('./shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
+const loadCategoryAlertReportComponent = () => import('./shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
+const loadAddCustomAlertComponent = () => import('./shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
+const loadManageProfileComponent = () => import('./pages/tenant/tenant-management/view-profile/manage-profile.component').then(m => m.ManageProfileComponent);
+const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
+const loadSidebarProfileSystemSettingsComponent = () => import('./shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
+const loadTenantSettingsComponent = () => import('./shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
+const loadFileScannerComponent = () => import('./pages/intel-panel/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
+const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
+const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -56,37 +57,37 @@ const consolidatedChildren :Route[] = [
   },
   {
     path: 'all',
-    component: DashboardConsolidatedComponent,
+    loadComponent: loadDashboardConsolidatedComponent,
     data: { type: 'consolidated', animation: 'DataBreach' }
   },
   {
     path: 'chat/:m_hash',
-    component: ReportChatComponent,
+    loadComponent: loadReportChatComponent,
     ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'social/:m_hash',
-    component: ReportChatComponent,
+    loadComponent: loadReportChatComponent,
     ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'general/:m_hash',
-    component: ReportComponent,
+    loadComponent: loadReportComponent,
     ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'leak/:m_hash',
-    component: ReportComponent,
+    loadComponent: loadReportComponent,
     ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'exploit/:m_hash',
-    component: ReportComponent,
+    loadComponent: loadReportComponent,
     ...HASH_CONSOLIDATED_ROUTE
   },
   {
     path: 'defacement/:m_hash',
-    component: ReportDefacementComponent,
+    loadComponent: loadReportDefacementComponent,
     ...HASH_CONSOLIDATED_ROUTE
   }
 ];
@@ -99,58 +100,58 @@ export const routes: Routes = [
   },
   {
     path: 'signup',
-    component: SignupComponent,
+    loadComponent: loadSignupComponent,
     data: { animation: 'SignupPage' }
   },
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: loadLoginComponent,
     data: { animation: 'LoginPage' }
   },
   {
     path: 'onboarding',
     resolve: { config: ConfigResolver },
-    component: TenantComponent,
+    loadComponent: loadTenantComponent,
     canActivate: [TenantGuard],
     data: { animation: 'TenantPage' }
   },
   {
     path: 'welcome',
-    component: WelcomeComponent,
+    loadComponent: loadWelcomeComponent,
     canActivate: [NotificationGuard],
     data: { animation: 'WelcomePage' }
   },
   {
     path: 'welcome/:token',
-    component: WelcomeComponent,
+    loadComponent: loadWelcomeComponent,
     canActivate: [NotificationGuard],
     data: { animation: 'WelcomePage' }
   },
   {
     path: 'paymentGateway',
-    component: TrailNotificationComponent,
+    loadComponent: loadTrailNotificationComponent,
     data: { animation: 'TrailNotificationPage' }
   },
   {
     path: 'reset',
-    component: ResetPasswordComponent,
+    loadComponent: loadResetPasswordComponent,
     canActivate: [NotificationGuard],
     data: { animation: 'ForgotPasswordComponent' }
   },
   {
     path: 'notification',
-    component: NotificationComponent,
+    loadComponent: loadNotificationComponent,
     data: { animation: 'PaymentGatewayComponent' }
   },
   {
     path: 'reset/:token',
-    component: ResetPasswordComponent,
+    loadComponent: loadResetPasswordComponent,
     canActivate: [NotificationGuard],
     data: { animation: 'ForgotPasswordComponent' }
   },
   {
     path: 'dashboard',
-    component: DashboardComponent,
+    loadComponent: loadDashboardComponent,
     canActivate: [AuthGuard],
     resolve: {
       config: ConfigResolver,
@@ -165,12 +166,12 @@ export const routes: Routes = [
       },
       {
         path: 'scan',
-        component: SecurityScanComponent,
+        loadComponent: loadSecurityScanComponent,
         data: { animation: 'HomePage' }
       },
       {
         path: 'home',
-        component: HomepageComponent,
+        loadComponent: loadHomepageComponent,
         resolve: { insights: InsightResolver },
         data: { animation: 'HomePage' }
       },
@@ -181,12 +182,12 @@ export const routes: Routes = [
       },
       {
         path: 'social-graph',
-        component: SocialMapperComponent,
+        loadComponent: loadSocialMapperComponent,
         data: { animation: 'SocialMapper' }
       },
       {
         path: 'social-intel',
-        component: SocialMapperComponent,
+        loadComponent: loadSocialMapperComponent,
         data: { animation: 'SocialMapper' }
       },
       {
@@ -196,7 +197,7 @@ export const routes: Routes = [
       },
       {
         path: 'directory',
-        component: DirectoryComponent,
+        loadComponent: loadDirectoryComponent,
         data: { animation: 'DirectoryPage' }
       },
       {
@@ -211,37 +212,37 @@ export const routes: Routes = [
           },
           {
             path: 'email-breach',
-            component: DashboardApiComponent,
+            loadComponent: loadDashboardApiComponent,
             data: { animation: 'EmailAPI', type: 'user' }
           },
           {
             path: 'social-scanner',
-            component: DashboardApiComponent,
+            loadComponent: loadDashboardApiComponent,
             data: { animation: 'SocialAPI', type: 'social' }
           },
           {
             path: 'wanted-list',
-            component: DashboardApiComponent,
+            loadComponent: loadDashboardApiComponent,
             data: { animation: 'WantedAPI', type: 'wanted' }
           },
           {
             path: 'national-identity',
-            component: DashboardApiComponent,
+            loadComponent: loadDashboardApiComponent,
             data: { animation: 'NationalIdentityAPI', type: 'national-identity' }
           },
           {
             path: 'playstore-scanner',
-            component: DashboardApiComponent,
+            loadComponent: loadDashboardApiComponent,
             data: { animation: 'CrackedAPI', type: 'cracked' }
           },
           {
             path: 'software-scanner',
-            component: DashboardApiComponent,
+            loadComponent: loadDashboardApiComponent,
             data: { animation: 'SoftwareAPI', type: 'software' }
           },
           {
             path: 'file-scanner',
-            component: FileScannerComponent,
+            loadComponent: loadFileScannerComponent,
             data: {
               animation: 'FileAPI',
               type: 'filescan',
@@ -251,7 +252,7 @@ export const routes: Routes = [
           },
           {
             path: 'crypto-scanner',
-            component: DashboardApiComponent,
+            loadComponent: loadDashboardApiComponent,
             data: {
               animation: 'FileAPI',
               type: 'crypto',
@@ -277,7 +278,7 @@ export const routes: Routes = [
           },
           {
             path: 'all',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'Social', animation: 'Discussion' },
             pathMatch: 'full'
           },
@@ -288,49 +289,49 @@ export const routes: Routes = [
           },
           {
             path: ':category/chat/:m_hash',
-            component: ReportChatComponent,
+            loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
             path: ':category/social/:m_hash',
-            component: ReportChatComponent,
+            loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
             path: ':category',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'Social', animation: 'Discussion' },
             pathMatch: 'full'
           },
           {
             path: 'social/:m_hash',
-            component: ReportChatComponent,
+            loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
             path: 'general/:m_hash',
-            component: ReportComponent,
+            loadComponent: loadReportComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
             path: 'leak/:m_hash',
-            component: ReportComponent,
+            loadComponent: loadReportComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
             path: 'exploit/:m_hash',
-            component: ReportComponent,
+            loadComponent: loadReportComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
             path: 'defacement/:m_hash',
-            component: ReportDefacementComponent,
+            loadComponent: loadReportDefacementComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
           },
@@ -351,12 +352,12 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'Breach', animation: 'DataBreach' }
           },
           {
             path: ':category/:m_hash',
-            component: ReportComponent,
+            loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Breach', animation: 'HashPage' }
           }
@@ -373,12 +374,12 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'strategic', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            component: ReportComponent,
+            loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'strategic', animation: 'HashPage' }
           }
@@ -395,32 +396,32 @@ export const routes: Routes = [
           },
           {
             path: 'all',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'defacement', animation: 'DataBreach' }
           },
           {
             path: 'hacked',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'defacement', animation: 'DataBreach' }
           },
           {
             path: 'phishing',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'defacement', animation: 'DataBreach' }
           },
           {
             path: 'databases',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'defacement', animation: 'DataBreach' }
           },
           {
             path: ':category',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'Defacement', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            component: ReportDefacementComponent,
+            loadComponent: loadReportDefacementComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Defacement', animation: 'HashPage' }
           }
@@ -438,7 +439,7 @@ export const routes: Routes = [
           },
           {
             path: 'all',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
           },
@@ -450,54 +451,54 @@ export const routes: Routes = [
           },
           {
             path: 'telegram',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
           },
           {
             path: 'twitter',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
           },
           {
             path: 'mastodon',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
           },
           {
             path: 'pastebin',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
           },
           {
             path: 'forum',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
           },
           {
             path: 'reddit',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
           },
           {
             path: ':category',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'Social', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            component: ReportChatComponent,
+            loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Social', animation: 'HashPage' }
           },
           {
             path: ':category/all/:m_hash',
-            component: ReportChatComponent,
+            loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Social', animation: 'HashPage' }
           }
@@ -514,12 +515,12 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'Feed', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            component: ReportComponent,
+            loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Feed', animation: 'HashPage' }
           }
@@ -536,32 +537,32 @@ export const routes: Routes = [
           },
           {
             path: 'all',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'exploit', animation: 'DataBreach' }
           },
           {
             path: 'tools',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'exploit', animation: 'DataBreach' }
           },
           {
             path: 'cve',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'exploit', animation: 'DataBreach' }
           },
           {
             path: 'zeroday',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'exploit', animation: 'DataBreach' }
           },
           {
             path: ':category',
-            component: DashboardResultContainer,
+            loadComponent: loadDashboardResultContainer,
             data: { type: 'Social', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            component: ReportComponent,
+            loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Exploit', animation: 'HashPage' }
           }
@@ -585,27 +586,27 @@ export const routes: Routes = [
           },
           {
             path: 'basic-scan',
-            component: SecurityScanComponent,
+            loadComponent: loadSecurityScanComponent,
             data: { type: 'basic', animation: 'CategoryPage' }
           },
           {
             path: 'port-scan',
-            component: SecurityScanComponent,
+            loadComponent: loadSecurityScanComponent,
             data: { type: 'advanced', animation: 'CategoryPage' }
           },
           {
             path: 'repository-scan',
-            component: SecurityScanComponent,
+            loadComponent: loadSecurityScanComponent,
             data: { type: 'repo', animation: 'CategoryPage' }
           },
           {
             path: 'seo-scan',
-            component: SecurityScanComponent,
+            loadComponent: loadSecurityScanComponent,
             data: { type: 'seo', animation: 'CategoryPage' }
           },
           {
             path: 'apk-scan',
-            component: FileScannerComponent,
+            loadComponent: loadFileScannerComponent,
             data: {
               animation: 'CategoryPage',
               type: 'apk',
@@ -627,12 +628,12 @@ export const routes: Routes = [
           },
           {
             path: 'listing',
-            component: DumpComponent,
+            loadComponent: loadDumpComponent,
             data: { type: 'listing', animation: 'CategoryPage' }
           },
           {
             path: 'credential',
-            component: CredentialComponent,
+            loadComponent: loadCredentialComponent,
             data: { type: 'credential', animation: 'CategoryPage' }
           }
         ]
@@ -649,7 +650,7 @@ export const routes: Routes = [
           },
           {
             path: 'iocs',
-            component: CredentialComponent,
+            loadComponent: loadCredentialComponent,
             data: { type: 'credential', animation: 'CategoryPage' }
           }
         ]
@@ -666,17 +667,17 @@ export const routes: Routes = [
           },
           {
             path: 'view-profiles',
-            component: ManageProfileComponent,
+            loadComponent: loadManageProfileComponent,
             data: { type: 'view', animation: 'CategoryPage' }
           },
           {
             path: 'view-tenants',
-            component: ViewTenantComponent,
+            loadComponent: loadViewTenantComponent,
             data: { type: 'view', animation: 'CategoryPage' }
           },
           {
             path: 'auditlog',
-            component: AuditlogComponent,
+            loadComponent: loadAuditlogComponent,
             data: { type: 'auditlog', animation: 'CategoryPage' }
           }
         ]
@@ -684,7 +685,7 @@ export const routes: Routes = [
       {
         path: 'netint',
         canActivate: [subscriptionGuard],
-        component: NetworkIntel,
+        loadComponent: loadNetworkIntelComponent,
         data: { animation: 'CategoryPage' }
       },
       {
@@ -706,29 +707,29 @@ export const routes: Routes = [
           },
           {
             path: 'alerts/:type',
-            component: CategoryAlertReportComponent,
+            loadComponent: loadCategoryAlertReportComponent,
             data: { type: 'alert', animation: 'AlertPage' },
           },
           {
             path: 'addcustomalert',
-            component: AddCustomAlertComponent,
+            loadComponent: loadAddCustomAlertComponent,
             data: { type: 'alert', animation: 'AlertPage' },
           },
           {
             path: 'homepage',
-            component: SidebarUserHomepageComponent,
+            loadComponent: loadSidebarUserHomepageComponent,
             resolve: { insights: InsightResolver },
             data: { type: 'homepage', animation: 'HomepagePage' },
           },
           {
             path: 'statistics',
-            component: SidebarUserStatisticsComponent,
+            loadComponent: loadSidebarUserStatisticsComponent,
             resolve: { insights: InsightResolver },
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {
             path: 'ioc',
-            component: SidebarUserIocComponent,
+            loadComponent: loadSidebarUserIocComponent,
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {
@@ -738,32 +739,32 @@ export const routes: Routes = [
           },
           {
             path: 'auditlog',
-            component: AuditlogComponent,
+            loadComponent: loadAuditlogComponent,
             data: { type: 'auditlog', animation: 'CategoryPage' }
           },
           {
             path: 'users',
-            component: ManageProfileComponent,
+            loadComponent: loadManageProfileComponent,
             data: { type: 'profile', animation: 'CategoryPage' }
           },
           {
             path: 'account',
-            component: AccountSettingsComponent,
+            loadComponent: loadAccountSettingsComponent,
             data: { type: 'account', animation: 'CategoryPage' }
           },
           {
             path: 'tenant-settings',
-            component: TenantSettingsComponent,
+            loadComponent: loadTenantSettingsComponent,
             data: { type: 'settings', animation: 'CategoryPage' }
           },
           {
             path: 'tenant',
-            component: ViewTenantComponent,
+            loadComponent: loadViewTenantComponent,
             data: { type: 'view', animation: 'CategoryPage' }
           },
           {
             path: 'system-settings',
-            component: SidebarProfileSystemSettingsComponent,
+            loadComponent: loadSidebarProfileSystemSettingsComponent,
             data: { type: 'srttings', animation: 'CategoryPage' }
           },
           {
@@ -781,7 +782,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    component: ErrorHandlerComponent,
+    loadComponent: loadErrorHandlerComponent,
     data: { animation: 'ErrorPage' }
   }
 ];

@@ -1,18 +1,23 @@
 import { Injectable } from '@angular/core';
-import jsPDF from 'jspdf';
-import autoTable, { RowInput } from 'jspdf-autotable';
+import type jsPDF from 'jspdf';
+import type { RowInput } from 'jspdf-autotable';
 import { GraphReportMeta, GraphReportPayload } from '../../model/report/report-export.model';
 import { GraphExportService } from './graph-export.service';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentExportService extends GraphExportService {
   exportDocumentPdf(payload: GraphReportPayload): void {
-    const bytes = this.buildDocPdfBytes(payload);
+    void this.exportDocumentPdfAsync(payload);
+  }
+
+  private async exportDocumentPdfAsync(payload: GraphReportPayload): Promise<void> {
+    const libs = await this.getPdfLibs();
+    const bytes = this.buildDocPdfBytes(payload, libs.jsPDF, libs.autoTable);
     this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-doc-report.pdf`);
   }
 
-  private buildDocPdfBytes(payload: GraphReportPayload): Uint8Array {
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
+  private buildDocPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default): Uint8Array {
+    const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
     const meta = this.makeMeta(payload);
     const hooks = this.makeHeaderFooterHooks(payload, meta);
     this.drawCover(doc, payload, meta, 'Document Report');

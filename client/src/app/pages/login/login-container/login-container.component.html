@@ -70,11 +70,7 @@
           </div>
         </div>
         <div class="flex-1 relative overflow-hidden bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
-          @if (getDashboardPreviewSrc()) {
-            <img [src]="getDashboardPreviewSrc()" alt="Dashboard Preview" loading="eager" fetchpriority="high" decoding="async" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
-          } @else {
-            <div class="absolute inset-0 flex items-center justify-center text-[56px] text-white/60">-</div>
-          }
+          <img [src]="getDashboardPreviewSrc()" alt="Dashboard Preview" loading="eager" fetchpriority="high" decoding="async" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
         </div>
       </div>
     </div>
