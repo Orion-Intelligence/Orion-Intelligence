@@ -15,6 +15,7 @@ import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameS
 export class SignupComponent implements OnInit {
   private static readonly DEFAULT_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
   private static readonly DEFAULT_AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
+
   user = { username: '', mail: '', password: '' };
   errorMessage: string | null = null;
   passwordStrength: PasswordStrength = null;
