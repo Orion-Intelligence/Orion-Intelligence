@@ -65,7 +65,7 @@ class mongo_controller:
         demo_username = env_handler.get_instance().env("DEMO_USERNAME")
         demo_password = env_handler.get_instance().env("DEMO_PASSWORD")
 
-        if demo_username != "demo" or demo_password != "T@YdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw":
+        if not demo_username or not demo_password:
             return
 
         demo_user = await self.__engine.find_one(db_user_account, db_user_account.username == demo_username)
