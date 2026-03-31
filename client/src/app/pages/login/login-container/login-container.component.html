@@ -32,7 +32,7 @@
               <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="w-full flex flex-col gap-2">
                 <label for="username" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">Email</label>
                 <div class="relative w-full">
-                  <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+                  <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" fetchpriority="high" decoding="async" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
                   <input [(ngModel)]="user.mail" placeholder="Enter email" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" data-testid="login-user" required type="text" />
                 </div>
                 <label for=" word" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">Password</label>
