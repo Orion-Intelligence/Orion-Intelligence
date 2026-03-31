@@ -226,7 +226,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="login-page"]').should('be.visible');
     capture('login-page');
 
-    cy.contains('[data-cy="reset-password"], span.reset-password', 'Reset password?').click();
+    cy.get('[data-testid="reset-password-link"]').click();
     cy.get('[data-testid="reset-companymail"]').should('be.visible');
     capture('password-reset');
 
