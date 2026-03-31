@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, NgOptimizedImage } from '@angular/common';
-import { DefacementModel, GenericModel, InsightCallbackModel, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
+import { DefacementModel, GenericModel, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
 import { AppService } from '../../../services/core/app/app.service';
