@@ -95,5 +95,6 @@ Promise.allSettled([
     preloadSearch.decode()
 ]).finally(() => {
     preloadAllImagesFromManifest().then();
-    bootstrapApplication(AppComponent, appConfig).then();
 });
+
+bootstrapApplication(AppComponent, appConfig).then();
