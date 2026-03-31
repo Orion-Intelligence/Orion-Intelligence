@@ -5,9 +5,9 @@
       <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-testid="login-page">
         <div class="min-w-[500px] bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:flex-[0_0_100vw] max-[943px]:min-w-[350px]">
           <div class="w-full flex justify-center gap-6">
-            <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Data Sources</a>
-            <a [href]="appService.getConfig().appSettings.home_header_adversaries" target="_blank" rel="noopener noreferrer" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Adversaries</a>
-            <a [href]="appService.getConfig().appSettings.home_header_pricing" target="_blank" rel="noopener noreferrer" class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Pricing</a>
+            <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#6f8399] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Data Sources</a>
+            <a [href]="appService.getConfig().appSettings.home_header_adversaries" target="_blank" rel="noopener noreferrer" class="text-[#6f8399] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Adversaries</a>
+            <a [href]="appService.getConfig().appSettings.home_header_pricing" target="_blank" rel="noopener noreferrer" class="text-[#6f8399] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Pricing</a>
           </div>
           <div class="flex flex-col mt-[100px] items-center flex-grow">
             <div class="w-full max-w-[500px] flex flex-col items-center">
@@ -36,7 +36,7 @@
                   <img src="/assets/images/shared/lock.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
                   <input [(ngModel)]="user.password" placeholder="Enter password" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" data-testid="login-pass" required type="password" />
                 </div>
-                <span (click)="goToForgot()" class="text-[#a0b8d1] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-testid="reset-password-link">Reset password?</span>
+                <span (click)="goToForgot()" class="text-[#6f8399] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-testid="reset-password-link">Reset password?</span>
                 @if (errorMessage == 'verification pending') {
                   <div class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm">
                     <span class="text-left"><b>{{ errorMessage }}</b></span>
@@ -61,8 +61,8 @@
             </div>
           </div>
           <div class="text-center mt-auto">
-            <p class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">Copyright &copy; 2025. Powered by</p>
-            <p class="text-[#a0b8d1] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">{{ this.appService.getConfig().appSettings.app_name }}</p>
+            <p class="text-[#6f8399] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">Copyright &copy; 2025. Powered by</p>
+            <p class="text-[#6f8399] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">{{ this.appService.getConfig().appSettings.app_name }}</p>
           </div>
         </div>
         <div class="flex-1 relative overflow-hidden bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
