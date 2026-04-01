@@ -42,41 +42,7 @@ const preloadSearch = new Image();
 preloadSearch.src = SEARCH_LOGO_SRC;
 const preloadDashboardLogo = new Image();
 preloadDashboardLogo.src = DEFAULT_DASHBOARD_LOGO_SRC;
-const bootstrapIconStyleId = 'ui-bootstrap-icon-runtime';
 const bootstrapIconClassPattern = /(?:^|\s)(bi-[A-Za-z0-9-]+)(?=\s|$)/;
-const ensureBootstrapIconStyles = () => {
-    if (document.getElementById(bootstrapIconStyleId)) {
-        return;
-    }
-    const style = document.createElement('style');
-    style.id = bootstrapIconStyleId;
-    style.textContent = `
-        .bi,
-        [class^="bi-"],
-        [class*=" bi-"] {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-style: normal;
-            line-height: 1;
-        }
-        .bi > .ui-bootstrap-icon,
-        [class^="bi-"] > .ui-bootstrap-icon,
-        [class*=" bi-"] > .ui-bootstrap-icon {
-            width: 1em;
-            height: 1em;
-            display: block;
-            flex: none;
-            fill: currentColor;
-        }
-        .bi > .ui-bootstrap-icon [fill]:not([fill="none"]),
-        [class^="bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]),
-        [class*=" bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]) {
-            fill: currentColor;
-        }
-    `;
-    document.head.appendChild(style);
-};
 const getBootstrapIconName = (element: Element): BootstrapIconName | null => {
     const className = element.getAttribute('class') || '';
     const match = className.match(bootstrapIconClassPattern);
@@ -108,7 +74,6 @@ const renderBootstrapIcon = (element: Element) => {
     element.dataset['bootstrapIconName'] = iconName;
 };
 const hydrateBootstrapIcons = (root: ParentNode | Element = document) => {
-    ensureBootstrapIconStyles();
     if (root instanceof Element) {
         renderBootstrapIcon(root);
     }

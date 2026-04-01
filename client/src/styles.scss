@@ -10,6 +10,32 @@
 @tailwind components;
 @tailwind utilities;
 
+.bi,
+[class^="bi-"],
+[class*=" bi-"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  line-height: 1;
+}
+
+.bi > .ui-bootstrap-icon,
+[class^="bi-"] > .ui-bootstrap-icon,
+[class*=" bi-"] > .ui-bootstrap-icon {
+  width: 1em;
+  height: 1em;
+  display: block;
+  flex: none;
+  fill: currentColor;
+}
+
+.bi > .ui-bootstrap-icon [fill]:not([fill="none"]),
+[class^="bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]),
+[class*=" bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]) {
+  fill: currentColor;
+}
+
 
 html,
 body {
