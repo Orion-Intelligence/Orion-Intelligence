@@ -27,6 +27,29 @@ const preloadAuth = new Image();
 preloadAuth.src = AUTH_ICON_SRC;
 const preloadSearch = new Image();
 preloadSearch.src = SEARCH_LOGO_SRC;
+const loadDeferredStylesheet = (href: string) => {
+    if (document.querySelector(`link[data-deferred-style="${href}"]`)) {
+        return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute('data-deferred-style', href);
+    document.head.appendChild(link);
+};
+const deferBootstrapIcons = () => {
+    loadDeferredStylesheet('bootstrap-icons.css');
+};
+if ('requestIdleCallback' in window) {
+    (window as Window & { requestIdleCallback: (callback: IdleRequestCallback) => number; }).requestIdleCallback(() => {
+        deferBootstrapIcons();
+    });
+}
+else {
+    setTimeout(() => {
+        deferBootstrapIcons();
+    }, 0);
+}
 const mark = (img: HTMLImageElement) => {
     if (img.dataset['ph'] === '1') {
         return;
@@ -44,7 +67,6 @@ const mark = (img: HTMLImageElement) => {
         img.classList.contains('auth-wrapper__image')) {
         return;
     }
-    img.removeAttribute('alt');
     img.dataset['ph'] = '1';
     img.setAttribute('data-ph', '');
     const onload = () => { img.removeAttribute('data-ph'); };

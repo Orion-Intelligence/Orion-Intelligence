@@ -57,8 +57,12 @@
               "src/assets/fonts"
             ],
             "styles": [
-              "src/bootstrap-icons-local.css",
               "src/styles.scss",
+              {
+                "input": "src/bootstrap-icons-local.css",
+                "bundleName": "bootstrap-icons",
+                "inject": false
+              },
               {
                 "input": "src/tailwind.css",
                 "bundleName": "tailwind-social",
@@ -106,8 +110,12 @@
                 "src/assets/fonts"
               ],
               "styles": [
-                "src/bootstrap-icons-local.css",
                 "src/styles.scss",
+                {
+                  "input": "src/bootstrap-icons-local.css",
+                  "bundleName": "bootstrap-icons",
+                  "inject": false
+                },
                 {
                   "input": "src/tailwind.css",
                   "bundleName": "tailwind-social",
@@ -181,8 +189,12 @@
               "src/assets/fonts"
             ],
             "styles": [
-              "src/bootstrap-icons-local.css",
               "src/styles.scss",
+              {
+                "input": "src/bootstrap-icons-local.css",
+                "bundleName": "bootstrap-icons",
+                "inject": false
+              },
               {
                 "input": "src/tailwind.css",
                 "bundleName": "tailwind-social",
