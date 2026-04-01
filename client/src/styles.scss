@@ -6,6 +6,13 @@
 @use "./app/shared/styles/alert-stagger-animations.scss";
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
+@font-face {
+  font-display: swap;
+  font-family: "bootstrap-icons";
+  src: url("/bootstrap-icons.woff2?e34853135f9e39acf64315236852cd5a") format("woff2"),
+    url("/bootstrap-icons.woff?e34853135f9e39acf64315236852cd5a") format("woff");
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
