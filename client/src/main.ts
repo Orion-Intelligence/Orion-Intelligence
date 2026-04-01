@@ -6,6 +6,17 @@ import '@angular/localize/init';
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
 const SEARCH_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
+const DEFAULT_DASHBOARD_LOGO_SRC = '/api/s/static/system/logo_wide_dark_default.png';
+const preloadImageHref = (href: string) => {
+    if (document.head.querySelector(`link[rel="preload"][as="image"][href="${href}"]`)) {
+        return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = href;
+    document.head.prepend(link);
+};
 const preload = document.createElement('link');
 preload.rel = 'preload';
 preload.as = 'image';
@@ -21,12 +32,15 @@ preloadSearchLogo.rel = 'preload';
 preloadSearchLogo.as = 'image';
 preloadSearchLogo.href = SEARCH_LOGO_SRC;
 document.head.prepend(preloadSearchLogo);
+preloadImageHref(DEFAULT_DASHBOARD_LOGO_SRC);
 const preloadPlaceholder = new Image();
 preloadPlaceholder.src = PLACEHOLDER_SRC;
 const preloadAuth = new Image();
 preloadAuth.src = AUTH_ICON_SRC;
 const preloadSearch = new Image();
 preloadSearch.src = SEARCH_LOGO_SRC;
+const preloadDashboardLogo = new Image();
+preloadDashboardLogo.src = DEFAULT_DASHBOARD_LOGO_SRC;
 const loadDeferredStylesheet = (href: string) => {
     if (document.querySelector(`link[data-deferred-style="${href}"]`)) {
         return;
@@ -40,15 +54,22 @@ const loadDeferredStylesheet = (href: string) => {
 const deferBootstrapIcons = () => {
     loadDeferredStylesheet('bootstrap-icons.css');
 };
-if ('requestIdleCallback' in window) {
-    (window as Window & { requestIdleCallback: (callback: IdleRequestCallback) => number; }).requestIdleCallback(() => {
-        deferBootstrapIcons();
-    });
-}
-else {
+const scheduleBootstrapIcons = () => {
+    if ('requestIdleCallback' in window) {
+        (window as Window & { requestIdleCallback: (callback: IdleRequestCallback) => number; }).requestIdleCallback(() => {
+            deferBootstrapIcons();
+        });
+        return;
+    }
     setTimeout(() => {
         deferBootstrapIcons();
     }, 0);
+};
+if (document.readyState === 'complete') {
+    scheduleBootstrapIcons();
+}
+else {
+    window.addEventListener('load', scheduleBootstrapIcons, { once: true });
 }
 const mark = (img: HTMLImageElement) => {
     if (img.dataset['ph'] === '1') {

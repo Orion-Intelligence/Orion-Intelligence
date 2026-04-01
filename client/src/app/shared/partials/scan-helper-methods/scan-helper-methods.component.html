@@ -26,7 +26,7 @@
             @if (activeTab === 'subdomains') {
               <div class="flex items-center">
                 <label class="inline-flex items-center gap-[8px] cursor-pointer select-none">
-                  <input data-testid="domain-scanner-live-toggle" type="checkbox" class="sr-only peer" [(ngModel)]="checkLive" [disabled]="isLoading"/>
+                  <input data-testid="domain-scanner-live-toggle" type="checkbox" class="sr-only peer" aria-label="Show only live" [(ngModel)]="checkLive" [disabled]="isLoading"/>
                   <span class="relative h-[20px] w-[36px] rounded-full transition peer-checked:bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] peer-disabled:opacity-50" [ngClass]="isLightTheme ? 'bg-[#c9d8ea]' : 'bg-[#2c3a4a]'">
                     <span class="absolute left-[2px] top-[2px] h-[16px] w-[16px] rounded-full transition peer-checked:translate-x-[16px]" [ngClass]="isLightTheme ? 'bg-white' : 'bg-[#e1e8f0]'"></span>
                   </span>

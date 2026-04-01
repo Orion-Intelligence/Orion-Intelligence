@@ -119,6 +119,7 @@ export class AppService {
         const current = this.configData();
         this.configData.set(new ConfigSettings(response.settings, current.localSettings));
         this.updateFavicon(this.configData().appSettings.logo_url);
+        this.preloadImage(this.configData().appSettings.logo_wide_dark);
         this.title.setTitle(this.configData().appSettings.app_name || 'Orion Intelligence');
       }
     }), catchError(() => of(null)), mapTo(void 0), finalize(() => {
@@ -151,6 +152,17 @@ export class AppService {
   public updateFavicon(url: string = '/api/s/static/system/logo.png'): void {
     (document.querySelector<HTMLLinkElement>('link[rel="icon"]') ??
             document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'icon' }))).href = url;
+  }
+
+  private preloadImage(url?: string): void {
+    if (!url || document.head.querySelector(`link[rel="preload"][as="image"][href="${url}"]`)) {
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = url;
+    document.head.appendChild(link);
   }
 
   updatePage(newPage: number): void {

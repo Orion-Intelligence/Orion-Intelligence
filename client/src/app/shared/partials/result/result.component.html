@@ -34,7 +34,7 @@
                       <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
                       <span>Advance&nbsp;&nbsp;</span>
                       <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
-                        <input data-testid="dashboard-advance-toggle" type="checkbox" class="sr-only peer" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
+                        <input data-testid="dashboard-advance-toggle" type="checkbox" class="sr-only peer" aria-label="Advance search" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
                         <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-[#e5e7eb] transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
                           <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="app_service.configData().localSettings.advance_setting_toggle ? 'translate-x-[14px]' : 'translate-x-0'">
                           </span>

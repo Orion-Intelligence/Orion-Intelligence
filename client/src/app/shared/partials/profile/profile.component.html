@@ -15,9 +15,9 @@
       }
     }
     @if (router.url !== '/login') {
-      <a (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
         <img alt="Logout" height="24" [ngSrc]="isDarkTheme ? 'assets/images/shared/theme/profile-icon.svg' : 'assets/images/shared/profile-icon-dark.svg'" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
-      </a>
+      </button>
     }
     @if (dropdownOpen()) {
       <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[40] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">

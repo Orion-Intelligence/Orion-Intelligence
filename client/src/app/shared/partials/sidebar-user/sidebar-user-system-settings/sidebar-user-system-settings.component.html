@@ -165,7 +165,7 @@
             <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
               <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Documentation Allowed</span>
               <span class="relative inline-flex items-center">
-                <input type="checkbox" class="sr-only peer" [(ngModel)]="form.documentation_allowed" [disabled]="!isEditing" />
+                <input type="checkbox" class="sr-only peer" aria-label="Documentation allowed" [(ngModel)]="form.documentation_allowed" [disabled]="!isEditing" />
                 <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
                   <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.documentation_allowed ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                 </span>
@@ -177,7 +177,7 @@
             <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
               <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Whistle Blowing Allowed</span>
               <span class="relative inline-flex items-center">
-                <input type="checkbox" class="sr-only peer" [(ngModel)]="form.whistle_blowing_allowed" [disabled]="!isEditing" />
+                <input type="checkbox" class="sr-only peer" aria-label="Whistle blowing allowed" [(ngModel)]="form.whistle_blowing_allowed" [disabled]="!isEditing" />
                 <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
                   <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.whistle_blowing_allowed ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                 </span>

@@ -5,7 +5,7 @@
       @for (crumb of breadcrumb; track crumb.path; let i = $index; let last = $last) {
         <span>
           @if (!last) {
-            <span (click)="navigateToCrumb(i)" [ngClass]="{ 'cursor-default opacity-50 pointer-events-none': breadcrumb.length <= 2 }" class="inline-flex min-w-0 items-center cursor-pointer font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-header)] hover:text-[#fcfcfc]">
+            <span (click)="navigateToCrumb(i)" [ngClass]="{ 'cursor-default opacity-50 pointer-events-none': breadcrumb.length <= 2 }" class="inline-flex min-w-0 items-center cursor-pointer font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text2)] hover:text-[#fcfcfc]">
               <span class="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[110px]">{{ crumb.label.replace('-', ' ') | titlecase }}</span>
               <img alt="breadcrumb" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
             </span>
