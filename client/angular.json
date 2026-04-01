@@ -59,11 +59,6 @@
             "styles": [
               "src/styles.scss",
               {
-                "input": "src/bootstrap-icons-local.css",
-                "bundleName": "bootstrap-icons",
-                "inject": false
-              },
-              {
                 "input": "src/tailwind.css",
                 "bundleName": "tailwind-social",
                 "inject": false
@@ -111,11 +106,6 @@
               ],
               "styles": [
                 "src/styles.scss",
-                {
-                  "input": "src/bootstrap-icons-local.css",
-                  "bundleName": "bootstrap-icons",
-                  "inject": false
-                },
                 {
                   "input": "src/tailwind.css",
                   "bundleName": "tailwind-social",
@@ -190,11 +180,6 @@
             ],
             "styles": [
               "src/styles.scss",
-              {
-                "input": "src/bootstrap-icons-local.css",
-                "bundleName": "bootstrap-icons",
-                "inject": false
-              },
               {
                 "input": "src/tailwind.css",
                 "bundleName": "tailwind-social",

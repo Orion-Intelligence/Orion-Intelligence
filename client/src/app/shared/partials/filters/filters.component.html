@@ -11,7 +11,7 @@
   <div class="flex-1 overflow-y-auto overflow-x-hidden pb-4">
     @for (key of Object.keys(filterModel.filters); track key) {
       <div>
-        <label appTooltip="{{filterModel.filters[key].tooltip}}" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
+        <label [attr.for]="'side-filter-' + key" appTooltip="{{filterModel.filters[key].tooltip}}" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
           {{ filterModel.filters[key].title }}
         </label>
         @if (filterModel.filters[key].type === 'daterange') {
@@ -19,7 +19,7 @@
           [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
         }
         @if (filterModel.filters[key].type === 'dropdown') {
-          <select [attr.data-testid]="'side-filter-select-' + key" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" name="{{ key }}">
+          <select [attr.data-testid]="'side-filter-select-' + key" [id]="'side-filter-' + key" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" name="{{ key }}">
             <option [ngValue]="''">Select</option>
             @for (option of filterModel.filters[key].options; track option) {
               <option [ngValue]="option.key">{{ option.label }}</option>
@@ -28,7 +28,7 @@
         }
         @if (filterModel.filters[key].type === 'text') {
           <div class="mb-2">
-            <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text" />
+            <input [id]="'side-filter-' + key" (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text" />
           </div>
         }
       </div>

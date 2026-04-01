@@ -1,6 +1,7 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/pages/app/app.component';
+import { bootstrapIconRegistry, BootstrapIconName } from './app/shared/icons/bootstrap-icon-registry';
 import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
@@ -41,36 +42,79 @@ const preloadSearch = new Image();
 preloadSearch.src = SEARCH_LOGO_SRC;
 const preloadDashboardLogo = new Image();
 preloadDashboardLogo.src = DEFAULT_DASHBOARD_LOGO_SRC;
-const loadDeferredStylesheet = (href: string) => {
-    if (document.querySelector(`link[data-deferred-style="${href}"]`)) {
+const bootstrapIconStyleId = 'ui-bootstrap-icon-runtime';
+const bootstrapIconClassPattern = /(?:^|\s)(bi-[A-Za-z0-9-]+)(?=\s|$)/;
+const ensureBootstrapIconStyles = () => {
+    if (document.getElementById(bootstrapIconStyleId)) {
         return;
     }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    link.setAttribute('data-deferred-style', href);
-    document.head.appendChild(link);
+    const style = document.createElement('style');
+    style.id = bootstrapIconStyleId;
+    style.textContent = `
+        .bi,
+        [class^="bi-"],
+        [class*=" bi-"] {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-style: normal;
+            line-height: 1;
+        }
+        .bi > .ui-bootstrap-icon,
+        [class^="bi-"] > .ui-bootstrap-icon,
+        [class*=" bi-"] > .ui-bootstrap-icon {
+            width: 1em;
+            height: 1em;
+            display: block;
+            flex: none;
+            fill: currentColor;
+        }
+        .bi > .ui-bootstrap-icon [fill]:not([fill="none"]),
+        [class^="bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]),
+        [class*=" bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]) {
+            fill: currentColor;
+        }
+    `;
+    document.head.appendChild(style);
 };
-let bootstrapIconsRequested = false;
-const maybeLoadBootstrapIcons = () => {
-    if (bootstrapIconsRequested || !document.querySelector('.bi, [class^="bi-"], [class*=" bi-"]')) {
-        return;
+const getBootstrapIconName = (element: Element): BootstrapIconName | null => {
+    const className = element.getAttribute('class') || '';
+    const match = className.match(bootstrapIconClassPattern);
+    if (!match) {
+        return null;
     }
-    bootstrapIconsRequested = true;
-    const schedule = () => {
-        loadDeferredStylesheet('bootstrap-icons.css');
-    };
-    if ('requestIdleCallback' in window) {
-        (window as Window & { requestIdleCallback: (callback: IdleRequestCallback) => number; }).requestIdleCallback(() => {
-            schedule();
-        });
-        return;
-    }
-    setTimeout(() => {
-        schedule();
-    }, 0);
+    const iconName = match[1] as BootstrapIconName;
+    return iconName in bootstrapIconRegistry ? iconName : null;
 };
-maybeLoadBootstrapIcons();
+const renderBootstrapIcon = (element: Element) => {
+    if (!(element instanceof HTMLElement)) {
+        return;
+    }
+    const iconName = getBootstrapIconName(element);
+    if (!iconName) {
+        if (element.dataset['bootstrapIconRendered'] === '1') {
+            element.textContent = '';
+            delete element.dataset['bootstrapIconRendered'];
+            delete element.dataset['bootstrapIconName'];
+        }
+        return;
+    }
+    if (element.dataset['bootstrapIconName'] === iconName) {
+        return;
+    }
+    const icon = bootstrapIconRegistry[iconName];
+    element.innerHTML = `<svg class="ui-bootstrap-icon" viewBox="${icon.viewBox}" aria-hidden="true" focusable="false">${icon.markup}</svg>`;
+    element.dataset['bootstrapIconRendered'] = '1';
+    element.dataset['bootstrapIconName'] = iconName;
+};
+const hydrateBootstrapIcons = (root: ParentNode | Element = document) => {
+    ensureBootstrapIconStyles();
+    if (root instanceof Element) {
+        renderBootstrapIcon(root);
+    }
+    root.querySelectorAll('.bi, [class^="bi-"], [class*=" bi-"]').forEach(renderBootstrapIcon);
+};
+hydrateBootstrapIcons();
 const mark = (img: HTMLImageElement) => {
     if (img.dataset['ph'] === '1') {
         return;
@@ -103,6 +147,7 @@ new MutationObserver(ms => {
                 }
                 else if (n instanceof Element) {
                     n.querySelectorAll('img').forEach(i => mark(i as HTMLImageElement));
+                    hydrateBootstrapIcons(n);
                 }
             });
         }
@@ -111,8 +156,19 @@ new MutationObserver(ms => {
         }
     }
 }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
-new MutationObserver(() => {
-    maybeLoadBootstrapIcons();
+new MutationObserver(ms => {
+    for (const m of ms) {
+        if (m.type === 'attributes' && m.attributeName === 'class' && m.target instanceof Element) {
+            renderBootstrapIcon(m.target);
+        }
+        if (m.type === 'childList') {
+            m.addedNodes.forEach(n => {
+                if (n instanceof Element) {
+                    hydrateBootstrapIcons(n);
+                }
+            });
+        }
+    }
 }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
 bootstrapApplication(AppComponent, appConfig).then();
