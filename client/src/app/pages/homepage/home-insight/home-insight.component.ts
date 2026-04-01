@@ -20,6 +20,8 @@ export class HomeInsightComponent implements OnInit {
   latestDocuments: LatestDocumentCallbackModel = { generic_model: [], leak_model: [], defacement_model: [], chat_model: [], exploit_model: [] };
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
   latestDocumentModelKeys: string[] = [];
+  isLoading = true;
+  readonly loadingCards = [1, 2, 3, 4];
 
   constructor(private router: Router, private route: ActivatedRoute, public appService: AppService, protected licenseService: LicenseService, private insightCacheService: InsightCacheService) {
   }
@@ -39,6 +41,7 @@ export class HomeInsightComponent implements OnInit {
     this.latestDocumentModelKeys = (Object.keys(this.latestDocuments) as (keyof LatestDocumentCallbackModel)[]).filter(key => ['leak_model', 'chat_model', 'defacement_model'].includes(key) &&
             this.latestDocuments[key] &&
             this.latestDocuments[key].length > 0);
+    this.isLoading = false;
   }
 
   getKeys(obj: GenericModel | LeakModel | DefacementModel): string[] {

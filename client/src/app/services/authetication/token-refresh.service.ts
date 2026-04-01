@@ -5,7 +5,7 @@ import { EMPTY, Observable, Subscription, catchError, switchMap, timer } from 'r
 export class TokenRefreshService {
   private destroyRef = inject(DestroyRef);
   private refreshTokenSubscription: Subscription | null = null;
-  private readonly FIRST_REFRESH_DELAY = 5000;
+  private readonly FIRST_REFRESH_DELAY = 120000;
   private readonly REFRESH_INTERVAL = 120000;
 
   constructor() {
