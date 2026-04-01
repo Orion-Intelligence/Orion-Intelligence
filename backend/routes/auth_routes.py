@@ -20,7 +20,7 @@ COOKIE_MAX_AGE = 30 * 60  # 30 minutes
 
 def set_access_cookie(resp: Response, token: str) -> None:
     resp.set_cookie(
-        key=ACCESS_COOKIE, value=token, httponly=True, samesite="lax", secure=False, path="/api", max_age=COOKIE_MAX_AGE, )
+        key=ACCESS_COOKIE, value=token, httponly=True, samesite="lax", secure=False, path="/", max_age=COOKIE_MAX_AGE, )
 
 
 def token_from_request(request: Request) -> str | None:
@@ -85,7 +85,7 @@ async def logout(request: Request):
     token = request.cookies.get(ACCESS_COOKIE)
     session_manager.logout_user(ptoken=token)
     resp = JSONResponse(content={"detail": "Logged out"})
-    resp.delete_cookie(ACCESS_COOKIE, path="/api")
+    resp.delete_cookie(ACCESS_COOKIE, path="/")
     return resp
 
 
