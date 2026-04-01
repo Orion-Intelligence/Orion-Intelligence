@@ -2,13 +2,13 @@
   <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full">
     <div class="flex w-full items-start justify-between px-[20px] py-[10px] mt-[10px] text-[24px] font-medium">
       <a href="">
-        <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_wide_dark" width="197" />
+        <img alt="Logo" decoding="async" fetchpriority="high" height="35" loading="eager" [src]="appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'" width="197" />
       </a>
       <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" data-testid="sidebar-collapse-button" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
         <img alt="Collapse sidebar" height="28" src="/assets/images/sidebar/nav_menu.svg" width="24" />
       </button>
     </div>
-    <ul class="list-none overflow-y-auto min-h-[500px] ml-[-5px] p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div class="overflow-y-auto min-h-[500px] ml-[-5px] p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-items
         (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)"
@@ -190,7 +190,7 @@
           </div>
         </a>
       }
-    </ul>
+    </div>
   </nav>
 }
 
@@ -204,7 +204,7 @@
         <img alt="Logo" height="30" ngSrc="/assets/images/shared/logo-min.svg" priority width="30" />
       </a>
     </div>
-    <ul class="flex-1 min-h-0 w-full list-none flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-collapsed
         (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)"
@@ -383,6 +383,6 @@
           </a>
         }
       </li>
-    </ul>
+    </div>
   </nav>
 }

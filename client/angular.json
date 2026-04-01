@@ -57,7 +57,7 @@
               "src/assets/fonts"
             ],
             "styles": [
-              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+              "src/bootstrap-icons-local.css",
               "src/styles.scss",
               {
                 "input": "src/tailwind.css",
@@ -106,7 +106,7 @@
                 "src/assets/fonts"
               ],
               "styles": [
-                "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+                "src/bootstrap-icons-local.css",
                 "src/styles.scss",
                 {
                   "input": "src/tailwind.css",
@@ -181,7 +181,7 @@
               "src/assets/fonts"
             ],
             "styles": [
-              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+              "src/bootstrap-icons-local.css",
               "src/styles.scss",
               {
                 "input": "src/tailwind.css",
