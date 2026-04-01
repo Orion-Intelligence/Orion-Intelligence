@@ -2,9 +2,15 @@
   <div #mapContainer data-testid="world-heatmap-map" class="map-container relative aspect-[100/52] max-h-[80vh] min-h-[400px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]">
     @if (isMapLoading) {
       <div class="absolute inset-0 z-[2] grid place-items-center bg-[rgba(14,22,38,0.82)] [body.light-theme_&]:bg-[rgba(255,255,255,0.88)]">
-        <div class="flex flex-col items-center gap-3">
-          <div class="h-9 w-9 rounded-full border-2 border-[rgba(255,255,255,0.14)] border-t-[var(--color-blue-640)] animate-spin [body.light-theme_&]:border-[rgba(15,23,42,0.10)]"></div>
-          <p class="m-0 text-[13px] font-medium tracking-[0.08em] text-[var(--color-text3)]">Loading heatmap</p>
+        <div class="flex flex-col items-center gap-[14px] rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(8,15,28,0.58)] px-[26px] py-[22px] shadow-[0_24px_60px_rgba(0,0,0,0.28)] backdrop-blur-[10px] [body.light-theme_&]:border-[rgba(15,23,42,0.08)] [body.light-theme_&]:bg-[rgba(255,255,255,0.82)] [body.light-theme_&]:shadow-[0_18px_40px_rgba(15,23,42,0.10)] [body.light-theme_&]:backdrop-blur-[6px]">
+          <div class="relative grid h-[56px] w-[56px] place-items-center rounded-full border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.03)] [body.light-theme_&]:border-[rgba(15,23,42,0.10)] [body.light-theme_&]:bg-[rgba(15,23,42,0.02)]">
+            <div class="h-[34px] w-[34px] rounded-full border-[3px] border-[rgba(255,255,255,0.14)] border-t-[var(--color-blue-640)] border-r-[rgba(87,165,235,0.55)] animate-spin [body.light-theme_&]:border-[rgba(15,23,42,0.12)]"></div>
+            <div class="absolute h-[14px] w-[14px] rounded-full bg-[radial-gradient(circle,_rgba(87,165,235,0.95)_0%,_rgba(87,165,235,0.22)_72%,_transparent_100%)] blur-[0.2px]"></div>
+          </div>
+          <div class="flex flex-col items-center gap-[4px] text-center">
+            <p class="m-0 font-[Inter] text-[14px] font-semibold tracking-[0.12em] text-[var(--color-text1)] uppercase">Rendering Heatmap</p>
+            <p class="m-0 max-w-[220px] font-[Roboto] text-[12px] font-medium leading-[1.45] tracking-[0.01em] text-[var(--color-text4)]">Preparing global activity layers and country intensity signals.</p>
+          </div>
         </div>
       </div>
     }
