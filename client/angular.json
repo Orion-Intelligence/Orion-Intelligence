@@ -73,13 +73,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "15MB",
-                  "maximumError": "15MB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12MB",
-                  "maximumError": "12MB"
+                  "maximumWarning": "10kB",
+                  "maximumError": "25kB"
                 }
               ],
               "outputHashing": "all",
@@ -91,10 +91,10 @@
                 "fonts": true
               },
               "sourceMap": {
-                "hidden": false,
+                "hidden": true,
                 "scripts": true,
-                "styles": true,
-                "vendor": true
+                "styles": false,
+                "vendor": false
               },
               "extractLicenses": true,
               "namedChunks": false,
