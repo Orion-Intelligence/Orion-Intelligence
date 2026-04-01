@@ -71,9 +71,9 @@ export class ScrollService {
     };
 
     resetTop();
-    requestAnimationFrame(() => resetTop());
-    setTimeout(() => resetTop(), 50);
-    setTimeout(() => resetTop(), 150);
+    requestAnimationFrame(() => { resetTop(); });
+    setTimeout(() => { resetTop(); }, 50);
+    setTimeout(() => { resetTop(); }, 150);
   }
 
   saveCurrentPosition(_itemId = ''): void {
@@ -135,6 +135,6 @@ export class ScrollService {
     };
 
     applyScroll();
-    requestAnimationFrame(() => applyScroll());
+    requestAnimationFrame(() => { applyScroll(); });
   }
 }

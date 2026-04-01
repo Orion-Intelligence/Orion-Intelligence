@@ -22,7 +22,7 @@ export class GraphOrchestratorService {
 
   private wait(milliseconds: number): Promise<void> {
     return new Promise(resolve => {
-      setTimeout(() => resolve(), milliseconds);
+      setTimeout(() => { resolve(); }, milliseconds);
     });
   }
 
@@ -139,7 +139,7 @@ export class GraphOrchestratorService {
       }
       const node = platformNodes[index], edge = { id: `${centralNodeId}->${node.id}`, from: centralNodeId, to: node.id };
       state.networkData.update(d => ({ nodes: [...d.nodes, node], edges: [...d.edges, edge] }));
-      setTimeout(() => addNodeSequentially(index + 1), 75);
+      setTimeout(() => { addNodeSequentially(index + 1); }, 75);
     };
     addNodeSequentially(0);
   }

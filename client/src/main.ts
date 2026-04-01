@@ -102,7 +102,7 @@ const mark = (img: HTMLImageElement) => {
     const onload = () => { img.removeAttribute('data-ph'); };
     img.addEventListener('load', onload, { once: true });
 };
-Array.from(document.images).forEach(i => mark(i as HTMLImageElement));
+Array.from(document.images).forEach(i => { mark(i as HTMLImageElement); });
 new MutationObserver(ms => {
     for (const m of ms) {
         if (m.type === 'childList') {
@@ -111,7 +111,7 @@ new MutationObserver(ms => {
                     mark(n);
                 }
                 else if (n instanceof Element) {
-                    n.querySelectorAll('img').forEach(i => mark(i as HTMLImageElement));
+                    n.querySelectorAll('img').forEach(i => { mark(i as HTMLImageElement); });
                     hydrateBootstrapIcons(n);
                 }
             });

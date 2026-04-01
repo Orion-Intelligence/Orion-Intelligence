@@ -89,7 +89,7 @@ export class GraphExportService {
       { label: 'Node Types', value: String(composition.length) },
       { label: 'Session', value: this.truncateWithEllipsis(payload.sessionName || '-', 15) }
     ];
-    kpis.forEach((kpi, idx) => this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value));
+    kpis.forEach((kpi, idx) => { this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value); });
     const analysisDidDrawPage = (data: any) => {
       sectionsByPage[data.pageNumber] = 'Graph Analysis';
     };

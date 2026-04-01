@@ -50,7 +50,7 @@ export class ConsolidatedApiService {
     }), takeWhile(res => {
       return this.shouldContinueLivePolling(res);
     }, true), catchError(error => {
-      return new Observable(observer => observer.error(error));
+      return new Observable(observer => { observer.error(error); });
     }));
   }
 

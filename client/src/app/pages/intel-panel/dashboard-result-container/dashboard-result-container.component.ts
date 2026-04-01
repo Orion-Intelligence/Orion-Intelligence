@@ -70,7 +70,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     }
     this.pendingScrollRestore = false;
     this.scrollService.scrollToSavedPosition();
-    requestAnimationFrame(() => this.scrollService.scrollToSavedPosition());
+    requestAnimationFrame(() => { this.scrollService.scrollToSavedPosition(); });
   }
 
   ngOnInit(): void {

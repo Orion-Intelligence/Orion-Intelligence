@@ -359,7 +359,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleFollowerScan(usernames: string[]) {
-    usernames.forEach(username => this.initiateScan(username)); 
+    usernames.forEach(username => { this.initiateScan(username); }); 
   }
 
   openFollowerScanFromNode(nodeId: string) {
@@ -475,11 +475,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   cancelAllFetchesForUser(username: string) {
     this.platformFetchService.cancelAllFetchesForUser(username, this.scanResults(), {
-      profile: (p: PlatformResult) => this.cancelFetchProfileDetails(p),
-      posts: (p: PlatformResult) => this.handleCancelFetchSocialPosts(p),
-      images: (p: PlatformResult) => this.handleCancelFetchImagesForPlatform(p),
-      followers: (p: PlatformResult) => this.handleCancelFetchFollowers(p),
-      following: (p: PlatformResult) => this.handleCancelFetchFollowing(p)
+      profile: (p: PlatformResult) => { this.cancelFetchProfileDetails(p); },
+      posts: (p: PlatformResult) => { this.handleCancelFetchSocialPosts(p); },
+      images: (p: PlatformResult) => { this.handleCancelFetchImagesForPlatform(p); },
+      followers: (p: PlatformResult) => { this.handleCancelFetchFollowers(p); },
+      following: (p: PlatformResult) => { this.handleCancelFetchFollowing(p); }
     });
   }
 
@@ -751,8 +751,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId);
         this.tabManager.scheduleSave();
       },
-      deleteEntity: () => this.deleteCustomEntity(nodeId),
-      openRelationship: () => this.onRelationshipNodeClicked(nodeId),
+      deleteEntity: () => { this.deleteCustomEntity(nodeId); },
+      openRelationship: () => { this.onRelationshipNodeClicked(nodeId); },
     };
     handlers[action]();
     this.state.closeContextMenu();
@@ -786,7 +786,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     await this.graphOrchestrator.handleGroupNodeClicked(this.activeTabState()!, { nodeId, position });
     this.tabManager.scheduleSave();
     if (!wasPhysicsEnabled) {
-      setTimeout(() => this.updateState(state => state.isPhysicsEnabled.set(false), false), 2500);
+      setTimeout(() => { this.updateState(state => state.isPhysicsEnabled.set(false), false); }, 2500);
     }
   }
 }

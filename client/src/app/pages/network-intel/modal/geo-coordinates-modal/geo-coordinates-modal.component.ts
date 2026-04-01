@@ -229,7 +229,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   }
 
   private queueRenderMap(): void {
-    setTimeout(() => this.renderMap(), 0);
+    setTimeout(() => { this.renderMap(); }, 0);
   }
 
   private applyZoom(nextZoomLevel: number, anchor: ZoomAnchor | null): void {
@@ -287,7 +287,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
     const worldData = this.appService.worldJson();
     if (!worldData) {
-      setTimeout(() => this.renderMap(), 100);
+      setTimeout(() => { this.renderMap(); }, 100);
       return;
     }
 
