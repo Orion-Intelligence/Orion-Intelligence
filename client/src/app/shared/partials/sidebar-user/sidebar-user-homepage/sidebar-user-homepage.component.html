@@ -1,7 +1,7 @@
 @if (!isAdmin() && !appService.userSessionData().tenant.isDefault) {
   <div>
     @if (!licenseService.getLicenses().includes('free') && !isAnalyst() && !isDemo()) {
-      <div>
+      <div id="alert-summery">
         <div class="relative min-h-[calc(100dvh-60px)] w-full overflow-x-hidden px-[30px] py-[20px] font-[Inter,sans-serif] text-[var(--color-text1)] max-[1000px]:px-[10px] max-[640px]:px-[8px] max-[640px]:py-[12px]">
           @if (showAlertScanLoading()) {
             <div>
@@ -128,7 +128,7 @@
           <app-home-search></app-home-search>
         </div>
       } @else {
-        <div class="sidebar-profile-statistics-container">
+        <div id="free-user-statistics" class="sidebar-profile-statistics-container">
           <app-home-insight></app-home-insight>
         </div>
       }

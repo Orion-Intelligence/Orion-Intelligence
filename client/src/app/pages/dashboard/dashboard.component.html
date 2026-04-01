@@ -36,3 +36,7 @@
     <router-outlet data-cy="cti-router-outlet"></router-outlet>
   </div>
 }
+
+@if (shouldShowDemoTour()) {
+  <app-demo-tour></app-demo-tour>
+}

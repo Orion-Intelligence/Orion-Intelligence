@@ -29,6 +29,7 @@ export interface UserDataModel {
     preferences?: {
         [key: string]: any;
     };
+    demo_tour: boolean;
 }
 export interface TenantDataModel {
     id: string;
@@ -47,13 +48,14 @@ export interface TenantDataModel {
     image?: string;
 }
 export interface userMetaData {
-    username: string;
-    twofa_enabled: boolean;
-    theme?: 'dark-theme' | 'light-theme';
+    username: string|undefined;
+    twofa_enabled: boolean|undefined;
+    theme?: 'dark-theme' | 'light-theme'|undefined;
     preferences?: {
-        theme?: 'dark-theme' | 'light-theme';
+        theme?: 'dark-theme' | 'light-theme'|undefined;
         [key: string]: any;
     };
+    demo_tour:boolean|undefined;
 }
 export interface AlertAllIoc {
     name: string;

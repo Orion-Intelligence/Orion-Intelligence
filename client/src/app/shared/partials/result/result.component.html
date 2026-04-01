@@ -21,7 +21,7 @@
           <div class="relative">
             <div class="flex w-full items-center justify-between gap-[8px] max-[900px]:flex-col max-[900px]:items-stretch">
               <div class="relative min-w-0 max-w-[910px] flex-1 max-[900px]:max-w-full">
-                <div class="flex h-[40px] min-w-0 w-full flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
+                <div id="homeSearch" class="flex h-[40px] min-w-0 w-full flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
                   <button data-testid="dashboard-search-submit" class="flex h-[40px] w-[42px] items-center justify-center bg-white transition-colors hover:bg-white" type="submit">
                     <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
                   </button>

@@ -74,7 +74,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   get currentResultCount(): number {
-    return this.stealerlogCallbackModel?.Page_Count ?? 0;
+    return (this.stealerlogCallbackModel?.Result?.length ?? 0) + (this.rankedResult?.result?.length ?? 0);
   }
 
   ngOnInit(): void {

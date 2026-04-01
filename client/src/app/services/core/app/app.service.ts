@@ -10,17 +10,20 @@ import { userSessionData } from '../../../shared/model/company-profile/node.mode
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
+import { DemoTourConfig } from '../../../shared/model/demo-tour/demo.tour.model';
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
   private entitiesCache: any[] | null = null;
   private sessionLoadPromise: Promise<void> | null = null;
+  private demoTourLoadPromise: Promise<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
   public entities = signal<any[]>([]);
   public worldJson = signal<any>(null);
+  public demoTourConfig = signal<DemoTourConfig>({});
   public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
   public tenantData = signal<TenantModel>({
     name: '',
@@ -38,7 +41,8 @@ export class AppService {
         status: '',
         subscription: false,
         verificationDate: '',
-        license: []
+        license: [],
+        demo_tour:false,
       },
       tenant: {
         id: '',
@@ -73,6 +77,9 @@ export class AppService {
     this.loadEntities();
     this.loadLicenseRules();
     this.loadWorldJson();
+    this.loadDemoTourConfig().then(() => {
+      console.log(this.demoTourConfig());
+    });
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) {
@@ -189,6 +196,25 @@ export class AppService {
         this.worldJson.set(data);
       }))
       .subscribe();
+  }
+
+  loadDemoTourConfig(): Promise<void> {
+    if (this.demoTourLoadPromise) {
+      return this.demoTourLoadPromise;
+    }
+
+    this.demoTourLoadPromise = firstValueFrom(this.http.get<DemoTourConfig>('assets/data/demo_tour/demo_tour.json'))
+      .then(data => {
+        this.demoTourConfig.set(data || {});
+      })
+      .catch(() => {
+        this.demoTourConfig.set({});
+      })
+      .finally(() => {
+        this.demoTourLoadPromise = null;
+      });
+
+    return this.demoTourLoadPromise;
   }
 
   clearAll(): void {

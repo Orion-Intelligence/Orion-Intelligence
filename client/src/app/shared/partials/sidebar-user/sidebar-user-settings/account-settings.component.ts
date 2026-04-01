@@ -102,6 +102,7 @@ export class AccountSettingsComponent implements OnInit {
       twofa_enabled: this.userSessionData.user.twofa_enabled,
       theme,
       preferences,
+      demo_tour: this.userSessionData.user.demo_tour
     };
     this.apiService.post(route, userMeta).subscribe({
       next: () => {
