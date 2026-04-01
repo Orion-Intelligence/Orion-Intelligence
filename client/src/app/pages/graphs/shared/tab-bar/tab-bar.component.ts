@@ -18,7 +18,7 @@ export class TabBarComponent {
   private tabManager = inject(TabManagerService, { optional: true });
   private hostRef = inject(ElementRef<HTMLElement>);
 
-  tabs = input<Array<{ id: string; name: string; }>>([]);
+  tabs = input<{ id: string; name: string; }[]>([]);
   activeTabId = input<string | null>(null);
   editingTabId = input<string | null>(null);
   mode = input<'social' | 'cti'>('social');
@@ -37,7 +37,7 @@ export class TabBarComponent {
   exportReportRequested = output<void>();
   fileSelected = output<Event>();
 
-  private currentTabs(): Array<{ id: string; name: string; }> {
+  private currentTabs(): { id: string; name: string; }[] {
     if (this.tabManager) {
       return this.tabManager.tabs();
     }
@@ -217,7 +217,7 @@ export class TabBarComponent {
     return `${this.mode()}-${prefix}`;
   }
 
-  visibleTabs(): Array<{ id: string; name: string; }> {
+  visibleTabs(): { id: string; name: string; }[] {
     return this.currentTabs();
   }
 }

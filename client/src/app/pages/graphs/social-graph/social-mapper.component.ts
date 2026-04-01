@@ -590,17 +590,17 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.selectedEntityReport.set(null);
   }
 
-  getEntityReportRecords(entity: CustomEntity): Array<Record<string, unknown>> {
+  getEntityReportRecords(entity: CustomEntity): Record<string, unknown>[] {
     const report = entity.reportData;
     if (!report || typeof report !== 'object') {
       return [];
     }
     const nestedResult = (report as any)?.result;
     if (Array.isArray(nestedResult)) {
-      return nestedResult as Array<Record<string, unknown>>;
+      return nestedResult as Record<string, unknown>[];
     }
     if (Array.isArray(nestedResult?.result)) {
-      return nestedResult.result as Array<Record<string, unknown>>;
+      return nestedResult.result as Record<string, unknown>[];
     }
     if (nestedResult?.result && typeof nestedResult.result === 'object') {
       return [nestedResult.result as Record<string, unknown>];
@@ -611,7 +611,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return [report as Record<string, unknown>];
   }
 
-  getEntityRecordEntries(record: Record<string, unknown>): Array<{ key: string; label: string; values: string[]; }> {
+  getEntityRecordEntries(record: Record<string, unknown>): { key: string; label: string; values: string[]; }[] {
     return Object.entries(record)
       .filter(([, value]) => value !== null && value !== undefined && !(Array.isArray(value) && value.length === 0))
       .map(([key, value]) => ({

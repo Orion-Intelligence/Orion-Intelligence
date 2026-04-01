@@ -53,7 +53,7 @@ export interface CameraInfo {
   stream_url?:      string;
   camera_path?:     string;
   camera_paths?:    string[];
-  cameras?:         Array<{
+  cameras?:         {
     port?: number;
     service?: string;
     brand?: string;
@@ -62,8 +62,8 @@ export interface CameraInfo {
     path_status?: number;
     is_camera?: boolean;
     [key: string]: any;
-  }>;
-  ports?:           Array<number | IpPortData>;
+  }[];
+  ports?:           (number | IpPortData)[];
   vulnerabilities?: string[];
 }
 

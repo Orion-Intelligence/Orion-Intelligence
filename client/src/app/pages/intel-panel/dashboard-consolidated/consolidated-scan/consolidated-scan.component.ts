@@ -83,10 +83,10 @@ export class ConsolidatedScanComponent {
     }
     this.isProcessing = true;
     this.liveApiEntities = this.extractLiveApiEntities(input);
-    const scans: Array<{
+    const scans: {
           t: ScanKey;
           o: Observable<any>;
-      }> = isRepo
+      }[] = isRepo
         ? [{ t: 'repo', o: this.api.scanForRepo(input, 'repo') as any }]
         : [
           { t: 'basic', o: this.api.scanDomain(input, 'basic') as any },

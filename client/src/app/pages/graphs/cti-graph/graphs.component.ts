@@ -134,7 +134,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   isGraphView = true;
   isListingsCollapsed = true;
   searchMatchedCount = 0;
-  listRows: Array<{ id: string; label: string; cluster: string; }> = [];
+  listRows: { id: string; label: string; cluster: string; }[] = [];
   showMaxEdgeNotice = false;
   tabs: GraphSessionTab[] = [];
   activeTabId = '';
@@ -516,10 +516,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     const originalScale = this.network.getScale();
     const originalPosition = this.network.getViewPosition();
-    const groupsToExpand: Array<{
+    const groupsToExpand: {
       id: string;
       subNodes: string[];
-  }> = [];
+  }[] = [];
     this.nodeSet.get().forEach(node => {
       const ext = node as ExtendedNode;
       const nodeId = String(ext.id ?? '');
@@ -1190,10 +1190,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private getReportCategory(nodeId: string): string {
-    const checks: Array<[
+    const checks: [
       string,
       string
-  ]> = [
+  ][] = [
     ['general', 'cti_vertices/general'],
     ['leak', 'cti_vertices/leak'],
     ['defacement', 'cti_vertices/defacement'],

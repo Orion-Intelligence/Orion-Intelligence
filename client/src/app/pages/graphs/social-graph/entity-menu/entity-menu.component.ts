@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 
 import { CustomEntity } from '../../../../shared/model/social/social-scan.models';
-const ENTITY_ADD_OPTIONS: Array<{ type: CustomEntity['type']; label: string; iconClass: string; }> = [
+const ENTITY_ADD_OPTIONS: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [
   { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' },
   { type: 'social-scanner', label: 'Add Social Scanner', iconClass: 'bi bi-people text-indigo-400' },
   { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' },
@@ -30,7 +30,7 @@ export class EntityMenuComponent {
   addSearchTerm = signal('');
   entityAddOptions = ENTITY_ADD_OPTIONS;
 
-  get filteredEntityAddOptions(): Array<{ type: CustomEntity['type']; label: string; iconClass: string; }> {
+  get filteredEntityAddOptions(): { type: CustomEntity['type']; label: string; iconClass: string; }[] {
     const term = this.addSearchTerm().trim().toLowerCase();
     if (!term) {
       return this.entityAddOptions;

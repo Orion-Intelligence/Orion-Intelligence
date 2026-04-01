@@ -296,10 +296,10 @@ export class GraphExportService {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(37, 99, 235);
-    const sectionItems: Array<{
+    const sectionItems: {
             label: string;
             page: number;
-        }> = [];
+        }[] = [];
     if (pages.graphPage) {
       sectionItems.push({ label: 'Graph Snapshot', page: pages.graphPage });
     }
@@ -513,10 +513,10 @@ export class GraphExportService {
     return normalized;
   }
 
-  private extractSocialPlatformCounts(payload: GraphReportPayload): Array<{
+  private extractSocialPlatformCounts(payload: GraphReportPayload): {
         name: string;
         count: number;
-    }> {
+    }[] {
     if (payload.graphKind !== 'social') {
       return [];
     }
@@ -684,8 +684,8 @@ export class GraphExportService {
     return `Section ${index + 1}`;
   }
 
-  protected buildReportSectionRows(values: Record<string, string>): Array<[string, string]> {
-    const rows: Array<[string, string]> = [['Field', 'Value']];
+  protected buildReportSectionRows(values: Record<string, string>): [string, string][] {
+    const rows: [string, string][] = [['Field', 'Value']];
     Object.entries(values ?? {}).forEach(([rawKey, rawValue]) => {
       const key = this.cleanReportFieldLabel(rawKey);
       const value = this.cleanReportFieldValue(rawValue, key);

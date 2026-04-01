@@ -957,7 +957,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return Object.fromEntries(entries);
   }
 
-  private buildIpDetailTables(detail: IpDetail, prefix = ''): Array<{ title: string; values: Record<string, string> }> {
+  private buildIpDetailTables(detail: IpDetail, prefix = ''): { title: string; values: Record<string, string> }[] {
     const titlePrefix = prefix ? `${prefix} ` : '';
     const cameraPorts = this.countCameraPorts(detail);
     const iotPorts = this.countIotPorts(detail);
@@ -1037,7 +1037,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     ].filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
 
-  private buildPortDetailTables(detail: IpDetail, prefix = ''): Array<{ title: string; values: Record<string, string> }> {
+  private buildPortDetailTables(detail: IpDetail, prefix = ''): { title: string; values: Record<string, string> }[] {
     const titlePrefix = prefix ? `${prefix} ` : '';
 
     return (detail.ports || []).slice(0, 12).map((port, index) => ({
@@ -1102,7 +1102,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     })).filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
 
-  private buildRawJsonTables(source: unknown, title: string, chunkSize = 3500): Array<{ title: string; values: Record<string, string> }> {
+  private buildRawJsonTables(source: unknown, title: string, chunkSize = 3500): { title: string; values: Record<string, string> }[] {
     if (source === null || source === undefined) {
       return [];
     }
@@ -1119,7 +1119,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [];
     }
 
-    const tables: Array<{ title: string; values: Record<string, string> }> = [];
+    const tables: { title: string; values: Record<string, string> }[] = [];
     for (let offset = 0, part = 1; offset < json.length; offset += chunkSize, part += 1) {
       tables.push({
         title: `${title} ${part}`.trim(),

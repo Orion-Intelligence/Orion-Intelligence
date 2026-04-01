@@ -28,14 +28,14 @@ export class IpDetailComponent {
     return !!this.detail?.is_camera || this.cameraPortCount > 0 || (this.detail?.cameras?.length ?? 0) > 0;
   }
 
-  get extraDetailEntries(): Array<[string, string]> {
+  get extraDetailEntries(): [string, string][] {
     return this.ui.safeEntries(this.detail)
       .filter(([key, value]) => !this.renderedTopLevelKeys.has(key) && this.hasRenderableValue(value))
       .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
       .filter(([, value]) => Boolean(value));
   }
 
-  get generalInfoExtraEntries(): Array<[string, string]> {
+  get generalInfoExtraEntries(): [string, string][] {
     return this.ui.safeEntries(this.detail?.ip_info)
       .filter(([key, value]) => !this.isDuplicateGeneralInfoField(key, value) && this.hasRenderableValue(value))
       .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
@@ -59,7 +59,7 @@ export class IpDetailComponent {
     return '';
   }
 
-  renderHeaderEntries(source: Record<string, any> | undefined | null): Array<[string, string]> {
+  renderHeaderEntries(source: Record<string, any> | undefined | null): [string, string][] {
     return this.ui.safeEntries(source)
       .map(([key, value]) => [key.trim(), this.formatDisplayValue(value)] as [string, string])
       .filter(([key, value]) => Boolean(key && value));
