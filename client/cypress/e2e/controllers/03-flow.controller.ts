@@ -25,22 +25,22 @@ export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
   cy.get(`[data-testid="${groupTestId}"]`).then(($group) => {
     cy.wrap($group).scrollIntoView();
-    let li = $group.closest('li');
-    let sub = li.find('> ul');
+    let group = $group.parent('div');
+    let sub = group.find('> ul');
     let isClosed = !sub.length || getComputedStyle(sub[0] as HTMLElement).pointerEvents === 'none';
     if (isClosed) {
       cy.wrap($group).find('img[alt="Drop Down"]').click();
     }
   });
 
-  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
+  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   });
 }
 
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const groupTestId = getSidebarGroupTestId(groupTitle);
-  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
+  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   }).find(`[data-testid^="sidebar-subitem-${SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle]}-"]`).contains('div', new RegExp(`^\\s*${itemTitle}\\s*$`)).scrollIntoView().click();
 }
@@ -178,7 +178,7 @@ export function assertFreeModeDashboardChrome() {
     .filter(':visible')
     .should('have.length.at.least', 1);
 
-  cy.get('[data-testid="dashboard-sidebar"] ul')
+  cy.get('[data-testid="dashboard-sidebar"] > app-dashboard-sidebar > nav > div.overflow-y-auto')
     .first()
     .scrollTo('bottom', { ensureScrollable: false });
 

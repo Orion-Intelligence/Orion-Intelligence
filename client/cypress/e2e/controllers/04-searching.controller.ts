@@ -19,7 +19,7 @@ function getSidebarGroupTestId(title: string): string {
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
   cy.get(`[data-testid="${groupTestId}"]`).should('be.visible').click();
-  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
+  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   });
 }
@@ -27,7 +27,7 @@ export function openSidebarGroup(title: string) {
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
   const groupTestId = getSidebarGroupTestId(groupTitle);
-  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
+  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   }).find(`[data-testid^="sidebar-subitem-${routePrefix}-"]`).contains('div', new RegExp(`^\\s*${itemTitle}\\s*$`)).click();
 }
