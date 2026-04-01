@@ -110,7 +110,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       const fallbackMap: Record<string, string> = {
         logo_url: '/api/s/static/system/logo_url_default.png',
         logo_wide_light: '/api/s/static/system/logo_wide_light_default.png',
-        logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png',
+        logo_wide_dark: '/assets/images/shared/logo-wide-light.svg',
         login_page_image: '/api/s/static/system/auth_dashboard_icon_default.png'
       };
       const fallback = fallbackMap[key];

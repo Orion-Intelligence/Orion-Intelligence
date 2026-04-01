@@ -5,7 +5,7 @@
       @for (crumb of breadcrumb; track crumb.path; let i = $index; let last = $last) {
         <span>
           @if (!last) {
-            <span (click)="navigateToCrumb(i)" [ngClass]="{ 'cursor-default opacity-50 pointer-events-none': breadcrumb.length <= 2 }" class="inline-flex min-w-0 items-center cursor-pointer font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text2)] hover:text-[#fcfcfc]">
+            <span (click)="navigateToCrumb(i)" [ngClass]="{ 'cursor-default opacity-80 pointer-events-none': breadcrumb.length <= 2 }" class="inline-flex min-w-0 items-center cursor-pointer font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)] hover:text-[#fcfcfc]">
               <span class="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[110px]">{{ crumb.label.replace('-', ' ') | titlecase }}</span>
               <img alt="breadcrumb" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
             </span>
@@ -16,7 +16,7 @@
                 <span class="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[130px]">{{ crumb.label.replace('-', ' ') | titlecase }}</span>
               } @else {
                 <div class="mt-[10px] flex w-full items-start justify-between px-[20px] py-[10px] text-[24px] font-medium">
-                  <a href=""><img alt="Logo" decoding="async" fetchpriority="high" height="35" loading="eager" width="197" [src]="appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'" /></a>
+                  <a href=""><img alt="Logo" decoding="async" fetchpriority="high" height="44" loading="eager" width="246" [src]="appService.getConfig().appSettings.logo_wide_dark || '/assets/images/shared/logo-wide-light.svg'" /></a>
                 </div>
               }
             </span>
@@ -28,7 +28,7 @@
   @if (authService.getIsMobileDemo()) {
     <div class="ml-0 flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-0 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-0">
       <a href="" class="ml-3 inline-flex items-center">
-        <img alt="Logo" decoding="async" fetchpriority="high" height="35" loading="eager" width="197" [src]="appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'" />
+        <img alt="Logo" decoding="async" fetchpriority="high" height="44" loading="eager" width="246" [src]="appService.getConfig().appSettings.logo_wide_dark || '/assets/images/shared/logo-wide-light.svg'" />
       </a>
     </div>
   }
