@@ -1,10 +1,10 @@
 @if (this.sidebar_default) {
   <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full">
     <div class="flex w-full items-start justify-between px-[20px] py-[10px] mt-[10px] text-[24px] font-medium">
-      <a href="">
+      <a href="" aria-label="Go to homepage">
         <img alt="Logo" decoding="async" fetchpriority="high" height="44" loading="eager" [src]="appService.getConfig().appSettings.logo_wide_dark || '/assets/images/shared/logo-wide-light.svg'" width="246" />
       </a>
-      <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" data-testid="sidebar-collapse-button" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
+      <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" aria-label="Collapse sidebar" data-testid="sidebar-collapse-button" class="cursor-pointer bg-transparent border-0 p-0 mt-[-5px]">
         <img alt="Collapse sidebar" height="28" src="/assets/images/sidebar/nav_menu.svg" width="24" />
       </button>
     </div>
@@ -200,7 +200,7 @@
       <img alt="Menu" height="20" ngSrc="/assets/images/sidebar/menu-mini.svg" width="20" />
     </button>
     <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">
-      <a href="">
+      <a href="" aria-label="Go to homepage">
         <img alt="Logo" height="30" ngSrc="/assets/images/shared/logo-min.svg" priority width="30" />
       </a>
     </div>

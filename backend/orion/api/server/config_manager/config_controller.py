@@ -56,6 +56,8 @@ class config_controller:
             custom = self.SYSTEM_DIR / f"{base}_custom.png"
             if custom.is_file():
                 return f"/api/s/static/system/{base}_custom.png"
+            if base in {"logo_wide_light", "logo_wide_dark"}:
+                return "/assets/images/shared/logo-wide-light.svg"
             return f"/api/s/static/system/{base}_default.png"
 
         fresh_config["ai_endpoint"] = "1"
@@ -84,8 +86,8 @@ class config_controller:
                 "ai_endpoint": "1",
                 "s_onion": "",
                 "logo_url": "/api/s/static/system/logo_url_default.png",
-                "logo_wide_light": "/api/s/static/system/logo_wide_dark_default.png",
-                "logo_wide_dark": "/api/s/static/system/logo_wide_light_default.png",
+                "logo_wide_light": "/assets/images/shared/logo-wide-light.svg",
+                "logo_wide_dark": "/assets/images/shared/logo-wide-light.svg",
                 "meta_info": json.dumps({
                     "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
                     "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
