@@ -51,26 +51,26 @@ const loadDeferredStylesheet = (href: string) => {
     link.setAttribute('data-deferred-style', href);
     document.head.appendChild(link);
 };
-const deferBootstrapIcons = () => {
-    loadDeferredStylesheet('bootstrap-icons.css');
-};
-const scheduleBootstrapIcons = () => {
+let bootstrapIconsRequested = false;
+const maybeLoadBootstrapIcons = () => {
+    if (bootstrapIconsRequested || !document.querySelector('.bi, [class^="bi-"], [class*=" bi-"]')) {
+        return;
+    }
+    bootstrapIconsRequested = true;
+    const schedule = () => {
+        loadDeferredStylesheet('bootstrap-icons.css');
+    };
     if ('requestIdleCallback' in window) {
         (window as Window & { requestIdleCallback: (callback: IdleRequestCallback) => number; }).requestIdleCallback(() => {
-            deferBootstrapIcons();
+            schedule();
         });
         return;
     }
     setTimeout(() => {
-        deferBootstrapIcons();
+        schedule();
     }, 0);
 };
-if (document.readyState === 'complete') {
-    scheduleBootstrapIcons();
-}
-else {
-    window.addEventListener('load', scheduleBootstrapIcons, { once: true });
-}
+maybeLoadBootstrapIcons();
 const mark = (img: HTMLImageElement) => {
     if (img.dataset['ph'] === '1') {
         return;
@@ -111,5 +111,8 @@ new MutationObserver(ms => {
         }
     }
 }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+new MutationObserver(() => {
+    maybeLoadBootstrapIcons();
+}).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
 bootstrapApplication(AppComponent, appConfig).then();
