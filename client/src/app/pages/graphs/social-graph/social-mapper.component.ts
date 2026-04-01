@@ -603,12 +603,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return nestedResult.result as Record<string, unknown>[];
     }
     if (nestedResult?.result && typeof nestedResult.result === 'object') {
-      return [nestedResult.result as Record<string, unknown>];
+      return [nestedResult.result];
     }
     if (nestedResult && typeof nestedResult === 'object') {
-      return [nestedResult as Record<string, unknown>];
+      return [nestedResult];
     }
-    return [report as Record<string, unknown>];
+    return [report];
   }
 
   getEntityRecordEntries(record: Record<string, unknown>): { key: string; label: string; values: string[]; }[] {
