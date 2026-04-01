@@ -98,10 +98,8 @@ export class SidebarUserIocComponent implements OnInit {
     this.setIocLocal();
     this.appService.tenantData.set({ ...filteredOnboardingData });
     this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
-      next: () => {
-      },
-      error: (_err) => {
-      },
+      next: () => void 0,
+      error: (_err) => void 0,
     });
   }
 

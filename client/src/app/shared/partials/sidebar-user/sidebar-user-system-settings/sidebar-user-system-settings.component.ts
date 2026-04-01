@@ -188,7 +188,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           }
         }
       },
-      error: () => {}
+      error: () => void 0
     });
   }
 

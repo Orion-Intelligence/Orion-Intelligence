@@ -217,8 +217,7 @@ export class DashboardService {
     keysToRemove.forEach(key => { sessionStorage.removeItem(key); });
   }
 
-  private cancelOngoingRequest() {
-  }
+  private cancelOngoingRequest() { return; }
 
   private beginRequestWithMergedParams(paramModel: any): {
         entityCategories: any;

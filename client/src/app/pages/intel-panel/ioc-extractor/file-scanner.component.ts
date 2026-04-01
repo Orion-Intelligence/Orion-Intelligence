@@ -119,7 +119,7 @@ export class FileScannerComponent {
       relativeTo: this.route,
       queryParams: { file: encodeURIComponent(file.name) },
       queryParamsHandling: 'merge'
-    }).catch(() => { });
+    }).catch(() => void 0);
     this.scanFile(modeIsApk);
   }
 

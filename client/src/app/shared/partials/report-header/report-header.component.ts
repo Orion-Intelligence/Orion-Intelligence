@@ -134,8 +134,7 @@ export class ReportHeaderComponent {
           this.aiSuggestSummary = response.result || 'No summary available';
           this.cdr.detectChanges();
         },
-        error: (_err) => {
-        }
+        error: (_err) => void 0
       });
   }
 

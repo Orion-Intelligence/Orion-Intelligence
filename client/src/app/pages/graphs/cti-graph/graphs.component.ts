@@ -329,7 +329,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       next: () => {
         this.lastSavedSessionSignature = nextSignature;
       },
-      error: () => { }
+      error: () => void 0
     });
   }
 
