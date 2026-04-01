@@ -46,9 +46,9 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
 }
 
 export function getHeatmapComponent() {
-  return cy.window().then((win) => {
-    let host = win.document.querySelector('app-world-heatmap') as any;
-    expect(host, 'app-world-heatmap host').to.exist;
+  return cy.get('app-world-heatmap', { timeout: 10000 }).should('exist').then(($host) => {
+    let host = $host[0] as any;
+    return cy.window().then((win) => {
     let ngApi = (win as any).ng;
     if (ngApi?.getComponent) {
       return ngApi.getComponent(host) as any;
@@ -58,6 +58,7 @@ export function getHeatmapComponent() {
     let comp = (ctx || []).find((x: any) => x && x.constructor?.name === 'WorldHeatmapComponent');
     expect(comp, 'WorldHeatmapComponent in ngContext').to.exist;
     return comp as any;
+    });
   });
 }
 
