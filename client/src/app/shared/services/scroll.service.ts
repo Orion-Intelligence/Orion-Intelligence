@@ -15,15 +15,19 @@ export class ScrollService {
     this.resetOnReload();
   }
 
+  public clearSavedPosition(): void {
+    sessionStorage.removeItem(this.resultWindowScrollPositionKey);
+    sessionStorage.removeItem(this.resultContainerScrollPositionKey);
+    sessionStorage.removeItem(this.resultDocumentScrollPositionKey);
+    sessionStorage.removeItem(this.resultBodyScrollPositionKey);
+    sessionStorage.removeItem(this.resultDashboardBodyScrollPositionKey);
+  }
+
   public resetOnReload(ingore = false): void {
     const navEntries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[];
     const isHardReload = navEntries?.[0]?.type === 'reload';
     if (isHardReload || ingore) {
-      sessionStorage.removeItem(this.resultWindowScrollPositionKey);
-      sessionStorage.removeItem(this.resultContainerScrollPositionKey);
-      sessionStorage.removeItem(this.resultDocumentScrollPositionKey);
-      sessionStorage.removeItem(this.resultBodyScrollPositionKey);
-      sessionStorage.removeItem(this.resultDashboardBodyScrollPositionKey);
+      this.clearSavedPosition();
       window.scrollTo(0, 0);
     }
   }

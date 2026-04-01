@@ -7,6 +7,7 @@ import { filterAnimation } from '../../animations/filter.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { ScrollService } from '../../services/scroll.service';
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
@@ -28,7 +29,7 @@ export class FiltersComponent implements OnInit {
   @Output() filterReset = new EventEmitter<void>();
   @Output() filterClose = new EventEmitter<void>();
 
-  constructor(protected dashboard: DashboardService) {
+  constructor(protected dashboard: DashboardService, private scrollService: ScrollService) {
     this.initialModel = structuredClone(this.filterModel);
     effect(() => {
       const currentFilters = this.dashboard.selectedFilters();
@@ -55,6 +56,7 @@ export class FiltersComponent implements OnInit {
   }
 
   applyFilters() {
+    this.scrollService.clearSavedPosition();
     this.dashboard.selectedFilters.set(this.selectedFilters);
     this.filterChanged.emit({ ...this.selectedFilters });
     this.closeFilter();
@@ -65,6 +67,7 @@ export class FiltersComponent implements OnInit {
   }
 
   resetFilters() {
+    this.scrollService.clearSavedPosition();
     this.dashboard.selectedFilters.set({});
     this.filterChanged.emit({ ...this.selectedFilters });
     this.filterReset.emit();
