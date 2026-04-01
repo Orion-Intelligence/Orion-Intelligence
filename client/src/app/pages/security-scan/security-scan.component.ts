@@ -118,7 +118,7 @@ export class SecurityScanComponent implements OnInit {
             return;
           }
           this.isFetched = true;
-          const safe = !!(res && res.result && res.result.meta);
+          const safe = !!(res?.result?.meta);
           if (!safe) {
             this.hasError = true;
             this.errorMessage = 'No data received from scanner.';
@@ -127,7 +127,7 @@ export class SecurityScanComponent implements OnInit {
           const m = res.result.meta;
           this.meta = {
             ...m,
-            Host: (m?.Host && m.Host.trim()) || this.extractHost(m?.URL) || this.requestedDomain,
+            Host: (m?.Host?.trim()) || this.extractHost(m?.URL) || this.requestedDomain,
             URL: m?.URL || this.requestedUrl,
           };
           this.grade = res.result.grade || '';

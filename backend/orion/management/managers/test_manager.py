@@ -14,6 +14,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.session_manager.session_enums import admin_mock, admin_user, crawler_mock, crawler_user
+from orion.services.log_manager.log_controller import log
 
 
 class test_manager:
@@ -78,8 +79,8 @@ class test_manager:
         for c in cols:
             try:
                 await db.drop_collection(c)
-            except Exception:
-                pass
+            except Exception as ex:
+                log.g().e(f"Failed to drop test collection {c}: {ex}")
 
         mocks_dir = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "mongo"
         if mocks_dir.exists():

@@ -70,7 +70,7 @@ export class FileScannerComponent {
 
   onFileSelected(event: Event): void {
     const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
+    if (target.files?.[0]) {
       this.handleFileSelect(target.files[0]);
     }
   }

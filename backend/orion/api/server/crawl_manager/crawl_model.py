@@ -7,7 +7,7 @@ import random
 from datetime import datetime, timezone
 import httpx
 import requests
-from fastapi import HTTPException, Request
+from fastapi import Request
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model import *

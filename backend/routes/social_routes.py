@@ -1,6 +1,6 @@
 import base64
 
-from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
+from fastapi import APIRouter, Body, Depends, Query, File
 
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.graph_manager.graph_models.search_social_param_model import (

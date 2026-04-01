@@ -1189,6 +1189,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private countIotPorts(detail: IpDetail | null | undefined): number {
-    return (detail?.ports || []).filter((port: any) => port && port.is_iot).length;
+    return (detail?.ports || []).filter((port: any) => port?.is_iot).length;
   }
 }

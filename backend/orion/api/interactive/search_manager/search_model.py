@@ -4,21 +4,11 @@ from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
 from orion.api.interactive.search_manager.search_callback_model import search_callback
-from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_callback_model import grouped_consolidated_search_callback_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import search_defacement_callback_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import search_stealerlog_callback_model
-from orion.api.interactive.search_manager.search_data_model.enums import general_listing, leak_listing, exploit_listing
-from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_callback_model import search_exploit_callback_model
-from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
-from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import search_general_callback_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import search_leak_callback_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
-from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import search_social_callback_model
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -218,7 +208,7 @@ class search_model:
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
         document, data_filter = elastic_request_generator().on_search_persona(param)
-        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+        _, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         body = m_documents.body if hasattr(m_documents, "body") else m_documents
         aggs = body.get("aggregations", {}) if isinstance(body, dict) else {}

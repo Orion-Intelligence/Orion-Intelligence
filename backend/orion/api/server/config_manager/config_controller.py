@@ -40,8 +40,8 @@ class config_controller:
         try:
             records = await self._engine.find(db_system_model)
             self._config = {record.key.value: record.value for record in records}
-        except Exception:
-            pass
+        except Exception as ex:
+            log.g().e(f"Error loading config: {ex}")
 
     def get(self, key: str, default=None):
         return self._config.get(key, default)

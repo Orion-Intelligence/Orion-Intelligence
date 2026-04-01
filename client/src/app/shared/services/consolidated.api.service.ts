@@ -84,7 +84,7 @@ export class ConsolidatedApiService {
         }
         return {
           input,
-          status: data && data.cards_data?.length ? 'success' : 'error',
+          status: data?.cards_data?.length ? 'success' : 'error',
           resultData: data,
           errorMessage: null,
         } as ConsolidatedLiveApiResults;

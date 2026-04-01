@@ -277,7 +277,7 @@ export class GraphOrchestratorService {
     const isCollapsing = expandedGroupForUser?.id === nodeId;
     const collapseGroupAnimated = async (currentState: TabState) => {
       const groupToCollapse = currentState.expandedGroupDataByUser()[username];
-      if (!groupToCollapse || !groupToCollapse.groupedPlatforms) {
+      if (!groupToCollapse?.groupedPlatforms) {
         return;
       }
       const platformIdsToRemove = groupToCollapse.groupedPlatforms.map(p => this.fetchingState.getPlatformUniqueKey(p));

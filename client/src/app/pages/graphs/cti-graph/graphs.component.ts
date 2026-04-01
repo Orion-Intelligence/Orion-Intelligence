@@ -822,7 +822,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!menu) {
       return;
     }
-    if (node && node.color) {
+    if (node?.color) {
       this.orignalColor = node.color;
     }
     if (node && typeof node.id === 'string') {
@@ -1371,7 +1371,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const edgeMap: Record<string, number> = {};
     data.forEach(item => {
       const e = item.edge;
-      if (!e || !e._from || !e._to) {
+      if (!e?._from || !e._to) {
         return;
       }
       this.rawEdges.push({

@@ -155,8 +155,8 @@ class entity_manager:
                             lambda: self.__db.collection("cti_edges").insert(
                                 {"_key": edge_key, "_from": doc_vertex, "_to": prop_vertex, "type": f"has_{key}"},
                                 overwrite=True))
-                except Exception:
-                    pass
+                except Exception as ex:
+                    log.g().e(f"Skipping entity property upsert for key={key}, doc={normalized_doc_id}: {ex}")
 
             return {"status": "success", "message": f"Entity {normalized_doc_id} processed."}
 

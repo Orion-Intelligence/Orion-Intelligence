@@ -21,7 +21,7 @@ export class IpDetailComponent {
   }
 
   get iotPortCount(): number {
-    return (this.detail?.ports || []).filter((port: any) => port && port.is_iot).length;
+    return (this.detail?.ports || []).filter((port: any) => port?.is_iot).length;
   }
 
   get hasCameraSignals(): boolean {

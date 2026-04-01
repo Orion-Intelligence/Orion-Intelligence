@@ -11,10 +11,7 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
-from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
@@ -23,6 +20,7 @@ from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, IocCategory
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 
 ALERT_CATEGORIES = ["general", "defacement", "breach", "exploit", "social", "discussion", "stealerlogs", "feed",
@@ -117,7 +115,7 @@ class alert_job:
                 all_ioc=all_ioc_list)
             return True
 
-        except Exception as e:
+        except Exception:
             return False
 
     async def _handle_dynamic_scanning_alert(self,
@@ -250,8 +248,8 @@ class alert_job:
                                 await self._handle_dynamic_scanning_alert(
                                     tenant_key, ioc_type_name, ioc_value, scan_type, result_list)
 
-                        except Exception as dynamic_e:
-                            pass
+                        except Exception as _:
+                            log.g().e(f"Dynamic alert scan failed for tenant={tenant_key}, category={dynamic_search_category}, ioc={ioc_type_name}:{ioc_value}")
                 return
 
             search_data_category = 'all'
@@ -411,10 +409,10 @@ class alert_job:
                                     alerts_payload=bulk_alerts,
                                     chunk_size=200)
                                 total_alerts_processed += len(bulk_alerts)
-                    except Exception as sub_e:
-                        pass
+                    except Exception as _:
+                        log.g().e(f"Alert processing failed for tenant={tenant_key}, category={category}, ioc={ioc_type_name}:{ioc_value}")
         except Exception as e:
-            pass
+            log.g().e(f"Tenant alert processing failed for tenant={tenant_key}, category={category}: {e}")
 
     async def run_all_categories(self):
         all_tenants = await self._tenant_manager.get_all_tenant()
@@ -432,8 +430,8 @@ class alert_job:
             try:
                 for category in ALERT_CATEGORIES:
                     await self._process_tenant_alerts(tenant, category)
-            except Exception as ex:
-                pass
+            except Exception as _:
+                log.g().e(f"Alert category run failed for tenant={tenant.id}")
             finally:
                 self._cancel_scan_flags.pop(self._tenant_key(tenant.id), None)
                 await self._alert_manager.getInstance().set_scan_running(tenant.id, False)
@@ -474,8 +472,8 @@ class alert_job:
                         name=(enc.decrypt(ioc.name.encode()).decode() if ioc.name else ioc.name),
                         values=[(enc.decrypt(v.encode()).decode() if v else v) for v in (ioc.values or [])]))
             return iocs
-        except Exception as _:
-            pass
+        except Exception as ex:
+            log.g().e(f"Failed to decrypt IOCs for tenant={getattr(tenant, 'id', None)}: {ex}")
         return []
 
     async def run_all_categories_for_api(self, current_user) -> dict:
