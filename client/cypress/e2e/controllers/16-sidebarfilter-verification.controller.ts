@@ -66,7 +66,6 @@ export function openAnyMatchingReport(option: string) {
         .click();
 
       cy.get('[data-testid="dashboard-header-back"]').click();
-      cy.wait(1000);
       cy.scrollDashboardToTop()
     });
   };
