@@ -6,7 +6,7 @@ import '@angular/localize/init';
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
 const SEARCH_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
-const DEFAULT_DASHBOARD_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
+const DEFAULT_DASHBOARD_LOGO_SRC = '/api/s/static/system/logo_wide_dark_default.png';
 const preloadImageHref = (href: string) => {
     if (document.head.querySelector(`link[rel="preload"][as="image"][href="${href}"]`)) {
         return;

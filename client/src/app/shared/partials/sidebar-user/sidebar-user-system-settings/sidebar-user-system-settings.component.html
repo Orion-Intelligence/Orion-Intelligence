@@ -62,8 +62,8 @@
             <app-user-image-picker
               class="mt-1 block h-20 w-full max-w-[250px] rounded-xl p-2 pl-0"
               [wide]="true"
-              [imageUrl]="this.appService.getConfig().appSettings.logo_wide_dark || '/assets/images/shared/logo-wide-light.svg'"
-              [defaultImage]="'/assets/images/shared/logo-wide-light.svg'"
+              [imageUrl]="this.appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'"
+              [defaultImage]="'/api/s/static/system/logo_wide_dark_default.png'"
               (onImageSelected)="updateUserResource($event,'logo_wide_dark')"
               (onClear)="deleteUserResource('logo_wide_dark')"
             ></app-user-image-picker>
