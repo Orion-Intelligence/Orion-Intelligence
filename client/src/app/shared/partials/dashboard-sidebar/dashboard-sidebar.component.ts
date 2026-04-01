@@ -151,7 +151,8 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         }
       }
     }
-    this.scrollService.resetOnReload();
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
   }
 
   onResetCallback() {
@@ -169,7 +170,8 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (window.innerWidth < 800 && this.sidebar_default) {
       this.onToggleSidebar();
     }
-    this.scrollService.resetOnReload();
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
   }
 
   onToggleSidebar(mobile_menu_status: boolean = false) {

@@ -5,6 +5,7 @@ import { TooltipDirective } from '../../../directive/tooltip-directive.directive
 import { LowerPipe } from '../../../pipes/lower.pipe';
 import { sidebarItemTooltips } from '../../../constants/shared-enums';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { ScrollService } from '../../../services/scroll.service';
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
   standalone: true,
@@ -25,14 +26,18 @@ export class SidebarSectionComponent {
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
 
-  constructor(protected licenseService: LicenseService) {}
+  constructor(protected licenseService: LicenseService, protected scrollService: ScrollService) {}
 
   selectSection() {
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
     this.sectionSelected.emit(this.category);
   }
 
   selectOption(event: Event, item: string) {
     event.stopPropagation();
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
     this.optionSelected.emit(item);
   }
 

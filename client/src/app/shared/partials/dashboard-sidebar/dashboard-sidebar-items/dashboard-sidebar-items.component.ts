@@ -6,6 +6,7 @@ import { LowerPipe } from '../../../pipes/lower.pipe';
 import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
+import { ScrollService } from '../../../services/scroll.service';
 @Component({
   selector: 'app-dashboard-sidebar-items',
   standalone: true,
@@ -23,15 +24,19 @@ export class DashboardSidebarItemsComponent {
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
 
-  constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected subscriptionService: SubscriptionService) {
+  constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected subscriptionService: SubscriptionService, protected scrollService: ScrollService) {
   }
 
   selectSection() {
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
     this.sectionSelected.emit(this.category);
   }
 
   selectOption(event: Event, item: string) {
     event.stopPropagation();
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
     this.optionSelected.emit(item);
   }
 
