@@ -1,0 +1,25 @@
+<section class="relative h-[calc(100vh-7.75rem)] min-h-[560px] overflow-hidden rounded-[14px] border border-cyan-500/20 bg-slate-900">
+	<div #mapViewNode class="h-full w-full"></div>
+
+	<div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(56,189,248,0.16),transparent_44%),radial-gradient(circle_at_82%_76%,rgba(34,197,94,0.16),transparent_40%)]"></div>
+
+	<div class="absolute left-4 top-4 z-20 w-fit rounded-[12px] border border-white/15 bg-slate-900/75 px-4 py-3 text-slate-100 backdrop-blur-md">
+		<h2 class="text-[14px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Threat Lens</h2>
+		@if (hoverCountryName) {
+			<p class="mt-2 text-[13px] text-slate-100">Hover: <span class="font-semibold text-white">{{ hoverCountryName }}</span></p>
+		}
+		@if (selectedCountryName) {
+			<p class="mt-1 text-[13px] text-emerald-300">Selected: <span class="font-semibold">{{ selectedCountryName }}</span></p>
+		}
+	</div>
+
+	<div class="absolute right-4 top-4 z-20 w-[min(25rem,calc(100%-2rem))] rounded-[12px] border border-white/15 bg-slate-900/80 p-3 backdrop-blur-md">
+		<div class="flex items-center gap-2">
+			<input (keyup.enter)="onSearch()" [(ngModel)]="searchTerm" placeholder="Search country..." type="text" class="h-10 w-full rounded-[10px] border border-white/20 bg-slate-950/70 px-3 text-[13px] text-slate-100 outline-none ring-0 transition focus:border-cyan-400" />
+			<button (click)="onSearch()" class="h-10 rounded-[10px] bg-cyan-500 px-4 text-[13px] font-semibold text-slate-900 transition hover:bg-cyan-400">Search</button>
+		</div>
+		@if (statusMessage) {
+			<p class="mt-2 text-[12px] text-slate-300">{{ statusMessage }}</p>
+		}
+	</div>
+</section>

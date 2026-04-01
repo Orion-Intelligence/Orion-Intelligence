@@ -44,6 +44,7 @@ import { FileScannerComponent } from './pages/intel-panel/ioc-extractor/file-sca
 import { SocialMapperComponent } from './pages/graphs/social-graph/social-mapper.component';
 import { NotificationGuard } from './shared/guards/notification.guard';
 import { NetworkIntel } from './pages/network-intel/network-intel';
+import { ThreatLensComponent } from './pages/threat-lens/threat-lens';
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -686,6 +687,12 @@ export const routes: Routes = [
         path: 'netint',
         canActivate: [subscriptionGuard],
         component: NetworkIntel,
+        data: { animation: 'CategoryPage' }
+      },
+      {
+        path: 'threat-lens',
+        canActivate: [subscriptionGuard],
+        component: ThreatLensComponent,
         data: { animation: 'CategoryPage' }
       },
       {

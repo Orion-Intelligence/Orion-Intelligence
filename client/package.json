@@ -30,6 +30,7 @@
     "bootstrap-icons": "1.13.1",
     "cypress-axe": "1.7.0",
     "d3": "7.9.0",
+    "esri-loader": "^3.7.0",
     "franc-min": "6.2.0",
     "glob": "13.0.6",
     "jspdf": "4.2.1",
