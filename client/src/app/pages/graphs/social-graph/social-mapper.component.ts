@@ -78,6 +78,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map<string, PlatformResult[]>());
   activeUsernames = computed(() => this.activeTabState()?.activeUsernames() ?? new Set<string>());
   customEntities = computed(() => this.activeTabState()?.customEntities() ?? []);
+
+  private requireActiveTabState(): TabState {
+    const activeState = this.activeTabState();
+    if (!activeState) {
+      throw new Error('Active tab state is not available');
+    }
+    return activeState;
+  }
   isEditMode = computed(() => this.activeTabState()?.isEditMode() ?? false);
   isHomeMenuCollapsed = computed(() => this.activeTabState()?.isHomeMenuCollapsed() ?? false);
   isEntityMenuCollapsed = computed(() => this.activeTabState()?.isEntityMenuCollapsed() ?? false);
@@ -415,7 +423,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         const newMap = new Map(currentMap); newMap.delete(username); return newMap; 
       });
     });
-    this.graphOrchestrator.removeUserFromGraph(this.activeTabState(), username);
+    this.graphOrchestrator.removeUserFromGraph(this.requireActiveTabState(), username);
   }
 
   fetchProfileDetails(p: PlatformResult) {
@@ -726,7 +734,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       this.state.openInfoModal('warning', 'Maximum Node Limit Reached', 'The graph has reached its maximum capacity of 300 nodes. Please remove some nodes before adding more.');
       return;
     }
-    await this.graphOrchestrator.updateGraphFromModal(this.activeTabState(), username, selectedPlatforms);
+    await this.graphOrchestrator.updateGraphFromModal(this.requireActiveTabState(), username, selectedPlatforms);
     this.tabManager.scheduleSave();
   }
 
@@ -745,11 +753,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const handlers: Record<ContextMenuAction, () => void> = {
       fetchLinks: () => this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'),
       clearConnections: () => {
-        this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState(), username);
+        this.graphOrchestrator.removeAllPlatformNodes(this.requireActiveTabState(), username);
         this.tabManager.scheduleSave();
       },
       deleteProfile: () => {
-        this.graphOrchestrator.removeUserFromGraph(this.activeTabState(), username);
+        this.graphOrchestrator.removeUserFromGraph(this.requireActiveTabState(), username);
         this.tabManager.scheduleSave();
       },
       setAlias: () => {
@@ -762,7 +770,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         this.platformAliasInput.set(currentAlias);
       },
       removeNode: () => {
-        this.graphOrchestrator.removeSingleNode(this.activeTabState(), nodeId);
+        this.graphOrchestrator.removeSingleNode(this.requireActiveTabState(), nodeId);
         this.tabManager.scheduleSave();
       },
       deleteEntity: () => {
@@ -787,12 +795,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleEdgeAdded( edge: { from: string; to: string; } ) {
-    this.graphOrchestrator.addEdge(this.activeTabState(), edge);
+    this.graphOrchestrator.addEdge(this.requireActiveTabState(), edge);
     this.tabManager.scheduleSave();
   }
 
   handleEdgeDeleted( { edges }: { edges: string[]; } ) {
-    this.graphOrchestrator.deleteEdges(this.activeTabState(), edges);
+    this.graphOrchestrator.deleteEdges(this.requireActiveTabState(), edges);
     this.tabManager.scheduleSave();
   }
 
@@ -801,7 +809,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (!wasPhysicsEnabled) {
       this.updateState(state => state.isPhysicsEnabled.set(true), false);
     }
-    await this.graphOrchestrator.handleGroupNodeClicked(this.activeTabState(), { nodeId, position });
+    await this.graphOrchestrator.handleGroupNodeClicked(this.requireActiveTabState(), { nodeId, position });
     this.tabManager.scheduleSave();
     if (!wasPhysicsEnabled) {
       setTimeout(() => {
