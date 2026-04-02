@@ -1985,7 +1985,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       const radius = 200;
       const newEdges = this.rawEdges
         .filter(e => e.from === nodeId && subNodes.includes(e.to as string))
-        .filter(e => !this.edgeSet.get(e.id!));
+        .filter(e => !this.edgeSet.get(e.id));
       const newNodes = this.buildCircularSubNodes(subNodes, centerPos, radius);
       this.nodeSet.add(newNodes);
       this.edgeSet.add(newEdges);
@@ -2109,8 +2109,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     const updates = this.nodeSet.get().map(node => ({
       id: node.id!,
       color: this.originalNodeState.get(String(node.id))?.color ?? node.color,
-      borderWidth: this.originalNodeState.get(String(node.id))?.borderWidth ?? (node as any).borderWidth,
-      image: this.originalNodeState.get(String(node.id))?.image ?? (node as any).image
+      borderWidth: this.originalNodeState.get(String(node.id))?.borderWidth ?? (node).borderWidth,
+      image: this.originalNodeState.get(String(node.id))?.image ?? (node).image
     }));
     if (updates.length > 0) {
       this.nodeSet.update(updates);
@@ -2150,8 +2150,8 @@ export class GraphComponent implements OnInit, OnDestroy {
             highlight: { border: '#facc15', background: '#facc15' },
             hover: { border: '#facc15', background: '#facc15' }
           };
-        const baseBorderWidth = nodeState?.borderWidth ?? ((node as any).borderWidth ?? 2);
-        const selectedBorderWidth = nodeState?.borderWidthSelected ?? ((node as any).borderWidthSelected ?? (baseBorderWidth + 2));
+        const baseBorderWidth = nodeState?.borderWidth ?? ((node).borderWidth ?? 2);
+        const selectedBorderWidth = nodeState?.borderWidthSelected ?? ((node).borderWidthSelected ?? (baseBorderWidth + 2));
         const extNode = node as ExtendedNode;
         const iconName = this.getIconNameForNode(extNode, extNode.nodeType || '');
         const yellowIcon = this.buildIconSvg(iconName, '#facc15');
@@ -2159,7 +2159,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           id: node.id!,
           color: highlightedColor,
           borderWidth: selectedBorderWidth,
-          image: yellowIcon ?? (node as any).image
+          image: yellowIcon ?? (node).image
         };
       });
     this.searchMatchedCount = updates.length;

@@ -267,7 +267,7 @@ class helper_controller:
 
         result_parts = ['"{}"'.format(p) for p in quoted_phrases] + filtered_tokens
         return ' '.join(result_parts)
-    
+
     @staticmethod
     def parse_tagged_logic_query_for_iocs(query: str):
         query = query.replace("&&", " AND ").replace("||", " OR ")

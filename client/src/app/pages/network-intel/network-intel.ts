@@ -669,10 +669,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
           tables: [
             {
               title: 'Resolved IPs',
-              values: this.geoIpRows.slice(0, 25).reduce((acc, row, index) => {
+              values: this.geoIpRows.slice(0, 25).reduce<Record<string, string>>((acc, row, index) => {
                 acc[`IP ${index + 1}`] = row.ip;
                 return acc;
-              }, {} as Record<string, string>)
+              }, {})
             },
             ...this.buildRawJsonTables(this.geoIpListResult, 'Geo IP Raw Result')
           ]
@@ -725,14 +725,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
           },
           {
             title: 'Detected Cameras',
-            values: cameras.slice(0, 25).reduce((acc, camera, index) => {
+            values: cameras.slice(0, 25).reduce<Record<string, string>>((acc, camera, index) => {
               acc[`Camera ${index + 1}`] = [
                 camera.ip || 'Unknown IP',
                 camera.port ? `:${camera.port}` : '',
                 camera.brand || camera.model || ''
               ].join(' ').trim();
               return acc;
-            }, {} as Record<string, string>)
+            }, {})
           },
           ...this.buildRawJsonTables(result, 'Geo Cameras Raw Result'),
           ...this.buildRawJsonTables(stats, 'Geo Cameras Live Stats')
@@ -1027,7 +1027,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       },
       {
         title: `${titlePrefix}Detected Cameras`.trim(),
-        values: (detail.cameras || []).slice(0, 20).reduce((acc, camera, index) => {
+        values: (detail.cameras || []).slice(0, 20).reduce<Record<string, string>>((acc, camera, index) => {
           acc[`Camera ${index + 1}`] = [
             detail.ip || 'Unknown IP',
             camera.port ? `:${camera.port}` : '',
@@ -1035,7 +1035,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
             camera.service ? `(${camera.service})` : ''
           ].join(' ').trim();
           return acc;
-        }, {} as Record<string, string>)
+        }, {})
       },
       ...this.buildPortDetailTables(detail, prefix)
     ].filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));

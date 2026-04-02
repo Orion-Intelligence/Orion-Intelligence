@@ -49,7 +49,7 @@ export class ScrollService {
   }
 
   scrollReportToTop(): void {
-    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]');
     const dashboardContainer = document.getElementById('dashboard-container');
     const documentElement = document.documentElement;
     const body = document.body;

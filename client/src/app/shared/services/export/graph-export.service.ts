@@ -108,11 +108,7 @@ export class GraphExportService {
         lineColor: this.TABLE_BORDER_RGB
       },
       bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB as [
-                      number,
-                      number,
-                      number
-                  ], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
       didDrawPage: analysisDidDrawPage,
       theme: 'plain' as const
     };

@@ -143,10 +143,7 @@ export class SecurityScanComponent implements OnInit {
               }
             });
           });
-          const entries = Object.entries(res.result.threats || {}) as [
-                    string,
-                    any
-                ][];
+          const entries = Object.entries(res.result.threats || {});
           this.categories = entries
             .map(([name, items]) => {
               const list: any[] = Array.isArray(items) ? items : [];

@@ -32,7 +32,7 @@ class SignupManager:
             db_user_account, (db_user_account.username == username))
         if existing_user:
             raise HTTPException(status_code=400, detail="Username or email already exists")
-        
+
         existing_mail = await engine.find_one(
             db_user_account, (db_user_account.email == email))
         if existing_mail:

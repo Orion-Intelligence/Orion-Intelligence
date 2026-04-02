@@ -111,9 +111,9 @@ export class ConsolidatedScanComponent {
             this.liveApiResults = Array.isArray(v) ? v : [];
             return;
           }
-          this.resultsByType[t as Exclude<ScanKey, 'liveapi'>] = {
+          this.resultsByType[t] = {
             ...(v as ConsolidatedScanResults),
-            scanType: (v as any)?.scanType || t
+            scanType: (v)?.scanType || t
           } as ConsolidatedScanResults;
         },
         error: () => {
@@ -188,7 +188,7 @@ export class ConsolidatedScanComponent {
       if (t === 'liveapi') {
         return (this.progressByType.liveapi ?? 0) < 100;
       }
-      return !this.resultsByType[t as Exclude<ScanKey, 'liveapi'>];
+      return !this.resultsByType[t];
     });
   }
 

@@ -136,7 +136,7 @@ export class ScanHelperMethodsService {
 
   scanUrlVulnerability(domain: string): Subscription {
     const call = () => this.api.post<any>('netintel/url_vulnerability_scan', { domain });
-    const getStatus = (res: any) => (res?.result?.status || res?.status) as any;
+    const getStatus = (res: any) => (res?.result?.status || res?.status);
     const enhanced = (res: any) => {
       const p = res?.result?.progress ?? res?.progress;
       if (typeof p === 'number') {

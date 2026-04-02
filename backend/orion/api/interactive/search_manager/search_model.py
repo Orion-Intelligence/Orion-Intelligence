@@ -187,7 +187,7 @@ class search_model:
             indices, query, indices_boost)
 
         return search_model._build_ranked_response(response, query, 10)
-    
+
     @staticmethod
     async def search_consolidated_iocs(param: search_consolidated_param_model, base_index):
         filter_dict = {}
@@ -312,7 +312,7 @@ class search_model:
         if password_filter and response and hasattr(response, "Result"):
             filtered_results = [
             item for item in response.Result
-            if getattr(item, "password", None) and 
+            if getattr(item, "password", None) and
                helper_controller.password_matches_schema(item.password, password_filter)
             ]
             response.Result = filtered_results
