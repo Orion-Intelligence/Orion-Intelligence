@@ -36,7 +36,6 @@ export class DemoTourService {
       this.currentStepIndex.next(this.currentStepIndex.value + 1);
     }
     else {
-      console.log("next else")
       this.end();
     }
   }
@@ -73,7 +72,6 @@ export class DemoTourService {
       next: () => {
       },
       error: (err) => {
-        console.error('Failed to update demo tour status', err);
       },
     });
   }

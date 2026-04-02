@@ -1,4 +1,4 @@
-import { Component, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DemoTourService } from '../../../shared/services/demo.tour.service';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
 
@@ -38,31 +38,29 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   @HostBinding('style.--tour-tooltip-top') tooltipTop = '0px';
   @HostBinding('style.--tour-tooltip-left') tooltipLeft = '0px';
 
-  constructor(private tourService: DemoTourService) {}
+  constructor( private tourService: DemoTourService,private cdr: ChangeDetectorRef, private ngZone: NgZone,private renderer: Renderer2 ) {}
 
   ngOnInit() {
     void this.tourService.startTourForCurrentLicense();
 
     this.tourService.currentStep$.subscribe(index => {
-      this.visible = index !== -1;
-      this.stepReady = false;
-      this.currentIndex = index;
-      this.step = this.tourService.getCurrentStep();
+      this.ngZone.run(() => {
 
-      this.clearActiveElementStyles();
+        this.visible = index !== -1;
+        this.stepReady = false;
+        this.currentIndex = index;
+        this.step = this.tourService.getCurrentStep();
 
-      if (this.visible && this.step) {
-        this.totalSteps = this.tourService.getTotalSteps();
-        void this.prepareStep(this.step);
-        return;
-      }
+        if (this.visible && this.step) {
+          this.totalSteps = this.tourService.getTotalSteps();
+          void this.prepareStep(this.step);
+        }
+        else {
+          this.resetHostStyles();
+        }
 
-      this.positionStyle = {};
-      this.spotlightStyle = {};
-      this.additionalSpotlightStyles = [];
-      this.cutoutRects = [];
-      this.overlayStyle = {};
-      this.resetHostStyles();
+        this.cdr.detectChanges();
+      });
     });
   }
 
@@ -111,7 +109,6 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     if (!el) {
       return;
     }
-
     this.activeElement = el;
     this.applyActiveElementStyles(el);
     this.applyStepInputState(el, this.step);
@@ -180,7 +177,6 @@ export class DemoTourComponent implements OnInit, OnDestroy {
 
   private async prepareStep(step: TourStep): Promise<void> {
     const token = ++this.stepPreparationToken;
-
     if (step.activateSelector) {
       const trigger = document.querySelector(step.activateSelector);
       if (trigger instanceof HTMLElement) {
@@ -197,6 +193,8 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     if (element) {
       await this.waitForStepStability(step, element);
     }
+    else {
+    }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
       return;
@@ -212,8 +210,12 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       this.triggerStepSubmit(element, step);
       await this.waitForStepStability(step, element);
     }
-
     this.stepReady = true;
+    this.cdr.detectChanges();
+
+    requestAnimationFrame(() => {
+      this.updatePosition();
+    });
     this.schedulePositionUpdate();
   }
 
@@ -500,7 +502,6 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     if (this.nextTransitionInProgress) {
       return;
     }
-
     if (this.step?.triggerSubmitOnNext && this.activeElement) {
       this.nextTransitionInProgress = true;
       this.triggerStepSubmit(this.activeElement, this.step);
@@ -512,7 +513,6 @@ export class DemoTourComponent implements OnInit, OnDestroy {
 
       this.nextTransitionInProgress = false;
     }
-
     this.tourService.next();
   }
 
@@ -570,7 +570,8 @@ export class DemoTourComponent implements OnInit, OnDestroy {
 
       observer.observe(document.body, {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true
       });
 
       window.setTimeout(() => {

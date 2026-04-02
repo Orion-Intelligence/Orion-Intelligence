@@ -77,9 +77,7 @@ export class AppService {
     this.loadEntities();
     this.loadLicenseRules();
     this.loadWorldJson();
-    this.loadDemoTourConfig().then(() => {
-      console.log(this.demoTourConfig());
-    });
+    this.loadDemoTourConfig();
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) {

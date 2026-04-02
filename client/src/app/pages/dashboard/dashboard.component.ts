@@ -60,6 +60,6 @@ export class DashboardComponent implements AfterViewInit, OnInit {
 
   shouldShowDemoTour(): boolean {
     const { user } = this.appService.userSessionData();
-    return this.authService.isAuthenticated() && !!user.username && !user.demo_tour;
+    return this.authService.isAuthenticated() && !!user.username && !user.demo_tour && !(user.role == 'admin');
   }
 }
