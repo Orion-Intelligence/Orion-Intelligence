@@ -113,7 +113,7 @@ describe('User Manual Screenshot Flow', () => {
       for (const selector of selectors) {
         doc.querySelectorAll(selector).forEach((el) => {
           const node = el as HTMLElement;
-          if (!node || node?.offsetParent === null) {
+          if (node?.offsetParent === null) {
             return;
           }
 

@@ -514,7 +514,7 @@ class alert_job:
                     category_status = {"category": category, "status": "completed_successfully", "tenant_count": 1, "duration_seconds": (
                             datetime.now(timezone.utc) - category_start_time).total_seconds(), "error_count": 0}
 
-                except Exception as e:
+                except Exception:
                     overall_success = False
                     pass
 

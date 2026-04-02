@@ -18,12 +18,12 @@ import { ensureStylesheet } from '../../../../shared/utils/ensure-stylesheet.uti
 })
 export class NetworkGraphComponent implements OnInit, OnDestroy {
   private fetchingState = inject(FetchingStateService);
-  private networkInstance = signal<Network | null>(null);
+  private networkInstance = signal<Network>(null);
   private visData = { nodes: new DataSet<any>(), edges: new DataSet<any>(), };
   private animationFrameId: number | null = null;
   private animationStartTime: number | null = null;
   private readonly minZoomScale = 0.35;
-  private minZoomLockPosition: Position | null = null;
+  private minZoomLockPosition: Position = null;
 
   protected readonly isCypressEnvironment = typeof window !== 'undefined' && !!(window as any).Cypress;
 

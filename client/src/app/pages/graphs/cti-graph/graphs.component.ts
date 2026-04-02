@@ -126,7 +126,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   copied = false;
   copiedX = 0;
   copiedY = 0;
-  orignalColor: string | Color = '';
+  orignalColor: Color = '';
   currentCategory = '';
   isSidebarCollapsed = false;
   isTailwindReady = true;
@@ -162,7 +162,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   @ViewChild('networkContainer')
-  set networkContainerRef(ref: ElementRef | undefined) {
+  set networkContainerRef(ref: ElementRef) {
     if (ref) {
       this.networkContainer = ref;
       this.tryRestorePendingSessionState();
@@ -610,6 +610,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         this.saveSessions();
       }
       catch {
+        // Ignore invalid imported session files.
       }
     };
     reader.readAsText(input.files[0]);

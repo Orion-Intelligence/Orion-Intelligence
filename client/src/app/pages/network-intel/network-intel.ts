@@ -43,7 +43,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   dnsResult:       DnsResult | null = null;
   ipRows:          IpRowState[]     = [];
   shodanResult:    IpDetail | null  = null;
-  vulnerabilityResult: any | null   = null;
+  vulnerabilityResult: any   = null;
   geoIpListResult: DnsResult | null = null;
   geoIpRows:       IpRowState[]     = [];
   geoResult:       GeoResult | null    = null;
@@ -588,10 +588,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
         tables: [
           {
             title: 'Resolved IPs',
-            values: this.dnsResult.ips.reduce((acc, ip, index) => {
+            values: this.dnsResult.ips.reduce<Record<string, string>>((acc, ip, index) => {
               acc[`IP ${index + 1}`] = ip;
               return acc;
-            }, {} as Record<string, string>)
+            }, {})
           },
           ...this.buildRawJsonTables(this.dnsResult, 'DNS Raw Result'),
           ...this.ipRows

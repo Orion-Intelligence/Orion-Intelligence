@@ -30,7 +30,7 @@ export class SearchFiltersComponent implements OnInit {
   showRightFade = false;
 
   @Input() showSorting!: boolean;
-  @Input() homePage: Boolean = false;
+  @Input() homePage: boolean = false;
 
   @Output() checkDomain = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();

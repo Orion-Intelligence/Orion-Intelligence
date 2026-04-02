@@ -168,7 +168,9 @@ export class HomeSearchComponent implements OnInit {
     try {
       el.setPointerCapture(event.pointerId);
     }
-    catch {}
+    catch {
+      // Ignore pointer-capture failures on unsupported targets.
+    }
 
     this.insightDragging = true;
     this.insightMoved = false;

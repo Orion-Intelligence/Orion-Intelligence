@@ -132,6 +132,7 @@ export class TabBarComponent {
           tabManager.importTab(content);
         }
         catch {
+          // Ignore invalid import payloads.
         }
       })
       .finally(() => {

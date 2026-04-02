@@ -129,8 +129,10 @@ export class SidebarUserIocComponent implements OnInit {
       this.appService.tenantData.set({ ...filteredOnboardingData });
       this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
         next: () => {
+          // State is updated optimistically above.
         },
         error: (_err) => {
+          // Ignore API errors and keep the local reset.
         },
       });
       this.isConfirmationOpen = false;

@@ -55,7 +55,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const hasSavedSidebarPreference = typeof window !== 'undefined' && localStorage.getItem('isSidebarOpen') !== null;
     this.sidebar_default = hasSavedSidebarPreference
-      ? this.appService.getConfig().localSettings.isSidebarOpen !== false
+      ? this.appService.getConfig().localSettings.isSidebarOpen
       : !(typeof window !== 'undefined' && window.innerWidth <= 900);
     if (typeof window !== 'undefined' && window.innerWidth < 800) {
       this.min_detected = hasSavedSidebarPreference;
