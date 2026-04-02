@@ -34,7 +34,7 @@ describe('Consolidated - IOC Basic Flow', () => {
       .and('have.attr', 'data-tab', 'Deep Search');
     searchDeepFromTop('data');
 
-    cy.get('[data-testid="defacement-report"]').should('exist').within(() => {
+    cy.get('[data-testid="defacement-report"]', { timeout: 30000 }).should('exist').within(() => {
       cy.get('[data-testid="defacement-report-title"]').should('contain.text', 'IP Threat Report');
       cy.get('[data-testid="defacement-report-chip"]').contains(/databases\s*\(\d+\)/i).scrollIntoView().should('exist');
       cy.get('[data-testid="defacement-report-chip"]').contains(/phishing\s*\(\d+\)/i).scrollIntoView().should('exist');

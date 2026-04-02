@@ -5,7 +5,6 @@ import { PlatformResult } from '../../../../../shared/model/social/social-scan.m
 import { formatFollowers, formatKey } from '../../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../../services/fetching-state.service';
-import { SocialEntityUiService } from '../../services/social-entity-ui.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
@@ -22,7 +21,6 @@ import { finalize } from 'rxjs/operators';
 export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   private socialScanService = inject(SocialScanService);
   private destroyRef = inject(DestroyRef);
-  private socialEntityUiService = inject(SocialEntityUiService);
 
   platform = input.required<PlatformResult | null>();
   isScanInProgress = input<boolean>(false);
@@ -99,22 +97,6 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     return index;
   }
 
-  scanConnections(usernames: string[] | null | undefined): void {
-    const normalized = this.socialEntityUiService.normalizeUsernames(usernames);
-    if (normalized.length === 0) {
-      return;
-    }
-    this.scanUsernames.emit(normalized);
-  }
-
-  supportsPostConnections(platformName: string | null | undefined): boolean {
-    return this.socialEntityUiService.supportsPostConnections(platformName);
-  }
-
-  supportsFollowersFollowing(platformName: string | null | undefined): boolean {
-    return this.socialEntityUiService.supportsFollowersFollowing(platformName);
-  }
-
   fetchPlatformMetadata(): void {
     const p = this.platform();
     if (!p) {
@@ -145,27 +127,12 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     });
   }
 
-  onMetadataTokenKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.addTokensFromInput();
-    }
+  override onMetadataTokenKeydown(event: KeyboardEvent): void {
+    super.onMetadataTokenKeydown(event, () => this.addTokensFromInput());
   }
 
   addTokensFromInput(): void {
-    const input = this.metadataTokenInput();
-    const tokens = this.socialEntityUiService.parseTokens(input);
-    if (!tokens.length) {
-      return;
-    }
-    const next = [...this.metadataTokens()];
-    for (const token of tokens) {
-      if (!next.includes(token)) {
-        next.push(token);
-      }
-    }
-    this.metadataTokens.set(next);
-    this.metadataTokenInput.set('');
+    this.addTokensFromInputSignal(this.metadataTokenInput, this.metadataTokens);
   }
 
   removeMetadataToken(token: string): void {

@@ -4,7 +4,6 @@ import { PlatformResult, SocialImage, SocialPost } from '../../../../shared/mode
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../services/fetching-state.service';
-import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
@@ -17,8 +16,6 @@ import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
   imports: [SocialIconComponent, PlatformIconBgDirective],
 })
 export class MetadataPopupComponent extends PlatformFeedViewBase {
-  private socialEntityUiService: SocialEntityUiService;
-
   data = input.required<PlatformResult>();
   isScanInProgress = input<boolean>(false);
   close = output<undefined>();
@@ -44,10 +41,9 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   public isUrl = isUrl;
   public isImageUrl = isImageUrl;
 
-  constructor(fetchingState: FetchingStateService, socialEntityUiService: SocialEntityUiService) {
+  constructor(fetchingState: FetchingStateService) {
     super();
     this.fetchingState = fetchingState;
-    this.socialEntityUiService = socialEntityUiService;
     effect(() => {
       this.resetFeedState(this.data().posts, this.data().images, this.data().followers_list, this.data().following_list, this.data().post_connections);
     });
@@ -112,21 +108,5 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   getAccountUrl(): string {
     const platformData = this.data();
     return buildSocialProfileUrl(platformData.platform, platformData.username, platformData.url);
-  }
-
-  scanConnections(usernames: string[] | null | undefined): void {
-    const normalized = this.socialEntityUiService.normalizeUsernames(usernames);
-    if (normalized.length === 0) {
-      return;
-    }
-    this.scanUsernames.emit(normalized);
-  }
-
-  supportsPostConnections(platformName: string | null | undefined): boolean {
-    return this.socialEntityUiService.supportsPostConnections(platformName);
-  }
-
-  supportsFollowersFollowing(platformName: string | null | undefined): boolean {
-    return this.socialEntityUiService.supportsFollowersFollowing(platformName);
   }
 }

@@ -30,17 +30,9 @@ export class DocumentExportService extends GraphExportService {
       margin: { left: 40, right: 40 },
       tableWidth: contentW,
       body: Object.entries(payload.summary ?? {}).map(([k, v]) => [k, String(v)]) as RowInput[],
-      styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6 }),
       columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didParseCell: (data: any) => {
-        if (data.column.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [214, 226, 240];
-        }
-      },
-      theme: 'plain',
+      didParseCell: this.makeFirstColumnDidParse(),
       didDrawPage: hooks.didDrawPage
     });
     this.drawRoundedTableContainer(doc, 40, contentW, 160, (doc as any).lastAutoTable?.finalY ?? 160);
@@ -69,17 +61,9 @@ export class DocumentExportService extends GraphExportService {
       margin: { left: 40, right: 40 },
       tableWidth: contentW,
       body: [['Node', 'Type', 'ID'], ...payload.nodes.slice(0, 150).map(n => [n.label || n.id, n.type, this.truncateWithEllipsis(String(n.id || ''), 20)])] as RowInput[],
-      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+      ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5 }),
       columnStyles: { 0: { cellWidth: 240 }, 1: { cellWidth: 90 }, 2: { cellWidth: 185 } },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didParseCell: (data: any) => {
-        if (data.row.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [207, 220, 236];
-        }
-      },
-      theme: 'plain',
+      didParseCell: this.makeHeaderRowDidParse(),
       didDrawPage: hooks.didDrawPage
     });
     this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
@@ -99,22 +83,9 @@ export class DocumentExportService extends GraphExportService {
           margin: { top: 139, left: 40, right: 40, bottom: 58 },
           tableWidth: contentW,
           body: tableRows as RowInput[],
-          styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+          ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6 }),
           columnStyles: { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
-          bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-          alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-          didParseCell: (data: any) => {
-            if (data.row.index === 0) {
-              data.cell.styles.fontStyle = 'bold';
-              data.cell.styles.fillColor = [207, 220, 236];
-              return;
-            }
-            if (data.column.index === 0) {
-              data.cell.styles.fontStyle = 'bold';
-              data.cell.styles.fillColor = [214, 226, 240];
-            }
-          },
-          theme: 'plain',
+          didParseCell: this.makeHeaderAndFirstColumnDidParse(),
           didDrawPage: reportSectionDidDrawPage
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
@@ -134,17 +105,9 @@ export class DocumentExportService extends GraphExportService {
         margin: { left: 40, right: 40 },
         tableWidth: contentW,
         body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 200).map((e, i) => [String(i + 1), e.from, e.to, e.label ?? ''])] as RowInput[],
-        styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+        ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5 }),
         columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: 150 }, 2: { cellWidth: 150 }, 3: { cellWidth: 177 } },
-        bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        didParseCell: (data: any) => {
-          if (data.row.index === 0) {
-            data.cell.styles.fontStyle = 'bold';
-            data.cell.styles.fillColor = [207, 220, 236];
-          }
-        },
-        theme: 'plain',
+        didParseCell: this.makeHeaderRowDidParse(),
         didDrawPage: hooks.didDrawPage
       });
       this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
@@ -164,8 +127,7 @@ export class DocumentExportService extends GraphExportService {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(226, 232, 240);
-    const sessionText = this.compactSession(payload.sessionName || '—');
-    const sessionLines = doc.splitTextToSize(`Session: ${sessionText}`, W - 80) as string[];
+    const sessionLines = this.getSessionLines(doc, payload.sessionName || '—', W - 80);
     const isAlertCover = meta.kindLabel === 'Brand Alerts';
     if (isAlertCover) {
       const infoTop = 58;
@@ -179,9 +141,7 @@ export class DocumentExportService extends GraphExportService {
     }
     else {
       doc.text(`${subtitle} • ${meta.kindLabel}`, 40, 70);
-      doc.text(sessionLines, 40, 90);
-      const generatedY = 90 + (sessionLines.length * 12);
-      doc.text(this.fitSingleLine(doc, `Generated: ${meta.generatedAt}`, W - 80), 40, generatedY);
+      this.drawSessionBlock(doc, payload.sessionName || '—', meta.generatedAt, 40, 90, W - 80, 12);
     }
     doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.5);
@@ -197,18 +157,9 @@ export class DocumentExportService extends GraphExportService {
       this.drawStandardPageHeader(doc, payload.title || 'Network Report', section, 54);
     };
     const drawFooter = (doc: jsPDF, meta2: GraphReportMeta) => {
-      const W = this.getPageW(doc);
-      const H = this.getPageH(doc);
       const pageNo = doc.getCurrentPageInfo().pageNumber;
       const total = doc.getNumberOfPages();
-      doc.setDrawColor(226, 232, 240);
-      doc.line(40, H - 54, W - 40, H - 54);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(51, 65, 85);
-      const compactSession = this.compactSession(payload.sessionName || '—');
-      doc.text(this.fitSingleLine(doc, `${meta2.kindLabel} • ${compactSession} • ${meta2.generatedAt}`, W - 170), 40, H - 32);
-      doc.text(`Page ${pageNo} of ${total}`, W - 40, H - 32, { align: 'right' });
+      this.drawStandardFooter(doc, payload.sessionName || '—', meta2, pageNo, total, 54, 32);
     };
     const didDrawPage = (data: any) => {
       const pageNo = data?.pageNumber ?? docPageNumberSafe(data?.doc);

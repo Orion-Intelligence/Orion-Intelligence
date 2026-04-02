@@ -10,13 +10,14 @@ import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
 @Component({
   selector: 'app-dashboard-api',
   imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
-export class DashboardApiComponent implements OnInit {
+export class DashboardApiComponent extends ValuePresentationBase implements OnInit {
   q1 = '';
   q2 = '';
   displayQ1 = '';
@@ -38,7 +39,9 @@ export class DashboardApiComponent implements OnInit {
   expandedResultIndex: number | null = null;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService) {
+    super();
+  }
 
   get cardsData(): any[] {
     const r = this.responseData;
@@ -117,20 +120,6 @@ export class DashboardApiComponent implements OnInit {
     return [];
   }
 
-  getObjectEntries(item: any): { key: string; value: any }[] {
-    if (!item || typeof item !== 'object' || Array.isArray(item)) {
-      return [];
-    }
-    return Object.entries(item).map(([key, value]) => ({ key, value }));
-  }
-
-  displayFieldLabel(key: string): string {
-    return key
-      .replace(/^m_/, '')
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase());
-  }
-
   isArrayValue(value: any): boolean {
     return Array.isArray(value);
   }
@@ -145,27 +134,6 @@ export class DashboardApiComponent implements OnInit {
       map.set(key, (map.get(key) || 0) + 1);
     });
     return Array.from(map.entries()).map(([value, count]) => ({ value, count }));
-  }
-
-  isObjectValue(value: any): boolean {
-    return !!value && typeof value === 'object' && !Array.isArray(value);
-  }
-
-  isUrlValue(value: any): boolean {
-    if (typeof value !== 'string') {
-      return false;
-    }
-    return /^https?:\/\//i.test(value.trim());
-  }
-
-  stringifyPrimitive(value: any): string {
-    if (value === null || value === undefined || value === '') {
-      return 'not available';
-    }
-    if (typeof value === 'boolean') {
-      return value ? 'true' : 'false';
-    }
-    return String(value);
   }
 
   stringifyJson(value: any): string {
