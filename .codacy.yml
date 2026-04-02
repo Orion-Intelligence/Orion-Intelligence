@@ -6,6 +6,7 @@ exclude_paths:
   - "client/.nyc_output/**"
   - "client/src/assets/**"
   - "client/*.config.*"
+  - "client/cypress/**"
   - "**/*.html"
   - "**/*.css"
   - "**/*.scss"
@@ -17,6 +18,7 @@ exclude_paths:
   - "**/*.map"
   - "**/__init__.py"
   - "**/eslint.config.js"
+  - "docs/**"
   - ".nyc_output/**"
   - "coverage/**"
   - "backend/**/doc/**"
@@ -29,12 +31,6 @@ exclude_paths:
   - "backend/orion/services/__init__.py"
   - "backend/orion/services/log_manager/log_controller.py"
   - "backend/orion/services/elastic_manager/elastic_request_generator.py"
-  - client/cypress/**
-  - backend/static/**
-  - backend/migrations/**
-  - "backend/orion/services/__init__.py"
-  - "backend/orion/services/log_manager/log_controller.py"
-  - backend/orion/services/elastic_manager/elastic_request_generator.py
 
 engines:
   duplication:
@@ -46,11 +42,13 @@ engines:
       - "client/.nyc_output/**"
       - "client/src/assets/**"
       - "client/*.config.*"
+      - "client/cypress/**"
       - "**/*.html"
       - "**/*.css"
       - "**/*.scss"
       - "**/__init__.py"
       - "**/eslint.config.js"
+      - "docs/**"
       - ".nyc_output/**"
       - "coverage/**"
       - "backend/**/doc/**"
@@ -63,9 +61,3 @@ engines:
       - "backend/orion/services/__init__.py"
       - "backend/orion/services/log_manager/log_controller.py"
       - "backend/orion/services/elastic_manager/elastic_request_generator.py"
-      - client/cypress/**
-      - backend/static/**
-      - backend/migrations/**
-      - "backend/orion/services/__init__.py"
-      - "backend/orion/services/log_manager/log_controller.py"
-      - backend/orion/services/elastic_manager/elastic_request_generator.py
