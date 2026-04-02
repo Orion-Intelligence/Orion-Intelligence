@@ -30,7 +30,7 @@ export default defineConfig({
             testing2: { username: "testing2", email: "b@hotmail.com", password: "1qaz!QAZ", role: "Analyst", licenses: ["Free", "OSINT Basic"] },
             testing3: { username: "testing3", email: "c@hotmail.com", password: "1qaz!QAZ", role: "Member", licenses: ["Free", "OSINT Advanced"] },
             testing4: { username: "testing4", email: "d@gmail.com", password: "1qaz!QAZ", role: "Member", licenses: ["Free", "Pentester"] },
-            testing5: { username: "demo", email: "demo@orionintelligence.org", password: "T@YdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw", role: "Demo", licenses: ["Free"] },
+            testing5: { username: 'testing5', email: 'e@hotmail.com', password: '1qaz!QAZ', role: 'Demo', licenses: ['Free']},
         },
         DEFAULT_TEST_USER_KEY: "testing5",
         RESET_PASSWORD_EMAIL: "d@hotmail.com",

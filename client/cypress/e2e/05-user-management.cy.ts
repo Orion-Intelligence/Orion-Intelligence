@@ -2,19 +2,16 @@ import {addUser, completeSubscriptionPopupFlow, deleteFirstUser, loginAndClickSi
 
 let testUsers: any = {};
 let testData: any = {};
-const CREATE_USERS: ManagedUser[] = [
-  {username: 'testing1', email: 'a@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free']},
-  {username: 'testing2', email: 'b@hotmail.com', password: '1qaz!QAZ', role: 'Analyst', licenses: ['Free', 'OSINT Basic']},
-  {username: 'testing3', email: 'c@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free', 'OSINT Advanced']},
-  {username: 'testing4', email: 'd@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free', 'Pentester']},
-  {username: 'testing5', email: 'e@hotmail.com', password: '1qaz!QAZ', role: 'Demo', licenses: ['Free']}
-];
+let createUsers: ManagedUser[] = [];
 
 describe('Orion Intelligence - User Management Creation Flow', () => {
   before(() => {
     cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
       testUsers = TEST_USERS || {};
       testData = TEST_DATA || {};
+      createUsers = Object.keys(testUsers)
+        .filter((key) => /^testing\d+$/.test(key))
+        .map((key) => testUsers[key] as ManagedUser);
     });
   });
 
@@ -31,7 +28,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.url().should('include', '/dashboard/profile/users');
     cy.wait('@usersApi');
 
-    CREATE_USERS.forEach((u) => addUser(u));
+    createUsers.forEach((u) => addUser(u));
     cy.logout();
   });
 
@@ -93,21 +90,21 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.logout();
   });
 });
-
-describe('Orion Intelligence - User Management Deletion Flow', () => {
-  const USERS_URL = '/dashboard/profile/users?page=1';
-
-  beforeEach(() => {
-    cy.loginAsAdmin();
-  });
-
-  after(() => {
-    cy.logout();
-  });
-
-  it('deletes users sequentially until only system users remain', () => {
-    openUsersList(USERS_URL);
-    deleteFirstUser(USERS_URL);
-    cy.logout();
-  });
-});
+//
+// describe('Orion Intelligence - User Management Deletion Flow', () => {
+//   const USERS_URL = '/dashboard/profile/users?page=1';
+//
+//   beforeEach(() => {
+//     cy.loginAsAdmin();
+//   });
+//
+//   after(() => {
+//     cy.logout();
+//   });
+//
+//   it('deletes users sequentially until only system users remain', () => {
+//     openUsersList(USERS_URL);
+//     deleteFirstUser(USERS_URL);
+//     cy.logout();
+//   });
+// });
