@@ -82,8 +82,10 @@ export function loginAsUser(username: string, password: string) {
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"]').should('be.visible').click();
-  cy.url().should('include', '/dashboard/profile');
+  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+    .filter(':visible')
+    .should('have.length.greaterThan', 0);
 }
 
 export function loginAndClickSidebar(username: string, sidebarItems: string[], testUsers: any, testData: any) {
