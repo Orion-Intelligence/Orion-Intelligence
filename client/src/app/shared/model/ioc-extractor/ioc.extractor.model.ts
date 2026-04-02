@@ -1,6 +1,4 @@
-export interface IocItem {
-    [key: string]: string;
-}
+export type IocItem = Record<string, string>;
 export interface IocExtractionResult {
     filename: string;
     file_type: string;

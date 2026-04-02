@@ -16,7 +16,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   showLimitDefacement = 10;
   showLimitStealer = 10;
-  threatTypeCounts: { [key: string]: number; } = {};
+  threatTypeCounts: Record<string, number> = {};
   copiedKey: string | null = null;
 
   @Input() results_defacement!: DefacementCallbackModel | undefined;

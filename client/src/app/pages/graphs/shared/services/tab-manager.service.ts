@@ -42,9 +42,7 @@ export class TabManagerService {
       activeHomeMenuTab: signal<'history' | 'entities'>('history'),
       isPhysicsEnabled: signal(true),
       viewMode: signal<'graph' | 'list'>('graph'),
-      expandedGroupDataByUser: signal<{
-                [username: string]: NetworkNode | null;
-            }>({}),
+      expandedGroupDataByUser: signal<Record<string, NetworkNode | null>>({}),
       graphPlatformBatches: signal(new Map<string, GraphPlatformBatch>()),
       profileLeakIntelligenceByUser: signal<Record<string, ProfileLeakSessionData>>({}),
       profileMetadataByUser: signal<Record<string, ProfileMetadataSessionData>>({}),

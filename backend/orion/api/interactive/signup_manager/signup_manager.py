@@ -47,7 +47,6 @@ class SignupManager:
         )
         if domain_exists:
             raise HTTPException(status_code=400, detail="This domain tenant already exists")
-            
 
         TenantManager.validate_company_email(email)
 

@@ -248,7 +248,7 @@ export class SocialScanService {
         return { cards_data: [] };
       }
       const normalized = (res && typeof res === 'object')
-        ? (res.data ?? (res as any).result ?? res)
+        ? (res.data ?? res.result ?? res)
         : res;
       const cards = Array.isArray(normalized?.cards_data)
         ? normalized.cards_data
@@ -288,12 +288,12 @@ export class SocialScanService {
         query: string;
         total_found: number;
         timestamp?: string;
-        results: Array<{
+        results: {
           title?: string;
           url?: string;
           snippet?: string;
           timestamp?: string;
-        }>;
+        }[];
     }> {
     const payload: any = { tokens, username };
     if (platform) {

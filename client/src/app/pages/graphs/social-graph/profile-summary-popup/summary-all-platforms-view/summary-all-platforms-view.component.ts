@@ -308,10 +308,10 @@ export class SummaryAllPlatformsViewComponent {
     });
   }
 
-  getObjectEntries(item: any): Array<{
+  getObjectEntries(item: any): {
         key: string;
         value: any;
-    }> {
+    }[] {
     if (!item || typeof item !== 'object' || Array.isArray(item)) {
       return [];
     }

@@ -7,8 +7,8 @@ import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
 import { ensureStylesheet } from '../../../../shared/utils/ensure-stylesheet.util';
 
-type GraphPosition = { x: number; y: number; };
-type NetworkInstance = {
+interface GraphPosition { x: number; y: number; }
+interface NetworkInstance {
   focus(nodeId: string, options?: unknown): void;
   addEdgeMode(): void;
   disableEditMode(): void;
@@ -24,7 +24,7 @@ type NetworkInstance = {
   getViewPosition(): GraphPosition;
   moveTo(options: unknown): void;
   destroy(): void;
-};
+}
 @Component({
   selector: 'app-network-graph',
   templateUrl: './network-graph.component.html',

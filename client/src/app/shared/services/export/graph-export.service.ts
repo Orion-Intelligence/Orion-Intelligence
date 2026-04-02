@@ -398,7 +398,7 @@ export class GraphExportService {
     doc.setTextColor(71, 85, 105);
     doc.text('Snapshot captured from the rendered graph canvas at export time.', 40, 104);
     const fit = this.fitRectToPage(doc, 40, 146, 40, 122);
-    const img = doc.getImageProperties(payload.graphImageDataUrl as string);
+    const img = doc.getImageProperties(payload.graphImageDataUrl!);
     let imgW = fit.w;
     let imgH = (imgW * img.height) / img.width;
     if (imgH > fit.h) {
@@ -414,7 +414,7 @@ export class GraphExportService {
     doc.setDrawColor(203, 213, 225);
     doc.setLineWidth(1);
     doc.rect(fit.x, fit.y, fit.w, fit.h);
-    doc.addImage(payload.graphImageDataUrl as string, 'JPEG', drawX, drawY, imgW, imgH, undefined, 'FAST');
+    doc.addImage(payload.graphImageDataUrl!, 'JPEG', drawX, drawY, imgW, imgH, undefined, 'FAST');
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text(`Nodes: ${payload.nodes.length}   Edges: ${payload.edges.length}`, 40, this.getPageH(doc) - 56);
@@ -552,7 +552,7 @@ export class GraphExportService {
   }
 
   protected isJpegDataUrl(dataUrl?: string): boolean {
-    return typeof dataUrl === 'string' && /^data:image\/jpeg;base64,/.test(dataUrl);
+    return typeof dataUrl === 'string' && dataUrl.startsWith('data:image/jpeg;base64,');
   }
 
   private fitRectToPage(doc: jsPDF, left: number, top: number, right: number, bottom: number): {

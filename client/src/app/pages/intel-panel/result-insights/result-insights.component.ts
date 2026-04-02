@@ -296,9 +296,7 @@ export class ResultInsightsComponent implements OnInit {
       });
       return urls.size;
     }
-    const fieldMap: {
-          [key: string]: string[];
-      } = {
+    const fieldMap: Record<string, string[]> = {
         generic_model: ['m_url', 'm_clearnet_links', 'm_weblink', 'm_dumplink'],
         leak_model: ['m_url'],
         defacement_model: ['m_url', 'm_source_url'],

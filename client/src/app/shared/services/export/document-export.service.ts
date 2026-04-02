@@ -60,7 +60,7 @@ export class DocumentExportService extends GraphExportService {
       this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
       const y = (doc as any).lastAutoTable.finalY + 10;
       const fit = this.fitRect(doc, this.getPageW(doc) - 80, 260, 40, y);
-      doc.addImage(payload.graphImageDataUrl as string, 'JPEG', fit.x, fit.y, fit.w, fit.h, undefined, 'FAST');
+      doc.addImage(payload.graphImageDataUrl!, 'JPEG', fit.x, fit.y, fit.w, fit.h, undefined, 'FAST');
     }
     const nodeMarkerY = Math.max((doc as any).lastAutoTable?.finalY ?? 160, 160) + 18;
     this.drawInfoSectionMarker(doc, nodeMarkerY, contentW, 'Nodes');

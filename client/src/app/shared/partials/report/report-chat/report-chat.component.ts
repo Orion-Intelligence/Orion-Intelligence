@@ -194,13 +194,13 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     return true;
   }
 
-  getMetadataRows(): Array<{ label: string; value: string; long?: boolean }> {
+  getMetadataRows(): { label: string; value: string; long?: boolean }[] {
     if (!this.resultItem) {
       return [];
     }
 
     const item = this.resultItem as any;
-    const rows: Array<{ label: string; value: string; long?: boolean }> = [];
+    const rows: { label: string; value: string; long?: boolean }[] = [];
     const add = (label: string, value: unknown, long = false) => {
       if (!this.hasValue(value)) {
         return;

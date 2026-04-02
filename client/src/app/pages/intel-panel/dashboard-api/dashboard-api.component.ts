@@ -100,7 +100,7 @@ export class DashboardApiComponent implements OnInit {
       this.responseData &&
       typeof this.responseData === 'object' &&
       (
-        Array.isArray((this.responseData as any).cards_data) ||
+        Array.isArray(this.responseData.cards_data) ||
         Array.isArray(this.responseData.result) ||
         Array.isArray(this.responseData.data?.cards_data) ||
         Array.isArray(this.responseData.result?.cards_data)
@@ -117,7 +117,7 @@ export class DashboardApiComponent implements OnInit {
     return [];
   }
 
-  getObjectEntries(item: any): Array<{ key: string; value: any }> {
+  getObjectEntries(item: any): { key: string; value: any }[] {
     if (!item || typeof item !== 'object' || Array.isArray(item)) {
       return [];
     }
@@ -135,7 +135,7 @@ export class DashboardApiComponent implements OnInit {
     return Array.isArray(value);
   }
 
-  deduplicateWithCount(arr: any[]): Array<{ value: any; count: number }> {
+  deduplicateWithCount(arr: any[]): { value: any; count: number }[] {
     if (!Array.isArray(arr)) {
       return [];
     }
@@ -381,7 +381,7 @@ export class DashboardApiComponent implements OnInit {
           }
           else {
             const normalized = (res && typeof res === 'object')
-              ? (res.data ?? (res as any).result ?? res)
+              ? (res.data ?? res.result ?? res)
               : res;
             this.responseData = normalized;
             this.breachData = (this.cardsData && this.cardsData.length > 0) ? this.cardsData[0] : null;

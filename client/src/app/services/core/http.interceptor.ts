@@ -10,9 +10,7 @@ let activeRequests = 0;
 let hideTimeout: any = null;
 const inFlightCancels = new Map<string, Subject<void>>();
 const GLOBAL_TIMEOUT = 150000;
-const STATUS_MEANINGS: {
-    [key: number]: string;
-} = {
+const STATUS_MEANINGS: Record<number, string> = {
   400: 'Bad Request',
   401: 'Unauthorized',
   402: 'Payment Required',
