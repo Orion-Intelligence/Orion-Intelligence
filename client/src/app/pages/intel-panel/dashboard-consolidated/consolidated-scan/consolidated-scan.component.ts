@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription, concat } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -31,8 +31,7 @@ export class ConsolidatedScanComponent {
   targetLabel = '';
   expectedTypes: ScanKey[] = [];
   liveApiResults: ConsolidatedLiveApiResults[] = [];
-
-  @Input() isLoading!: boolean;
+  readonly isLoading = input.required<boolean>();
 
   constructor(private api: ConsolidatedApiService) { }
 

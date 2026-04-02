@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -27,9 +27,8 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   queryParams: any = {};
   isCollapsed = true;
   isConsolidatedView = false;
-
-  @Input() searchResults: SocialResultItem[] = [];
-  @Input() isExpandAble: boolean = false;
+  readonly searchResults = input<SocialResultItem[]>([]);
+  readonly isExpandAble = input<boolean>(false);
 
   constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
@@ -86,5 +85,4 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
 
     window.open(url, '_blank');
   }
-
 }

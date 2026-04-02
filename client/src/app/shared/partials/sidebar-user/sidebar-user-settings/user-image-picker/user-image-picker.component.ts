@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges, effect, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 @Component({
   selector: 'app-user-image-picker',
@@ -6,24 +6,32 @@ import { NgClass } from '@angular/common';
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent implements OnInit, OnChanges {
+  readonly imageUrlInput = input<string | undefined>(undefined, { alias: 'imageUrl' });
   selectedFile?: File;
   selectedImage?: string;
+  readonly id = input('');
+  imageUrl!: string;
+  readonly defaultImage = input<string>('assets/images/tenant/logo_url_default.png');
+  readonly wide = input(false);
+  readonly onImageSelected = output<File>();
+  readonly onClear = output<string>();
 
-  @Input() id!: string;
-  @Input() imageUrl!: string;
-  @Input() defaultImage: string = 'assets/images/tenant/logo_url_default.png';
-  @Input() wide = false;
-
-  @Output() onImageSelected = new EventEmitter<File>();
-  @Output() onClear = new EventEmitter<string>();
+  constructor() {
+    effect(() => {
+      const imageUrl = this.imageUrlInput();
+      if (imageUrl !== undefined) {
+        this.imageUrl = imageUrl;
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.selectedImage = this.imageUrl || this.defaultImage;
+    this.selectedImage = this.imageUrl || this.defaultImage();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['imageUrl'] || changes['defaultImage']) {
-      this.selectedImage = this.imageUrl || this.defaultImage;
+      this.selectedImage = this.imageUrl || this.defaultImage();
     }
   }
 
@@ -38,10 +46,10 @@ export class UserImagePickerComponent implements OnInit, OnChanges {
 
   deleteImage(event?: Event) {
     event?.stopPropagation();
-    this.onClear.emit(this.id);
+    this.onClear.emit(this.id());
     this.selectedFile = undefined;
-    this.selectedImage = this.defaultImage;
-    this.imageUrl = this.defaultImage;
+    this.selectedImage = this.defaultImage();
+    this.imageUrl = this.defaultImage();
   }
 
   hasCustomImage(): boolean {

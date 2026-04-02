@@ -1,31 +1,32 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 @Component({
   selector: 'app-heatmap-report',
   imports: [],
   templateUrl: './heatmap-report.component.html'
 })
 export class HeatmapReportComponent {
-  @Input() reports: any[] = [];
-  @Input() loading = false;
-  @Input() loadingMore = false;
-  @Input() hasMore = false;
-
-  @Output() close = new EventEmitter<void>();
-  @Output() loadMore = new EventEmitter<void>();
+  readonly reports = input<any[]>([]);
+  readonly loading = input(false);
+  readonly loadingMore = input(false);
+  readonly hasMore = input(false);
+  readonly close = output<void>();
+  readonly loadMore = output<void>();
 
   closePopup(event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
+    // TODO: The 'emit' function requires a mandatory void argument
     this.close.emit();
   }
 
   onLoadMore(event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
-    if (this.loadingMore || !this.hasMore) {
+    if (this.loadingMore() || !this.hasMore()) {
       return;
     }
+    // TODO: The 'emit' function requires a mandatory void argument
     this.loadMore.emit();
   }
 }

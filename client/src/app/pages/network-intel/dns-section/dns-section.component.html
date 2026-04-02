@@ -1,5 +1,5 @@
 <div [ngClass]="isEmbeddedInConsolidated ? 'py-4' : 'px-4 py-4 md:px-6'">
-  @if (isScanning) {
+  @if (isScanning()) {
     <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
       <div class="mb-[6px] flex items-center justify-between gap-3">
         <span class="text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
@@ -11,17 +11,17 @@
     </div>
   }
 
-  @if (errorMessage && !isScanning) {
+  @if (errorMessage && !isScanning()) {
     <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
       <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Request Failed</div>
       <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
     </div>
   }
 
-  @if (hasSearched) {
+  @if (hasSearched()) {
     <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
       <div class="ui-ioc-table-head flex items-center justify-between border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
-        <span>{{ resultLabel }}</span><span>DETAILS</span>
+        <span>{{ resultLabel() }}</span><span>DETAILS</span>
       </div>
       @if (ipRows.length > pageSize) {
         <div class="flex items-center justify-between gap-3 border-b border-[var(--color-divider)] px-4 py-3 text-[12px] text-[var(--color-text3)]">
@@ -47,7 +47,7 @@
           <div class="text-sm font-semibold text-[var(--color-text2)]">No results found</div>
           <div class="mt-1 text-[12px] text-[var(--color-text4)]">The scan completed successfully, but no IPs were returned.</div>
         </div>
-      } @else if (dnsResult && pagedRows.length) {
+      } @else if (dnsResult() && pagedRows.length) {
         <div @fadeInDashboardItem>
         @for (row of pagedRows; track trackByIp($index, row); let last = $last) {
           <div [attr.data-testid]="'network-intel-dns-row-' + row.ip" class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-[filter] hover:brightness-105" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [ngClass]="{ 'credential_row_expand border-b-transparent': row.expanded, 'border-b-0': last && !row.expanded }" (click)="toggleRow.emit(row)">
@@ -86,7 +86,7 @@
           }
         }
         </div>
-      } @else if (dnsResult) {
+      } @else if (dnsResult()) {
         <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
           <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">-</span>
           <span class="text-[var(--color-text4)]">-</span>

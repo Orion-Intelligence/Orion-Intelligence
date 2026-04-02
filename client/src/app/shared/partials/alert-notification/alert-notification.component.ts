@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
@@ -32,10 +32,8 @@ export class AlertNotificationComponent implements OnChanges {
   alertToShowReport: AlertModel | null = null;
   isExportChoiceOpen: boolean = false;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
-
-  @Input() isNotificationOpen!: boolean | null;
-
-  @Output() closeNotification = new EventEmitter<void>();
+  readonly isNotificationOpen = input.required<boolean | null>();
+  readonly closeNotification = output<void>();
 
   constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService) {
   }
@@ -223,6 +221,7 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   close() {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.closeNotification.emit();
   }
 

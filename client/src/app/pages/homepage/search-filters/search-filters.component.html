@@ -1,4 +1,4 @@
-<div class="w-full max-w-[910px] overflow-y-auto rounded-[12px] border border-[#e5e7eb] bg-white bg-[radial-gradient(rgba(15,23,42,0.018)_0.6px,transparent_0.6px)] bg-[length:10px_10px] px-[12px] pt-[10px] pb-[10px] font-[Inter] text-[#172235] shadow-[0_10px_22px_rgba(2,6,23,0.12)] max-h-[460px] z-[60] max-[550px]:fixed max-[550px]:top-[125px] max-[550px]:left-0 max-[550px]:w-[calc(100%-20px)] max-[550px]:mx-[10px]" [ngClass]="homePage ? 'mt-0' : 'mt-[10px]'" @searchFilterAnimation>
+<div class="w-full max-w-[910px] overflow-y-auto rounded-[12px] border border-[#e5e7eb] bg-white bg-[radial-gradient(rgba(15,23,42,0.018)_0.6px,transparent_0.6px)] bg-[length:10px_10px] px-[12px] pt-[10px] pb-[10px] font-[Inter] text-[#172235] shadow-[0_10px_22px_rgba(2,6,23,0.12)] max-h-[460px] z-[60] max-[550px]:fixed max-[550px]:top-[125px] max-[550px]:left-0 max-[550px]:w-[calc(100%-20px)] max-[550px]:mx-[10px]" [ngClass]="homePage() ? 'mt-0' : 'mt-[10px]'" @searchFilterAnimation>
 
   <div class="flex items-center justify-between pb-[6px] max-[460px]:flex-col max-[460px]:items-start max-[460px]:gap-[6px]">
     <div>
@@ -6,7 +6,7 @@
       <div class="text-[11px] text-[#667085]">Refine result entities and IOCs</div>
     </div>
     <div class="flex items-center gap-[12px]">
-      <button data-testid="entity-filter-clear-selection" class="inline-flex h-[32px] items-center gap-[7px] rounded-[8px] border border-[#d7e3f7] bg-[#f4f8ff] px-[10px] text-[11px] font-semibold text-[#1f2e47] transition-all hover:border-[#bfd4f8] hover:bg-[#eaf2ff] focus:outline-none" (click)="clearSelection()" [type]="homePage ? 'button' : 'submit'">
+      <button data-testid="entity-filter-clear-selection" class="inline-flex h-[32px] items-center gap-[7px] rounded-[8px] border border-[#d7e3f7] bg-[#f4f8ff] px-[10px] text-[11px] font-semibold text-[#1f2e47] transition-all hover:border-[#bfd4f8] hover:bg-[#eaf2ff] focus:outline-none" (click)="clearSelection()" [type]="homePage() ? 'button' : 'submit'">
         <span class="inline-flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.08)]">
           <img src="assets/images/shared/searchFIlter_clearSelaction.svg" alt="Clear" class="h-[12px] w-[12px]" />
         </span>

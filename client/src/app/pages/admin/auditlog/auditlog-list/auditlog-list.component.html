@@ -1,4 +1,4 @@
-@if (!isLoading && (auditData$ | async); as dumpData) {
+@if (!isLoading() && (auditData$ | async); as dumpData) {
   <div class="ui-table-shell hidden md:block">
     <table class="ui-table">
       <thead>
@@ -59,7 +59,7 @@
   </div>
 }
 
-@if (isLoading) {
+@if (isLoading()) {
   <div class="ui-table-shell hidden md:block">
     <table class="ui-table">
       <thead>

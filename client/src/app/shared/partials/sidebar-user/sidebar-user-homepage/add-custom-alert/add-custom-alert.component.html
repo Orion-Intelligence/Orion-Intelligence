@@ -1,12 +1,12 @@
 <div data-testid="tenant-alert-modal" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
   <div class="ui-popup-shell relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] p-[30px] font-[Inter] max-[900px]:p-[18px]" @popupAnimation>
     <div>
-      <div class="text-[24px] font-semibold leading-none">{{ heading }}</div>
+      <div class="text-[24px] font-semibold leading-none">{{ heading() }}</div>
       <button class="absolute right-[20px] top-[20px] text-[28px] text-[#ccc] hover:text-white" (click)="cancleAlert(false)">×</button>
     </div>
 
     <form>
-      <div class="mt-1 text-[12px] font-normal text-[var(--color-text2)]">{{ description }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text2)]">{{ description() }}</div>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Selected Type</label>
       <button class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-left text-[14px] text-[var(--color-text1)] opacity-80 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" type="button" disabled>
@@ -65,7 +65,7 @@
     <div class="mt-[26px] flex items-center justify-between gap-[15px]">
       <button class="ui-alert-cancel-btn px-[24px] text-[14px]" (click)="cancleAlert(false)">Cancel</button>
       <button data-testid="tenant-alert-save" class="h-[42px] rounded-[8px] bg-[#57A5EB] px-[24px] text-[14px] font-medium text-[#0e1626]" (click)="saveAlert()">
-        {{ edit ? 'Save Alert' : 'Add Alert' }}
+        {{ edit() ? 'Save Alert' : 'Add Alert' }}
       </button>
     </div>
 

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, effect, input, output } from '@angular/core';
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { max } from 'rxjs';
@@ -8,13 +8,18 @@ import { max } from 'rxjs';
 export class PaginationComponent implements OnInit {
   protected readonly max = max;
 
-  @Input() maxPages = 1;
-  @Input() currentPage = 1;
-  @Input() align: 'left' | 'center' = 'center';
-
-  @Output() pageChange = new EventEmitter<number>();
+  readonly maxPagesInput = input(1, { alias: 'maxPages' });
+  readonly currentPageInput = input(1, { alias: 'currentPage' });
+  maxPages = 1;
+  currentPage = 1;
+  readonly align = input<'left' | 'center'>('center');
+  readonly pageChange = output<number>();
 
   constructor(private appService: AppService, private cdr: ChangeDetectorRef) {
+    effect(() => {
+      this.maxPages = this.maxPagesInput();
+      this.currentPage = this.currentPageInput();
+    });
   }
 
   ngOnInit(): void {

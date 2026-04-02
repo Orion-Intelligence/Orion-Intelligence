@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, OnInit, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
@@ -19,26 +19,34 @@ export class FiltersComponent implements OnInit {
   protected readonly Object = Object;
   protected readonly last = last;
 
+  readonly filterModelInput = input<FilterModel | undefined>(undefined, { alias: 'filterModel' });
   selectedFilters: Record<string, string | null> = {};
   initialModel!: FilterModel;
-
-  @Input() filterModel!: FilterModel;
-  @Input() isFilterOpen!: boolean | null;
-
-  @Output() filterChanged = new EventEmitter<Record<string, string | null>>();
-  @Output() filterReset = new EventEmitter<void>();
-  @Output() filterClose = new EventEmitter<void>();
+  filterModel!: FilterModel;
+  readonly isFilterOpen = input.required<boolean | null>();
+  readonly filterChanged = output<Record<string, string | null>>();
+  readonly filterReset = output<void>();
+  readonly filterClose = output<void>();
 
   constructor(protected dashboard: DashboardService, private scrollService: ScrollService) {
-    this.initialModel = structuredClone(this.filterModel);
     effect(() => {
       const currentFilters = this.dashboard.selectedFilters();
       this.selectedFilters = { ...currentFilters };
     });
+    effect(() => {
+      const filterModel = this.filterModelInput();
+      if (filterModel === undefined) {
+        return;
+      }
+      this.filterModel = filterModel;
+      this.initialModel = structuredClone(filterModel);
+    });
   }
 
   ngOnInit() {
-    this.initialModel = structuredClone(this.filterModel);
+    if (this.filterModel) {
+      this.initialModel = structuredClone(this.filterModel);
+    }
   }
 
   updateFilter( event: { key: string; value: string; } ) {
@@ -63,6 +71,7 @@ export class FiltersComponent implements OnInit {
   }
 
   closeFilter() {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.filterClose.emit();
   }
 
@@ -70,6 +79,7 @@ export class FiltersComponent implements OnInit {
     this.scrollService.clearSavedPosition();
     this.dashboard.selectedFilters.set({});
     this.filterChanged.emit({ ...this.selectedFilters });
+    // TODO: The 'emit' function requires a mandatory void argument
     this.filterReset.emit();
     this.closeFilter();
   }

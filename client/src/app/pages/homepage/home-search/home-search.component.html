@@ -19,7 +19,7 @@
                 <path d="M8 1.333a6.667 6.667 0 1 0 0 13.334A6.667 6.667 0 0 0 8 1.333Zm2.02 8.687-.96.96L8 8.96l-1.06 1.02-.96-.96L7.04 8 5.98 6.94l.96-.96L8 7.04l1.06-1.06.96.96L8.96 8l1.06 1.02Z" />
               </svg>
             </button>
-            <div class="flex shrink-0 items-center whitespace-nowrap bg-white font-[Roboto] text-[15px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden max-[550px]:border-r-0" [ngClass]="hideToolsSection ? 'pr-[5px]' : ''">
+            <div class="flex shrink-0 items-center whitespace-nowrap bg-white font-[Roboto] text-[15px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden max-[550px]:border-r-0" [ngClass]="hideToolsSection() ? 'pr-[5px]' : ''">
               <ng-container>
                 <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)] max-[550px]:hidden">
                 <span class="inline-flex items-center">Advance&nbsp;&nbsp;</span>
@@ -29,7 +29,7 @@
                     <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="app_service.configData().localSettings.advance_setting_toggle ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                   </span>
                 </label>
-                @if (!hideToolsSection) {
+                @if (!hideToolsSection()) {
                   <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)] max-[550px]:hidden">
                   <button type="button" (click)="onToolToggle($event)" class="inline-flex items-center cursor-pointer">
                     Tools
@@ -69,7 +69,7 @@
         }
       }
 
-      @if (isRoleAdmin) {
+      @if (isRoleAdmin()) {
         @defer (on idle) {
           <div>
             <app-world-heatmap></app-world-heatmap>

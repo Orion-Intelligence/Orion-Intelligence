@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, input } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -36,9 +36,8 @@ export class HomeSearchComponent implements OnInit {
   public insightDragging = false;
   public insightDragY: number | null = null;
   insightTranslateY = 0;
-
-  @Input() isRoleAdmin: boolean = true;
-  @Input() hideToolsSection: boolean = false;
+  readonly isRoleAdmin = input<boolean>(true);
+  readonly hideToolsSection = input<boolean>(false);
 
   constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
 

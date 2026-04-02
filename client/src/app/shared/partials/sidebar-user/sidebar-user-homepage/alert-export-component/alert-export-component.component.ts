@@ -1,5 +1,5 @@
 import { CommonModule, UpperCasePipe, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input } from '@angular/core';
 
 import { AlertModel } from '../../../../model/company-profile/node.model';
 type AlertStatusClass = 'alert-active' | 'alert-ignore' | 'alert-info';
@@ -10,17 +10,19 @@ type AlertRiskClass = 'risk-critical' | 'risk-high' | 'risk-medium' | 'risk-low'
   templateUrl: './alert-export-component.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AlertExportComponentComponent implements OnChanges {
+export class AlertExportComponentComponent {
+  readonly alertsInput = input<AlertModel | AlertModel[] | null>(null, { alias: 'alerts' });
   viewAlerts: AlertModel[] = [];
 
-  @Input() alerts!: AlertModel | AlertModel[];
-
-  ngOnChanges(): void {
-    this.viewAlerts = Array.isArray(this.alerts)
-      ? this.alerts
-      : this.alerts
-        ? [this.alerts]
-        : [];
+  constructor() {
+    effect(() => {
+      const alerts = this.alertsInput();
+      this.viewAlerts = Array.isArray(alerts)
+        ? alerts
+        : alerts
+          ? [alerts]
+          : [];
+    });
   }
 
   get printedNow(): string {

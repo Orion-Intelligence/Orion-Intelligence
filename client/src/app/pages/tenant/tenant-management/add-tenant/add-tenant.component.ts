@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
@@ -27,9 +27,8 @@ export class AddTenantComponent implements OnInit {
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();
   currentUnmetCheck: string | null = null;
   confirmPassword = '';
-
-  @Output() closs = new EventEmitter<void>();
-  @Output() accountAdded = new EventEmitter<void>();
+  readonly closs = output<void>();
+  readonly accountAdded = output<void>();
 
   constructor(public apiService: ApiService, private appService: AppService, protected licenseService: LicenseService) {
   }
@@ -67,6 +66,7 @@ export class AddTenantComponent implements OnInit {
     const endpoint = this.isAdmin ? 'tenant/create/user' : 'tenant/create/user';
     this.apiService.post(endpoint, this.model).subscribe({
       next: () => {
+        // TODO: The 'emit' function requires a mandatory void argument
         this.accountAdded.emit();
         this.onClose();
       },
@@ -87,6 +87,7 @@ export class AddTenantComponent implements OnInit {
   }
 
   onClose() {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.closs.emit();
   }
 

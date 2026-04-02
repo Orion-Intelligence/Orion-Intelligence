@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { IpDetail } from '../../../shared/model/network-intel/network-intel.model';
@@ -13,26 +13,33 @@ import { IpDetailComponent } from '../ip-detail/ip-detail.component';
   animations: [fadeInDashboardItem],
 })
 export class ShodanSectionComponent {
-  @Input() isScanning = false;
-  @Input() progress = 0;
-  @Input() currentStep = '';
-  @Input() progressSegments: number[] = [];
-  @Input() errorMessage: string | null = null;
-  @Input() hasSearched = false;
-  @Input() shodanResult: IpDetail | null = null;
+  readonly errorMessageInput = input<string | null>(null, { alias: 'errorMessage' });
+  readonly shodanResultInput = input<IpDetail | null>(null, { alias: 'shodanResult' });
+  readonly isScanning = input(false);
+  readonly progress = input(0);
+  readonly currentStep = input('');
+  readonly progressSegments = input<number[]>([]);
+  errorMessage: string | null = null;
+  readonly hasSearched = input(false);
+  shodanResult: IpDetail | null = null;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    effect(() => {
+      this.errorMessage = this.errorMessageInput();
+      this.shodanResult = this.shodanResultInput();
+    });
+  }
 
   get isEmbeddedInConsolidated(): boolean {
     return this.router.url.includes('/consolidated');
   }
 
   get progressValue(): number {
-    return Math.max(6, Math.min(100, Math.round(this.progress || 0)));
+    return Math.max(6, Math.min(100, Math.round(this.progress() || 0)));
   }
 
   get loadingStepLabel(): string {
-    const raw = (this.currentStep || '').trim();
+    const raw = (this.currentStep() || '').trim();
     if (!raw) {
       return 'Scanning in progress...';
     }
@@ -44,7 +51,7 @@ export class ShodanSectionComponent {
   }
 
   get showLoadingSkeleton(): boolean {
-    return this.hasSearched && !this.shodanResult && !this.errorMessage && (this.isScanning || this.progress > 0);
+    return this.hasSearched() && !this.shodanResult && !this.errorMessage && (this.isScanning() || this.progress() > 0);
   }
 
   get cameraPortCount(): number {
@@ -56,6 +63,6 @@ export class ShodanSectionComponent {
   }
 
   isProgressSegmentActive(index: number): boolean {
-    return index < Math.ceil(this.progress / 5);
+    return index < Math.ceil(this.progress() / 5);
   }
 }

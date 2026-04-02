@@ -11,7 +11,7 @@
     }
   }
 
-  @if (!domain && (!consolidated || activeTab === 'Deep Search')) {
+  @if (!domain() && (!consolidated || activeTab === 'Deep Search')) {
     <form (submit)="onFormSubmit($event)" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }">
       <div class="flex w-full flex-wrap items-start justify-between">
         <div class="w-full">
@@ -59,7 +59,7 @@
                   </div>
                 }
               </div>
-              @if (!shrinkmenu && filterModel) {
+              @if (!shrinkmenu() && filterModel) {
                 <div class="flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end" [ngClass]="homeSearchService.showFiltersOverlay ? 'z-[0]' : 'z-[3]'">
                   <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
                     <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
@@ -71,7 +71,7 @@
           </div>
           @if (app_service.configData().localSettings.enable_advanced_tools) {
             <div class="mt-[8px] flex gap-[12px]" @fadeInDashboardItem>
-              @if (showSorting) {
+              @if (showSorting()) {
                 <div #sortMenuRef class="relative">
                   <button data-testid="result-tools-sort" type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSortMenu($event)">
                     sort by <b>({{ selectedSortBy }})</b>
@@ -105,7 +105,7 @@
               </div>
             </div>
           }
-          @if ((entityFiltersCount() || sidebarFilterCount() || app_service.getConfig().localSettings.matchType && app_service.getConfig().localSettings.matchType !== 'or') && showSelectedFilters) {
+          @if ((entityFiltersCount() || sidebarFilterCount() || app_service.getConfig().localSettings.matchType && app_service.getConfig().localSettings.matchType !== 'or') && showSelectedFilters()) {
             <app-selected-filter-bar
               (clearAll)="reloadFilter()"
               [showSorting]="app_service.configData().localSettings.enable_advanced_tools">
@@ -117,14 +117,14 @@
   }
 
   @if (!consolidated) {
-    @if (result_count && !isLoading && result_count !== 0 && (!checkMember() || hasIOCs())) {
+    @if (result_count && !isLoading() && result_count !== 0 && (!checkMember() || hasIOCs())) {
       <div @fadeInDashboardItem>
         <div class="mt-[26px] mb-[8px] mx-[30px] flex w-full max-w-[910px] items-center text-[14px] leading-[1.35] font-[Roboto] font-medium tracking-[0.01em] text-[var(--color-text3)] max-[1000px]:mx-[15px]">
           <span class="text-[var(--color-text2)]">{{ result_count }} Results Found</span>
         </div>
       </div>
     } @else {
-      @if ((!checkMember() || hasIOCs()) && isLoading) {
+      @if ((!checkMember() || hasIOCs()) && isLoading()) {
         <div class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] text-[14px] font-[Roboto] font-medium text-[var(--color-text2)] max-[1000px]:ml-[15px]">
           <span>Searching for results ...</span><br><br>
         </div>
@@ -132,36 +132,36 @@
     }
   }
 
-  @if (filterModel && !shrinkmenu && (isFilterOpen$ | async)) {
+  @if (filterModel && !shrinkmenu() && (isFilterOpen$ | async)) {
     <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
     </div>
   }
 
-  @if (filterModel && !shrinkmenu) {
+  @if (filterModel && !shrinkmenu()) {
     <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }
 
-  @if (isLoading) {
+  @if (isLoading()) {
     <div class="mx-[30px] w-full min-w-0 max-w-[910px] max-[1000px]:mx-[15px] max-[800px]:mx-0 max-[800px]:w-full max-[800px]:max-w-full max-[800px]:px-[10px] max-[800px]:box-border" @fadeInDashboardItem>
       <app-loading-form></app-loading-form>
     </div>
   }
 
-  @if (!entityFiltersCount() && !sidebarFilterCount() && showEmptyQuery && !isLoading && !result_count) {
+  @if (!entityFiltersCount() && !sidebarFilterCount() && showEmptyQuery() && !isLoading() && !result_count) {
     <div class="ml-[30px] w-full max-w-[910px] max-[1000px]:ml-[15px]" @fadeInDashboardItem>
       <app-empty-query></app-empty-query>
     </div>
   }
 
-  @if (showNoResult && !isLoading && result_count === 0) {
+  @if (showNoResult() && !isLoading() && result_count === 0) {
     <div class="mx-[30px] w-[calc(100%-60px)] max-w-[910px] box-border max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]" @fadeInDashboardItem>
       <app-empty-result [searchQuery]="searchQuery"></app-empty-result>
     </div>
   }
 
-  @if (result_count && !isLoading && result_count > 0 && type === Category.STRATEGIC) {
+  @if (result_count && !isLoading() && result_count > 0 && type() === Category.STRATEGIC) {
     <div class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[20px] py-[12px] text-[14px] text-[var(--color-text1)] max-[1000px]:ml-[15px]">
       <span class="inline-flex items-center">
         <img alt="Info Icon" width="16" height="16" class="mr-[8px] h-[16px] w-[16px] shrink-0" src="assets/images/shared/hint.svg">
@@ -174,7 +174,7 @@
     </div>
   }
 
-  @if (!isLoading && result_count > 0 && !disableScroll && (!checkMember() || hasIOCs())) {
+  @if (!isLoading() && result_count > 0 && !disableScroll() && (!checkMember() || hasIOCs())) {
     <div>
       <app-scroll-top></app-scroll-top>
     </div>

@@ -78,14 +78,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map<string, PlatformResult[]>());
   activeUsernames = computed(() => this.activeTabState()?.activeUsernames() ?? new Set<string>());
   customEntities = computed(() => this.activeTabState()?.customEntities() ?? []);
-
-  private requireActiveTabState(): TabState {
-    const activeState = this.activeTabState();
-    if (!activeState) {
-      throw new Error('Active tab state is not available');
-    }
-    return activeState;
-  }
   isEditMode = computed(() => this.activeTabState()?.isEditMode() ?? false);
   isHomeMenuCollapsed = computed(() => this.activeTabState()?.isHomeMenuCollapsed() ?? false);
   isEntityMenuCollapsed = computed(() => this.activeTabState()?.isEntityMenuCollapsed() ?? false);
@@ -138,6 +130,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return visibleNodeIdsWithFollows;
   });
   isCustomEntityNode = (nodeId: string): boolean => this.customEntities().some(e => e.id === nodeId);
+
+  private requireActiveTabState(): TabState {
+    const activeState = this.activeTabState();
+    if (!activeState) {
+      throw new Error('Active tab state is not available');
+    }
+    return activeState;
+  }
 
   constructor( private scanService: SocialScanService, private destroyRef: DestroyRef, public tabManager: TabManagerService, private fetchingState: FetchingStateService, private graphOrchestrator: GraphOrchestratorService, private scanJobService: SocialScanJobService, private platformFetchService: PlatformFetchService, private relationshipResolver: RelationshipResolverService, @Inject(PLATFORM_ID) private platformId: object ) {
     if (isPlatformBrowser(this.platformId)) {

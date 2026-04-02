@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, Output, EventEmitter } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, output } from '@angular/core';
 import { NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -34,8 +34,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   licences: string = '';
   dropdownOpen = signal(false);
   isDarkTheme = true;
-
-  @Output() openPopup = new EventEmitter<void>();
+  readonly openPopup = output<void>();
 
   constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
@@ -175,6 +174,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openSupportPopup() {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.openPopup.emit();
   }
 }

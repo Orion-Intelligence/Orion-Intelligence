@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Input, OnDestroy, AfterViewInit, Renderer2, NgZone } from '@angular/core';
+import { Directive, ElementRef, HostListener, OnDestroy, AfterViewInit, Renderer2, NgZone, input } from '@angular/core';
 @Directive({
   selector: '[appTooltip]'
 })
@@ -10,7 +10,7 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
   private tooltipLeft = 0;
   private tooltipTop = 0;
 
-  @Input('appTooltip') tooltipText = '';
+  readonly tooltipText = input('', { alias: "appTooltip" });
 
   constructor(private el: ElementRef, private renderer: Renderer2, private zone: NgZone) { }
 
@@ -32,7 +32,7 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
 
   @HostListener('mouseenter')
   onMouseEnter(): void {
-    if (this.tooltipText.trim()) {
+    if (this.tooltipText().trim()) {
       this.showTimeout = setTimeout(() => {
         this.createOrUpdateTooltip();
       }, 300);
@@ -91,7 +91,7 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
         this.renderer.removeChild(this.tooltip, this.tooltip.firstChild);
       }
     }
-    const textNode = this.renderer.createText(this.tooltipText);
+    const textNode = this.renderer.createText(this.tooltipText());
     this.renderer.appendChild(this.tooltip, textNode);
     this.renderer.setAttribute(this.tooltip, 'data-visible', '0');
     requestAnimationFrame(() => {

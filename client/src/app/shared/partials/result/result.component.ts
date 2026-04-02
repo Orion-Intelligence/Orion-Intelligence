@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, input, output } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EmptyResultComponent } from '../empty-result/empty-result.component';
 import { FormsModule } from '@angular/forms';
@@ -39,6 +39,11 @@ export class ResultComponent implements OnInit, OnChanges {
   protected readonly Category = Category;
   protected readonly query = query;
 
+  readonly resultCountInput = input<number | undefined>(undefined, { alias: 'result_count' });
+  readonly searchQueryInput = input('', { alias: 'searchQuery' });
+  readonly consolidatedInput = input(false, { alias: 'consolidated' });
+  readonly filterModelInput = input<FilterModel | undefined>(undefined, { alias: 'filterModel' });
+  readonly activeTabInput = input('IOCs', { alias: 'activeTab' });
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
   @ViewChild('sortMenuRef', { static: false }) sortMenuRef?: ElementRef;
@@ -65,39 +70,50 @@ export class ResultComponent implements OnInit, OnChanges {
     }
     return "Match any term";
   });
-
-  @Input() result_count_enabled: boolean = true;
-  @Input() result_count!: number;
-  @Input() isLoading!: boolean;
-  @Input() showNoResult: boolean = true;
-  @Input() isList!: boolean;
-  @Input() isTool: boolean = true;
-  @Input() showEmptyQuery = false;
-  @Input() searchQuery = '';
-  @Input() analyticsToggle = false;
-  @Input() list_grid = false;
-  @Input() shrinkmenu = false;
-  @Input() disableScroll = false;
-  @Input() type!: Category;
-  @Input() discussion = false;
-  @Input() consolidated = false;
-  @Input() domain = false;
-  @Input() showTabs = true;
-  @Input() filterModel!: FilterModel;
-  @Input() showSorting: boolean = true;
-  @Input() showSelectedFilters: boolean = true;
-  @Input() activeTab: string = 'IOCs';
-
-  @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
-  @Output() resetFilter = new EventEmitter<void>();
-  @Output() onToggleSwitch = new EventEmitter<string>();
-  @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
-  @Output() reloadData = new EventEmitter<void>();
-  @Output() updateQuery = new EventEmitter<string>();
-  @Output() onToggleSort = new EventEmitter<SortType>();
+  readonly result_count_enabled = input<boolean>(true);
+  result_count!: number;
+  readonly isLoading = input(false);
+  readonly showNoResult = input<boolean>(true);
+  readonly isList = input(false);
+  readonly isTool = input<boolean>(true);
+  readonly showEmptyQuery = input(false);
+  searchQuery = '';
+  readonly analyticsToggle = input(false);
+  readonly list_grid = input(false);
+  readonly shrinkmenu = input(false);
+  readonly disableScroll = input(false);
+  readonly type = input<Category | undefined>(undefined);
+  readonly discussion = input(false);
+  consolidated = false;
+  readonly domain = input(false);
+  readonly showTabs = input(true);
+  filterModel!: FilterModel;
+  readonly showSorting = input<boolean>(true);
+  readonly showSelectedFilters = input<boolean>(true);
+  activeTab: string = 'IOCs';
+  readonly reloadSearchFilters = output<FilterCategory[]>();
+  readonly resetFilter = output<void>();
+  readonly onToggleSwitch = output<string>();
+  readonly reloadFilters = output<Record<string, string | null>>();
+  readonly reloadData = output<void>();
+  readonly updateQuery = output<string>();
+  readonly onToggleSort = output<SortType>();
 
   constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+    effect(() => {
+      const resultCount = this.resultCountInput();
+      if (resultCount !== undefined) {
+        this.result_count = resultCount;
+      }
+      this.searchQuery = this.searchQueryInput();
+      this.consolidated = this.consolidatedInput();
+      const filterModel = this.filterModelInput();
+      if (filterModel !== undefined) {
+        this.filterModel = filterModel;
+      }
+      this.activeTab = this.activeTabInput();
+    });
   }
 
   ngOnChanges(_: SimpleChanges): void {
@@ -169,6 +185,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.result_triggered = true;
     this.showScans = false;
     this.updateQuery.emit(query);
+    // TODO: The 'emit' function requires a mandatory void argument
     this.reloadData.emit();
     this.init_domains();
   }
@@ -232,7 +249,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   reloadFilter() {
-    this.reloadFilters.emit();
+    this.reloadFilters.emit({ ...this.dashboardService.selectedFilters() });
   }
 
   init_domains() {

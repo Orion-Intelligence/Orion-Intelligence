@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { IpDetail } from '../../../shared/model/network-intel/network-intel.model';
 import { ScanHelperMethodsService } from '../network-intel-service.service';
 
@@ -12,9 +12,17 @@ import { ScanHelperMethodsService } from '../network-intel-service.service';
 export class IpDetailComponent {
   private readonly renderedTopLevelKeys = new Set([ 'ip',  'status', 'ip_info', 'hostnames', 'country', 'city', 'organization', 'isp', 'asn', 'cloud_provider', 'cloud_region', 'cloud_service', 'hosting_type', 'web_technologies', 'vulnerabilities', 'misconfigurations', 'security', 'cdn', 'waf', 'paas', 'amazon_s3', 'load_balancer', 'hsts', 'web_server', 'favicon_hash', 'allowed_methods', 'cookies', 'title', 'http_headers', 'cache_headers', 'link_headers', 'camera_paths', 'cameras', 'is_camera', 'ports', 'open_ports', ]);
 
-  @Input({ required: true }) detail!: IpDetail;
+  readonly detailInput = input<IpDetail | undefined>(undefined, { alias: 'detail' });
+  detail!: IpDetail;
 
-  constructor(public ui: ScanHelperMethodsService) {}
+  constructor(public ui: ScanHelperMethodsService) {
+    effect(() => {
+      const detail = this.detailInput();
+      if (detail !== undefined) {
+        this.detail = detail;
+      }
+    });
+  }
 
   get cameraPortCount(): number {
     return (this.detail?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;

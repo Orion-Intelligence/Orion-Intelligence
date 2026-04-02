@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
@@ -17,13 +17,13 @@ export class SupportComponent {
   submitAttempted = false;
   errorMessage: string | null = null;
   supportModel = { email: '', subject: '', message: '' };
-
-  @Output() closePopup = new EventEmitter<void>();
+  readonly closePopup = output<void>();
 
   constructor( private apiService: ApiService, private messageNotificationService: MessageNotificationService ) { }
 
   close() {
     this.resetForm();
+    // TODO: The 'emit' function requires a mandatory void argument
     this.closePopup.emit();
   }
 

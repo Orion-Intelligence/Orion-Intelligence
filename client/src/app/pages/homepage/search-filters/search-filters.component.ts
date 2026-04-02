@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { AppService } from '../../../services/core/app/app.service';
@@ -28,12 +28,10 @@ export class SearchFiltersComponent implements OnInit {
   newValue = '';
   showLeftFade = false;
   showRightFade = false;
-
-  @Input() showSorting!: boolean;
-  @Input() homePage: boolean = false;
-
-  @Output() checkDomain = new EventEmitter<void>();
-  @Output() searchFiltersChange = new EventEmitter<void>();
+  readonly showSorting = input.required<boolean>();
+  readonly homePage = input<boolean>(false);
+  readonly checkDomain = output<void>();
+  readonly searchFiltersChange = output<void>();
 
   constructor(public helperService: HelperService, public app_service: AppService, private suggestionService: SuggestionService) {
   }
@@ -85,6 +83,7 @@ export class SearchFiltersComponent implements OnInit {
     this.filteredSuggestions = [];
     this.showSuggestions = false;
     if (this.checkDomain) {
+      // TODO: The 'emit' function requires a mandatory void argument
       this.checkDomain.emit();
     }
   }
@@ -105,6 +104,7 @@ export class SearchFiltersComponent implements OnInit {
       delete this.app_service.getConfig().localSettings.entityfilterCategories[categoryId];
     }
     this.app_service.set('entityfilterCategories', this.app_service.getConfig().localSettings.entityfilterCategories);
+    // TODO: The 'emit' function requires a mandatory void argument
     this.searchFiltersChange.emit();
   }
 

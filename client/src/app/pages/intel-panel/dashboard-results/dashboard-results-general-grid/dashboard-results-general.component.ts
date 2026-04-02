@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, input } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -26,11 +26,10 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   isCollapsed = true;
   isFreeStrategic = false;
   isConsolidatedView = false;
-
-  @Input() query!: string;
-  @Input() type!: string;
-  @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
-  @Input() isExpandAble: boolean = false;
+  readonly query = input.required<string>();
+  readonly type = input.required<string>();
+  readonly searchResults = input<(GeneralResultItem | LeakResultItem)[]>([]);
+  readonly isExpandAble = input<boolean>(false);
 
   constructor(private authService: AuthService, private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
@@ -52,7 +51,8 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
     this.isConsolidatedView = this.currentUrl.includes('/consolidated/');
-    const ci = this.type === 'leak' ? 'leak' : this.type === 'tracking' ? 'leak' : this.type === 'news' ? 'leak' : this.type === 'general' ? 'general' : this.type === 'Strategic' ? 'strategic' : 'leak';
+    const type = this.type();
+    const ci = type === 'leak' ? 'leak' : type === 'tracking' ? 'leak' : type === 'news' ? 'leak' : type === 'general' ? 'general' : type === 'Strategic' ? 'strategic' : 'leak';
     if (this.currentUrl.includes('/consolidated/all') || this.currentUrl.includes('/profile/homepage/all')) {
       this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);
     }

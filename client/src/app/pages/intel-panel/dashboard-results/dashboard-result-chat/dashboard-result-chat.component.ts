@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
@@ -24,9 +24,8 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   queryParams: any = {};
   isCollapsed = true;
   isConsolidatedView = false;
-
-  @Input() searchResults: ChatResultItem[] = [];
-  @Input() isExpandAble: boolean = false;
+  readonly searchResults = input<ChatResultItem[]>([]);
+  readonly isExpandAble = input<boolean>(false);
 
   constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
@@ -65,5 +64,4 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
 
     window.open(url, '_blank');
   }
-
 }

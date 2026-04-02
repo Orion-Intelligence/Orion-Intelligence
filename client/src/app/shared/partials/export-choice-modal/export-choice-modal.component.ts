@@ -1,6 +1,6 @@
 
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
 
 @Component({
@@ -10,19 +10,19 @@ import { ExportChoiceOption } from '../../model/report/export-choice.model';
   templateUrl: './export-choice-modal.component.html'
 })
 export class ExportChoiceModalComponent {
-  @Input() visible = false;
-  @Input() title = 'Export Report';
-  @Input() subtitle = 'Choose export format:';
-  @Input() options: ExportChoiceOption[] = [];
-  @Input() overlayTestId = 'graph-report-export-overlay';
-  @Input() modalTestId = 'graph-report-export-modal';
-  @Input() closeTestId = 'graph-report-export-close';
-
-  @Output() closed = new EventEmitter<void>();
-  @Output() optionSelected = new EventEmitter<string>();
+  readonly visible = input(false);
+  readonly title = input('Export Report');
+  readonly subtitle = input('Choose export format:');
+  readonly options = input<ExportChoiceOption[]>([]);
+  readonly overlayTestId = input('graph-report-export-overlay');
+  readonly modalTestId = input('graph-report-export-modal');
+  readonly closeTestId = input('graph-report-export-close');
+  readonly closed = output<void>();
+  readonly optionSelected = output<string>();
 
   onOverlayClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('export-choice-overlay')) {
+      // TODO: The 'emit' function requires a mandatory void argument
       this.closed.emit();
     }
   }

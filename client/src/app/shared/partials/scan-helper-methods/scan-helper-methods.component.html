@@ -1,4 +1,4 @@
-@if (isOpen) {
+@if (isOpen()) {
   <div data-testid="domain-scanner-modal" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-[18px]" (click)="onClose()">
     <div class="ui-popup-shell relative w-full max-w-[650px] rounded-[14px] p-[26px] mt-[-124px] max-[640px]:mt-0 max-[640px]:max-w-full max-[640px]:p-[20px]" (click)="$event.stopPropagation()">
       <div class="flex items-start justify-between gap-[16px] pb-[14px]">

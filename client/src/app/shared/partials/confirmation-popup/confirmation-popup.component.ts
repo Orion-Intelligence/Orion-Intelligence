@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FocusDirective } from '../../directive/focus.directive';
 import { popupAnimation } from '../../animations/popup.animations';
 @Component({
@@ -10,9 +10,8 @@ import { popupAnimation } from '../../animations/popup.animations';
   animations: [popupAnimation],
 })
 export class ConfirmationPopupComponent {
-  @Input() message = 'Are you sure you want to perform this action?';
-
-  @Output() confirmed = new EventEmitter<boolean>();
+  readonly message = input('Are you sure you want to perform this action?');
+  readonly confirmed = output<boolean>();
 
   onBackdrop(event: MouseEvent) {
     const eventTargetElement = event.target as HTMLElement | null;

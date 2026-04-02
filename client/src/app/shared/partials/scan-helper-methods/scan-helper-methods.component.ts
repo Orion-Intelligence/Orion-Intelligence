@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, effect } from '@angular/core';
+import { Component, OnDestroy, effect, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription, Subject } from 'rxjs';
@@ -30,11 +30,9 @@ export class ScanHelperMethods implements OnDestroy {
   waybackSnapshots: WaybackSnapshot[] = [];
   cancelRequested = false;
   showInvalid = false;
-
-  @Input() isOpen = false;
-
-  @Output() close = new EventEmitter<void>();
-  @Output() search = new EventEmitter<string[]>();
+  readonly isOpen = input(false);
+  readonly close = output<void>();
+  readonly search = output<string[]>();
 
   get isLightTheme(): boolean {
     return this.appService.userSessionData()?.user?.theme === 'light-theme';
@@ -155,6 +153,7 @@ export class ScanHelperMethods implements OnDestroy {
 
   onClose(): void {
     this.resetState();
+    // TODO: The 'emit' function requires a mandatory void argument
     this.close.emit();
   }
 

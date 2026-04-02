@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges, effect, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DefacementCallbackModel, DefacementResultItem } from '../../../../shared/model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
@@ -14,36 +14,42 @@ import { ResultRowHelperService } from '../../../../shared/services/result-row-h
 export class ThreatResultsComponent implements OnInit, OnChanges {
   private copiedTimer: any = null;
 
+  readonly isExpandableInput = input(false, { alias: 'isExpandable' });
   showLimitDefacement = 10;
   showLimitStealer = 10;
   threatTypeCounts: Record<string, number> = {};
   copiedKey: string | null = null;
+  readonly results_defacement = input.required<DefacementCallbackModel | undefined>();
+  readonly results_stealerlog = input.required<StealerLogCallbackModel | undefined>();
+  isExpandable = false;
 
-  @Input() results_defacement!: DefacementCallbackModel | undefined;
-  @Input() results_stealerlog!: StealerLogCallbackModel | undefined;
-  @Input() isExpandable = false;
-
-  constructor(protected helperService: HelperService, private dashboardService: DashboardService, private rowHelper: ResultRowHelperService) { }
+  constructor(protected helperService: HelperService, private dashboardService: DashboardService, private rowHelper: ResultRowHelperService) {
+    effect(() => {
+      this.isExpandable = this.isExpandableInput();
+    });
+  }
 
   isLightTheme(): boolean {
     return document.body.classList.contains('light-theme');
   }
 
   ngOnInit(): void {
-    if (this.results_defacement?.Result?.length) {
-      this.updateThreatTypeCounts(this.results_defacement.Result);
+    const results_defacement = this.results_defacement();
+    if (results_defacement?.Result?.length) {
+      this.updateThreatTypeCounts(results_defacement.Result);
     }
-    if (this.results_stealerlog?.Result?.length) {
+    if (this.results_stealerlog()?.Result?.length) {
       this.showLimitStealer = 10;
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['results_defacement'] && this.results_defacement?.Result?.length) {
-      this.updateThreatTypeCounts(this.results_defacement.Result);
+    const results_defacement = this.results_defacement();
+    if (changes['results_defacement'] && results_defacement?.Result?.length) {
+      this.updateThreatTypeCounts(results_defacement.Result);
       this.showLimitDefacement = 10;
     }
-    if (changes['results_stealerlog'] && this.results_stealerlog?.Result?.length) {
+    if (changes['results_stealerlog'] && this.results_stealerlog()?.Result?.length) {
       this.showLimitStealer = 10;
     }
     if (changes['results_defacement'] || changes['results_stealerlog'] || changes['isExpandable']) {
@@ -88,10 +94,10 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   onShowMore(category: 'defacement' | 'stealerlog', event: MouseEvent): void {
     event.stopPropagation();
     if (category === 'defacement') {
-      this.showLimitDefacement = Math.min(this.showLimitDefacement + 10, this.results_defacement?.Result?.length ?? this.showLimitDefacement);
+      this.showLimitDefacement = Math.min(this.showLimitDefacement + 10, this.results_defacement()?.Result?.length ?? this.showLimitDefacement);
     }
     else {
-      this.showLimitStealer = Math.min(this.showLimitStealer + 10, this.results_stealerlog?.Result?.length ?? this.showLimitStealer);
+      this.showLimitStealer = Math.min(this.showLimitStealer + 10, this.results_stealerlog()?.Result?.length ?? this.showLimitStealer);
     }
   }
 

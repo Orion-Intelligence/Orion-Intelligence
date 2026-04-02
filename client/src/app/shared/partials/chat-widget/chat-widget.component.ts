@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Input, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
@@ -28,8 +28,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   isBotTyping = false;
   newMessage = '';
   chatOpen = false;
-
-  @Input() reportText: string | undefined;
+  readonly reportText = input<string>();
 
   constructor(private api: ApiService, public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService) { }
 
@@ -82,7 +81,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     const payload = {
       session_id: this.sessionId,
       message: userMessage,
-      report: this.reportText
+      report: this.reportText()
     };
     this.api.post<ChatApiResponse>('nlp/chat/report', payload).subscribe({
       next: (response) => {
@@ -110,7 +109,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       sender: 'error',
       text: 'Something went wrong. try again.',
       time: new Date(),
-      retryPayload: { message: originalMessage, report: this.reportText }
+      retryPayload: { message: originalMessage, report: this.reportText() }
     });
   }
 

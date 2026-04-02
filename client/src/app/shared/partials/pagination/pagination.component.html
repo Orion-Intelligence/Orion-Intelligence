@@ -1,6 +1,6 @@
 @if (maxPages>1) {
   <div data-testid="pagination-root" class="mt-4 mb-[150px]">
-    <div data-testid="pagination-shell" class="ui-pagination-shell flex items-center gap-2" [ngClass]="align === 'left' ? 'justify-start' : 'justify-center'">
+    <div data-testid="pagination-shell" class="ui-pagination-shell flex items-center gap-2" [ngClass]="align() === 'left' ? 'justify-start' : 'justify-center'">
       <button data-testid="pagination-first" (click)="currentPage !== 1 && onPageChange(1)" [disabled]="currentPage === 1" class="ui-pagination-btn inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-[background-color,border-color,color,box-shadow] duration-300 ease-out hover:border-[rgba(87,165,235,0.45)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[0_0_0_1px_rgba(87,165,235,0.22)] disabled:cursor-not-allowed disabled:opacity-50">
         <img alt="nav-first" height="16" ngSrc="../../../../assets/images/shared/theme/nav-first.svg" width="16" class="ui-action-icon">
       </button>

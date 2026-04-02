@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit, output } from '@angular/core';
 import { KeyValuePipe, NgClass } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -26,8 +26,7 @@ export class CredentialsSearchBarComponent implements OnInit{
   selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
   advancedFilters: StealerlogsAdvancedFilter[] = [ { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' } ];
-
-  @Output() searchTriggered = new EventEmitter<string>();
+  readonly searchTriggered = output<string>();
 
   constructor(protected sidebarService: SidebarService,private route: ActivatedRoute) { }
 

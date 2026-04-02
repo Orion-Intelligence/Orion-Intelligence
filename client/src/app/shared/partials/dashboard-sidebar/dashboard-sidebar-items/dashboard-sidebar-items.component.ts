@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
@@ -14,15 +14,14 @@ import { ScrollService } from '../../../services/scroll.service';
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {
-  @Input() title = '';
-  @Input() icon = '';
-  @Input() items: string[] = [];
-  @Input() category: any;
-  @Input() routePrefix = '';
-  @Input() tooltip = '';
-
-  @Output() sectionSelected = new EventEmitter<any>();
-  @Output() optionSelected = new EventEmitter<string>();
+  readonly title = input('');
+  readonly icon = input('');
+  readonly items = input<string[]>([]);
+  readonly category = input<any>();
+  readonly routePrefix = input('');
+  readonly tooltip = input('');
+  readonly sectionSelected = output<any>();
+  readonly optionSelected = output<string>();
 
   constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected subscriptionService: SubscriptionService, protected scrollService: ScrollService) {
   }
@@ -30,7 +29,7 @@ export class DashboardSidebarItemsComponent {
   selectSection() {
     this.scrollService.clearSavedPosition();
     this.scrollService.scrollReportToTop();
-    this.sectionSelected.emit(this.category);
+    this.sectionSelected.emit(this.category());
   }
 
   selectOption(event: Event, item: string) {
