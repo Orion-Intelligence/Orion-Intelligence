@@ -7,11 +7,11 @@ import { ConsolidatedScanResults, ConsolidatedLiveApiResults, ConsolidatedLiveAp
 import { RouterLink } from '@angular/router';
 import { scanAnimation } from '../../../../shared/animations/scan.animations';
 type ScanKey = 'basic' | 'seo' | 'repo' | 'liveapi';
-type PendingMsg = {
+interface PendingMsg {
     status: 'pending';
     progress?: number;
     step?: string;
-};
+}
 @Component({
   selector: 'app-consolidated-scan',
   standalone: true,

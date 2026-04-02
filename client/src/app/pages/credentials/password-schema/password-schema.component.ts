@@ -34,8 +34,8 @@ export class PasswordSchemaComponent {
 
   @HostListener('document:click', ['$event'])
   onOutsideClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (this.isOpen && target.classList.contains('password-schema-overlay')) {
+    const eventTargetElement = event.target as HTMLElement;
+    if (this.isOpen && eventTargetElement.classList.contains('password-schema-overlay')) {
       this.close.emit();
     }
   }

@@ -79,7 +79,6 @@ export class PlatformFetchService {
             }
           }
         },
-        error: () => { },
         complete: () => {
           fetchingState.setFetching((fetchingState as any)[stateKey], key, false);
           cancelMap.delete(key);

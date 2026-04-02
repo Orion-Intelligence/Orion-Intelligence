@@ -218,8 +218,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.svg || !this.chartContainer) {
       return;
     }
-    const el = this.chartContainer.nativeElement as HTMLElement;
-    const width = el.offsetWidth || 800;
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     this.ensureLegendDefs();
     const legendColors = this.getLegendColors();
@@ -316,8 +316,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.svg || !this.chartContainer) {
       return;
     }
-    const el = this.chartContainer.nativeElement as HTMLElement;
-    const width = el.offsetWidth || 800;
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     const labelX = isMobile ? 35 : 33;
     const labelY = isMobile ? 22 : 28;
@@ -344,16 +344,16 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.worldData) {
       return;
     }
-    const el = this.chartContainer.nativeElement as HTMLElement;
-    const width = el.offsetWidth || 800;
-    const height = el.offsetHeight || Math.min(Math.max(Math.round(width * 0.52), 400), Math.round(window.innerHeight * 0.8));
-    d3.select(el).selectAll('*').remove();
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const width = chartContainerElement.offsetWidth || 800;
+    const height = chartContainerElement.offsetHeight || Math.min(Math.max(Math.round(width * 0.52), 400), Math.round(window.innerHeight * 0.8));
+    d3.select(chartContainerElement).selectAll('*').remove();
     this.tooltip = d3
-      .select(el)
+      .select(chartContainerElement)
       .append<HTMLDivElement>('div')
       .attr('class', this.tooltipHiddenClass);
     this.svg = d3
-      .select(el)
+      .select(chartContainerElement)
       .append('svg')
       .attr('viewBox', `0 0 ${width} ${height}`);
     this.mapG = this.svg.append('g');
@@ -442,11 +442,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.tooltip.selectAll('*').remove();
     this.tooltip.append('div').text(name);
     this.tooltip.append('div').text(`Leaks: ${v ?? 'N/A'}`);
-    const container = this.chartContainer.nativeElement as HTMLElement;
-    const rect = container.getBoundingClientRect();
-    const tipEl = this.tooltip.node() as HTMLDivElement | null;
-    const tipW = tipEl?.offsetWidth ?? 160;
-    const tipH = tipEl?.offsetHeight ?? 44;
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const rect = chartContainerElement.getBoundingClientRect();
+    const tooltipElement = this.tooltip.node() as HTMLDivElement | null;
+    const tipW = tooltipElement?.offsetWidth ?? 160;
+    const tipH = tooltipElement?.offsetHeight ?? 44;
     let x = event.clientX - rect.left + 12;
     let y = event.clientY - rect.top + 12;
     if (x + tipW > rect.width - 8) {

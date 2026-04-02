@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
@@ -14,16 +14,13 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   imports: [CommonModule, NgClass, TooltipDirective],
   animations: [fadeInDashboardItem],
 })
-export class ReportMappingComponent implements OnInit {
+export class ReportMappingComponent {
   loading = true;
   result: any[] = [];
   filteredItems: any[] = [];
   isExpanded = false;
 
   constructor(private api: ApiService, protected dashboardservice: DashboardService, protected authService: AuthService, protected subscriptionService: SubscriptionService, protected licenseService: LicenseService) {
-  }
-
-  ngOnInit(): void {
   }
 
   toggleContent(): void {

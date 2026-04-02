@@ -125,7 +125,6 @@ export class TenantComponent implements OnInit {
           return updated;
         });
       },
-      error: () => {},
     });
   }
 

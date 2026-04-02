@@ -14,7 +14,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
           <h2 class="text-lg font-semibold text-[var(--color-text1)]">{{ title() }}</h2>
           <p class="mt-2 text-sm text-[var(--color-text4)]">{{ subtitle() }}</p>
           @if (actionLabel()) {
-            <button type="button" class="mt-5 inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2 text-sm font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)]" (click)="actionTriggered.emit()">
+            <button type="button" class="mt-5 inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2 text-sm font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)]" (click)="actionTriggered.emit(undefined)">
               {{ actionLabel() }}
             </button>
           }
@@ -28,5 +28,5 @@ export class GraphLoadingComponent {
   title = input('Loading Graph');
   subtitle = input('Preparing graph view.');
   actionLabel = input('');
-  actionTriggered = output<void>();
+  actionTriggered = output<undefined>();
 }

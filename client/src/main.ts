@@ -52,6 +52,23 @@ const getBootstrapIconName = (element: Element): BootstrapIconName | null => {
     const iconName = match[1] as BootstrapIconName;
     return iconName in bootstrapIconRegistry ? iconName : null;
 };
+const buildBootstrapSvgElement = (iconName: BootstrapIconName): SVGSVGElement => {
+    const icon = bootstrapIconRegistry[iconName];
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(
+        `<svg xmlns="http://www.w3.org/2000/svg">${icon.markup}</svg>`,
+        'image/svg+xml'
+    );
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'ui-bootstrap-icon');
+    svg.setAttribute('viewBox', icon.viewBox);
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    Array.from(parsed.documentElement.childNodes).forEach((childNode) => {
+        svg.appendChild(document.importNode(childNode, true));
+    });
+    return svg;
+};
 const renderBootstrapIcon = (element: Element) => {
     if (!(element instanceof HTMLElement)) {
         return;
@@ -68,8 +85,7 @@ const renderBootstrapIcon = (element: Element) => {
     if (element.dataset['bootstrapIconName'] === iconName) {
         return;
     }
-    const icon = bootstrapIconRegistry[iconName];
-    element.innerHTML = `<svg class="ui-bootstrap-icon" viewBox="${icon.viewBox}" aria-hidden="true" focusable="false">${icon.markup}</svg>`;
+    element.replaceChildren(buildBootstrapSvgElement(iconName));
     element.dataset['bootstrapIconRendered'] = '1';
     element.dataset['bootstrapIconName'] = iconName;
 };

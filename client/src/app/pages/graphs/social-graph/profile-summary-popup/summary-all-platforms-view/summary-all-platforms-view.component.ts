@@ -361,7 +361,8 @@ export class SummaryAllPlatformsViewComponent {
   }
 
   private onSearch(event: Event, termSignal: WritableSignal<string>, visibleSignal: WritableSignal<number>): void {
-    termSignal.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    termSignal.set(nextValue);
     visibleSignal.set(5);
   }
 

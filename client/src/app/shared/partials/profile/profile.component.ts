@@ -151,8 +151,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   closeDropdown(event: Event) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.profile')) {
+    const eventTargetElement = event.target as HTMLElement;
+    if (!eventTargetElement.closest('.profile')) {
       this.dropdownOpen.set(false);
     }
   }

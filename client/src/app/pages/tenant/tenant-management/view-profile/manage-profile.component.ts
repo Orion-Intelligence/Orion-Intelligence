@@ -65,8 +65,8 @@ export class ManageProfileComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.action-menu')) {
+    const eventTargetElement = event.target as HTMLElement;
+    if (!eventTargetElement.closest('.action-menu')) {
       this.selectedUserId = null;
     }
   }

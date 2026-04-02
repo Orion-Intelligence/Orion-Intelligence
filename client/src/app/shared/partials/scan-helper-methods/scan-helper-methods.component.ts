@@ -132,7 +132,9 @@ export class ScanHelperMethods implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subs.forEach(s => s.unsubscribe());
+    this.subs.forEach(s => {
+      s.unsubscribe();
+    });
     this.scanService.cancelCurrentScan?.();
     this.destroy$.next();
     this.destroy$.complete();
@@ -219,10 +221,14 @@ export class ScanHelperMethods implements OnDestroy {
   copy(text: string, message: string = 'Copied'): void {
     navigator.clipboard.writeText(text).then(() => {
       this.toast = message;
-      setTimeout(() => this.toast = '', 900);
+      setTimeout(() => {
+        this.toast = '';
+      }, 900);
     }).catch(() => {
       this.toast = 'Failed to copy';
-      setTimeout(() => this.toast = '', 1500);
+      setTimeout(() => {
+        this.toast = '';
+      }, 1500);
     });
   }
 

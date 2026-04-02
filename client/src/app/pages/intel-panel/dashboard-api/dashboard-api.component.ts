@@ -22,7 +22,7 @@ export class DashboardApiComponent implements OnInit {
   displayQ1 = '';
   displayQ2 = '';
   loading = false;
-  breachData: any | null = null;
+  breachData: any = null;
   query_triggered = false;
   apiType: string | null = null;
   progress = 0;
@@ -34,7 +34,7 @@ export class DashboardApiComponent implements OnInit {
   prevQ2 = '';
   prevDisplayQ1 = '';
   prevDisplayQ2 = '';
-  prevBreachData: any | null = null;
+  prevBreachData: any = null;
   expandedResultIndex: number | null = null;
   trackByIndex = (index: number) => index;
 
@@ -63,7 +63,7 @@ export class DashboardApiComponent implements OnInit {
     return [];
   }
 
-  get cryptoResult(): any | null {
+  get cryptoResult(): any {
     const r = this.responseData;
     if (!r) {
       return null;
@@ -101,9 +101,9 @@ export class DashboardApiComponent implements OnInit {
       typeof this.responseData === 'object' &&
       (
         Array.isArray((this.responseData as any).cards_data) ||
-        Array.isArray((this.responseData as any).result) ||
-        Array.isArray((this.responseData as any).data?.cards_data) ||
-        Array.isArray((this.responseData as any).result?.cards_data)
+        Array.isArray(this.responseData.result) ||
+        Array.isArray(this.responseData.data?.cards_data) ||
+        Array.isArray(this.responseData.result?.cards_data)
       )
     ) {
       return this.cardsData;
@@ -178,9 +178,9 @@ export class DashboardApiComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.apiType = this.route.snapshot.data && this.route.snapshot.data['type'] ? String(this.route.snapshot.data['type']) : null;
+    this.apiType = this.route.snapshot.data?.['type'] ? String(this.route.snapshot.data['type']) : null;
     this.route.data.subscribe(d => {
-      this.apiType = d && d['type'] ? String(d['type']) : this.apiType;
+      this.apiType = d?.['type'] ? String(d['type']) : this.apiType;
     });
     this.route.queryParams.subscribe(params => {
       if (this.apiType === 'user') {
@@ -381,7 +381,7 @@ export class DashboardApiComponent implements OnInit {
           }
           else {
             const normalized = (res && typeof res === 'object')
-              ? ((res as any).data ?? (res as any).result ?? res)
+              ? (res.data ?? (res as any).result ?? res)
               : res;
             this.responseData = normalized;
             this.breachData = (this.cardsData && this.cardsData.length > 0) ? this.cardsData[0] : null;

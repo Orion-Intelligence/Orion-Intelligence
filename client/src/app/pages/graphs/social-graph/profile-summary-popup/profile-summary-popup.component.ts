@@ -20,7 +20,7 @@ export class ProfileSummaryPopupComponent {
   platforms = input.required<PlatformResult[]>();
   email = input<string | undefined>();
   isScanInProgress = input<boolean>(false);
-  close = output<void>();
+  close = output<undefined>();
   fetchProfile = output<PlatformResult>();
   fetchPosts = output<PlatformResult>();
   fetchFollowers = output<PlatformResult>();
@@ -80,7 +80,8 @@ export class ProfileSummaryPopupComponent {
   }
 
   onSearchTermChange(event: Event) {
-    this.platformSearchTerm.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.platformSearchTerm.set(nextValue);
   }
 
   clearSearch() {
@@ -88,7 +89,7 @@ export class ProfileSummaryPopupComponent {
   }
 
   onClose() {
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   onAllPlatformsClick(): void {

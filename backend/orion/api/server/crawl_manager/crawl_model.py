@@ -3,7 +3,7 @@ import hashlib
 import os
 import asyncio
 import json
-import random
+import secrets
 from datetime import datetime, timezone
 import httpx
 import requests
@@ -418,7 +418,7 @@ class crawl_model:
         if not available_swarm_urls:
             raise ValueError("SWARM_URL is not configured")
 
-        target_base_url = random.choice(available_swarm_urls)
+        target_base_url = secrets.choice(available_swarm_urls)
         return f"{target_base_url}/user-dumps"
 
     @staticmethod

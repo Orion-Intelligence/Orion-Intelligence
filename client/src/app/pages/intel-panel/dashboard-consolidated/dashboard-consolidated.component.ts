@@ -209,7 +209,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetFilters(_: void) {
+  resetFilters(_: undefined) {
     this.fetchSearchResults(true);
   }
 

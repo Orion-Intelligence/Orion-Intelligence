@@ -127,18 +127,18 @@ export class HomeSearchComponent implements OnInit {
 
   clearSearchInput(): void {
     this.searchQuery = '';
-    const input = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
-    if (input) {
-      input.value = '';
-      input.focus();
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+    const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    if (inputElement) {
+      inputElement.value = '';
+      inputElement.focus();
+      inputElement.dispatchEvent(new Event('input', { bubbles: true }));
     }
   }
 
   closeMatchTypeDropdown(): void {
-    const el = this.matchTypeDropdownRef?.nativeElement;
-    if (el?.open) {
-      el.open = false;
+    const dropdownElement = this.matchTypeDropdownRef?.nativeElement;
+    if (dropdownElement?.open) {
+      dropdownElement.open = false;
     }
   }
 
@@ -164,9 +164,9 @@ export class HomeSearchComponent implements OnInit {
     this.computeInsightMax();
     const max = this.insightMax;
 
-    const el = event.currentTarget as HTMLElement;
+    const currentTargetElement = event.currentTarget as HTMLElement;
     try {
-      el.setPointerCapture(event.pointerId);
+      currentTargetElement.setPointerCapture(event.pointerId);
     }
     catch {
       // Ignore pointer-capture failures on unsupported targets.

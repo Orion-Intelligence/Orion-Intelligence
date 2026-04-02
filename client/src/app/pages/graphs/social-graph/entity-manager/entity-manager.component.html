@@ -3,7 +3,7 @@
   [isCollapsed]="isCollapsed()"
   [isSmallScreen]="isSmallScreen()"
   [customEntities]="activeTabState().customEntities()"
-  (toggle)="toggle.emit()"
+  (toggle)="toggle.emit(undefined)"
   (addEntityClicked)="openAddEntityModal($event)"
   (entityClicked)="addEntityToGraph($event)"
   (deleteEntityClicked)="deleteEntityRequested.emit($event)">

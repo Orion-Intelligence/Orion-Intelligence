@@ -19,6 +19,8 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
+
+type GraphNodeColor = string | Color;
 @Component({
   selector: 'app-graphs',
   standalone: true,
@@ -63,9 +65,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!this.network || !this.isGraphView) {
       return;
     }
-    const target = event.target as HTMLElement | null;
-    const tag = target?.tagName?.toLowerCase() || '';
-    const isEditable = !!target?.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
+    const eventTargetElement = event.target as HTMLElement | null;
+    const tag = eventTargetElement?.tagName?.toLowerCase() || '';
+    const isEditable = !!eventTargetElement?.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
     if (isEditable) {
       return;
     }
@@ -126,7 +128,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   copied = false;
   copiedX = 0;
   copiedY = 0;
-  orignalColor: string | Color = '';
+  orignalColor: GraphNodeColor = '';
   currentCategory = '';
   isSidebarCollapsed = false;
   isTailwindReady = true;
@@ -543,19 +545,19 @@ export class GraphComponent implements OnInit, OnDestroy {
       animation: false
     });
     this.network.redraw();
-    const canvases = this.networkContainer.nativeElement.querySelectorAll('canvas') as NodeListOf<HTMLCanvasElement>;
+    const canvasElements = this.networkContainer.nativeElement.querySelectorAll('canvas') as NodeListOf<HTMLCanvasElement>;
     let snapshot: string | undefined;
-    if (canvases.length > 0) {
-      const width = canvases[0].width;
-      const height = canvases[0].height;
+    if (canvasElements.length > 0) {
+      const width = canvasElements[0].width;
+      const height = canvasElements[0].height;
       const merged = document.createElement('canvas');
       merged.width = width;
       merged.height = height;
       const ctx = merged.getContext('2d');
       if (ctx) {
-        canvases.forEach(c => {
-          if (c.width === width && c.height === height) {
-            ctx.drawImage(c, 0, 0);
+        canvasElements.forEach(canvasElement => {
+          if (canvasElement.width === width && canvasElement.height === height) {
+            ctx.drawImage(canvasElement, 0, 0);
           }
         });
         const pad = Math.round(Math.max(width, height) * 0.06);
@@ -587,8 +589,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   importSessionFile(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) {
+    const inputElement = event.target as HTMLInputElement;
+    if (!inputElement.files?.length) {
       return;
     }
     const reader = new FileReader();
@@ -613,8 +615,8 @@ export class GraphComponent implements OnInit, OnDestroy {
         // Ignore invalid imported session files.
       }
     };
-    reader.readAsText(input.files[0]);
-    input.value = '';
+    reader.readAsText(inputElement.files[0]);
+    inputElement.value = '';
   }
 
   toggleAddMenu(event: MouseEvent): void {
@@ -1985,7 +1987,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       const radius = 200;
       const newEdges = this.rawEdges
         .filter(e => e.from === nodeId && subNodes.includes(e.to as string))
-        .filter(e => !this.edgeSet.get(e.id!));
+        .filter(e => !this.edgeSet.get(e.id));
       const newNodes = this.buildCircularSubNodes(subNodes, centerPos, radius);
       this.nodeSet.add(newNodes);
       this.edgeSet.add(newEdges);

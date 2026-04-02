@@ -190,7 +190,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
   flushAllConfirmation(value: boolean) {
     this.isFlushAllConfirmationOpen.set(false);
-    if (value === true) {
+    if (value) {
       this.apiService.post(`profile/alerts/delete/${this.category}`, null).subscribe({
         next: () => {
           this.getLatestAlerts();
@@ -280,8 +280,6 @@ export class CategoryAlertReportComponent implements OnInit {
         if (response) {
           this.helperService.downloadstixJson(response);
         }
-      },
-      error: (_err) => {
       }
     });
 
@@ -470,9 +468,6 @@ export class CategoryAlertReportComponent implements OnInit {
             },
           });
         }
-        else {
-
-        }
       }
       else {
         this.messageNotificationService.show("Please purchase enterprise license to view reports")
@@ -601,7 +596,7 @@ export class CategoryAlertReportComponent implements OnInit {
       }
     }
     return Array.from(mergedIocMap.values())
-      .filter(ioc => this.iocTypes.hasOwnProperty(ioc.name))
+      .filter(ioc => Object.prototype.hasOwnProperty.call(this.iocTypes, ioc.name))
       .map(ioc => ({
         label: this.iocTypes[ioc.name],
         count: ioc.values.length
@@ -664,7 +659,7 @@ export class CategoryAlertReportComponent implements OnInit {
         }
       }
       Array.from(mergedIocMap.values())
-        .filter(ioc => this.iocTypes.hasOwnProperty(ioc.name))
+        .filter(ioc => Object.prototype.hasOwnProperty.call(this.iocTypes, ioc.name))
         .forEach(ioc => {
           ioc.values.forEach(value => {
             if (value) {

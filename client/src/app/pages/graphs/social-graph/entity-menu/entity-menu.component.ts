@@ -22,7 +22,7 @@ export class EntityMenuComponent {
   isCollapsed = input.required<boolean>();
   isSmallScreen = input.required<boolean>();
   customEntities = input.required<CustomEntity[]>();
-  toggle = output<void>();
+  toggle = output<undefined>();
   addEntityClicked = output<CustomEntity['type']>();
   entityClicked = output<string>();
   deleteEntityClicked = output<string>();
@@ -39,7 +39,8 @@ export class EntityMenuComponent {
   }
 
   onAddSearchInput(event: Event) {
-    this.addSearchTerm.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.addSearchTerm.set(nextValue);
   }
 
   getIconForEntityType(type: CustomEntity['type']): string {

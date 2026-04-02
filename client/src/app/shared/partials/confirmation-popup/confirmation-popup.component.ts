@@ -15,8 +15,8 @@ export class ConfirmationPopupComponent {
   @Output() confirmed = new EventEmitter<boolean>();
 
   onBackdrop(event: MouseEvent) {
-    const target = event.target as HTMLElement | null;
-    if (target?.dataset?.['role'] === 'backdrop') {
+    const eventTargetElement = event.target as HTMLElement | null;
+    if (eventTargetElement?.dataset?.['role'] === 'backdrop') {
       this.confirmed.emit(false);
     }
   }

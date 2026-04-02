@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-const path = require("path");
+import path from "path";
 
 module.exports = (config) => {
   config.module.rules.push({

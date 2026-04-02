@@ -23,7 +23,7 @@ export class HomeMenuComponent implements OnDestroy {
   activeUsernames = input.required<Set<string>>();
   viewMode = input.required<'graph' | 'list'>();
   isSmallScreen = input.required<boolean>();
-  toggle = output<void>();
+  toggle = output<undefined>();
   tabSelected = output<'history' | 'entities'>();
   searchChanged = output<string>();
   jobClicked = output<Job>();
@@ -87,7 +87,8 @@ export class HomeMenuComponent implements OnDestroy {
   }
 
   onSearchInput(event: Event) {
-    this.searchChanged.emit((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchChanged.emit(nextValue);
   }
 
   getJobClasses(job: Job): string {

@@ -145,7 +145,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   pushButton(btn: HTMLButtonElement) {
     btn.classList.add('chat-bot-push-anim');
-    setTimeout(() => btn.classList.remove('chat-bot-push-anim'), 150);
+    setTimeout(() => {
+      btn.classList.remove('chat-bot-push-anim');
+    }, 150);
   }
 
   onMessagesScroll(): void {
@@ -166,7 +168,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.cdr.detectChanges();
     this.zone.runOutsideAngular(() => {
-      requestAnimationFrame(() => this.scrollToBottom(true));
+      requestAnimationFrame(() => {
+        this.scrollToBottom(true);
+      });
     });
   }
 

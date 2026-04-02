@@ -181,7 +181,7 @@ export class CredentialComponent implements OnInit {
     this.fetchRanked();
   }
 
-  resetFilters(_: void) {
+  resetFilters(_: undefined) {
     this.fetchSearchResults(true);
     this.fetchRanked();
   }

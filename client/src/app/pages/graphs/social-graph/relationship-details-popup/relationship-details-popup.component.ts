@@ -11,7 +11,7 @@ import { buildSocialProfileUrl } from '../utils/profile-url.util';
 })
 export class RelationshipDetailsPopupComponent {
   data = input.required<RelationshipPopupData>();
-  close = output<void>();
+  close = output<undefined>();
 
   trackByConnection(_index: number, item: RelationshipConnectionItem): string {
     return `${item.sourceUser}|${item.sourcePlatform}|${item.sourceUsername}|${item.targetUser}|${item.relation}`;

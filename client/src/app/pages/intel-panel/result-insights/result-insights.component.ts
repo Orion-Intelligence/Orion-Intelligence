@@ -170,7 +170,9 @@ export class ResultInsightsComponent implements OnInit {
       ['m_clearnet_links', 'm_weblink', 'm_dumplink', 'm_source_url'].forEach(field => {
         const links = item[field];
         if (Array.isArray(links)) {
-          links.forEach(link => addToMap(link, item.m_title, item.m_creation_date));
+          links.forEach(link => {
+            addToMap(link, item.m_title, item.m_creation_date);
+          });
         }
       });
     });

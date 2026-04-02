@@ -42,7 +42,9 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   toggleEdit(event: Event) {
-    this.isEditing = toggleEditState(event, this.isEditing, () => this.updateUser());
+    this.isEditing = toggleEditState(event, this.isEditing, () => {
+      this.updateUser();
+    });
   }
 
   getLocationDisplay(): string {
@@ -60,12 +62,7 @@ export class TenantSettingsComponent implements OnInit {
       postal_code: this.userSessionData.tenant.postalCode,
       iocs: []
     };
-    this.apiService.post(route, tenantData).subscribe({
-      next: () => {
-      },
-      error: (_) => {
-      },
-    });
+    this.apiService.post(route, tenantData).subscribe();
   }
 
   cancelEdit(event: Event) {

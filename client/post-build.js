@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const sourceDir = path.resolve(__dirname, 'build');
 const targetDir = path.resolve(__dirname, '../backend/build');

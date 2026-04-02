@@ -3,11 +3,11 @@ import { Observable, throwError, timer, EMPTY } from 'rxjs';
 import { catchError, expand, filter, map, retry, switchMap, take, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
 import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
-type ApiEnvelope<T> = {
-    status?: 'success' | 'error' | string;
+interface ApiEnvelope<T> {
+    status?: string;
     message?: any;
     result?: T;
-};
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -19,7 +19,7 @@ export class SocialScanService {
       return { allMetadata: {} };
     }
     const platformData = data;
-    if (!platformData || !platformData.ids) {
+    if (!platformData?.ids) {
       return { allMetadata: platformData };
     }
     const ids = platformData.ids;
@@ -39,6 +39,7 @@ export class SocialScanService {
         });
       }
       catch (_) {
+        // Ignore invalid date strings and keep the raw metadata.
       }
     }
     return result;
@@ -60,7 +61,7 @@ export class SocialScanService {
   }
 
   private emitPendingProgress(subscriber: any, res: any): void {
-    if (res && res.step) {
+    if (res?.step) {
       subscriber.next({
         type: 'progress',
         payload: { progress: res.progress || 0, step: res.step }
@@ -88,6 +89,7 @@ export class SocialScanService {
         }
       }
       catch {
+        // Ignore malformed URLs and fall back to the current platform value.
       }
     }
     return platform;
@@ -126,11 +128,16 @@ export class SocialScanService {
       subscriber.next({ type: 'progress', payload: { progress: 10, step: opts.submitStep } });
       const pollingSub = this.pollForResult<{
                 data?: any[];
-            } | any, PlatformResult[]>({
+                result?: any;
+                step?: string;
+                progress?: number;
+            }, PlatformResult[]>({
               request: opts.request,
               isReady: (res) => !!res && 'result' in (res as any),
               mapResult: opts.mapResult,
-              onPending: (res: any) => this.emitPendingProgress(subscriber, res),
+              onPending: (res: any) => {
+                this.emitPendingProgress(subscriber, res);
+              },
               initialDelayMs: opts.initialDelayMs,
               intervalMs: opts.intervalMs
             }).subscribe({
@@ -139,9 +146,13 @@ export class SocialScanService {
                 subscriber.next({ type: 'complete', payload: platforms });
                 subscriber.complete();
               },
-              error: (err) => subscriber.error(err)
+              error: (err) => {
+                subscriber.error(err);
+              }
             });
-      return () => pollingSub.unsubscribe();
+      return () => {
+        pollingSub.unsubscribe();
+      };
     });
   }
 
@@ -149,7 +160,7 @@ export class SocialScanService {
     return this.runScanFlow({
       submitStep: 'Submitting job to API...',
       request: () => this.api.post<any>('social/recon', { query: username }),
-      mapResult: (res) => this.mapScanItems((res as any).result || [], username, (item: any) => this.inferPlatformName(item, username)),
+      mapResult: (res) => this.mapScanItems(res.result || [], username, (item: any) => this.inferPlatformName(item, username)),
       initialDelayMs: 1000,
       intervalMs: 2000
     });
@@ -160,7 +171,7 @@ export class SocialScanService {
     return this.runScanFlow({
       submitStep: 'Submitting image to API...',
       request: () => this.api.post<any>('social/recon/image', { image_base64: base64Image }),
-      mapResult: (res) => this.mapScanItems((res as any).result || [], username, (item: any) => item?.metadata?.platform || ''),
+      mapResult: (res) => this.mapScanItems(res.result || [], username, (item: any) => item?.metadata?.platform || ''),
       initialDelayMs: 2000,
       intervalMs: 3000
     });
@@ -237,12 +248,12 @@ export class SocialScanService {
         return { cards_data: [] };
       }
       const normalized = (res && typeof res === 'object')
-        ? ((res as any).data ?? (res as any).result ?? res)
+        ? (res.data ?? (res as any).result ?? res)
         : res;
-      const cards = Array.isArray((normalized as any)?.cards_data)
-        ? (normalized as any).cards_data
-        : Array.isArray((normalized as any)?.result)
-          ? (normalized as any).result
+      const cards = Array.isArray(normalized?.cards_data)
+        ? normalized.cards_data
+        : Array.isArray(normalized?.result)
+          ? normalized.result
           : [];
       return { cards_data: cards };
     }),

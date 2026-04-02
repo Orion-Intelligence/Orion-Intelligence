@@ -69,9 +69,9 @@ export class FileScannerComponent {
   }
 
   onFileSelected(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    if (target.files?.[0]) {
-      this.handleFileSelect(target.files[0]);
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement.files?.[0]) {
+      this.handleFileSelect(inputElement.files[0]);
     }
   }
 
@@ -333,8 +333,8 @@ export class FileScannerComponent {
   }
 
   triggerFileInput(): void {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    fileInput?.click();
+    const fileInputElement = document.getElementById('fileInput') as HTMLInputElement;
+    fileInputElement?.click();
   }
 
   closeError(): void {

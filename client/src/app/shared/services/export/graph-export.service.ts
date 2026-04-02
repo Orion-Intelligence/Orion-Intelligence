@@ -7,7 +7,7 @@ import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPay
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
   private pdfLibs$: Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
-  private loadedAutoTable: typeof import('jspdf-autotable').default | null = null;
+  private loadedAutoTable: unknown = null;
 
   protected readonly SECTION_RADIUS = 4;
   protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
@@ -46,7 +46,7 @@ export class GraphExportService {
     if (!this.loadedAutoTable) {
       throw new Error('PDF export library not loaded');
     }
-    return this.loadedAutoTable;
+    return this.loadedAutoTable as typeof import('jspdf-autotable').default;
   }
 
   private exportGraphPdf(payload: GraphReportPayload): void {

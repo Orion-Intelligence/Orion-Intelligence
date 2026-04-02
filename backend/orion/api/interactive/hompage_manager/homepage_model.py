@@ -276,6 +276,6 @@ class homepage_model:
             try:
                 dt = datetime.strptime(raw_date, fmt)
                 return dt.strftime("%B %d, %Y")
-            except Exception:
+            except (TypeError, ValueError):
                 continue
         return None

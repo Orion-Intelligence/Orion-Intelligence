@@ -243,7 +243,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onGraphSearchChanged(event: Event) {
-    this.graphSearchTerm.set((event.target as HTMLInputElement).value); 
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.graphSearchTerm.set(nextValue); 
   }
 
   toggleGraphSearch() {
@@ -266,7 +267,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onPlatformAliasInputChanged(event: Event) {
-    this.platformAliasInput.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.platformAliasInput.set(nextValue);
   }
 
   closePlatformAliasModal() {
@@ -413,7 +415,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         const newMap = new Map(currentMap); newMap.delete(username); return newMap; 
       });
     });
-    this.graphOrchestrator.removeUserFromGraph(this.activeTabState()!, username);
+    this.graphOrchestrator.removeUserFromGraph(this.activeTabState(), username);
   }
 
   fetchProfileDetails(p: PlatformResult) {
@@ -724,7 +726,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       this.state.openInfoModal('warning', 'Maximum Node Limit Reached', 'The graph has reached its maximum capacity of 300 nodes. Please remove some nodes before adding more.');
       return;
     }
-    await this.graphOrchestrator.updateGraphFromModal(this.activeTabState()!, username, selectedPlatforms);
+    await this.graphOrchestrator.updateGraphFromModal(this.activeTabState(), username, selectedPlatforms);
     this.tabManager.scheduleSave();
   }
 
@@ -743,11 +745,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const handlers: Record<ContextMenuAction, () => void> = {
       fetchLinks: () => this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'),
       clearConnections: () => {
-        this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username);
+        this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState(), username);
         this.tabManager.scheduleSave();
       },
       deleteProfile: () => {
-        this.graphOrchestrator.removeUserFromGraph(this.activeTabState()!, username);
+        this.graphOrchestrator.removeUserFromGraph(this.activeTabState(), username);
         this.tabManager.scheduleSave();
       },
       setAlias: () => {
@@ -760,7 +762,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         this.platformAliasInput.set(currentAlias);
       },
       removeNode: () => {
-        this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId);
+        this.graphOrchestrator.removeSingleNode(this.activeTabState(), nodeId);
         this.tabManager.scheduleSave();
       },
       deleteEntity: () => {
@@ -785,12 +787,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleEdgeAdded( edge: { from: string; to: string; } ) {
-    this.graphOrchestrator.addEdge(this.activeTabState()!, edge);
+    this.graphOrchestrator.addEdge(this.activeTabState(), edge);
     this.tabManager.scheduleSave();
   }
 
   handleEdgeDeleted( { edges }: { edges: string[]; } ) {
-    this.graphOrchestrator.deleteEdges(this.activeTabState()!, edges);
+    this.graphOrchestrator.deleteEdges(this.activeTabState(), edges);
     this.tabManager.scheduleSave();
   }
 
@@ -799,7 +801,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (!wasPhysicsEnabled) {
       this.updateState(state => state.isPhysicsEnabled.set(true), false);
     }
-    await this.graphOrchestrator.handleGroupNodeClicked(this.activeTabState()!, { nodeId, position });
+    await this.graphOrchestrator.handleGroupNodeClicked(this.activeTabState(), { nodeId, position });
     this.tabManager.scheduleSave();
     if (!wasPhysicsEnabled) {
       setTimeout(() => {

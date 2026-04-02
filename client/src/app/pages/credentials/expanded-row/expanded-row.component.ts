@@ -2,11 +2,11 @@ import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
-type TelemetryGroup = {
+interface TelemetryGroup {
     key: string;
     label: string;
     values: string[];
-};
+}
 @Component({
   selector: 'app-expanded-row',
   standalone: true,

@@ -21,7 +21,7 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
 
   data = input.required<PlatformResult>();
   isScanInProgress = input<boolean>(false);
-  close = output<void>();
+  close = output<undefined>();
   fetchProfile = output<PlatformResult>();
   fetchPosts = output<PlatformResult>();
   fetchImages = output<PlatformResult>();
@@ -77,7 +77,7 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   }
 
   onClose() {
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   getMetadataEntries(): {

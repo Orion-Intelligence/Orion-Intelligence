@@ -81,7 +81,9 @@ export class AlertNotificationComponent implements OnChanges {
         if (reset && nextPage === 1 && items.length === 0 && attempt < 3) {
           this.isLoadingMore = false;
           this.isLoadMoreTriggered = false;
-          setTimeout(() => this.fetchNotifications(true, attempt + 1), 800);
+          setTimeout(() => {
+            this.fetchNotifications(true, attempt + 1);
+          }, 800);
           return;
         }
         this.totalCount = response?.total || 0;

@@ -7,13 +7,13 @@ import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AppService } from '../core/app/app.service';
 import { AuthService } from '../authetication/auth.service';
-type CombinedRule = {
+interface CombinedRule {
     modules: Set<string> | 'all';
     cti_graph: boolean;
     mapping: boolean;
     scanning: boolean;
     maintainer: boolean;
-};
+}
 @Injectable({
   providedIn: 'root'
 })

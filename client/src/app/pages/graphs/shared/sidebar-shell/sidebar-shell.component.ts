@@ -17,7 +17,7 @@ export class SidebarShellComponent {
   isCollapsed = input.required<boolean>();
   logoAlt = input('Orion Intelligence');
   homeHref = input('/');
-  toggleClicked = output<void>();
+  toggleClicked = output<undefined>();
 
   get logoSrc(): string {
     const settings = this.appService.getConfig().appSettings;

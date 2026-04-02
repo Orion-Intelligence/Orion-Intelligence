@@ -122,14 +122,14 @@ export class ScrollService {
     const dashboardBodyPosition = parseInt(savedDashboardBodyPosition ?? '0', 10);
     const applyScroll = () => {
       const dashboardContainer = document.getElementById('dashboard-container');
-      const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+      const dashboardBodyElement = document.querySelector<HTMLElement>('[data-testid="dashboard-body"]');
       const documentElement = document.documentElement;
       const body = document.body;
       if (dashboardContainer) {
         dashboardContainer.scrollTop = containerPosition;
       }
-      if (dashboardBody) {
-        dashboardBody.scrollTop = dashboardBodyPosition;
+      if (dashboardBodyElement) {
+        dashboardBodyElement.scrollTop = dashboardBodyPosition;
       }
       if (documentElement) {
         documentElement.scrollTop = documentPosition;

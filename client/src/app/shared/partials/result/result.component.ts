@@ -114,12 +114,12 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onTabClick(event: Event): void {
-    const target = event.target as HTMLElement | null;
-    const tabEl = target?.closest('[data-tab]') as HTMLElement | null;
-    if (!tabEl) {
+    const eventTargetElement = event.target as HTMLElement | null;
+    const tabElement = eventTargetElement?.closest('[data-tab]') as HTMLElement | null;
+    if (!tabElement) {
       return;
     }
-    const tab = tabEl.getAttribute('data-tab') || '';
+    const tab = tabElement.getAttribute('data-tab') || '';
     if (!tab || tab === this.activeTab) {
       return;
     }
@@ -269,9 +269,9 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onSearchInput(event: Event): void {
-    const target = event.target as HTMLInputElement | null;
-    if (target) {
-      this.local_query = target.value;
+    const inputElement = event.target as HTMLInputElement | null;
+    if (inputElement) {
+      this.local_query = inputElement.value;
     }
     this.homeSearchService.handleSearchInput(event);
   }
@@ -279,9 +279,9 @@ export class ResultComponent implements OnInit, OnChanges {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
-    const target = event.target as Node | null;
-    const isInsideSort = !!(target && this.sortMenuRef?.nativeElement?.contains(target));
-    const isInsideSearch = !!(target && this.searchMenuRef?.nativeElement?.contains(target));
+    const eventTargetNode = event.target as Node | null;
+    const isInsideSort = !!(eventTargetNode && this.sortMenuRef?.nativeElement?.contains(eventTargetNode));
+    const isInsideSearch = !!(eventTargetNode && this.searchMenuRef?.nativeElement?.contains(eventTargetNode));
     if (!isInsideSort && !isInsideSearch) {
       this.closeMenus();
     }
@@ -290,10 +290,10 @@ export class ResultComponent implements OnInit, OnChanges {
   clearSearchInput(): void {
     this.searchQuery = '';
     this.local_query = '';
-    const input = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
-    if (input) {
-      input.value = '';
-      input.focus();
+    const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    if (inputElement) {
+      inputElement.value = '';
+      inputElement.focus();
     }
     this.updateQuery.emit('');
     this.init_domains();

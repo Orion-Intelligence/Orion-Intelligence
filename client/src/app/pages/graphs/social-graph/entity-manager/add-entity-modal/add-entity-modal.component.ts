@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, effect, computed } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { CustomEntity } from '../../../../../shared/model/social/social-scan.models';
-export type AddEntityData = {
+export interface AddEntityData {
     type: CustomEntity['type'];
     value: string;
     label: string;
@@ -9,7 +9,7 @@ export type AddEntityData = {
     entityId?: string;
     inputMode?: 'manual' | 'api';
     apiQuery?: string;
-};
+}
 @Component({
   selector: 'app-add-entity-modal',
   standalone: true,
@@ -19,7 +19,7 @@ export type AddEntityData = {
 })
 export class AddEntityModalComponent {
   data = input.required<AddEntityData | null>();
-  close = output<void>();
+  close = output<undefined>();
   addEntity = output<AddEntityData>();
   entityValue = signal('');
   entityLabel = signal('');
@@ -41,16 +41,19 @@ export class AddEntityModalComponent {
 
   onEntityValueChange(event: Event) {
     this.isTouched.set(true);
-    this.entityValue.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.entityValue.set(nextValue);
   }
 
   onEntityLabelChange(event: Event) {
-    this.entityLabel.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.entityLabel.set(nextValue);
   }
 
   onApiQueryChange(event: Event) {
     this.isTouched.set(true);
-    this.apiQuery.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.apiQuery.set(nextValue);
   }
 
   setInputMode(mode: 'manual' | 'api') {
