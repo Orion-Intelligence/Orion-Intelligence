@@ -20,8 +20,8 @@ export class SelectedFilterBarComponent implements OnInit {
   maxVisibleTags = 8;
   Object: any;
   readonly showSorting = input.required<boolean>();
-  readonly clearAll = output<void>();
-  readonly searchFiltersChange = output<void>();
+  readonly clearAll = output<undefined>();
+  readonly searchFiltersChange = output<undefined>();
 
   get selectedFilters() {
     return this.dashboardService.selectedFilters();
@@ -50,7 +50,7 @@ export class SelectedFilterBarComponent implements OnInit {
     });
     this.app_service.set('matchType', "or");
     // TODO: The 'emit' function requires a mandatory void argument
-    this.clearAll.emit();
+    this.clearAll.emit(undefined);
   }
 
   clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
@@ -66,7 +66,7 @@ export class SelectedFilterBarComponent implements OnInit {
       this.app_service.set('matchType', "or");
     }
     // TODO: The 'emit' function requires a mandatory void argument
-    this.clearAll.emit();
+    this.clearAll.emit(undefined);
   }
 
   removeEntityTypeFilterTag(tagToRemoveId: string) {
@@ -82,7 +82,7 @@ export class SelectedFilterBarComponent implements OnInit {
     }
     this.app_service.set('entityfilterCategories', categories);
     // TODO: The 'emit' function requires a mandatory void argument
-    this.searchFiltersChange.emit();
+    this.searchFiltersChange.emit(undefined);
   }
 
   toggleFilterBarCollapse(): void {

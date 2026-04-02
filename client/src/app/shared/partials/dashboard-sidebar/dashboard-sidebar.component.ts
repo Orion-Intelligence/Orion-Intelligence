@@ -46,7 +46,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   tenantCategories = Object.values(TenantSubCategory);
   profileCategories = Object.values(ProfileSubCategory);
   category = Category;
-  readonly menuToggle = output<void>();
+  readonly menuToggle = output<undefined>();
 
   constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
@@ -175,7 +175,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   onToggleSidebar(mobile_menu_status: boolean = false) {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.menuToggle.emit();
+    this.menuToggle.emit(undefined);
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status;
   }

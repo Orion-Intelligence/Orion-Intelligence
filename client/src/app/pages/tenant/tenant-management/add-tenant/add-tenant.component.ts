@@ -27,8 +27,8 @@ export class AddTenantComponent implements OnInit {
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();
   currentUnmetCheck: string | null = null;
   confirmPassword = '';
-  readonly closs = output<void>();
-  readonly accountAdded = output<void>();
+  readonly closs = output<undefined>();
+  readonly accountAdded = output<undefined>();
 
   constructor(public apiService: ApiService, private appService: AppService, protected licenseService: LicenseService) {
   }
@@ -67,7 +67,7 @@ export class AddTenantComponent implements OnInit {
     this.apiService.post(endpoint, this.model).subscribe({
       next: () => {
         // TODO: The 'emit' function requires a mandatory void argument
-        this.accountAdded.emit();
+        this.accountAdded.emit(undefined);
         this.onClose();
       },
       error: err => {
@@ -88,7 +88,7 @@ export class AddTenantComponent implements OnInit {
 
   onClose() {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.closs.emit();
+    this.closs.emit(undefined);
   }
 
   get hasFullLicenseAccess(): boolean {

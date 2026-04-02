@@ -92,10 +92,10 @@ export class ResultComponent implements OnInit, OnChanges {
   readonly showSelectedFilters = input<boolean>(true);
   activeTab: string = 'IOCs';
   readonly reloadSearchFilters = output<FilterCategory[]>();
-  readonly resetFilter = output<void>();
+  readonly resetFilter = output<undefined>();
   readonly onToggleSwitch = output<string>();
   readonly reloadFilters = output<Record<string, string | null>>();
-  readonly reloadData = output<void>();
+  readonly reloadData = output<undefined>();
   readonly updateQuery = output<string>();
   readonly onToggleSort = output<SortType>();
 
@@ -186,7 +186,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.showScans = false;
     this.updateQuery.emit(query);
     // TODO: The 'emit' function requires a mandatory void argument
-    this.reloadData.emit();
+    this.reloadData.emit(undefined);
     this.init_domains();
   }
 

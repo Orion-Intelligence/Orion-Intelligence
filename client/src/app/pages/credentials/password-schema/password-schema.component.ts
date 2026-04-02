@@ -11,7 +11,7 @@ import { AppService } from '../../../services/core/app/app.service';
 export class PasswordSchemaComponent {
   filter: PasswordSchemaFilter = { minLength: null, maxLength: null, hasAlphabets: false, hasNumbers: false, hasSpecialChars: false };
   readonly isOpen = input(false);
-  readonly close = output<void>();
+  readonly close = output<undefined>();
   readonly search = output<PasswordSchemaFilter>();
 
   constructor(private appService: AppService) {}
@@ -24,12 +24,12 @@ export class PasswordSchemaComponent {
     this.normalizeRange();
     this.search.emit(this.filter);
     // TODO: The 'emit' function requires a mandatory void argument
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   onClose() {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   @HostListener('document:click', ['$event'])
@@ -37,7 +37,7 @@ export class PasswordSchemaComponent {
     const eventTargetElement = event.target as HTMLElement;
     if (this.isOpen() && eventTargetElement.classList.contains('password-schema-overlay')) {
       // TODO: The 'emit' function requires a mandatory void argument
-      this.close.emit();
+      this.close.emit(undefined);
     }
   }
 

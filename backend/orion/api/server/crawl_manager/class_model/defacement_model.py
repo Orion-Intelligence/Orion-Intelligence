@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
-from pydantic.v1 import Extra
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CardExtractionModel(BaseModel):
@@ -18,8 +17,7 @@ class CardExtractionModel(BaseModel):
     m_network: Optional[str] = None
     m_mirror_links: Optional[List[str]] = Field(default_factory=list)
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 class DefacementDataModel(BaseModel):

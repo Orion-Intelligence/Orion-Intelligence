@@ -520,7 +520,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.selectedCountryReports = [];
     this.selectedCountryPage = 1;
     this.hasMoreCountryReports = false;
-    this.fetchCountryReportsPage(1, false);
+    void this.fetchCountryReportsPage(1, false);
   }
 
   closeCountryReport(): void {

@@ -25,8 +25,8 @@ export class FiltersComponent implements OnInit {
   filterModel!: FilterModel;
   readonly isFilterOpen = input.required<boolean | null>();
   readonly filterChanged = output<Record<string, string | null>>();
-  readonly filterReset = output<void>();
-  readonly filterClose = output<void>();
+  readonly filterReset = output<undefined>();
+  readonly filterClose = output<undefined>();
 
   constructor(protected dashboard: DashboardService, private scrollService: ScrollService) {
     effect(() => {
@@ -72,7 +72,7 @@ export class FiltersComponent implements OnInit {
 
   closeFilter() {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.filterClose.emit();
+    this.filterClose.emit(undefined);
   }
 
   resetFilters() {
@@ -80,7 +80,7 @@ export class FiltersComponent implements OnInit {
     this.dashboard.selectedFilters.set({});
     this.filterChanged.emit({ ...this.selectedFilters });
     // TODO: The 'emit' function requires a mandatory void argument
-    this.filterReset.emit();
+    this.filterReset.emit(undefined);
     this.closeFilter();
   }
 

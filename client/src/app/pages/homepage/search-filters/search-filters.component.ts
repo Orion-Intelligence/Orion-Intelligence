@@ -30,8 +30,8 @@ export class SearchFiltersComponent implements OnInit {
   showRightFade = false;
   readonly showSorting = input.required<boolean>();
   readonly homePage = input<boolean>(false);
-  readonly checkDomain = output<void>();
-  readonly searchFiltersChange = output<void>();
+  readonly checkDomain = output<undefined>();
+  readonly searchFiltersChange = output<undefined>();
 
   constructor(public helperService: HelperService, public app_service: AppService, private suggestionService: SuggestionService) {
   }
@@ -84,7 +84,7 @@ export class SearchFiltersComponent implements OnInit {
     this.showSuggestions = false;
     if (this.checkDomain) {
       // TODO: The 'emit' function requires a mandatory void argument
-      this.checkDomain.emit();
+      this.checkDomain.emit(undefined);
     }
   }
 
@@ -105,7 +105,7 @@ export class SearchFiltersComponent implements OnInit {
     }
     this.app_service.set('entityfilterCategories', this.app_service.getConfig().localSettings.entityfilterCategories);
     // TODO: The 'emit' function requires a mandatory void argument
-    this.searchFiltersChange.emit();
+    this.searchFiltersChange.emit(undefined);
   }
 
   clearSelection() {

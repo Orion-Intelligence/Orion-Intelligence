@@ -324,7 +324,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return;
     }
     const { input, file } = selected;
-    readFileAsDataUrl(file)
+    void readFileAsDataUrl(file)
       .then((dataUrl) => {
         const base64Image = dataUrl.split(',')[1];
         if (base64Image) {

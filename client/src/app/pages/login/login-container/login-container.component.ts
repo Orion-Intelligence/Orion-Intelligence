@@ -81,7 +81,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   copyToClipboard(text: string): void {
-    navigator.clipboard.writeText(text).then(() => {
+    void navigator.clipboard.writeText(text).then(() => {
       this.copied = true;
     });
   }

@@ -16,14 +16,14 @@ export class ProSubscriptionComponent {
   userEmail: string = '';
   submitted = false;
   readonly permanent = input(false);
-  readonly close = output<void>();
+  readonly close = output<undefined>();
 
   constructor(private api: ApiService, private router: Router) {
   }
 
   closePopup() {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   submitForm() {

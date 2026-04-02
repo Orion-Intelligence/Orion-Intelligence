@@ -10,14 +10,14 @@ export class HeatmapReportComponent {
   readonly loading = input(false);
   readonly loadingMore = input(false);
   readonly hasMore = input(false);
-  readonly close = output<void>();
-  readonly loadMore = output<void>();
+  readonly close = output<undefined>();
+  readonly loadMore = output<undefined>();
 
   closePopup(event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
     // TODO: The 'emit' function requires a mandatory void argument
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   onLoadMore(event?: Event): void {
@@ -27,6 +27,6 @@ export class HeatmapReportComponent {
       return;
     }
     // TODO: The 'emit' function requires a mandatory void argument
-    this.loadMore.emit();
+    this.loadMore.emit(undefined);
   }
 }

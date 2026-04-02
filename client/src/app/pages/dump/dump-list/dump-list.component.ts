@@ -58,6 +58,6 @@ export class DumpListComponent implements OnInit {
   }
 
   copyRowData(item: any): void {
-    navigator.clipboard.writeText(item).then();
+    void navigator.clipboard.writeText(item);
   }
 }

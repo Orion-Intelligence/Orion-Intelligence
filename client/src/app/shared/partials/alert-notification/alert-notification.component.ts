@@ -33,7 +33,7 @@ export class AlertNotificationComponent implements OnChanges {
   isExportChoiceOpen: boolean = false;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
   readonly isNotificationOpen = input.required<boolean | null>();
-  readonly closeNotification = output<void>();
+  readonly closeNotification = output<undefined>();
 
   constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService) {
   }
@@ -222,7 +222,7 @@ export class AlertNotificationComponent implements OnChanges {
 
   close() {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.closeNotification.emit();
+    this.closeNotification.emit(undefined);
   }
 
   clearAll() {

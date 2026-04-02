@@ -31,7 +31,7 @@ export class ScanHelperMethods implements OnDestroy {
   cancelRequested = false;
   showInvalid = false;
   readonly isOpen = input(false);
-  readonly close = output<void>();
+  readonly close = output<undefined>();
   readonly search = output<string[]>();
 
   get isLightTheme(): boolean {
@@ -154,7 +154,7 @@ export class ScanHelperMethods implements OnDestroy {
   onClose(): void {
     this.resetState();
     // TODO: The 'emit' function requires a mandatory void argument
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   cancelScan(): void {

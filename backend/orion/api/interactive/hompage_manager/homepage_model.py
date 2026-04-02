@@ -38,7 +38,7 @@ class homepage_model:
     @staticmethod
     async def insight_consolidated_result():
         redis_instance = redis_controller.getInstance()
-        redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}:latest_document_v1"
+        redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}"
         cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
         if cached:
             try:

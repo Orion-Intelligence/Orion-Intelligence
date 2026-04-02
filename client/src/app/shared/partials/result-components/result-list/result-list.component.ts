@@ -21,7 +21,7 @@ export class ResultListComponent {
   }
 
   copyText(text: string, index: number): void {
-    navigator.clipboard.writeText(text).then(() => {
+    void navigator.clipboard.writeText(text).then(() => {
       this.copiedIndex = index;
       setTimeout(() => {
         this.copiedIndex = null;

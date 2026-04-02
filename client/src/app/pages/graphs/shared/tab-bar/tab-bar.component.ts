@@ -127,7 +127,7 @@ export class TabBarComponent {
     }
     const { input, file } = selected;
     this.closeMenus();
-    readFileAsText(file)
+    void readFileAsText(file)
       .then((content) => {
         try {
           tabManager.importTab(content);

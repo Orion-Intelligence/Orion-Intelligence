@@ -17,14 +17,14 @@ export class SupportComponent {
   submitAttempted = false;
   errorMessage: string | null = null;
   supportModel = { email: '', subject: '', message: '' };
-  readonly closePopup = output<void>();
+  readonly closePopup = output<undefined>();
 
   constructor( private apiService: ApiService, private messageNotificationService: MessageNotificationService ) { }
 
   close() {
     this.resetForm();
     // TODO: The 'emit' function requires a mandatory void argument
-    this.closePopup.emit();
+    this.closePopup.emit(undefined);
   }
 
   submit() {

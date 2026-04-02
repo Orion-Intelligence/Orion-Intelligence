@@ -142,7 +142,7 @@ class SignupManager:
             raise e
         except Exception:
             raise HTTPException(status_code=422, detail="Invalid data")
-        
+
     @staticmethod
     async def send_support_mail(data: SupportRequest):
         email=data.email or ""

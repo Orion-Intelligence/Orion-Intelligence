@@ -26,7 +26,7 @@ export class JsonApiViewerComponent {
       return;
     }
     const payload = JSON.stringify(jsonData, null, 2);
-    navigator.clipboard?.writeText(payload).then(() => {
+    void navigator.clipboard?.writeText(payload).then(() => {
       this.copied = true;
       if (this.copyTimer) {
         clearTimeout(this.copyTimer);

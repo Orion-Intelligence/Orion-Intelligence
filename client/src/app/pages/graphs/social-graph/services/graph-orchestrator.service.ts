@@ -136,7 +136,7 @@ export class GraphOrchestratorService {
     state.activeUsernames.update(s => new Set(s).add(username));
     const addNodeSequentially = (index: number) => {
       if (index >= platformNodes.length) {
-        this.updateUserConnections(state).then();
+        void this.updateUserConnections(state);
         return;
       }
       const node = platformNodes[index], edge = { id: `${centralNodeId}->${node.id}`, from: centralNodeId, to: node.id };

@@ -40,11 +40,11 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   readonly coordinates = input('');
   readonly radiusKm = input(25);
   readonly maxIps = input(200);
-  readonly close = output<void>();
+  readonly close = output<undefined>();
   readonly coordinatesChange = output<string>();
   readonly radiusKmChange = output<number>();
   readonly maxIpsChange = output<number>();
-  readonly search = output<void>();
+  readonly search = output<undefined>();
 
   get parsedCoordinates(): { lat: number; lon: number } | null {
     return this.parseCoordinates(this.coordinates());
@@ -79,12 +79,12 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
   onClose(): void {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   onSearch(): void {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.search.emit();
+    this.search.emit(undefined);
   }
 
   onRadiusKmChange(value: number | string | null | undefined): void {
@@ -225,7 +225,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   onEscape(): void {
     if (this.isOpen()) {
       // TODO: The 'emit' function requires a mandatory void argument
-      this.close.emit();
+      this.close.emit(undefined);
     }
   }
 

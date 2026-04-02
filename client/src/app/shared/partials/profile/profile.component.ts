@@ -34,7 +34,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   licences: string = '';
   dropdownOpen = signal(false);
   isDarkTheme = true;
-  readonly openPopup = output<void>();
+  readonly openPopup = output<undefined>();
 
   constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
@@ -175,6 +175,6 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openSupportPopup() {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.openPopup.emit();
+    this.openPopup.emit(undefined);
   }
 }

@@ -17,13 +17,13 @@ export class ExportChoiceModalComponent {
   readonly overlayTestId = input('graph-report-export-overlay');
   readonly modalTestId = input('graph-report-export-modal');
   readonly closeTestId = input('graph-report-export-close');
-  readonly closed = output<void>();
+  readonly closed = output<undefined>();
   readonly optionSelected = output<string>();
 
   onOverlayClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('export-choice-overlay')) {
       // TODO: The 'emit' function requires a mandatory void argument
-      this.closed.emit();
+      this.closed.emit(undefined);
     }
   }
 
