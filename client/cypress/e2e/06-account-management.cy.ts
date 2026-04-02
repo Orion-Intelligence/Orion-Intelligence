@@ -1,19 +1,5 @@
-const defaultUserKey = 'testing4';
-let defaultUser: any = {};
-let resetEmail = 'd@hotmail.com';
-let newPassword: string | undefined;
-
 describe('Orion Intelligence - Account Settings and Password Reset Flow', () => {
     before(() => {
-        cy.env(['TEST_USERS', 'RESET_PASSWORD_EMAIL', 'NEW_PASSWORD']).then(({TEST_USERS, RESET_PASSWORD_EMAIL, NEW_PASSWORD}) => {
-            const testUsers = TEST_USERS || {};
-            defaultUser = testUsers[defaultUserKey] || {};
-            resetEmail = RESET_PASSWORD_EMAIL || 'd@hotmail.com';
-            newPassword = NEW_PASSWORD;
-            if (!defaultUser?.username || !defaultUser?.password || !resetEmail || !newPassword) {
-                throw new Error('Missing required account/password env values in cypress.config.ts');
-            }
-        });
         cy.loginAsTest1();
     });
 
@@ -22,7 +8,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
     });
 
     it('updates avatar/theme/2FA and validates reset password journey', () => {
-        const resolvedNewPassword = newPassword ?? '';
+        const resolvedNewPassword = Cypress.env('NEW_PASSWORD') ?? '';
         cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click({scrollBehavior: false});
         cy.get('[data-testid="sidebar-subitem-profile-account"]').should('be.visible').click({scrollBehavior: false});
         cy.location('pathname').should('include', '/dashboard/profile/account');
@@ -49,8 +35,8 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
         cy.logout();
 
         cy.visit('/login');
-        cy.get('[data-testid="login-user"]').clear().type(defaultUser.username);
-        cy.get('[data-testid="login-pass"]').clear().type(defaultUser.password, {log: false});
+        cy.get('[data-testid="login-user"]').clear().type(Cypress.env('TEST_USERS').testing4.username);
+        cy.get('[data-testid="login-pass"]').clear().type(Cypress.env('TEST_USERS').testing4.password, {log: false});
         cy.get('[data-testid="login-button"]').click();
         cy.get('[data-testid="twofa-center"], .twofa-center').should('be.visible');
         cy.get('img[alt="2FA QR"]').should('exist');
@@ -60,7 +46,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
         cy.visit('/');
         cy.clearAllEmails();
         cy.contains('[data-testid="reset-password-link"], span.reset-password', 'Reset password?').click();
-        cy.get('[data-testid="reset-companymail"]').clear().type(resetEmail);
+        cy.get('[data-testid="reset-companymail"]').clear().type(Cypress.env('TEST_USERS').testing3.email);
         cy.get('[data-testid="reset-submit"]').click();
 
         cy.get('body').then(($body) => {
@@ -73,15 +59,15 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 cy.visit(url);
             });
             cy.url().should('include', '/reset');
-            cy.get('[data-testid="reset-password"]').clear().type(defaultUser.password, {log: false}).blur();
-            cy.get('[data-testid="reset-confirm-password"]').clear().type(defaultUser.password, {log: false}).blur();
+            cy.get('[data-testid="reset-password"]').clear().type(Cypress.env('TEST_USERS').testing3.password, {log: false}).blur();
+            cy.get('[data-testid="reset-confirm-password"]').clear().type(Cypress.env('TEST_USERS').testing3.password, {log: false}).blur();
             cy.get('[data-testid="reset-submit"]').click();
             cy.contains('New password must be different from the old one.').should('be.visible');
             cy.get('[data-testid="reset-password"]').clear().type(resolvedNewPassword, {log: false}).blur();
             cy.get('[data-testid="reset-confirm-password"]').clear().type(resolvedNewPassword, {log: false}).blur();
             cy.get('[data-testid="reset-submit"]').click();
             cy.url().should('include', '/login');
-            cy.get('[data-testid="login-user"]').clear().type(defaultUser.username);
+            cy.get('[data-testid="login-user"]').clear().type(Cypress.env('TEST_USERS').testing3.username);
             cy.get('[data-testid="login-pass"]').clear().type(resolvedNewPassword, {log: false});
             cy.get('[data-testid="login-button"]').click();
         });
