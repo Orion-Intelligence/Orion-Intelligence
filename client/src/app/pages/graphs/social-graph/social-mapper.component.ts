@@ -31,6 +31,7 @@ import { PlatformFetchService } from './services/platform-fetch.service';
 import { RelationshipResolverService } from './services/relationship-resolver.service';
 import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
+import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from './utils/social-graph-view.util';
 @Component({
   selector: 'app-social-graph',
   templateUrl: './social-mapper.component.html',
@@ -509,49 +510,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
   }
 
-  private parsePlatformNodeId(nodeId: string): {
-        keyUsername: string;
-        platformName: string;
-        platformUsername: string;
-    } | null {
-    if (!nodeId.startsWith('platform-')) {
-      return null;
-    }
-    const raw = nodeId.substring('platform-'.length);
-    const firstSep = raw.indexOf('|');
-    if (firstSep < 0) {
-      return null;
-    }
-    const secondSep = raw.indexOf('|', firstSep + 1);
-    if (secondSep < 0) {
-      return null;
-    }
-    const keyUsername = raw.slice(0, firstSep);
-    const platformName = raw.slice(firstSep + 1, secondSep);
-    const platformUsername = raw.slice(secondSep + 1);
-    return { keyUsername, platformName, platformUsername };
-  }
-
-  private getScanResultsByUsername(username: string): PlatformResult[] | undefined {
-    const direct = this.scanResults().get(username);
-    if (direct) {
-      return direct;
-    }
-    const normalized = username.toLowerCase();
-    for (const [key, value] of this.scanResults().entries()) {
-      if (key.toLowerCase() === normalized) {
-        return value;
-      }
-    }
-    return undefined;
-  }
-
   onNodeClicked(nodeId: string) {
     if (!nodeId.startsWith('user-')) {
       return;
     }
     const username = nodeId.replace('user-', '');
-    const allUserPlatforms = this.getScanResultsByUsername(username);
+    const allUserPlatforms = getScanResultsByUsername(this.scanResults(), username);
     if (!allUserPlatforms) {
       return;
     }
@@ -569,7 +533,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
             });
           }
           else if (connectedNode.id.toString().startsWith('platform-')) {
-            const parsed = this.parsePlatformNodeId(connectedNode.id.toString());
+            const parsed = parsePlatformNodeId(connectedNode.id.toString());
             if (!parsed) {
               return;
             }
@@ -613,70 +577,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   getEntityReportRecords(entity: CustomEntity): Record<string, unknown>[] {
-    const report = entity.reportData;
-    if (!report || typeof report !== 'object') {
-      return [];
-    }
-    const nestedResult = (report as any)?.result;
-    if (Array.isArray(nestedResult)) {
-      return nestedResult as Record<string, unknown>[];
-    }
-    if (Array.isArray(nestedResult?.result)) {
-      return nestedResult.result as Record<string, unknown>[];
-    }
-    if (nestedResult?.result && typeof nestedResult.result === 'object') {
-      return [nestedResult.result];
-    }
-    if (nestedResult && typeof nestedResult === 'object') {
-      return [nestedResult];
-    }
-    return [report];
+    return getEntityReportRecords(entity);
   }
 
   getEntityRecordEntries(record: Record<string, unknown>): { key: string; label: string; values: string[]; }[] {
-    return Object.entries(record)
-      .filter(([, value]) => value !== null && value !== undefined && !(Array.isArray(value) && value.length === 0))
-      .map(([key, value]) => ({
-        key,
-        label: this.toFieldLabel(key),
-        values: this.toDisplayValues(value)
-      }));
-  }
-
-  private toFieldLabel(key: string): string {
-    const normalized = key.replace(/^m_/, '').replace(/_/g, ' ').trim();
-    if (!normalized) {
-      return key;
-    }
-    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-  }
-
-  private toDisplayValues(value: unknown): string[] {
-    if (Array.isArray(value)) {
-      const values = value
-        .filter(item => item !== null && item !== undefined && `${item}`.trim() !== '')
-        .map(item => `${item}`);
-      return values.length > 0 ? values : ['-'];
-    }
-    return [this.toDisplayValue(value)];
-  }
-
-  private toDisplayValue(value: unknown): string {
-    if (value === null || value === undefined) {
-      return '-';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    if (typeof value === 'number' || typeof value === 'boolean') {
-      return String(value);
-    }
-    try {
-      return JSON.stringify(value, null, 2);
-    }
-    catch {
-      return String(value);
-    }
+    return getEntityRecordEntries(record);
   }
 
   onRelationshipNodeClicked(nodeId: string) {

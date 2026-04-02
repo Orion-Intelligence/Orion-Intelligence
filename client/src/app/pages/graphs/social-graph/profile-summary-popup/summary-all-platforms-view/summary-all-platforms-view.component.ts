@@ -254,11 +254,7 @@ export class SummaryAllPlatformsViewComponent extends PlatformFeedViewBase {
     });
   }
 
-  override onMetadataTokenKeydown(event: KeyboardEvent): void {
-    super.onMetadataTokenKeydown(event, () => this.addTokensFromInput());
-  }
-
-  addTokensFromInput(): void {
+  override addTokensFromInput(): void {
     const previousCount = this.profileMetadataTokens().length;
     const next = this.addTokensFromInputSignal(this.profileMetadataTokenInput, this.profileMetadataTokens);
     if (next.length === previousCount) {

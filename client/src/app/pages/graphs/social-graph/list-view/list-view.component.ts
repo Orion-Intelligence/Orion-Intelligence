@@ -7,6 +7,7 @@ import { SocialMapperStateService } from '../services/social-mapper-state.servic
 import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { getMetadataEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
+import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from '../utils/social-graph-view.util';
 @Component({
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
@@ -76,52 +77,14 @@ export class ListViewComponent {
   }
 
   getPlatformData(platformNodeId: string): PlatformResult | undefined {
-    const parsed = this.parsePlatformNodeId(platformNodeId);
+    const parsed = parsePlatformNodeId(platformNodeId);
     if (!parsed) {
       return undefined;
     }
-    const userResults = this.getScanResultsByUsername(parsed.keyUsername);
+    const userResults = getScanResultsByUsername(this.scanResults(), parsed.keyUsername);
     return userResults?.find(p =>
       (p.platform || '').toLowerCase() === parsed.platformName.toLowerCase() &&
             (p.username || '').toLowerCase() === parsed.platformUsername.toLowerCase());
-  }
-
-  private parsePlatformNodeId(nodeId: string): {
-        keyUsername: string;
-        platformName: string;
-        platformUsername: string;
-    } | null {
-    if (!nodeId.startsWith('platform-')) {
-      return null;
-    }
-    const raw = nodeId.substring('platform-'.length);
-    const firstSep = raw.indexOf('|');
-    if (firstSep < 0) {
-      return null;
-    }
-    const secondSep = raw.indexOf('|', firstSep + 1);
-    if (secondSep < 0) {
-      return null;
-    }
-    return {
-      keyUsername: raw.slice(0, firstSep),
-      platformName: raw.slice(firstSep + 1, secondSep),
-      platformUsername: raw.slice(secondSep + 1)
-    };
-  }
-
-  private getScanResultsByUsername(username: string): PlatformResult[] | undefined {
-    const direct = this.scanResults().get(username);
-    if (direct) {
-      return direct;
-    }
-    const normalized = username.toLowerCase();
-    for (const [key, value] of this.scanResults().entries()) {
-      if (key.toLowerCase() === normalized) {
-        return value;
-      }
-    }
-    return undefined;
   }
 
   getEntityData(entityNodeId: string): CustomEntity | undefined {
@@ -129,34 +92,11 @@ export class ListViewComponent {
   }
 
   getEntityReportRecords(entity: CustomEntity): Record<string, unknown>[] {
-    const report = entity.reportData;
-    if (!report || typeof report !== 'object') {
-      return [];
-    }
-    const nestedResult = (report as any)?.result;
-    if (Array.isArray(nestedResult)) {
-      return nestedResult as Record<string, unknown>[];
-    }
-    if (Array.isArray(nestedResult?.result)) {
-      return nestedResult.result as Record<string, unknown>[];
-    }
-    if (nestedResult?.result && typeof nestedResult.result === 'object') {
-      return [nestedResult.result];
-    }
-    if (nestedResult && typeof nestedResult === 'object') {
-      return [nestedResult];
-    }
-    return [report];
+    return getEntityReportRecords(entity);
   }
 
   getEntityRecordEntries(record: Record<string, unknown>): { key: string; label: string; values: string[]; }[] {
-    return Object.entries(record)
-      .filter(([, value]) => value !== null && value !== undefined && !(Array.isArray(value) && value.length === 0))
-      .map(([key, value]) => ({
-        key,
-        label: this.toFieldLabel(key),
-        values: this.toDisplayValues(value)
-      }));
+    return getEntityRecordEntries(record);
   }
 
   getNodeById(nodeId: string | number): NetworkNode | undefined {
@@ -242,39 +182,4 @@ export class ListViewComponent {
     });
   }
 
-  private toFieldLabel(key: string): string {
-    const normalized = key.replace(/^m_/, '').replace(/_/g, ' ').trim();
-    if (!normalized) {
-      return key;
-    }
-    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-  }
-
-  private toDisplayValues(value: unknown): string[] {
-    if (Array.isArray(value)) {
-      const values = value
-        .filter(item => item !== null && item !== undefined && `${item}`.trim() !== '')
-        .map(item => `${item}`);
-      return values.length > 0 ? values : ['-'];
-    }
-    return [this.toDisplayValue(value)];
-  }
-
-  private toDisplayValue(value: unknown): string {
-    if (value === null || value === undefined) {
-      return '-';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    if (typeof value === 'number' || typeof value === 'boolean') {
-      return String(value);
-    }
-    try {
-      return JSON.stringify(value, null, 2);
-    }
-    catch {
-      return String(value);
-    }
-  }
 }

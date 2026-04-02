@@ -6,6 +6,7 @@ import { SocialEntityUiService } from '../services/social-entity-ui.service';
 export abstract class SocialSummaryBase extends ValuePresentationBase {
   protected readonly socialEntityUiService = inject(SocialEntityUiService);
   abstract scanUsernames: OutputEmitterRef<string[]>;
+  protected addTokensFromInput(): void {}
 
   scanConnections(usernames: string[] | null | undefined): void {
     const normalized = this.socialEntityUiService.normalizeUsernames(usernames);
@@ -23,10 +24,10 @@ export abstract class SocialSummaryBase extends ValuePresentationBase {
     return this.socialEntityUiService.supportsFollowersFollowing(platformName);
   }
 
-  onMetadataTokenKeydown(event: KeyboardEvent, addTokens: () => void): void {
+  onMetadataTokenKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       event.preventDefault();
-      addTokens();
+      this.addTokensFromInput();
     }
   }
 
