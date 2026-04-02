@@ -71,9 +71,15 @@ export class ScrollService {
     };
 
     resetTop();
-    requestAnimationFrame(() => { resetTop(); });
-    setTimeout(() => { resetTop(); }, 50);
-    setTimeout(() => { resetTop(); }, 150);
+    requestAnimationFrame(() => {
+      resetTop(); 
+    });
+    setTimeout(() => {
+      resetTop(); 
+    }, 50);
+    setTimeout(() => {
+      resetTop(); 
+    }, 150);
   }
 
   saveCurrentPosition(_itemId = ''): void {
@@ -101,10 +107,10 @@ export class ScrollService {
     const savedDashboardBodyPosition = sessionStorage.getItem(this.resultDashboardBodyScrollPositionKey);
     if (
       savedWindowPosition === null &&
-      savedContainerPosition === null &&
-      savedDocumentPosition === null &&
-      savedBodyPosition === null &&
-      savedDashboardBodyPosition === null
+        savedContainerPosition === null &&
+        savedDocumentPosition === null &&
+        savedBodyPosition === null &&
+        savedDashboardBodyPosition === null
     ) {
       return;
     }
@@ -135,6 +141,8 @@ export class ScrollService {
     };
 
     applyScroll();
-    requestAnimationFrame(() => { applyScroll(); });
+    requestAnimationFrame(() => {
+      applyScroll(); 
+    });
   }
 }

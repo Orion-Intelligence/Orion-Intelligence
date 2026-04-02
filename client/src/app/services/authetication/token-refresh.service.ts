@@ -9,7 +9,9 @@ export class TokenRefreshService {
   private readonly REFRESH_INTERVAL = 120000;
 
   constructor() {
-    this.destroyRef.onDestroy(() => { this.stopTokenRefresh(); });
+    this.destroyRef.onDestroy(() => {
+      this.stopTokenRefresh(); 
+    });
   }
 
   startTokenRefresh(refreshAction: () => Observable<string | null>): void {

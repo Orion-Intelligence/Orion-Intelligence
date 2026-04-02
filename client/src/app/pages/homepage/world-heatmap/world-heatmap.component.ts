@@ -85,7 +85,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       this.applyInsightData(data);
       return;
     }
-    this.insightCacheService.getInsight().subscribe(data => { this.applyInsightData(data); });
+    this.insightCacheService.getInsight().subscribe(data => {
+      this.applyInsightData(data); 
+    });
   }
 
   ngAfterViewInit(): void {
@@ -129,7 +131,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       this.isMapLoading = false;
       return;
     }
-    window.setTimeout(() => { this.waitForWorldJsonAndRender(); }, 50);
+    window.setTimeout(() => {
+      this.waitForWorldJsonAndRender(); 
+    }, 50);
   }
 
   private getAvailableCategories(): string[] {
@@ -367,8 +371,12 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .attr('d', this.path as any)
       .attr('class', this.countryClass)
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
-      .on('mousemove', (event: MouseEvent, d: any) => { this.onHoverMove(event, d); })
-      .on('mouseleave', (event: MouseEvent) => { this.onHoverOut(event); })
+      .on('mousemove', (event: MouseEvent, d: any) => {
+        this.onHoverMove(event, d); 
+      })
+      .on('mouseleave', (event: MouseEvent) => {
+        this.onHoverOut(event); 
+      })
       .on('click', (_: MouseEvent, d: any) => {
         if (this.getValueForFeature(d) == null) {
           return;

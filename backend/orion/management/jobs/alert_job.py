@@ -177,7 +177,7 @@ class alert_job:
                     all_ioc=all_ioc_list)
             return True
 
-        except Exception as e:
+        except Exception:
             return False
 
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):

@@ -517,9 +517,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     const originalScale = this.network.getScale();
     const originalPosition = this.network.getViewPosition();
     const groupsToExpand: {
-      id: string;
-      subNodes: string[];
-  }[] = [];
+        id: string;
+        subNodes: string[];
+    }[] = [];
     this.nodeSet.get().forEach(node => {
       const ext = node as ExtendedNode;
       const nodeId = String(ext.id ?? '');
@@ -530,7 +530,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         groupsToExpand.push({ id: nodeId, subNodes: ext.subNodes ?? [] });
       }
     });
-    groupsToExpand.forEach(item => { this.expandGroupFromNodeId(item.id, item.subNodes, 200); });
+    groupsToExpand.forEach(item => {
+      this.expandGroupFromNodeId(item.id, item.subNodes, 200); 
+    });
     this.network.redraw();
     this.network.fit({ animation: false });
     const fittedPosition = this.network.getViewPosition();
@@ -572,7 +574,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         }
       }
     }
-    groupsToExpand.forEach(item => { this.collapseGroupFromNodeId(item.id, item.subNodes, true); });
+    groupsToExpand.forEach(item => {
+      this.collapseGroupFromNodeId(item.id, item.subNodes, true); 
+    });
     this.network.moveTo({
       position: originalPosition,
       scale: originalScale,
@@ -1511,7 +1515,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     };
     data.forEach(item => {
       put(item.vertex, this.nodePrimaryBorder);
-      (item.path?.vertices ?? []).forEach(pv => { put(pv, this.nodeSecondaryBorder); });
+      (item.path?.vertices ?? []).forEach(pv => {
+        put(pv, this.nodeSecondaryBorder); 
+      });
     });
     return rawNodeMap;
   }
@@ -1776,9 +1782,15 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private attachNetworkHandlers(): void {
-    this.network.on('oncontext', params => { this.handleContextMenu(params); });
-    this.network.on('click', params => { this.handleClick(params); });
-    this.network.on('doubleClick', params => { this.handleDoubleClick(params); });
+    this.network.on('oncontext', params => {
+      this.handleContextMenu(params); 
+    });
+    this.network.on('click', params => {
+      this.handleClick(params); 
+    });
+    this.network.on('doubleClick', params => {
+      this.handleDoubleClick(params); 
+    });
     this.network.on('zoom', (properties: any) => {
       const currentScale = this.network.getScale();
       const currentPosition = this.network.getViewPosition();
@@ -2154,7 +2166,6 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.nodeSet.update(updates);
     }
   }
-
 }
 const BOOTSTRAP_ICON_PATHS: Record<string, {
   viewBox: string;

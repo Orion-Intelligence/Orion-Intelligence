@@ -32,7 +32,9 @@ export class HomeInsightComponent implements OnInit {
       this.applyInsightData(data);
       return;
     }
-    this.insightCacheService.getInsight().subscribe(data => { this.applyInsightData(data); });
+    this.insightCacheService.getInsight().subscribe(data => {
+      this.applyInsightData(data); 
+    });
   }
 
   private applyInsightData(data: any): void {

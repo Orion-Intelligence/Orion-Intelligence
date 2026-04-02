@@ -263,7 +263,9 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    setTimeout(() => { URL.revokeObjectURL(url); }, 1500);
+    setTimeout(() => {
+      URL.revokeObjectURL(url); 
+    }, 1500);
     this.setCopied('download');
   }
 

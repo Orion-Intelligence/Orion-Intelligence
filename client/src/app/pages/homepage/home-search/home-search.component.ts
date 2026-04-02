@@ -186,9 +186,15 @@ export class HomeSearchComponent implements OnInit {
   private attachWindowPointerListeners() {
     this.detachWindowPointerListeners();
 
-    const move = (e: PointerEvent) => { this.onInsightPointerMove(e); };
-    const up = (e: PointerEvent) => { this.onInsightPointerUp(e); };
-    const cancel = (e: PointerEvent) => { this.onInsightPointerCancel(e); };
+    const move = (e: PointerEvent) => {
+      this.onInsightPointerMove(e); 
+    };
+    const up = (e: PointerEvent) => {
+      this.onInsightPointerUp(e); 
+    };
+    const cancel = (e: PointerEvent) => {
+      this.onInsightPointerCancel(e); 
+    };
 
     window.addEventListener('pointermove', move, { passive: false });
     window.addEventListener('pointerup', up, { passive: false });
@@ -284,5 +290,4 @@ export class HomeSearchComponent implements OnInit {
       detailsEl.open = false;
     }
   }
-
 }

@@ -112,7 +112,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
 
     if (!this.formError) {
-      queueMicrotask(() => { this.runToolbarSearch(); });
+      queueMicrotask(() => {
+        this.runToolbarSearch(); 
+      });
     }
     else {
       this.syncUrl();
@@ -934,7 +936,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private waitForPaint(): Promise<void> {
-    return new Promise(resolve => requestAnimationFrame(() => { resolve(); }));
+    return new Promise(resolve => requestAnimationFrame(() => {
+      resolve(); 
+    }));
   }
 
   private joinValues(values: unknown[] | undefined | null): string {

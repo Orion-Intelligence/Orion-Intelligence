@@ -214,10 +214,14 @@ export class DashboardService {
         keysToRemove.push(key);
       }
     }
-    keysToRemove.forEach(key => { sessionStorage.removeItem(key); });
+    keysToRemove.forEach(key => {
+      sessionStorage.removeItem(key); 
+    });
   }
 
-  private cancelOngoingRequest() { return; }
+  private cancelOngoingRequest() {
+    return; 
+  }
 
   private beginRequestWithMergedParams(paramModel: any): {
         entityCategories: any;
