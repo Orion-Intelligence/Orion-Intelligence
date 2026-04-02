@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, output } from '@angular/core';
+import { Component, HostListener, AfterViewInit, OnDestroy, signal, effect, output } from '@angular/core';
 import { NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -19,7 +19,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   ],
   templateUrl: './profile.component.html'
 })
-export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ProfileComponent implements AfterViewInit, OnDestroy {
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler = () => {
     this.dropdownOpen.set(false);
@@ -33,7 +33,6 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   profile_image: string = "";
   licences: string = '';
   dropdownOpen = signal(false);
-  isDarkTheme = true;
   readonly openPopup = output<undefined>();
 
   constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService) {
@@ -46,14 +45,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       const data = this.appService.userSessionData();
       this.username.set(data?.user?.username ?? '');
       this.role.set(data?.user?.role ?? '');
-      this.isDarkTheme = (data?.user?.theme ?? 'dark-theme') === 'dark-theme';
-      this.applyTheme();
     });
-  }
-
-  ngOnInit(): void {
-    this.isDarkTheme = (this.appService.userSessionData()?.user?.theme ?? 'dark-theme') === 'dark-theme';
-    this.applyTheme();
   }
 
   ngAfterViewInit(): void {
@@ -75,47 +67,16 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     this.profile_image = this.appService.userSessionData().user.image || "";
   }
 
-  toggleThemeByClick() {
-    this.isDarkTheme = !this.isDarkTheme;
-    const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';
-    this.appService.userSessionData.update(state => {
-      if (!state) {
-        return state;
-      }
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          theme,
-          preferences: {
-            ...(state.user.preferences || {}),
-            theme
-          }
-        }
-      };
-    });
-    this.applyTheme();
-  }
-
-  applyTheme() {
-    const body = document.body;
-    body.classList.remove('light-theme', 'dark-theme');
-    body.classList.add(this.isDarkTheme ? 'dark-theme' : 'light-theme');
-  }
-
   isAdmin(): boolean {
-    const currentRole = this.appService.userSessionData().user.role;
-    return currentRole === 'admin';
+    return this.licenseService.isAdmin();
   }
 
   isDemo(): boolean {
-    const currentRole = this.appService.userSessionData().user.role;
-    return currentRole === 'demo';
+    return this.licenseService.isDemo();
   }
 
   isMember(): boolean {
-    const currentRole = this.appService.userSessionData().user.role;
-    return currentRole === 'member';
+    return this.licenseService.isMember();
   }
 
   toggleDropdown(event: Event) {

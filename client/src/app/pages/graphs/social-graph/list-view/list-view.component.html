@@ -168,7 +168,7 @@
                   <div class="overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50 animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
                     @if (getEntityData(entityNode.id.toString()); as entity) {
                       <div class="p-4 flex items-start gap-4 cursor-pointer hover:bg-slate-800/70 transition-colors" (click)="toggleEntity(entity.id)">
-                        <i [class]="getIconForEntityType(entity.type) + ' text-3xl mt-1'"></i>
+                        <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-3xl mt-1'"></i>
                         <div class="flex-grow">
                           <h3 class="text-md font-bold text-slate-300">{{entity.label}}</h3>
                           <p class="text-sm text-slate-400 capitalize">{{entity.type}}</p>

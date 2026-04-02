@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, effect, computed } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { CustomEntity } from '../../../../../shared/model/social/social-scan.models';
+import { SocialEntityUiService } from '../../services/social-entity-ui.service';
 export interface AddEntityData {
     type: CustomEntity['type'];
     value: string;
@@ -29,7 +30,7 @@ export class AddEntityModalComponent {
   validationError = computed(() => this.getValidationError());
   isValidInput = computed(() => this.validationError() === null);
 
-  constructor() {
+  constructor(readonly socialEntityUiService: SocialEntityUiService) {
     effect(() => {
       this.entityValue.set(this.data()?.value || '');
       this.entityLabel.set(this.data()?.label || '');
@@ -118,38 +119,15 @@ export class AddEntityModalComponent {
     return null;
   }
 
-  getIconForEntityType(type: CustomEntity['type']): string {
-    switch (type) {
-      case 'wallet': return 'bi bi-wallet2 text-green-400';
-      case 'email': return 'bi bi-envelope-at text-yellow-400';
-      case 'domain': return 'bi bi-globe text-sky-400';
-      case 'domain-scan': return 'bi bi-globe2 text-sky-400';
-      case 'subdomains-scan': return 'bi bi-diagram-3 text-sky-400';
-      case 'dns-scan': return 'bi bi-broadcast text-sky-400';
-      case 'wayback-scan': return 'bi bi-clock-history text-sky-400';
-      case 'email-breach': return 'bi bi-person-badge text-indigo-400';
-      case 'social-scanner': return 'bi bi-people text-indigo-400';
-      case 'wanted-list': return 'bi bi-person-exclamation text-indigo-400';
-      case 'national-identity': return 'bi bi-card-text text-indigo-400';
-      case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
-      case 'software-scanner': return 'bi bi-window text-indigo-400';
-      case 'phone': return 'bi bi-telephone text-indigo-400';
-      case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
-      case 'apk-scan': return 'bi bi-android2 text-indigo-400';
-      case 'crypto-scanner': return 'bi bi-currency-bitcoin text-green-400';
-      default: return 'bi bi-circle text-slate-400';
-    }
-  }
-
   getModalTitle(): string {
     const modalData = this.data();
     if (!modalData) {
       return 'Entity';
     }
     if (modalData.mode === 'edit') {
-      return `Edit ${this.toTitleCase(modalData.type)}`;
+      return `Edit ${this.socialEntityUiService.toTitleCase(modalData.type)}`;
     }
-    return `Add ${this.toTitleCase(modalData.type)}`;
+    return `Add ${this.socialEntityUiService.toTitleCase(modalData.type)}`;
   }
 
   getSubmitLabel(): string {
@@ -158,12 +136,5 @@ export class AddEntityModalComponent {
       return 'Save Changes';
     }
     return 'Add Entity';
-  }
-
-  private toTitleCase(value: string): string {
-    if (!value) {
-      return value;
-    }
-    return value.charAt(0).toUpperCase() + value.slice(1);
   }
 }

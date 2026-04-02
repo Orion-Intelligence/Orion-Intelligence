@@ -29,7 +29,7 @@
             <div class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/75 p-2">
               <div class="flex items-center justify-between gap-2">
                 <button (click)="entityClicked.emit(entity.id)" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-[var(--color-text2)] transition-colors hover:text-[var(--color-text1)]">
-                  <i [class]="getIconForEntityType(entity.type)"></i>
+                  <i [class]="socialEntityUiService.getIconForEntityType(entity.type)"></i>
                   <span class="truncate">{{ entity.label }}</span>
                   <span class="ml-1 text-[11px] uppercase tracking-wide text-[var(--color-text4)]">{{ entity.type.replace('-', ' ') }}</span>
                 </button>
@@ -85,7 +85,7 @@
           <div class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/75 p-2">
             <div class="flex items-center justify-between gap-2">
               <button (click)="entityClicked.emit(entity.id); closeMobilePanel();" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-[var(--color-text2)] transition-colors hover:text-[var(--color-text1)]">
-                <i [class]="getIconForEntityType(entity.type)"></i>
+                <i [class]="socialEntityUiService.getIconForEntityType(entity.type)"></i>
                 <span class="truncate">{{ entity.label }}</span>
                 <span class="ml-1 text-[11px] uppercase tracking-wide text-[var(--color-text4)]">{{ entity.type.replace('-', ' ') }}</span>
               </button>

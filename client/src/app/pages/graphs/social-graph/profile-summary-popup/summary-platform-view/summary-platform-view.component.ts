@@ -5,6 +5,7 @@ import { PlatformResult } from '../../../../../shared/model/social/social-scan.m
 import { formatFollowers, formatKey } from '../../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../../services/fetching-state.service';
+import { SocialEntityUiService } from '../../services/social-entity-ui.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
@@ -19,10 +20,9 @@ import { finalize } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
-  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
-  private static readonly FOLLOW_PLATFORMS = new Set(['instagram', 'twitter', 'behance', 'behnace', 'facebook']);
   private socialScanService = inject(SocialScanService);
   private destroyRef = inject(DestroyRef);
+  private socialEntityUiService = inject(SocialEntityUiService);
 
   platform = input.required<PlatformResult | null>();
   isScanInProgress = input<boolean>(false);
@@ -100,7 +100,7 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   }
 
   scanConnections(usernames: string[] | null | undefined): void {
-    const normalized = this.normalizeUsernames(usernames);
+    const normalized = this.socialEntityUiService.normalizeUsernames(usernames);
     if (normalized.length === 0) {
       return;
     }
@@ -108,11 +108,11 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   }
 
   supportsPostConnections(platformName: string | null | undefined): boolean {
-    return SummaryPlatformViewComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
+    return this.socialEntityUiService.supportsPostConnections(platformName);
   }
 
   supportsFollowersFollowing(platformName: string | null | undefined): boolean {
-    return SummaryPlatformViewComponent.FOLLOW_PLATFORMS.has(this.normalizePlatformName(platformName));
+    return this.socialEntityUiService.supportsFollowersFollowing(platformName);
   }
 
   fetchPlatformMetadata(): void {
@@ -154,7 +154,7 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
 
   addTokensFromInput(): void {
     const input = this.metadataTokenInput();
-    const tokens = this.parseTokens(input);
+    const tokens = this.socialEntityUiService.parseTokens(input);
     if (!tokens.length) {
       return;
     }
@@ -170,38 +170,5 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
 
   removeMetadataToken(token: string): void {
     this.metadataTokens.set(this.metadataTokens().filter(t => t !== token));
-  }
-
-  private parseTokens(input: string): string[] {
-    return String(input || '')
-      .split(/[,\n\r\t]+|\s+/)
-      .map(token => token.trim())
-      .filter(Boolean);
-  }
-
-  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
-    const seen = new Set<string>();
-    const result: string[] = [];
-    for (const name of usernames || []) {
-      const trimmed = String(name || '').trim();
-      if (!trimmed) {
-        continue;
-      }
-      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
-      if (!normalized) {
-        continue;
-      }
-      const key = normalized.toLowerCase();
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      result.push(normalized);
-    }
-    return result;
-  }
-
-  private normalizePlatformName(platformName: string | null | undefined): string {
-    return String(platformName || '').trim().toLowerCase();
   }
 }

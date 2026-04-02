@@ -4,6 +4,7 @@ import { NetworkData, PlatformResult, CustomEntity, NetworkNode } from '../../..
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
+import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { getMetadataEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 @Component({
@@ -23,6 +24,7 @@ export class ListViewComponent {
   platformNodeClicked = output<string>();
   deleteCustomEntity = output<string>();
   public state = inject(SocialMapperStateService);
+  readonly socialEntityUiService = inject(SocialEntityUiService);
   expandedEntityIds = signal<Set<string>>(new Set<string>());
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
@@ -194,32 +196,9 @@ export class ListViewComponent {
     }
     const entity = this.getEntityData(node.id.toString());
     if (entity) {
-      return this.getIconForEntityType(entity.type);
+      return this.socialEntityUiService.getIconForEntityType(entity.type);
     }
     return 'bi bi-record-circle text-teal-400';
-  }
-
-  getIconForEntityType(type: CustomEntity['type']): string {
-    switch (type) {
-      case 'wallet': return 'bi bi-wallet2 text-green-400';
-      case 'email': return 'bi bi-envelope-at text-yellow-400';
-      case 'domain': return 'bi bi-globe text-sky-400';
-      case 'domain-scan': return 'bi bi-globe2 text-sky-400';
-      case 'subdomains-scan': return 'bi bi-diagram-3 text-sky-400';
-      case 'dns-scan': return 'bi bi-broadcast text-sky-400';
-      case 'wayback-scan': return 'bi bi-clock-history text-sky-400';
-      case 'email-breach': return 'bi bi-person-badge text-indigo-400';
-      case 'social-scanner': return 'bi bi-people text-indigo-400';
-      case 'wanted-list': return 'bi bi-person-exclamation text-indigo-400';
-      case 'national-identity': return 'bi bi-card-text text-indigo-400';
-      case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
-      case 'software-scanner': return 'bi bi-window text-indigo-400';
-      case 'phone': return 'bi bi-telephone text-indigo-400';
-      case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
-      case 'apk-scan': return 'bi bi-android2 text-indigo-400';
-      case 'crypto-scanner': return 'bi bi-currency-bitcoin text-green-400';
-      default: return 'bi bi-circle text-slate-400';
-    }
   }
 
   getMetadataEntries(platformNodeId: string): {

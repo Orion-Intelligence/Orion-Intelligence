@@ -4,6 +4,7 @@ import { PlatformResult, SocialImage, SocialPost } from '../../../../shared/mode
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../services/fetching-state.service';
+import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
@@ -16,8 +17,7 @@ import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
   imports: [SocialIconComponent, PlatformIconBgDirective],
 })
 export class MetadataPopupComponent extends PlatformFeedViewBase {
-  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
-  private static readonly FOLLOW_PLATFORMS = new Set(['instagram', 'twitter', 'behance', 'behnace', 'facebook']);
+  private socialEntityUiService: SocialEntityUiService;
 
   data = input.required<PlatformResult>();
   isScanInProgress = input<boolean>(false);
@@ -44,9 +44,10 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   public isUrl = isUrl;
   public isImageUrl = isImageUrl;
 
-  constructor(fetchingState: FetchingStateService) {
+  constructor(fetchingState: FetchingStateService, socialEntityUiService: SocialEntityUiService) {
     super();
     this.fetchingState = fetchingState;
+    this.socialEntityUiService = socialEntityUiService;
     effect(() => {
       this.resetFeedState(this.data().posts, this.data().images, this.data().followers_list, this.data().following_list, this.data().post_connections);
     });
@@ -80,17 +81,11 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
     this.close.emit(undefined);
   }
 
-  getMetadataEntries(): {
-        key: string;
-        value: any;
-    }[] {
+  getMetadataEntries(): { key: string; value: any; }[] {
     return getMetadataEntries(this.data().allMetadata);
   }
 
-  getProfileDetailEntries(): {
-        key: string;
-        value: any;
-    }[] {
+  getProfileDetailEntries(): { key: string; value: any; }[] {
     return getProfileDetailEntries(this.data());
   }
 
@@ -120,7 +115,7 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   }
 
   scanConnections(usernames: string[] | null | undefined): void {
-    const normalized = this.normalizeUsernames(usernames);
+    const normalized = this.socialEntityUiService.normalizeUsernames(usernames);
     if (normalized.length === 0) {
       return;
     }
@@ -128,36 +123,10 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   }
 
   supportsPostConnections(platformName: string | null | undefined): boolean {
-    return MetadataPopupComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
+    return this.socialEntityUiService.supportsPostConnections(platformName);
   }
 
   supportsFollowersFollowing(platformName: string | null | undefined): boolean {
-    return MetadataPopupComponent.FOLLOW_PLATFORMS.has(this.normalizePlatformName(platformName));
-  }
-
-  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
-    const seen = new Set<string>();
-    const result: string[] = [];
-    for (const name of usernames || []) {
-      const trimmed = String(name || '').trim();
-      if (!trimmed) {
-        continue;
-      }
-      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
-      if (!normalized) {
-        continue;
-      }
-      const key = normalized.toLowerCase();
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      result.push(normalized);
-    }
-    return result;
-  }
-
-  private normalizePlatformName(platformName: string | null | undefined): string {
-    return String(platformName || '').trim().toLowerCase();
+    return this.socialEntityUiService.supportsFollowersFollowing(platformName);
   }
 }

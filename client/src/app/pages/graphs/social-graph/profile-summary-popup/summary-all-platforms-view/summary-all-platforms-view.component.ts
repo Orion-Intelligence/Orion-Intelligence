@@ -5,6 +5,7 @@ import { PlatformResult, ProfileLeakSessionData, ProfileMetadataSessionData } fr
 import { formatKey } from '../../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
 import { FetchingStateService } from '../../services/fetching-state.service';
+import { SocialEntityUiService } from '../../services/social-entity-ui.service';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { SocialScanService } from '../../../shared/services/social-scan.service';
@@ -19,10 +20,10 @@ import { forkJoin, of } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryAllPlatformsViewComponent {
-  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
   private socialScanService = inject(SocialScanService);
   private tabManager = inject(TabManagerService);
   private destroyRef = inject(DestroyRef);
+  private socialEntityUiService = inject(SocialEntityUiService);
 
   username = input.required<string>();
   email = input<string | undefined>();
@@ -175,7 +176,7 @@ export class SummaryAllPlatformsViewComponent {
   }
 
   supportsPostConnections(platformName: string | null | undefined): boolean {
-    return SummaryAllPlatformsViewComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
+    return this.socialEntityUiService.supportsPostConnections(platformName);
   }
 
   fetchProfileLeaks(): void {
@@ -219,7 +220,7 @@ export class SummaryAllPlatformsViewComponent {
   }
 
   scanConnections(usernames: string[] | null | undefined): void {
-    const normalized = this.normalizeUsernames(usernames);
+    const normalized = this.socialEntityUiService.normalizeUsernames(usernames);
     if (normalized.length === 0) {
       return;
     }
@@ -273,7 +274,7 @@ export class SummaryAllPlatformsViewComponent {
 
   addTokensFromInput(): void {
     const input = this.profileMetadataTokenInput();
-    const tokens = this.parseTokens(input);
+    const tokens = this.socialEntityUiService.parseTokens(input);
     if (!tokens.length) {
       return;
     }
@@ -383,39 +384,6 @@ export class SummaryAllPlatformsViewComponent {
       unique.push(row);
     }
     return unique;
-  }
-
-  private parseTokens(input: string): string[] {
-    return String(input || '')
-      .split(/[,\n\r\t]+|\s+/)
-      .map(token => token.trim())
-      .filter(Boolean);
-  }
-
-  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
-    const seen = new Set<string>();
-    const result: string[] = [];
-    for (const name of usernames || []) {
-      const trimmed = String(name || '').trim();
-      if (!trimmed) {
-        continue;
-      }
-      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
-      if (!normalized) {
-        continue;
-      }
-      const key = normalized.toLowerCase();
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      result.push(normalized);
-    }
-    return result;
-  }
-
-  private normalizePlatformName(platformName: string | null | undefined): string {
-    return String(platformName || '').trim().toLowerCase();
   }
 
   private getStoredProfileLeakData(): ProfileLeakSessionData | null {
