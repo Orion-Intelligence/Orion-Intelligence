@@ -48,31 +48,14 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
     super.handleTaskValue(value);
   }
 
-  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(
-    call: () => Observable<T>
-  ): Subscription {
-    return this.runTask<T>((cancel$) => this.poll<T>(
-      call,
-      (response) => this.getPendingStatus(response),
-      (response) => this.updateProgress(response?.result?.progress ?? response?.progress),
-      cancel$,
-      this.pollDelayMs
-    ));
+  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>): Subscription {
+    return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, this.pollDelayMs));
   }
 
-  private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(
-    call: () => Observable<T>,
-    onEach?: (response: T) => void
-  ): Promise<any> {
+  private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<any> {
     const cancel$ = this.createCancelSubject();
     try {
-      const response = await lastValueFrom(this.poll<T>(
-        call,
-        (value) => this.getPendingStatus(value),
-        (value) => onEach?.(value),
-        cancel$,
-        this.pollDelayMs
-      ));
+      const response = await lastValueFrom(this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs));
       return this.unwrapPolledResult(response);
     }
     finally {
@@ -80,23 +63,12 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
     }
   }
 
-  private fetchPolledResult$<T extends { result?: { status?: string } | null; status?: string }>(
-    call: () => Observable<T>,
-    onEach?: (response: T) => void
-  ): Observable<any> {
+  private fetchPolledResult$<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Observable<any> {
     const cancel$ = this.createCancelSubject();
-    return this.poll<T>(
-      call,
-      (value) => this.getPendingStatus(value),
-      (value) => onEach?.(value),
-      cancel$,
-      this.pollDelayMs
-    ).pipe(
-      map((response) => this.unwrapPolledResult(response)),
-      finalize(() => {
+    return this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs)
+      .pipe(map((response) => this.unwrapPolledResult(response)), finalize(() => {
         this.completeCancelSubject(cancel$);
-      })
-    );
+      }));
   }
 
   private unwrapPolledResult<T>(response: T): any {
@@ -120,17 +92,11 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
   }
 
   async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<any> {
-    return this.fetchPolledResult<NetworkIntelScanResponse>(
-      () => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }),
-      onEach
-    );
+    return this.fetchPolledResult<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
   }
 
   fetchShodanIpDetail$(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Observable<any> {
-    return this.fetchPolledResult$<NetworkIntelScanResponse>(
-      () => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }),
-      onEach
-    );
+    return this.fetchPolledResult$<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
   }
 
   scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {

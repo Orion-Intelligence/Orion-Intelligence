@@ -11,7 +11,6 @@ import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { PlatformFeedViewBase } from '../../utils/platform-feed-view.base';
 import { SocialScanService } from '../../../shared/services/social-scan.service';
 import { finalize } from 'rxjs/operators';
-import { createPlatformCancelOutputs, createPlatformFetchOutputs } from '../../utils/profile-summary-output.util';
 @Component({
   selector: 'app-summary-platform-view',
   standalone: true,
@@ -22,22 +21,20 @@ import { createPlatformCancelOutputs, createPlatformFetchOutputs } from '../../u
 export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
   private socialScanService = inject(SocialScanService);
   private destroyRef = inject(DestroyRef);
-  private readonly fetchOutputs = createPlatformFetchOutputs();
-  private readonly cancelOutputs = createPlatformCancelOutputs();
 
   platform = input.required<PlatformResult | null>();
   isScanInProgress = input<boolean>(false);
-  fetchProfile = this.fetchOutputs.fetchProfile;
-  fetchPosts = this.fetchOutputs.fetchPosts;
-  fetchFollowers = this.fetchOutputs.fetchFollowers;
-  fetchFollowing = this.fetchOutputs.fetchFollowing;
-  fetchPlatformImages = this.fetchOutputs.fetchPlatformImages;
+  fetchProfile = output<PlatformResult>();
+  fetchPosts = output<PlatformResult>();
+  fetchFollowers = output<PlatformResult>();
+  fetchFollowing = output<PlatformResult>();
+  fetchPlatformImages = output<PlatformResult>();
   scanUsernames = output<string[]>();
-  cancelFetchProfile = this.cancelOutputs.cancelFetchProfile;
-  cancelFetchPosts = this.cancelOutputs.cancelFetchPosts;
-  cancelFetchFollowers = this.cancelOutputs.cancelFetchFollowers;
-  cancelFetchFollowing = this.cancelOutputs.cancelFetchFollowing;
-  cancelFetchPlatformImages = this.cancelOutputs.cancelFetchPlatformImages;
+  cancelFetchProfile = output<PlatformResult>();
+  cancelFetchPosts = output<PlatformResult>();
+  cancelFetchFollowers = output<PlatformResult>();
+  cancelFetchFollowing = output<PlatformResult>();
+  cancelFetchPlatformImages = output<PlatformResult>();
   public fetchingState = inject(FetchingStateService);
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;

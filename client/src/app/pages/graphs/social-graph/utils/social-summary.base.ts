@@ -6,6 +6,7 @@ import { SocialEntityUiService } from '../services/social-entity-ui.service';
 export abstract class SocialSummaryBase extends ValuePresentationBase {
   protected readonly socialEntityUiService = inject(SocialEntityUiService);
   abstract scanUsernames: OutputEmitterRef<string[]>;
+
   protected addTokensFromInput(): void {}
 
   scanConnections(usernames: string[] | null | undefined): void {

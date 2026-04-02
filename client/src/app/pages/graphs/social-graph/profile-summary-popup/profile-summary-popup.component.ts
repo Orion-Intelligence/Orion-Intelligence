@@ -6,7 +6,6 @@ import { FetchingStateService } from '../services/fetching-state.service';
 import { SummaryAllPlatformsViewComponent } from './summary-all-platforms-view/summary-all-platforms-view.component';
 import { SummaryPlatformViewComponent } from './summary-platform-view/summary-platform-view.component';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
-import { createPlatformCancelOutputs, createPlatformFetchOutputs } from '../utils/profile-summary-output.util';
 @Component({
   selector: 'app-profile-summary-popup',
   templateUrl: './profile-summary-popup.component.html',
@@ -21,20 +20,18 @@ export class ProfileSummaryPopupComponent {
   platforms = input.required<PlatformResult[]>();
   email = input<string | undefined>();
   isScanInProgress = input<boolean>(false);
-  private readonly fetchOutputs = createPlatformFetchOutputs();
-  private readonly cancelOutputs = createPlatformCancelOutputs();
   close = output<undefined>();
-  fetchProfile = this.fetchOutputs.fetchProfile;
-  fetchPosts = this.fetchOutputs.fetchPosts;
-  fetchFollowers = this.fetchOutputs.fetchFollowers;
-  fetchFollowing = this.fetchOutputs.fetchFollowing;
-  fetchPlatformImages = this.fetchOutputs.fetchPlatformImages;
+  fetchProfile = output<PlatformResult>();
+  fetchPosts = output<PlatformResult>();
+  fetchFollowers = output<PlatformResult>();
+  fetchFollowing = output<PlatformResult>();
+  fetchPlatformImages = output<PlatformResult>();
   rescan = output<string>();
-  cancelFetchProfile = this.cancelOutputs.cancelFetchProfile;
-  cancelFetchPosts = this.cancelOutputs.cancelFetchPosts;
-  cancelFetchFollowers = this.cancelOutputs.cancelFetchFollowers;
-  cancelFetchFollowing = this.cancelOutputs.cancelFetchFollowing;
-  cancelFetchPlatformImages = this.cancelOutputs.cancelFetchPlatformImages;
+  cancelFetchProfile = output<PlatformResult>();
+  cancelFetchPosts = output<PlatformResult>();
+  cancelFetchFollowers = output<PlatformResult>();
+  cancelFetchFollowing = output<PlatformResult>();
+  cancelFetchPlatformImages = output<PlatformResult>();
   cancelAllFetches = output<string>();
   platformSearchTerm = signal('');
   selectedPlatform = signal<PlatformResult | 'all' | null>('all');
