@@ -37,17 +37,11 @@ export class IpDetailComponent {
   }
 
   get extraDetailEntries(): [string, string][] {
-    return this.ui.safeEntries(this.detail)
-      .filter(([key, value]) => !this.renderedTopLevelKeys.has(key) && this.hasRenderableValue(value))
-      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
-      .filter(([, value]) => Boolean(value));
+    return this.buildRenderableEntries(this.detail, (key) => !this.renderedTopLevelKeys.has(key));
   }
 
   get generalInfoExtraEntries(): [string, string][] {
-    return this.ui.safeEntries(this.detail?.ip_info)
-      .filter(([key, value]) => !this.isDuplicateGeneralInfoField(key, value) && this.hasRenderableValue(value))
-      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
-      .filter(([, value]) => Boolean(value));
+    return this.buildRenderableEntries(this.detail?.ip_info, (key, value) => !this.isDuplicateGeneralInfoField(key, value));
   }
 
   formatVulnerability(value: any): string {
@@ -93,19 +87,14 @@ export class IpDetailComponent {
   }
 
   private hasRenderableValue(value: any): boolean {
-    if (value === null || value === undefined) {
-      return false;
-    }
-    if (typeof value === 'string') {
-      return value.trim().length > 0;
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0;
-    }
-    if (typeof value === 'object') {
-      return Object.keys(value).length > 0;
-    }
-    return true;
+    return this.ui.hasRenderableValue(value);
+  }
+
+  private buildRenderableEntries(source: Record<string, any> | undefined | null, includeEntry: (key: string, value: any) => boolean): [string, string][] {
+    return this.ui.safeEntries(source)
+      .filter(([key, value]) => includeEntry(key, value) && this.hasRenderableValue(value))
+      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
+      .filter(([, value]) => Boolean(value));
   }
 
   private formatLabel(value: string): string {

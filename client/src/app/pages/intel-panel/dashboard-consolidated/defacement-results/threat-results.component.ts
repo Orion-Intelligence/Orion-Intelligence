@@ -128,31 +128,15 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   isCopied(key: string): boolean {
-    return this.copiedKey === key;
+    return this.rowHelper.isCopied(this.copiedKey, key);
   }
 
   copyText(text: any, key: string, e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    const value = text == null ? '' : String(text);
-    if (!value || value === '-') {
-      return;
-    }
-    this.rowHelper.copyToClipboard(value).subscribe((ok) => {
-      if (!ok) {
-        return;
-      }
-      this.setCopied(key);
-    });
-  }
-
-  private setCopied(key: string) {
-    this.copiedKey = key;
-    if (this.copiedTimer) {
-      clearTimeout(this.copiedTimer);
-    }
-    this.copiedTimer = setTimeout(() => (this.copiedKey = null), 1200);
+    this.rowHelper.copyText(text, key, (copiedKey) => {
+      this.copiedTimer = this.rowHelper.setCopiedState(copiedKey, this.copiedTimer, (value) => {
+        this.copiedKey = value;
+      });
+    }, e);
   }
 
   webServerValue(item: any): string {

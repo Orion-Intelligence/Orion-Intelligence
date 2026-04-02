@@ -148,7 +148,7 @@ class SignupManager:
         email=data.email or ""
         subject=data.subject or ""
         message=data.message or ""
-            
+
 
         TenantManager.validate_company_email(email)
 

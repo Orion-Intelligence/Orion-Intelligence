@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { DnsResult, IpRowState } from '../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
+import { ScanHelperMethodsService } from '../network-intel-service.service';
 
 @Component({
   selector: 'app-network-intel-dns-section',
@@ -28,7 +29,7 @@ export class DnsSectionComponent {
   readonly resultLabel = input('IP ADDRESS');
   readonly toggleRow = output<IpRowState>();
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private ui: ScanHelperMethodsService) {
     effect(() => {
       this.errorMessage = this.errorMessageInput();
       this.ipRows = this.ipRowsInput();
@@ -36,27 +37,19 @@ export class DnsSectionComponent {
   }
 
   get isEmbeddedInConsolidated(): boolean {
-    return this.router.url.includes('/consolidated');
+    return this.ui.isEmbeddedInConsolidated(this.router.url);
   }
 
   get progressValue(): number {
-    return Math.max(6, Math.min(100, Math.round(this.progress() || 0)));
+    return this.ui.getProgressValue(this.progress());
   }
 
   get loadingStepLabel(): string {
-    const raw = (this.currentStep() || '').trim();
-    if (!raw) {
-      return 'Scanning in progress...';
-    }
-    const normalized = raw.toLowerCase();
-    if (normalized === 'queued' || normalized.includes('queue')) {
-      return 'Queued: waiting for scanner availability...';
-    }
-    return raw;
+    return this.ui.getLoadingStepLabel(this.currentStep());
   }
 
   get showLoadingSkeleton(): boolean {
-    return this.hasSearched() && !this.dnsResult() && !this.errorMessage && (this.isScanning() || this.progress() > 0);
+    return this.ui.shouldShowLoadingSkeleton(this.hasSearched(), this.dnsResult(), this.errorMessage, this.isScanning(), this.progress());
   }
 
   get showNoResults(): boolean {

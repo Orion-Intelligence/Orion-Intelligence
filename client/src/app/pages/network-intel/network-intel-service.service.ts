@@ -240,6 +240,46 @@ export class ScanHelperMethodsService {
     return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
   }
 
+  hasRenderableValue(value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    if (typeof value === 'object') {
+      return Object.keys(value).length > 0;
+    }
+    return true;
+  }
+
+  isEmbeddedInConsolidated(url: string): boolean {
+    return url.includes('/consolidated');
+  }
+
+  getProgressValue(progress: number | null | undefined): number {
+    return Math.max(6, Math.min(100, Math.round(progress || 0)));
+  }
+
+  getLoadingStepLabel(step: string | null | undefined): string {
+    const raw = (step || '').trim();
+    if (!raw) {
+      return 'Scanning in progress...';
+    }
+    const normalized = raw.toLowerCase();
+    if (normalized === 'queued' || normalized.includes('queue')) {
+      return 'Queued: waiting for scanner availability...';
+    }
+    return raw;
+  }
+
+  shouldShowLoadingSkeleton(hasSearched: boolean, result: unknown, errorMessage: string | null | undefined, isScanning: boolean, progress: number | null | undefined): boolean {
+    return hasSearched && !result && !errorMessage && (isScanning || (progress || 0) > 0);
+  }
+
   validateDnsInput(value: string): string | null {
     const trimmed = value.trim();
     if (!trimmed) {

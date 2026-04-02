@@ -3,6 +3,10 @@ import { Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ResultRowHelperService {
+  isCopied(copiedKey: string | null, key: string): boolean {
+    return copiedKey === key;
+  }
+
   normalizeToArray(value: any): string[] {
     if (value == null) {
       return [];
@@ -63,6 +67,30 @@ export class ResultRowHelperService {
       });
     }
     return of(this.copyWithExecCommand(value));
+  }
+
+  copyText(text: any, key: string, setCopied: (key: string) => void, e?: MouseEvent): void {
+    if (e) {
+      e.stopPropagation();
+    }
+    const value = text == null ? '' : String(text);
+    if (!value || value === '-') {
+      return;
+    }
+    this.copyToClipboard(value).subscribe((ok) => {
+      if (!ok) {
+        return;
+      }
+      setCopied(key);
+    });
+  }
+
+  setCopiedState(key: string, copiedTimer: any, setCopiedKey: (value: string | null) => void): any {
+    setCopiedKey(key);
+    if (copiedTimer) {
+      clearTimeout(copiedTimer);
+    }
+    return setTimeout(() => setCopiedKey(null), 1200);
   }
 
   private copyWithExecCommand(value: string): boolean {

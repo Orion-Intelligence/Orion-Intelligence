@@ -5,16 +5,16 @@ import { from, Observable } from 'rxjs';
 import { map, shareReplay, tap } from 'rxjs/operators';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 
-type PlainTableThemeOptions = {
+interface PlainTableThemeOptions {
   font?: string;
   fontSize: number;
   cellPadding: number;
   overflow?: 'linebreak';
   valign?: 'middle' | 'top';
   textColor?: [number, number, number];
-};
+}
 
-type PlainTableThemeConfig = {
+interface PlainTableThemeConfig {
   styles: {
     font?: string;
     fontSize: number;
@@ -37,7 +37,7 @@ type PlainTableThemeConfig = {
     lineColor: [number, number, number];
   };
   theme: 'plain';
-};
+}
 
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {

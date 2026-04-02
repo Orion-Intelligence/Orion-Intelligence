@@ -13,6 +13,7 @@ import { UrlScanMeta, UrlScanThreatItem, } from '../../shared/model/security-sca
 import { ScannerService } from './scanner-service.service';
 import { ReportExportService } from '../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../shared/model/report/report-export.model';
+import { ScanHelperMethodsService } from '../network-intel/network-intel-service.service';
 @Component({
   selector: 'app-security-scan',
   standalone: true,
@@ -51,7 +52,7 @@ export class SecurityScanComponent implements OnInit {
   trackByCategory = ( _: number, c: { name: string; } ) => c.name;
   trackByItem = (i: number) => i;
 
-  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: ReportExportService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: ReportExportService, private scanHelperMethodsService: ScanHelperMethodsService) { }
 
   ngOnInit(): void {
     this.scanType = this.route.snapshot.data['type'];
@@ -291,15 +292,7 @@ export class SecurityScanComponent implements OnInit {
   }
 
   get loadingStepLabel(): string {
-    const raw = (this.currentStep || '').trim();
-    if (!raw) {
-      return 'Scanning in progress...';
-    }
-    const normalized = raw.toLowerCase();
-    if (normalized === 'queued' || normalized.includes('queue')) {
-      return 'Queued: waiting for scanner availability...';
-    }
-    return raw;
+    return this.scanHelperMethodsService.getLoadingStepLabel(this.currentStep);
   }
 
   retry(): void {

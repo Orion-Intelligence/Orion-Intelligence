@@ -219,43 +219,31 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   copyText(text: any, key: string, e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    const value = text == null ? '' : String(text);
-    if (!value || value === '-') {
-      return;
-    }
-    this.rowHelper.copyToClipboard(value).subscribe((ok) => {
-      if (!ok) {
-        return;
-      }
-      this.setCopied(key);
-    });
+    this.rowHelper.copyText(text, key, (copiedKey) => {
+      this.copiedTimer = this.rowHelper.setCopiedState(copiedKey, this.copiedTimer, (value) => {
+        this.copiedKey = value;
+      });
+    }, e);
   }
 
   copyAll(e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    const payload = this.buildReportText();
-    if (!payload.trim()) {
+    const payload = this.getReportPayload(e);
+    if (!payload) {
       return;
     }
     this.rowHelper.copyToClipboard(payload).subscribe((ok) => {
       if (!ok) {
         return;
       }
-      this.setCopied('copy-all');
+      this.copiedTimer = this.rowHelper.setCopiedState('copy-all', this.copiedTimer, (value) => {
+        this.copiedKey = value;
+      });
     });
   }
 
   downloadReport(e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    const payload = this.buildReportText();
-    if (!payload.trim()) {
+    const payload = this.getReportPayload(e);
+    if (!payload) {
       return;
     }
     const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
@@ -271,25 +259,27 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     setTimeout(() => {
       URL.revokeObjectURL(url); 
     }, 1500);
-    this.setCopied('download');
+    this.copiedTimer = this.rowHelper.setCopiedState('download', this.copiedTimer, (value) => {
+      this.copiedKey = value;
+    });
   }
 
   isCopied(key: string): boolean {
-    return this.copiedKey === key;
-  }
-
-  private setCopied(key: string) {
-    this.copiedKey = key;
-    if (this.copiedTimer) {
-      clearTimeout(this.copiedTimer);
-    }
-    this.copiedTimer = setTimeout(() => (this.copiedKey = null), 1200);
+    return this.rowHelper.isCopied(this.copiedKey, key);
   }
 
   private rebuildTelemetryGroups() {
     this.telemetryGroupsCache = this.mode() === 'stealer'
       ? this.buildStealerGroups(this.item())
       : this.buildThreatGroups(this.result());
+  }
+
+  private getReportPayload(e?: MouseEvent): string | null {
+    if (e) {
+      e.stopPropagation();
+    }
+    const payload = this.buildReportText();
+    return payload.trim() ? payload : null;
   }
 
   private buildReportText(): string {

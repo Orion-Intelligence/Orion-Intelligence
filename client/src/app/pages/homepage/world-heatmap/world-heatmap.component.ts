@@ -99,9 +99,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
 
   ngOnDestroy(): void {
     this.tooltip?.remove();
-    if (this.rotationTimer) {
-      clearInterval(this.rotationTimer);
-    }
+    this.stopCategoryRotation();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -110,9 +108,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       if (!this.mapG || !this.svg) {
         return;
       }
-      this.updateColors();
-      this.updateLegend();
-      this.updateActiveCategoryLabel();
+      this.refreshMapPresentation(false);
     }
   }
 
@@ -165,19 +161,14 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!available.length) {
       return;
     }
-    if (this.rotationTimer) {
-      clearInterval(this.rotationTimer);
-      this.rotationTimer = null;
-    }
+    this.stopCategoryRotation();
     let index = 0;
     const switchCategory = () => {
       this.activeCategoryKey = available[index];
       this.activeCountryReports = this.allCategoryReports[this.activeCategoryKey];
       this.mapData = this.gettingUniqueCountrys();
       this.buildIndex();
-      this.animateMapTransition();
-      this.updateLegend();
-      this.updateActiveCategoryLabel();
+      this.refreshMapPresentation(true);
       index = (index + 1) % available.length;
     };
     switchCategory();
@@ -401,9 +392,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         .attr('x2', width)
         .attr('y2', y);
     }
-    this.updateColors();
-    this.updateLegend();
-    this.updateActiveCategoryLabel();
+    this.refreshMapPresentation(false);
   }
 
   private getValueForFeature(d: any): number | null {
@@ -517,20 +506,15 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
 
   private openCountryReport(): void {
     this.isOpenCountryReport = true;
-    this.selectedCountryReports = [];
-    this.selectedCountryPage = 1;
-    this.hasMoreCountryReports = false;
+    this.resetCountryReportState();
     void this.fetchCountryReportsPage(1, false);
   }
 
   closeCountryReport(): void {
     this.isOpenCountryReport = false;
     this.selectedName = null;
-    this.selectedCountryReports = [];
-    this.hasMoreCountryReports = false;
-    this.isCountryReportLoading = false;
-    this.isCountryReportLoadingMore = false;
-    this.selectedCountryPage = 1;
+    this.resetCountryReportState();
+    this.setCountryReportLoadingState(false, false);
   }
 
   async loadMoreCountryReports(): Promise<void> {
@@ -544,12 +528,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.selectedName || !this.activeCategoryKey) {
       return;
     }
-    if (append) {
-      this.isCountryReportLoadingMore = true;
-    }
-    else {
-      this.isCountryReportLoading = true;
-    }
+    this.setCountryReportLoadingState(append, true);
 
     try {
       const params = new HttpParams()
@@ -570,8 +549,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       this.hasMoreCountryReports = false;
     }
     finally {
-      this.isCountryReportLoading = false;
-      this.isCountryReportLoadingMore = false;
+      this.setCountryReportLoadingState(append, false);
     }
   }
 
@@ -596,6 +574,38 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         const interpolateFill = d3.interpolateRgb(currentFill, nextFill);
         return (t: number) => interpolateFill(t);
       });
+  }
+
+  private stopCategoryRotation(): void {
+    if (this.rotationTimer) {
+      clearInterval(this.rotationTimer);
+      this.rotationTimer = null;
+    }
+  }
+
+  private refreshMapPresentation(animate: boolean): void {
+    if (animate) {
+      this.animateMapTransition();
+    }
+    else {
+      this.updateColors();
+    }
+    this.updateLegend();
+    this.updateActiveCategoryLabel();
+  }
+
+  private resetCountryReportState(): void {
+    this.selectedCountryReports = [];
+    this.selectedCountryPage = 1;
+    this.hasMoreCountryReports = false;
+  }
+
+  private setCountryReportLoadingState(append: boolean, isLoading: boolean): void {
+    if (append) {
+      this.isCountryReportLoadingMore = isLoading;
+      return;
+    }
+    this.isCountryReportLoading = isLoading;
   }
 
   private normalizePositionValue(rawValue: number): number {
