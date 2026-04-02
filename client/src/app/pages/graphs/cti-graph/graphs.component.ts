@@ -126,7 +126,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   copied = false;
   copiedX = 0;
   copiedY = 0;
-  orignalColor: Color = '';
+  orignalColor: string | Color = '';
   currentCategory = '';
   isSidebarCollapsed = false;
   isTailwindReady = true;
@@ -1985,7 +1985,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       const radius = 200;
       const newEdges = this.rawEdges
         .filter(e => e.from === nodeId && subNodes.includes(e.to as string))
-        .filter(e => !this.edgeSet.get(e.id));
+        .filter(e => !this.edgeSet.get(e.id!));
       const newNodes = this.buildCircularSubNodes(subNodes, centerPos, radius);
       this.nodeSet.add(newNodes);
       this.edgeSet.add(newEdges);

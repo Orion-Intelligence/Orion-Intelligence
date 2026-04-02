@@ -330,12 +330,12 @@ class test_manager:
 
         try:
             vcol.truncate()
-        except Exception:
-            pass
+        except Exception as exc:
+            log.warning(f"Failed to truncate cti_vertices during test setup: {exc}")
         try:
             ecol.truncate()
-        except Exception:
-            pass
+        except Exception as exc:
+            log.warning(f"Failed to truncate cti_edges during test setup: {exc}")
 
         def load_docs(fp: Path):
             docs = []

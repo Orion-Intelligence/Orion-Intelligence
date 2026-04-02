@@ -84,7 +84,7 @@ export class ScrollService {
 
   saveCurrentPosition(_itemId = ''): void {
     const dashboardContainer = document.getElementById('dashboard-container');
-    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]');
     const documentElement = document.documentElement;
     const body = document.body;
     const windowPosition = window.scrollY;

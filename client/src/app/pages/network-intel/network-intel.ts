@@ -943,7 +943,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private joinValues(values: unknown[] | undefined | null): string {
     const normalized = (values || [])
-      .map(value => `${value ?? ''}`.trim())
+      .map(value => String(value ?? '').trim())
       .filter(Boolean);
 
     return normalized.length ? normalized.join(', ') : '-';

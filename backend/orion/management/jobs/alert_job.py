@@ -516,15 +516,15 @@ class alert_job:
 
                 except Exception:
                     overall_success = False
-                    pass
+                    # Continue processing remaining categories for this tenant.
 
                 category_statuses.append(category_status)
 
             end_time = datetime.now(timezone.utc)
             return {"status": "success" if overall_success else "completed_with_errors", "message": f"Alert generation job finished for tenant {tenant_id}.", "start_time": start_time.isoformat(), "end_time": end_time.isoformat(), "total_duration_seconds": (
                     end_time - start_time).total_seconds(), "results": category_statuses}
-        except Exception as _:
-            pass
+        except Exception as exc:
+            log.error(f"Alert generation job failed for tenant {tenant_id}: {exc}")
         finally:
             await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
 

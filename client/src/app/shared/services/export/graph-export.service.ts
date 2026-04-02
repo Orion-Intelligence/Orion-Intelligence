@@ -7,7 +7,7 @@ import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPay
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
   private pdfLibs$: Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
-  private loadedAutoTable: typeof import('jspdf-autotable').default = null;
+  private loadedAutoTable: typeof import('jspdf-autotable').default | null = null;
 
   protected readonly SECTION_RADIUS = 4;
   protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
@@ -748,7 +748,7 @@ export class GraphExportService {
     const values = table?.values ?? {};
     // Prefer fields that are explicitly screenshot-related, then fall back to any image data URL.
     for (const [key, value] of Object.entries(values)) {
-      if (`${key}`.toLowerCase().includes('screenshot') && this.isImageDataUrl(value)) {
+      if (key.toLowerCase().includes('screenshot') && this.isImageDataUrl(value)) {
         return this.normalizeDataUrl(value);
       }
     }

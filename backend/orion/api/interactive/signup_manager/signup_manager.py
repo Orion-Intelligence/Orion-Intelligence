@@ -37,7 +37,7 @@ class SignupManager:
             db_user_account, (db_user_account.email == email))
         if existing_mail:
             raise HTTPException(status_code=400, detail="Username or email already exists")
-        
+
         new_email_domain = TenantManager.get_email_domain(email)
         maintainers = await engine.find(
             db_user_account, db_user_account.licenses == LicenseName.MAINTAINER)
