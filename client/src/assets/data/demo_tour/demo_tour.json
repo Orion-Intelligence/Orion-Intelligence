@@ -1,0 +1,206 @@
+{
+  "enterprise": [
+    {
+      "elementId": "homeSearch",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Global Threat Search",
+      "description": "Search emails, domains, or usernames across dark web intelligence. This demo value is prefilled for the tour.",
+      "position": "bottom",
+      "inputSelector": "input[type=\"text\"]",
+      "presetValue": "jessidig@amazon.com",
+      "disableInput": true,
+      "disableSelectors": [
+        ".ui-search-clear-btn",
+        "input[type=\"checkbox\"]",
+        "button[type=\"button\"]"
+      ],
+      "triggerSubmitOnNext": true
+    },
+    {
+      "elementId": "dashboard-consolidated",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Ioc Results",
+      "description": "Here you can see the results related to the searched value.",
+      "position": "left"
+    },
+    {
+      "elementId": "dashboard-consolidated",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Deep Search",
+      "description": "Now we switch to Deep Search, enter bbc.com, and run the search automatically.",
+      "activateSelector": "button[data-testid=\"consolidated-tab-deep-search\"]",
+      "inputSelector": "input[data-testid=\"dashboard-general-input\"]",
+      "presetValue": "bbc.com",
+      "triggerSubmitOnShow": true,
+      "paddingBottom": 0,
+      "position": "left"
+    },
+    {
+      "elementId": "dashboard-consolidated",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Network Intel",
+      "description": "Now we move to Network Intel and search bbc.com there as well.",
+      "activateSelector": "button[data-testid=\"consolidated-tab-network-intelligence\"]",
+      "inputSelector": "input[data-testid=\"network-intel-search-input\"]",
+      "presetValue": "bbc.com",
+      "triggerSubmitOnShow": true,
+      "position": "left"
+    },
+    {
+      "elementId": "sidebar-social",
+      "title": "Social Section",
+      "description": "This opens the Social section in the sidebar so you can access its sub-categories quickly.",
+      "activateSelector": "[data-testid=\"sidebar-group-social\"]",
+      "waitForSelector": "#sidebar-social [data-testid^=\"sidebar-subitem-social-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    },
+    {
+      "elementId": "sidebar-web-scan",
+      "title": "Web Scans",
+      "description": "This opens the Web Scans section in the sidebar so you can access its sub-categories quickly.",
+      "activateSelector": "[data-testid=\"sidebar-group-scanner\"]",
+      "waitForSelector": "#sidebar-web-scan [data-testid^=\"sidebar-subitem-scanner-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    }
+  ],
+  "free": [
+    {
+      "elementId": "free-user-statistics",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Profile Overview",
+      "description": "This shows your free account overview and key statistics from the profile area.",
+      "position": "bottom"
+    },
+    {
+      "elementId": "sidebar-general",
+      "title": "General Intelligence",
+      "description": "This opens the General Intelligence section in the sidebar and takes you to it.",
+      "activateSelector": "[data-testid=\"sidebar-group-strategic\"]",
+      "waitForSelector": "#sidebar-general [data-testid^=\"sidebar-subitem-strategic-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    }
+  ],
+  "osint_basic": [
+    {
+      "elementId": "alert-summery",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Alert Summary",
+      "description": "This section shows your alert summary and the latest overview for your OSINT Basic workspace.",
+      "position": "bottom"
+    },
+    {
+      "elementId": "sidebar-general",
+      "additionalElementIds": ["search-result"],
+      "title": "General Intelligence",
+      "description": "This opens the General Intelligence section in the sidebar and redirects you to it.",
+      "activateSelector": "[data-testid=\"sidebar-group-strategic\"]",
+      "waitForSelector": "#sidebar-general [data-testid^=\"sidebar-subitem-strategic-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    },
+    {
+      "elementId": "report-detail",
+      "title": "Open Report",
+      "description": "This opens the full report view for the selected result.",
+      "activateSelector": "#open-report",
+      "waitForSelector": "#report-detail",
+      "position": "left"
+    }
+  ],
+  "osint_advanced": [
+    {
+      "elementId": "alert-summery",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Alert Summary",
+      "description": "This section shows your alert summary and the latest overview for your OSINT Advanced workspace.",
+      "position": "bottom"
+    },
+    {
+      "elementId": "sidebar-general",
+      "additionalElementIds": ["search-result"],
+      "title": "General Intelligence",
+      "description": "This opens the General Intelligence section in the sidebar and shows its result area.",
+      "activateSelector": "[data-testid=\"sidebar-group-strategic\"]",
+      "waitForSelector": "#sidebar-general [data-testid^=\"sidebar-subitem-strategic-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    },
+    {
+      "elementId": "sidebar-stealer-logs",
+      "title": "Stealer Logs",
+      "description": "This opens the Stealer Logs section in the sidebar so you can access its sub-categories quickly.",
+      "activateSelector": "[data-testid=\"sidebar-group-stealerlogs\"]",
+      "waitForSelector": "#sidebar-stealer-logs [data-testid^=\"sidebar-subitem-stealerlogs-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    },
+    {
+      "elementId": "sidebar-network-intel",
+      "title": "Network Intel",
+      "description": "This highlights the Network Intel section available with the OSINT Advanced license.",
+      "scrollIntoView": true,
+      "position": "right"
+    },
+    {
+      "elementId": "sidebar-cti-graph",
+      "title": "CTI Graph",
+      "description": "This highlights the CTI Graph entry available with the OSINT Advanced license.",
+      "scrollIntoView": true,
+      "position": "right"
+    }
+  ],
+  "social_mapper": [
+    {
+      "elementId": "alert-summery",
+      "title": "Alert Summary",
+      "description": "This section shows your alert summary and latest overview for the Social Mapper workspace.",
+      "position": "bottom"
+    },
+    {
+      "elementId": "sidebar-stealer-logs",
+      "title": "Stealer Logs",
+      "description": "This opens the Stealer Logs section in the sidebar so you can access its sub-categories quickly.",
+      "activateSelector": "[data-testid=\"sidebar-group-stealerlogs\"]",
+      "waitForSelector": "#sidebar-stealer-logs [data-testid^=\"sidebar-subitem-stealerlogs-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    },
+    {
+      "elementId": "sidebar-social-intel",
+      "title": "Social Intel",
+      "description": "This highlights the Social Intel section available with the Social Mapper license.",
+      "scrollIntoView": true,
+      "position": "right"
+    }
+  ],
+  "pentester": [
+    {
+      "elementId": "alert-summery",
+      "additionalElementIds": ["sidebar-profile"],
+      "title": "Alert Summary",
+      "description": "This section shows your alert summary and profile overview for the Pentester workspace.",
+      "position": "bottom"
+    },
+    {
+      "elementId": "sidebar-web-scan",
+      "title": "Web Scans",
+      "description": "This opens the Web Scans section in the sidebar so you can access its scanning tools.",
+      "activateSelector": "[data-testid=\"sidebar-group-scanner\"]",
+      "waitForSelector": "#sidebar-web-scan [data-testid^=\"sidebar-subitem-scanner-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    },
+    {
+      "elementId": "sidebar-entity-api",
+      "title": "Entity API",
+      "description": "This opens the Entity API section in the sidebar so you can access the available API tools.",
+      "activateSelector": "[data-testid=\"sidebar-group-api\"]",
+      "waitForSelector": "#sidebar-entity-api [data-testid^=\"sidebar-subitem-api-\"]",
+      "scrollIntoView": true,
+      "position": "right"
+    }
+  ]
+}

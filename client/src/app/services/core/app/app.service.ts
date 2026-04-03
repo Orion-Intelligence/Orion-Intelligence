@@ -12,6 +12,8 @@ import { Title } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
 import entitiesData from '../../../../assets/data/entities_data/entities.json';
 import licenseRulesData from '../../../../assets/data/licenses/license_rules.json';
+import { firstValueFrom } from 'rxjs';
+import { DemoTourConfig } from '../../../shared/model/demo-tour/demo.tour.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,11 +21,15 @@ import licenseRulesData from '../../../../assets/data/licenses/license_rules.jso
 export class AppService {
   private sessionLoad$: Observable<void> | null = null;
   private configLoad$: Observable<void> | null = null;
+  private entitiesCache: any[] | null = null;
+  private sessionLoadPromise: Promise<void> | null = null;
+  private demoTourLoadPromise: Promise<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
   public entities = signal<any[]>([]);
   public worldJson = signal<any>(null);
+  public demoTourConfig = signal<DemoTourConfig>({});
   public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
   public tenantData = signal<TenantModel>({
     name: '',
@@ -41,7 +47,8 @@ export class AppService {
         status: '',
         subscription: false,
         verificationDate: '',
-        license: []
+        license: [],
+        demo_tour:false,
       },
       tenant: {
         id: '',
@@ -75,6 +82,10 @@ export class AppService {
   constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
     this.initializeEntities();
     this.initializeLicenseRules();
+    this.loadEntities();
+    this.loadLicenseRules();
+    this.loadWorldJson();
+    this.loadDemoTourConfig();
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) {
@@ -208,6 +219,25 @@ export class AppService {
         this.worldJson.set(data);
       }))
       .subscribe();
+  }
+
+  loadDemoTourConfig(): Promise<void> {
+    if (this.demoTourLoadPromise) {
+      return this.demoTourLoadPromise;
+    }
+
+    this.demoTourLoadPromise = firstValueFrom(this.http.get<DemoTourConfig>('assets/data/demo_tour/demo_tour.json'))
+      .then(data => {
+        this.demoTourConfig.set(data || {});
+      })
+      .catch(() => {
+        this.demoTourConfig.set({});
+      })
+      .finally(() => {
+        this.demoTourLoadPromise = null;
+      });
+
+    return this.demoTourLoadPromise;
   }
 
   clearAll(): void {

@@ -27,6 +27,7 @@ export interface UserDataModel {
     license: string[];
     image?: string;
     preferences?: Record<string, any>;
+    demo_tour: boolean;
 }
 export interface TenantDataModel {
     id: string;
@@ -51,6 +52,7 @@ export interface userMetaData {
     preferences?: Record<string, any> & {
         theme?: 'dark-theme' | 'light-theme';
     };
+    demo_tour:boolean|undefined;
 }
 export interface AlertAllIoc {
     name: string;

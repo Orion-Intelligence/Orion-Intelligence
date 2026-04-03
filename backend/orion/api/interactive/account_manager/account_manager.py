@@ -210,6 +210,8 @@ class AccountManager:
             user.twofa_enabled = request.twofa_enabled
             if not request.twofa_enabled:
                 user.twofa_secret = None
+        if request.demo_tour is not None:
+            user.demo_tour=request.demo_tour
 
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(
@@ -279,7 +281,7 @@ class AccountManager:
         node = NodeCallbackModel.model_validate(
             {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "license": [
                 license.value for license in
-                user.licenses], "image": user_image_path, }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
+                user.licenses], "image": user_image_path, "demo_tour": user.demo_tour }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(
                 enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone), "country": self.safe_decrypt(
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(

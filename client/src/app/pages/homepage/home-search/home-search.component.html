@@ -1,4 +1,4 @@
-<form (submit)="onSearchSubmit($event)" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px] max-[550px]:grid">
+<form  (submit)="onSearchSubmit($event)" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px] max-[550px]:grid">
   <div class="flex w-full flex-wrap items-start justify-between">
     <div class="w-full">
       @if (homeSearchService.showFiltersOverlay) {
@@ -8,7 +8,8 @@
       @if (app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') ||
         app_service.userSessionData().user.role === 'analyst') {
         <div class="relative">
-          <div class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-[calc(100vw-90px)] max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay }">
+          <div >
+          <div id="homeSearch" class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-[calc(100vw-90px)] max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay }">
             <button class="flex w-[45px] items-center justify-center bg-white transition-colors hover:bg-white" type="submit">
               <img alt="Search" height="16" class="ml-[6px] mb-[1px] opacity-80" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
             </button>
@@ -38,6 +39,7 @@
                 }
               </ng-container>
             </div>
+          </div>
           </div>
           @if (homeSearchService.showFiltersOverlay) {
             <div class="hidden max-[550px]:block h-[43px]"></div>

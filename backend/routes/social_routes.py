@@ -164,7 +164,7 @@ async def upsert_social_session(data: dict = Body(...), graph_type: str = Query(
 @social_routes.get(
     "/api/social/session/tabs",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced"]))])
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced","social_mapper"]))])
 async def get_social_tabs(graph_type: str = Query("social"), current_user=Depends(get_current_user)):
     return await graphs_model.getInstance().get_tabs_summary(str(current_user.id), graph_type)
 
