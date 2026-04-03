@@ -18,7 +18,7 @@
   </svg>
 }
 
-@if (visible && stepReady) {
+@if (visible && cutoutRects.length) {
   <div class="tour-spotlight fixed z-[1001] pointer-events-none transition-all duration-300"></div>
   @for (spotlight of additionalSpotlightStyles; track $index) {
     <div
