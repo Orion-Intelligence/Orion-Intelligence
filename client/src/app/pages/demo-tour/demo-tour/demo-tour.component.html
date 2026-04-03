@@ -8,45 +8,88 @@
           </rect>
         }
       </mask>
+      <radialGradient id="tour-overlay-glow" cx="50%" cy="50%" r="72%">
+        <stop offset="0%" stop-color="rgba(18, 35, 28, 0.22)"></stop>
+        <stop offset="55%" stop-color="rgba(5, 10, 8, 0.7)"></stop>
+        <stop offset="100%" stop-color="rgba(2, 6, 5, 0.9)"></stop>
+      </radialGradient>
     </defs>
-    <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#tour-overlay-mask)"></rect>
+    <rect x="0" y="0" width="100%" height="100%" fill="url(#tour-overlay-glow)" mask="url(#tour-overlay-mask)"></rect>
   </svg>
 }
 
 @if (visible && stepReady) {
-  <div class="tour-spotlight fixed z-[1001] rounded-xl border border-green-400 shadow-[0_0_25px_rgba(0,255,150,0.7)] pointer-events-none transition-all duration-300"></div>
-  <svg class="tour-secondary-spotlights fixed inset-0 z-[1003] h-full w-full pointer-events-none transition-all duration-300" preserveAspectRatio="none" aria-hidden="true">
-    @for (spotlight of additionalSpotlightStyles; track $index) {
-      <rect class="tour-secondary-spotlight-rect" [attr.x]="spotlight['left']" [attr.y]="spotlight['top']" [attr.width]="spotlight['width']" [attr.height]="spotlight['height']" rx="16" ry="16">
-      </rect>
-    }
-  </svg>
-}
-@if (visible && stepReady) {
-  <div class="tour-tooltip fixed z-[1002] w-80 rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-[0_0_30px_rgba(0,255,150,0.3)] backdrop-blur-xl transition-all duration-300" data-testid="demo-tour-tooltip">
-
-    <div class="text-xs text-green-400 mb-2" data-testid="demo-tour-step">
-      Step {{ currentIndex + 1 }} / {{ totalSteps }}
+  <div class="tour-spotlight fixed z-[1001] pointer-events-none transition-all duration-300"></div>
+  @for (spotlight of additionalSpotlightStyles; track $index) {
+    <div
+      class="tour-secondary-spotlight fixed z-[1003] pointer-events-none transition-all duration-300"
+      [style.top]="spotlight['top']"
+      [style.left]="spotlight['left']"
+      [style.width]="spotlight['width']"
+      [style.height]="spotlight['height']">
     </div>
+  }
+}
+@if (visible) {
+  <div class="tour-tooltip fixed z-[1002] w-80 overflow-hidden border border-white/12 text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300" data-testid="demo-tour-tooltip">
+    <div class="tour-tooltip-shell p-4">
+      <div class="mb-3 flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          @if (stepReady) {
+            <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-blue-640)]" data-testid="demo-tour-step">
+              <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-blue-640)] shadow-[0_0_14px_rgba(87,165,235,0.5)]"></span>
+              Step {{ currentIndex + 1 }} / {{ totalSteps }}
+            </div>
+            <h3 class="text-lg font-semibold leading-tight text-white">
+              {{ step?.title }}
+            </h3>
+          } @else {
+            <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-blue-640)]">
+              <span class="tour-loader-spinner h-3.5 w-3.5" aria-hidden="true"></span>
+              Loading
+            </div>
+            <h3 class="text-lg font-semibold leading-tight text-white">
+              Loading demo step
+            </h3>
+          }
+        </div>
+      </div>
 
-    <h3 class="text-lg font-semibold mb-2 text-green-300">
-      {{ step?.title }}
-    </h3>
+      <div class="mb-3">
+        <div class="h-1.5 overflow-hidden rounded-full bg-white/8">
+          <div class="tour-progress-bar h-full rounded-full"></div>
+        </div>
+      </div>
 
-    <p class="text-sm text-gray-300 mb-4">
-      {{ step?.description }}
-    </p>
+      @if (stepReady) {
+        <p class="mb-4 text-sm leading-6 text-[var(--color-text2)]">
+          {{ step?.description }}
+        </p>
+      } @else {
+        <div class="mb-4 flex items-center gap-3 text-sm leading-6 text-[var(--color-text2)]">
+          <span class="tour-loader-spinner" aria-hidden="true"></span>
+          <span>Preparing data and highlight</span>
+        </div>
+      }
 
-    <div class="flex justify-between items-center">
-      <button (click)="close()" class="text-xs px-3 py-1 rounded bg-red-500/20 hover:bg-red-500/40" data-testid="demo-tour-skip">
-          Skip
-        </button>
-      <div class="space-x-2">
-        <button (click)="next()" class="text-xs px-3 py-1 rounded bg-green-500/20 hover:bg-green-500/40" data-testid="demo-tour-next">
-          Next →
-        </button>
+      <div class="tour-footer flex items-center justify-end gap-2">
+        @if (stepReady && (step?.endOnEnter || step?.captureValueOnEnter)) {
+          <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase">
+            Press Enter
+          </div>
+        } @else if (!stepReady) {
+          <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase">
+            Loading
+          </div>
+        }
+
+        <div class="flex items-center gap-2">
+          <button type="button" (click)="next()" class="tour-primary-button text-xs" data-testid="demo-tour-next" [disabled]="!stepReady">
+            <span>{{ currentIndex + 1 === totalSteps ? 'Finish' : 'Next' }}</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
       </div>
     </div>
-
   </div>
 }

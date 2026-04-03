@@ -21,6 +21,7 @@
       "additionalElementIds": ["sidebar-profile"],
       "title": "Ioc Results",
       "description": "Here you can see the results related to the searched value.",
+      "paddingLeft": -20,
       "position": "left"
     },
     {
@@ -32,6 +33,7 @@
       "inputSelector": "input[data-testid=\"dashboard-general-input\"]",
       "presetValue": "bbc.com",
       "triggerSubmitOnShow": true,
+      "paddingLeft": -20,
       "paddingBottom": 0,
       "position": "left"
     },
@@ -44,6 +46,7 @@
       "inputSelector": "input[data-testid=\"network-intel-search-input\"]",
       "presetValue": "bbc.com",
       "triggerSubmitOnShow": true,
+      "paddingLeft": -20,
       "position": "left"
     },
     {

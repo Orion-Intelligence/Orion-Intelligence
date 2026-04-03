@@ -71,7 +71,7 @@ export class DemoTourService {
     this.apiService.post(route, userMeta).subscribe({
       next: () => {
       },
-      error: (err) => {
+      error: (_err) => {
       },
     });
   }

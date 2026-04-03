@@ -19,7 +19,9 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   private activeInputWasDisabled = false;
   private disabledElements: Array<{ element: HTMLButtonElement | HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement; wasDisabled: boolean; }> = [];
   private nextTransitionInProgress = false;
+  private scrollLockY = 0;
 
+  readonly spotlightCornerRadius = 10;
   step: TourStep | null = null;
   visible = false;
   stepReady = false;
@@ -30,13 +32,22 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   overlayStyle: Record<string, string> = {};
   currentIndex = 0;
   totalSteps = 0;
+  @HostBinding('class.tour-loading') get isTourLoading(): boolean {
+    return this.visible && !this.stepReady;
+  }
+  @HostBinding('class.tour-tooltip-positioned') get isTooltipPositioned(): boolean {
+    return this.tooltipTop !== '0px' || this.tooltipLeft !== '0px';
+  }
   @HostBinding('style.--tour-overlay-clip') overlayClipPath = 'none';
+  @HostBinding('style.--tour-accent') tourAccent = '#34d399';
+  @HostBinding('style.--tour-accent-strong') tourAccentStrong = '#10b981';
   @HostBinding('style.--tour-spotlight-top') spotlightTop = '0px';
   @HostBinding('style.--tour-spotlight-left') spotlightLeft = '0px';
   @HostBinding('style.--tour-spotlight-width') spotlightWidth = '0px';
   @HostBinding('style.--tour-spotlight-height') spotlightHeight = '0px';
   @HostBinding('style.--tour-tooltip-top') tooltipTop = '0px';
   @HostBinding('style.--tour-tooltip-left') tooltipLeft = '0px';
+  @HostBinding('style.--tour-progress-width') progressWidth = '0%';
 
   constructor( private tourService: DemoTourService,private cdr: ChangeDetectorRef, private ngZone: NgZone,private renderer: Renderer2 ) {}
 
@@ -50,12 +61,15 @@ export class DemoTourComponent implements OnInit, OnDestroy {
         this.stepReady = false;
         this.currentIndex = index;
         this.step = this.tourService.getCurrentStep();
+        this.updateAccentTheme(this.step);
 
         if (this.visible && this.step) {
+          this.lockPageScroll();
           this.totalSteps = this.tourService.getTotalSteps();
           void this.prepareStep(this.step);
         }
         else {
+          this.unlockPageScroll();
           this.resetHostStyles();
         }
 
@@ -64,12 +78,36 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     });
   }
 
+  private updateAccentTheme(step: TourStep | null): void {
+    if (step?.elementId === 'alert-summery') {
+      this.tourAccent = 'var(--color-blue-640, #57A5EB)';
+      this.tourAccentStrong = 'var(--color-blue-630, #1792fe)';
+      return;
+    }
+
+    if (
+      step?.elementId === 'dashboard-consolidated' ||
+      step?.elementId === 'homeSearch' ||
+      step?.elementId === 'free-user-statistics' ||
+      step?.elementId === 'report-detail' ||
+      step?.elementId.startsWith('sidebar-')
+    ) {
+      this.tourAccent = '#34d399';
+      this.tourAccentStrong = '#10b981';
+      return;
+    }
+
+    this.tourAccent = 'var(--color-blue-640, #57A5EB)';
+    this.tourAccentStrong = 'var(--color-blue-630, #1792fe)';
+  }
+
   ngOnDestroy(): void {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
     this.disconnectActiveElementObservers();
     this.clearActiveElementStyles();
+    this.unlockPageScroll();
   }
 
   @HostListener('window:resize')
@@ -143,18 +181,25 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       left: paddingLeft
     });
     this.cutoutRects = [
-      { top, left, width, height, rx: 16, ry: 16 },
+      { top, left, width, height, rx: this.spotlightCornerRadius, ry: this.spotlightCornerRadius },
       ...this.additionalSpotlightStyles.map(spotlight => ({
         top: Number.parseFloat(spotlight['top']),
         left: Number.parseFloat(spotlight['left']),
         width: Number.parseFloat(spotlight['width']),
         height: Number.parseFloat(spotlight['height']),
-        rx: 16,
-        ry: 16
+        rx: this.spotlightCornerRadius,
+        ry: this.spotlightCornerRadius
       }))
     ];
 
-    this.positionStyle = this.getTooltipPosition(rect, this.step.position);
+    this.positionStyle = this.getTooltipPosition(rect, this.step.position, {
+      top,
+      left,
+      right,
+      bottom,
+      width,
+      height
+    });
     this.overlayClipPath = this.overlayStyle['clipPath'] || 'none';
     this.spotlightTop = this.spotlightStyle['top'] || '0px';
     this.spotlightLeft = this.spotlightStyle['left'] || '0px';
@@ -162,6 +207,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.spotlightHeight = this.spotlightStyle['height'] || '0px';
     this.tooltipTop = this.positionStyle['top'] || '0px';
     this.tooltipLeft = this.positionStyle['left'] || '0px';
+    this.progressWidth = `${this.totalSteps > 0 ? ((this.currentIndex + 1) / this.totalSteps) * 100 : 0}%`;
   }
 
   private schedulePositionUpdate(): void {
@@ -201,7 +247,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     }
 
     if (element && step.scrollIntoView) {
-      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
       await this.waitForStepStability(step, element);
     }
 
@@ -212,10 +258,6 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     }
     this.stepReady = true;
     this.cdr.detectChanges();
-
-    requestAnimationFrame(() => {
-      this.updatePosition();
-    });
     this.schedulePositionUpdate();
   }
 
@@ -272,10 +314,38 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.activeElementMutationObserver = null;
   }
 
-  private getTooltipPosition(rect: DOMRect, preferredPosition: TourStep['position'] = 'bottom'): Record<string, string> {
+  private getTooltipPosition(rect: DOMRect, preferredPosition: TourStep['position'] = 'bottom', spotlightBounds?: { top: number; left: number; right: number; bottom: number; width: number; height: number; }): Record<string, string> {
     const tooltipWidth = 320;
     const tooltipHeight = 220;
     const margin = 12;
+
+    if (preferredPosition === 'bottom' && this.step?.elementId === 'homeSearch' && spotlightBounds) {
+      const homeSearchAlignedTooltip = this.getBelowLeftAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
+      if (this.fitsInViewport(homeSearchAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
+        return homeSearchAlignedTooltip;
+      }
+
+      return this.clampTooltipToViewport(homeSearchAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+    }
+
+    if (preferredPosition === 'right' && this.step?.elementId.startsWith('sidebar-') && spotlightBounds) {
+      const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
+      if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
+        return sidebarAlignedTooltip;
+      }
+
+      return this.clampTooltipToViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+    }
+
+    if (preferredPosition === 'left' && this.step?.elementId === 'dashboard-consolidated') {
+      const dashboardAlignedTooltip = this.getDashboardAlignedTooltipPosition(tooltipWidth, tooltipHeight, spotlightBounds);
+      if (this.fitsInViewport(dashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
+        return dashboardAlignedTooltip;
+      }
+
+      return this.clampTooltipToViewport(dashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+    }
+
     const primaryPosition: NonNullable<TourStep['position']> = preferredPosition ?? 'bottom';
     const positions: Array<NonNullable<TourStep['position']>> = [
       primaryPosition,
@@ -293,6 +363,22 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       tooltipWidth,
       tooltipHeight,
       margin);
+  }
+
+  private getSidebarAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
+    return this.clampTooltipToViewport({ top: `${spotlightBounds.top}px`, left: `${spotlightBounds.right + gap}px` }, tooltipWidth, tooltipHeight, 12);
+  }
+
+  private getBelowLeftAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
+    return this.clampTooltipToViewport({ top: `${spotlightBounds.bottom + gap}px`, left: `${spotlightBounds.left}px` }, tooltipWidth, tooltipHeight, 12);
+  }
+
+  private getDashboardAlignedTooltipPosition(tooltipWidth: number, tooltipHeight: number, spotlightBounds?: { top: number; left: number; right: number; bottom: number; width: number; height: number; }): Record<string, string> {
+    if (spotlightBounds) {
+      return this.clampTooltipToViewport({ top: `${spotlightBounds.top + 15}px`, left: `${spotlightBounds.left + 15}px` }, tooltipWidth, tooltipHeight, 12);
+    }
+
+    return { top: '12px', left: '12px' };
   }
 
   private calculateTooltipCoordinates( rect: DOMRect, position: NonNullable<TourStep['position']>, tooltipWidth: number, tooltipHeight: number, margin: number ): Record<string, string> {
@@ -360,10 +446,18 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     )`;
   }
 
-  private getAdditionalSpotlightStyles( step: TourStep, padding: { top: number; right: number; bottom: number; left: number; } ): Array<Record<string, string>> {
+  private getAdditionalSpotlightStyles(step: TourStep, padding: { top: number; right: number; bottom: number; left: number; }): Array<Record<string, string>> {
     if (!step.additionalElementIds?.length) {
       return [];
     }
+
+    const minimumPadding = step.padding ?? 10;
+    const additionalPadding = {
+      top: Math.max(padding.top, minimumPadding),
+      right: Math.max(padding.right, minimumPadding),
+      bottom: Math.max(padding.bottom, minimumPadding),
+      left: Math.max(padding.left, minimumPadding)
+    };
 
     const styles: Array<Record<string, string>> = [];
     for (const elementId of step.additionalElementIds) {
@@ -373,10 +467,10 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       }
 
       const rect = element.getBoundingClientRect();
-      const top = Math.max(rect.top - padding.top, 8);
-      const left = Math.max(rect.left - padding.left, 8);
-      const right = Math.min(rect.right + padding.right, window.innerWidth - 8);
-      const bottom = Math.min(rect.bottom + padding.bottom, window.innerHeight - 8);
+      const top = Math.max(rect.top - additionalPadding.top, 8);
+      const left = Math.max(rect.left - additionalPadding.left, 8);
+      const right = Math.min(rect.right + additionalPadding.right, window.innerWidth - 8);
+      const bottom = Math.min(rect.bottom + additionalPadding.bottom, window.innerHeight - 8);
 
       styles.push({
         top: `${top}px`,
@@ -487,6 +581,59 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.disabledElements = [];
   }
 
+  private lockPageScroll(): void {
+    const html = document.documentElement;
+    const body = document.body;
+
+    if (body.classList.contains('demo-tour-scroll-locked')) {
+      return;
+    }
+
+    this.scrollLockY = window.scrollY;
+    body.classList.add('demo-tour-scroll-locked');
+
+    this.renderer.setStyle(html, 'overflow', 'hidden');
+    this.renderer.setStyle(html, 'overscroll-behavior', 'none');
+    this.renderer.setStyle(html, 'height', '100%');
+
+    this.renderer.setStyle(body, 'overflow', 'hidden');
+    this.renderer.setStyle(body, 'overscroll-behavior', 'none');
+    this.renderer.setStyle(body, 'position', 'fixed');
+    this.renderer.setStyle(body, 'top', `-${this.scrollLockY}px`);
+    this.renderer.setStyle(body, 'left', '0');
+    this.renderer.setStyle(body, 'right', '0');
+    this.renderer.setStyle(body, 'width', '100%');
+    this.renderer.setStyle(body, 'height', '100%');
+    this.renderer.setStyle(body, 'touch-action', 'none');
+  }
+
+  private unlockPageScroll(): void {
+    const html = document.documentElement;
+    const body = document.body;
+
+    if (!body.classList.contains('demo-tour-scroll-locked')) {
+      return;
+    }
+
+    body.classList.remove('demo-tour-scroll-locked');
+
+    this.renderer.removeStyle(html, 'overflow');
+    this.renderer.removeStyle(html, 'overscroll-behavior');
+    this.renderer.removeStyle(html, 'height');
+
+    this.renderer.removeStyle(body, 'overflow');
+    this.renderer.removeStyle(body, 'overscroll-behavior');
+    this.renderer.removeStyle(body, 'position');
+    this.renderer.removeStyle(body, 'top');
+    this.renderer.removeStyle(body, 'left');
+    this.renderer.removeStyle(body, 'right');
+    this.renderer.removeStyle(body, 'width');
+    this.renderer.removeStyle(body, 'height');
+    this.renderer.removeStyle(body, 'touch-action');
+
+    window.scrollTo(0, this.scrollLockY);
+  }
+
   private resetHostStyles(): void {
     this.overlayClipPath = 'none';
     this.spotlightTop = '0px';
@@ -495,6 +642,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.spotlightHeight = '0px';
     this.tooltipTop = '0px';
     this.tooltipLeft = '0px';
+    this.progressWidth = '0%';
     this.cutoutRects = [];
   }
 
