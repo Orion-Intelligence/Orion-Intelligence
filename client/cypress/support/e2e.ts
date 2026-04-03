@@ -146,4 +146,14 @@ Cypress.on("window:before:load", (win) => {
     });
 });
 
+beforeEach(() => {
+    cy.intercept('POST', '**/api/get/tenant/node', (req) => {
+        req.continue((res) => {
+            if (res.body?.user) {
+                res.body.user.demo_tour = true;
+            }
+        });
+    });
+});
+
 export {};

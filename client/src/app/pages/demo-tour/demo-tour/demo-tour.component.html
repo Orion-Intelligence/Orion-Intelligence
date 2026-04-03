@@ -1,0 +1,52 @@
+@if (visible) {
+  <svg class="tour-overlay fixed inset-0 z-[1000] h-full w-full pointer-events-auto transition-all duration-300" data-testid="demo-tour-overlay" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <mask id="tour-overlay-mask">
+        <rect x="0" y="0" width="100%" height="100%" fill="white"></rect>
+        @for (cutout of cutoutRects; track $index) {
+          <rect [attr.x]="cutout.left" [attr.y]="cutout.top" [attr.width]="cutout.width" [attr.height]="cutout.height" [attr.rx]="cutout.rx" [attr.ry]="cutout.ry" fill="black">
+          </rect>
+        }
+      </mask>
+    </defs>
+    <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#tour-overlay-mask)"></rect>
+  </svg>
+}
+
+@if (visible && stepReady) {
+  <div class="tour-spotlight fixed z-[1001] rounded-xl border border-green-400 shadow-[0_0_25px_rgba(0,255,150,0.7)] pointer-events-none transition-all duration-300"></div>
+  <svg class="tour-secondary-spotlights fixed inset-0 z-[1003] h-full w-full pointer-events-none transition-all duration-300" preserveAspectRatio="none" aria-hidden="true">
+    @for (spotlight of additionalSpotlightStyles; track $index) {
+      <rect class="tour-secondary-spotlight-rect" [attr.x]="spotlight['left']" [attr.y]="spotlight['top']" [attr.width]="spotlight['width']" [attr.height]="spotlight['height']" rx="16" ry="16">
+      </rect>
+    }
+  </svg>
+}
+@if (visible && stepReady) {
+  <div class="tour-tooltip fixed z-[1002] w-80 rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-[0_0_30px_rgba(0,255,150,0.3)] backdrop-blur-xl transition-all duration-300" data-testid="demo-tour-tooltip">
+
+    <div class="text-xs text-green-400 mb-2" data-testid="demo-tour-step">
+      Step {{ currentIndex + 1 }} / {{ totalSteps }}
+    </div>
+
+    <h3 class="text-lg font-semibold mb-2 text-green-300">
+      {{ step?.title }}
+    </h3>
+
+    <p class="text-sm text-gray-300 mb-4">
+      {{ step?.description }}
+    </p>
+
+    <div class="flex justify-between items-center">
+      <button (click)="close()" class="text-xs px-3 py-1 rounded bg-red-500/20 hover:bg-red-500/40" data-testid="demo-tour-skip">
+          Skip
+        </button>
+      <div class="space-x-2">
+        <button (click)="next()" class="text-xs px-3 py-1 rounded bg-green-500/20 hover:bg-green-500/40" data-testid="demo-tour-next">
+          Next →
+        </button>
+      </div>
+    </div>
+
+  </div>
+}

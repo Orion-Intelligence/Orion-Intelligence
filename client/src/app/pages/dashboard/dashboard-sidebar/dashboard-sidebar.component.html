@@ -9,6 +9,7 @@
       </button>
     </div>
     <div class="overflow-y-auto min-h-[500px] ml-[-5px] p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div id="sidebar-profile">
       <app-dashboard-sidebar-items
         (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)"
@@ -18,11 +19,14 @@
         [routePrefix]="'profile'"
         [title]="this.appService.userSessionData().user.username">
       </app-dashboard-sidebar-items>
+      <!-- </div> -->
+      </div>
       @if (licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise')) {
         <div class="mt-[20px] text-[13px] font-bold text-white">Search API's</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (isAdmin() || licenseService.canUseModule('general')) {
+        <div id="sidebar-general">
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
@@ -31,6 +35,7 @@
           [items]="generalCategories"
           [routePrefix]="'strategic'"
         [title]="'General Intelligence'"></app-dashboard-sidebar-items>
+        </div>
       }
       @if (isAdmin() || licenseService.canUseModule('breach')) {
         <app-dashboard-sidebar-items
@@ -53,6 +58,7 @@
         [title]="'Defacement'"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('social')) {
+        <div id="sidebar-social">
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
@@ -61,6 +67,7 @@
           [items]="socialCategories"
           [routePrefix]="'social'"
         [title]="'Social'"></app-dashboard-sidebar-items>
+        </div>
       }
       @if (isAdmin() || licenseService.canUseModule('exploit')) {
         <app-dashboard-sidebar-items
@@ -97,6 +104,7 @@
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
+        <div id="sidebar-stealer-logs">
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
@@ -105,8 +113,10 @@
           [items]="stealerlogsCategories"
           [routePrefix]="'stealerlogs'"
         [title]="'Stealer logs'"></app-dashboard-sidebar-items>
+        </div>
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
+        <div id="sidebar-web-scan">
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
@@ -115,8 +125,10 @@
           [items]="scannerCategories"
           [routePrefix]="'scanner'"
         [title]="'Web Scans'"></app-dashboard-sidebar-items>
+        </div>
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
+        <div id="sidebar-entity-api">
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
@@ -125,13 +137,14 @@
           [items]="apiCategories"
           [routePrefix]="'api'"
         [title]="'Entity API'"></app-dashboard-sidebar-items>
+        </div>
       }
       @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs') || canAccessStandaloneDataCollection()) {
         <div class="mt-[20px] text-[13px] font-bold text-white">Data Collection</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (canAccessNetworkIntel() || isDemo()) {
-        <div class="my-[6px] rounded-[8px] select-none">
+        <div id="sidebar-network-intel" class="my-[6px] rounded-[8px] select-none">
           <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel()); canAccessNetworkIntel() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': isDemo() && !canAccessNetworkIntel() }" [routerLink]="canAccessNetworkIntel() ? 'netint' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
             <img alt="Network Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
             Network Intel
@@ -139,15 +152,16 @@
         </div>
       }
       @if (isAdmin() || licenseService.canUseCtiGraph() || isDemo()) {
-        <div class="my-[6px] rounded-[8px] select-none">
+        <div id="sidebar-cti-graph" class="my-[6px] rounded-[8px] select-none">
           <a (click)="requestStandaloneSubscription($event, isAdmin() || licenseService.canUseCtiGraph())" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || licenseService.canUseCtiGraph()) }" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="isAdmin() || licenseService.canUseCtiGraph() ? '/dashboard/ctigraph' : null" target="_blank">
             <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/graph.svg" width="20">
+
             CTI Graph
           </a>
         </div>
       }
       @if (canAccessSocialIntel() || isDemo()) {
-        <div class="my-[6px] rounded-[8px] select-none">
+        <div id="sidebar-social-intel" class="my-[6px] rounded-[8px] select-none">
           <a (click)="requestStandaloneSubscription($event, canAccessSocialIntel())" [ngClass]="{ 'opacity-20': isDemo() && !canAccessSocialIntel() }" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="canAccessSocialIntel() ? '/dashboard/social-intel' : null" target="_blank">
             <img alt="Social Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
             Social Intel

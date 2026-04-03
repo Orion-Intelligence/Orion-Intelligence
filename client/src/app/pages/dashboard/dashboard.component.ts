@@ -10,6 +10,7 @@ import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
 import { AuthService } from '../../services/authetication/auth.service';
 import { filter } from 'rxjs';
+import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -19,7 +20,8 @@ import { filter } from 'rxjs';
     NgClass,
     RouterOutlet,
     ScrollingModule,
-    ProSubscriptionComponent
+    ProSubscriptionComponent,
+    DemoTourComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
@@ -79,5 +81,10 @@ export class DashboardComponent implements AfterViewInit, OnInit {
 
   hideSubscription() {
     this.dashboardService.showSubscription.set(false);
+  }
+
+  shouldShowDemoTour(): boolean {
+    const { user } = this.appService.userSessionData();
+    return this.authService.isAuthenticated() && !!user.username && !user.demo_tour && !(user.role == 'admin');
   }
 }

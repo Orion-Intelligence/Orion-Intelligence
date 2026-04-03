@@ -1,0 +1,34 @@
+:host {
+  --tour-overlay-clip: none;
+  --tour-spotlight-top: 0px;
+  --tour-spotlight-left: 0px;
+  --tour-spotlight-width: 0px;
+  --tour-spotlight-height: 0px;
+  --tour-tooltip-top: 0px;
+  --tour-tooltip-left: 0px;
+}
+
+.tour-spotlight {
+  top: var(--tour-spotlight-top);
+  left: var(--tour-spotlight-left);
+  width: var(--tour-spotlight-width);
+  height: var(--tour-spotlight-height);
+}
+
+.tour-tooltip {
+  top: var(--tour-tooltip-top);
+  left: var(--tour-tooltip-left);
+}
+
+.tour-secondary-spotlight-rect {
+  fill: none;
+  stroke: #4ade80;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 25px rgba(0, 255, 150, 0.7));
+}
+
+.demo-tour-active {
+  position: relative !important;
+  z-index: 1004 !important;
+  pointer-events: auto !important;
+}

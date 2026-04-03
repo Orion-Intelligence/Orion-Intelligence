@@ -59,6 +59,7 @@ class db_user_account(Model):
     preferences: Optional[Dict[str, Any]] = {}
     current_session_id: Optional[str] = Field(default=None)
     licenses: List[LicenseName] = Field(default=[LicenseName.FREE])
+    demo_tour: bool = Field(default=False)
 
     @staticmethod
     def hash_password(password: str) -> str:
