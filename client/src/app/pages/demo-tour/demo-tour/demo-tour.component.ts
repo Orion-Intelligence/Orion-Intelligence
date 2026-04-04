@@ -233,10 +233,16 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         const dashboardBody = document.querySelector('[data-testid="dashboard-body"]');
         if (dashboardBody instanceof HTMLElement && this.isElementRendered(dashboardBody)) {
           const dashboardRect = dashboardBody.getBoundingClientRect();
-          left = Math.max(dashboardRect.left + 4, 4);
-          right = Math.min(dashboardRect.right - 4, window.innerWidth - 4);
+          const compactSpotlightInset = 10;
+          top = Math.max(top, dashboardRect.top + compactSpotlightInset);
+          left = Math.max(dashboardRect.left + compactSpotlightInset, compactSpotlightInset);
+          right = Math.min(dashboardRect.right - compactSpotlightInset, window.innerWidth - compactSpotlightInset);
           width = Math.max(right - left, 0);
         }
+
+        const compactSpotlightBottomLimit = this.getCompactDashboardSpotlightBottomLimit();
+        bottom = Math.max(top, Math.min(bottom, compactSpotlightBottomLimit));
+        height = Math.max(bottom - top, 0);
       }
 
       const additionalSpotlightStyles = this.getAdditionalSpotlightStyles(this.step, {
@@ -551,6 +557,14 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.tooltipWidth = `${width}px`;
 
     return { width, height, margin, compact };
+  }
+
+  private getCompactDashboardSpotlightBottomLimit(): number {
+    const { height: tooltipHeight, margin } = this.getTooltipMetrics();
+    const tooltipBottomOffset = 10;
+    const spotlightGap = 16;
+
+    return Math.max(window.innerHeight - tooltipHeight - tooltipBottomOffset - spotlightGap - margin, 8);
   }
 
   private getSidebarAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
