@@ -248,7 +248,7 @@ export class AppService {
   }
 
   isMobileMode(): boolean {
-    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+    return localStorage.getItem('mobileDemo') === 'true';
   }
 
   setOnboardingStatus(value: boolean) {
