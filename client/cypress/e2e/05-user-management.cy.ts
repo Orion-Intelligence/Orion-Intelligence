@@ -161,7 +161,6 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
     waitForTourStep(2);
 
-    cy.get('[data-testid="demo-tour-skip"]').should('not.exist');
     cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
   });
 

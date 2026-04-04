@@ -1408,13 +1408,15 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private waitForElement(elementId: string): Promise<void> {
     return new Promise(resolve => {
-      if (document.getElementById(elementId)) {
+      const existingElement = document.getElementById(elementId);
+      if (existingElement instanceof HTMLElement && this.isElementRendered(existingElement)) {
         resolve();
         return;
       }
 
       const observer = new MutationObserver(() => {
-        if (!document.getElementById(elementId)) {
+        const element = document.getElementById(elementId);
+        if (!(element instanceof HTMLElement) || !this.isElementRendered(element)) {
           return;
         }
 
@@ -1430,7 +1432,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       window.setTimeout(() => {
         observer.disconnect();
         resolve();
-      }, 100);
+      }, 1500);
     });
   }
 }
