@@ -80,11 +80,9 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    // window.setTimeout(() => {
-    //   this.dashboardAnimationsReady = true;
-    //   this.demoTourMounted = true;
-    //   this.cdr.detectChanges();
-    // }, 0);
+    this.dashboardAnimationsReady = true;
+    this.demoTourMounted = true;
+    this.cdr.detectChanges();
   }
 
   hideSubscription() {

@@ -509,6 +509,15 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return this.clampTooltipToViewport(homeSearchAlignedTooltip, tooltipWidth, tooltipHeight, margin);
     }
 
+    if (effectivePreferredPosition === 'bottom' && this.step?.elementId === 'free-user-statistics') {
+      const freeDashboardAlignedTooltip = this.getDashboardAlignedTooltipPosition(tooltipWidth, tooltipHeight, spotlightBounds);
+      if (this.fitsInViewport(freeDashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
+        return freeDashboardAlignedTooltip;
+      }
+
+      return this.clampTooltipToViewport(freeDashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+    }
+
     if (effectivePreferredPosition === 'right' && this.step?.elementId.startsWith('sidebar-') && spotlightBounds) {
       const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
       if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
@@ -525,6 +534,27 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       return this.clampTooltipToViewport(dashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+    }
+
+    if (effectivePreferredPosition === 'left' && this.step?.elementId === 'report-detail') {
+      const sidebarElement = document.getElementById('sidebar-general');
+      if (sidebarElement) {
+        const sidebarRect = sidebarElement.getBoundingClientRect();
+        const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition({
+          top: sidebarRect.top,
+          left: sidebarRect.left,
+          right: sidebarRect.right,
+          bottom: sidebarRect.bottom,
+          width: sidebarRect.width,
+          height: sidebarRect.height
+        }, tooltipWidth, tooltipHeight, 20);
+
+        if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
+          return sidebarAlignedTooltip;
+        }
+
+        return this.clampTooltipToViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+      }
     }
 
     const primaryPosition: NonNullable<TourStep['position']> = effectivePreferredPosition ?? 'bottom';

@@ -79,6 +79,7 @@
       "additionalElementIds": ["sidebar-profile"],
       "title": "Profile Overview",
       "description": "This shows your free account overview and key statistics from the profile area.",
+      "paddingLeft": -16,
       "position": "bottom"
     },
     {
@@ -111,10 +112,12 @@
     },
     {
       "elementId": "report-detail",
+      "additionalElementIds": ["sidebar-general"],
       "title": "Open Report",
       "description": "This opens the full report view for the selected result.",
       "activateSelector": "#open-report",
       "waitForSelector": "#report-detail",
+      "paddingLeft": -16,
       "position": "left"
     }
   ],
