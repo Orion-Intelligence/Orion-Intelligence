@@ -1,4 +1,4 @@
-import {addUser, completeSubscriptionPopupFlow, deleteFirstUser, loginAndClickSidebar, loginAsUser, ManagedUser, openSidebarGroup, openSidebarSubItem, openUsersList} from './controllers/05-user-management.controller';
+import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openSidebarGroup, openSidebarSubItem} from './controllers/05-user-management.controller';
 
 let testUsers: any = {};
 let testData: any = {};
@@ -193,21 +193,25 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.get('[data-testid="demo-tour-tooltip"]').should('not.exist');
   });
 });
-//
-// describe('Orion Intelligence - User Management Deletion Flow', () => {
-//   const USERS_URL = '/dashboard/profile/users?page=1';
-//
-//   beforeEach(() => {
-//     cy.loginAsAdmin();
-//   });
-//
-//   after(() => {
-//     cy.logout();
-//   });
-//
-//   it('deletes users sequentially until only system users remain', () => {
-//     openUsersList(USERS_URL);
-//     deleteFirstUser(USERS_URL);
-//     cy.logout();
-//   });
-// });
+
+describe('Orion Intelligence - User Management Deletion Flow', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('deletes all configured test users except testing4', () => {
+    cy.env(['TEST_USERS']).then(({TEST_USERS}) => {
+      const usernames = Object.keys(TEST_USERS || {})
+        .filter((key) => /^testing\d+$/.test(key) && key !== 'testing4')
+        .map((key) => TEST_USERS[key]?.username)
+        .filter(Boolean);
+
+      deleteUsersByUsername(usernames);
+    });
+    cy.logout();
+  });
+});
