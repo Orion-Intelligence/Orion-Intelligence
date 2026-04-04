@@ -901,7 +901,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.scrollLockY = window.scrollY;
+    html.classList.add('no-scroll');
     html.classList.add('demo-tour-scroll-locked');
+    body.classList.add('no-scroll');
     body.classList.add('demo-tour-scroll-locked');
     body.classList.add('demo-tour-active');
     this.syncRuntimeStyles();
@@ -912,12 +914,16 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     const body = document.body;
 
     if (!body.classList.contains('demo-tour-scroll-locked')) {
+      html.classList.remove('no-scroll');
       html.classList.remove('demo-tour-scroll-locked');
+      body.classList.remove('no-scroll');
       body.classList.remove('demo-tour-active');
       return;
     }
 
+    html.classList.remove('no-scroll');
     html.classList.remove('demo-tour-scroll-locked');
+    body.classList.remove('no-scroll');
     body.classList.remove('demo-tour-scroll-locked');
     body.classList.remove('demo-tour-active');
     this.syncRuntimeStyles();

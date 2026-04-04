@@ -93,8 +93,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
 
   shouldShowDemoTour(): boolean {
     const { user } = this.appService.userSessionData();
-    return localStorage.getItem('mobileDemo') !== 'true' &&
-      this.authService.isAuthenticated() &&
+    return this.authService.isAuthenticated() &&
       !!user.username &&
       !user.demo_tour &&
       !(user.role == 'admin');
