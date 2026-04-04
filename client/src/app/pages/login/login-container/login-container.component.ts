@@ -58,6 +58,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         mode = tree.queryParams['mode'];
       }
       if (mode === 'free') {
+        localStorage.setItem('mobileDemo', 'true');
         this.autoDemoLogin = true;
         this.demoLogin();
       }
