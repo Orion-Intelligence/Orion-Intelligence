@@ -19,6 +19,7 @@ export enum Category {
 export enum GeneralSubCategory {
     ALL = 'All',
     GENERAL = 'General',
+    SWARM = 'Swarm',
     FORUMS = 'Forums',
     NEWS = 'News',
     STOLEN = 'Stolen',
