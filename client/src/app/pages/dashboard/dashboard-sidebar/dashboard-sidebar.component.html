@@ -220,6 +220,7 @@
     </div>
     <div class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-collapsed
+        id="sidebar-profile"
         (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)"
         [category]="category.PROFILE"
@@ -230,6 +231,7 @@
       [title]="appService.userSessionData().user.username"></app-dashboard-sidebar-collapsed>
       @if (isAdmin() || licenseService.canUseModule('general')) {
         <app-dashboard-sidebar-collapsed
+          id="sidebar-general"
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.STRATEGIC"
@@ -266,6 +268,7 @@
       }
       @if (isAdmin() || licenseService.canUseModule('social')) {
         <app-dashboard-sidebar-collapsed
+          id="sidebar-social"
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.SOCIAL"
@@ -313,6 +316,7 @@
       }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
         <app-dashboard-sidebar-collapsed
+          id="sidebar-stealer-logs"
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.STEALERLOGS"
@@ -324,6 +328,7 @@
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <app-dashboard-sidebar-collapsed
+          id="sidebar-web-scan"
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.SCANNER"
@@ -335,6 +340,7 @@
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <app-dashboard-sidebar-collapsed
+          id="sidebar-entity-api"
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.API"

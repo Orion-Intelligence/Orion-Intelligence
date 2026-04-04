@@ -32,6 +32,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   private lastRenderedGeometry: RenderedGeometry | null = null;
   private readonly spotlightCornerRadius = 10;
   private runtimeStyleSheet: CSSStyleSheet | null = null;
+  private stepIndexTimerId: number | null = null;
 
   step: TourStep | null = null;
   visible = false;
@@ -66,34 +67,43 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   constructor(private tourService: DemoTourService, private cdr: ChangeDetectorRef, private ngZone: NgZone) {}
 
   ngOnInit() {
-    void this.tourService.startTourForCurrentLicense();
-
     this.tourService.currentStep$.subscribe(index => {
-      this.ngZone.run(() => {
-        this.visible = index !== -1;
-        this.stepReady = false;
-        this.lastRenderedGeometry = null;
-        this.geometryFrozen = false;
-        this.currentIndex = index;
-        this.step = this.tourService.getCurrentStep();
-        this.updateAccentTheme(this.step);
-        this.syncRuntimeStyles();
+      if (this.stepIndexTimerId !== null) {
+        window.clearTimeout(this.stepIndexTimerId);
+      }
 
-        if (this.visible && this.step) {
-          this.preparingStep = true;
-          this.loadingVisible = true;
-          this.lockPageScroll();
-          this.totalSteps = this.tourService.getTotalSteps();
-          void this.prepareStep(this.step);
-        }
-        else {
-          this.unlockPageScroll();
-          this.resetHostStyles();
-        }
-
-        this.cdr.detectChanges();
-      });
+      this.stepIndexTimerId = window.setTimeout(() => {
+        this.stepIndexTimerId = null;
+        this.ngZone.run(() => {
+          this.applyStepIndex(index);
+        });
+      }, 0);
     });
+
+    void this.tourService.startTourForCurrentLicense();
+  }
+
+  private applyStepIndex(index: number): void {
+    this.visible = index !== -1;
+    this.stepReady = false;
+    this.lastRenderedGeometry = null;
+    this.geometryFrozen = false;
+    this.currentIndex = index;
+    this.step = this.tourService.getCurrentStep();
+    this.updateAccentTheme(this.step);
+    this.syncRuntimeStyles();
+
+    if (this.visible && this.step) {
+      this.preparingStep = true;
+      this.loadingVisible = true;
+      this.lockPageScroll();
+      this.totalSteps = this.tourService.getTotalSteps();
+      void this.prepareStep(this.step);
+      return;
+    }
+
+    this.unlockPageScroll();
+    this.resetHostStyles();
   }
 
   private updateAccentTheme(step: TourStep | null): void {
@@ -120,6 +130,9 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.stepIndexTimerId !== null) {
+      window.clearTimeout(this.stepIndexTimerId);
+    }
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
