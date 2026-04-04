@@ -112,26 +112,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private updateAccentTheme(step: TourStep | null): void {
-    if (step?.elementId === 'alert-summery') {
-      this.tourAccent = 'var(--color-blue-640, #57A5EB)';
-      this.tourAccentStrong = 'var(--color-blue-630, #1792fe)';
-      return;
-    }
-
-    if (
-      step?.elementId === 'dashboard-consolidated' ||
-      step?.elementId === 'homeSearch' ||
-      step?.elementId === 'free-user-statistics' ||
-      step?.elementId === 'report-detail' ||
-      step?.elementId.startsWith('sidebar-')
-    ) {
-      this.tourAccent = '#34d399';
-      this.tourAccentStrong = '#10b981';
-      return;
-    }
-
-    this.tourAccent = 'var(--color-blue-640, #57A5EB)';
-    this.tourAccentStrong = 'var(--color-blue-630, #1792fe)';
+    this.tourAccent = '#34d399';
+    this.tourAccentStrong = '#10b981';
   }
 
   ngOnDestroy(): void {
@@ -235,14 +217,18 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         if (dashboardBody instanceof HTMLElement && this.isElementRendered(dashboardBody)) {
           const dashboardRect = dashboardBody.getBoundingClientRect();
           const compactSpotlightInset = 10;
-          top = Math.max(top, dashboardRect.top + compactSpotlightInset);
+          top = Math.max(top, this.getCompactTooltipReservedTop());
           left = Math.max(dashboardRect.left + compactSpotlightInset, compactSpotlightInset);
           right = Math.min(dashboardRect.right - compactSpotlightInset, window.innerWidth - compactSpotlightInset);
+          bottom = Math.min(dashboardRect.bottom - compactSpotlightInset, window.innerHeight - compactSpotlightInset);
           width = Math.max(right - left, 0);
+          height = Math.max(bottom - top, 0);
         }
+      }
 
-        const compactSpotlightBottomLimit = this.getCompactDashboardSpotlightBottomLimit();
-        bottom = Math.max(top, Math.min(bottom, compactSpotlightBottomLimit));
+      if (this.isCompactViewport() && this.isSidebarRelatedStep(this.step)) {
+        const compactSidebarTopLimit = this.getCompactTooltipReservedTop();
+        top = Math.max(top, compactSidebarTopLimit);
         height = Math.max(bottom - top, 0);
       }
 
@@ -488,11 +474,13 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private getTooltipPosition(rect: DOMRect, preferredPosition: TourStep['position'] = 'bottom', spotlightBounds?: { top: number; left: number; right: number; bottom: number; width: number; height: number; }): Record<string, string> {
     const { width: tooltipWidth, height: tooltipHeight, margin, compact } = this.getTooltipMetrics();
     if (compact) {
+      const isSidebarRelatedStep = !!this.step && this.isSidebarRelatedStep(this.step);
+      const isDashboardStep = this.step?.elementId === 'dashboard-consolidated';
       const isFinalSidebarStep = this.currentIndex >= Math.max(this.totalSteps - 2, 0);
       return {
-        top: isFinalSidebarStep ? '10px' : 'auto',
+        top: (isSidebarRelatedStep || isDashboardStep || isFinalSidebarStep) ? '10px' : 'auto',
         left: '10px',
-        bottom: isFinalSidebarStep ? 'auto' : '10px'
+        bottom: (isSidebarRelatedStep || isDashboardStep || isFinalSidebarStep) ? 'auto' : '10px'
       };
     }
 
@@ -516,6 +504,15 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       return this.clampTooltipToViewport(freeDashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+    }
+
+    if (effectivePreferredPosition === 'bottom' && this.step?.elementId === 'alert-summery' && spotlightBounds) {
+      const alertSummaryAlignedTooltip = this.getAlertSummaryAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight);
+      if (this.fitsInViewport(alertSummaryAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
+        return alertSummaryAlignedTooltip;
+      }
+
+      return this.clampTooltipToViewport(alertSummaryAlignedTooltip, tooltipWidth, tooltipHeight, margin);
     }
 
     if (effectivePreferredPosition === 'right' && this.step?.elementId.startsWith('sidebar-') && spotlightBounds) {
@@ -590,12 +587,12 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     return { width, height, margin, compact };
   }
 
-  private getCompactDashboardSpotlightBottomLimit(): number {
+  private getCompactTooltipReservedTop(): number {
     const { height: tooltipHeight, margin } = this.getTooltipMetrics();
-    const tooltipBottomOffset = 10;
+    const tooltipTopOffset = 10;
     const spotlightGap = 16;
 
-    return Math.max(window.innerHeight - tooltipHeight - tooltipBottomOffset - spotlightGap - margin, 8);
+    return Math.max(tooltipTopOffset + tooltipHeight + spotlightGap + margin, 8);
   }
 
   private getSidebarAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
@@ -612,6 +609,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return { top: '12px', left: '12px' };
+  }
+
+  private getAlertSummaryAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number): Record<string, string> {
+    return this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
   }
 
   private calculateTooltipCoordinates( rect: DOMRect, position: NonNullable<TourStep['position']>, tooltipWidth: number, tooltipHeight: number, margin: number ): Record<string, string> {
@@ -661,7 +662,29 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getStepElement(step: TourStep): HTMLElement | null {
-    return document.getElementById(step.elementId);
+    const primaryElement = document.getElementById(step.elementId);
+    if (primaryElement) {
+      return primaryElement;
+    }
+
+    return this.getStepFallbackElement(step);
+  }
+
+  private getStepFallbackElement(step: TourStep): HTMLElement | null {
+    if (step.elementId !== 'alert-summery') {
+      return null;
+    }
+
+    const additionalFallback = step.additionalElementIds
+      ?.map(elementId => document.getElementById(elementId))
+      .find((element): element is HTMLElement => !!element && this.isElementRendered(element));
+
+    if (additionalFallback) {
+      return additionalFallback;
+    }
+
+    const sidebarProfile = document.getElementById('sidebar-profile');
+    return sidebarProfile && this.isElementRendered(sidebarProfile) ? sidebarProfile : null;
   }
 
   private getRenderedContentBounds(element: HTMLElement): DOMRect {
@@ -697,12 +720,18 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     return step.elementId.startsWith('sidebar-');
   }
 
+  private isSidebarRelatedStep(step: TourStep): boolean {
+    return this.isSidebarStep(step) ||
+      step.elementId === 'alert-summery' ||
+      !!step.additionalElementIds?.some(elementId => elementId.startsWith('sidebar-'));
+  }
+
   private async ensureMobileViewportState(step: TourStep): Promise<void> {
     if (!this.isCompactViewport()) {
       return;
     }
 
-    if (this.isSidebarStep(step)) {
+    if (this.isSidebarRelatedStep(step)) {
       await this.ensureMobileSidebarExpanded();
       return;
     }
@@ -735,6 +764,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       await this.waitForAnimationFrames(2);
     }
   }
+
 
   private isExpandedSidebarVisible(): boolean {
     const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
@@ -813,12 +843,15 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       const left = Math.max(rect.left - additionalPadding.left, 8);
       const right = Math.min(rect.right + additionalPadding.right, window.innerWidth - 8);
       const bottom = Math.min(rect.bottom + additionalPadding.bottom, window.innerHeight - 8);
+      const adjustedTop = this.isCompactViewport() && elementId.startsWith('sidebar-')
+        ? Math.max(top, this.getCompactTooltipReservedTop())
+        : top;
 
       styles.push({
-        top: `${top}px`,
+        top: `${adjustedTop}px`,
         left: `${left}px`,
         width: `${Math.max(right - left, 0)}px`,
-        height: `${Math.max(bottom - top, 0)}px`
+        height: `${Math.max(bottom - adjustedTop, 0)}px`
       });
     }
 
