@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { TourStep } from '../model/demo-tour/demo.tour.model';
 import { userMetaData } from '../model/company-profile/node.model';
@@ -13,7 +14,7 @@ export class DemoTourService {
 
   currentStep$ = this.currentStepIndex.asObservable();
 
-  constructor(private appService: AppService,private apiService:ApiService){}
+  constructor(private appService: AppService,private apiService:ApiService, private router: Router){}
 
   async startTourForCurrentLicense(): Promise<void> {
     await this.appService.loadDemoTourConfig();
@@ -36,7 +37,7 @@ export class DemoTourService {
       this.currentStepIndex.next(this.currentStepIndex.value + 1);
     }
     else {
-      this.end();
+      void this.finish();
     }
   }
 
@@ -56,6 +57,11 @@ export class DemoTourService {
     }));
     this.updateUser();
     this.currentStepIndex.next(-1);
+  }
+
+  async finish(): Promise<void> {
+    this.end();
+    await this.router.navigate(['/dashboard/profile/homepage'], { replaceUrl: true });
   }
 
   updateUser() {

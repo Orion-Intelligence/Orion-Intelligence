@@ -1,17 +1,23 @@
-import { ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { DemoTourService } from '../../../shared/services/demo.tour.service';
+import { RenderedGeometry } from '../../../shared/model/demo-tour/modal/rendered-geometry.interface';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
 
 @Component({
   selector: 'app-demo-tour',
   imports: [],
-  templateUrl: './demo-tour.component.html',
-  styleUrls: ['./demo-tour.component.css']
+  templateUrl: './demo-tour.component.html'
 })
 export class DemoTourComponent implements OnInit, OnDestroy {
+  private static readonly hostRuntimeSelector = 'app-demo-tour.demo-tour-runtime';
+  private static readonly bodyRuntimeSelector = 'body.demo-tour-scroll-locked';
   private readonly fallbackPositions: Array<NonNullable<TourStep['position']>> = ['bottom', 'top', 'right', 'left'];
+  private readonly minimumLoadingMs = 1500;
+  private readonly geometryTolerancePx = 1.5;
+  private readonly geometryTrackingWindowMs = 100;
   private activeElement: HTMLElement | null = null;
   private animationFrameId: number | null = null;
+  private geometryTrackingFrameId: number | null = null;
   private activeElementResizeObserver: ResizeObserver | null = null;
   private activeElementMutationObserver: MutationObserver | null = null;
   private stepPreparationToken = 0;
@@ -20,50 +26,62 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   private disabledElements: Array<{ element: HTMLButtonElement | HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement; wasDisabled: boolean; }> = [];
   private nextTransitionInProgress = false;
   private scrollLockY = 0;
+  private preparingStep = false;
+  private loadingStartedAt = 0;
+  private geometryFrozen = false;
+  private lastRenderedGeometry: RenderedGeometry | null = null;
+  private readonly spotlightCornerRadius = 10;
+  private runtimeStyleSheet: CSSStyleSheet | null = null;
 
-  readonly spotlightCornerRadius = 10;
   step: TourStep | null = null;
   visible = false;
   stepReady = false;
+  loadingVisible = false;
   positionStyle: Record<string, string> = {};
-  spotlightStyle: Record<string, string> = {};
-  additionalSpotlightStyles: Array<Record<string, string>> = [];
   cutoutRects: Array<{ top: number; left: number; width: number; height: number; rx: number; ry: number; }> = [];
-  overlayStyle: Record<string, string> = {};
   currentIndex = 0;
   totalSteps = 0;
+  spotlightRevealVariant = 0;
+  tourAccent = '#34d399';
+  tourAccentStrong = '#10b981';
+  spotlightTop = '0px';
+  spotlightLeft = '0px';
+  spotlightWidth = '0px';
+  spotlightHeight = '0px';
+  tooltipTop = '0px';
+  tooltipLeft = '0px';
+  tooltipBottom = 'auto';
+  tooltipWidth = '320px';
+  progressWidth = '0%';
+  @HostBinding('class.demo-tour-runtime') readonly runtimeClass = true;
+
   @HostBinding('class.tour-loading') get isTourLoading(): boolean {
     return this.visible && !this.stepReady;
   }
-  @HostBinding('class.tour-tooltip-positioned') get isTooltipPositioned(): boolean {
-    return this.tooltipTop !== '0px' || this.tooltipLeft !== '0px';
-  }
-  @HostBinding('style.--tour-overlay-clip') overlayClipPath = 'none';
-  @HostBinding('style.--tour-accent') tourAccent = '#34d399';
-  @HostBinding('style.--tour-accent-strong') tourAccentStrong = '#10b981';
-  @HostBinding('style.--tour-spotlight-top') spotlightTop = '0px';
-  @HostBinding('style.--tour-spotlight-left') spotlightLeft = '0px';
-  @HostBinding('style.--tour-spotlight-width') spotlightWidth = '0px';
-  @HostBinding('style.--tour-spotlight-height') spotlightHeight = '0px';
-  @HostBinding('style.--tour-tooltip-top') tooltipTop = '0px';
-  @HostBinding('style.--tour-tooltip-left') tooltipLeft = '0px';
-  @HostBinding('style.--tour-progress-width') progressWidth = '0%';
 
-  constructor( private tourService: DemoTourService,private cdr: ChangeDetectorRef, private ngZone: NgZone,private renderer: Renderer2 ) {}
+  @HostBinding('class.tour-tooltip-positioned') get isTooltipPositioned(): boolean {
+    return this.tooltipTop !== '0px' || this.tooltipLeft !== '0px' || this.tooltipBottom !== 'auto';
+  }
+
+  constructor(private tourService: DemoTourService, private cdr: ChangeDetectorRef, private ngZone: NgZone) {}
 
   ngOnInit() {
     void this.tourService.startTourForCurrentLicense();
 
     this.tourService.currentStep$.subscribe(index => {
       this.ngZone.run(() => {
-
         this.visible = index !== -1;
         this.stepReady = false;
+        this.lastRenderedGeometry = null;
+        this.geometryFrozen = false;
         this.currentIndex = index;
         this.step = this.tourService.getCurrentStep();
         this.updateAccentTheme(this.step);
+        this.syncRuntimeStyles();
 
         if (this.visible && this.step) {
+          this.preparingStep = true;
+          this.loadingVisible = true;
           this.lockPageScroll();
           this.totalSteps = this.tourService.getTotalSteps();
           void this.prepareStep(this.step);
@@ -105,6 +123,10 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
+    if (this.geometryTrackingFrameId !== null) {
+      cancelAnimationFrame(this.geometryTrackingFrameId);
+    }
+    this.clearRuntimeStyles();
     this.disconnectActiveElementObservers();
     this.clearActiveElementStyles();
     this.unlockPageScroll();
@@ -113,7 +135,8 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   @HostListener('window:resize')
   onWindowResize(): void {
     if (this.visible) {
-      this.schedulePositionUpdate();
+      this.geometryFrozen = false;
+      this.schedulePositionUpdate(true);
     }
   }
 
@@ -143,56 +166,77 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const el = this.getStepElement(this.step);
-    if (!el) {
+    const spotlightElement = this.getStepElement(this.step);
+    const tooltipElement = this.preparingStep
+      ? this.getTooltipAnchorElement(this.step) ?? spotlightElement
+      : spotlightElement;
+
+    if (!spotlightElement && !tooltipElement) {
       return;
     }
-    this.activeElement = el;
-    this.applyActiveElementStyles(el);
-    this.applyStepInputState(el, this.step);
+
+    if (spotlightElement) {
+      this.activeElement = spotlightElement;
+      this.applyActiveElementStyles(spotlightElement);
+      this.applyStepInputState(spotlightElement, this.step);
+    }
 
     const basePadding = this.step.padding ?? 10;
     const paddingTop = this.step.paddingTop ?? basePadding;
     const paddingRight = this.step.paddingRight ?? basePadding;
     const paddingBottom = this.step.paddingBottom ?? basePadding;
     const paddingLeft = this.step.paddingLeft ?? basePadding;
-    const rect = el.getBoundingClientRect();
-    const top = Math.max(rect.top - paddingTop, 8);
-    const left = Math.max(rect.left - paddingLeft, 8);
-    const right = Math.min(rect.right + paddingRight, window.innerWidth - 8);
-    const bottom = Math.min(rect.bottom + paddingBottom, window.innerHeight - 8);
-    const width = Math.max(right - left, 0);
-    const height = Math.max(bottom - top, 0);
+    let top = this.lastRenderedGeometry?.spotlightTop ?? 0;
+    let left = this.lastRenderedGeometry?.spotlightLeft ?? 0;
+    let width = this.lastRenderedGeometry?.spotlightWidth ?? 0;
+    let height = this.lastRenderedGeometry?.spotlightHeight ?? 0;
+    let right = left + width;
+    let bottom = top + height;
 
-    this.overlayStyle = {
-      clipPath: this.buildOverlayClipPath(top, right, bottom, left)
-    };
+    if (spotlightElement) {
+      const spotlightRect = spotlightElement.getBoundingClientRect();
+      top = Math.max(spotlightRect.top - paddingTop, 8);
+      left = Math.max(spotlightRect.left - paddingLeft, 8);
+      right = Math.min(spotlightRect.right + paddingRight, window.innerWidth - 8);
+      bottom = Math.min(spotlightRect.bottom + paddingBottom, window.innerHeight - 8);
+      width = Math.max(right - left, 0);
+      height = Math.max(bottom - top, 0);
 
-    this.spotlightStyle = {
-      top: `${top}px`,
-      left: `${left}px`,
-      width: `${width}px`,
-      height: `${height}px`
-    };
-    this.additionalSpotlightStyles = this.getAdditionalSpotlightStyles(this.step, {
-      top: paddingTop,
-      right: paddingRight,
-      bottom: paddingBottom,
-      left: paddingLeft
-    });
-    this.cutoutRects = [
-      { top, left, width, height, rx: this.spotlightCornerRadius, ry: this.spotlightCornerRadius },
-      ...this.additionalSpotlightStyles.map(spotlight => ({
-        top: Number.parseFloat(spotlight['top']),
-        left: Number.parseFloat(spotlight['left']),
-        width: Number.parseFloat(spotlight['width']),
-        height: Number.parseFloat(spotlight['height']),
-        rx: this.spotlightCornerRadius,
-        ry: this.spotlightCornerRadius
-      }))
-    ];
+      if (this.isCompactViewport() && this.step?.elementId === 'dashboard-consolidated') {
+        const dashboardBody = document.querySelector('[data-testid="dashboard-body"]');
+        if (dashboardBody instanceof HTMLElement && this.isElementRendered(dashboardBody)) {
+          const dashboardRect = dashboardBody.getBoundingClientRect();
+          left = Math.max(dashboardRect.left + 4, 4);
+          right = Math.min(dashboardRect.right - 4, window.innerWidth - 4);
+          width = Math.max(right - left, 0);
+        }
+      }
 
-    this.positionStyle = this.getTooltipPosition(rect, this.step.position, {
+      const additionalSpotlightStyles = this.getAdditionalSpotlightStyles(this.step, {
+        top: paddingTop,
+        right: paddingRight,
+        bottom: paddingBottom,
+        left: paddingLeft
+      });
+      this.cutoutRects = [
+        { top, left, width, height, rx: this.spotlightCornerRadius, ry: this.spotlightCornerRadius },
+        ...additionalSpotlightStyles.map(spotlight => ({
+          top: Number.parseFloat(spotlight['top']),
+          left: Number.parseFloat(spotlight['left']),
+          width: Number.parseFloat(spotlight['width']),
+          height: Number.parseFloat(spotlight['height']),
+          rx: this.spotlightCornerRadius,
+          ry: this.spotlightCornerRadius
+        }))
+      ];
+    }
+
+    const tooltipRect = (tooltipElement ?? spotlightElement)?.getBoundingClientRect();
+    if (!tooltipRect) {
+      return;
+    }
+
+    this.positionStyle = this.getTooltipPosition(tooltipRect, this.step.position, {
       top,
       left,
       right,
@@ -200,17 +244,55 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       width,
       height
     });
-    this.overlayClipPath = this.overlayStyle['clipPath'] || 'none';
-    this.spotlightTop = this.spotlightStyle['top'] || '0px';
-    this.spotlightLeft = this.spotlightStyle['left'] || '0px';
-    this.spotlightWidth = this.spotlightStyle['width'] || '0px';
-    this.spotlightHeight = this.spotlightStyle['height'] || '0px';
+
+    const nextGeometry = {
+      spotlightTop: top,
+      spotlightLeft: left,
+      spotlightWidth: width,
+      spotlightHeight: height,
+      tooltipTop: Number.parseFloat(this.positionStyle['top'] || '0'),
+      tooltipLeft: Number.parseFloat(this.positionStyle['left'] || '0')
+    };
+
+    if (this.shouldSkipGeometryUpdate(nextGeometry)) {
+      this.progressWidth = `${this.totalSteps > 0 ? ((this.currentIndex + 1) / this.totalSteps) * 100 : 0}%`;
+      return;
+    }
+
+    this.lastRenderedGeometry = nextGeometry;
+    this.spotlightTop = `${top}px`;
+    this.spotlightLeft = `${left}px`;
+    this.spotlightWidth = `${width}px`;
+    this.spotlightHeight = `${height}px`;
     this.tooltipTop = this.positionStyle['top'] || '0px';
     this.tooltipLeft = this.positionStyle['left'] || '0px';
+    this.tooltipBottom = this.positionStyle['bottom'] || 'auto';
     this.progressWidth = `${this.totalSteps > 0 ? ((this.currentIndex + 1) / this.totalSteps) * 100 : 0}%`;
+    this.syncRuntimeStyles();
   }
 
-  private schedulePositionUpdate(): void {
+  private shouldSkipGeometryUpdate(nextGeometry: RenderedGeometry): boolean {
+    if (!this.lastRenderedGeometry) {
+      return false;
+    }
+
+    return this.isWithinTolerance(this.lastRenderedGeometry.spotlightTop, nextGeometry.spotlightTop) &&
+      this.isWithinTolerance(this.lastRenderedGeometry.spotlightLeft, nextGeometry.spotlightLeft) &&
+      this.isWithinTolerance(this.lastRenderedGeometry.spotlightWidth, nextGeometry.spotlightWidth) &&
+      this.isWithinTolerance(this.lastRenderedGeometry.spotlightHeight, nextGeometry.spotlightHeight) &&
+      this.isWithinTolerance(this.lastRenderedGeometry.tooltipTop, nextGeometry.tooltipTop) &&
+      this.isWithinTolerance(this.lastRenderedGeometry.tooltipLeft, nextGeometry.tooltipLeft);
+  }
+
+  private isWithinTolerance(previousValue: number, nextValue: number): boolean {
+    return Math.abs(previousValue - nextValue) < this.geometryTolerancePx;
+  }
+
+  private schedulePositionUpdate(force = false): void {
+    if (!force && this.geometryFrozen) {
+      return;
+    }
+
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
@@ -218,37 +300,65 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.animationFrameId = requestAnimationFrame(() => {
       this.animationFrameId = null;
       this.updatePosition();
+      this.cdr.detectChanges();
     });
   }
 
   private async prepareStep(step: TourStep): Promise<void> {
     const token = ++this.stepPreparationToken;
+    this.preparingStep = true;
+    this.loadingVisible = true;
+    this.loadingStartedAt = performance.now();
+    this.cdr.detectChanges();
+
+    await this.ensureMobileViewportState(step);
+
+    if (token !== this.stepPreparationToken || this.step !== step) {
+      this.preparingStep = false;
+      return;
+    }
+
+    this.schedulePositionUpdate(true);
+
     if (step.activateSelector) {
       const trigger = document.querySelector(step.activateSelector);
       if (trigger instanceof HTMLElement) {
         trigger.click();
+        await this.waitForAnimationFrames(2);
+        this.schedulePositionUpdate(true);
         await this.waitForStepTarget(step);
+        await this.waitForAnimationFrames(2);
+        this.schedulePositionUpdate(true);
       }
     }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
+      this.preparingStep = false;
       return;
     }
 
     const element = this.getStepElement(step);
-    if (element) {
-      await this.waitForStepStability(step, element);
-    }
-    else {
+    if (element && step.scrollIntoView) {
+      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+      await this.waitForAnimationFrames(1);
+      this.schedulePositionUpdate(true);
     }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
+      this.preparingStep = false;
       return;
     }
 
-    if (element && step.scrollIntoView) {
-      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+    if (element) {
+      this.triggerSpotlightReveal();
+      this.updatePosition();
+      this.cdr.detectChanges();
+      await this.trackGeometryForWindow(step, this.geometryTrackingWindowMs);
+    }
+
+    if (element) {
       await this.waitForStepStability(step, element);
+      await this.waitForSidebarRectStability(step, element);
     }
 
     if (element && step.triggerSubmitOnShow) {
@@ -256,9 +366,26 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       this.triggerStepSubmit(element, step);
       await this.waitForStepStability(step, element);
     }
+
+    if (token !== this.stepPreparationToken || this.step !== step) {
+      this.preparingStep = false;
+      return;
+    }
+
+    const elapsedLoadingMs = performance.now() - this.loadingStartedAt;
+    if (elapsedLoadingMs < this.minimumLoadingMs) {
+      await this.wait(this.minimumLoadingMs - elapsedLoadingMs);
+    }
+
+    if (token !== this.stepPreparationToken || this.step !== step) {
+      this.preparingStep = false;
+      return;
+    }
+
     this.stepReady = true;
+    this.loadingVisible = false;
+    this.preparingStep = false;
     this.cdr.detectChanges();
-    this.schedulePositionUpdate();
   }
 
   private applyActiveElementStyles(element: HTMLElement): void {
@@ -289,14 +416,14 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.disconnectActiveElementObservers();
 
     this.activeElementResizeObserver = new ResizeObserver(() => {
-      if (this.visible) {
+      if (this.visible && !this.preparingStep && !this.geometryFrozen) {
         this.schedulePositionUpdate();
       }
     });
     this.activeElementResizeObserver.observe(element);
 
     this.activeElementMutationObserver = new MutationObserver(() => {
-      if (this.visible) {
+      if (this.visible && !this.preparingStep && !this.geometryFrozen) {
         this.schedulePositionUpdate();
       }
     });
@@ -315,11 +442,21 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   }
 
   private getTooltipPosition(rect: DOMRect, preferredPosition: TourStep['position'] = 'bottom', spotlightBounds?: { top: number; left: number; right: number; bottom: number; width: number; height: number; }): Record<string, string> {
-    const tooltipWidth = 320;
-    const tooltipHeight = 220;
-    const margin = 12;
+    const { width: tooltipWidth, height: tooltipHeight, margin, compact } = this.getTooltipMetrics();
+    if (compact) {
+      const isFinalSidebarStep = this.currentIndex >= Math.max(this.totalSteps - 2, 0);
+      return {
+        top: isFinalSidebarStep ? '10px' : 'auto',
+        left: '10px',
+        bottom: isFinalSidebarStep ? 'auto' : '10px'
+      };
+    }
 
-    if (preferredPosition === 'bottom' && this.step?.elementId === 'homeSearch' && spotlightBounds) {
+    const effectivePreferredPosition = compact && (preferredPosition === 'left' || preferredPosition === 'right')
+      ? 'bottom'
+      : preferredPosition;
+
+    if (effectivePreferredPosition === 'bottom' && this.step?.elementId === 'homeSearch' && spotlightBounds) {
       const homeSearchAlignedTooltip = this.getBelowLeftAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
       if (this.fitsInViewport(homeSearchAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
         return homeSearchAlignedTooltip;
@@ -328,7 +465,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       return this.clampTooltipToViewport(homeSearchAlignedTooltip, tooltipWidth, tooltipHeight, margin);
     }
 
-    if (preferredPosition === 'right' && this.step?.elementId.startsWith('sidebar-') && spotlightBounds) {
+    if (effectivePreferredPosition === 'right' && this.step?.elementId.startsWith('sidebar-') && spotlightBounds) {
       const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
       if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
         return sidebarAlignedTooltip;
@@ -337,7 +474,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       return this.clampTooltipToViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin);
     }
 
-    if (preferredPosition === 'left' && this.step?.elementId === 'dashboard-consolidated') {
+    if (effectivePreferredPosition === 'left' && this.step?.elementId === 'dashboard-consolidated') {
       const dashboardAlignedTooltip = this.getDashboardAlignedTooltipPosition(tooltipWidth, tooltipHeight, spotlightBounds);
       if (this.fitsInViewport(dashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
         return dashboardAlignedTooltip;
@@ -346,7 +483,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       return this.clampTooltipToViewport(dashboardAlignedTooltip, tooltipWidth, tooltipHeight, margin);
     }
 
-    const primaryPosition: NonNullable<TourStep['position']> = preferredPosition ?? 'bottom';
+    const primaryPosition: NonNullable<TourStep['position']> = effectivePreferredPosition ?? 'bottom';
     const positions: Array<NonNullable<TourStep['position']>> = [
       primaryPosition,
       ...this.fallbackPositions.filter(position => position !== primaryPosition)
@@ -359,10 +496,24 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       }
     }
 
-    return this.clampTooltipToViewport(this.calculateTooltipCoordinates(rect, preferredPosition ?? 'bottom', tooltipWidth, tooltipHeight, margin),
+    return this.clampTooltipToViewport(this.calculateTooltipCoordinates(rect, effectivePreferredPosition ?? 'bottom', tooltipWidth, tooltipHeight, margin),
       tooltipWidth,
       tooltipHeight,
       margin);
+  }
+
+  private getTooltipMetrics(): { width: number; height: number; margin: number; compact: boolean } {
+    const viewportWidth = window.innerWidth;
+    const compact = viewportWidth <= 640;
+    const margin = compact ? 10 : 12;
+    const width = compact
+      ? Math.max(viewportWidth - 20, 240)
+      : 320;
+    const height = compact ? 260 : 220;
+
+    this.tooltipWidth = `${width}px`;
+
+    return { width, height, margin, compact };
   }
 
   private getSidebarAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
@@ -431,19 +582,103 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     return document.getElementById(step.elementId);
   }
 
-  private buildOverlayClipPath(top: number, right: number, bottom: number, left: number): string {
-    return `polygon(
-      0% 0%,
-      0% 100%,
-      ${left}px 100%,
-      ${left}px ${top}px,
-      ${right}px ${top}px,
-      ${right}px ${bottom}px,
-      ${left}px ${bottom}px,
-      ${left}px 100%,
-      100% 100%,
-      100% 0%
-    )`;
+  private isCompactViewport(): boolean {
+    return window.innerWidth <= 900;
+  }
+
+  private isSidebarStep(step: TourStep): boolean {
+    return step.elementId.startsWith('sidebar-');
+  }
+
+  private async ensureMobileViewportState(step: TourStep): Promise<void> {
+    if (!this.isCompactViewport()) {
+      return;
+    }
+
+    if (this.isSidebarStep(step)) {
+      await this.ensureMobileSidebarExpanded();
+      return;
+    }
+
+    await this.ensureMobileSidebarCollapsed();
+  }
+
+  private async ensureMobileSidebarExpanded(): Promise<void> {
+    if (this.isExpandedSidebarVisible()) {
+      return;
+    }
+
+    const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
+    if (expandButton instanceof HTMLElement) {
+      expandButton.click();
+      await this.waitForCompactSidebarState(true);
+      await this.waitForAnimationFrames(2);
+    }
+  }
+
+  private async ensureMobileSidebarCollapsed(): Promise<void> {
+    if (!this.isExpandedSidebarVisible()) {
+      return;
+    }
+
+    const collapseButton = document.querySelector('[data-testid="sidebar-collapse-button"]');
+    if (collapseButton instanceof HTMLElement) {
+      collapseButton.click();
+      await this.waitForCompactSidebarState(false);
+      await this.waitForAnimationFrames(2);
+    }
+  }
+
+  private isExpandedSidebarVisible(): boolean {
+    const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
+    return !(expandButton instanceof HTMLElement);
+  }
+
+  private waitForCompactSidebarState(expanded: boolean): Promise<void> {
+    return new Promise(resolve => {
+      const isReady = () => {
+        const shell = document.querySelector('[data-testid="dashboard-shell"]');
+        const collapseButton = document.querySelector('[data-testid="sidebar-collapse-button"]');
+        const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
+
+        if (!(shell instanceof HTMLElement)) {
+          return false;
+        }
+
+        const shellVisible = shell.offsetParent !== null;
+
+        if (expanded) {
+          return collapseButton instanceof HTMLElement && !shellVisible;
+        }
+
+        return expandButton instanceof HTMLElement && shellVisible;
+      };
+
+      if (isReady()) {
+        resolve();
+        return;
+      }
+
+      const observer = new MutationObserver(() => {
+        if (!isReady()) {
+          return;
+        }
+
+        observer.disconnect();
+        resolve();
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true
+      });
+
+      window.setTimeout(() => {
+        observer.disconnect();
+        resolve();
+      }, 1500);
+    });
   }
 
   private getAdditionalSpotlightStyles(step: TourStep, padding: { top: number; right: number; bottom: number; left: number; }): Array<Record<string, string>> {
@@ -590,21 +825,10 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     }
 
     this.scrollLockY = window.scrollY;
+    html.classList.add('demo-tour-scroll-locked');
     body.classList.add('demo-tour-scroll-locked');
-
-    this.renderer.setStyle(html, 'overflow', 'hidden');
-    this.renderer.setStyle(html, 'overscroll-behavior', 'none');
-    this.renderer.setStyle(html, 'height', '100%');
-
-    this.renderer.setStyle(body, 'overflow', 'hidden');
-    this.renderer.setStyle(body, 'overscroll-behavior', 'none');
-    this.renderer.setStyle(body, 'position', 'fixed');
-    this.renderer.setStyle(body, 'top', `-${this.scrollLockY}px`);
-    this.renderer.setStyle(body, 'left', '0');
-    this.renderer.setStyle(body, 'right', '0');
-    this.renderer.setStyle(body, 'width', '100%');
-    this.renderer.setStyle(body, 'height', '100%');
-    this.renderer.setStyle(body, 'touch-action', 'none');
+    body.classList.add('demo-tour-active');
+    this.syncRuntimeStyles();
   }
 
   private unlockPageScroll(): void {
@@ -612,38 +836,114 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     const body = document.body;
 
     if (!body.classList.contains('demo-tour-scroll-locked')) {
+      html.classList.remove('demo-tour-scroll-locked');
+      body.classList.remove('demo-tour-active');
       return;
     }
 
+    html.classList.remove('demo-tour-scroll-locked');
     body.classList.remove('demo-tour-scroll-locked');
-
-    this.renderer.removeStyle(html, 'overflow');
-    this.renderer.removeStyle(html, 'overscroll-behavior');
-    this.renderer.removeStyle(html, 'height');
-
-    this.renderer.removeStyle(body, 'overflow');
-    this.renderer.removeStyle(body, 'overscroll-behavior');
-    this.renderer.removeStyle(body, 'position');
-    this.renderer.removeStyle(body, 'top');
-    this.renderer.removeStyle(body, 'left');
-    this.renderer.removeStyle(body, 'right');
-    this.renderer.removeStyle(body, 'width');
-    this.renderer.removeStyle(body, 'height');
-    this.renderer.removeStyle(body, 'touch-action');
+    body.classList.remove('demo-tour-active');
+    this.syncRuntimeStyles();
 
     window.scrollTo(0, this.scrollLockY);
   }
 
   private resetHostStyles(): void {
-    this.overlayClipPath = 'none';
     this.spotlightTop = '0px';
     this.spotlightLeft = '0px';
     this.spotlightWidth = '0px';
     this.spotlightHeight = '0px';
     this.tooltipTop = '0px';
     this.tooltipLeft = '0px';
+    this.tooltipBottom = 'auto';
     this.progressWidth = '0%';
     this.cutoutRects = [];
+    this.loadingVisible = false;
+    this.preparingStep = false;
+    this.geometryFrozen = false;
+    this.lastRenderedGeometry = null;
+    if (this.geometryTrackingFrameId !== null) {
+      cancelAnimationFrame(this.geometryTrackingFrameId);
+      this.geometryTrackingFrameId = null;
+    }
+    this.syncRuntimeStyles();
+  }
+
+  private syncRuntimeStyles(): void {
+    const styleSheet = this.getRuntimeStyleSheet();
+    if (!styleSheet) {
+      return;
+    }
+
+    this.upsertRuntimeRule(styleSheet, DemoTourComponent.hostRuntimeSelector, [
+      `--tour-accent: ${this.tourAccent}`,
+      `--tour-accent-strong: ${this.tourAccentStrong}`,
+      `--tour-spotlight-top: ${this.spotlightTop}`,
+      `--tour-spotlight-left: ${this.spotlightLeft}`,
+      `--tour-spotlight-width: ${this.spotlightWidth}`,
+      `--tour-spotlight-height: ${this.spotlightHeight}`,
+      `--tour-tooltip-top: ${this.tooltipTop}`,
+      `--tour-tooltip-left: ${this.tooltipLeft}`,
+      `--tour-tooltip-bottom: ${this.tooltipBottom}`,
+      `--tour-tooltip-width: ${this.tooltipWidth}`,
+      `--tour-progress-width: ${this.progressWidth}`
+    ]);
+
+    if (document.body.classList.contains('demo-tour-scroll-locked')) {
+      this.upsertRuntimeRule(styleSheet, DemoTourComponent.bodyRuntimeSelector, [`top: -${this.scrollLockY}px`]);
+      return;
+    }
+
+    this.removeRuntimeRule(styleSheet, DemoTourComponent.bodyRuntimeSelector);
+  }
+
+  private clearRuntimeStyles(): void {
+    const styleSheet = this.getRuntimeStyleSheet();
+    if (!styleSheet) {
+      return;
+    }
+
+    this.removeRuntimeRule(styleSheet, DemoTourComponent.hostRuntimeSelector);
+    this.removeRuntimeRule(styleSheet, DemoTourComponent.bodyRuntimeSelector);
+  }
+
+  private getRuntimeStyleSheet(): CSSStyleSheet | null {
+    if (this.runtimeStyleSheet) {
+      return this.runtimeStyleSheet;
+    }
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        const styleSheet = sheet as CSSStyleSheet;
+        void styleSheet.cssRules;
+        this.runtimeStyleSheet = styleSheet;
+        return styleSheet;
+      }
+      catch {
+        continue;
+      }
+    }
+
+    return null;
+  }
+
+  private upsertRuntimeRule(styleSheet: CSSStyleSheet, selector: string, declarations: string[]): void {
+    this.removeRuntimeRule(styleSheet, selector);
+    styleSheet.insertRule(`${selector} { ${declarations.join('; ')}; }`, styleSheet.cssRules.length);
+  }
+
+  private removeRuntimeRule(styleSheet: CSSStyleSheet, selector: string): void {
+    for (let index = styleSheet.cssRules.length - 1; index >= 0; index -= 1) {
+      const rule = styleSheet.cssRules[index];
+      if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+        styleSheet.deleteRule(index);
+      }
+    }
+  }
+
+  private triggerSpotlightReveal(): void {
+    this.spotlightRevealVariant = this.spotlightRevealVariant === 0 ? 1 : 0;
   }
 
   async next() {
@@ -664,10 +964,6 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.tourService.next();
   }
 
-  prev() {
-    this.tourService.prev();
-  }
-
   close() {
     this.clearActiveElementStyles();
     this.tourService.end();
@@ -685,30 +981,13 @@ export class DemoTourComponent implements OnInit, OnDestroy {
 
   private waitForStepTarget(step: TourStep): Promise<void> {
     return new Promise(resolve => {
-      const hasStepTarget = () => {
-        const element = this.getStepElement(step);
-        if (!element) {
-          return false;
-        }
-        if (step.waitForSelector) {
-          const nestedElement = document.querySelector(step.waitForSelector);
-          if (!(nestedElement instanceof HTMLElement) || !this.isElementRendered(nestedElement)) {
-            return false;
-          }
-        }
-        if (!step.inputSelector) {
-          return true;
-        }
-        return !!this.getStepInput(element, step);
-      };
-
-      if (hasStepTarget()) {
+      if (this.hasStepTarget(step)) {
         resolve();
         return;
       }
 
       const observer = new MutationObserver(() => {
-        if (!hasStepTarget()) {
+        if (!this.hasStepTarget(step)) {
           return;
         }
 
@@ -729,9 +1008,98 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     });
   }
 
+  private hasStepTarget(step: TourStep): boolean {
+    const element = this.getStepElement(step);
+    if (!element) {
+      return false;
+    }
+    if (step.waitForSelector) {
+      const nestedElement = document.querySelector(step.waitForSelector);
+      if (!(nestedElement instanceof HTMLElement) || !this.isElementRendered(nestedElement)) {
+        return false;
+      }
+    }
+    if (!step.inputSelector) {
+      return true;
+    }
+    return !!this.getStepInput(element, step);
+  }
+
   private wait(ms: number): Promise<void> {
     return new Promise(resolve => {
       window.setTimeout(resolve, ms);
+    });
+  }
+
+  private waitForAnimationFrames(count: number): Promise<void> {
+    return new Promise(resolve => {
+      const stepFrame = (remaining: number) => {
+        if (remaining <= 0) {
+          resolve();
+          return;
+        }
+
+        requestAnimationFrame(() => stepFrame(remaining - 1));
+      };
+
+      stepFrame(count);
+    });
+  }
+
+  private getTooltipAnchorElement(step: TourStep): HTMLElement | null {
+    const finalElement = this.getStepElement(step);
+    if (finalElement && this.isElementRendered(finalElement)) {
+      return finalElement;
+    }
+
+    if (!step.activateSelector) {
+      return finalElement;
+    }
+
+    const trigger = document.querySelector(step.activateSelector);
+    if (!(trigger instanceof HTMLElement)) {
+      return finalElement;
+    }
+
+    const triggerContainer = trigger.closest('[id]');
+    if (triggerContainer instanceof HTMLElement && this.isElementRendered(triggerContainer)) {
+      return triggerContainer;
+    }
+
+    return this.isElementRendered(trigger) ? trigger : finalElement;
+  }
+
+  private trackGeometryForWindow(step: TourStep, durationMs: number): Promise<void> {
+    this.geometryFrozen = false;
+
+    return new Promise(resolve => {
+      const startedAt = performance.now();
+
+      const tick = () => {
+        if (this.step !== step || !this.visible || this.preparingStep) {
+          this.geometryTrackingFrameId = null;
+          resolve();
+          return;
+        }
+
+        this.updatePosition();
+        this.cdr.detectChanges();
+
+        if (performance.now() - startedAt >= durationMs) {
+          this.geometryFrozen = true;
+          this.geometryTrackingFrameId = null;
+          resolve();
+          return;
+        }
+
+        this.geometryTrackingFrameId = requestAnimationFrame(tick);
+      };
+
+      if (this.geometryTrackingFrameId !== null) {
+        cancelAnimationFrame(this.geometryTrackingFrameId);
+      }
+
+      this.geometryTrackingFrameId = requestAnimationFrame(tick);
     });
   }
 
@@ -788,6 +1156,57 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       });
 
       scheduleSettle();
+    });
+  }
+
+  private waitForSidebarRectStability(step: TourStep, element: HTMLElement): Promise<void> {
+    if (!step.elementId.startsWith('sidebar-')) {
+      return Promise.resolve();
+    }
+
+    return new Promise(resolve => {
+      let previousRect = element.getBoundingClientRect();
+      let stableFrames = 0;
+      let frameId = 0;
+      let timeoutId = 0;
+      const requiredStableFrames = 4;
+      const tolerance = 1;
+
+      const finish = () => {
+        if (frameId) {
+          cancelAnimationFrame(frameId);
+        }
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
+        resolve();
+      };
+
+      const tick = () => {
+        const nextRect = element.getBoundingClientRect();
+        const heightStable = Math.abs(nextRect.height - previousRect.height) <= tolerance;
+        const topStable = Math.abs(nextRect.top - previousRect.top) <= tolerance;
+        const widthStable = Math.abs(nextRect.width - previousRect.width) <= tolerance;
+
+        if (heightStable && topStable && widthStable) {
+          stableFrames += 1;
+        }
+        else {
+          stableFrames = 0;
+        }
+
+        previousRect = nextRect;
+
+        if (stableFrames >= requiredStableFrames) {
+          finish();
+          return;
+        }
+
+        frameId = requestAnimationFrame(tick);
+      };
+
+      timeoutId = window.setTimeout(() => finish(), 700);
+      frameId = requestAnimationFrame(tick);
     });
   }
 
