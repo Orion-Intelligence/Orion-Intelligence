@@ -37,6 +37,6 @@
   </div>
 }
 
-@if (shouldShowDemoTour()) {
+@if (demoTourMounted && shouldShowDemoTour()) {
   <app-demo-tour></app-demo-tour>
 }

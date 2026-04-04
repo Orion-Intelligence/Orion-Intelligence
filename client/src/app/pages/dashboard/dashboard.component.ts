@@ -28,7 +28,8 @@ import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
 })
 export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
-  animationState: any;
+  demoTourMounted = false;
+  dashboardAnimationsReady = false;
 
   constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService: AuthService, protected appService: AppService) {
   }
@@ -67,8 +68,11 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   prepareRoute(outlet: RouterOutlet) {
-    this.animationState = outlet?.activatedRouteData?.['animation'] || null;
-    return this.animationState;
+    if (!this.dashboardAnimationsReady) {
+      return null;
+    }
+
+    return outlet?.activatedRouteData?.['animation'] || null;
   }
 
   isCtiGraph(): boolean {
@@ -76,7 +80,11 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    this.cdr.detectChanges();
+    window.setTimeout(() => {
+      this.dashboardAnimationsReady = true;
+      this.demoTourMounted = true;
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   hideSubscription() {
@@ -85,6 +93,10 @@ export class DashboardComponent implements AfterViewInit, OnInit {
 
   shouldShowDemoTour(): boolean {
     const { user } = this.appService.userSessionData();
-    return this.authService.isAuthenticated() && !!user.username && !user.demo_tour && !(user.role == 'admin');
+    return localStorage.getItem('mobileDemo') !== 'true' &&
+      this.authService.isAuthenticated() &&
+      !!user.username &&
+      !user.demo_tour &&
+      !(user.role == 'admin');
   }
 }

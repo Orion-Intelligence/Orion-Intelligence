@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { DemoTourService } from '../../../shared/services/demo.tour.service';
 import { RenderedGeometry } from '../../../shared/model/demo-tour/modal/rendered-geometry.interface';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
@@ -8,11 +8,11 @@ import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
   imports: [],
   templateUrl: './demo-tour.component.html'
 })
-export class DemoTourComponent implements OnInit, OnDestroy {
+export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly hostRuntimeSelector = 'app-demo-tour.demo-tour-runtime';
   private static readonly bodyRuntimeSelector = 'body.demo-tour-scroll-locked';
   private readonly fallbackPositions: Array<NonNullable<TourStep['position']>> = ['bottom', 'top', 'right', 'left'];
-  private readonly minimumLoadingMs = 1500;
+  private readonly minimumLoadingMs = 350;
   private readonly geometryTolerancePx = 1.5;
   private readonly geometryTrackingWindowMs = 100;
   private activeElement: HTMLElement | null = null;
@@ -33,6 +33,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   private readonly spotlightCornerRadius = 10;
   private runtimeStyleSheet: CSSStyleSheet | null = null;
   private stepIndexTimerId: number | null = null;
+  private startTourTimerId: number | null = null;
 
   step: TourStep | null = null;
   visible = false;
@@ -55,10 +56,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   tooltipWidth = '320px';
   progressWidth = '0%';
   @HostBinding('class.demo-tour-runtime') readonly runtimeClass = true;
-
-  @HostBinding('class.tour-loading') get isTourLoading(): boolean {
-    return this.visible && !this.stepReady;
-  }
+  @HostBinding('class.tour-loading') readonly tourLoadingClass = true;
 
   @HostBinding('class.tour-tooltip-positioned') get isTooltipPositioned(): boolean {
     return this.tooltipTop !== '0px' || this.tooltipLeft !== '0px' || this.tooltipBottom !== 'auto';
@@ -79,8 +77,13 @@ export class DemoTourComponent implements OnInit, OnDestroy {
         });
       }, 0);
     });
+  }
 
-    void this.tourService.startTourForCurrentLicense();
+  ngAfterViewInit(): void {
+    this.startTourTimerId = window.setTimeout(() => {
+      this.startTourTimerId = null;
+      void this.tourService.startTourForCurrentLicense();
+    }, 0);
   }
 
   private applyStepIndex(index: number): void {
@@ -130,6 +133,9 @@ export class DemoTourComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.startTourTimerId !== null) {
+      window.clearTimeout(this.startTourTimerId);
+    }
     if (this.stepIndexTimerId !== null) {
       window.clearTimeout(this.stepIndexTimerId);
     }
@@ -313,7 +319,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.animationFrameId = requestAnimationFrame(() => {
       this.animationFrameId = null;
       this.updatePosition();
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 
@@ -322,7 +328,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.preparingStep = true;
     this.loadingVisible = true;
     this.loadingStartedAt = performance.now();
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     await this.ensureMobileViewportState(step);
 
@@ -365,7 +371,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     if (element) {
       this.triggerSpotlightReveal();
       this.updatePosition();
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
       await this.trackGeometryForWindow(step, this.geometryTrackingWindowMs);
     }
 
@@ -378,6 +384,15 @@ export class DemoTourComponent implements OnInit, OnDestroy {
       this.applyStepInputState(element, step);
       this.triggerStepSubmit(element, step);
       await this.waitForStepStability(step, element);
+    }
+
+    const tooltipAnchor = this.getTooltipAnchorElement(step);
+    if (!element && !tooltipAnchor) {
+      this.preparingStep = false;
+      this.loadingVisible = false;
+      this.cdr.markForCheck();
+      window.setTimeout(() => this.tourService.next(), 0);
+      return;
     }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
@@ -398,7 +413,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
     this.stepReady = true;
     this.loadingVisible = false;
     this.preparingStep = false;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   private applyActiveElementStyles(element: HTMLElement): void {
@@ -1096,7 +1111,7 @@ export class DemoTourComponent implements OnInit, OnDestroy {
         }
 
         this.updatePosition();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
 
         if (performance.now() - startedAt >= durationMs) {
           this.geometryFrozen = true;

@@ -144,6 +144,35 @@
   animation: tour-loader-spin 0.8s linear infinite;
 }
 
+.tour-state-layer {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+  pointer-events: none;
+  transition:
+    opacity 220ms ease-out,
+    transform 220ms ease-out,
+    filter 220ms ease-out;
+  will-change: opacity, transform;
+}
+
+.tour-state-layer.is-active {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+
+.tour-state-layer-ready {
+  transition-delay: 70ms;
+}
+
+.tour-state-layer-ready:not(.is-active) {
+  transition-delay: 0ms;
+}
+
+.tour-state-layer-loading {
+  transition-duration: 160ms;
+}
+
 .tour-primary-button[disabled] {
   cursor: default;
   opacity: 0.65;
