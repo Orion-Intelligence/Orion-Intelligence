@@ -111,7 +111,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.resetHostStyles();
   }
 
-  private updateAccentTheme(step: TourStep | null): void {
+  private updateAccentTheme(_step: TourStep | null): void {
     this.tourAccent = '#34d399';
     this.tourAccentStrong = '#10b981';
   }
@@ -731,7 +731,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (this.isSidebarRelatedStep(step)) {
+    if (this.isSidebarStep(step)) {
       await this.ensureMobileSidebarExpanded();
       return;
     }
@@ -764,7 +764,6 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       await this.waitForAnimationFrames(2);
     }
   }
-
 
   private isExpandedSidebarVisible(): boolean {
     const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
