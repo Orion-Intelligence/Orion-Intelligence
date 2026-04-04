@@ -15,9 +15,11 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly minimumLoadingMs = 350;
   private readonly geometryTolerancePx = 1.5;
   private readonly geometryTrackingWindowMs = 100;
+  private readonly cutoutTransitionMs = 220;
   private activeElement: HTMLElement | null = null;
   private animationFrameId: number | null = null;
   private geometryTrackingFrameId: number | null = null;
+  private cutoutAnimationFrameId: number | null = null;
   private activeElementResizeObserver: ResizeObserver | null = null;
   private activeElementMutationObserver: MutationObserver | null = null;
   private stepPreparationToken = 0;
@@ -145,6 +147,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.geometryTrackingFrameId !== null) {
       cancelAnimationFrame(this.geometryTrackingFrameId);
     }
+    if (this.cutoutAnimationFrameId !== null) {
+      cancelAnimationFrame(this.cutoutAnimationFrameId);
+    }
     this.clearRuntimeStyles();
     this.disconnectActiveElementObservers();
     this.clearActiveElementStyles();
@@ -212,8 +217,11 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     let right = left + width;
     let bottom = top + height;
 
+    let nextCutoutRects = this.cutoutRects;
     if (spotlightElement) {
-      const spotlightRect = spotlightElement.getBoundingClientRect();
+      const spotlightRect = this.step.elementId === 'dashboard-consolidated'
+        ? this.getRenderedContentBounds(spotlightElement)
+        : spotlightElement.getBoundingClientRect();
       top = Math.max(spotlightRect.top - paddingTop, 8);
       left = Math.max(spotlightRect.left - paddingLeft, 8);
       right = Math.min(spotlightRect.right + paddingRight, window.innerWidth - 8);
@@ -237,7 +245,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         bottom: paddingBottom,
         left: paddingLeft
       });
-      this.cutoutRects = [
+      nextCutoutRects = [
         { top, left, width, height, rx: this.spotlightCornerRadius, ry: this.spotlightCornerRadius },
         ...additionalSpotlightStyles.map(spotlight => ({
           top: Number.parseFloat(spotlight['top']),
@@ -279,6 +287,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.lastRenderedGeometry = nextGeometry;
+    this.animateCutoutRects(nextCutoutRects);
     this.spotlightTop = `${top}px`;
     this.spotlightLeft = `${left}px`;
     this.spotlightWidth = `${width}px`;
@@ -610,6 +619,31 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     return document.getElementById(step.elementId);
   }
 
+  private getRenderedContentBounds(element: HTMLElement): DOMRect {
+    const baseRect = element.getBoundingClientRect();
+    const descendants = Array.from(element.querySelectorAll<HTMLElement>('*'))
+      .filter(candidate => this.isElementRendered(candidate));
+
+    if (!descendants.length) {
+      return baseRect;
+    }
+
+    let top = baseRect.top;
+    let left = baseRect.left;
+    let right = baseRect.right;
+    let bottom = baseRect.top;
+
+    for (const candidate of descendants) {
+      const rect = candidate.getBoundingClientRect();
+      top = Math.min(top, rect.top);
+      left = Math.min(left, rect.left);
+      right = Math.max(right, rect.right);
+      bottom = Math.max(bottom, rect.bottom);
+    }
+
+    return new DOMRect(left, top, Math.max(right - left, 0), Math.max(bottom - top, 0));
+  }
+
   private isCompactViewport(): boolean {
     return window.innerWidth <= 900;
   }
@@ -891,11 +925,62 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.preparingStep = false;
     this.geometryFrozen = false;
     this.lastRenderedGeometry = null;
+    if (this.cutoutAnimationFrameId !== null) {
+      cancelAnimationFrame(this.cutoutAnimationFrameId);
+      this.cutoutAnimationFrameId = null;
+    }
     if (this.geometryTrackingFrameId !== null) {
       cancelAnimationFrame(this.geometryTrackingFrameId);
       this.geometryTrackingFrameId = null;
     }
     this.syncRuntimeStyles();
+  }
+
+  private animateCutoutRects(nextCutoutRects: Array<{ top: number; left: number; width: number; height: number; rx: number; ry: number; }>): void {
+    if (this.cutoutAnimationFrameId !== null) {
+      cancelAnimationFrame(this.cutoutAnimationFrameId);
+      this.cutoutAnimationFrameId = null;
+    }
+
+    if (!this.cutoutRects.length || this.cutoutRects.length !== nextCutoutRects.length) {
+      this.cutoutRects = nextCutoutRects;
+      return;
+    }
+
+    const startRects = this.cutoutRects.map(rect => ({ ...rect }));
+    const startedAt = performance.now();
+
+    const tick = () => {
+      const elapsed = performance.now() - startedAt;
+      const progress = Math.min(elapsed / this.cutoutTransitionMs, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 2);
+
+      this.cutoutRects = nextCutoutRects.map((targetRect, index) => {
+        const startRect = startRects[index];
+        return {
+          top: this.interpolateNumber(startRect.top, targetRect.top, easedProgress),
+          left: this.interpolateNumber(startRect.left, targetRect.left, easedProgress),
+          width: this.interpolateNumber(startRect.width, targetRect.width, easedProgress),
+          height: this.interpolateNumber(startRect.height, targetRect.height, easedProgress),
+          rx: this.interpolateNumber(startRect.rx, targetRect.rx, easedProgress),
+          ry: this.interpolateNumber(startRect.ry, targetRect.ry, easedProgress)
+        };
+      });
+      this.cdr.markForCheck();
+
+      if (progress >= 1) {
+        this.cutoutAnimationFrameId = null;
+        return;
+      }
+
+      this.cutoutAnimationFrameId = requestAnimationFrame(tick);
+    };
+
+    this.cutoutAnimationFrameId = requestAnimationFrame(tick);
+  }
+
+  private interpolateNumber(start: number, end: number, progress: number): number {
+    return start + (end - start) * progress;
   }
 
   private syncRuntimeStyles(): void {
