@@ -161,12 +161,8 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
     waitForTourStep(2);
 
-    cy.get('[data-testid="demo-tour-skip"]').should('be.visible').click();
-    cy.wait('@updateCurrentUser').then(({ request }) => {
-      expect(request.body.demo_tour).to.eq(true);
-      expect(request.body.username).to.eq(enterpriseUser.username);
-    });
-    cy.get('[data-testid="demo-tour-tooltip"]').should('not.exist');
+    cy.get('[data-testid="demo-tour-skip"]').should('not.exist');
+    cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
   });
 
   it('marks demo_tour true after the enterprise tour completes', () => {
@@ -203,10 +199,10 @@ describe('Orion Intelligence - User Management Deletion Flow', () => {
     cy.logout();
   });
 
-  it('deletes all configured test users except testing4', () => {
+  it('deletes configured test users', () => {
     cy.env(['TEST_USERS']).then(({TEST_USERS}) => {
       const usernames = Object.keys(TEST_USERS || {})
-        .filter((key) => /^testing\d+$/.test(key) && key !== 'testing4')
+        .filter((key) => /^testing\d+$/.test(key) && key !== 'testing3' && key !== 'testing4' && key !== 'testing5')
         .map((key) => TEST_USERS[key]?.username)
         .filter(Boolean);
 

@@ -181,7 +181,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.step.endOnEnter) {
-      this.close();
+      this.clearActiveElementStyles();
+      this.tourService.end();
     }
   }
 
@@ -1095,11 +1096,6 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       this.nextTransitionInProgress = false;
     }
     this.tourService.next();
-  }
-
-  close() {
-    this.clearActiveElementStyles();
-    this.tourService.end();
   }
 
   private triggerStepSubmit(element: HTMLElement, step: TourStep): void {

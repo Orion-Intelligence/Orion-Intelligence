@@ -2,8 +2,9 @@ import json
 from pathlib import Path
 
 from fastapi import APIRouter, Body, Depends, UploadFile, File, Query, HTTPException
-from configs.app_dependency import license_required, role_required, status_required
+from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
+from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, )
@@ -81,6 +82,20 @@ test_routes = APIRouter(
     ]
 )
 
+
+@test_routes.post(
+    "/api/get/tenant/node",
+    include_in_schema=False,
+)
+async def test_get_tenant_node(current_user=Depends(get_current_user)):
+    response = await AccountManager.get_instance().get_node(current_user)
+
+    if response.user.username == "enterprise_tour1":
+        response.user.demo_tour = False
+    else:
+        response.user.demo_tour = True
+
+    return response
 
 @test_routes.post(
     "/api/dynamic/user",

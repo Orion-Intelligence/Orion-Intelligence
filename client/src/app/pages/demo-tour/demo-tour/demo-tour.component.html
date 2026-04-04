@@ -91,9 +91,6 @@
               </div>
             }
             <div class="flex items-center gap-2 max-[640px]:block max-[640px]:w-full">
-              <button type="button" (click)="close()" class="tour-secondary-button text-xs" data-testid="demo-tour-skip">
-                <span>Skip</span>
-              </button>
               <button type="button" (click)="next()" class="tour-primary-button text-xs" data-testid="demo-tour-next" [disabled]="!stepReady">
                 <span>{{ currentIndex + 1 === totalSteps ? 'Finish' : 'Next' }}</span>
                 <span aria-hidden="true">→</span>
