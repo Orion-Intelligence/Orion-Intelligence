@@ -145,9 +145,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       }
       if (firstSubcategory) {
         this.selectionStore.setSelectedOption(firstSubcategory);
-        if (window.innerWidth < 800 && this.sidebar_default && !this.mobile_menu_status) {
-          this.onToggleSidebar();
-        }
+      }
+      if (!firstSubcategory && window.innerWidth <= 900 && this.sidebar_default) {
+        this.onToggleSidebar();
       }
     }
     this.scrollService.clearSavedPosition();
@@ -166,7 +166,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.dashboardService.resetParams();
     this.onResetCallback();
     this.selectionStore.setSelectedOption(option);
-    if (window.innerWidth < 800 && this.sidebar_default) {
+    if (window.innerWidth <= 900 && this.sidebar_default) {
       this.onToggleSidebar();
     }
     this.scrollService.clearSavedPosition();
