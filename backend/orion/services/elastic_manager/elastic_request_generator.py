@@ -482,7 +482,8 @@ class elastic_request_generator:
         if m_ctype != "all":
             allowed_categories = [m_ctype]
             must_clauses.append(
-                {"bool": {"should": [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}},
+                {"bool": {"should": [
+                    *([] if m_ctype == "swarm" else [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}}]),
                     {"bool": {"filter": [{"exists": {"field": "m_content_type"}},
                         {"terms": {"m_content_type": allowed_categories}}]}}], "minimum_should_match": 1}})
 
