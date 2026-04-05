@@ -514,7 +514,6 @@ class elastic_request_generator:
             if m_content_type.lower() == "swarm":
                 must_clauses.append(
                     {"bool": {"should": [
-                        {"bool": {"must_not": {"exists": {"field": "m_content_type"}}}},
                         {"term": {"m_content_type": "swarm"}},
                         {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": "swarm"}}]}},
                         {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["swarm"]}}]}}
