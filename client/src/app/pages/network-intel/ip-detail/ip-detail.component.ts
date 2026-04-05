@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, input } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { IpDetail } from '../../../shared/model/network-intel/network-intel.model';
 import { ScanHelperMethodsService } from '../network-intel-service.service';
 
@@ -15,7 +16,7 @@ export class IpDetailComponent {
   readonly detailInput = input<IpDetail | undefined>(undefined, { alias: 'detail' });
   detail!: IpDetail;
 
-  constructor(public ui: ScanHelperMethodsService) {
+  constructor(public ui: ScanHelperMethodsService, private sanitizer: DomSanitizer) {
     effect(() => {
       const detail = this.detailInput();
       if (detail !== undefined) {
@@ -84,6 +85,10 @@ export class IpDetailComponent {
         .join(', ');
     }
     return String(value).trim();
+  }
+
+  getCameraIframeUrl(ip: string, port: string | number): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`http://${ip}:${port}`);
   }
 
   private hasRenderableValue(value: any): boolean {

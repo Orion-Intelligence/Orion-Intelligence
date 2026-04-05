@@ -96,7 +96,12 @@
               @if (p.banner) {
                 <div>
                   <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text4)]">Banner</div>
-                  <pre class="m-0 max-h-56 overflow-y-auto whitespace-pre-wrap break-all rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5 text-[13px] leading-relaxed text-[var(--color-text3)]">{{ p.banner }}</pre>
+                  <div class="flex flex-col gap-3 md:flex-row md:items-stretch">
+                    @if ((p['is_camera'] || p['device_type'] === 'camera') && detail.ip && p.port) {
+                      <iframe [src]="getCameraIframeUrl(detail.ip, p.port)" class="h-56 w-full shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] md:w-1/2" loading="eager" referrerpolicy="no-referrer"></iframe>
+                    }
+                    <pre class="m-0 max-h-56 min-h-56 w-full overflow-y-auto whitespace-pre-wrap break-all rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5 text-[13px] leading-relaxed text-[var(--color-text3)] md:w-1/2">{{ p.banner }}</pre>
+                  </div>
                 </div>
               }
               @if (p.tls) {
