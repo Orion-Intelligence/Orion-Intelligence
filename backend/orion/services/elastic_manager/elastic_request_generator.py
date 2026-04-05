@@ -511,11 +511,20 @@ class elastic_request_generator:
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
         if m_content_type and m_content_type.lower() not in ("", "all"):
-            must_clauses.append(
-                {"bool": {"should": [
-                    {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
-                    {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
-                ], "minimum_should_match": 1}})
+            if m_content_type.lower() == "swarm":
+                must_clauses.append(
+                    {"bool": {"should": [
+                        {"bool": {"must_not": {"exists": {"field": "m_content_type"}}}},
+                        {"term": {"m_content_type": "swarm"}},
+                        {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": "swarm"}}]}},
+                        {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["swarm"]}}]}}
+                    ], "minimum_should_match": 1}})
+            else:
+                must_clauses.append(
+                    {"bool": {"should": [
+                        {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
+                        {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
+                    ], "minimum_should_match": 1}})
 
         phrases = re.findall(r'"([^"]+)"', p_query_model.q or "")
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (
