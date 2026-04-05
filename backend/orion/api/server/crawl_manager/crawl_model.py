@@ -5,6 +5,8 @@ import asyncio
 import json
 import secrets
 from datetime import datetime, timezone
+from urllib.parse import urlparse, urlunparse
+from bloom_filter2 import BloomFilter
 import httpx
 import requests
 from fastapi import Request
@@ -26,6 +28,7 @@ from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextReq
 
 class crawl_model:
     __instance = None
+    __swarm_bloom = None
 
     @staticmethod
     def getInstance():
@@ -39,6 +42,49 @@ class crawl_model:
             pass
         else:
             crawl_model.__instance = self
+
+    @staticmethod
+    def _normalize_swarm_route_url(raw_url: str | None) -> str | None:
+        if not raw_url or not isinstance(raw_url, str):
+            return None
+
+        text: str = raw_url.strip()
+        if not text:
+            return None
+
+        parsed = urlparse(text)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            return None
+
+        normalized = parsed._replace(
+            scheme=parsed.scheme.lower(),
+            netloc=parsed.netloc.lower(),
+            params="",
+            query="",
+            fragment="",
+        )
+        normalized_url = str(urlunparse(normalized))
+        return normalized_url.rstrip("/")
+
+    @staticmethod
+    def _extract_swarm_route_url(payload: dict) -> str | None:
+        for key in ("m_url", "m_base_url", "url"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
+                return value
+        return None
+
+    @classmethod
+    def _get_swarm_bloom(cls) -> BloomFilter:
+        if cls.__swarm_bloom is None:
+            bloom_dir = env_handler.get_instance().env("BLOOM_DIR") or "/tmp"
+            os.makedirs(bloom_dir, exist_ok=True)
+            cls.__swarm_bloom = BloomFilter(
+                max_elements=10_000_000,
+                error_rate=0.01,
+                filename=os.path.join(bloom_dir, "swarm_routes.bloom"),
+            )
+        return cls.__swarm_bloom
 
     async def _update_or_create_model(self,
             base_url: str,
@@ -427,7 +473,15 @@ class crawl_model:
             await client.post(target_url, json=payload)
 
     async def proxy_swarm_index(self, request: Request):
-        target_url = self._get_swarm_proxy_url(request)
         payload = await request.json()
+        normalized_url = self._normalize_swarm_route_url(self._extract_swarm_route_url(payload))
+
+        if normalized_url:
+            bloom = self._get_swarm_bloom()
+            if normalized_url in bloom:
+                return JSONResponse(content={"status": "duplicate_ignored"}, status_code=200)
+            bloom.add(normalized_url)
+
+        target_url = self._get_swarm_proxy_url(request)
         asyncio.create_task(self._post_swarm_payload(target_url, payload))
         return JSONResponse(content={"status": "accepted"}, status_code=202)
