@@ -6,10 +6,6 @@ export class ProxyService {
     return /^(?:[a-z0-9-]+\.)*[a-z2-7]{16,56}\.onion$/i.test(hostname);
   }
 
-  static isBareOnionHost(hostname: string): boolean {
-    return /^[a-z2-7]{16,56}\.onion$/i.test(hostname);
-  }
-
   static buildExternalNavigationUrl(url?: string | null, currentHost = typeof window !== 'undefined' ? window.location.hostname : ''): string {
     if (!url) {
       return '';
