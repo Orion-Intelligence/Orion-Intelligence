@@ -21,9 +21,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && pip3 install --no-cache-dir parsley \
  && rm -rf /var/lib/apt/lists/*
 
+COPY tor2web/patch_t2w.py /tmp/patch_t2w.py
+
 RUN git clone https://github.com/tor2web/Tor2web /opt/tor2web \
  && cd /opt/tor2web \
  && git checkout "${TOR2WEB_REF}" \
+ && python3 /tmp/patch_t2w.py \
+ && rm -f /tmp/patch_t2w.py \
  && python3 setup.py install \
  && mkdir -p /usr/share/tor2web \
  && cp -R /opt/tor2web/data /usr/share/tor2web/data
