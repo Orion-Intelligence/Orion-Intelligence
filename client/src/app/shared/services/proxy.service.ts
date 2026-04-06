@@ -3,6 +3,10 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class ProxyService {
   static isOnionHost(hostname: string): boolean {
+    return /^(?:[a-z0-9-]+\.)*[a-z2-7]{16,56}\.onion$/i.test(hostname);
+  }
+
+  static isBareOnionHost(hostname: string): boolean {
     return /^[a-z2-7]{16,56}\.onion$/i.test(hostname);
   }
 
