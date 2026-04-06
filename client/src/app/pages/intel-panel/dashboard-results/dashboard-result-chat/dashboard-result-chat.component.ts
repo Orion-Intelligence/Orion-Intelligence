@@ -7,6 +7,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { ProxyService } from '../../../../shared/services/proxy.service';
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
@@ -62,6 +63,6 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    window.open(url, '_blank');
+    window.open(ProxyService.buildExternalNavigationUrl(url), '_blank');
   }
 }
