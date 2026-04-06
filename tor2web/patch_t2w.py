@@ -11,7 +11,7 @@ if old not in text:
 text = text.replace(old, new, 1)
 
 old = """        self.obj.uri = req.uri.decode('utf-8')\n        self.obj.host_tor = \"http://\" + self.obj.onion\n        self.obj.address = self.obj.host_tor + self.obj.uri\n"""
-new = """        self.obj.uri = req.uri.decode('utf-8')\n        onion_scheme = 'http'\n        try:\n            header = req.headers.getRawHeaders(b'x-onion-scheme')\n            if header and header[0].decode('utf-8').lower() == 'https':\n                onion_scheme = 'https'\n        except Exception:\n            pass\n        self.obj.host_tor = onion_scheme + \"://\" + self.obj.onion\n        self.obj.address = self.obj.host_tor + self.obj.uri\n"""
+new = """        self.obj.uri = req.uri.decode('utf-8')\n        onion_scheme = 'http'\n        try:\n            header = req.headers.getRawHeaders('x-onion-scheme')\n            if not header:\n                header = req.headers.getRawHeaders(b'x-onion-scheme')\n            if header:\n                value = header[0]\n                if isinstance(value, bytes):\n                    value = value.decode('utf-8')\n                if value.lower() == 'https':\n                    onion_scheme = 'https'\n        except Exception:\n            pass\n        self.obj.host_tor = onion_scheme + \"://\" + self.obj.onion\n        self.obj.address = self.obj.host_tor + self.obj.uri\n"""
 if old not in text:
     raise SystemExit("process_request snippet not found")
 text = text.replace(old, new, 1)
