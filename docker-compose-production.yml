@@ -115,8 +115,10 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - web
-      - tor2web-official
+      web:
+        condition: service_started
+      tor2web-official:
+        condition: service_healthy
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./backend/static:/app/static:cached
@@ -147,7 +149,7 @@ services:
       backend:
         ipv4_address: 172.20.1.16
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z 127.0.0.1 9050 || exit 1" ]
+      test: [ "CMD-SHELL", "nc -z 127.0.0.1 9050 && test -d /var/lib/tor && test -n \"$(ls -A /var/lib/tor 2>/dev/null)\" || exit 1" ]
       interval: 20s
       timeout: 5s
       retries: 6
@@ -161,12 +163,13 @@ services:
       args:
         TOR2WEB_REF: 734416e960e4e0fb2bdb5ba3fa22fd80ee2982a6
     depends_on:
-      - tor
+      tor:
+        condition: service_healthy
     networks:
       backend:
         ipv4_address: 172.20.1.17
     healthcheck:
-      test: [ "CMD-SHELL", "python3 -c \"import socket; s = socket.create_connection(('127.0.0.1', 38080), 5); s.close()\"" ]
+      test: [ "CMD-SHELL", "python3 -c \"import socket; socket.gethostbyname('tor'); a = socket.create_connection(('tor', 9050), 5); a.close(); b = socket.create_connection(('127.0.0.1', 38080), 5); b.close()\"" ]
       interval: 20s
       timeout: 5s
       retries: 6

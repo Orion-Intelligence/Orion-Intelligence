@@ -1,6 +1,4 @@
 SocksPort 0.0.0.0:9050
 DataDirectory /var/lib/tor
 ClientOnly 1
-FascistFirewall 1
-ReachableAddresses *:80,*:443
 Log notice stdout
