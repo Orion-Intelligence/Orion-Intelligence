@@ -5,21 +5,42 @@
 
 	<div class="absolute left-4 top-4 z-20 w-fit rounded-[12px] border border-white/15 bg-slate-900/75 px-4 py-3 text-slate-100 backdrop-blur-md">
 		<h2 class="text-[14px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Threat Lens</h2>
-		@if (hoverCountryName) {
-			<p class="mt-2 text-[13px] text-slate-100">Hover: <span class="font-semibold text-white">{{ hoverCountryName }}</span></p>
-		}
 		@if (selectedCountryName) {
-			<p class="mt-1 text-[13px] text-emerald-300">Selected: <span class="font-semibold">{{ selectedCountryName }}</span></p>
+			<p class="mt-2 text-[13px] text-emerald-300">Selected: <span class="font-semibold">{{ selectedCountryName }}</span></p>
 		}
+		@if (isLoading) {
+			<p class="mt-2 text-[12px] text-cyan-100/90">Loading country highlights...</p>
+		}
+		<p class="mt-2 max-w-[420px] text-[12px] text-slate-300">{{ statusMessage }}</p>
+		<p class="mt-2 text-[11px] text-slate-400">Click any country to focus and view its name.</p>
+		<p class="mt-2 text-[11px] text-slate-400">Arcs currently visible: <span class="font-semibold text-cyan-100">{{ arcCount }}</span></p>
 	</div>
 
-	<div class="absolute right-4 top-4 z-20 w-[min(25rem,calc(100%-2rem))] rounded-[12px] border border-white/15 bg-slate-900/80 p-3 backdrop-blur-md">
+	<div class="absolute right-4 top-4 z-20 w-[min(24rem,calc(100%-2rem))] rounded-[12px] border border-white/15 bg-slate-900/80 p-3 backdrop-blur-md">
 		<div class="flex items-center gap-2">
-			<input (keyup.enter)="onSearch()" [(ngModel)]="searchTerm" placeholder="Search country..." type="text" class="h-10 w-full rounded-[10px] border border-white/20 bg-slate-950/70 px-3 text-[13px] text-slate-100 outline-none ring-0 transition focus:border-cyan-400" />
-			<button (click)="onSearch()" class="h-10 rounded-[10px] bg-cyan-500 px-4 text-[13px] font-semibold text-slate-900 transition hover:bg-cyan-400">Search</button>
+			<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. pakistan database)" class="h-10 w-full rounded-[10px] border border-white/20 bg-slate-950/70 px-3 text-[13px] text-slate-100 outline-none ring-0 transition focus:border-cyan-400" />
+			<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[10px] bg-cyan-500 px-4 text-[13px] font-semibold text-slate-900 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60">
+				Search
+			</button>
 		</div>
-		@if (statusMessage) {
-			<p class="mt-2 text-[12px] text-slate-300">{{ statusMessage }}</p>
+
+		@if (currentQuery) {
+			<p class="mt-2 text-[12px] text-cyan-100">Active keyword: <span class="font-semibold">{{ currentQuery }}</span></p>
+		}
+
+		@if (topCountries.length) {
+			<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-cyan-200">Top Highlighted Countries</h3>
+			<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1">
+				@for (item of topCountries; track item.country) {
+					<div class="flex items-center justify-between rounded-[8px] border border-white/10 bg-slate-950/45 px-2 py-1.5 text-[12px] text-slate-200">
+						<span class="truncate pr-2">{{ item.country }}</span>
+						<span class="font-semibold text-rose-300">{{ item.count }}</span>
+					</div>
+				}
+			</div>
+		}
+		@else {
+			<p class="mt-3 text-[12px] text-slate-300">No country matches found for the current keyword.</p>
 		}
 	</div>
 </section>

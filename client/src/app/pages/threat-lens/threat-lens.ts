@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
+import { ThreatCountryCount, ThreatLensMiddlewareService } from './threat-lens-middleware.service';
+import { buildArcPath, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor } from './threat-lens-map.utils';
 
 @Component({
   selector: 'app-threat-lens',
@@ -13,28 +16,39 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewNode?: ElementRef<HTMLDivElement>;
   private view: any | null = null;
   private countryLayer: any | null = null;
+  private newsGraphicsLayer: any | null = null;
+  private arcGraphicsLayer: any | null = null;
+  private arcSurfaceGraphicsLayer: any | null = null;
   private countryLayerView: any | null = null;
   private highlightHandle: { remove: () => void } | null = null;
-  private hoverFrameId: number | null = null;
+  private mapClickHandle: { remove: () => void } | null = null;
+  private countryFeatureIndex = new Map<string, any>();
+  private countryNewsCountByKey = new Map<string, number>();
+  private geometryEngine: any | null = null;
+  private webMercatorUtils: any | null = null;
+  private readonly maxArcCount = 140;
+  private readonly minArcWeight = 1;
   private readonly countryNameFields = ['COUNTRY', 'COUNTRYAFF', 'NAME', 'ADMIN', 'SOVEREIGNT'];
 
-  searchTerm = 'Pakistan';
-  hoverCountryName = '';
+  searchTerm = '';
+  currentQuery = '';
   selectedCountryName = '';
-  statusMessage = '';
+  statusMessage = 'Loading threat lens news...';
+  isLoading = true;
+  topCountries: ThreatCountryCount[] = [];
+  arcCount = 0;
 
-  constructor(private ngZone: NgZone) {}
+  constructor(private ngZone: NgZone, private threatLensMiddleware: ThreatLensMiddlewareService) {}
 
   async ngAfterViewInit(): Promise<void> {
     await this.initializeMap();
   }
 
   ngOnDestroy(): void {
-    if (this.hoverFrameId !== null) {
-      cancelAnimationFrame(this.hoverFrameId);
-      this.hoverFrameId = null;
-    }
+    this.mapClickHandle?.remove();
+    this.mapClickHandle = null;
     this.clearHighlight();
+
     if (this.view) {
       this.view.destroy();
       this.view = null;
@@ -42,12 +56,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   async onSearch(): Promise<void> {
-    const term = this.searchTerm.trim();
-    if (!term) {
-      this.statusMessage = 'Enter a country name to search.';
-      return;
-    }
-    await this.searchCountry(term);
+    await this.loadNewsData(this.searchTerm.trim());
   }
 
   private async initializeMap(): Promise<void> {
@@ -62,43 +71,49 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       SceneView,
       FeatureLayer,
       GraphicsLayer,
-      Graphic,
-      Polyline,
-      Point,
+      geometryEngine,
+      webMercatorUtils,
     ] = await loadModules([
       'esri/Map',
       'esri/views/SceneView',
       'esri/layers/FeatureLayer',
       'esri/layers/GraphicsLayer',
-      'esri/Graphic',
-      'esri/geometry/Polyline',
-      'esri/geometry/Point',
+      'esri/geometry/geometryEngine',
+      'esri/geometry/support/webMercatorUtils',
     ]);
+
+    this.geometryEngine = geometryEngine;
+    this.webMercatorUtils = webMercatorUtils;
 
     this.countryLayer = new FeatureLayer({
       url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
       outFields: ['*'],
       popupEnabled: false,
-      opacity: 0.42,
+      opacity: 0.5,
       renderer: {
         type: 'simple',
         symbol: {
           type: 'simple-fill',
-          color: [62, 127, 220, 0.18],
+          color: [59, 130, 246, 0.08],
           outline: {
-            color: [148, 185, 255, 0.35],
-            width: 0.6,
+            color: [148, 185, 255, 0.25],
+            width: 0.5,
           },
         },
       },
     });
 
-    const arcLayer = new GraphicsLayer({ title: 'Threat Lens Arc' });
+    this.newsGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens News Intensity' });
+    this.arcGraphicsLayer = new GraphicsLayer({
+      title: 'Threat Lens Country Arcs',
+      elevationInfo: { mode: 'absolute-height' },
+    });
+    this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
 
     const map = new EsriMap({
       basemap: 'satellite',
       ground: 'world-elevation',
-      layers: [this.countryLayer, arcLayer],
+      layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer],
     });
 
     this.view = new SceneView({
@@ -118,107 +133,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
     await this.view.when();
     this.countryLayerView = await this.view.whenLayerView(this.countryLayer);
-    this.drawArc(arcLayer, Graphic, Polyline, Point);
-    this.registerHoverHandler();
+    await this.buildCountryFeatureIndex();
     this.registerClickHandler();
-    await this.searchCountry(this.searchTerm);
-  }
-
-  private drawArc(arcLayer: any, Graphic: any, Polyline: any, Point: any): void {
-    const usa: [number, number] = [-95.7129, 37.0902];
-    const pakistan: [number, number] = [69.3451, 30.3753];
-    const arcPath: [number, number, number][] = [];
-
-    for (let i = 0; i <= 72; i += 1) {
-      const t = i / 72;
-      const lon = usa[0] + (pakistan[0] - usa[0]) * t;
-      const lat = usa[1] + (pakistan[1] - usa[1]) * t;
-      const z = 24000 + Math.sin(Math.PI * t) * 780000;
-      arcPath.push([lon, lat, z]);
-    }
-
-    const arcGraphic = new Graphic({
-      geometry: new Polyline({
-        hasZ: true,
-        paths: [arcPath],
-        spatialReference: { wkid: 4326 },
-      }),
-      symbol: {
-        type: 'line-3d',
-        symbolLayers: [
-          {
-            type: 'path',
-            profile: 'tube',
-            width: 7,
-            cap: 'round',
-            material: { color: '#38bdf8' },
-            anchor: 'center',
-          },
-        ],
-      },
-    });
-
-    const usaPoint = new Graphic({
-      geometry: new Point({ longitude: usa[0], latitude: usa[1], z: 5000 }),
-      attributes: { country: 'United States' },
-      symbol: {
-        type: 'point-3d',
-        symbolLayers: [
-          {
-            type: 'icon',
-            resource: { primitive: 'circle' },
-            size: 11,
-            material: { color: '#f97316' },
-            outline: { color: '#fdba74', size: 2 },
-          },
-        ],
-      },
-    });
-
-    const pakistanPoint = new Graphic({
-      geometry: new Point({ longitude: pakistan[0], latitude: pakistan[1], z: 5000 }),
-      attributes: { country: 'Pakistan' },
-      symbol: {
-        type: 'point-3d',
-        symbolLayers: [
-          {
-            type: 'icon',
-            resource: { primitive: 'circle' },
-            size: 11,
-            material: { color: '#22c55e' },
-            outline: { color: '#86efac', size: 2 },
-          },
-        ],
-      },
-    });
-
-    arcLayer.addMany([arcGraphic, usaPoint, pakistanPoint]);
-  }
-
-  private registerHoverHandler(): void {
-    if (!this.view || !this.countryLayer) {
-      return;
-    }
-
-    this.view.on('pointer-move', (event: any) => {
-      if (this.hoverFrameId !== null) {
-        cancelAnimationFrame(this.hoverFrameId);
-      }
-
-      this.hoverFrameId = requestAnimationFrame(async () => {
-        if (!this.view || !this.countryLayer) {
-          return;
-        }
-
-        const hit = await this.view.hitTest(event, { include: [this.countryLayer] });
-        const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryLayer)?.graphic;
-        const countryName = this.extractCountryName(countryGraphic?.attributes);
-
-        this.ngZone.run(() => {
-          this.hoverCountryName = countryName;
-        });
-      });
-    });
+    await this.loadNewsData('');
   }
 
   private registerClickHandler(): void {
@@ -226,7 +143,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.view.on('click', async (event: any) => {
+    this.mapClickHandle = this.view.on('click', async (event: any) => {
       if (!this.view || !this.countryLayer) {
         return;
       }
@@ -238,94 +155,243 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         this.clearHighlight();
         this.ngZone.run(() => {
           this.selectedCountryName = '';
-          this.statusMessage = 'No country selected.';
+          this.statusMessage = 'No country detected at clicked point.';
         });
         return;
       }
 
       const name = this.extractCountryName(countryGraphic.attributes);
       this.applyHighlight(countryGraphic);
+      const geometryToFocus = countryGraphic.geometry?.extent ?? countryGraphic.geometry;
 
+      if (geometryToFocus) {
+        try {
+          await this.view.goTo(geometryToFocus, { duration: 750, easing: 'ease-in-out' });
+        }
+        catch {
+        }
+      }
+
+      const countryCount = this.countryNewsCountByKey.get(this.toCountryKey(name)) || 0;
       this.ngZone.run(() => {
         this.selectedCountryName = name;
-        this.statusMessage = name ? `Selected ${name}.` : 'Country selected.';
-        if (name) {
-          this.searchTerm = name;
-        }
+        this.statusMessage = name
+          ? `${name}: ${countryCount} related threat news item(s).`
+          : 'Country selected.';
       });
     });
   }
 
-  private async searchCountry(country: string): Promise<void> {
-    if (!this.countryLayer || !this.countryLayerView || !this.view) {
+  private async buildCountryFeatureIndex(): Promise<void> {
+    if (!this.countryLayer) {
       return;
     }
 
-    const normalized = country.trim().toUpperCase().replace(/'/g, "''");
-    const candidateFields = this.countryNameFields.filter((fieldName) => this.countryLayer.fields?.some((field: any) => String(field.name || '').toUpperCase() === fieldName));
-    const fieldsToSearch = candidateFields.length ? candidateFields : ['COUNTRY', 'NAME'];
+    const query = this.countryLayer.createQuery();
+    query.where = '1=1';
+    query.returnGeometry = true;
+    query.outFields = ['*'];
 
-    let feature: any | null = null;
+    const response = await this.countryLayer.queryFeatures(query);
+    this.countryFeatureIndex = buildCountryFeatureIndex(response.features, this.countryNameFields, (value) => this.threatLensMiddleware.normalizeCountryLabel(value), (value) => this.toCountryKey(value));
+  }
 
-    for (const fieldName of fieldsToSearch) {
-      const query = this.countryLayer.createQuery();
-      query.where = `UPPER(${fieldName}) = '${normalized}'`;
-      query.returnGeometry = true;
-      query.outFields = ['*'];
-      query.num = 1;
-      const response = await this.countryLayer.queryFeatures(query);
-      if (response.features.length) {
-        feature = response.features[0];
-        break;
-      }
-    }
+  private async loadNewsData(query: string): Promise<void> {
+    const activeQuery = query.trim();
+    this.currentQuery = activeQuery;
 
-    if (!feature) {
-      for (const fieldName of fieldsToSearch) {
-        const query = this.countryLayer.createQuery();
-        query.where = `UPPER(${fieldName}) LIKE '%${normalized}%'`;
-        query.returnGeometry = true;
-        query.outFields = ['*'];
-        query.num = 1;
-        const response = await this.countryLayer.queryFeatures(query);
-        if (response.features.length) {
-          feature = response.features[0];
-          break;
-        }
-      }
-    }
-
-    if (!feature) {
-      this.ngZone.run(() => {
-        this.statusMessage = `No country found for "${country}".`;
-      });
-      return;
-    }
-
-    this.applyHighlight(feature);
-
-    const focusGeometry = feature.geometry?.extent ?? feature.geometry;
-    if (focusGeometry) {
-      try {
-        await this.view.goTo(focusGeometry, { duration: 1200, easing: 'ease-in-out' });
-      }
-      catch {
-      }
-    }
-
-    const name = this.extractCountryName(feature.attributes) || country;
     this.ngZone.run(() => {
-      this.selectedCountryName = name;
-      this.hoverCountryName = name;
-      this.searchTerm = name;
-      this.statusMessage = `Focused on ${name}.`;
+      this.isLoading = true;
+      this.statusMessage = activeQuery
+        ? `Searching threat lens news for "${activeQuery}"...`
+        : 'Loading threat lens news...';
     });
+
+    try {
+      const stats = await firstValueFrom(this.threatLensMiddleware.getThreatLensMapData({ q: activeQuery }));
+      this.countryNewsCountByKey.clear();
+
+      for (const item of stats.countryCounts) {
+        this.countryNewsCountByKey.set(this.toCountryKey(item.country), item.count);
+      }
+
+      await this.renderNewsIntensity(stats.countryCounts, stats.maxCount);
+      const arcCount = await this.renderCountryArcs(stats.documentCountryGroups);
+      this.arcCount = arcCount;
+
+      const mostActive = stats.countryCounts[0];
+      const queryLabel = activeQuery ? ` for "${activeQuery}"` : '';
+
+      this.ngZone.run(() => {
+        this.topCountries = stats.countryCounts.slice(0, 8);
+
+        if (!mostActive) {
+          this.statusMessage = `Loaded ${stats.totalNews} records${queryLabel}, but no country metadata was found.`;
+          return;
+        }
+
+        this.statusMessage = arcCount > 0
+          ? `Loaded ${stats.totalNews} records${queryLabel} across ${stats.countryCounts.length} countries and drew ${arcCount} country arcs. Most active: ${mostActive.country} (${mostActive.count}).`
+          : `Loaded ${stats.totalNews} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
+      });
+    }
+    catch {
+      await this.renderCountryArcs([]);
+      this.arcCount = 0;
+
+      this.ngZone.run(() => {
+        this.topCountries = [];
+        this.statusMessage = activeQuery
+          ? `Failed to load threat lens data for "${activeQuery}" from /api/threat/lens.`
+          : 'Failed to load threat lens data from /api/threat/lens.';
+      });
+    }
+    finally {
+      this.ngZone.run(() => {
+        this.isLoading = false;
+      });
+    }
+  }
+
+  private async renderCountryArcs(documentCountryGroups: string[][]): Promise<number> {
+    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
+      return 0;
+    }
+
+    this.arcGraphicsLayer.removeAll();
+    this.arcSurfaceGraphicsLayer.removeAll();
+
+    if (!documentCountryGroups.length) {
+      return 0;
+    }
+
+    const pairs = collectArcPairs(documentCountryGroups, (value) => this.toCountryKey(value), this.countryFeatureIndex, this.maxArcCount, this.minArcWeight);
+
+    let renderedArcCount = 0;
+
+    for (const pair of pairs) {
+      const featureA = this.countryFeatureIndex.get(pair.countryAKey);
+      const featureB = this.countryFeatureIndex.get(pair.countryBKey);
+      const start = getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
+      const end = getFeatureAnchor(featureB, this.geometryEngine, this.webMercatorUtils);
+
+      if (!start || !end) {
+        continue;
+      }
+
+      this.arcGraphicsLayer.add({
+        geometry: {
+          type: 'polyline',
+          hasZ: true,
+          paths: [buildArcPath(start, end, pair.weight)],
+          spatialReference: { wkid: 4326 },
+        },
+        attributes: {
+          country_a: pair.countryAKey,
+          country_b: pair.countryBKey,
+          weight: pair.weight,
+        },
+        symbol: {
+          type: 'line-3d',
+          symbolLayers: [
+            {
+              type: 'path',
+              profile: 'tube',
+              width: Math.min(20, 12 + (pair.weight * 0.8)),
+              cap: 'round',
+              material: { color: [255, 255, 255, 0.62] },
+              anchor: 'center',
+            },
+            {
+              type: 'path',
+              profile: 'tube',
+              width: Math.min(11, 5 + (pair.weight * 0.48)),
+              cap: 'round',
+              material: { color: [16, 185, 255, 1] },
+              anchor: 'center',
+            },
+          ],
+        },
+      });
+
+      this.arcSurfaceGraphicsLayer.add({
+        geometry: {
+          type: 'polyline',
+          paths: [buildSurfacePath(start, end)],
+          spatialReference: { wkid: 4326 },
+        },
+        attributes: {
+          country_a: pair.countryAKey,
+          country_b: pair.countryBKey,
+          weight: pair.weight,
+        },
+        symbol: {
+          type: 'simple-line',
+          color: [147, 229, 255, 0.96],
+          width: Math.min(3.8, 1.8 + (pair.weight * 0.24)),
+        },
+      });
+
+      renderedArcCount += 1;
+    }
+
+    return renderedArcCount;
+  }
+
+  private async renderNewsIntensity(countryCounts: ThreatCountryCount[], maxCount: number): Promise<void> {
+    if (!this.newsGraphicsLayer) {
+      return;
+    }
+
+    this.newsGraphicsLayer.removeAll();
+    if (!countryCounts.length || maxCount <= 0) {
+      return;
+    }
+
+    for (const item of countryCounts) {
+      const feature = this.countryFeatureIndex.get(this.toCountryKey(item.country));
+      if (!feature?.geometry) {
+        continue;
+      }
+
+      const opacity = this.getIntensityOpacity(item.count, maxCount);
+      this.newsGraphicsLayer.add({
+        geometry: feature.geometry,
+        attributes: {
+          country: item.country,
+          news_count: item.count,
+        },
+        symbol: {
+          type: 'simple-fill',
+          color: [239, 68, 68, opacity],
+          outline: {
+            color: [248, 113, 113, Math.min(opacity + 0.12, 0.95)],
+            width: 0.8,
+          },
+        },
+      });
+    }
+  }
+
+  private getIntensityOpacity(count: number, maxCount: number): number {
+    if (maxCount <= 0) {
+      return 0.14;
+    }
+
+    const ratio = Math.max(0, Math.min(1, count / maxCount));
+    return 0.14 + (ratio * 0.68);
+  }
+
+  private toCountryKey(value: string): string {
+    const normalized = this.threatLensMiddleware.normalizeCountryLabel(value);
+    return this.threatLensMiddleware.toCountryKey(normalized);
   }
 
   private applyHighlight(graphic: any): void {
     if (!this.countryLayerView) {
       return;
     }
+
     this.clearHighlight();
     this.highlightHandle = this.countryLayerView.highlight(graphic);
   }
