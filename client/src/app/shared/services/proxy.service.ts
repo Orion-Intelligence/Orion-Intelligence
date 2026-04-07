@@ -6,7 +6,7 @@ export class ProxyService {
     return /^(?:[a-z0-9-]+\.)*[a-z2-7]{16,56}\.onion$/i.test(hostname);
   }
 
-  static buildExternalNavigationUrl(url?: string | null, currentHost = typeof window !== 'undefined' ? window.location.hostname : ''): string {
+  static tor2web_navigation(url?: string | null, currentHost = typeof window !== 'undefined' ? window.location.hostname : ''): string {
     if (!url) {
       return '';
     }
@@ -14,6 +14,15 @@ export class ProxyService {
     const trimmed = url.trim();
     if (!trimmed) {
       return '';
+    }
+
+    if (/^(?:[/?#]|\.\.?\/)/.test(trimmed)) {
+      try {
+        return new URL(trimmed, window.location.origin).toString();
+      }
+      catch {
+        return trimmed;
+      }
     }
 
     const leadingHost = trimmed.split('/')[0] || '';
@@ -31,13 +40,5 @@ export class ProxyService {
     catch {
       return normalized;
     }
-  }
-
-  isOnionHost(hostname: string): boolean {
-    return ProxyService.isOnionHost(hostname);
-  }
-
-  buildExternalNavigationUrl(url?: string | null, currentHost = typeof window !== 'undefined' ? window.location.hostname : ''): string {
-    return ProxyService.buildExternalNavigationUrl(url, currentHost);
   }
 }

@@ -40,9 +40,9 @@
           </h2>
         </div>
         @if (item.m_message_sharable_link) {
-          <div class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
+          <a [href]="getExternalNavigationUrl(item.m_message_sharable_link)" (click)="$event.stopPropagation()" target="_blank" rel="noopener noreferrer" class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)] no-underline hover:text-[var(--color-text1)] hover:underline">
             {{ item.m_message_sharable_link }}
-          </div>
+          </a>
         }
         @if (item.m_platform !== 'forum') {
           @if (hasCodeType(item)) {

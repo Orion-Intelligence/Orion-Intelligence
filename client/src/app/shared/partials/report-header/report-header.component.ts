@@ -95,7 +95,7 @@ export class ReportHeaderComponent {
   redirectToUrl() {
     const urlValue = this.url();
     if (urlValue) {
-      window.open(ProxyService.buildExternalNavigationUrl(urlValue), '_blank');
+      window.open(ProxyService.tor2web_navigation(urlValue), '_blank');
     }
   }
 

@@ -17,6 +17,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { ScrollService } from '../../../services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
 import { ScanHelperMethodsService } from '../../../../pages/network-intel/network-intel-service.service';
+import { ProxyService } from '../../../services/proxy.service';
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
@@ -180,6 +181,10 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   normalizeDisplayUrl(url?: string | null): string {
     return normalizeDisplayUrlUtil(url, '-');
+  }
+
+  buildExternalNavigationUrl(url?: string | null): string {
+    return ProxyService.tor2web_navigation(url);
   }
 
   hasValue(value: unknown): boolean {

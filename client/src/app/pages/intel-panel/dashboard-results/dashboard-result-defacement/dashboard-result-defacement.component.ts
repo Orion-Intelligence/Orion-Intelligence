@@ -104,6 +104,6 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       return;
     }
 
-    window.open(ProxyService.buildExternalNavigationUrl(url), '_blank');
+    window.open(ProxyService.tor2web_navigation(url), '_blank');
   }
 }

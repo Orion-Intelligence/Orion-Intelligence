@@ -161,7 +161,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   }
 
   buildExternalNavigationUrl(url?: string | null): string {
-    return ProxyService.buildExternalNavigationUrl(url);
+    return ProxyService.tor2web_navigation(url);
   }
 
   loadImage(fileName: string) {

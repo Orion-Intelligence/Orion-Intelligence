@@ -9,7 +9,7 @@
         </p>
         @if (resultItem.m_channel_url) {
           <p class="mt-1 truncate text-[14px]">
-            <a [href]="resultItem.m_channel_url" target="_blank" rel="noopener noreferrer" class="text-[var(--color-blue-640)] hover:underline">
+            <a [href]="buildExternalNavigationUrl(resultItem.m_channel_url)" target="_blank" rel="noopener noreferrer" class="text-[var(--color-blue-640)] hover:underline">
               {{ normalizeDisplayUrl(resultItem.m_channel_url) }}
             </a>
           </p>
@@ -39,7 +39,7 @@
       <h5 class="mt-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">Report Sharable Link</h5>
       @if (resultItem.m_message_sharable_link) {
         <p class="mt-2 truncate text-[14px]">
-          <a [href]="resultItem.m_message_sharable_link" class="text-[var(--color-blue-640)] hover:underline" target="_blank">
+          <a [href]="buildExternalNavigationUrl(resultItem.m_message_sharable_link)" class="text-[var(--color-blue-640)] hover:underline" target="_blank" rel="noopener noreferrer">
             {{ normalizeDisplayUrl(resultItem.m_message_sharable_link) }}
           </a>
         </p>

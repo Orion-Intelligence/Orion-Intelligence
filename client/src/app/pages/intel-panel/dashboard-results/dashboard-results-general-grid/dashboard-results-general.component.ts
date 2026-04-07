@@ -79,6 +79,6 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   }
 
   getExternalNavigationUrl(url?: string | null): string {
-    return ProxyService.buildExternalNavigationUrl(url);
+    return ProxyService.tor2web_navigation(url);
   }
 }
