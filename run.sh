@@ -162,7 +162,7 @@ EOF
 
     trap 'rm -f "$temp_spec"' EXIT
     npm test -- run --browser "$browser" \
-        --config 'baseUrl=https://127.0.0.1:8443,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
+        --config 'baseUrl=http://127.0.0.1:8443,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
         --spec "$temp_spec"
     rm -f "$temp_spec"
     trap - EXIT
