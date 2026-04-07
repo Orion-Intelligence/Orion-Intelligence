@@ -28,9 +28,22 @@ if IS_PRODUCTION:
         COOKIE_DOMAIN = PRODUCTION_DOMAIN
 
 
-def set_access_cookie(resp: Response, token: str) -> None:
+def resolve_cookie_domain(request: Request | None = None) -> str | None:
+    if request is not None:
+        host = (request.url.hostname or "").strip(".")
+        if host and host not in {"localhost", "127.0.0.1"}:
+            host_parts = host.split(".")
+            if len(host_parts) >= 2:
+                return "." + ".".join(host_parts[-2:])
+    if COOKIE_DOMAIN in {"*", "-", ""}:
+        return None
+    return COOKIE_DOMAIN
+
+
+def set_access_cookie(resp: Response, token: str, request: Request | None = None) -> None:
+    cookie_domain = resolve_cookie_domain(request)
     resp.set_cookie(
-        key=ACCESS_COOKIE, value=token, httponly=True, samesite="lax", secure=False, path="/", max_age=COOKIE_MAX_AGE, domain=COOKIE_DOMAIN, )
+        key=ACCESS_COOKIE, value=token, httponly=True, samesite="lax", secure=False, path="/", max_age=COOKIE_MAX_AGE, domain=cookie_domain, )
 
 
 def token_from_request(request: Request) -> str | None:
@@ -41,19 +54,19 @@ def token_from_request(request: Request) -> str | None:
 
 
 @auth_router.post("/api/token")
-async def token(form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
+async def token(request: Request = None, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
     result = await auth_manager.login(form_data.username, form_data.password)
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
 
     if access_token and not twofa_required:
-        set_access_cookie(response, access_token)
+        set_access_cookie(response, access_token, request)
 
     return result
 
 
 @auth_router.post("/api/token/demo")
-async def token_demo(response: Response = None):
+async def token_demo(request: Request = None, response: Response = None):
     DEMO_USERNAME = env_handler.get_instance().env("DEMO_USERNAME")
     DEMO_PASSWORD = env_handler.get_instance().env("DEMO_PASSWORD")
 
@@ -62,7 +75,7 @@ async def token_demo(response: Response = None):
     twofa_required = result.get("twofa_required")
 
     if access_token and not twofa_required:
-        set_access_cookie(response, access_token)
+        set_access_cookie(response, access_token, request)
 
     return result
 
@@ -70,11 +83,12 @@ async def token_demo(response: Response = None):
 @auth_router.post("/api/token/2fa/verify")
 async def verify_2fa(code: str = Body(..., embed=True),
         ptoken: str = Depends(oauth2_scheme),
+        request: Request = None,
         response: Response = None):
     result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code)
     access_token = result.get("access_token")
     if access_token:
-        set_access_cookie(response, access_token)
+        set_access_cookie(response, access_token, request)
     return result
 
 
@@ -86,7 +100,7 @@ async def refresh_token(request: Request, response: Response = None):
     result = await session_manager.get_instance().refresh_token(token)
     access_token = result.get("access_token")
     if access_token:
-        set_access_cookie(response, access_token)
+        set_access_cookie(response, access_token, request)
     return result
 
 
@@ -95,7 +109,7 @@ async def logout(request: Request):
     token = request.cookies.get(ACCESS_COOKIE)
     session_manager.logout_user(ptoken=token)
     resp = JSONResponse(content={"detail": "Logged out"})
-    resp.delete_cookie(ACCESS_COOKIE, path="/", domain=COOKIE_DOMAIN)
+    resp.delete_cookie(ACCESS_COOKIE, path="/", domain=resolve_cookie_domain(request))
     resp.delete_cookie(ACCESS_COOKIE, path="/", domain="localhost")
     resp.delete_cookie(ACCESS_COOKIE, path="/")
     return resp
