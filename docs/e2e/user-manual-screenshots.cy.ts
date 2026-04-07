@@ -352,7 +352,8 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.visit('/dashboard/dump');
     ensureDashboardReady();
-    cy.get('input[name="username"][placeholder="Search leak URL"]').first().should('be.visible').type('leak');
+    cy.contains('h1', 'Dump Listing').should('be.visible');
+    cy.get('input[placeholder="Search leak URL"]').filter(':visible').first().should('be.visible').type('leak');
     cy.contains('button', 'Search').should('be.visible').click();
     cy.get('app-dump-list, table tbody tr').should('exist');
     capture('dump-listing');
