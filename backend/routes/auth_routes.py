@@ -16,11 +16,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 ACCESS_COOKIE = "access_token"
 COOKIE_MAX_AGE = 30 * 60  # 30 minutes
+IS_PRODUCTION = env_handler.get_instance().env("PRODUCTION", "0") == "1"
+PRODUCTION_DOMAIN = env_handler.get_instance().env("PRODUCTION_DOMAIN", "try.orionintelligence.org")
+COOKIE_DOMAIN = ".localtest.me"
+
+if IS_PRODUCTION:
+    domain_parts = str(PRODUCTION_DOMAIN).split(".")
+    if len(domain_parts) >= 2:
+        COOKIE_DOMAIN = "." + ".".join(domain_parts[-2:])
+    else:
+        COOKIE_DOMAIN = PRODUCTION_DOMAIN
 
 
 def set_access_cookie(resp: Response, token: str) -> None:
     resp.set_cookie(
-        key=ACCESS_COOKIE, value=token, httponly=True, samesite="lax", secure=False, path="/", max_age=COOKIE_MAX_AGE, )
+        key=ACCESS_COOKIE, value=token, httponly=True, samesite="lax", secure=False, path="/", max_age=COOKIE_MAX_AGE, domain=COOKIE_DOMAIN, )
 
 
 def token_from_request(request: Request) -> str | None:
@@ -85,7 +95,7 @@ async def logout(request: Request):
     token = request.cookies.get(ACCESS_COOKIE)
     session_manager.logout_user(ptoken=token)
     resp = JSONResponse(content={"detail": "Logged out"})
-    resp.delete_cookie(ACCESS_COOKIE, path="/")
+    resp.delete_cookie(ACCESS_COOKIE, path="/", domain=COOKIE_DOMAIN)
     return resp
 
 
