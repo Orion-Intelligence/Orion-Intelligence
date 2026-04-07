@@ -96,6 +96,8 @@ async def logout(request: Request):
     session_manager.logout_user(ptoken=token)
     resp = JSONResponse(content={"detail": "Logged out"})
     resp.delete_cookie(ACCESS_COOKIE, path="/", domain=COOKIE_DOMAIN)
+    resp.delete_cookie(ACCESS_COOKIE, path="/", domain="localhost")
+    resp.delete_cookie(ACCESS_COOKIE, path="/")
     return resp
 
 
