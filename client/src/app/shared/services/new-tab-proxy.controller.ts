@@ -10,7 +10,12 @@ export class ProxyController {
       return;
     }
 
-    const eventTarget = event.target as Element | null;
+    const rawTarget = event.target;
+    const eventTarget = rawTarget instanceof Element
+      ? rawTarget
+      : rawTarget instanceof Node
+        ? rawTarget.parentElement
+        : null;
     const anchor = eventTarget?.closest?.('a[target="_blank"][href]') as HTMLAnchorElement | null;
     if (!anchor) {
       return;
@@ -51,48 +56,11 @@ export class ProxyController {
     if (!rawUrl || typeof window === 'undefined') {
       return '';
     }
-
-    if (this.isMobileFreeMode()) {
-      return rawUrl;
-    }
-
-    let parsedUrl: URL;
     try {
-      parsedUrl = new URL(rawUrl, window.location.href);
+      return new URL(rawUrl, window.location.href).toString();
     }
     catch {
       return rawUrl;
     }
-
-    if (this.isLocalTor2webUrl(parsedUrl)) {
-      const onionHost = parsedUrl.hostname.replace(/\.onion(?=\.localhost$)/i, '');
-      return `http://${onionHost}.localhost:9080${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
-    }
-
-    if (parsedUrl.hostname.endsWith('.onion')) {
-      if (this.shouldUseLocalTor2web()) {
-        const onionHost = parsedUrl.hostname.replace(/\.onion$/i, '');
-        return `http://${onionHost}.localhost:9080${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
-      }
-
-      return `https://${parsedUrl.hostname}.tor2web.orionintelligence.org${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
-    }
-
-    return parsedUrl.toString();
-  }
-
-  private shouldUseLocalTor2web(): boolean {
-    const currentHost = window.location.hostname.toLowerCase();
-    return currentHost === 'localhost' ||
-      currentHost === '127.0.0.1' ||
-      currentHost.endsWith('.localhost');
-  }
-
-  private isMobileFreeMode(): boolean {
-    return localStorage.getItem('mobileDemo') === 'true' && window.innerWidth <= 900;
-  }
-
-  private isLocalTor2webUrl(url: URL): boolean {
-    return url.hostname.endsWith('.onion.localhost') && url.port === '9080';
   }
 }

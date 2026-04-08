@@ -10,17 +10,5 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
-  },
-  "/tor2web/**": {
-    "target": "https://127.0.0.1:8443",
-    "secure": false,
-    "changeOrigin": true,
-    "logLevel": "debug"
-  },
-  "/tor2web": {
-    "target": "https://127.0.0.1:8443",
-    "secure": false,
-    "changeOrigin": true,
-    "logLevel": "debug"
   }
 }

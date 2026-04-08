@@ -1,4 +1,0 @@
-SocksPort 0.0.0.0:9050
-DataDirectory /var/lib/tor
-ClientOnly 1
-Log notice stdout
