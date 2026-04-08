@@ -10,7 +10,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
-import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
@@ -19,7 +19,7 @@ import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   private highlightCache = new Map<string, SafeHtml>();
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
 
   protected readonly window = window;
 

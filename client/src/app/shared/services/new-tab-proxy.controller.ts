@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
-export class NewTabProxyController {
+export class ProxyController {
   private isInitialized = false;
   private readonly handleDocumentClick = (event: MouseEvent): void => {
     if (event.button !== 0 || event.defaultPrevented) {
@@ -52,6 +52,10 @@ export class NewTabProxyController {
       return '';
     }
 
+    if (this.isMobileFreeMode()) {
+      return rawUrl;
+    }
+
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(rawUrl, window.location.href);
@@ -61,9 +65,24 @@ export class NewTabProxyController {
     }
 
     if (parsedUrl.hostname.endsWith('.onion')) {
+      if (this.shouldUseLocalTor2web()) {
+        return `http://${parsedUrl.hostname}.localhost:9080${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+      }
+
       return `${window.location.origin}/tor2web?url=${encodeURIComponent(parsedUrl.toString())}`;
     }
 
     return parsedUrl.toString();
+  }
+
+  private shouldUseLocalTor2web(): boolean {
+    const currentHost = window.location.hostname.toLowerCase();
+    return currentHost === 'localhost' ||
+      currentHost === '127.0.0.1' ||
+      currentHost.endsWith('.localhost');
+  }
+
+  private isMobileFreeMode(): boolean {
+    return localStorage.getItem('mobileDemo') === 'true' && window.innerWidth <= 900;
   }
 }

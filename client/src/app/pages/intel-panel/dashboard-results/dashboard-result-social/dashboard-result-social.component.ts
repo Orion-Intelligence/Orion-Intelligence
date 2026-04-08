@@ -8,7 +8,7 @@ import { fadeInDashboardItem } from "../../../../shared/animations/dashboard.ite
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
 @Component({
   selector: 'app-dashboard-result-social',
   standalone: true,
@@ -24,7 +24,7 @@ import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy
   animations: [fadeInDashboardItem]
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
 
   currentUrl = '';
   queryParams: any = {};

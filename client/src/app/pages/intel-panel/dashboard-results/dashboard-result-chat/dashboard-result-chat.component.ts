@@ -7,7 +7,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
@@ -21,7 +21,7 @@ import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy
   templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
 
   currentUrl = '';
   queryParams: any = {};

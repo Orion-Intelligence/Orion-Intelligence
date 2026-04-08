@@ -8,7 +8,7 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
 @Component({
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
@@ -16,7 +16,7 @@ import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultDefacementComponent implements OnInit, AfterViewInit {
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
 
   readonly searchResultsInput = input<DefacementResultItem[]>([], { alias: 'searchResults' });
   readonly isLoadingInput = input(true, { alias: 'isLoading' });

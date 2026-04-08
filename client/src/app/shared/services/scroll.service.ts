@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { LicenseService } from '../../services/licenses/licenses.service';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
-import { NewTabProxyController } from './new-tab-proxy.controller';
+import { ProxyController } from './new-tab-proxy.controller';
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollService {
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
   private readonly resultWindowScrollPositionKey = 'resultWindowScrollPosition';
   private readonly resultContainerScrollPositionKey = 'resultContainerScrollPosition';
   private readonly resultDocumentScrollPositionKey = 'resultDocumentScrollPosition';

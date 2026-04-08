@@ -26,7 +26,7 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
-import { NewTabProxyController } from '../../services/new-tab-proxy.controller';
+import { ProxyController } from '../../services/new-tab-proxy.controller';
 
 @Component({
   selector: 'app-result',
@@ -36,7 +36,7 @@ import { NewTabProxyController } from '../../services/new-tab-proxy.controller';
   imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
 
   protected readonly SortType = SortType;
   protected readonly Category = Category;

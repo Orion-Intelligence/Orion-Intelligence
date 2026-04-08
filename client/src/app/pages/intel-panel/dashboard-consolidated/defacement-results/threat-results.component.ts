@@ -6,14 +6,14 @@ import { HelperService } from '../../../../shared/services/helper.service';
 import { StealerLogCallbackModel } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
-import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
 @Component({
   selector: 'app-defacement-results',
   imports: [CommonModule, TooltipDirective],
   templateUrl: './threat-results.component.html',
 })
 export class ThreatResultsComponent implements OnInit, OnChanges {
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
   private copiedTimer: any = null;
 
   readonly isExpandableInput = input(false, { alias: 'isExpandable' });

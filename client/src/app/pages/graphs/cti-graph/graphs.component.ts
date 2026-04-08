@@ -19,7 +19,7 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
-import { NewTabProxyController } from '../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../shared/services/new-tab-proxy.controller';
 
 type GraphNodeColor = string | Color;
 @Component({
@@ -30,7 +30,7 @@ type GraphNodeColor = string | Color;
   imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
-  private readonly proxied_resource = inject(NewTabProxyController);
+  private readonly proxied_resource = inject(ProxyController);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
   private readonly edgeHighlightColor = '#a78bfa';
