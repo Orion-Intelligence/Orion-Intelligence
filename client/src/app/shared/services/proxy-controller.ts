@@ -72,6 +72,7 @@ export class ProxyController {
       const resolvedUrl = new URL(rawUrl, window.location.href);
       const currentHost = window.location.hostname.toLowerCase();
       const isCurrentOnionHost = currentHost.endsWith('.onion');
+      const isProductionTor2webHost = currentHost.endsWith('.tor2web.orionintelligence.org');
       const isLocalhostHost = currentHost === 'localhost'
         || currentHost === '127.0.0.1'
         || currentHost.endsWith('.localhost');
@@ -84,6 +85,10 @@ export class ProxyController {
       if (isLocalhostHost && onionHost.endsWith('.onion')) {
         const proxyHost = onionHost.slice(0, -'.onion'.length);
         return `${resolvedUrl.protocol}//${proxyHost}.localhost:9080${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
+      }
+
+      if (isProductionTor2webHost && onionHost.endsWith('.onion')) {
+        return `https://${onionHost}.tor2web.orionintelligence.org${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
       }
 
       return resolvedUrl.toString();
