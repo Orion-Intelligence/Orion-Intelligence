@@ -11,7 +11,6 @@ import { ResultListComponent } from '../../result-components/result-list/result-
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
 import { ScrollService } from '../../../services/scroll.service';
-import { ProxyService } from '../../../services/proxy.service';
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
@@ -119,9 +118,5 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   normalizeDisplayUrl(url?: string | string[] | null): string {
     const rawUrl = Array.isArray(url) ? (url[0] || '') : (url || '');
     return normalizeDisplayUrlUtil(rawUrl, '-');
-  }
-
-  buildExternalNavigationUrl(url?: string | null): string {
-    return ProxyService.tor2web_navigation(url);
   }
 }

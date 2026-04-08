@@ -19,7 +19,6 @@ import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
 import { CodeBlockComponent } from '../../code-block/code-block.component';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isLikelyUrl as isLikelyUrlUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
 import { ScrollService } from '../../../services/scroll.service';
-import { ProxyService } from '../../../services/proxy.service';
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
@@ -158,10 +157,6 @@ export class ReportComponent implements OnInit, AfterViewInit {
 
   onImageError() {
     this.isImageError = true;
-  }
-
-  buildExternalNavigationUrl(url?: string | null): string {
-    return ProxyService.tor2web_navigation(url);
   }
 
   loadImage(fileName: string) {

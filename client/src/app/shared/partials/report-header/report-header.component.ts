@@ -15,7 +15,6 @@ import { ReportExportService } from '../../services/report-export.service';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { ProxyService } from '../../services/proxy.service';
 @Component({
   selector: 'app-report-header',
   standalone: true,
@@ -95,7 +94,11 @@ export class ReportHeaderComponent {
   redirectToUrl() {
     const urlValue = this.url();
     if (urlValue) {
-      window.open(ProxyService.tor2web_navigation(urlValue), '_blank');
+      let url = urlValue.trim();
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+      window.open(url, '_blank');
     }
   }
 

@@ -10,7 +10,6 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
-import { ProxyService } from '../../../../shared/services/proxy.service';
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
@@ -76,9 +75,5 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
 
   isMobileMode(): boolean {
     return this.authService.getIsMobileDemo();
-  }
-
-  getExternalNavigationUrl(url?: string | null): string {
-    return ProxyService.tor2web_navigation(url);
   }
 }

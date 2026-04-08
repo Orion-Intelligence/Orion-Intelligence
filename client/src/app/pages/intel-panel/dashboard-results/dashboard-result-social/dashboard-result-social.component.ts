@@ -8,7 +8,6 @@ import { fadeInDashboardItem } from "../../../../shared/animations/dashboard.ite
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProxyService } from '../../../../shared/services/proxy.service';
 @Component({
   selector: 'app-dashboard-result-social',
   standalone: true,
@@ -84,10 +83,6 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    window.open(ProxyService.tor2web_navigation(url), '_blank');
-  }
-
-  getExternalNavigationUrl(url?: string | null): string {
-    return ProxyService.tor2web_navigation(url);
+    window.open(url, '_blank');
   }
 }

@@ -3,7 +3,7 @@
 <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
   <div class="mb-4 pb-3">
     <div class="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">Target</div>
-    <a [href]="buildExternalNavigationUrl(defacementData?.m_url)" target="_blank" rel="noopener noreferrer" class="block min-w-0 truncate text-[20px] font-semibold leading-tight text-[var(--color-text1)] hover:text-[var(--color-blue-640)] hover:underline">
+    <a [href]="defacementData?.m_url" target="_blank" rel="noopener noreferrer" class="block min-w-0 truncate text-[20px] font-semibold leading-tight text-[var(--color-text1)] hover:text-[var(--color-blue-640)] hover:underline">
       {{ formatTitleUrl(defacementData?.m_url) }}
     </a>
   </div>

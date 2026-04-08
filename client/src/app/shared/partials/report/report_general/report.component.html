@@ -36,7 +36,7 @@
     @if (resultItem?.m_url; as url) {
       @if (url.trim().length > 1) {
         <p class="mt-2 truncate text-[14px]">
-          <a [href]="buildExternalNavigationUrl(url)" class="text-[var(--color-blue-640)] hover:underline" target="_blank">{{ normalizeDisplayUrl(url) }}</a>
+          <a [href]="url" class="text-[var(--color-blue-640)] hover:underline" target="_blank">{{ normalizeDisplayUrl(url) }}</a>
         </p>
       } @else {
         <p class="mt-2 text-[14px] text-[var(--color-text4)]">URL not available</p>

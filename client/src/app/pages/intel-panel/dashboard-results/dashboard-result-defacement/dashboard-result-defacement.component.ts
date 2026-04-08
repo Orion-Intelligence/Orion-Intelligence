@@ -8,7 +8,6 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProxyService } from '../../../../shared/services/proxy.service';
 @Component({
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
@@ -104,6 +103,6 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       return;
     }
 
-    window.open(ProxyService.tor2web_navigation(url), '_blank');
+    window.open(url, '_blank');
   }
 }

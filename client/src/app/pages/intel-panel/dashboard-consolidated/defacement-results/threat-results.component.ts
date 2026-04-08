@@ -6,7 +6,6 @@ import { HelperService } from '../../../../shared/services/helper.service';
 import { StealerLogCallbackModel } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
-import { ProxyService } from '../../../../shared/services/proxy.service';
 @Component({
   selector: 'app-defacement-results',
   imports: [CommonModule, TooltipDirective],
@@ -61,10 +60,6 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     }
   }
 
-  private openWindow(url: string): void {
-    window.open(ProxyService.tor2web_navigation(url), '_blank');
-  }
-
   updateThreatTypeCounts(results: DefacementResultItem[]) {
     this.threatTypeCounts = {};
     results.forEach(item => {
@@ -82,14 +77,14 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
       route = 'databases';
     }
     const url = `/dashboard/defacement/${route}?q=${encodeURIComponent(q)}`;
-    this.openWindow(url);
+    window.open(url, '_blank');
   }
 
   exploreStealer(url: string, username: string) {
     const encodedUrl = encodeURIComponent(url || '');
     const encodedUser = encodeURIComponent(username || '');
     const finalUrl = `/dashboard/stealerlogs?domain=${encodedUrl}&user=${encodedUser}`;
-    this.openWindow(finalUrl);
+    window.open(finalUrl, '_blank');
   }
 
   toggleResultsBarCollapse(): void {
@@ -111,7 +106,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     if (type === 'defacement_all') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/databases?q=${encodeURIComponent(query)}`;
-      this.openWindow(url);
+      window.open(url, '_blank');
       return;
     }
     if (type === 'phishing' || type === 'hacked' || type === 'databases' || type === 'scam' || type === 'crack') {
@@ -123,12 +118,12 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
       }
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/${type}?q=${encodeURIComponent(query)}`;
-      this.openWindow(url);
+      window.open(url, '_blank');
     }
     else if (type === 'stealerlog') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const finalUrl = `/dashboard/stealerlogs?url=${encodeURIComponent(query)}&user=`;
-      this.openWindow(finalUrl);
+      window.open(finalUrl, '_blank');
     }
   }
 
