@@ -177,7 +177,7 @@ Common examples:
 
 - `cd client && npm test run --browser electron`
 - `cd client && npm test run --browser electron --spec cypress/e2e/08-tenant-management.cy.ts`
-- `cd client && npm test run --browser electron --config baseUrl="https://127.0.0.1:8443"`
+- `cd client && npm test run --browser electron --config baseUrl="http://127.0.0.1:8080"`
 
 This is important because `./run.sh build -t` prepares and starts the instrumented application stack, but it does not automatically execute Cypress. The test run is a second explicit step.
 

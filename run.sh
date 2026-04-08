@@ -151,7 +151,7 @@ generate_docs() {
     fi
 
     cd client || exit
-    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:4200" --spec cypress/e2e/08-tenant-management.cy.ts
+    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:8080" --spec cypress/e2e/08-tenant-management.cy.ts
     mkdir -p "$target_dir"
     rm -rf "$nested_dir"
     rm -rf "$legacy_nested_dir"
@@ -162,7 +162,7 @@ EOF
 
     trap 'rm -f "$temp_spec"' EXIT
     npm test -- run --browser "$browser" \
-        --config 'baseUrl=http://127.0.0.1:4200,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
+        --config 'baseUrl=http://127.0.0.1:8080,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
         --spec "$temp_spec"
     rm -f "$temp_spec"
     trap - EXIT
