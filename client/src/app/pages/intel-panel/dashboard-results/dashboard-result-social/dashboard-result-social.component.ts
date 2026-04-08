@@ -8,7 +8,7 @@ import { fadeInDashboardItem } from "../../../../shared/animations/dashboard.ite
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/proxy-controller';
 @Component({
   selector: 'app-dashboard-result-social',
   standalone: true,

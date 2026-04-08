@@ -8,7 +8,7 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/proxy-controller';
 @Component({
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],

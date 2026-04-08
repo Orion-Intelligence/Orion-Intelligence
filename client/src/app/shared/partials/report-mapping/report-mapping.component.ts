@@ -8,7 +8,7 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { ProxyController } from '../../services/new-tab-proxy.controller';
+import { ProxyController } from '../../services/proxy-controller';
 @Component({
   selector: 'app-report-mapping',
   templateUrl: './report-mapping.component.html',

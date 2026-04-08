@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { LicenseService } from '../../services/licenses/licenses.service';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
-import { ProxyController } from './new-tab-proxy.controller';
+import { ProxyController } from './proxy-controller';
 @Injectable({
   providedIn: 'root'
 })
@@ -74,13 +74,13 @@ export class ScrollService {
 
     resetTop();
     requestAnimationFrame(() => {
-      resetTop(); 
+      resetTop();
     });
     setTimeout(() => {
-      resetTop(); 
+      resetTop();
     }, 50);
     setTimeout(() => {
-      resetTop(); 
+      resetTop();
     }, 150);
   }
 
@@ -144,7 +144,7 @@ export class ScrollService {
 
     applyScroll();
     requestAnimationFrame(() => {
-      applyScroll(); 
+      applyScroll();
     });
   }
 }

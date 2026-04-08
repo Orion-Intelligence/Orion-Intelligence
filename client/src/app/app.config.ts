@@ -6,7 +6,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { AuthGuard } from './shared/guards/auth-guard.guard';
 import { httpInterceptor } from './services/core/http.interceptor';
 import { AppService } from './services/core/app/app.service';
-import { ProxyController } from './shared/services/new-tab-proxy.controller';
+import { ProxyController } from './shared/services/proxy-controller';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -19,7 +19,7 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
-import { ProxyController } from '../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../shared/services/proxy-controller';
 
 type GraphNodeColor = string | Color;
 @Component({
@@ -535,7 +535,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     });
     groupsToExpand.forEach(item => {
-      this.expandGroupFromNodeId(item.id, item.subNodes, 200); 
+      this.expandGroupFromNodeId(item.id, item.subNodes, 200);
     });
     this.network.redraw();
     this.network.fit({ animation: false });
@@ -579,7 +579,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     }
     groupsToExpand.forEach(item => {
-      this.collapseGroupFromNodeId(item.id, item.subNodes, true); 
+      this.collapseGroupFromNodeId(item.id, item.subNodes, true);
     });
     this.network.moveTo({
       position: originalPosition,
@@ -1521,7 +1521,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     data.forEach(item => {
       put(item.vertex, this.nodePrimaryBorder);
       (item.path?.vertices ?? []).forEach(pv => {
-        put(pv, this.nodeSecondaryBorder); 
+        put(pv, this.nodeSecondaryBorder);
       });
     });
     return rawNodeMap;
@@ -1788,13 +1788,13 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private attachNetworkHandlers(): void {
     this.network.on('oncontext', params => {
-      this.handleContextMenu(params); 
+      this.handleContextMenu(params);
     });
     this.network.on('click', params => {
-      this.handleClick(params); 
+      this.handleClick(params);
     });
     this.network.on('doubleClick', params => {
-      this.handleDoubleClick(params); 
+      this.handleDoubleClick(params);
     });
     this.network.on('zoom', (properties: any) => {
       const currentScale = this.network.getScale();

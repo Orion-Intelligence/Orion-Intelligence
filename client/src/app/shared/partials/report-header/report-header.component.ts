@@ -15,7 +15,7 @@ import { ReportExportService } from '../../services/report-export.service';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { ProxyController } from '../../services/new-tab-proxy.controller';
+import { ProxyController } from '../../services/proxy-controller';
 @Component({
   selector: 'app-report-header',
   standalone: true,

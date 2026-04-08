@@ -7,7 +7,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProxyController } from '../../../../shared/services/new-tab-proxy.controller';
+import { ProxyController } from '../../../../shared/services/proxy-controller';
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
