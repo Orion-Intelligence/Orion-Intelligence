@@ -162,7 +162,7 @@ EOF
 
     trap 'rm -f "$temp_spec"' EXIT
     npm test -- run --browser "$browser" \
-        --config 'baseUrl=http://127.0.0.1:8443,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
+        --config 'baseUrl=http://127.0.0.1:4200,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
         --spec "$temp_spec"
     rm -f "$temp_spec"
     trap - EXIT
@@ -242,13 +242,13 @@ if [ "$COMMAND" = "build" ]; then
         -t)
             ensure_local_ssl_cert
             client_build "-t"
-            cp nginx/nginx-dev.conf nginx/nginx.conf
+            cp nginx/nginx-testing.conf nginx/nginx.conf
             use_compose_file "-t"
             ;;
         -tb)
             ensure_local_ssl_cert
             client_build "-t"
-            cp nginx/nginx-dev.conf nginx/nginx.conf
+            cp nginx/nginx-testing.conf nginx/nginx.conf
             use_compose_file "-tb"
             ;;
         -c)
