@@ -64,9 +64,15 @@ export class ProxyController {
       return rawUrl;
     }
 
+    if (this.isLocalTor2webUrl(parsedUrl)) {
+      const onionHost = parsedUrl.hostname.replace(/\.onion(?=\.localhost$)/i, '');
+      return `http://${onionHost}.localhost:9080${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+    }
+
     if (parsedUrl.hostname.endsWith('.onion')) {
       if (this.shouldUseLocalTor2web()) {
-        return `http://${parsedUrl.hostname}.localhost:9080${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+        const onionHost = parsedUrl.hostname.replace(/\.onion$/i, '');
+        return `http://${onionHost}.localhost:9080${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
       }
 
       return `${window.location.origin}/tor2web?url=${encodeURIComponent(parsedUrl.toString())}`;
@@ -84,5 +90,9 @@ export class ProxyController {
 
   private isMobileFreeMode(): boolean {
     return localStorage.getItem('mobileDemo') === 'true' && window.innerWidth <= 900;
+  }
+
+  private isLocalTor2webUrl(url: URL): boolean {
+    return url.hostname.endsWith('.onion.localhost') && url.port === '9080';
   }
 }
