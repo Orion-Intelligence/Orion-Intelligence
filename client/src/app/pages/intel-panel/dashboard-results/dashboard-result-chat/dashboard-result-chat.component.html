@@ -18,11 +18,11 @@
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
-          <div (click)="scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" appTooltip="Open Report" data-testid="open-report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="flex cursor-pointer justify-center">
+          <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" appTooltip="Open Report" data-testid="open-report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="flex cursor-pointer justify-center">
             <div class="pb-[10px] pl-[10px]">
               <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
             </div>
-          </div>
+          </a>
           </div>
         }
       </div>
@@ -32,7 +32,9 @@
       </div>
       @if (item.m_message_sharable_link) {
         <div class="mb-[20px] mt-[5px] block truncate text-[12px] font-medium text-[var(--color-text8)]">
-          {{ item.m_message_sharable_link }}
+          <a [href]="item.m_message_sharable_link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+            {{ item.m_message_sharable_link }}
+          </a>
         </div>
       }
       @if (item.m_summary && item.m_summary[0] && item.m_summary[0].length > 5) {
@@ -103,11 +105,13 @@
     }
   }
 }
-@if (item.m_weblink?.length) {
+  @if (item.m_weblink?.length) {
   <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
   @for (link of item.m_weblink | slice:0:3; track $index) {
     <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
-      {{ link }}
+      <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+        {{ link }}
+      </a>
     </div>
   }
 }

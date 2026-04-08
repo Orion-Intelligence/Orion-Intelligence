@@ -20,11 +20,11 @@
                 <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
               </div>
             </div>
-            <div (click)="scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
+            <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>
-            </div>
+            </a>
             </div>
           }
         </div>
@@ -41,7 +41,9 @@
         </div>
         @if (item.m_message_sharable_link) {
           <div class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
-            {{ item.m_message_sharable_link }}
+            <a [href]="item.m_message_sharable_link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+              {{ item.m_message_sharable_link }}
+            </a>
           </div>
         }
         @if (item.m_platform !== 'forum') {
@@ -82,7 +84,9 @@
         <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
         @for (link of item.m_weblink | slice:0:3; track $index) {
           <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
-            {{ link }}
+            <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+              {{ link }}
+            </a>
           </div>
         }
       }
