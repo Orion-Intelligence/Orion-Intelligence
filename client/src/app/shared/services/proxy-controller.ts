@@ -87,7 +87,7 @@ export class ProxyController {
       }
 
       if (onionHost.endsWith('.onion')) {
-        return `http://${onionHost}.tor.orionintelligence.org:9080${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
+        return `https://${onionHost}.tor.orionintelligence.org:9080${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
       }
 
       return resolvedUrl.toString();
