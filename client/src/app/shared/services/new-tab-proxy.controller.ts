@@ -75,7 +75,7 @@ export class ProxyController {
         return `http://${onionHost}.localhost:9080${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
       }
 
-      return `${window.location.origin}/tor2web?url=${encodeURIComponent(parsedUrl.toString())}`;
+      return `https://${parsedUrl.hostname}.tor2web.orionintelligence.org${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
     }
 
     return parsedUrl.toString();
