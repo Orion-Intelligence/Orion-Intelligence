@@ -98,22 +98,6 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
 
 
 @api_routes.post(
-    "/api/threat/lens",
-    summary="Search threat lens news reports",
-    description=SEARCH_DOCS["breach"]["description"],
-    tags=["Search"],
-    operation_id="searchThreatLensNews",
-    response_description=SEARCH_DOCS["breach"]["response_description"],
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach"))])
-async def search_threat_lens_news(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    _enforce_demo_safe_search(param, current_user)
-    param.category = "news"
-    base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ["news"], [])
-
-
-@api_routes.post(
     "/api/search/social",
     summary="Search social reports",
     description=SEARCH_DOCS["strategic"]["description"],
@@ -140,7 +124,6 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
 
 
 @api_routes.post(
-
     "/api/search/exploit",
     summary="Search exploit reports",
     description=SEARCH_DOCS["strategic"]["description"],
@@ -278,6 +261,18 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     _enforce_demo_safe_search(param, current_user)
     return await search_model.getInstance().search_consolidated_result(param)
 
+@api_routes.post(
+    "/api/threat/lens",
+    summary="Search threat lens reports",
+    description=SEARCH_DOCS["breach"]["description"],
+    tags=["Search"],
+    operation_id="searchThreatLens",
+    response_description=SEARCH_DOCS["consolidated"]["response_description"],
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning"))])
+async def search_threat_lens_news(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
+    return await search_model.getInstance().search_consolidated_result(param)
 
 @api_routes.post(
     "/api/search/consolidated/ioc",

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { forkJoin, map, Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
+import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
+import { ConsolidatedParamModel } from '../../shared/model/results/consolidated/consolidated.param.model';
 import { ApiService } from '../../shared/services/api.service';
 
 const COUNTRY_ALIAS: Record<string, string> = {
@@ -15,81 +17,53 @@ const COUNTRY_ALIAS: Record<string, string> = {
   northkorea: 'North Korea',
 };
 
-const DEFAULT_PAYLOAD: ThreatLensRequestPayload = {
-  q: '',
-  page: 1,
-  category: 'news',
-  fullsearch: false,
-  safe: false,
-  must: false,
-  network: 'all',
-  matchtype: 'or',
-  content: 'all',
-  platform: '',
-  url: '',
-  user: '',
-  ioc: '',
-  daterange: '',
-};
-
 const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
 
-export interface ThreatLensRequestPayload {
-  q: string;
-  page: number;
-  category: string;
-  fullsearch: boolean;
-  safe: boolean;
-  must: boolean;
-  network: string;
-  matchtype: string;
-  content: string;
-  platform: string;
-  url: string;
-  user: string;
-  ioc: string;
-  daterange: string;
-}
+const THREAT_LENS_CATEGORY_CONFIG = [
+  { key: 'leak_model', label: 'Leak', color: [244, 114, 182] as [number, number, number] },
+  { key: 'tracking_model', label: 'Tracking', color: [250, 204, 21] as [number, number, number] },
+  { key: 'news_model', label: 'News', color: [34, 211, 238] as [number, number, number] },
+  { key: 'exploit_model', label: 'Exploit', color: [251, 146, 60] as [number, number, number] },
+  { key: 'defacement_model', label: 'Defacement', color: [248, 113, 113] as [number, number, number] },
+  { key: 'chat_model', label: 'Chat', color: [167, 139, 250] as [number, number, number] },
+  { key: 'social_model', label: 'Social', color: [74, 222, 128] as [number, number, number] },
+  { key: 'generic_model', label: 'Generic', color: [148, 163, 184] as [number, number, number] },
+] as const;
+
+export type ThreatLensCategoryModelKey = typeof THREAT_LENS_CATEGORY_CONFIG[number]['key'];
+export type ThreatLensRequestPayload = ConsolidatedParamModel;
 
 export interface ThreatCountryCount {
   country: string;
   count: number;
 }
 
-export interface ThreatLensCountryStats {
+export interface ThreatLensCategoryMapData {
+  categoryKey: ThreatLensCategoryModelKey;
+  categoryLabel: string;
+  color: [number, number, number];
   countryCounts: ThreatCountryCount[];
-  totalNews: number;
-  maxCount: number;
-}
-
-export interface ThreatLensMapData extends ThreatLensCountryStats {
+  totalResults: number;
   documentCountryGroups: string[][];
 }
 
-type ThreatLensApiResponse = {
-  Result?: any[];
-  result?: any[];
-  news_model?: { Result?: any[] };
-};
+export interface ThreatLensMapData {
+  countryCounts: ThreatCountryCount[];
+  totalResults: number;
+  maxCount: number;
+  categoryData: ThreatLensCategoryMapData[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class ThreatLensMiddlewareService {
-  private readonly pagesToAggregate = 4;
-
   constructor(private api: ApiService) {}
 
-  fetchThreatLensNews(payload?: Partial<ThreatLensRequestPayload>): Observable<ThreatLensApiResponse> {
-    return this.api.post<ThreatLensApiResponse>('threat/lens', { ...DEFAULT_PAYLOAD, ...payload });
+  fetchThreatLensData(payload?: Partial<ThreatLensRequestPayload>): Observable<ConsolidatedCallbackModel> {
+    return this.api.post<ConsolidatedCallbackModel>('threat/lens', { ...new ConsolidatedParamModel(), ...payload });
   }
 
   getThreatLensMapData(payload?: Partial<ThreatLensRequestPayload>): Observable<ThreatLensMapData> {
-    const basePage = Math.max(1, Number(payload?.page || 1));
-    const requests = Array.from({ length: this.pagesToAggregate }, (_, index) => this.fetchThreatLensNews({
-      ...payload,
-      page: basePage + index,
-    }));
-
-    return forkJoin(requests).pipe(map((responses) => this.buildMapDataFromResponses(responses)));
+    return this.fetchThreatLensData(payload).pipe(map((response) => this.buildMapDataFromResponse(response)));
   }
 
   toCountryKey(value: string): string {
@@ -116,52 +90,83 @@ export class ThreatLensMiddlewareService {
     return this.resolveRegionCode(compact) || compact;
   }
 
-  private buildMapDataFromResponses(responses: ThreatLensApiResponse[]): ThreatLensMapData {
-    const documents = this.dedupeDocuments(responses.flatMap((response) => this.extractResultItems(response)));
+  private buildMapDataFromResponse(response: ConsolidatedCallbackModel): ThreatLensMapData {
+    const normalizedResponse = new ConsolidatedCallbackModel(response);
+    const overallCountryCounts = new Map<string, number>();
+    const overallCountryNames = new Map<string, string>();
+    const categoryData: ThreatLensCategoryMapData[] = [];
+    let totalResults = 0;
 
-    const countryCounts = new Map<string, number>();
-    const countryNames = new Map<string, string>();
-    const documentCountryGroups: string[][] = [];
+    for (const category of THREAT_LENS_CATEGORY_CONFIG) {
+      const documents = this.dedupeDocuments(this.extractResultItems(normalizedResponse[category.key]));
+      totalResults += documents.length;
 
-    for (const document of documents) {
-      const seenKeys = new Set<string>();
-      const countriesForDoc: string[] = [];
+      const categoryCountryCounts = new Map<string, number>();
+      const categoryCountryNames = new Map<string, string>();
+      const documentCountryGroups: string[][] = [];
 
-      for (const country of this.extractCountries(document)) {
-        const normalized = this.normalizeCountryLabel(country);
-        const key = this.toCountryKey(normalized);
+      for (const document of documents) {
+        const seenKeys = new Set<string>();
+        const countriesForDoc: string[] = [];
 
-        if (!key || seenKeys.has(key)) {
-          continue;
+        for (const country of this.extractCountries(document)) {
+          const normalized = this.normalizeCountryLabel(country);
+          const key = this.toCountryKey(normalized);
+
+          if (!key || seenKeys.has(key)) {
+            continue;
+          }
+
+          seenKeys.add(key);
+          countriesForDoc.push(normalized);
+          categoryCountryCounts.set(key, (categoryCountryCounts.get(key) || 0) + 1);
+          overallCountryCounts.set(key, (overallCountryCounts.get(key) || 0) + 1);
+
+          if (!categoryCountryNames.has(key)) {
+            categoryCountryNames.set(key, normalized);
+          }
+
+          if (!overallCountryNames.has(key)) {
+            overallCountryNames.set(key, normalized);
+          }
         }
 
-        seenKeys.add(key);
-        countriesForDoc.push(normalized);
-        countryCounts.set(key, (countryCounts.get(key) || 0) + 1);
-
-        if (!countryNames.has(key)) {
-          countryNames.set(key, normalized);
+        if (countriesForDoc.length) {
+          documentCountryGroups.push(countriesForDoc);
         }
       }
 
-      if (countriesForDoc.length) {
-        documentCountryGroups.push(countriesForDoc);
+      const rankedCategoryCounts = this.rankCountryCounts(categoryCountryCounts, categoryCountryNames);
+      if (!documents.length && !rankedCategoryCounts.length) {
+        continue;
       }
+
+      categoryData.push({
+        categoryKey: category.key,
+        categoryLabel: category.label,
+        color: category.color,
+        countryCounts: rankedCategoryCounts,
+        totalResults: documents.length,
+        documentCountryGroups,
+      });
     }
 
-    const rankedCountryCounts: ThreatCountryCount[] = Array.from(countryCounts.entries())
+    const countryCounts = this.rankCountryCounts(overallCountryCounts, overallCountryNames);
+    return {
+      countryCounts,
+      totalResults,
+      maxCount: countryCounts.length ? countryCounts[0].count : 0,
+      categoryData,
+    };
+  }
+
+  private rankCountryCounts(countryCounts: Map<string, number>, countryNames: Map<string, string>): ThreatCountryCount[] {
+    return Array.from(countryCounts.entries())
       .map(([key, count]) => ({
         country: countryNames.get(key) || key,
         count,
       }))
       .sort((a, b) => b.count - a.count);
-
-    return {
-      countryCounts: rankedCountryCounts,
-      totalNews: documents.length,
-      maxCount: rankedCountryCounts.length ? rankedCountryCounts[0].count : 0,
-      documentCountryGroups,
-    };
   }
 
   private dedupeDocuments(documents: any[]): any[] {
@@ -199,20 +204,8 @@ export class ThreatLensMiddlewareService {
     return identity || JSON.stringify(document || {});
   }
 
-  private extractResultItems(response: ThreatLensApiResponse): any[] {
-    if (Array.isArray(response?.Result)) {
-      return response.Result;
-    }
-
-    if (Array.isArray(response?.result)) {
-      return response.result;
-    }
-
-    if (Array.isArray(response?.news_model?.Result)) {
-      return response.news_model.Result;
-    }
-
-    return [];
+  private extractResultItems(model: { Result?: any[] } | undefined): any[] {
+    return Array.isArray(model?.Result) ? model.Result : [];
   }
 
   private extractCountries(document: any): string[] {
