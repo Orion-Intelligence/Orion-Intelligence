@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, input } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -10,6 +10,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
+import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy.controller';
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
@@ -18,6 +19,7 @@ import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   private highlightCache = new Map<string, SafeHtml>();
+  private readonly proxied_resource = inject(NewTabProxyController);
 
   protected readonly window = window;
 
@@ -75,5 +77,13 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
 
   isMobileMode(): boolean {
     return this.authService.getIsMobileDemo();
+  }
+
+  openExternalUrl(url?: string | null): void {
+    if (!this.isMobileMode() || !url) {
+      return;
+    }
+
+    this.proxied_resource.open(url);
   }
 }

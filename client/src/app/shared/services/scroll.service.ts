@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { LicenseService } from '../../services/licenses/licenses.service';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { NewTabProxyController } from './new-tab-proxy.controller';
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollService {
+  private readonly proxied_resource = inject(NewTabProxyController);
   private readonly resultWindowScrollPositionKey = 'resultWindowScrollPosition';
   private readonly resultContainerScrollPositionKey = 'resultContainerScrollPosition';
   private readonly resultDocumentScrollPositionKey = 'resultDocumentScrollPosition';
@@ -44,7 +46,7 @@ export class ScrollService {
         selectedType: 'document', singleInput: itemId
       });
       const fullUrl = `${baseUrl}?${params.toString()}`;
-      window.open(fullUrl, '_blank');
+      this.proxied_resource.open(fullUrl);
     }
   }
 

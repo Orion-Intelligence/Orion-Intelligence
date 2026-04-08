@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, SimpleChanges, effect, input } from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges, effect, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DefacementCallbackModel, DefacementResultItem } from '../../../../shared/model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
@@ -6,12 +6,14 @@ import { HelperService } from '../../../../shared/services/helper.service';
 import { StealerLogCallbackModel } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
+import { NewTabProxyController } from '../../../../shared/services/new-tab-proxy.controller';
 @Component({
   selector: 'app-defacement-results',
   imports: [CommonModule, TooltipDirective],
   templateUrl: './threat-results.component.html',
 })
 export class ThreatResultsComponent implements OnInit, OnChanges {
+  private readonly proxied_resource = inject(NewTabProxyController);
   private copiedTimer: any = null;
 
   readonly isExpandableInput = input(false, { alias: 'isExpandable' });
@@ -77,14 +79,14 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
       route = 'databases';
     }
     const url = `/dashboard/defacement/${route}?q=${encodeURIComponent(q)}`;
-    window.open(url, '_blank');
+    this.proxied_resource.open(url);
   }
 
   exploreStealer(url: string, username: string) {
     const encodedUrl = encodeURIComponent(url || '');
     const encodedUser = encodeURIComponent(username || '');
     const finalUrl = `/dashboard/stealerlogs?domain=${encodedUrl}&user=${encodedUser}`;
-    window.open(finalUrl, '_blank');
+    this.proxied_resource.open(finalUrl);
   }
 
   toggleResultsBarCollapse(): void {
@@ -106,7 +108,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     if (type === 'defacement_all') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/databases?q=${encodeURIComponent(query)}`;
-      window.open(url, '_blank');
+      this.proxied_resource.open(url);
       return;
     }
     if (type === 'phishing' || type === 'hacked' || type === 'databases' || type === 'scam' || type === 'crack') {
@@ -118,12 +120,12 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
       }
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/${type}?q=${encodeURIComponent(query)}`;
-      window.open(url, '_blank');
+      this.proxied_resource.open(url);
     }
     else if (type === 'stealerlog') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const finalUrl = `/dashboard/stealerlogs?url=${encodeURIComponent(query)}&user=`;
-      window.open(finalUrl, '_blank');
+      this.proxied_resource.open(finalUrl);
     }
   }
 

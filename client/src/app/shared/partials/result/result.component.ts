@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, input, output } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, inject, input, output } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EmptyResultComponent } from '../empty-result/empty-result.component';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +26,7 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
+import { NewTabProxyController } from '../../services/new-tab-proxy.controller';
 
 @Component({
   selector: 'app-result',
@@ -35,6 +36,8 @@ import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/inte
   imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
+  private readonly proxied_resource = inject(NewTabProxyController);
+
   protected readonly SortType = SortType;
   protected readonly Category = Category;
   protected readonly query = query;
@@ -269,7 +272,7 @@ export class ResultComponent implements OnInit, OnChanges {
     const url = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan'], {
       queryParams: { domain }
     }));
-    window.open(url, '_blank');
+    this.proxied_resource.open(url);
   }
 
   normalizeDisplayUrl(url?: string | null): string {

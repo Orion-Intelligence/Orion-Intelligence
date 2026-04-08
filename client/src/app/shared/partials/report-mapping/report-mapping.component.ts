@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
@@ -8,6 +8,7 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { NewTabProxyController } from '../../services/new-tab-proxy.controller';
 @Component({
   selector: 'app-report-mapping',
   templateUrl: './report-mapping.component.html',
@@ -15,6 +16,8 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingComponent {
+  private readonly proxied_resource = inject(NewTabProxyController);
+
   loading = true;
   result: any[] = [];
   filteredItems: any[] = [];
@@ -82,7 +85,7 @@ export class ReportMappingComponent {
     const category = parts[parts.length - 3];
     const subCategory = parts[parts.length - 2];
     const baseUrl = `${window.location.origin}/dashboard/${category}/${subCategory}/${id}`;
-    window.open(baseUrl, '_blank');
+    this.proxied_resource.open(baseUrl);
   }
 
   extractId(path: string): string {

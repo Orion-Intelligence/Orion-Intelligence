@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Color, Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -19,6 +19,7 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
+import { NewTabProxyController } from '../../../shared/services/new-tab-proxy.controller';
 
 type GraphNodeColor = string | Color;
 @Component({
@@ -29,6 +30,7 @@ type GraphNodeColor = string | Color;
   imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
+  private readonly proxied_resource = inject(NewTabProxyController);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
   private readonly edgeHighlightColor = '#a78bfa';
@@ -1178,7 +1180,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       singleInput: singleInput
     });
     const fullUrl = `${baseUrl}?${params.toString()}`;
-    window.open(fullUrl, '_blank');
+    this.proxied_resource.open(fullUrl);
     this.hideContextMenu();
   }
 
@@ -1221,7 +1223,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const parts = nodeId.split('/');
     const singleInput = parts[parts.length - 1];
     const category = this.getReportCategory(nodeId);
-    const open = (path: string) => window.open(`${window.location.origin}${path}/${singleInput}`, '_blank');
+    const open = (path: string) => this.proxied_resource.open(`${window.location.origin}${path}/${singleInput}`);
     if (category === 'leak') {
       open('/dashboard/breach/all');
     }
