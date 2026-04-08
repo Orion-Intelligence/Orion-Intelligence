@@ -11,7 +11,7 @@
 				<div class="mt-2 space-y-1">
 					@for (item of selectedCountryBreakdown; track item.label) {
 						<p class="text-[11px] text-slate-300">
-							<span class="font-semibold" [style.color]="item.colorHex">{{ item.label }}</span>: {{ item.count }}
+							<span class="font-semibold text-cyan-200">{{ item.label }}</span>: {{ item.count }}
 						</p>
 					}
 				</div>
@@ -21,7 +21,6 @@
 			<p class="mt-2 text-[12px] text-cyan-100/90">Loading country highlights...</p>
 		}
 		<p class="mt-2 max-w-[420px] text-[12px] text-slate-300">{{ statusMessage }}</p>
-		<p class="mt-2 text-[11px] text-slate-400">Click any country to focus and view its name.</p>
 		<p class="mt-2 text-[11px] text-slate-400">Arcs currently visible: <span class="font-semibold text-cyan-100">{{ arcCount }}</span></p>
 	</div>
 
@@ -58,7 +57,7 @@
 				@for (item of categoryLegend; track item.categoryKey) {
 					<div class="rounded-[8px] border border-white/10 bg-slate-950/45 px-2 py-1.5 text-[12px] text-slate-200">
 						<div class="flex items-center justify-between gap-3">
-							<span class="truncate font-semibold" [style.color]="item.colorHex">{{ item.label }}</span>
+							<span class="truncate font-semibold text-cyan-100">{{ item.label }}</span>
 							<span>{{ item.arcCount }} arcs</span>
 						</div>
 						<p class="mt-1 text-[11px] text-slate-400">{{ item.totalResults }} results, {{ item.countryCount }} countries</p>
