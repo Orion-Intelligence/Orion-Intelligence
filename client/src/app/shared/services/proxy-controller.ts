@@ -71,10 +71,15 @@ export class ProxyController {
     try {
       const resolvedUrl = new URL(rawUrl, window.location.href);
       const currentHost = window.location.hostname.toLowerCase();
+      const isCurrentOnionHost = currentHost.endsWith('.onion');
       const isLocalhostHost = currentHost === 'localhost'
         || currentHost === '127.0.0.1'
         || currentHost.endsWith('.localhost');
       const onionHost = resolvedUrl.hostname.toLowerCase();
+
+      if (isCurrentOnionHost) {
+        return resolvedUrl.toString();
+      }
 
       if (isLocalhostHost && onionHost.endsWith('.onion')) {
         const proxyHost = onionHost.slice(0, -'.onion'.length);
