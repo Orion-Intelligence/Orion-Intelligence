@@ -6,6 +6,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, LicenseName
+from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager import *
 
@@ -57,6 +58,7 @@ class mongo_controller:
             name="unique_maintainer_per_company", )
 
         await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
+        await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
 
     def get_engine(self) -> AIOEngine:
         return self.__engine
@@ -103,4 +105,5 @@ class mongo_controller:
         admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
         admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
+        admin.add_view(ModelView(db_document_feedback_model, icon="fa fa-comments"))
         return admin

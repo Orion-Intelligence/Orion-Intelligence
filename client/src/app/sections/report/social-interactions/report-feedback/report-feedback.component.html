@@ -1,0 +1,41 @@
+<div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px]">
+<div class="inline-flex max-w-full flex-col rounded-[14px] border border-[var(--color-border)] bg-[linear-gradient(180deg,var(--color-blue-700),var(--color-blue-720))] p-2">
+  <div class="flex flex-wrap gap-1.5">
+    <button type="button" [disabled]="!docId || !!savingKey || !feedback.can_react" (click)="increment('recommended', 'recommended_count')" [class]="isSelected('recommended') ? 'inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1.5 text-left transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-70' : 'inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-1.5 text-left transition-all duration-150 hover:bg-[rgba(87,165,235,0.10)] disabled:cursor-not-allowed disabled:opacity-70'">
+      <span class="text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Recommended</span>
+      <span class="text-[15px] font-semibold leading-none text-[var(--color-text1)]">{{ feedback.recommended_count }}</span>
+      <div class="flex items-center gap-1.5">
+        @if (savingKey === 'recommended_count') {
+          <span class="text-[10px] text-[var(--color-text4)]">Saving...</span>
+        } @else if (isSelected('recommended')) {
+          <span class="text-[10px] font-semibold text-emerald-300">Selected</span>
+        }
+      </div>
+    </button>
+
+    <button type="button" [disabled]="!docId || !!savingKey || !feedback.can_react" (click)="increment('trust', 'trust_count')" [class]="isSelected('trust') ? 'inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1.5 text-left transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-70' : 'inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-1.5 text-left transition-all duration-150 hover:bg-[rgba(87,165,235,0.10)] disabled:cursor-not-allowed disabled:opacity-70'">
+      <span class="text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Trust</span>
+      <span class="text-[15px] font-semibold leading-none text-[var(--color-text1)]">{{ feedback.trust_count }}</span>
+      <div class="flex items-center gap-1.5">
+        @if (savingKey === 'trust_count') {
+          <span class="text-[10px] text-[var(--color-text4)]">Saving...</span>
+        } @else if (isSelected('trust')) {
+          <span class="text-[10px] font-semibold text-sky-300">Selected</span>
+        }
+      </div>
+    </button>
+
+    <button type="button" [disabled]="!docId || !!savingKey || !feedback.can_react" (click)="increment('untrust', 'untrust_count')" [class]="isSelected('untrust') ? 'inline-flex items-center gap-2 rounded-full border border-rose-400/30 bg-rose-500/10 px-2.5 py-1.5 text-left transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-70' : 'inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-1.5 text-left transition-all duration-150 hover:bg-[rgba(87,165,235,0.10)] disabled:cursor-not-allowed disabled:opacity-70'">
+      <span class="text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Untrust</span>
+      <span class="text-[15px] font-semibold leading-none text-[var(--color-text1)]">{{ feedback.untrust_count }}</span>
+      <div class="flex items-center gap-1.5">
+        @if (savingKey === 'untrust_count') {
+          <span class="text-[10px] text-[var(--color-text4)]">Saving...</span>
+        } @else if (isSelected('untrust')) {
+          <span class="text-[10px] font-semibold text-rose-300">Selected</span>
+        }
+      </div>
+    </button>
+  </div>
+</div>
+</div>

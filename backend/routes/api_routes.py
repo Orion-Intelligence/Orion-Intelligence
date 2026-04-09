@@ -3,6 +3,8 @@ from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
 from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
 from configs.limiter_dependency import limiter_dependency
+from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
+from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (directory_param_model, )
 from orion.api.interactive.dump_manager.dump_model import dump_model
@@ -155,6 +157,56 @@ async def search_defacement(param: search_consolidated_param_model = Body(...), 
     param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
+
+
+@api_routes.post(
+    "/api/feedback/comment/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def add_feedback_comment(doc_id: str, param: feedback_comment_param_model = Body(...), current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().add_comment(doc_id, param.comment, current_user)
+
+
+@api_routes.get(
+    "/api/feedback/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def get_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().get_feedback(doc_id, current_user)
+
+
+@api_routes.post(
+    "/api/feedback/recommended/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def increment_recommended_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().increment_recommended(doc_id, current_user)
+
+
+@api_routes.post(
+    "/api/feedback/trust/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def increment_trust_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().increment_trust(doc_id, current_user)
+
+
+@api_routes.post(
+    "/api/feedback/untrust/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def increment_untrust_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().increment_untrust(doc_id, current_user)
 
 
 @api_routes.get(
