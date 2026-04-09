@@ -3,6 +3,7 @@ import { firstValueFrom, from, map, Observable } from 'rxjs';
 import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
 import { ConsolidatedParamModel } from '../../shared/model/results/consolidated/consolidated.param.model';
 import { ApiService } from '../../shared/services/api.service';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
 
 const COUNTRY_ALIAS: Record<string, string> = {
   usa: 'United States',
@@ -56,7 +57,7 @@ export interface ThreatLensMapData {
 
 @Injectable({ providedIn: 'root' })
 export class ThreatLensMiddlewareService {
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private dashboardService:DashboardService) {}
 
   fetchThreatLensData(payload?: Partial<ThreatLensRequestPayload>): Observable<ConsolidatedCallbackModel> {
     return this.api.post<ConsolidatedCallbackModel>('threat/lens', this.buildThreatLensPayload(payload));
@@ -95,11 +96,34 @@ export class ThreatLensMiddlewareService {
   }
 
   private buildThreatLensPayload(payload?: Partial<ThreatLensRequestPayload>): ThreatLensRequestPayload {
-    const request: ConsolidatedParamModel = Object.assign(new ConsolidatedParamModel(), payload);
+    const request = Object.assign(new ConsolidatedParamModel(), this.dashboardService.selectedFilters(), payload) as ThreatLensRequestPayload & Record<string, any>;
+
     if (!String(request.q ?? '').trim()) {
       request.q = '';
     }
-    return request;
+
+    return this.removeEmptyOrDefaultValues(request) as ThreatLensRequestPayload;
+  }
+
+  private removeEmptyOrDefaultValues(params: ThreatLensRequestPayload & Record<string, any>): Record<string, any> {
+    const defaultParams = new ConsolidatedParamModel() as Record<string, any>;
+    const cleanedParams: Record<string, any> = {};
+
+    for (const key of Object.keys(params)) {
+      const value = params[key];
+      const defaultValue = defaultParams[key];
+      const isNullOrUndefined = value === null || value === undefined;
+      const isEmptyString = typeof value === 'string' && value.trim() === '';
+      const isEmptyArray = Array.isArray(value) && value.length === 0;
+      const isSameAsDefault = JSON.stringify(value) === JSON.stringify(defaultValue);
+      const isAllOption = value === 'all';
+
+      if ((!isNullOrUndefined && !isEmptyString && !isEmptyArray && !isSameAsDefault && !isAllOption) || key === 'q' || key === 'page') {
+        cleanedParams[key] = value;
+      }
+    }
+
+    return cleanedParams;
   }
 
   private async fetchAllThreatLensData(payload?: Partial<ThreatLensRequestPayload>): Promise<ConsolidatedCallbackModel[]> {
@@ -127,6 +151,7 @@ export class ThreatLensMiddlewareService {
   }
 
   private buildMapDataFromResponses(responses: ConsolidatedCallbackModel[]): ThreatLensMapData {
+    console.log(responses)
     const normalizedResponses = responses.map((response) => new ConsolidatedCallbackModel(response));
     const overallCountryCounts = new Map<string, number>();
     const overallCountryNames = new Map<string, string>();
@@ -134,6 +159,7 @@ export class ThreatLensMiddlewareService {
     const categoryData: ThreatLensCategoryMapData[] = [];
     let totalResults = 0;
 
+    console.log(normalizedResponses)
     for (const normalizedResponse of normalizedResponses) {
       for (const category of THREAT_LENS_CATEGORY_CONFIG) {
         const documents = this.extractResultItems(normalizedResponse[category.key]);
@@ -289,9 +315,14 @@ export class ThreatLensMiddlewareService {
       return '';
     }
 
-    const regionName = new Intl.DisplayNames(['en'], { type: 'region' }).of(code);
-    if (regionName && regionName.toUpperCase() !== code) {
-      return regionName;
+    try {
+      const regionName = new Intl.DisplayNames(['en'], { type: 'region' }).of(code);
+      if (regionName && regionName.toUpperCase() !== code) {
+        return regionName;
+      }
+    }
+    catch {
+      return '';
     }
 
     return '';

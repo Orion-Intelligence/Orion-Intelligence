@@ -1,10 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
-import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensMiddlewareService, ThreatLensRequestPayload } from './threat-lens-middleware.service';
-import { buildArcPath, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor } from './threat-lens-map.utils';
+import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensMapData, ThreatLensMiddlewareService, ThreatLensRequestPayload } from './threat-lens-middleware.service';
+import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, extractArcSegment, getFeatureAnchor,getArcPointAtProgress } from './threat-lens-map.utils';
+import { SidebarService } from '../../shared/services/sidebar.service';
+import { FilterModel } from '../../shared/model/filter/filter.model';
+import { FiltersComponent } from "../../shared/partials/filters/filters.component";
+import { consolidated_filters } from '../../shared/constants/filters';
 
 type ThreatLensLegendItem = {
   categoryKey: ThreatLensCategoryModelKey;
@@ -21,19 +25,34 @@ type SelectedCountryCategoryCount = {
   count: number;
 };
 
+type AnimatedArcDescriptor = {
+  categoryKey: ThreatLensCategoryModelKey;
+  color: [number, number, number];
+  weight: number;
+  arcPoints: [number, number, number][];
+  arcPaths: [number, number, number][][];
+  surfacePaths: [number, number][][];
+  countryAKey: string;
+  countryBKey: string;
+  animationOffset: number;
+  animationDuration: number;
+};
+
 @Component({
   selector: 'app-threat-lens',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FiltersComponent],
   templateUrl: './threat-lens.html',
 })
 export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewNode?: ElementRef<HTMLDivElement>;
+  protected readonly filterModel: FilterModel=consolidated_filters;
   private view: any | null = null;
   private countryLayer: any | null = null;
   private newsGraphicsLayer: any | null = null;
   private arcGraphicsLayer: any | null = null;
   private arcSurfaceGraphicsLayer: any | null = null;
+  private animatedArcGraphicsLayer: any | null = null;
   private countryLayerView: any | null = null;
   private highlightHandle: { remove: () => void } | null = null;
   private mapClickHandle: { remove: () => void } | null = null;
@@ -42,9 +61,21 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private categoryCountryNewsCountByKey = new Map<ThreatLensCategoryModelKey, Map<string, number>>();
   private geometryEngine: any | null = null;
   private webMercatorUtils: any | null = null;
-  private readonly maxArcCount = 140;
+  private animatedArcs: AnimatedArcDescriptor[] = [];
+  private arcAnimationFrame: number | null = null;
+  private lastAnimationTick = 0;
+  private batchAnimationStartTime = 0;
+  private visibleBatchIndex = -1;
+  private readonly maxArcCount = 80;
   private readonly minArcWeight = 1;
+  private readonly arcBatchSize = 5;
+  private readonly arcBatchDuration = 6000;
   private readonly countryNameFields = ['COUNTRY', 'COUNTRYAFF', 'NAME', 'ADMIN', 'SOVEREIGNT'];
+  private activePulseGraphics: any[] = [];
+private readonly segmentCount = 6;
+private movingDotGraphics: any[] = [];
+  
+ isFilterOpen$: Observable<boolean>;
 
   searchTerm = '';
   currentQuery = '';
@@ -56,7 +87,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   categoryLegend: ThreatLensLegendItem[] = [];
   selectedCountryBreakdown: SelectedCountryCategoryCount[] = [];
 
-  constructor(private ngZone: NgZone, private threatLensMiddleware: ThreatLensMiddlewareService) {}
+  constructor(private ngZone: NgZone, private threatLensMiddleware: ThreatLensMiddlewareService, protected sidebarService: SidebarService) {
+     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+  }
 
   async ngAfterViewInit(): Promise<void> {
     await this.initializeMap();
@@ -66,6 +99,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.mapClickHandle?.remove();
     this.mapClickHandle = null;
     this.clearHighlight();
+    this.stopArcAnimation();
 
     if (this.view) {
       this.view.destroy();
@@ -126,12 +160,16 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       title: 'Threat Lens Country Arcs',
       elevationInfo: { mode: 'absolute-height' },
     });
+    this.animatedArcGraphicsLayer = new GraphicsLayer({
+      title: 'Threat Lens Animated Arcs',
+      elevationInfo: { mode: 'absolute-height' },
+    });
     this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
 
     const map = new EsriMap({
       basemap: 'dark-gray-vector',
       ground: 'world-elevation',
-      layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer],
+      layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer, this.animatedArcGraphicsLayer],
     });
 
     this.view = new SceneView({
@@ -229,8 +267,16 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     // The match-all load can be very large, so keep the first render responsive
     // and let explicit searches use the same fast path.
     const loadAllPages = false;
-    const statsResult = await firstValueFrom(this.threatLensMiddleware.getThreatLensMapData(this.buildSearchPayload(activeQuery), loadAllPages))
-      .then((stats) => ({ ok: true as const, stats }), () => ({ ok: false as const, stats: null }));
+    let statsResult: { ok: true; stats: ThreatLensMapData } | { ok: false; stats: null };
+    try {
+      const stats = await firstValueFrom(this.threatLensMiddleware.getThreatLensMapData(this.buildSearchPayload(activeQuery), loadAllPages),);
+      statsResult = { ok: true, stats };
+    }
+    catch (error) {
+      console.error('Failed to load threat lens data', error);
+      statsResult = { ok: false, stats: null };
+    }
+    console.log(statsResult);
 
     if (!statsResult.ok || !statsResult.stats) {
       await this.renderCountryArcs([]);
@@ -292,7 +338,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       }
 
       this.statusMessage = totalArcCount > 0
-        ? `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries and drew ${totalArcCount} country arcs. Most active: ${mostActive.country} (${mostActive.count}).`
+        ? `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing rotating arc batches of up to ${this.arcBatchSize} at a time. Most active: ${mostActive.country} (${mostActive.count}).`
         : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
       this.isLoading = false;
     });
@@ -302,12 +348,17 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     totalArcCount: number;
     arcCountByCategory: Map<ThreatLensCategoryModelKey, number>;
   }> {
-    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
+    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer || !this.animatedArcGraphicsLayer) {
       return { totalArcCount: 0, arcCountByCategory: new Map() };
     }
 
+    this.stopArcAnimation();
     this.arcGraphicsLayer.removeAll();
     this.arcSurfaceGraphicsLayer.removeAll();
+    this.animatedArcGraphicsLayer.removeAll();
+    this.animatedArcs = [];
+    this.visibleBatchIndex = -1;
+    this.batchAnimationStartTime = 0;
 
     const arcCountByCategory = new Map<ThreatLensCategoryModelKey, number>();
     let totalArcCount = 0;
@@ -327,59 +378,24 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
           continue;
         }
 
-        this.arcGraphicsLayer.add({
-          geometry: {
-            type: 'polyline',
-            hasZ: true,
-            paths: [buildArcPath(start, end, pair.weight)],
-            spatialReference: { wkid: 4326 },
-          },
-          attributes: {
-            category: category.categoryKey,
-            country_a: pair.countryAKey,
-            country_b: pair.countryBKey,
-            weight: pair.weight,
-          },
-          symbol: {
-            type: 'line-3d',
-            symbolLayers: [
-              {
-                type: 'path',
-                profile: 'quad',
-                width: Math.min(20, 12 + (pair.weight * 0.8)),
-                cap: 'round',
-                material: { color: [255, 255, 255, 0.38] },
-                anchor: 'center',
-              },
-              {
-                type: 'path',
-                profile: 'quad',
-                width: Math.min(11, 5 + (pair.weight * 0.48)),
-                cap: 'round',
-                material: { color: [...category.color, 1] },
-                anchor: 'center',
-              },
-            ],
-          },
-        });
+        const arcPoints = buildArcPathPoints(start, end, pair.weight);
+        const arcPaths = buildArcPath(start, end, pair.weight);
+        const surfacePaths = buildSurfacePath(start, end);
+        if (!arcPaths.length || !surfacePaths.length || arcPoints.length < 2) {
+          continue;
+        }
 
-        this.arcSurfaceGraphicsLayer.add({
-          geometry: {
-            type: 'polyline',
-            paths: [buildSurfacePath(start, end)],
-            spatialReference: { wkid: 4326 },
-          },
-          attributes: {
-            category: category.categoryKey,
-            country_a: pair.countryAKey,
-            country_b: pair.countryBKey,
-            weight: pair.weight,
-          },
-          symbol: {
-            type: 'simple-line',
-            color: [...category.color, 0.92],
-            width: Math.min(3.8, 1.8 + (pair.weight * 0.24)),
-          },
+        this.animatedArcs.push({
+          categoryKey: category.categoryKey,
+          color: category.color,
+          weight: pair.weight,
+          arcPoints,
+          arcPaths,
+          surfacePaths,
+          countryAKey: pair.countryAKey,
+          countryBKey: pair.countryBKey,
+          animationOffset: renderedArcCount * 0.11,
+          animationDuration: Math.max(1800, 3300 - Math.min(1200, pair.weight * 110)),
         });
 
         renderedArcCount += 1;
@@ -389,51 +405,20 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       totalArcCount += renderedArcCount;
     }
 
-    return { totalArcCount, arcCountByCategory };
+    this.renderArcBatch(0);
+    this.startArcAnimation();
+    return {
+      totalArcCount: Math.min(totalArcCount, this.arcBatchSize),
+      arcCountByCategory,
+    };
   }
 
-  private async renderNewsIntensity(countryCounts: ThreatCountryCount[], maxCount: number): Promise<void> {
+  private async renderNewsIntensity(_countryCounts: ThreatCountryCount[], _maxCount: number): Promise<void> {
     if (!this.newsGraphicsLayer) {
       return;
     }
 
     this.newsGraphicsLayer.removeAll();
-    if (!countryCounts.length || maxCount <= 0) {
-      return;
-    }
-
-    for (const item of countryCounts) {
-      const feature = this.countryFeatureIndex.get(this.toCountryKey(item.country));
-      if (!feature?.geometry) {
-        continue;
-      }
-
-      const opacity = this.getIntensityOpacity(item.count, maxCount);
-      this.newsGraphicsLayer.add({
-        geometry: feature.geometry,
-        attributes: {
-          country: item.country,
-          news_count: item.count,
-        },
-        symbol: {
-          type: 'simple-fill',
-          color: [239, 68, 68, opacity],
-          outline: {
-            color: [248, 113, 113, Math.min(opacity + 0.12, 0.95)],
-            width: 0.8,
-          },
-        },
-      });
-    }
-  }
-
-  private getIntensityOpacity(count: number, maxCount: number): number {
-    if (maxCount <= 0) {
-      return 0.14;
-    }
-
-    const ratio = Math.max(0, Math.min(1, count / maxCount));
-    return 0.14 + (ratio * 0.68);
   }
 
   private toCountryKey(value: string): string {
@@ -442,7 +427,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private getSelectedCountryBreakdown(countryKey: string): SelectedCountryCategoryCount[] {
-    console.log("444444")
     return this.categoryLegend
       .map((category) => ({
         label: category.label,
@@ -466,7 +450,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     const normalizedCountry = this.threatLensMiddleware.normalizeCountryLabel(query);
     const countryKey = this.toCountryKey(normalizedCountry);
     if (countryKey && this.countryFeatureIndex.has(countryKey)) {
-      payload.q = '*';
+      payload.q = '';
       payload.entity_filter = { m_country: [normalizedCountry] };
       payload.must = true;
       payload.fullsearch = false;
@@ -504,5 +488,226 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     }
 
     return '';
+  }
+
+  private startArcAnimation(): void {
+  if (!this.animatedArcGraphicsLayer || !this.animatedArcs.length) {
+    return;
+  }
+
+  this.ngZone.runOutsideAngular(() => {
+    const animate = (timestamp: number) => {
+      if (!this.animatedArcGraphicsLayer) {
+        this.arcAnimationFrame = null;
+        return;
+      }
+
+      if (!this.batchAnimationStartTime) {
+        this.batchAnimationStartTime = timestamp;
+      }
+
+      // throttle (performance)
+      if (this.lastAnimationTick && (timestamp - this.lastAnimationTick) < 40) {
+        this.arcAnimationFrame = requestAnimationFrame(animate);
+        return;
+      }
+
+      this.lastAnimationTick = timestamp;
+
+      const batch = this.getCurrentArcBatch(timestamp);
+
+      // if batch changed → recreate dots
+      if (batch.index !== this.visibleBatchIndex) {
+        this.renderArcBatch(batch.index, batch.items);
+      }
+
+      let index = 0;
+
+      for (const arc of batch.items) {
+        const progress = ((timestamp + (arc.animationOffset * arc.animationDuration)) % arc.animationDuration) / arc.animationDuration;
+
+        const point = getArcPointAtProgress(arc.arcPoints, progress);
+
+        const graphic = this.movingDotGraphics[index];
+
+        if (point && graphic) {
+          const [lon, lat, z] = point;
+
+          graphic.geometry = {
+            type: 'point',
+            longitude: lon,
+            latitude: lat,
+            z: z,
+            spatialReference: { wkid: 4326 }
+          };
+        }
+
+        index++;
+      }
+
+      this.arcAnimationFrame = requestAnimationFrame(animate);
+    };
+
+    this.arcAnimationFrame = requestAnimationFrame(animate);
+  });
+}
+
+  private stopArcAnimation(): void {
+    if (this.arcAnimationFrame !== null) {
+      cancelAnimationFrame(this.arcAnimationFrame);
+      this.arcAnimationFrame = null;
+    }
+
+    this.animatedArcGraphicsLayer?.removeAll();
+    this.lastAnimationTick = 0;
+    this.batchAnimationStartTime = 0;
+    this.visibleBatchIndex = -1;
+  }
+
+  private getCurrentArcBatch(timestamp: number): { index: number; items: AnimatedArcDescriptor[] } {
+    if (!this.animatedArcs.length) {
+      return { index: -1, items: [] };
+    }
+
+    const totalBatches = Math.max(1, Math.ceil(this.animatedArcs.length / this.arcBatchSize));
+    const elapsed = Math.max(0, timestamp - this.batchAnimationStartTime);
+    const index = Math.floor(elapsed / this.arcBatchDuration) % totalBatches;
+    const start = index * this.arcBatchSize;
+    return {
+      index,
+      items: this.animatedArcs.slice(start, start + this.arcBatchSize),
+    };
+  }
+
+  private renderArcBatch(index: number, batchItems?: AnimatedArcDescriptor[]): void {
+    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
+      return;
+    }
+
+    const items = batchItems ?? (index >= 0 ? this.animatedArcs.slice(index * this.arcBatchSize, (index + 1) * this.arcBatchSize) : []);
+    this.visibleBatchIndex = index;
+    this.arcGraphicsLayer.removeAll();
+    this.arcSurfaceGraphicsLayer.removeAll();
+
+    if (!items.length) {
+      this.ngZone.run(() => {
+        this.arcCount = 0;
+      });
+      return;
+    }
+
+    this.arcGraphicsLayer.addMany(items.map((arc) => ({
+      geometry: {
+        type: 'polyline',
+        hasZ: true,
+        paths: arc.arcPaths,
+        spatialReference: { wkid: 4326 },
+      },
+      attributes: {
+        category: arc.categoryKey,
+        country_a: arc.countryAKey,
+        country_b: arc.countryBKey,
+        weight: arc.weight,
+      },
+      symbol: {
+        type: 'line-3d',
+        symbolLayers: [
+          {
+            type: 'path',
+            profile: 'quad',
+            width: Math.min(20, 12 + (arc.weight * 0.8)),
+            cap: 'round',
+            material: { color: [...arc.color, 0.18] },
+            anchor: 'center',
+          },
+          {
+            type: 'path',
+            profile: 'quad',
+            width: Math.min(11, 5 + (arc.weight * 0.48)),
+            cap: 'round',
+            material: { color: [...arc.color, 0.64] },
+            anchor: 'center',
+          },
+        ],
+      },
+    })));
+
+    this.arcSurfaceGraphicsLayer.addMany(items.map((arc) => ({
+      geometry: {
+        type: 'polyline',
+        paths: arc.surfacePaths,
+        spatialReference: { wkid: 4326 },
+      },
+      attributes: {
+        category: arc.categoryKey,
+        country_a: arc.countryAKey,
+        country_b: arc.countryBKey,
+        weight: arc.weight,
+      },
+      symbol: {
+        type: 'simple-line',
+        color: [...arc.color, 0.92],
+        width: Math.min(3.8, 1.8 + (arc.weight * 0.24)),
+      },
+    })));
+
+    this.ngZone.run(() => {
+      this.arcCount = items.length;
+    });
+// 🔥 Prepare reusable pulse graphics (only once per batch)
+this.activePulseGraphics = [];
+
+const totalGraphics = items.length * this.segmentCount;
+
+for (let i = 0; i < totalGraphics; i++) {
+  this.activePulseGraphics.push({
+    geometry: null,
+    symbol: {
+      type: 'line-3d',
+      symbolLayers: [
+        {
+          type: 'path',
+          profile: 'quad',
+          width: 6,
+          cap: 'round',
+          material: { color: [255, 255, 255, 0.3] },
+          anchor: 'center',
+        }
+      ],
+    },
+  });
+}
+
+// clear and add once (NOT per frame)
+this.animatedArcGraphicsLayer.removeAll();
+this.animatedArcGraphicsLayer.addMany(this.activePulseGraphics);
+// 🔥 Create moving dots (one per arc)
+this.movingDotGraphics = [];
+
+for (const arc of items) {
+  const graphic = {
+    geometry: null,
+    symbol: {
+      type: 'point-3d',
+      symbolLayers: [
+        {
+          type: 'object',
+          resource: { primitive: 'sphere' },
+          width: 120000,
+          height: 120000,
+          depth: 120000,
+          material: { color: [...arc.color, 1] },
+        }
+      ]
+    }
+  };
+
+  this.movingDotGraphics.push(graphic);
+}
+
+// clear and add once
+this.animatedArcGraphicsLayer.removeAll();
+this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
+    
   }
 }
