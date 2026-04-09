@@ -1,7 +1,6 @@
 export class ReportFeedbackCommentModel {
   user_id = '';
   username = '';
-  tenant_id = '';
   comment = '';
   created_at = '';
   updated_at = '';
@@ -14,7 +13,6 @@ export class ReportFeedbackCommentModel {
 export class ReportFeedbackReactionModel {
   user_id = '';
   username = '';
-  tenant_id = '';
   recommended = false;
   trust_state: 'trust' | 'untrust' | null = null;
   created_at = '';
