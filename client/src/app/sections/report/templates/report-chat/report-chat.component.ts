@@ -17,6 +17,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScanHelperMethodsService } from '../../../../pages/network-intel/network-intel-service.service';
+import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
@@ -30,7 +31,8 @@ import { ScanHelperMethodsService } from '../../../../pages/network-intel/networ
     JsonApiViewerComponent,
     TooltipDirective,
     ReportHeaderComponent,
-    ChatWidgetComponent
+    ChatWidgetComponent,
+    ReportInteractionHostComponent
   ],
   animations: [fadeInDashboardItem]
 })
@@ -223,5 +225,9 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     add('Commenters', item.m_commenters, true);
 
     return rows;
+  }
+
+  get reportDocId(): string {
+    return (this.resultItem as any)?.m_hash || (this.resultItem as any)?._id || '';
   }
 }

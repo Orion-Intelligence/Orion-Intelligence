@@ -11,6 +11,7 @@ import { ResultListComponent } from '../../../../shared/partials/result-componen
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
+import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
@@ -23,7 +24,8 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
     ResultSectionComponent,
     ResultListComponent,
     NgClass,
-    TooltipDirective
+    TooltipDirective,
+    ReportInteractionHostComponent
   ]
 })
 export class ReportDefacementComponent implements OnInit, AfterViewInit {
@@ -118,5 +120,9 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   normalizeDisplayUrl(url?: string | string[] | null): string {
     const rawUrl = Array.isArray(url) ? (url[0] || '') : (url || '');
     return normalizeDisplayUrlUtil(rawUrl, '-');
+  }
+
+  get reportDocId(): string {
+    return (this.defacementData as any)?.m_hash || (this.defacementData as any)?._id || '';
   }
 }
