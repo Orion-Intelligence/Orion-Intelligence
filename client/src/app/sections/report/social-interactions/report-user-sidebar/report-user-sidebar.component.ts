@@ -29,7 +29,7 @@ export class ReportUserSidebarComponent {
     }
     this.userId = userId;
     this.isOpen = true;
-    this.loadUser();
+    window.requestAnimationFrame(() => this.loadUser());
   }
 
   closeSidebar(): void {
