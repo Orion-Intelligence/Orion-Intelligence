@@ -92,6 +92,9 @@ class FeedbackManager:
 
         current_user_id = str(current_user.id)
         now = datetime.now(UTC)
+        existing_reaction = self._get_user_reaction(doc, current_user)
+        if existing_reaction is not None:
+            return self._serialize(doc, current_user)
         reaction_payload = {
             "user_id": current_user_id,
             "username": getattr(current_user, "username", ""),
@@ -108,21 +111,12 @@ class FeedbackManager:
             inc_payload["trust_count"] = 1
         elif trust_state == FeedbackTrustState.UNTRUST:
             inc_payload["untrust_count"] = 1
-
-        await self._engine.get_collection(db_document_feedback_model).update_one(
-            {
-                "doc_id": doc_id,
-                "reactions.user_id": {"$ne": current_user_id},
-            },
-            {
-                "$push": {"reactions": reaction_payload},
-                "$inc": inc_payload,
-                "$set": {"updated_at": now},
-            },
-        )
-        saved = await self._engine.find_one(db_document_feedback_model, {"doc_id": doc_id})
-        if saved is None:
-            saved = doc
+        doc.reactions.append(DocumentFeedbackReaction(**reaction_payload))
+        doc.recommended_count += inc_payload.get("recommended_count", 0)
+        doc.trust_count += inc_payload.get("trust_count", 0)
+        doc.untrust_count += inc_payload.get("untrust_count", 0)
+        doc.updated_at = now
+        saved = await self._engine.save(doc)
         return self._serialize(saved, current_user)
 
     async def increment_recommended(self, doc_id: str, current_user) -> dict:
