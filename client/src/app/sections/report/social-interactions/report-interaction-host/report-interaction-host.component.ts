@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ReportFeedbackCommentsComponent } from '../report-feedback-comments/report-feedback-comments.component';
 import { ReportFeedbackComponent } from '../report-feedback/report-feedback.component';
+import { ReportUserSidebarComponent } from '../report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../templates/report_general/models/report-feedback.model';
 
 type FeedbackAction = 'recommended' | 'trust' | 'untrust';
@@ -10,10 +11,12 @@ type FeedbackAction = 'recommended' | 'trust' | 'untrust';
 @Component({
   selector: 'app-report-interaction-host',
   standalone: true,
-  imports: [CommonModule, ReportFeedbackComponent, ReportFeedbackCommentsComponent],
+  imports: [CommonModule, ReportFeedbackComponent, ReportFeedbackCommentsComponent, ReportUserSidebarComponent],
   templateUrl: './report-interaction-host.component.html',
 })
 export class ReportInteractionHostComponent implements OnChanges {
+  @ViewChild(ReportUserSidebarComponent) private userSidebar?: ReportUserSidebarComponent;
+
   feedbackModel = new ReportFeedbackModel();
   feedbackSavingKey: 'recommended_count' | 'trust_count' | 'untrust_count' | '' = '';
   isCommentSaving = false;
@@ -54,5 +57,9 @@ export class ReportInteractionHostComponent implements OnChanges {
 
   private setCommentErrorMessage(value: string): void {
     this.commentErrorMessage = value;
+  }
+
+  openUserSidebar(userId: string): void {
+    this.userSidebar?.open(userId);
   }
 }

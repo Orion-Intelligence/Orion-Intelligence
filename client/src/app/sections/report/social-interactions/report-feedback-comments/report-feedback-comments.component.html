@@ -33,12 +33,14 @@
       @for (comment of feedback.comments; track comment.created_at) {
         <div class="report-comment-surface rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3.5 py-3">
           <div class="flex items-start gap-3">
-            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[11px] font-semibold uppercase text-[var(--color-text2)]">
+            <button type="button" (click)="openUser(comment.user_id)" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[11px] font-semibold uppercase text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:text-[var(--color-text1)]">
               {{ (comment.username || 'A').slice(0, 1) }}
-            </div>
+            </button>
             <div class="min-w-0 flex-1">
               <div class="flex min-w-0 items-center justify-between gap-3">
-                <div class="truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ comment.username || 'Analyst note' }}</div>
+                <button type="button" (click)="openUser(comment.user_id)" class="truncate text-[13px] font-semibold text-[var(--color-text1)] transition hover:text-[var(--color-blue-640)]">
+                  {{ comment.username || 'Analyst note' }}
+                </button>
                 <div class="shrink-0 text-[11px] text-[var(--color-text4)]">{{ comment.created_at | date:'medium' }}</div>
               </div>
               <div class="mt-2">

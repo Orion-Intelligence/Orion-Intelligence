@@ -290,3 +290,26 @@ class AccountManager:
                 assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path, }, "alerts": [], "alert_summary": alert_summary, })
 
         return node
+
+    async def get_public_user(self, user_id: str, current_user) -> dict:
+        user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if current_user.role != user_role.ADMIN and str(user.tenant_uuid) != str(current_user.tenant_uuid):
+            raise HTTPException(status_code=403, detail="You are not allowed to access this user")
+
+        tenant_name = ""
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        if tenant:
+            dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
+            enc = Fernet(dek)
+            tenant_name = self.safe_decrypt(enc, tenant.name)
+
+        return {
+            "username": user.username,
+            "email": user.email,
+            "role": user.role,
+            "tenant_name": tenant_name,
+            "licenses": [license.value if hasattr(license, "value") else str(license) for license in (user.licenses or [])],
+        }

@@ -1,5 +1,6 @@
 <div class="pb-[200px]">
   <app-report-feedback [docId]="docId" [feedback]="feedbackModel" [savingKey]="feedbackSavingKey" (feedbackAction)="submitFeedback($event)"></app-report-feedback>
   <ng-content></ng-content>
-  <app-report-feedback-comments [docId]="docId" [feedback]="feedbackModel" [isSaving]="isCommentSaving" [errorMessage]="commentErrorMessage" (saveComment)="saveFeedbackComment($event)"></app-report-feedback-comments>
+  <app-report-feedback-comments [docId]="docId" [feedback]="feedbackModel" [isSaving]="isCommentSaving" [errorMessage]="commentErrorMessage" (saveComment)="saveFeedbackComment($event)" (userSelected)="openUserSidebar($event)"></app-report-feedback-comments>
+  <app-report-user-sidebar></app-report-user-sidebar>
 </div>

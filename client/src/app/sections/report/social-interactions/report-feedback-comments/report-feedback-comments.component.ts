@@ -18,6 +18,7 @@ export class ReportFeedbackCommentsComponent implements OnChanges {
   @Input() errorMessage = '';
 
   @Output() saveComment = new EventEmitter<string>();
+  @Output() userSelected = new EventEmitter<string>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['docId']) {
@@ -32,5 +33,12 @@ export class ReportFeedbackCommentsComponent implements OnChanges {
     }
     this.saveComment.emit(text);
     this.draft = '';
+  }
+
+  openUser(userId: string): void {
+    if (!userId) {
+      return;
+    }
+    this.userSelected.emit(userId);
   }
 }
