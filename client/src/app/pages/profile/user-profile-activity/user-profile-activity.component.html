@@ -1,0 +1,99 @@
+<div class="w-full p-3 md:p-4">
+  @if (isLoading) {
+    <div class="ui-page-container w-full max-w-[2400px] animate-pulse">
+      <div class="mb-4 flex items-start gap-3">
+        <div class="h-[88px] w-[88px] shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[0.2rem]"></div>
+        <div class="pt-1">
+          <div class="h-6 w-40 rounded-full bg-[var(--color-blue-700)]"></div>
+          <div class="mt-2 h-4 w-56 rounded-full bg-[var(--color-blue-700)]"></div>
+        </div>
+      </div>
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="h-4 w-20 rounded-full bg-[var(--color-blue-700)]"></div>
+        <div class="mt-2 h-3 w-48 rounded-full bg-[var(--color-blue-700)]"></div>
+        <div class="mt-3 space-y-3">
+          <div class="h-24 rounded-[8px] bg-[var(--color-blue-700)]"></div>
+          <div class="h-24 rounded-[8px] bg-[var(--color-blue-700)]"></div>
+        </div>
+      </div>
+    </div>
+  } @else if (errorMessage) {
+    <div class="ui-page-container w-full max-w-[2400px]">
+      <div class="rounded-[10px] border border-rose-400/25 bg-rose-500/10 p-4">
+        <div class="text-[14px] font-medium text-rose-200">Unable to load user activity</div>
+        <p class="mt-1 text-[12px] text-rose-200/80">{{ errorMessage }}</p>
+      </div>
+    </div>
+  } @else if (response?.profile?.hidden) {
+    <div class="ui-page-container w-full max-w-[2400px]">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Profile</div>
+        <div class="ui-section-description">{{ response?.profile?.message || 'Profile hidden by user' }}</div>
+      </div>
+    </div>
+  } @else if (response) {
+    <div class="ui-page-container w-full max-w-[2400px]">
+      <div class="mb-4 flex items-start gap-3">
+        <div class="h-[88px] w-[88px] shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[0.2rem]">
+          <img [src]="profileImageUrl" alt="Profile image" class="h-full w-full rounded-full object-cover">
+        </div>
+        <div class="pt-1">
+          <h1 class="ui-page-title">{{ response.profile.username || 'Profile' }}</h1>
+          <p class="ui-page-description">All threads where this user reacted or commented.</p>
+          <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
+            {{ response.profile.role || '-' }} · {{ response.profile.tenant_name || '-' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Activity</div>
+        <div class="ui-section-description">Feedback and comment history across report threads.</div>
+
+        @if (response.activity.length > 0) {
+          <div class="mt-3 space-y-3">
+            @for (item of response.activity; track trackByDocId($index, item)) {
+              <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]">{{ item.title || item.doc_id }}</div>
+                    @if (item.preview) {
+                      <p class="mt-1 text-[12px] leading-relaxed text-[var(--color-text4)]">{{ item.preview }}</p>
+                    }
+                  </div>
+                  @if (item.route_path) {
+                    <button type="button" (click)="openThread(item)" class="inline-flex shrink-0 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35">
+                      Open Thread
+                    </button>
+                  }
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-2">
+                  @if (item.recommended) {
+                    <span class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">Recommended</span>
+                  }
+                  @if (item.trust_state === 'trust') {
+                    <span class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">Trust</span>
+                  }
+                  @if (item.trust_state === 'untrust') {
+                    <span class="rounded-full border border-rose-400/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300">Untrust</span>
+                  }
+                  @if (item.comments_count > 0) {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ item.comments_count }} comment{{ item.comments_count > 1 ? 's' : '' }}</span>
+                  }
+                  @if (item.report_date) {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text4)]">{{ item.report_date }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="mt-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 text-[13px] text-[var(--color-text4)]">
+            No thread activity found for this user.
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

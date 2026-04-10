@@ -1,18 +1,21 @@
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from bson import ObjectId
 from fastapi import HTTPException
 from cryptography.fernet import Fernet
 
+from orion.api.interactive.search_manager.search_model import search_model
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_document_feedback_model import (
     FeedbackTrustState,
     DocumentFeedbackComment,
     DocumentFeedbackReaction,
     db_document_feedback_model,
 )
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
 
 class FeedbackManager:
@@ -39,6 +42,40 @@ class FeedbackManager:
         except Exception:
             return ""
         return str(getattr(user, "tenant_uuid", "") or "") if user else ""
+
+    async def _get_public_profile(self, user_id: str, current_user) -> dict:
+        user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if current_user.role != user_role.ADMIN and str(user.tenant_uuid) != str(current_user.tenant_uuid):
+            raise HTTPException(status_code=403, detail="You are not allowed to access this user")
+
+        preferences = user.preferences if isinstance(user.preferences, dict) else {}
+        if str(getattr(current_user, "id", "")) != user_id and preferences.get("profile_visible") is False:
+            return {
+                "hidden": True,
+                "message": "Profile hidden by user",
+            }
+
+        tenant_name = ""
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        if tenant:
+            dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
+            enc = Fernet(dek)
+            try:
+                tenant_name = enc.decrypt(tenant.name.encode()).decode() if tenant.name else ""
+            except Exception:
+                tenant_name = ""
+
+        return {
+            "hidden": False,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role,
+            "tenant_name": tenant_name,
+            "licenses": [license.value if hasattr(license, "value") else str(license) for license in (user.licenses or [])],
+        }
 
     @staticmethod
     async def _serialize_comment(comment: DocumentFeedbackComment) -> dict:
@@ -76,6 +113,78 @@ class FeedbackManager:
             if reaction.user_id == current_user_id:
                 return reaction
         return None
+
+    @staticmethod
+    def _truncate(value: str, limit: int = 180) -> str:
+        value = (value or "").strip()
+        if len(value) <= limit:
+            return value
+        return value[: limit - 3].rstrip() + "..."
+
+    @staticmethod
+    def _pick_title(data: dict[str, Any]) -> str:
+        for key in ("m_title", "m_name", "m_channel_name", "m_sender_name", "m_message_id", "m_url", "m_weblink", "m_web_url", "m_base_url", "m_channel_url"):
+            value = data.get(key)
+            if value:
+                return str(value)
+        return ""
+
+    @staticmethod
+    def _pick_preview(data: dict[str, Any]) -> str:
+        for key in ("m_content", "m_important_content", "m_meta_description"):
+            value = data.get(key)
+            if value:
+                return FeedbackManager._truncate(str(value))
+        return ""
+
+    @staticmethod
+    def _pick_date(data: dict[str, Any]) -> str:
+        for key in ("m_message_date", "m_update_date", "m_creation_date", "m_leak_date"):
+            value = data.get(key)
+            if value:
+                return str(value)
+        return ""
+
+    async def _resolve_doc_summary(self, doc_id: str) -> dict:
+        candidates = [
+            ("leak_model", "leak", lambda: search_model.getInstance().request_leak_doc(doc_id, None)),
+            ("generic_model", "general", lambda: search_model.getInstance().request_general_doc(doc_id, None)),
+            ("exploit_model", "exploit", lambda: search_model.getInstance().request_exploit_doc(doc_id, None)),
+            ("chat_model", "chat", lambda: search_model.getInstance().request_chat_doc(doc_id, None)),
+            ("social_model", "social", lambda: search_model.getInstance().request_social_doc(doc_id, None)),
+            ("defacement_model", "defacement", lambda: search_model.getInstance().request_defacement_doc(doc_id)),
+        ]
+
+        for index_name, route_segment, loader in candidates:
+            try:
+                data = await loader()
+            except HTTPException as exc:
+                if exc.status_code == 404:
+                    continue
+                continue
+            except Exception:
+                continue
+
+            if not isinstance(data, dict):
+                continue
+
+            return {
+                "title": self._pick_title(data) or doc_id,
+                "preview": self._pick_preview(data),
+                "report_date": self._pick_date(data),
+                "route_path": f"/dashboard/profile/consolidated/{route_segment}/{doc_id}",
+                "route_query": {"ci": index_name},
+                "index_name": index_name,
+            }
+
+        return {
+            "title": doc_id,
+            "preview": "",
+            "report_date": "",
+            "route_path": "",
+            "route_query": {},
+            "index_name": "",
+        }
 
     @staticmethod
     async def _serialize(doc: db_document_feedback_model, current_user=None) -> dict:
@@ -194,3 +303,46 @@ class FeedbackManager:
         doc.updated_at = now
         saved = await self._engine.save(doc)
         return await self._serialize(saved, current_user)
+
+    async def get_user_activity(self, user_id: str) -> list[dict]:
+        docs = await self._engine.find(
+            db_document_feedback_model,
+            {"$or": [{"comments.user_id": user_id}, {"reactions.user_id": user_id}]},
+        )
+
+        activity = []
+        for doc in docs:
+            user_reaction = next((reaction for reaction in doc.reactions if reaction.user_id == user_id), None)
+            user_comments = [comment for comment in doc.comments if comment.user_id == user_id]
+            summary = await self._resolve_doc_summary(doc.doc_id)
+
+            latest_reaction_at = user_reaction.updated_at.isoformat() if user_reaction else ""
+            latest_comment_at = user_comments[0].created_at.isoformat() if user_comments else ""
+            latest_activity_at = max([value for value in (latest_reaction_at, latest_comment_at) if value], default="")
+
+            activity.append({
+                "doc_id": doc.doc_id,
+                "recommended": bool(user_reaction.recommended) if user_reaction else False,
+                "trust_state": user_reaction.trust_state.value if user_reaction and user_reaction.trust_state else None,
+                "comments_count": len(user_comments),
+                "latest_reaction_at": latest_reaction_at,
+                "latest_comment_at": latest_comment_at,
+                "latest_activity_at": latest_activity_at,
+                **summary,
+            })
+
+        activity.sort(key=lambda item: item.get("latest_activity_at") or "", reverse=True)
+        return activity
+
+    async def get_public_user_activity(self, user_id: str, current_user) -> dict:
+        profile = await self._get_public_profile(user_id, current_user)
+        if profile.get("hidden"):
+            return {
+                "profile": profile,
+                "activity": [],
+            }
+
+        return {
+            "profile": profile,
+            "activity": await self.get_user_activity(user_id),
+        }

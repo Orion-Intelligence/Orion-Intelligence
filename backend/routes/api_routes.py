@@ -221,6 +221,16 @@ async def get_public_user(user_id: str, current_user=Depends(get_current_user)):
 
 
 @api_routes.get(
+    "/api/user/{user_id}/activity",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def get_public_user_activity(user_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().get_public_user_activity(user_id, current_user)
+
+
+@api_routes.get(
     "/api/directory",
     summary="Get monitored source directory",
     description=SYSTEM_INFO_DOCS["directory"]["description"],

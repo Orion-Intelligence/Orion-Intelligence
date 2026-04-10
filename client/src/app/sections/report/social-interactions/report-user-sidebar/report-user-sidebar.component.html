@@ -1,6 +1,7 @@
+@if (hasOpened) {
 <div class="fixed inset-0 z-[1190] bg-black/25 transition-opacity duration-300 ease-out" [ngClass]="{ 'pointer-events-none opacity-0': !isOpen, 'opacity-100': isOpen }" (click)="closeSidebar()"></div>
 
-<div class="fixed top-0 right-0 z-[1200] h-screen w-[360px] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] transform-gpu will-change-transform max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%]': !isOpen, 'translate-x-0': isOpen }">
+<div class="fixed top-0 right-0 z-[1200] h-screen w-[360px] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] transform-gpu will-change-transform max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !isOpen, 'translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]': isOpen }">
   <div class="flex h-full flex-col">
     <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-820-light)] px-4 pb-3 pt-3">
       <div class="flex items-center justify-between gap-3">
@@ -42,7 +43,12 @@
       } @else if (userData?.hidden) {
         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
           <div class="ui-section-title">Profile</div>
-          <div class="ui-section-description">{{ userData.message || 'Profile hidden by user' }}</div>
+          <div class="ui-section-description">{{ userData?.message || 'Profile hidden by user' }}</div>
+          <div class="mt-3">
+            <button type="button" (click)="openDetails()" class="inline-flex items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35">
+              View Details
+            </button>
+          </div>
         </div>
       } @else if (userData) {
         <div class="w-full">
@@ -99,6 +105,16 @@
               </div>
             </div>
           </div>
+
+          <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+            <div class="ui-section-title">Activity</div>
+            <div class="ui-section-description">Open the dedicated page for thread reactions and comments.</div>
+            <div class="mt-3">
+              <button type="button" (click)="openDetails()" class="inline-flex items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35">
+                View Details
+              </button>
+            </div>
+          </div>
         </div>
       } @else {
         <div class="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
@@ -109,3 +125,4 @@
     </div>
   </div>
 </div>
+}

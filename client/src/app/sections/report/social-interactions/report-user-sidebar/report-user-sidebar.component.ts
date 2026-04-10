@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from '../../../../shared/services/api.service';
 import { PublicUserData } from '../models/public-user-data.model';
 
@@ -11,8 +12,10 @@ import { PublicUserData } from '../models/public-user-data.model';
 })
 export class ReportUserSidebarComponent {
   private readonly apiService = inject(ApiService);
+  private readonly router = inject(Router);
 
   isOpen = false;
+  hasOpened = false;
   isLoading = false;
   errorMessage = '';
   userData: PublicUserData | null = null;
@@ -28,6 +31,7 @@ export class ReportUserSidebarComponent {
       return;
     }
     this.userId = userId;
+    this.hasOpened = true;
     this.isOpen = true;
     window.requestAnimationFrame(() => this.loadUser());
   }
@@ -39,6 +43,15 @@ export class ReportUserSidebarComponent {
 
   onImageError(event: Event): void {
     (event.target as HTMLImageElement).src = '/api/s/static/user/default';
+  }
+
+  openDetails(): void {
+    if (!this.userId) {
+      return;
+    }
+    const userId = this.userId;
+    this.closeSidebar();
+    this.router.navigate(['/dashboard/profile/user', userId]);
   }
 
   private loadUser(): void {
