@@ -1,6 +1,7 @@
-<div class="fixed inset-0 z-[1190] bg-black/25 transition-opacity duration-300 ease-out" [ngClass]="{ 'pointer-events-none opacity-0': !isOpen, 'opacity-100': isOpen }" (click)="closeSidebar()"></div>
+@if (isMounted) {
+<div class="fixed inset-0 z-[1190] bg-black/25 transition-opacity duration-300 ease-out" [class.opacity-100]="isVisible" [class.opacity-0]="!isVisible" [class.pointer-events-auto]="isVisible" [class.pointer-events-none]="!isVisible" (click)="closeSidebar()"></div>
 
-<div class="fixed top-0 right-0 z-[1200] h-screen w-[360px] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] transform-gpu will-change-transform max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !isOpen, 'translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]': isOpen }">
+<div class="fixed top-0 right-0 z-[1200] h-screen w-[360px] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [class.translate-x-0]="isVisible" [class.translate-x-[102%]]="!isVisible" (transitionend)="onPanelTransitionEnd()">
   <div class="flex h-full flex-col">
     <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-820-light)] px-4 pb-3 pt-3">
       <div class="flex items-center justify-between gap-3">
@@ -120,3 +121,4 @@
     </div>
   </div>
 </div>
+}

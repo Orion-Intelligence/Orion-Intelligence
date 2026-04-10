@@ -14,7 +14,8 @@ export class ReportUserSidebarComponent {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
 
-  isOpen = false;
+  isMounted = false;
+  isVisible = false;
   isLoading = false;
   errorMessage = '';
   userData: PublicUserData | null = null;
@@ -30,13 +31,16 @@ export class ReportUserSidebarComponent {
       return;
     }
     this.userId = userId;
-    this.isOpen = true;
+    this.isMounted = true;
+    this.isVisible = false;
     window.requestAnimationFrame(() => this.loadUser());
+    window.requestAnimationFrame(() => {
+      this.isVisible = true;
+    });
   }
 
   closeSidebar(): void {
-    this.isOpen = false;
-    this.userId = '';
+    this.isVisible = false;
   }
 
   onImageError(event: Event): void {
@@ -66,5 +70,16 @@ export class ReportUserSidebarComponent {
         this.isLoading = false;
       },
     });
+  }
+
+  onPanelTransitionEnd(): void {
+    if (this.isVisible) {
+      return;
+    }
+    this.isMounted = false;
+    this.userId = '';
+    this.isLoading = false;
+    this.errorMessage = '';
+    this.userData = null;
   }
 }
