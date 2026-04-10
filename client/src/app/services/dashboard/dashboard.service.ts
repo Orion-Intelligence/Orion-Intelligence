@@ -160,7 +160,7 @@ export class DashboardService {
   }
 
   submitFeedbackAction(action: FeedbackAction, docId: string, feedbackModel: ReportFeedbackModel, setLoadingKey?: (value: 'recommended_count' | 'trust_count' | 'untrust_count' | '') => void): void {
-    if (!docId || !feedbackModel.can_react) {
+    if (!docId) {
       return;
     }
     const loadingMap = {
@@ -169,7 +169,6 @@ export class DashboardService {
       untrust: 'untrust_count',
     } as const;
     const previousState = new ReportFeedbackModel(feedbackModel);
-    feedbackModel.can_react = false;
     setLoadingKey?.(loadingMap[action]);
     this.apiService.post<ReportFeedbackModel>(`feedback/${action}/${docId}`, {}).subscribe({
       next: (response) => {

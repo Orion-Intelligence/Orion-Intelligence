@@ -88,7 +88,7 @@ class FeedbackManager:
             "comments": [await FeedbackManager._serialize_comment(comment) for comment in doc.comments],
             "reactions": [FeedbackManager._serialize_reaction(reaction) for reaction in doc.reactions],
             "current_user_reaction": FeedbackManager._serialize_reaction(current_user_reaction) if current_user_reaction else None,
-            "can_react": current_user_reaction is None,
+            "can_react": True,
             "created_at": doc.created_at.isoformat(),
             "updated_at": doc.updated_at.isoformat(),
         }
@@ -110,30 +110,54 @@ class FeedbackManager:
         if doc.id is None:
             doc = await self._engine.save(doc)
 
-        current_user_id = str(current_user.id)
         now = datetime.now(UTC)
         existing_reaction = self._get_user_reaction(doc, current_user)
-        if existing_reaction is not None:
-            return await self._serialize(doc, current_user)
-        reaction_payload = {
-            "user_id": current_user_id,
-            "username": getattr(current_user, "username", ""),
-            "recommended": recommended,
-            "trust_state": trust_state.value if trust_state else None,
-            "created_at": now,
-            "updated_at": now,
-        }
-        inc_payload = {}
+        if existing_reaction is None:
+            existing_reaction = DocumentFeedbackReaction(
+                user_id=str(current_user.id),
+                username=getattr(current_user, "username", ""),
+                recommended=False,
+                trust_state=None,
+                created_at=now,
+                updated_at=now,
+            )
+            doc.reactions.append(existing_reaction)
+
+        existing_reaction.username = getattr(current_user, "username", "")
+
         if recommended:
-            inc_payload["recommended_count"] = 1
-        elif trust_state == FeedbackTrustState.TRUST:
-            inc_payload["trust_count"] = 1
-        elif trust_state == FeedbackTrustState.UNTRUST:
-            inc_payload["untrust_count"] = 1
-        doc.reactions.append(DocumentFeedbackReaction(**reaction_payload))
-        doc.recommended_count += inc_payload.get("recommended_count", 0)
-        doc.trust_count += inc_payload.get("trust_count", 0)
-        doc.untrust_count += inc_payload.get("untrust_count", 0)
+            if existing_reaction.recommended:
+                existing_reaction.recommended = False
+                doc.recommended_count = max(0, doc.recommended_count - 1)
+            else:
+                existing_reaction.recommended = True
+                doc.recommended_count += 1
+
+        if trust_state == FeedbackTrustState.TRUST:
+            if existing_reaction.trust_state == FeedbackTrustState.TRUST:
+                existing_reaction.trust_state = None
+                doc.trust_count = max(0, doc.trust_count - 1)
+            else:
+                if existing_reaction.trust_state == FeedbackTrustState.UNTRUST:
+                    doc.untrust_count = max(0, doc.untrust_count - 1)
+                existing_reaction.trust_state = FeedbackTrustState.TRUST
+                doc.trust_count += 1
+
+        if trust_state == FeedbackTrustState.UNTRUST:
+            if existing_reaction.trust_state == FeedbackTrustState.UNTRUST:
+                existing_reaction.trust_state = None
+                doc.untrust_count = max(0, doc.untrust_count - 1)
+            else:
+                if existing_reaction.trust_state == FeedbackTrustState.TRUST:
+                    doc.trust_count = max(0, doc.trust_count - 1)
+                existing_reaction.trust_state = FeedbackTrustState.UNTRUST
+                doc.untrust_count += 1
+
+        if not existing_reaction.recommended and existing_reaction.trust_state is None:
+            doc.reactions = [reaction for reaction in doc.reactions if reaction.user_id != existing_reaction.user_id]
+        else:
+            existing_reaction.updated_at = now
+
         doc.updated_at = now
         saved = await self._engine.save(doc)
         return await self._serialize(saved, current_user)
