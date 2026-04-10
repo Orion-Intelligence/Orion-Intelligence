@@ -39,6 +39,11 @@
           <div class="text-[14px] font-medium text-rose-200">Unable to load profile</div>
           <p class="mt-1 text-[12px] text-rose-200/80">{{ errorMessage }}</p>
         </div>
+      } @else if (userData?.hidden) {
+        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+          <div class="ui-section-title">Profile</div>
+          <div class="ui-section-description">{{ userData.message || 'Profile hidden by user' }}</div>
+        </div>
       } @else if (userData) {
         <div class="w-full">
           <div class="mb-4 flex items-start gap-3">

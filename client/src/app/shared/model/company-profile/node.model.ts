@@ -51,6 +51,7 @@ export interface userMetaData {
     theme?: 'dark-theme' | 'light-theme';
     preferences?: Record<string, any> & {
         theme?: 'dark-theme' | 'light-theme';
+        profile_visible?: boolean;
     };
     demo_tour:boolean|undefined;
 }

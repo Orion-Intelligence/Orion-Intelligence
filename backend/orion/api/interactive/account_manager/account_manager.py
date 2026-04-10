@@ -281,7 +281,7 @@ class AccountManager:
         node = NodeCallbackModel.model_validate(
             {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "license": [
                 license.value for license in
-                user.licenses], "image": user_image_path, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
+                user.licenses], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(
                 enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone), "country": self.safe_decrypt(
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
@@ -299,6 +299,13 @@ class AccountManager:
         if current_user.role != user_role.ADMIN and str(user.tenant_uuid) != str(current_user.tenant_uuid):
             raise HTTPException(status_code=403, detail="You are not allowed to access this user")
 
+        preferences = user.preferences if isinstance(user.preferences, dict) else {}
+        if str(getattr(current_user, "id", "")) != user_id and preferences.get("profile_visible") is False:
+            return {
+                "hidden": True,
+                "message": "Profile hidden by user",
+            }
+
         tenant_name = ""
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
         if tenant:
@@ -307,6 +314,7 @@ class AccountManager:
             tenant_name = self.safe_decrypt(enc, tenant.name)
 
         return {
+            "hidden": False,
             "username": user.username,
             "email": user.email,
             "role": user.role,

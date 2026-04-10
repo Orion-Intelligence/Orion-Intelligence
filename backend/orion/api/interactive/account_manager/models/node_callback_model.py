@@ -18,6 +18,7 @@ class UserDataModel(BaseModel):
     license: List[LicenseName]
     image: Optional[str] = None
     theme: Literal["dark-theme", "light-theme"] = "dark-theme"
+    preferences: Optional[Dict[str, object]] = None
     demo_tour: bool
 
 
