@@ -44,6 +44,7 @@ export interface TenantDataModel {
     assignedQuota: string;
     quotaExceeded: boolean;
     image?: string;
+    profileVisibilityEnabled?: boolean;
 }
 export interface userMetaData {
     username: string;

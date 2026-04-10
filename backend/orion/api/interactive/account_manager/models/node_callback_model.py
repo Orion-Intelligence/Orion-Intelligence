@@ -37,6 +37,7 @@ class TenantDataModel(BaseModel):
     assignedQuota: str
     quotaExceeded: bool
     image: Optional[str] = None
+    profileVisibilityEnabled: bool = True
 
 
 class NodeCallbackModel(BaseModel):

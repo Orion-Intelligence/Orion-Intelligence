@@ -44,6 +44,10 @@ export class AccountSettingsComponent implements OnInit {
     this.isProfileVisible = this.userSessionData?.user?.preferences?.["profile_visible"] !== false;
   }
 
+  isTenantProfileVisibilityEnabled(): boolean {
+    return this.userSessionData?.tenant?.profileVisibilityEnabled !== false;
+  }
+
   isAdmin(): boolean {
     return this.appService.userSessionData().user.role === 'admin';
   }
@@ -86,6 +90,9 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   toggleProfileVisibility() {
+    if (!this.isTenantProfileVisibilityEnabled()) {
+      return;
+    }
     const preferences = {
       ...(this.userSessionData.user.preferences || {}),
       profile_visible: this.isProfileVisible

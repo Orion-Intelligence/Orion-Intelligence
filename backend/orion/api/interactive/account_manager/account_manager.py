@@ -287,7 +287,8 @@ class AccountManager:
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
                 enc, tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
                 self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
-                assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path, }, "alerts": [], "alert_summary": alert_summary, })
+                assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
+                "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True), }, "alerts": [], "alert_summary": alert_summary, })
 
         return node
 
@@ -308,6 +309,11 @@ class AccountManager:
 
         tenant_name = ""
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        if tenant and str(getattr(current_user, "id", "")) != user_id and getattr(tenant, "profile_visibility_enabled", True) is False:
+            return {
+                "hidden": True,
+                "message": "Profile hidden by tenant",
+            }
         if tenant:
             dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
             enc = Fernet(dek)

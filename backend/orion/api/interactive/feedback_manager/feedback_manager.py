@@ -60,6 +60,11 @@ class FeedbackManager:
 
         tenant_name = ""
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        if tenant and str(getattr(current_user, "id", "")) != user_id and getattr(tenant, "profile_visibility_enabled", True) is False:
+            return {
+                "hidden": True,
+                "message": "Profile hidden by tenant",
+            }
         if tenant:
             dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
             enc = Fernet(dek)

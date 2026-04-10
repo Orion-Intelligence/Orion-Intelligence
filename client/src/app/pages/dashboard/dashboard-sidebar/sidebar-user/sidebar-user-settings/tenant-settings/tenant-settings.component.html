@@ -144,6 +144,25 @@
 
     @if (isMember() && !licenseService.getLicenses().includes('free')) {
       <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Privacy</div>
+        <div class="ui-section-description">Control whether tenant users can expose profile details to others.</div>
+        <div class="mt-3 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="userSessionData.tenant.profileVisibilityEnabled = !userSessionData.tenant.profileVisibilityEnabled; updateUser()">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-[var(--color-text1)]">Allow User Profile Visibility</label>
+              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.tenant.profileVisibilityEnabled !== false ? 'Users can manage their profile visibility' : 'User profile visibility is disabled for this tenant' }}</p>
+            </div>
+            <label class="pointer-events-none relative h-6 w-11 shrink-0">
+              <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="userSessionData.tenant.profileVisibilityEnabled !== false" />
+              <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-300 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (isMember() && !licenseService.getLicenses().includes('free')) {
+      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
         <div class="ui-section-title">Address</div>
         <div class="ui-section-description">Country and city/state details for the tenant.</div>
         <div class="mt-3 grid gap-3 sm:grid-cols-2">

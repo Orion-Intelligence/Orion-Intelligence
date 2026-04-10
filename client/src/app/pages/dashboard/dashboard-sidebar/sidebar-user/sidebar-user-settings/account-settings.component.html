@@ -75,18 +75,20 @@
           </div>
         </div>
 
-        <div class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isProfileVisible = !isProfileVisible; toggleProfileVisibility()">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <label class="block text-sm font-semibold text-[var(--color-text1)]">Profile Visibility</label>
-              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ isProfileVisible ? 'Visible to other users' : 'Hidden from other users' }}</p>
+        @if (isTenantProfileVisibilityEnabled()) {
+          <div class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isProfileVisible = !isProfileVisible; toggleProfileVisibility()">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <label class="block text-sm font-semibold text-[var(--color-text1)]">Profile Visibility</label>
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ isProfileVisible ? 'Visible to other users' : 'Hidden from other users' }}</p>
+              </div>
+              <label class="pointer-events-none relative h-6 w-11 shrink-0">
+                <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="isProfileVisible" />
+                <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-300 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+              </label>
             </div>
-            <label class="pointer-events-none relative h-6 w-11 shrink-0">
-              <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="isProfileVisible" />
-              <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-300 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
-            </label>
           </div>
-        </div>
+        }
       </div>
     </div>
   </form>
