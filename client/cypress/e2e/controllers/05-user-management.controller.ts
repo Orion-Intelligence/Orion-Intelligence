@@ -90,6 +90,18 @@ export function loginAsUser(username: string, password: string) {
     .should('have.length.greaterThan', 0);
 }
 
+export function openFirstStrategicReportFromSearch(searchTerm = 'data') {
+  cy.visit('/dashboard/strategic/all?page=1');
+  cy.wait(1000);
+  cy.scrollDashboardToTop();
+  cy.get('[data-testid="dashboard-general-input"]').should('be.visible').clear().type(searchTerm);
+  cy.get('[data-testid="dashboard-search-submit"]').click();
+  cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
+  cy.get('[data-testid="open-report"]').filter(':visible').first().click();
+  cy.url().should('match', /\/dashboard\/strategic\/all\/[^/?]+/);
+  cy.get('#report-detail').should('be.visible');
+}
+
 export function loginAndClickSidebar(username: string, sidebarItems: string[], testUsers: any, testData: any) {
   const selectedUser = Object.values(testUsers).find((u: any) => u?.username === username) as ManagedUser | undefined;
   if (!selectedUser?.password) {

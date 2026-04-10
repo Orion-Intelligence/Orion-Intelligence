@@ -1,21 +1,9 @@
-import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openSidebarGroup, openSidebarSubItem} from './controllers/05-user-management.controller';
+import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openFirstStrategicReportFromSearch, openSidebarGroup, openSidebarSubItem} from './controllers/05-user-management.controller';
 
 let testUsers: any = {};
 let testData: any = {};
 let createUsers: ManagedUser[] = [];
 let profileUserId = '';
-
-function openFirstStrategicReportFromSearch(searchTerm = 'data') {
-  cy.visit('/dashboard/strategic/all?page=1');
-  cy.wait(1000)
-  cy.scrollDashboardToTop()
-  cy.get('[data-testid="dashboard-general-input"]').should('be.visible').clear().type(searchTerm);
-  cy.get('[data-testid="dashboard-search-submit"]').click();
-  cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
-  cy.get('[data-testid="open-report"]').filter(':visible').first().click();
-  cy.url().should('match', /\/dashboard\/strategic\/all\/[^/?]+/);
-  cy.get('#report-detail').should('be.visible');
-}
 
 describe('Orion Intelligence - User Management Creation Flow', () => {
   before(() => {
