@@ -37,6 +37,7 @@ export class HomeSearchComponent implements OnInit {
   public insightDragging = false;
   public insightDragY: number | null = null;
   insightTranslateY = 0;
+  selectedTab='All';
   readonly isRoleAdmin = input<boolean>(true);
   readonly hideToolsSection = input<boolean>(false);
 
@@ -47,6 +48,15 @@ export class HomeSearchComponent implements OnInit {
     const matchtype = cfg.localSettings.matchType;
     this.onSetMatchType(matchtype);
     this.computeInsightMax();
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'];
+      if (tab) {
+        this.selectTab(tab);
+      }
+      else{
+        this.selectTab("All");
+      }
+    });
   }
 
   @HostListener('window:resize')
@@ -281,6 +291,15 @@ export class HomeSearchComponent implements OnInit {
     this.refreshInsightTransformClass();
 
     this.detachWindowPointerListeners();
+  }
+
+  selectTab(tab:string){
+    this.selectedTab=tab;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge',
+    });
   }
 
   @HostListener('document:click', ['$event'])
