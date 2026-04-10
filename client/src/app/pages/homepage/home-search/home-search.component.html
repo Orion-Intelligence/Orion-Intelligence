@@ -71,12 +71,11 @@
         }
       }
 
-      @if (isRoleAdmin()) {
-        @defer (on idle) {
-          <div>
-            <app-world-heatmap></app-world-heatmap>
-          </div>
-          <div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [ngClass]="'ui-translate-y-neg-' + insightTranslateY">
+      @defer (on idle) {
+        <div>
+          <app-world-heatmap [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') || app_service.userSessionData().user.role === 'analyst'"></app-world-heatmap>
+        </div>
+        <div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [ngClass]="'ui-translate-y-neg-' + insightTranslateY">
             <div class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)">
               <button type="button" aria-label="Drag Panel" class="ui-home-insight-drag-btn group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-text1)] shadow-[0_12px_28px_rgba(0,0,0,0.28)] transition hover:border-[rgba(148,163,184,0.6)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.32)] active:scale-[0.97]">
                 <svg class="ui-home-insight-drag-icon h-4 w-4 opacity-80 transition-transform duration-200 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -92,7 +91,6 @@
         } @placeholder {
           <div class="mt-[20px] min-h-[420px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-800)]/45"></div>
         }
-      }
     </div>
   </div>
 </form>

@@ -2346,11 +2346,11 @@ body.demo-tour-scroll-locked {
 [data-platform-bg='violet'] { background-color: #6d28d9 !important; }
 [data-platform-bg='pink'] { background-color: #be185d !important; }
 
-app-world-heatmap .country.is-clickable {
+app-world-heatmap .country.can-open-reports {
   cursor: pointer;
 }
 
-app-world-heatmap .country:not(.is-clickable) {
+app-world-heatmap .country:not(.can-open-reports) {
   cursor: default;
 }
 

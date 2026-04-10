@@ -118,7 +118,7 @@
   }
 
   @if (!consolidated) {
-    @if (result_count && !isLoading() && result_count !== 0 && (!checkMember() || hasIOCs())) {
+    @if (result_count && !isLoading() && result_count !== 0) {
       <div @fadeInDashboardItem>
         <div class="mt-[26px] mb-[8px] mx-[30px] flex w-full max-w-[910px] items-center text-[14px] leading-[1.35] font-[Roboto] font-medium tracking-[0.01em] text-[var(--color-text3)] max-[1000px]:mx-[15px]">
           <span class="text-[var(--color-text2)]">{{ result_count }} Results Found</span>
