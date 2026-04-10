@@ -8,7 +8,7 @@
               <app-alert-scan-loading></app-alert-scan-loading>
             </div>
           }
-          @if (licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')) {
+          @if (!licenseService.isMaintainer() && licenseService.getLicenses().includes('enterprise')) {
             <div class="mb-[15px]">
               <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true"></app-home-search>
               <div class="mt-[12px] flex justify-end max-[640px]:justify-start">
