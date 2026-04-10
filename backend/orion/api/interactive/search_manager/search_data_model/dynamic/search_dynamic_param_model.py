@@ -18,6 +18,13 @@ class search_dynamic_social_model(BaseModel):
         default_factory=dict, examples=[{"username": "bitcoin"}])
 
 
+class search_dynamic_onion_search(BaseModel):
+    text: Dict[str, str] = Field(
+        default_factory=dict,
+        examples=[{"query": "ibrahim"}]
+    )
+
+
 class search_dynamic_crypto_model(BaseModel):
     text: Dict[str, str] = Field(
         default_factory=dict,

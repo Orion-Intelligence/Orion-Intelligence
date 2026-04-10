@@ -363,6 +363,29 @@ class search_model:
 
         return response.json()
 
+    async def onion_search(self, query, user_id: str = "system"):
+        if hasattr(query, "model_dump"):
+            payload = query.model_dump()
+        elif hasattr(query, "__dict__"):
+            payload = query.__dict__
+        elif isinstance(query, str):
+            payload = {"query": query}
+        else:
+            payload = {"query": str(query)}
+
+        async with httpx.AsyncClient(timeout=120) as client:
+            response = await client.post(
+                f"http://trusted-micros-api:8010/onion/search/{user_id}",
+                json=payload
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+        return response.json()
+
     async def network_intel(self, payload, route_name: str, user_id: str = "system"):
         base_url = env_handler.get_instance().env("NETWORK_API_BASE")
 

@@ -10,7 +10,9 @@ from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model impor
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (search_consolidated_param_model, )
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (search_credential_param_model, )
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, search_dynamic_crypto_model, )
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (
+    search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, search_dynamic_crypto_model,
+    search_dynamic_onion_search, )
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
     DomainScanRequest,
@@ -717,6 +719,22 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
 )
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
+
+@api_routes.post(
+    "/api/onion/search",
+    summary="Scan onion search engines",
+    # description=CRYPTO_DOCS["crypto_scan"]["description"],
+    # tags=["Entity Scans"],
+    # operation_id="dynamicCryptoScan",
+    # response_description=CRYPTO_DOCS["crypto_scan"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning"))
+    ],
+)
+async def crypto_scan(param: search_dynamic_onion_search = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().onion_search(param, user_id=str(current_user.id))
 
 @api_routes.post(
     "/api/netintel/resolve_ip",

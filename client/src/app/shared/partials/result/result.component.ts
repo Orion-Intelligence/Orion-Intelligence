@@ -27,13 +27,14 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
 import { ProxyController } from '../../services/proxy-controller';
+import { OnionSearchCardComponent } from '../onion-search-engine/onion-search-card.component';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, OnionSearchCardComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   private readonly proxied_resource = inject(ProxyController);
@@ -181,7 +182,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.scrollService.resetOnReload();
     this.dashboardService.consolidatedParamModel.page = 1;
     this.dashboardService.consolidatedParamModel.tab = "";
-    const query = (this.searchQuery || this.local_query || '').trim();
+    const query = (this.local_query || this.searchQuery || '').trim();
     this.searchInputRef?.nativeElement.blur();
     this.searchQuery = query;
     this.local_query = query;
