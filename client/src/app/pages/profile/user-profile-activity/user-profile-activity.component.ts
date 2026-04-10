@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../../shared/services/api.service';
 import { PublicUserActivityItem, PublicUserActivityResponse } from '../../../sections/report/social-interactions/models/public-user-data.model';
+import { HelperService } from '../../../shared/services/helper.service';
 
 @Component({
   selector: 'app-user-profile-activity',
@@ -14,6 +15,7 @@ export class UserProfileActivityComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+  private readonly helperService = inject(HelperService);
 
   isLoading = true;
   errorMessage = '';
@@ -38,12 +40,11 @@ export class UserProfileActivityComponent {
   }
 
   openThread(item: PublicUserActivityItem): void {
-    if (!item.route_path) {
+    const target = this.helperService.getActivityThreadTarget(item);
+    if (!target) {
       return;
     }
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/', ...item.route_path.split('/').filter(Boolean)], { queryParams: item.route_query })
-    );
+    const url = this.router.serializeUrl(this.router.createUrlTree(target.path, { queryParams: target.queryParams }));
     window.open(url, '_blank', 'noopener');
   }
 
@@ -66,4 +67,5 @@ export class UserProfileActivityComponent {
       },
     });
   }
+
 }
