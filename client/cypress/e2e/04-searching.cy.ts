@@ -132,28 +132,29 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     typeExploitSearch('exploit');
     clickOpenReport();
 
-    cy.go('back');
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('CVE');
     typeExploitSearch('cve');
     cy.get('[data-testid="open-report"]').filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
 
-    cy.go('back');
+
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('Tools');
     typeExploitSearch('tool');
     clickOpenReport();
 
-    cy.go('back');
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('ZeroDay');
     typeExploitSearch('exploit');
     clickOpenReport();
 
-    cy.go('back');
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     waitForSearchReady();

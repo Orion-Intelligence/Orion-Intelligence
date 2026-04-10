@@ -7,5 +7,5 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 })
 export class ExpandToggleButtonComponent {
   isExpanded = input(false);
-  toggled = output<void>();
+  toggled = output<undefined>();
 }

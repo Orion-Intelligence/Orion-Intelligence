@@ -1,6 +1,4 @@
-export interface IocItem {
-    [key: string]: string;
-}
+export type IocItem = Record<string, string>;
 export interface IocExtractionResult {
     filename: string;
     file_type: string;
@@ -54,7 +52,7 @@ export interface ApkScanResult {
     status: string;
     original_filename: string;
 }
-export type SummaryItem = {
+export interface SummaryItem {
     label: string;
     value: string;
-};
+}

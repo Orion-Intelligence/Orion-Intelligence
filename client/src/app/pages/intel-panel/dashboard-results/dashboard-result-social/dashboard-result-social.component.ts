@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -8,6 +8,7 @@ import { fadeInDashboardItem } from "../../../../shared/animations/dashboard.ite
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { ProxyController } from '../../../../shared/services/proxy-controller';
 @Component({
   selector: 'app-dashboard-result-social',
   standalone: true,
@@ -23,13 +24,14 @@ import { AuthService } from '../../../../services/authetication/auth.service';
   animations: [fadeInDashboardItem]
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
+  private readonly proxied_resource = inject(ProxyController);
+
   currentUrl = '';
   queryParams: any = {};
   isCollapsed = true;
   isConsolidatedView = false;
-
-  @Input() searchResults: SocialResultItem[] = [];
-  @Input() isExpandAble: boolean = false;
+  readonly searchResults = input<SocialResultItem[]>([]);
+  readonly isExpandAble = input<boolean>(false);
 
   constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
@@ -84,7 +86,6 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    window.open(url, '_blank');
+    this.proxied_resource.open(url);
   }
-
 }

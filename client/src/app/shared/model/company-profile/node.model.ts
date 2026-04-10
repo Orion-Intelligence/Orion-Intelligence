@@ -26,9 +26,8 @@ export interface UserDataModel {
     verificationDate: string;
     license: string[];
     image?: string;
-    preferences?: {
-        [key: string]: any;
-    };
+    preferences?: Record<string, any>;
+    demo_tour: boolean;
 }
 export interface TenantDataModel {
     id: string;
@@ -50,10 +49,10 @@ export interface userMetaData {
     username: string;
     twofa_enabled: boolean;
     theme?: 'dark-theme' | 'light-theme';
-    preferences?: {
+    preferences?: Record<string, any> & {
         theme?: 'dark-theme' | 'light-theme';
-        [key: string]: any;
     };
+    demo_tour:boolean|undefined;
 }
 export interface AlertAllIoc {
     name: string;

@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
-from pydantic.v1 import Extra
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CardExtractionModel(BaseModel):
@@ -40,8 +39,7 @@ class CardExtractionModel(BaseModel):
     m_cwe: Optional[List[str]] = Field(default_factory=list)
     m_embedding: List[float] = []
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 class LeakDataModel(BaseModel):

@@ -10,7 +10,7 @@
     @if (iconOverlayNodes().length > 0) {
       @for (overlay of iconOverlayNodes(); track trackByOverlayNodeId($index, overlay)) {
         <button type="button" class="network-graph-followers-overlay pointer-events-auto" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" [attr.data-size]="toSizeValue(overlay.size)" (click)="onFollowersShortcutClick($event, overlay.nodeId)">
-          <img src="assets/images/shared/socialicon.png" alt="" class="network-graph-followers-overlay-img" />
+          <img src="assets/images/shared/socialicon.png" alt="Social network icon" class="network-graph-followers-overlay-img" />
         </button>
       }
     }

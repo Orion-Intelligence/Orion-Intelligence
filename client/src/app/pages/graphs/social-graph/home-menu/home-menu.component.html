@@ -1,5 +1,5 @@
 <div class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-80]="!isCollapsed()" [class.w-20]="isCollapsed()">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" (toggleClicked)="toggle.emit()">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" (toggleClicked)="toggle.emit(undefined)">
     <div sidebar-expanded class="h-full flex flex-col">
       <div class="p-3 border-b border-slate-800 shrink-0">
         <div class="relative">

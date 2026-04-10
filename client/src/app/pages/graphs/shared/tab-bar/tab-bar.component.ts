@@ -16,9 +16,8 @@ import { getFirstFileFromInputEvent, readFileAsText } from '../../../../shared/u
 })
 export class TabBarComponent {
   private tabManager = inject(TabManagerService, { optional: true });
-  private hostRef = inject(ElementRef<HTMLElement>);
 
-  tabs = input<Array<{ id: string; name: string; }>>([]);
+  tabs = input<{ id: string; name: string; }[]>([]);
   activeTabId = input<string | null>(null);
   editingTabId = input<string | null>(null);
   mode = input<'social' | 'cti'>('social');
@@ -31,13 +30,15 @@ export class TabBarComponent {
   tabClosed = output<string>();
   tabEditStarted = output<string>();
   tabRenameSubmitted = output<{ id: string; name: string; }>();
-  tabRenameCancelled = output<void>();
-  newSessionRequested = output<void>();
-  exportCurrentRequested = output<void>();
-  exportReportRequested = output<void>();
+  tabRenameCancelled = output<undefined>();
+  newSessionRequested = output<undefined>();
+  exportCurrentRequested = output<undefined>();
+  exportReportRequested = output<undefined>();
   fileSelected = output<Event>();
 
-  private currentTabs(): Array<{ id: string; name: string; }> {
+  constructor(private hostElementRef: ElementRef<HTMLElement>) {}
+
+  private currentTabs(): { id: string; name: string; }[] {
     if (this.tabManager) {
       return this.tabManager.tabs();
     }
@@ -81,7 +82,7 @@ export class TabBarComponent {
     if (!target) {
       return;
     }
-    if (!this.hostRef.nativeElement.contains(target)) {
+    if (!this.hostElementRef.nativeElement.contains(target)) {
       this.closeMenus();
     }
   }
@@ -91,14 +92,14 @@ export class TabBarComponent {
       this.tabManager.addTab();
     }
     else {
-      this.newSessionRequested.emit();
+      this.newSessionRequested.emit(undefined);
     }
     this.closeMenus();
   }
 
   openReportExportModal() {
     if (!this.manageReportExportInternally()) {
-      this.exportReportRequested.emit();
+      this.exportReportRequested.emit(undefined);
       return;
     }
     this.isReportExportModalOpen.set(true);
@@ -126,16 +127,17 @@ export class TabBarComponent {
     }
     const { input, file } = selected;
     this.closeMenus();
-    readFileAsText(file)
+    void readFileAsText(file)
       .then((content) => {
         try {
           tabManager.importTab(content);
         }
         catch {
+          // Ignore invalid import payloads.
         }
       })
       .finally(() => {
-        input.value = ''; 
+        input.value = '';
       });
   }
 
@@ -153,7 +155,7 @@ export class TabBarComponent {
       this.tabManager.stopEditing();
     }
     else {
-      this.tabRenameCancelled.emit();
+      this.tabRenameCancelled.emit(undefined);
     }
   }
 
@@ -204,7 +206,7 @@ export class TabBarComponent {
       this.tabManager.exportActiveTab();
     }
     else {
-      this.exportCurrentRequested.emit();
+      this.exportCurrentRequested.emit(undefined);
     }
     this.closeMenus();
   }
@@ -217,7 +219,7 @@ export class TabBarComponent {
     return `${this.mode()}-${prefix}`;
   }
 
-  visibleTabs(): Array<{ id: string; name: string; }> {
+  visibleTabs(): { id: string; name: string; }[] {
     return this.currentTabs();
   }
 }

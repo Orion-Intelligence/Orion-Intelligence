@@ -14,6 +14,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.session_manager.session_enums import admin_mock, admin_user, crawler_mock, crawler_user
+from orion.services.log_manager.log_controller import log
 
 
 class test_manager:
@@ -78,8 +79,8 @@ class test_manager:
         for c in cols:
             try:
                 await db.drop_collection(c)
-            except Exception:
-                pass
+            except Exception as ex:
+                log.g().e(f"Failed to drop test collection {c}: {ex}")
 
         mocks_dir = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "mongo"
         if mocks_dir.exists():
@@ -110,6 +111,7 @@ class test_manager:
 
         admin_src = await db["db_user_account"].find_one({"role": "admin"})
         crawler_src = await db["db_user_account"].find_one({"role": crawler_user["role"]})
+        await mongo_controller.get_instance().ensure_demo_user()
 
         await db["db_user_account"].delete_many({})
 
@@ -132,7 +134,6 @@ class test_manager:
         if docs:
             await db["db_user_account"].insert_many(docs, ordered=False)
 
-        await mongo_controller.get_instance().ensure_demo_user()
 
     async def reset_test_elastic_and_import_mocks(self):
         print("reset_test_elastic_and_import_mocks: start", flush=True)
@@ -329,12 +330,12 @@ class test_manager:
 
         try:
             vcol.truncate()
-        except Exception:
-            pass
+        except Exception as exc:
+            log.warning(f"Failed to truncate cti_vertices during test setup: {exc}")
         try:
             ecol.truncate()
-        except Exception:
-            pass
+        except Exception as exc:
+            log.warning(f"Failed to truncate cti_edges during test setup: {exc}")
 
         def load_docs(fp: Path):
             docs = []

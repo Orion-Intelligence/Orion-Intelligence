@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 
 @Component({
   selector: 'app-result-section',
@@ -7,11 +7,10 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class ResultSectionComponent implements OnInit {
   filteredListItems: string[] = [];
-
-  @Input() listItems: string[] = [];
+  readonly listItems = input<string[]>([]);
 
   ngOnInit() {
-    this.filteredListItems = this.listItems.filter(item => {
+    this.filteredListItems = this.listItems().filter(item => {
       const cleaned = item?.trim();
       return cleaned && cleaned.length > 1;
     });

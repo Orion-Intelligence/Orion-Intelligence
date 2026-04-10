@@ -1,8 +1,7 @@
 from typing import List, Optional
 from datetime import date
 
-from pydantic import BaseModel, Field
-from pydantic.v1 import Extra
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class suggestion(BaseModel):
@@ -25,8 +24,7 @@ class result_item(BaseModel):
     m_message_id: Optional[str] = None
     m_platform: str
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 class search_social_callback_model(BaseModel):

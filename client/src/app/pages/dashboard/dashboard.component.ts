@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/co
 import { NgClass } from '@angular/common';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
-import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
+import { DashboardSidebarComponent } from './dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription/pro-subscription.component';
@@ -10,6 +10,7 @@ import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
 import { AuthService } from '../../services/authetication/auth.service';
 import { filter } from 'rxjs';
+import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -19,14 +20,16 @@ import { filter } from 'rxjs';
     NgClass,
     RouterOutlet,
     ScrollingModule,
-    ProSubscriptionComponent
+    ProSubscriptionComponent,
+    DemoTourComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })
 export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
-  animationState: any;
+  demoTourMounted = false;
+  dashboardAnimationsReady = false;
 
   constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService: AuthService, protected appService: AppService) {
   }
@@ -34,7 +37,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   ngOnInit(): void {
     const hasSavedSidebarPreference = typeof window !== 'undefined' && localStorage.getItem('isSidebarOpen') !== null;
     this.isMenuOpen = hasSavedSidebarPreference
-      ? this.appService.getConfig().localSettings.isSidebarOpen !== false
+      ? this.appService.getConfig().localSettings.isSidebarOpen
       : !this.isCompactViewport();
     this.appService.set('isSidebarOpen', this.isMenuOpen);
     this.redirectMobileDemoDashboardEntry(this.router.url);
@@ -65,8 +68,11 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   prepareRoute(outlet: RouterOutlet) {
-    this.animationState = outlet?.activatedRouteData?.['animation'] || null;
-    return this.animationState;
+    if (!this.dashboardAnimationsReady) {
+      return null;
+    }
+
+    return outlet?.activatedRouteData?.['animation'] || null;
   }
 
   isCtiGraph(): boolean {
@@ -74,10 +80,23 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
+    this.dashboardAnimationsReady = true;
+    this.demoTourMounted = true;
     this.cdr.detectChanges();
   }
 
   hideSubscription() {
     this.dashboardService.showSubscription.set(false);
+  }
+
+  shouldShowDemoTour(): boolean {
+    const { user } = this.appService.userSessionData();
+    if (this.appService.isMobileMode()) {
+      return false;
+    }
+    return this.authService.isAuthenticated() &&
+      !!user.username &&
+      !user.demo_tour &&
+      !(user.role == 'admin');
   }
 }

@@ -1,9 +1,49 @@
 import { Injectable } from '@angular/core';
-import jsPDF from 'jspdf';
-import autoTable, { RowInput } from 'jspdf-autotable';
+import type jsPDF from 'jspdf';
+import type { RowInput } from 'jspdf-autotable';
+import { from, Observable } from 'rxjs';
+import { map, shareReplay, tap } from 'rxjs/operators';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
+
+interface PlainTableThemeOptions {
+  font?: string;
+  fontSize: number;
+  cellPadding: number;
+  overflow?: 'linebreak';
+  valign?: 'middle' | 'top';
+  textColor?: [number, number, number];
+}
+
+interface PlainTableThemeConfig {
+  styles: {
+    font?: string;
+    fontSize: number;
+    cellPadding: number;
+    overflow?: 'linebreak';
+    valign?: 'middle' | 'top';
+    textColor: [number, number, number];
+    lineWidth: number;
+    lineColor: [number, number, number];
+  };
+  bodyStyles: {
+    fillColor: [number, number, number];
+    textColor?: [number, number, number];
+    lineWidth: number;
+    lineColor: [number, number, number];
+  };
+  alternateRowStyles: {
+    fillColor: [number, number, number];
+    lineWidth: number;
+    lineColor: [number, number, number];
+  };
+  theme: 'plain';
+}
+
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
+  private pdfLibs$: Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
+  private loadedAutoTable: unknown = null;
+
   protected readonly SECTION_RADIUS = 4;
   protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
   protected readonly TABLE_ROW_BG_RGB: [number, number, number] = [236, 242, 250];
@@ -19,8 +59,36 @@ export class GraphExportService {
     if (type !== 'graph_pdf') {
       throw new Error(`GraphExportService only supports graph exports. Received: ${type}`);
     }
-    const bytes = this.buildGraphPdfBytes(payload);
-    this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
+    this.exportGraphPdf(payload);
+  }
+
+  protected getPdfLibs(): Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> {
+    if (!this.pdfLibs$) {
+      this.pdfLibs$ = from(Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable')
+      ])).pipe(tap(([_, autoTableModule]) => {
+        this.loadedAutoTable = autoTableModule.default;
+      }), map(([jspdfModule, autoTableModule]) => ({
+        jsPDF: jspdfModule.default,
+        autoTable: autoTableModule.default
+      })), shareReplay(1));
+    }
+    return this.pdfLibs$;
+  }
+
+  protected requireAutoTable(): typeof import('jspdf-autotable').default {
+    if (!this.loadedAutoTable) {
+      throw new Error('PDF export library not loaded');
+    }
+    return this.loadedAutoTable as typeof import('jspdf-autotable').default;
+  }
+
+  private exportGraphPdf(payload: GraphReportPayload): void {
+    this.getPdfLibs().subscribe((libs) => {
+      const bytes = this.buildGraphPdfBytes(payload, libs.jsPDF, libs.autoTable);
+      this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
+    });
   }
 
   private exportGraphJson(payload: GraphReportPayload): void {
@@ -28,8 +96,8 @@ export class GraphExportService {
     this.downloadText(jsonString, 'application/json', `${this.buildSafeFilename(payload)}-graph.json`);
   }
 
-  private buildGraphPdfBytes(payload: GraphReportPayload): Uint8Array {
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
+  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default): Uint8Array {
+    const doc = new JsPdfCtor({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
     const meta = this.makeMeta(payload);
     const sectionsByPage: Record<number, string> = { 1: 'Overview' };
     this.drawGraphCover(doc, payload, meta);
@@ -56,48 +124,30 @@ export class GraphExportService {
       { label: 'Node Types', value: String(composition.length) },
       { label: 'Session', value: this.truncateWithEllipsis(payload.sessionName || '-', 15) }
     ];
-    kpis.forEach((kpi, idx) => this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value));
+    kpis.forEach((kpi, idx) => {
+      this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value); 
+    });
     const analysisDidDrawPage = (data: any) => {
       sectionsByPage[data.pageNumber] = 'Graph Analysis';
     };
     const analysisTableBase = {
       margin: { left: 40, right: 40, bottom: 58 },
       tableWidth: contentW,
-      styles: {
-        fontSize: 9,
-        cellPadding: 6,
-        overflow: 'linebreak' as const,
-        valign: 'middle' as const,
-        textColor: [30, 41, 59] as [number, number, number],
-        lineWidth: this.TABLE_BORDER_WIDTH,
-        lineColor: this.TABLE_BORDER_RGB
-      },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB as [
-                    number,
-                    number,
-                    number
-                ], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didDrawPage: analysisDidDrawPage,
-      theme: 'plain' as const
+      ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6 }),
+      didDrawPage: analysisDidDrawPage
     };
     this.drawInfoSectionMarker(doc, 220, contentW, 'Graph Summary');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: 232,
       body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]) as RowInput[],
       columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
-      didParseCell: (data: any) => {
-        if (data.column.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [214, 226, 240];
-        }
-      },
+      didParseCell: this.makeFirstColumnDidParse(),
       ...analysisTableBase
     });
     this.drawRoundedTableContainer(doc, 40, contentW, 220, (doc as any).lastAutoTable?.finalY ?? 220);
     const compositionMarkerY = (doc as any).lastAutoTable.finalY + 12;
     this.drawInfoSectionMarker(doc, compositionMarkerY, contentW, 'Node Type Distribution');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: compositionMarkerY + 12,
       body: composition.map(x => [x.type, String(x.count)]) as RowInput[],
       ...analysisTableBase
@@ -111,22 +161,14 @@ export class GraphExportService {
       sectionsByPage[platformPageNo] = 'Platform Inventory';
       this.drawConnectionMatrixHeader(doc, 'Platform Inventory', 'Detected social platforms in current graph');
       this.drawInfoSectionMarker(doc, 126, contentW, 'Platform Inventory');
-      autoTable(doc, {
+      this.requireAutoTable()(doc, {
         startY: 138,
         margin: { top: 126, left: 40, right: 40, bottom: 58 },
         tableWidth: contentW,
         body: [['#', 'Platform', 'Node Count'], ...socialPlatformCounts.map((item, i) => [String(i + 1), item.name, String(item.count)])] as RowInput[],
-        styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'top', lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        didParseCell: (data: any) => {
-          if (data.row.index === 0) {
-            data.cell.styles.fontStyle = 'bold';
-            data.cell.styles.fillColor = [207, 220, 236];
-          }
-        },
-        didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Platform Inventory', 'Detected social platforms in current graph'),
-        theme: 'plain'
+        ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6, valign: 'top' }),
+        didParseCell: this.makeHeaderRowDidParse(),
+        didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Platform Inventory', 'Detected social platforms in current graph')
       });
       this.drawRoundedTableContainer(doc, 40, contentW, 126, (doc as any).lastAutoTable?.finalY ?? 126);
     }
@@ -155,23 +197,10 @@ export class GraphExportService {
           margin: { top: 139, left: 40, right: 40, bottom: 58 },
           tableWidth: contentW,
           body: tableRows as RowInput[],
-          styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
+          ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6 }),
           columnStyles: { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
-          bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-          alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-          didParseCell: (data: any) => {
-            if (data.row.index === 0) {
-              data.cell.styles.fontStyle = 'bold';
-              data.cell.styles.fillColor = [207, 220, 236];
-              return;
-            }
-            if (data.column.index === 0) {
-              data.cell.styles.fontStyle = 'bold';
-              data.cell.styles.fillColor = [214, 226, 240];
-            }
-          },
-          didDrawPage: reportSectionDidDrawPage,
-          theme: 'plain'
+          didParseCell: this.makeHeaderAndFirstColumnDidParse(),
+          didDrawPage: reportSectionDidDrawPage
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
         if (screenshotDataUrl) {
@@ -191,22 +220,14 @@ export class GraphExportService {
     sectionsByPage[edgesPageNo] = 'Connection Matrix';
     this.drawConnectionMatrixHeader(doc, 'Connection Matrix', 'Relationship listing from current graph state');
     this.drawInfoSectionMarker(doc, 126, contentW, 'Connection Matrix');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: 138,
       margin: { top: 126, left: 40, right: 40, bottom: 58 },
       tableWidth: contentW,
       body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 240).map((e, i) => [String(i + 1), e.from, e.to, e.label ?? ''])] as RowInput[],
-      styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'middle', textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didParseCell: (data: any) => {
-        if (data.row.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [207, 220, 236];
-        }
-      },
-      didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Connection Matrix', 'Relationship listing from current graph state'),
-      theme: 'plain'
+      ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5 }),
+      didParseCell: this.makeHeaderRowDidParse(),
+      didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Connection Matrix', 'Relationship listing from current graph state')
     });
     const totalPages = doc.getNumberOfPages();
     this.drawGraphToc(doc, payload, {
@@ -237,13 +258,7 @@ export class GraphExportService {
     doc.setFontSize(12);
     doc.setTextColor(219, 234, 254);
     doc.text(`${meta.kindLabel} • Graph-Centric Report`, 40, 92);
-    doc.setFontSize(10);
-    doc.setTextColor(226, 232, 240);
-    const sessionText = this.compactSession(payload.sessionName || '—');
-    const sessionLines = doc.splitTextToSize(`Session: ${sessionText}`, W - 80) as string[];
-    doc.text(sessionLines, 40, 116);
-    const generatedY = 116 + (sessionLines.length * 14);
-    doc.text(this.fitSingleLine(doc, `Generated: ${meta.generatedAt}`, W - 80), 40, generatedY);
+    this.drawSessionBlock(doc, payload.sessionName || '—', meta.generatedAt, 40, 116, W - 80, 14);
   }
 
   private drawGraphToc( doc: jsPDF, payload: GraphReportPayload, pages: { graphPage: number | null; analysisPage: number; platformPage: number | null; reportsPage: number | null; edgesPage: number; } ): void {
@@ -263,10 +278,10 @@ export class GraphExportService {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(37, 99, 235);
-    const sectionItems: Array<{
+    const sectionItems: {
             label: string;
             page: number;
-        }> = [];
+        }[] = [];
     if (pages.graphPage) {
       sectionItems.push({ label: 'Graph Snapshot', page: pages.graphPage });
     }
@@ -315,42 +330,26 @@ export class GraphExportService {
     const composition = this.buildTypeComposition(payload.nodes).slice(0, 7);
     const compositionStartY = tocY + (sectionItems.length * rowH) + 24;
     this.drawInfoSectionMarker(doc, compositionStartY, W - 80, 'Top Node Types');
-    autoTable(doc, {
+    this.requireAutoTable()(doc, {
       startY: compositionStartY + 12,
       margin: { left: 40, right: 40 },
       tableWidth: W - 80,
       body: [['Type', 'Count'], ...composition.map(item => [item.type, String(item.count)])] as RowInput[],
-      styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-      didParseCell: (data: any) => {
-        if (data.row.index === 0) {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [207, 220, 236];
-        }
-      },
-      theme: 'plain'
+      ...this.buildPlainTableTheme({ font: 'helvetica', fontSize: 9, cellPadding: 5, overflow: undefined }),
+      didParseCell: this.makeHeaderRowDidParse()
     });
     this.drawRoundedTableContainer(doc, 40, W - 80, compositionStartY, (doc as any).lastAutoTable?.finalY ?? compositionStartY);
     if (payload.graphKind === 'social') {
       const platformCounts = this.extractSocialPlatformCounts(payload);
       const platformMarkerY = (doc as any).lastAutoTable.finalY + 10;
       this.drawInfoSectionMarker(doc, platformMarkerY, W - 80, `Found Social Platforms (${platformCounts.length})`);
-      autoTable(doc, {
+      this.requireAutoTable()(doc, {
         startY: platformMarkerY + 12,
         margin: { left: 40, right: 40 },
         tableWidth: W - 80,
         body: [['Platform', 'Count'], ...platformCounts.slice(0, 12).map(item => [item.name, String(item.count)])] as RowInput[],
-        styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        bodyStyles: { fillColor: this.TABLE_ROW_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        alternateRowStyles: { fillColor: this.TABLE_ROW_ALT_BG_RGB, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: this.TABLE_BORDER_RGB },
-        didParseCell: (data: any) => {
-          if (data.row.index === 0) {
-            data.cell.styles.fontStyle = 'bold';
-            data.cell.styles.fillColor = [207, 220, 236];
-          }
-        },
-        theme: 'plain'
+        ...this.buildPlainTableTheme({ font: 'helvetica', fontSize: 9, cellPadding: 5, overflow: undefined }),
+        didParseCell: this.makeHeaderRowDidParse()
       });
       this.drawRoundedTableContainer(doc, 40, W - 80, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
     }
@@ -367,7 +366,7 @@ export class GraphExportService {
     doc.setTextColor(71, 85, 105);
     doc.text('Snapshot captured from the rendered graph canvas at export time.', 40, 104);
     const fit = this.fitRectToPage(doc, 40, 146, 40, 122);
-    const img = doc.getImageProperties(payload.graphImageDataUrl as string);
+    const img = doc.getImageProperties(payload.graphImageDataUrl!);
     let imgW = fit.w;
     let imgH = (imgW * img.height) / img.width;
     if (imgH > fit.h) {
@@ -383,7 +382,7 @@ export class GraphExportService {
     doc.setDrawColor(203, 213, 225);
     doc.setLineWidth(1);
     doc.rect(fit.x, fit.y, fit.w, fit.h);
-    doc.addImage(payload.graphImageDataUrl as string, 'JPEG', drawX, drawY, imgW, imgH, undefined, 'FAST');
+    doc.addImage(payload.graphImageDataUrl!, 'JPEG', drawX, drawY, imgW, imgH, undefined, 'FAST');
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text(`Nodes: ${payload.nodes.length}   Edges: ${payload.edges.length}`, 40, this.getPageH(doc) - 56);
@@ -423,16 +422,106 @@ export class GraphExportService {
   }
 
   private drawGraphFooter(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, pageNo: number, totalPages: number): void {
+    this.drawStandardFooter(doc, payload.sessionName || '—', meta, pageNo, totalPages, 40, 24);
+  }
+
+  protected buildPlainTableTheme(options: PlainTableThemeOptions): PlainTableThemeConfig {
+    const styles: PlainTableThemeConfig['styles'] = {
+      fontSize: options.fontSize,
+      cellPadding: options.cellPadding,
+      textColor: options.textColor ?? [30, 41, 59],
+      lineWidth: this.TABLE_BORDER_WIDTH,
+      lineColor: this.TABLE_BORDER_RGB
+    };
+    if (options.font) {
+      styles.font = options.font;
+    }
+    if (options.overflow) {
+      styles.overflow = options.overflow;
+    }
+    if (options.valign) {
+      styles.valign = options.valign;
+    }
+
+    const bodyStyles: PlainTableThemeConfig['bodyStyles'] = {
+      fillColor: this.TABLE_ROW_BG_RGB,
+      lineWidth: this.TABLE_BORDER_WIDTH,
+      lineColor: this.TABLE_BORDER_RGB
+    };
+    if (options.textColor) {
+      bodyStyles.textColor = options.textColor;
+    }
+
+    return {
+      styles,
+      bodyStyles,
+      alternateRowStyles: {
+        fillColor: this.TABLE_ROW_ALT_BG_RGB,
+        lineWidth: this.TABLE_BORDER_WIDTH,
+        lineColor: this.TABLE_BORDER_RGB
+      },
+      theme: 'plain'
+    };
+  }
+
+  protected makeHeaderRowDidParse(fillColor: [number, number, number] = [207, 220, 236]): (data: any) => void {
+    return (data: any) => {
+      if (data.row.index === 0) {
+        data.cell.styles.fontStyle = 'bold';
+        data.cell.styles.fillColor = fillColor;
+      }
+    };
+  }
+
+  protected makeFirstColumnDidParse(fillColor: [number, number, number] = [214, 226, 240]): (data: any) => void {
+    return (data: any) => {
+      if (data.column.index === 0) {
+        data.cell.styles.fontStyle = 'bold';
+        data.cell.styles.fillColor = fillColor;
+      }
+    };
+  }
+
+  protected makeHeaderAndFirstColumnDidParse(): (data: any) => void {
+    return (data: any) => {
+      if (data.row.index === 0) {
+        data.cell.styles.fontStyle = 'bold';
+        data.cell.styles.fillColor = [207, 220, 236];
+        return;
+      }
+      if (data.column.index === 0) {
+        data.cell.styles.fontStyle = 'bold';
+        data.cell.styles.fillColor = [214, 226, 240];
+      }
+    };
+  }
+
+  protected drawSessionBlock(doc: jsPDF, sessionName: string, generatedAt: string, x: number, y: number, maxWidth: number, lineHeight: number): number {
+    doc.setFontSize(10);
+    doc.setTextColor(226, 232, 240);
+    const sessionLines = this.getSessionLines(doc, sessionName, maxWidth);
+    doc.text(sessionLines, x, y);
+    const generatedY = y + (sessionLines.length * lineHeight);
+    doc.text(this.fitSingleLine(doc, `Generated: ${generatedAt}`, maxWidth), x, generatedY);
+    return generatedY;
+  }
+
+  protected getSessionLines(doc: jsPDF, sessionName: string, maxWidth: number): string[] {
+    const sessionText = this.compactSession(sessionName || '—');
+    return doc.splitTextToSize(`Session: ${sessionText}`, maxWidth) as string[];
+  }
+
+  protected drawStandardFooter(doc: jsPDF, sessionName: string, meta: GraphReportMeta, pageNo: number, totalPages: number, lineOffset: number, textOffset: number): void {
     const W = this.getPageW(doc);
     const H = this.getPageH(doc);
     doc.setDrawColor(226, 232, 240);
-    doc.line(40, H - 40, W - 40, H - 40);
+    doc.line(40, H - lineOffset, W - 40, H - lineOffset);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(51, 65, 85);
-    const compactSession = this.compactSession(payload.sessionName || '—');
-    doc.text(this.fitSingleLine(doc, `${meta.kindLabel} • ${compactSession} • ${meta.generatedAt}`, W - 170), 40, H - 24);
-    doc.text(`Page ${pageNo} of ${totalPages}`, W - 40, H - 24, { align: 'right' });
+    const compactSession = this.compactSession(sessionName || '—');
+    doc.text(this.fitSingleLine(doc, `${meta.kindLabel} • ${compactSession} • ${meta.generatedAt}`, W - 170), 40, H - textOffset);
+    doc.text(`Page ${pageNo} of ${totalPages}`, W - 40, H - textOffset, { align: 'right' });
   }
 
   private drawKpiCard(doc: jsPDF, x: number, y: number, w: number, h: number, label: string, value: string): void {
@@ -480,10 +569,10 @@ export class GraphExportService {
     return normalized;
   }
 
-  private extractSocialPlatformCounts(payload: GraphReportPayload): Array<{
+  private extractSocialPlatformCounts(payload: GraphReportPayload): {
         name: string;
         count: number;
-    }> {
+    }[] {
     if (payload.graphKind !== 'social') {
       return [];
     }
@@ -521,7 +610,7 @@ export class GraphExportService {
   }
 
   protected isJpegDataUrl(dataUrl?: string): boolean {
-    return typeof dataUrl === 'string' && /^data:image\/jpeg;base64,/.test(dataUrl);
+    return typeof dataUrl === 'string' && dataUrl.startsWith('data:image/jpeg;base64,');
   }
 
   private fitRectToPage(doc: jsPDF, left: number, top: number, right: number, bottom: number): {
@@ -651,8 +740,8 @@ export class GraphExportService {
     return `Section ${index + 1}`;
   }
 
-  protected buildReportSectionRows(values: Record<string, string>): Array<[string, string]> {
-    const rows: Array<[string, string]> = [['Field', 'Value']];
+  protected buildReportSectionRows(values: Record<string, string>): [string, string][] {
+    const rows: [string, string][] = [['Field', 'Value']];
     Object.entries(values ?? {}).forEach(([rawKey, rawValue]) => {
       const key = this.cleanReportFieldLabel(rawKey);
       const value = this.cleanReportFieldValue(rawValue, key);
@@ -717,7 +806,7 @@ export class GraphExportService {
     const values = table?.values ?? {};
     // Prefer fields that are explicitly screenshot-related, then fall back to any image data URL.
     for (const [key, value] of Object.entries(values)) {
-      if (`${key}`.toLowerCase().includes('screenshot') && this.isImageDataUrl(value)) {
+      if (key.toLowerCase().includes('screenshot') && this.isImageDataUrl(value)) {
         return this.normalizeDataUrl(value);
       }
     }

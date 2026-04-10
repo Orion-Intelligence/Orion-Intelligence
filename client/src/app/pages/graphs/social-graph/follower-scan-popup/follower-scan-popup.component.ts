@@ -18,10 +18,10 @@ export class FollowerScanPopupComponent {
   platform = input.required<PlatformResult>();
   isFetchingFollowers = input<boolean>(false);
   isFetchingFollowing = input<boolean>(false);
-  close = output<void>();
+  close = output<undefined>();
   scan = output<string[]>();
-  fetchFollowers = output<void>();
-  fetchFollowing = output<void>();
+  fetchFollowers = output<undefined>();
+  fetchFollowing = output<undefined>();
   activeTab = signal<'followers' | 'following' | 'connections'>('followers');
   searchTerm = signal('');
   selectedUsernames = signal(new Set<string>());
@@ -85,7 +85,8 @@ export class FollowerScanPopupComponent {
   }
 
   onSearchInput(event: Event) {
-    this.searchTerm.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchTerm.set(nextValue);
   }
 
   toggleSelection(username: string) {
@@ -109,12 +110,12 @@ export class FollowerScanPopupComponent {
 
   confirmScan() {
     this.scan.emit(Array.from(this.selectedUsernames()));
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   scanSingle(username: string) {
     this.scan.emit([username]);
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   loadMoreFollowers() {

@@ -139,11 +139,11 @@ All supported `build` flags are listed below.
 
 | Flag | Primary use | Key behavior |
 | --- | --- | --- |
-| `-t` | frontend and Cypress test workflow | sets `TESTING_ENABLED="1"`, builds the Angular client with the `instrumented` configuration, uses `docker-compose-testing.yml`, starts the stack, and waits for `http://127.0.0.1:8080/api/public` before tests |
+| `-t` | frontend and Cypress test workflow | sets `TESTING_ENABLED="1"`, builds the Angular client with the `instrumented` configuration, uses `docker-compose-testing.yml`, starts the stack, and waits for `https://127.0.0.1:8443/api/public` before tests |
 | `-tb` | protected backend test workflow | same stack setup as `-t`, then runs containerized backend pytest through `run_backend_tests_protected` |
-| `-c` | rebuild client only for default local mode | builds the production client bundle, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
-| `-b` | rebuild backend and containers without rebuilding the client bundle | copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
-| `-d` | general default-mode rebuild | builds the production client bundle, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
+| `-c` | rebuild client only for default local mode | builds the production client bundle, ensures local SSL certs exist, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
+| `-b` | rebuild backend and containers without rebuilding the client bundle | ensures local SSL certs exist, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
+| `-d` | general default-mode rebuild | builds the production client bundle, ensures local SSL certs exist, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
 | `-p` | production-oriented rebuild | builds the production client bundle, copies `nginx/nginx-prod.conf`, uses `docker-compose-production.yml`, prepares `/srv/elasticsearch/data`, sets `ELASTIC_ROOT_IP`, rebuilds images, and waits for `https://try.orionintelligence.org` |
 
 Testing mode is the path most developers will use day to day. It enables the application testing flag, creates the instrumented frontend bundle, starts the testing compose stack, and blocks until the test service is reachable before Cypress is launched.
@@ -167,7 +167,7 @@ For most application work, the practical loop is:
 
 1. update code in `client/`, `backend/`, or docs
 2. run `./run.sh build -t`
-3. wait for the script to finish the readiness check against `http://127.0.0.1:8080/api/public`
+3. wait for the script to finish the readiness check against `https://127.0.0.1:8443/api/public`
 4. run targeted Cypress tests from `client/`
 5. inspect the UI or generated docs output
 

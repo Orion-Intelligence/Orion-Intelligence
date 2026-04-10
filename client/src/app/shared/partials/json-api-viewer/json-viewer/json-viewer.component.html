@@ -1,15 +1,15 @@
-@if (showRootBraces) {
+@if (showRootBraces()) {
   <div class="font-mono text-[13px] text-[var(--color-text4)]">{{ '{' }}</div>
 }
 
-<div class="relative" [class.pl-4]="level > 0">
+<div class="relative" [class.pl-4]="level() > 0">
   <span class="pointer-events-none absolute bottom-0 left-[3px] top-0 border-l-[1.5px] border-[var(--color-divider)]"></span>
   <ul class="list-none pl-0 font-mono text-[13px] leading-[1.55]">
     @for (key of keys(json); track key; let last = $last) {
       <li class="relative py-[1px]" [class.mb-[3px]]="!last">
         @if (isCollapsible(json[key])) {
           <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
-            @if (level > 0) {
+            @if (level() > 0) {
               <span class="pointer-events-none absolute left-[-11px] top-1/2 w-[20px] -translate-y-1/2 border-t-[1.5px] border-[var(--color-divider)]"></span>
             }
             <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
@@ -31,7 +31,7 @@
             <div class="ml-5 mt-[2px] border-l-[1.5px] border-[var(--color-divider)] pl-3 pt-[1px]">
               <app-json-viewer
                 [json]="json[key]"
-                [level]="level + 1"
+                [level]="level() + 1"
               [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
               <div class="px-2 py-[2px] text-[var(--color-text4)]">
                 {{ closeToken(json[key]) }}@if (!last) {
@@ -42,7 +42,7 @@
         }
       } @else {
         <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-start gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] ui-result-card-soft">
-          @if (level > 0) {
+          @if (level() > 0) {
             <span class="pointer-events-none absolute left-[-11px] top-[14px] w-[20px] border-t-[1.5px] border-[var(--color-divider)]"></span>
           }
           <span class="mr-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
@@ -68,6 +68,6 @@
 </ul>
 </div>
 
-@if (showRootBraces) {
+@if (showRootBraces()) {
   <div class="font-mono text-[13px] text-[var(--color-text4)]">{{ '}' }}</div>
 }

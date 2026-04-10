@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
-from configs.app_dependency import license_required, role_required, status_required, get_current_user
+from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (directory_param_model, )
@@ -63,8 +63,10 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
-async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user), role: user_role = Depends(get_current_role), is_free: bool = Depends(get_is_free_token)):
     _enforce_demo_safe_search(param, current_user)
+    if role == user_role.DEMO or is_free:
+        param.network = "onion"
     base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
     if current_user and getattr(current_user, "role", None) == user_role.DEMO and param.category == "all":
         base_index = [

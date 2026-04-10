@@ -83,7 +83,6 @@ function createThreatContent() {
     selected: "attack-pattern"
   };
 }
-;
 const SOURCE_FILTER = {
   title: "Source",
   options: [

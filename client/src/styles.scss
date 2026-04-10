@@ -1,14 +1,41 @@
+
 @use 'assets/styles/fonts.scss';
 @use "./app/pages/credentials/expanded-row/expanded-row.component.scss";
 @use "./app/pages/network-intel/modal/geo-coordinates-modal/geo-coordinates-modal.component.scss";
 @use "./app/pages/tenant/tenant-management/view-tenant.component-shared.scss";
-@use "./app/shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.scss";
+@use "app/pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.scss";
 @use "./app/shared/styles/alert-stagger-animations.scss";
-@import "bootstrap-icons/font/bootstrap-icons.css";
+@use "./app/pages/demo-tour/demo-tour/demo-tour.component.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bi,
+[class^="bi-"],
+[class*=" bi-"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  line-height: 1;
+}
+
+.bi > .ui-bootstrap-icon,
+[class^="bi-"] > .ui-bootstrap-icon,
+[class*=" bi-"] > .ui-bootstrap-icon {
+  width: 1em;
+  height: 1em;
+  display: block;
+  flex: none;
+  fill: currentColor;
+}
+
+.bi > .ui-bootstrap-icon [fill]:not([fill="none"]),
+[class^="bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]),
+[class*=" bi-"] > .ui-bootstrap-icon [fill]:not([fill="none"]) {
+  fill: currentColor;
+}
 
 
 html,
@@ -141,8 +168,6 @@ html:has(body.dark-theme) {
   pointer-events: none;
 }
 
-.app-background-dark {}
-
 .ui-see-more-btn {
   display: inline-flex;
   align-items: center;
@@ -195,6 +220,63 @@ html:has(body.dark-theme) {
   background-color: var(--ui-consolidated-sub-hover, #fbfdff) !important;
 }
 
+body.demo-tour-active {
+  [class*="ng-trigger-fadeInDashboardItem"],
+  [class*="ng-trigger-dashboard-global-animation"],
+  [class*="ng-trigger-appAnimation"] {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  [data-testid^="sidebar-group-"] + ul,
+  #sidebar-profile ul,
+  #sidebar-general ul,
+  #sidebar-social ul,
+  #sidebar-web-scan ul,
+  #sidebar-entity-api ul,
+  #sidebar-stealer-logs ul,
+  #sidebar-breach ul,
+  #sidebar-defacement ul {
+    transition: none !important;
+  }
+
+  [data-testid="dashboard-body"],
+  #dashboard-consolidated,
+  .ui-consolidated-theme,
+  .ui-consolidated-main,
+  .ui-consolidated-sub,
+  [data-testid="dashboard-shell"],
+  [data-testid="dashboard-container"] {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .ui-filter-sidebar-panel,
+  .ui-result-card,
+  [class*="transition-"],
+  [class*="duration-"] {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+html.demo-tour-scroll-locked,
+body.demo-tour-scroll-locked {
+  overflow: hidden;
+  overscroll-behavior: none;
+  height: 100%;
+}
+
+body.demo-tour-scroll-locked {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
 .ui-result-card.ui-consolidated-sub {
   background-image: repeating-linear-gradient(
     135deg,
@@ -203,11 +285,6 @@ html:has(body.dark-theme) {
     transparent 1px,
     transparent 12px
   ) !important;
-}
-
-.ui-consolidated-inner {
-  background: var(--ui-consolidated-inner-bg, #f7f9fc) !important;
-  border-color: var(--ui-consolidated-border, #d7e2ef) !important;
 }
 
 .dark-theme .ui-consolidated-theme {
@@ -389,7 +466,7 @@ html:has(body.dark-theme) {
   list-style: none;
   padding: 0;
   font-size: 12px;
-  color: #a0b8d1;
+  color: #5b6780;
 }
 
 .ui-auth-error {
@@ -3117,4 +3194,228 @@ app-sidebar-user-homepage app-home-search.homepage-search-no-margin form {
   background-repeat: no-repeat;
   background-position: center 100px;
   background-size: cover;
+}
+
+app-demo-tour {
+  --tour-overlay-clip: none;
+  --tour-spotlight-top: 0px;
+  --tour-spotlight-left: 0px;
+  --tour-spotlight-width: 0px;
+  --tour-spotlight-height: 0px;
+  --tour-tooltip-top: 0px;
+  --tour-tooltip-left: 0px;
+  --tour-tooltip-bottom: auto;
+  --tour-tooltip-width: 320px;
+  --tour-progress-width: 0%;
+  --tour-accent: var(--color-blue-640);
+  --tour-accent-strong: var(--color-blue-630);
+  --tour-tooltip-accent: var(--color-blue-640);
+  --tour-surface: color-mix(in srgb, var(--color-blue-700) 30%, transparent);
+  --tour-surface-edge: color-mix(in srgb, var(--tour-tooltip-accent) 24%, var(--color-border));
+  --tour-shadow: 0 16px 40px color-mix(in srgb, var(--color-text1) 28%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-border) 32%, transparent);
+  --tour-tooltip-radius: 0.78rem;
+  --tour-spotlight-radius: 10px;
+}
+
+app-demo-tour .tour-spotlight-svg {
+  stroke: color-mix(in srgb, var(--tour-accent) 34%, transparent);
+  stroke-width: 1px;
+  opacity: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+app-demo-tour .tour-spotlight-fill-stop-start {
+  stop-color: color-mix(in srgb, var(--tour-accent) 10%, transparent);
+}
+
+app-demo-tour .tour-spotlight-glow-shadow {
+  flood-color: var(--tour-accent);
+  flood-opacity: 0.18;
+}
+
+app-demo-tour .tour-spotlight-reveal-a,
+app-demo-tour .tour-spotlight-reveal-b {
+  animation: tour-spotlight-reveal 140ms ease-out;
+}
+
+app-demo-tour .tour-tooltip {
+  top: var(--tour-tooltip-top);
+  left: var(--tour-tooltip-left);
+  bottom: var(--tour-tooltip-bottom, auto);
+  width: var(--tour-tooltip-width, 320px);
+  max-width: calc(100vw - 24px);
+  opacity: 0;
+  border-radius: var(--tour-tooltip-radius);
+  border-width: 2px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-blue-710) 28%, transparent), color-mix(in srgb, var(--color-blue-700) 34%, transparent)),
+    var(--tour-surface);
+  border-color: var(--tour-surface-edge);
+  box-shadow: var(--tour-shadow);
+  transform: translate3d(0, 0, 0);
+  transform-origin: top left;
+  transition:
+    top 180ms ease-out,
+    left 180ms ease-out,
+    opacity 160ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease;
+  contain: layout paint style;
+}
+
+app-demo-tour.tour-tooltip-positioned .tour-tooltip {
+  opacity: 1;
+}
+
+app-demo-tour .tour-tooltip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--tour-accent) 12%, transparent), transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-text1) 4.5%, transparent), transparent 28%);
+}
+
+app-demo-tour .tour-tooltip::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  pointer-events: none;
+  border-radius: calc(var(--tour-tooltip-radius) - 0.18rem);
+  border: 1px solid color-mix(in srgb, var(--color-text1) 3.5%, transparent);
+}
+
+app-demo-tour .tour-progress-bar {
+  width: var(--tour-progress-width);
+  background: linear-gradient(90deg, var(--tour-accent), color-mix(in srgb, var(--tour-accent) 58%, white 42%));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--tour-accent) 22%, transparent);
+  transition: width 180ms ease-out;
+}
+
+app-demo-tour .tour-primary-button {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 9999px;
+  padding: 0.65rem 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid color-mix(in srgb, var(--tour-accent) 34%, var(--color-border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tour-accent-strong) 90%, transparent), color-mix(in srgb, var(--tour-accent) 82%, var(--color-text1) 18%));
+  color: var(--color-text1);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--tour-accent) 16%, transparent);
+}
+
+app-demo-tour .tour-primary-button:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--tour-accent) 48%, var(--color-text1) 12%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tour-accent-strong) 96%, var(--color-text1) 4%), color-mix(in srgb, var(--tour-accent) 88%, var(--color-text1) 12%));
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--tour-accent) 20%, transparent);
+}
+
+app-demo-tour .tour-primary-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--tour-accent) 62%, var(--color-text1) 38%);
+  outline-offset: 2px;
+}
+
+app-demo-tour .tour-overlay {
+  opacity: 1;
+  will-change: opacity;
+}
+
+app-demo-tour .tour-loader-spinner {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 auto;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in srgb, var(--tour-accent) 20%, var(--color-text1) 10%);
+  border-top-color: color-mix(in srgb, var(--tour-accent) 88%, var(--color-text1) 12%);
+  animation: tour-loader-spin 0.8s linear infinite;
+}
+
+app-demo-tour .tour-primary-button[disabled] {
+  cursor: default;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+app-demo-tour.tour-loading .tour-spotlight-svg,
+app-demo-tour.tour-loading .tour-progress-bar {
+  transition: none !important;
+}
+
+app-demo-tour.tour-loading .tour-spotlight-reveal-a,
+app-demo-tour.tour-loading .tour-spotlight-reveal-b {
+  animation-duration: 110ms;
+}
+
+app-demo-tour .demo-tour-active {
+  position: relative !important;
+  z-index: 1004 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+  transition: none;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--tour-accent) 18%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--tour-accent) 6%, transparent),
+    0 0 18px color-mix(in srgb, var(--tour-accent) 12%, transparent) !important;
+}
+
+@keyframes tour-spotlight-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tour-loader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.light-theme app-demo-tour .tour-tooltip {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-white) 98%, transparent), color-mix(in srgb, var(--color-blue-730) 98%, transparent)),
+    var(--color-white);
+  color: var(--color-text1);
+  box-shadow: 0 18px 42px var(--color-shadow-medium), 0 0 0 1px color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.light-theme app-demo-tour .tour-tooltip::before {
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--color-blue-640) 10%, transparent), transparent 36%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-white) 92%, transparent), transparent 26%);
+}
+
+.light-theme app-demo-tour .tour-overlay {
+  opacity: 0.96;
+}
+
+@media (width <= 640px) {
+  app-demo-tour .tour-tooltip {
+    max-width: calc(100vw - 20px);
+  }
+
+  app-demo-tour .tour-primary-button {
+    width: 100%;
+    justify-content: center;
+  }
 }

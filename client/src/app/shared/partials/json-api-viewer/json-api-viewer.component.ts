@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { JsonViewerComponent } from './json-viewer/json-viewer.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -13,8 +13,7 @@ export class JsonApiViewerComponent {
 
   isExpanded = false;
   copied = false;
-
-  @Input() jsonData: any;
+  readonly jsonData = input<any>();
 
   toggleContent(): void {
     this.isExpanded = !this.isExpanded;
@@ -22,11 +21,12 @@ export class JsonApiViewerComponent {
 
   copyJson(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.jsonData == null) {
+    const jsonData = this.jsonData();
+    if (jsonData == null) {
       return;
     }
-    const payload = JSON.stringify(this.jsonData, null, 2);
-    navigator.clipboard?.writeText(payload).then(() => {
+    const payload = JSON.stringify(jsonData, null, 2);
+    void navigator.clipboard?.writeText(payload).then(() => {
       this.copied = true;
       if (this.copyTimer) {
         clearTimeout(this.copyTimer);

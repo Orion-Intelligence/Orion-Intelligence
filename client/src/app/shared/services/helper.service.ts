@@ -131,21 +131,28 @@ export class HelperService {
     if (!text) {
       return '';
     }
-    let highlighted: string;
-    if (text.includes('<em>') && text.includes('</em>')) {
+    const escapeHtml = (value: string) => value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    let renderedHtml: string;
+    const hasHighlightMarkup = text.includes('<em>') && text.includes('</em>');
+    if (hasHighlightMarkup) {
       const regex = /<em>(.*?)<\/em>/g;
       const matches = [...text.matchAll(regex)];
-      let result = '';
+      let highlightedText = '';
       let lastIndex = 0;
       let i = 0;
       while (i < matches.length) {
         let merged = matches[i][1];
-        const start = matches[i].index!;
+        const start = matches[i].index;
         let end = start + matches[i][0].length;
         let j = i + 1;
         while (j < matches.length) {
           const prevEnd = end;
-          const nextStart = matches[j].index!;
+          const nextStart = matches[j].index;
           const betweenText = text.slice(prevEnd, nextStart);
           const wordGap = betweenText
             .replace(/<[^>]+>/g, '')
@@ -155,28 +162,24 @@ export class HelperService {
           if (wordGap <= 2) {
             const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
             merged += ` ${cleanBetween} ${matches[j][1]}`;
-            end = matches[j].index! + matches[j][0].length;
+            end = matches[j].index + matches[j][0].length;
             j++;
           }
           else {
             break;
           }
         }
-        result += text.slice(lastIndex, start);
-        result += `<em>${merged}</em>`;
+        highlightedText += escapeHtml(text.slice(lastIndex, start));
+        highlightedText += `<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">${escapeHtml(merged.trim())}</span>`;
         lastIndex = end;
         i = j;
       }
-      result += text.slice(lastIndex);
-      highlighted = result
-        .replace(/<em>/g,
-          '<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">')
-        .replace(/<\/em>/g, '</span>');
+      renderedHtml = highlightedText + escapeHtml(text.slice(lastIndex));
     }
     else {
-      highlighted = text.length > 500 ? text.substring(0, 500) : text;
+      renderedHtml = escapeHtml(text.length > 500 ? text.substring(0, 500) : text);
     }
-    return this.sanitizer.bypassSecurityTrustHtml(highlighted);
+    return this.sanitizer.bypassSecurityTrustHtml(renderedHtml);
   }
 
   private convertToCSV(data: any): string {

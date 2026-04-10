@@ -13,12 +13,6 @@ export class AuthService {
 
   constructor(private appService: AppService, private appStorageService: AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
     if (this.isAuthenticated()) {
-      const needsSession = !this.appService.userSessionData().user.username &&
-                !this.appService.userSessionData().user.role &&
-                !this.appService.userSessionData().user.verificationDate;
-      if (needsSession) {
-        this.refreshToken().subscribe();
-      }
       this.startTokenRefresh();
     }
   }
@@ -105,12 +99,12 @@ export class AuthService {
       localStorage.setItem('onboarding', String(false));
       this.appStorageService.clearStorage();
       this.appService.clearAll();
-      this.appService.loadConfig();
+      this.appService.loadConfig().subscribe();
     });
   }
 
   demoLogin(): void {
-    this.login('_', '_', true).subscribe(async (_) => { });
+    this.login('_', '_', true).subscribe(async (_) => void 0);
   }
 
   signup(username: string, email: string, password: string): Observable<any> {

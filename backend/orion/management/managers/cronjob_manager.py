@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from interface import BASE_DIR
 from orion.constants.constant import allowed_keys
@@ -7,6 +7,7 @@ from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
 from orion.management.jobs.alert_job import alert_job
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.log_manager.log_controller import log
 
 
 class cronjob_manager:
@@ -68,4 +69,4 @@ class cronjob_manager:
             try:
                 await alert_job.get_instance().run_all_categories()
             except Exception as e:
-                pass
+                log.g().e(f"IOC alert loop failed: {e}")

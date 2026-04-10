@@ -77,13 +77,17 @@ export function addUser(user: ManagedUser) {
 }
 
 export function loginAsUser(username: string, password: string) {
-  cy.clearCookies();
-  cy.clearLocalStorage();
+  cy.intercept('POST', '**/api/token').as('loginRequest');
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"]').should('be.visible').click();
-  cy.url().should('include', '/dashboard/profile');
+  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.wait('@loginRequest').then((interception) => {
+    expect(interception.response?.statusCode).to.eq(200);
+  });
+  cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+    .filter(':visible')
+    .should('have.length.greaterThan', 0);
 }
 
 export function loginAndClickSidebar(username: string, sidebarItems: string[], testUsers: any, testData: any) {
@@ -174,22 +178,43 @@ export function openUsersList(usersUrl: string) {
   cy.wait('@usersApi');
 }
 
-export function deleteFirstUser(usersUrl: string) {
-  cy.get('#dashboard-container').scrollTo('bottom', {duration: 300, ensureScrollable: false});
-
-  cy.get('[data-testid="tenant-edit-user-button"]').then(($btns) => {
-    if ($btns.length <= 2) {
-      cy.log('Only system users left. Stop.');
+export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboard/profile/users?page=1') {
+  const deleteNext = (remaining: string[]) => {
+    if (!remaining.length) {
       return;
     }
-    cy.wrap($btns[0]).scrollIntoView().click();
-    cy.get('[data-testid="tenant-delete-user-button"]').first().should('be.visible').click();
 
-    cy.get('.ui-graph-popup-panel').should('be.visible').within(() => {
-      cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
-    });
-    cy.get('.ui-graph-popup-panel').should('not.exist');
+    const [username, ...rest] = remaining;
+
     openUsersList(usersUrl);
-    deleteFirstUser(usersUrl);
-  });
+    cy.contains('tbody tr', username).then(($row) => {
+      if (!$row.length) {
+        cy.log(`User ${username} not found. Skip.`);
+        deleteNext(rest);
+        return;
+      }
+
+      cy.wrap($row)
+        .find('[data-testid="tenant-edit-user-button"]')
+        .first()
+        .scrollIntoView()
+        .should('be.visible')
+        .click();
+
+      cy.contains('tbody tr', username)
+        .next()
+        .within(() => {
+          cy.get('[data-testid="tenant-delete-user-button"]').filter(':visible').first().should('be.visible').click();
+        });
+
+      cy.get('.ui-graph-popup-panel').should('be.visible').within(() => {
+        cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
+      });
+      cy.get('.ui-graph-popup-panel').should('not.exist');
+
+      deleteNext(rest);
+    });
+  };
+
+  deleteNext(usernames);
 }

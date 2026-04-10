@@ -24,15 +24,16 @@ export class GraphToolbarComponent {
   canEditConnections = input(false);
   showEditToggle = input(false);
   searchChanged = output<string>();
-  searchSubmitted = output<void>();
-  imageSearchClicked = output<void>();
-  clearSearchClicked = output<void>();
+  searchSubmitted = output<undefined>();
+  imageSearchClicked = output<undefined>();
+  clearSearchClicked = output<undefined>();
   viewModeChanged = output<'graph' | 'list'>();
-  physicsToggled = output<void>();
-  editModeToggled = output<void>();
+  physicsToggled = output<undefined>();
+  editModeToggled = output<undefined>();
 
   onSearchInput(event: Event): void {
-    this.searchChanged.emit((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchChanged.emit(nextValue);
   }
 
   onSetViewMode(mode: 'graph' | 'list'): void {

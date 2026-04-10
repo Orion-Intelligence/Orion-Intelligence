@@ -42,9 +42,7 @@ export class TabManagerService {
       activeHomeMenuTab: signal<'history' | 'entities'>('history'),
       isPhysicsEnabled: signal(true),
       viewMode: signal<'graph' | 'list'>('graph'),
-      expandedGroupDataByUser: signal<{
-                [username: string]: NetworkNode | null;
-            }>({}),
+      expandedGroupDataByUser: signal<Record<string, NetworkNode | null>>({}),
       graphPlatformBatches: signal(new Map<string, GraphPlatformBatch>()),
       profileLeakIntelligenceByUser: signal<Record<string, ProfileLeakSessionData>>({}),
       profileMetadataByUser: signal<Record<string, ProfileMetadataSessionData>>({}),
@@ -238,10 +236,7 @@ export class TabManagerService {
       name: tab.name,
       state: this.serializeTabState(tab.state),
     };
-    this.api.post<any>(`social/session/tab/add?graph_type=${this.graphType}`, tabPayload).subscribe({
-      next: () => { },
-      error: () => { },
-    });
+    this.api.post<any>(`social/session/tab/add?graph_type=${this.graphType}`, tabPayload).subscribe();
   }
 
   private loadState() {
@@ -394,18 +389,18 @@ export class TabManagerService {
       return undefined;
     }
     try {
-      const base = canvases[0] as HTMLCanvasElement;
+      const baseCanvas = canvases[0] as HTMLCanvasElement;
       const merged = document.createElement('canvas');
-      merged.width = base.width;
-      merged.height = base.height;
+      merged.width = baseCanvas.width;
+      merged.height = baseCanvas.height;
       const ctx = merged.getContext('2d');
       if (!ctx) {
         return undefined;
       }
       canvases.forEach(node => {
-        const canvas = node as HTMLCanvasElement;
-        if (canvas.width === merged.width && canvas.height === merged.height) {
-          ctx.drawImage(canvas, 0, 0);
+        const canvasElement = node as HTMLCanvasElement;
+        if (canvasElement.width === merged.width && canvasElement.height === merged.height) {
+          ctx.drawImage(canvasElement, 0, 0);
         }
       });
       const pad = Math.round(Math.max(merged.width, merged.height) * 0.06);

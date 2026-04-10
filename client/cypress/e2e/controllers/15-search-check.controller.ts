@@ -78,7 +78,7 @@ export function openSidebarGroup15(title: string) {
     .click();
 
   cy.get(`[data-testid="${testId}"]`)
-    .closest('li')
+    .parent()
     .find('> ul')
     .should(($ul) => {
       expect(
@@ -93,7 +93,7 @@ export function clickSidebarSubItem15(groupTitle: string, itemTitle: string) {
   expect(prefix, `subitem prefix mapping for "${groupTitle}"`).to.exist;
 
   cy.get(`[data-testid="${testId}"]`)
-    .closest('li')
+    .parent()
     .find('> ul')
     .should(($ul) => {
       expect(
@@ -134,7 +134,7 @@ export function typeDashboardSearch15(value: string) {
 }
 
 export function assertFirstResultCard(data: SearchResultData) {
-  cy.wait(2000);
+  cy.wait(1000)
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
     .should('have.length.at.least', 1)
     .then(($cards) => {

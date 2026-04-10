@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { AuditLogCallbackModel } from '../../../../shared/model/auditlog/auditlog.model';
@@ -12,8 +12,7 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 })
 export class AuditlogListComponent {
   auditData$: Observable<AuditLogCallbackModel | null>;
-
-  @Input() isLoading = true;
+  readonly isLoading = input(true);
 
   constructor(public auditService: AuditlogService) {
     this.auditData$ = this.auditService.auditData$;

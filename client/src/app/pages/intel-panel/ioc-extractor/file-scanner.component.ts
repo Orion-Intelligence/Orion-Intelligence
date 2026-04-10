@@ -69,9 +69,9 @@ export class FileScannerComponent {
   }
 
   onFileSelected(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-      this.handleFileSelect(target.files[0]);
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement.files?.[0]) {
+      this.handleFileSelect(inputElement.files[0]);
     }
   }
 
@@ -119,7 +119,7 @@ export class FileScannerComponent {
       relativeTo: this.route,
       queryParams: { file: encodeURIComponent(file.name) },
       queryParamsHandling: 'merge'
-    }).catch(() => { });
+    }).catch(() => void 0);
     this.scanFile(modeIsApk);
   }
 
@@ -333,8 +333,8 @@ export class FileScannerComponent {
   }
 
   triggerFileInput(): void {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    fileInput?.click();
+    const fileInputElement = document.getElementById('fileInput') as HTMLInputElement;
+    fileInputElement?.click();
   }
 
   closeError(): void {
@@ -393,7 +393,7 @@ export class FileScannerComponent {
   }
 
   copyValue(value: string): void {
-    navigator.clipboard.writeText(value).then(() => {
+    void navigator.clipboard.writeText(value).then(() => {
       this.copiedValue.set(value);
       setTimeout(() => this.copiedValue.set(null), 1500);
     });

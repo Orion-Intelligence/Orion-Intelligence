@@ -31,6 +31,7 @@ import { PlatformFetchService } from './services/platform-fetch.service';
 import { RelationshipResolverService } from './services/relationship-resolver.service';
 import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
+import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from './utils/social-graph-view.util';
 @Component({
   selector: 'app-social-graph',
   templateUrl: './social-mapper.component.html',
@@ -130,6 +131,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return visibleNodeIdsWithFollows;
   });
   isCustomEntityNode = (nodeId: string): boolean => this.customEntities().some(e => e.id === nodeId);
+
+  private requireActiveTabState(): TabState {
+    const activeState = this.activeTabState();
+    if (!activeState) {
+      throw new Error('Active tab state is not available');
+    }
+    return activeState;
+  }
 
   constructor( private scanService: SocialScanService, private destroyRef: DestroyRef, public tabManager: TabManagerService, private fetchingState: FetchingStateService, private graphOrchestrator: GraphOrchestratorService, private scanJobService: SocialScanJobService, private platformFetchService: PlatformFetchService, private relationshipResolver: RelationshipResolverService, @Inject(PLATFORM_ID) private platformId: object ) {
     if (isPlatformBrowser(this.platformId)) {
@@ -243,7 +252,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onGraphSearchChanged(event: Event) {
-    this.graphSearchTerm.set((event.target as HTMLInputElement).value); 
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.graphSearchTerm.set(nextValue); 
   }
 
   toggleGraphSearch() {
@@ -266,7 +276,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onPlatformAliasInputChanged(event: Event) {
-    this.platformAliasInput.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.platformAliasInput.set(nextValue);
   }
 
   closePlatformAliasModal() {
@@ -314,7 +325,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return;
     }
     const { input, file } = selected;
-    readFileAsDataUrl(file)
+    void readFileAsDataUrl(file)
       .then((dataUrl) => {
         const base64Image = dataUrl.split(',')[1];
         if (base64Image) {
@@ -359,7 +370,9 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleFollowerScan(usernames: string[]) {
-    usernames.forEach(username => this.initiateScan(username)); 
+    usernames.forEach(username => {
+      this.initiateScan(username); 
+    }); 
   }
 
   openFollowerScanFromNode(nodeId: string) {
@@ -411,7 +424,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         const newMap = new Map(currentMap); newMap.delete(username); return newMap; 
       });
     });
-    this.graphOrchestrator.removeUserFromGraph(this.activeTabState()!, username);
+    this.graphOrchestrator.removeUserFromGraph(this.requireActiveTabState(), username);
   }
 
   fetchProfileDetails(p: PlatformResult) {
@@ -475,11 +488,21 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   cancelAllFetchesForUser(username: string) {
     this.platformFetchService.cancelAllFetchesForUser(username, this.scanResults(), {
-      profile: (p: PlatformResult) => this.cancelFetchProfileDetails(p),
-      posts: (p: PlatformResult) => this.handleCancelFetchSocialPosts(p),
-      images: (p: PlatformResult) => this.handleCancelFetchImagesForPlatform(p),
-      followers: (p: PlatformResult) => this.handleCancelFetchFollowers(p),
-      following: (p: PlatformResult) => this.handleCancelFetchFollowing(p)
+      profile: (p: PlatformResult) => {
+        this.cancelFetchProfileDetails(p); 
+      },
+      posts: (p: PlatformResult) => {
+        this.handleCancelFetchSocialPosts(p); 
+      },
+      images: (p: PlatformResult) => {
+        this.handleCancelFetchImagesForPlatform(p); 
+      },
+      followers: (p: PlatformResult) => {
+        this.handleCancelFetchFollowers(p); 
+      },
+      following: (p: PlatformResult) => {
+        this.handleCancelFetchFollowing(p); 
+      }
     });
   }
 
@@ -487,49 +510,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
   }
 
-  private parsePlatformNodeId(nodeId: string): {
-        keyUsername: string;
-        platformName: string;
-        platformUsername: string;
-    } | null {
-    if (!nodeId.startsWith('platform-')) {
-      return null;
-    }
-    const raw = nodeId.substring('platform-'.length);
-    const firstSep = raw.indexOf('|');
-    if (firstSep < 0) {
-      return null;
-    }
-    const secondSep = raw.indexOf('|', firstSep + 1);
-    if (secondSep < 0) {
-      return null;
-    }
-    const keyUsername = raw.slice(0, firstSep);
-    const platformName = raw.slice(firstSep + 1, secondSep);
-    const platformUsername = raw.slice(secondSep + 1);
-    return { keyUsername, platformName, platformUsername };
-  }
-
-  private getScanResultsByUsername(username: string): PlatformResult[] | undefined {
-    const direct = this.scanResults().get(username);
-    if (direct) {
-      return direct;
-    }
-    const normalized = username.toLowerCase();
-    for (const [key, value] of this.scanResults().entries()) {
-      if (key.toLowerCase() === normalized) {
-        return value;
-      }
-    }
-    return undefined;
-  }
-
   onNodeClicked(nodeId: string) {
     if (!nodeId.startsWith('user-')) {
       return;
     }
     const username = nodeId.replace('user-', '');
-    const allUserPlatforms = this.getScanResultsByUsername(username);
+    const allUserPlatforms = getScanResultsByUsername(this.scanResults(), username);
     if (!allUserPlatforms) {
       return;
     }
@@ -547,7 +533,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
             });
           }
           else if (connectedNode.id.toString().startsWith('platform-')) {
-            const parsed = this.parsePlatformNodeId(connectedNode.id.toString());
+            const parsed = parsePlatformNodeId(connectedNode.id.toString());
             if (!parsed) {
               return;
             }
@@ -590,71 +576,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.selectedEntityReport.set(null);
   }
 
-  getEntityReportRecords(entity: CustomEntity): Array<Record<string, unknown>> {
-    const report = entity.reportData;
-    if (!report || typeof report !== 'object') {
-      return [];
-    }
-    const nestedResult = (report as any)?.result;
-    if (Array.isArray(nestedResult)) {
-      return nestedResult as Array<Record<string, unknown>>;
-    }
-    if (Array.isArray(nestedResult?.result)) {
-      return nestedResult.result as Array<Record<string, unknown>>;
-    }
-    if (nestedResult?.result && typeof nestedResult.result === 'object') {
-      return [nestedResult.result as Record<string, unknown>];
-    }
-    if (nestedResult && typeof nestedResult === 'object') {
-      return [nestedResult as Record<string, unknown>];
-    }
-    return [report as Record<string, unknown>];
+  getEntityReportRecords(entity: CustomEntity): Record<string, unknown>[] {
+    return getEntityReportRecords(entity);
   }
 
-  getEntityRecordEntries(record: Record<string, unknown>): Array<{ key: string; label: string; values: string[]; }> {
-    return Object.entries(record)
-      .filter(([, value]) => value !== null && value !== undefined && !(Array.isArray(value) && value.length === 0))
-      .map(([key, value]) => ({
-        key,
-        label: this.toFieldLabel(key),
-        values: this.toDisplayValues(value)
-      }));
-  }
-
-  private toFieldLabel(key: string): string {
-    const normalized = key.replace(/^m_/, '').replace(/_/g, ' ').trim();
-    if (!normalized) {
-      return key;
-    }
-    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-  }
-
-  private toDisplayValues(value: unknown): string[] {
-    if (Array.isArray(value)) {
-      const values = value
-        .filter(item => item !== null && item !== undefined && `${item}`.trim() !== '')
-        .map(item => `${item}`);
-      return values.length > 0 ? values : ['-'];
-    }
-    return [this.toDisplayValue(value)];
-  }
-
-  private toDisplayValue(value: unknown): string {
-    if (value === null || value === undefined) {
-      return '-';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    if (typeof value === 'number' || typeof value === 'boolean') {
-      return String(value);
-    }
-    try {
-      return JSON.stringify(value, null, 2);
-    }
-    catch {
-      return String(value);
-    }
+  getEntityRecordEntries(record: Record<string, unknown>): { key: string; label: string; values: string[]; }[] {
+    return getEntityRecordEntries(record);
   }
 
   onRelationshipNodeClicked(nodeId: string) {
@@ -688,7 +615,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     for (let i = 0; i < activeUsers.length; i++) {
       for (let j = i + 1; j < activeUsers.length; j++) {
         const sortedPair = [activeUsers[i], activeUsers[j]].sort((a, b) => a.localeCompare(b));
-        if (`${sortedPair[0]}--${sortedPair[1]}` === pairKey) {
+        if ([sortedPair[0], sortedPair[1]].join('--') === pairKey) {
           return [sortedPair[0], sortedPair[1]];
         }
       }
@@ -712,7 +639,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       this.state.openInfoModal('warning', 'Maximum Node Limit Reached', 'The graph has reached its maximum capacity of 300 nodes. Please remove some nodes before adding more.');
       return;
     }
-    await this.graphOrchestrator.updateGraphFromModal(this.activeTabState()!, username, selectedPlatforms);
+    await this.graphOrchestrator.updateGraphFromModal(this.requireActiveTabState(), username, selectedPlatforms);
     this.tabManager.scheduleSave();
   }
 
@@ -731,11 +658,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     const handlers: Record<ContextMenuAction, () => void> = {
       fetchLinks: () => this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'),
       clearConnections: () => {
-        this.graphOrchestrator.removeAllPlatformNodes(this.activeTabState()!, username);
+        this.graphOrchestrator.removeAllPlatformNodes(this.requireActiveTabState(), username);
         this.tabManager.scheduleSave();
       },
       deleteProfile: () => {
-        this.graphOrchestrator.removeUserFromGraph(this.activeTabState()!, username);
+        this.graphOrchestrator.removeUserFromGraph(this.requireActiveTabState(), username);
         this.tabManager.scheduleSave();
       },
       setAlias: () => {
@@ -748,11 +675,15 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         this.platformAliasInput.set(currentAlias);
       },
       removeNode: () => {
-        this.graphOrchestrator.removeSingleNode(this.activeTabState()!, nodeId);
+        this.graphOrchestrator.removeSingleNode(this.requireActiveTabState(), nodeId);
         this.tabManager.scheduleSave();
       },
-      deleteEntity: () => this.deleteCustomEntity(nodeId),
-      openRelationship: () => this.onRelationshipNodeClicked(nodeId),
+      deleteEntity: () => {
+        this.deleteCustomEntity(nodeId); 
+      },
+      openRelationship: () => {
+        this.onRelationshipNodeClicked(nodeId); 
+      },
     };
     handlers[action]();
     this.state.closeContextMenu();
@@ -769,12 +700,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleEdgeAdded( edge: { from: string; to: string; } ) {
-    this.graphOrchestrator.addEdge(this.activeTabState()!, edge);
+    this.graphOrchestrator.addEdge(this.requireActiveTabState(), edge);
     this.tabManager.scheduleSave();
   }
 
   handleEdgeDeleted( { edges }: { edges: string[]; } ) {
-    this.graphOrchestrator.deleteEdges(this.activeTabState()!, edges);
+    this.graphOrchestrator.deleteEdges(this.requireActiveTabState(), edges);
     this.tabManager.scheduleSave();
   }
 
@@ -783,10 +714,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (!wasPhysicsEnabled) {
       this.updateState(state => state.isPhysicsEnabled.set(true), false);
     }
-    await this.graphOrchestrator.handleGroupNodeClicked(this.activeTabState()!, { nodeId, position });
+    await this.graphOrchestrator.handleGroupNodeClicked(this.requireActiveTabState(), { nodeId, position });
     this.tabManager.scheduleSave();
     if (!wasPhysicsEnabled) {
-      setTimeout(() => this.updateState(state => state.isPhysicsEnabled.set(false), false), 2500);
+      setTimeout(() => {
+        this.updateState(state => state.isPhysicsEnabled.set(false), false); 
+      }, 2500);
     }
   }
 }

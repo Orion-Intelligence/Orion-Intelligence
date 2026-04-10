@@ -17,6 +17,7 @@ export class RelationshipResolverService {
         }
       }
       catch {
+        // Ignore invalid URL input and continue normalization.
       }
     }
     normalized = normalized.replace(/^@+/, '');

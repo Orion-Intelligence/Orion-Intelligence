@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { HelperService } from '../../services/helper.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -15,6 +15,7 @@ import { ReportExportService } from '../../services/report-export.service';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { ProxyController } from '../../services/proxy-controller';
 @Component({
   selector: 'app-report-header',
   standalone: true,
@@ -23,18 +24,18 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   animations: [fadeInDashboardItem]
 })
 export class ReportHeaderComponent {
+  private readonly proxied_resource = inject(ProxyController);
+
   aiSuggestStatus = false;
   aiSuggestSummary = '';
   isExportChoiceOpen = false;
   readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
-
-  @Input() csv_object: string | object | null | undefined = null;
-  @Input() url: string | null | undefined = null;
-  @Input() lang: string = "";
-  @Input() content: string | null | undefined = null;
-  @Input() lang_detected: string = "";
-
-  @Output() languageUpdated = new EventEmitter<LeakResultItem | GeneralResultItem>();
+  readonly csv_object = input<string | object | null | undefined>(null);
+  readonly url = input<string | null | undefined>(null);
+  readonly lang = input<string>("");
+  readonly content = input<string | null | undefined>(null);
+  readonly lang_detected = input<string>("");
+  readonly languageUpdated = output<LeakResultItem | GeneralResultItem>();
 
   constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router, protected licenseServise: LicenseService, private reportExportService: ReportExportService) {
   }
@@ -76,11 +77,11 @@ export class ReportHeaderComponent {
     try {
       const payload = this.reportExportService.buildUnifiedGraphPayload({
         currentRouteUrl: this.route.url,
-        csvObject: this.csv_object,
-        url: this.url,
-        content: this.content,
-        lang: this.lang,
-        langDetected: this.lang_detected
+        csvObject: this.csv_object(),
+        url: this.url(),
+        content: this.content(),
+        lang: this.lang(),
+        langDetected: this.lang_detected()
       });
       this.reportExportService.exportByType(payload, 'graph_pdf');
     }
@@ -90,16 +91,17 @@ export class ReportHeaderComponent {
   }
 
   shareResult() {
-    this.helperService.shareResult(this.url || '');
+    this.helperService.shareResult(this.url() || '');
   }
 
   redirectToUrl() {
-    if (this.url) {
-      let url = this.url.trim();
+    const urlValue = this.url();
+    if (urlValue) {
+      let url = urlValue.trim();
       if (!/^https?:\/\//i.test(url)) {
         url = 'https://' + url;
       }
-      window.open(url, '_blank');
+      this.proxied_resource.open(url);
     }
   }
 
@@ -116,7 +118,7 @@ export class ReportHeaderComponent {
       singleInput
     });
     const fullUrl = `${baseUrl}?${params.toString()}`;
-    window.open(fullUrl, '_blank');
+    this.proxied_resource.open(fullUrl);
   }
 
   aiSuggest() {
@@ -127,28 +129,28 @@ export class ReportHeaderComponent {
     this.api.post<{
           result: string;
       }>('nlp/summarize/ai', {
-        data: [this.content]
+        data: [this.content()]
       }).subscribe({
         next: (response) => {
           this.aiSuggestStatus = true;
           this.aiSuggestSummary = response.result || 'No summary available';
           this.cdr.detectChanges();
         },
-        error: (_err) => {
-        }
+        error: (_err) => void 0
       });
   }
 
   langUpdate() {
     const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('lang', this.lang);
+    const lang = this.lang();
+    currentUrl.searchParams.set('lang', lang);
     const segments = currentUrl.pathname.split('/').filter(Boolean);
     const type = segments[segments.length - 3];
     const reportId = segments[segments.length - 1];
     const apiUrl = `search/${type}/${reportId}`;
     window.history.pushState({}, '', currentUrl.toString());
     this.api.get<GeneralResultItem | LeakResultItem>(apiUrl, {
-      params: new HttpParams().set('lang', this.lang)
+      params: new HttpParams().set('lang', lang)
     }).subscribe({
       next: (result) => {
         this.languageUpdated.emit(result);

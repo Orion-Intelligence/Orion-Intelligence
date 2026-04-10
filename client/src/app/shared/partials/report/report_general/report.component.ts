@@ -54,10 +54,10 @@ export class ReportComponent implements OnInit, AfterViewInit {
 
   get filteredArrayKeys(): string[] {
     return this.arrayKeys.filter(key => {
-      if (key === 'm_code_snippet' && 'm_code_snippet' in (this.resultItem as any)) {
+      if (key === 'm_code_snippet' && 'm_code_snippet' in (this.resultItem)) {
         return false;
       }
-      const val = (this.resultItem as any)?.[key];
+      const val = (this.resultItem)?.[key];
       return val != null && (!Array.isArray(val) || val.length > 0);
     });
   }
@@ -119,7 +119,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
         this.arrayKeys.push('m_content');
       }
       Object.keys(this.resultItem).forEach((key) => {
-        const value = (this.resultItem as any)[key];
+        const value = (this.resultItem)[key];
         if (Array.isArray(value) && value.length > 0 && key !== 'm_section') {
           this.arrayKeys.push(key);
         }
@@ -134,8 +134,8 @@ export class ReportComponent implements OnInit, AfterViewInit {
       return;
     }
     this.activeTab = tab;
-    if (this.resultItem && Array.isArray((this.resultItem as any)[tab])) {
-      this.listItems = (this.resultItem as any)[tab];
+    if (this.resultItem && Array.isArray((this.resultItem)[tab])) {
+      this.listItems = (this.resultItem)[tab];
     }
     else {
       this.listItems = [];

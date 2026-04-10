@@ -113,7 +113,7 @@ describe('User Manual Screenshot Flow', () => {
       for (const selector of selectors) {
         doc.querySelectorAll(selector).forEach((el) => {
           const node = el as HTMLElement;
-          if (!node || node.offsetParent === null) {
+          if (node?.offsetParent === null) {
             return;
           }
 
@@ -226,7 +226,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="login-page"]').should('be.visible');
     capture('login-page');
 
-    cy.contains('[data-cy="reset-password"], span.reset-password', 'Reset password?').click();
+    cy.get('[data-testid="reset-password-link"]').click();
     cy.get('[data-testid="reset-companymail"]').should('be.visible');
     capture('password-reset');
 
@@ -352,7 +352,8 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.visit('/dashboard/dump');
     ensureDashboardReady();
-    cy.get('input[name="username"][placeholder="Search leak URL"]').first().should('be.visible').type('leak');
+    cy.contains('h1', 'Dump Listing').should('be.visible');
+    cy.get('input[placeholder="Search leak URL"]').filter(':visible').first().should('be.visible').type('leak');
     cy.contains('button', 'Search').should('be.visible').click();
     cy.get('app-dump-list, table tbody tr').should('exist');
     capture('dump-listing');

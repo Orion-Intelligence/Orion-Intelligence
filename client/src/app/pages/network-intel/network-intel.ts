@@ -43,7 +43,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   dnsResult:       DnsResult | null = null;
   ipRows:          IpRowState[]     = [];
   shodanResult:    IpDetail | null  = null;
-  vulnerabilityResult: any | null   = null;
+  vulnerabilityResult: any   = null;
   geoIpListResult: DnsResult | null = null;
   geoIpRows:       IpRowState[]     = [];
   geoResult:       GeoResult | null    = null;
@@ -112,7 +112,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
 
     if (!this.formError) {
-      queueMicrotask(() => this.runToolbarSearch());
+      queueMicrotask(() => {
+        this.runToolbarSearch(); 
+      });
     }
     else {
       this.syncUrl();
@@ -586,10 +588,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
         tables: [
           {
             title: 'Resolved IPs',
-            values: this.dnsResult.ips.reduce((acc, ip, index) => {
+            values: this.dnsResult.ips.reduce<Record<string, string>>((acc, ip, index) => {
               acc[`IP ${index + 1}`] = ip;
               return acc;
-            }, {} as Record<string, string>)
+            }, {})
           },
           ...this.buildRawJsonTables(this.dnsResult, 'DNS Raw Result'),
           ...this.ipRows
@@ -667,10 +669,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
           tables: [
             {
               title: 'Resolved IPs',
-              values: this.geoIpRows.slice(0, 25).reduce((acc, row, index) => {
+              values: this.geoIpRows.slice(0, 25).reduce<Record<string, string>>((acc, row, index) => {
                 acc[`IP ${index + 1}`] = row.ip;
                 return acc;
-              }, {} as Record<string, string>)
+              }, {})
             },
             ...this.buildRawJsonTables(this.geoIpListResult, 'Geo IP Raw Result')
           ]
@@ -723,14 +725,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
           },
           {
             title: 'Detected Cameras',
-            values: cameras.slice(0, 25).reduce((acc, camera, index) => {
+            values: cameras.slice(0, 25).reduce<Record<string, string>>((acc, camera, index) => {
               acc[`Camera ${index + 1}`] = [
                 camera.ip || 'Unknown IP',
                 camera.port ? `:${camera.port}` : '',
                 camera.brand || camera.model || ''
               ].join(' ').trim();
               return acc;
-            }, {} as Record<string, string>)
+            }, {})
           },
           ...this.buildRawJsonTables(result, 'Geo Cameras Raw Result'),
           ...this.buildRawJsonTables(stats, 'Geo Cameras Live Stats')
@@ -934,12 +936,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private waitForPaint(): Promise<void> {
-    return new Promise(resolve => requestAnimationFrame(() => resolve()));
+    return new Promise(resolve => requestAnimationFrame(() => {
+      resolve(); 
+    }));
   }
 
   private joinValues(values: unknown[] | undefined | null): string {
     const normalized = (values || [])
-      .map(value => `${value ?? ''}`.trim())
+      .map(value => String(value ?? '').trim())
       .filter(Boolean);
 
     return normalized.length ? normalized.join(', ') : '-';
@@ -957,7 +961,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return Object.fromEntries(entries);
   }
 
-  private buildIpDetailTables(detail: IpDetail, prefix = ''): Array<{ title: string; values: Record<string, string> }> {
+  private buildIpDetailTables(detail: IpDetail, prefix = ''): { title: string; values: Record<string, string> }[] {
     const titlePrefix = prefix ? `${prefix} ` : '';
     const cameraPorts = this.countCameraPorts(detail);
     const iotPorts = this.countIotPorts(detail);
@@ -1023,7 +1027,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       },
       {
         title: `${titlePrefix}Detected Cameras`.trim(),
-        values: (detail.cameras || []).slice(0, 20).reduce((acc, camera, index) => {
+        values: (detail.cameras || []).slice(0, 20).reduce<Record<string, string>>((acc, camera, index) => {
           acc[`Camera ${index + 1}`] = [
             detail.ip || 'Unknown IP',
             camera.port ? `:${camera.port}` : '',
@@ -1031,13 +1035,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
             camera.service ? `(${camera.service})` : ''
           ].join(' ').trim();
           return acc;
-        }, {} as Record<string, string>)
+        }, {})
       },
       ...this.buildPortDetailTables(detail, prefix)
     ].filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
 
-  private buildPortDetailTables(detail: IpDetail, prefix = ''): Array<{ title: string; values: Record<string, string> }> {
+  private buildPortDetailTables(detail: IpDetail, prefix = ''): { title: string; values: Record<string, string> }[] {
     const titlePrefix = prefix ? `${prefix} ` : '';
 
     return (detail.ports || []).slice(0, 12).map((port, index) => ({
@@ -1102,7 +1106,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     })).filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
 
-  private buildRawJsonTables(source: unknown, title: string, chunkSize = 3500): Array<{ title: string; values: Record<string, string> }> {
+  private buildRawJsonTables(source: unknown, title: string, chunkSize = 3500): { title: string; values: Record<string, string> }[] {
     if (source === null || source === undefined) {
       return [];
     }
@@ -1119,7 +1123,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [];
     }
 
-    const tables: Array<{ title: string; values: Record<string, string> }> = [];
+    const tables: { title: string; values: Record<string, string> }[] = [];
     for (let offset = 0, part = 1; offset < json.length; offset += chunkSize, part += 1) {
       tables.push({
         title: `${title} ${part}`.trim(),
@@ -1189,6 +1193,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private countIotPorts(detail: IpDetail | null | undefined): number {
-    return (detail?.ports || []).filter((port: any) => port && port.is_iot).length;
+    return (detail?.ports || []).filter((port: any) => port?.is_iot).length;
   }
 }

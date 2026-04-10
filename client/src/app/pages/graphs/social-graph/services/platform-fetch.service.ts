@@ -75,11 +75,10 @@ export class PlatformFetchService {
           if (stateKey === 'followers' || stateKey === 'following' || stateKey === 'posts') {
             const tabState = activeTabState();
             if (tabState) {
-              graphOrchestrator.updateUserConnections(tabState).then();
+              void graphOrchestrator.updateUserConnections(tabState);
             }
           }
         },
-        error: () => { },
         complete: () => {
           fetchingState.setFetching((fetchingState as any)[stateKey], key, false);
           cancelMap.delete(key);

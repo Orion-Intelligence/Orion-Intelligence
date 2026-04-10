@@ -16,6 +16,7 @@ import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
 import { AppService } from '../../../../services/core/app/app.service';
 import { ScrollService } from '../../../services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
+import { ScanHelperMethodsService } from '../../../../pages/network-intel/network-intel-service.service';
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
@@ -44,7 +45,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   summary = '';
   isExpandedMetadata = true;
 
-  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
+  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>, private scanHelperMethodsService: ScanHelperMethodsService) {
   }
 
   ngOnInit(): void {
@@ -182,25 +183,16 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   }
 
   hasValue(value: unknown): boolean {
-    if (value === null || value === undefined) {
-      return false;
-    }
-    if (typeof value === 'string') {
-      return value.trim().length > 0;
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0;
-    }
-    return true;
+    return this.scanHelperMethodsService.hasRenderableValue(value);
   }
 
-  getMetadataRows(): Array<{ label: string; value: string; long?: boolean }> {
+  getMetadataRows(): { label: string; value: string; long?: boolean }[] {
     if (!this.resultItem) {
       return [];
     }
 
     const item = this.resultItem as any;
-    const rows: Array<{ label: string; value: string; long?: boolean }> = [];
+    const rows: { label: string; value: string; long?: boolean }[] = [];
     const add = (label: string, value: unknown, long = false) => {
       if (!this.hasValue(value)) {
         return;

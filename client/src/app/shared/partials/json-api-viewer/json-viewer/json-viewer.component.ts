@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-json-viewer',
@@ -6,17 +6,23 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   templateUrl: './json-viewer.component.html'
 })
-export class JsonViewerComponent implements OnInit {
+export class JsonViewerComponent {
+  readonly jsonInput = input<any>(undefined, { alias: 'json' });
+  readonly parentPathInput = input('', { alias: 'parentPath' });
   expandedMap = new Map<string, boolean>();
   excludedPaths = new Set([ '_title:trocador.app', 'm_meta_description', 'm_content', 'm_important_content' ]);
+  json: any;
+  readonly level = input(0);
+  parentPath = '';
+  readonly showRootBraces = input(false);
 
-  @Input() json: any;
-  @Input() level = 0;
-  @Input() parentPath = '';
-  @Input() showRootBraces = false;
-
-  ngOnInit(): void {
-    this.initExpansionState(this.json, this.parentPath);
+  constructor() {
+    effect(() => {
+      this.json = this.jsonInput();
+      this.parentPath = this.parentPathInput();
+      this.expandedMap.clear();
+      this.initExpansionState(this.json, this.parentPath);
+    });
   }
 
   initExpansionState(obj: any, path: string): void {

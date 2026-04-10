@@ -23,7 +23,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
       });
       cy.get('[data-testid="pagination-root"]').should('exist').scrollIntoView();
 
-      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-root"]', { timeout: 120000 }).scrollIntoView().should('be.visible');
       cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();

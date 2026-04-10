@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
 import { ResultComponent } from '../../shared/partials/result/result.component';
@@ -36,7 +36,7 @@ import { ScanHelperMethods } from '../../shared/partials/scan-helper-methods/sca
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
-export class CredentialComponent implements OnInit, AfterViewInit {
+export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private isSearchLoading = false;
   private isRankedLoading = false;
@@ -74,7 +74,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   get currentResultCount(): number {
-    return this.stealerlogCallbackModel?.Page_Count ?? 0;
+    return (this.stealerlogCallbackModel?.Result?.length ?? 0) + (this.rankedResult?.result?.length ?? 0);
   }
 
   ngOnInit(): void {
@@ -100,8 +100,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.dashboardService.consolidatedParamModel.q='';
     this.dashboardService.consolidatedParamModel.url='';
   }
-
-  ngAfterViewInit(): void { }
 
   triggerSearch(searchQuery: string): void {
     this.searchQuery = searchQuery;
@@ -183,7 +181,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.fetchRanked();
   }
 
-  resetFilters(_: void) {
+  resetFilters(_: undefined) {
     this.fetchSearchResults(true);
     this.fetchRanked();
   }

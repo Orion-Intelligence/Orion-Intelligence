@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, effect } from '@angular/core';
+import { Component, OnDestroy, effect, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription, Subject } from 'rxjs';
@@ -30,11 +30,9 @@ export class ScanHelperMethods implements OnDestroy {
   waybackSnapshots: WaybackSnapshot[] = [];
   cancelRequested = false;
   showInvalid = false;
-
-  @Input() isOpen = false;
-
-  @Output() close = new EventEmitter<void>();
-  @Output() search = new EventEmitter<string[]>();
+  readonly isOpen = input(false);
+  readonly close = output<undefined>();
+  readonly search = output<string[]>();
 
   get isLightTheme(): boolean {
     return this.appService.userSessionData()?.user?.theme === 'light-theme';
@@ -132,7 +130,9 @@ export class ScanHelperMethods implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subs.forEach(s => s.unsubscribe());
+    this.subs.forEach(s => {
+      s.unsubscribe();
+    });
     this.scanService.cancelCurrentScan?.();
     this.destroy$.next();
     this.destroy$.complete();
@@ -153,7 +153,8 @@ export class ScanHelperMethods implements OnDestroy {
 
   onClose(): void {
     this.resetState();
-    this.close.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.close.emit(undefined);
   }
 
   cancelScan(): void {
@@ -219,10 +220,14 @@ export class ScanHelperMethods implements OnDestroy {
   copy(text: string, message: string = 'Copied'): void {
     navigator.clipboard.writeText(text).then(() => {
       this.toast = message;
-      setTimeout(() => this.toast = '', 900);
+      setTimeout(() => {
+        this.toast = '';
+      }, 900);
     }).catch(() => {
       this.toast = 'Failed to copy';
-      setTimeout(() => this.toast = '', 1500);
+      setTimeout(() => {
+        this.toast = '';
+      }, 1500);
     });
   }
 

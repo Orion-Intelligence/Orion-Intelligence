@@ -45,9 +45,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
-  public groupedResults: { [index: string]: any[]; } = {};
+  public groupedResults: Record<string, any[]> = {};
   public response: any;
-  public pageCounts: { [key: string]: number; } = {};
+  public pageCounts: Record<string, number> = {};
   isGrouped = false;
   isIOC = true;
   isNetworkIntel = false;
@@ -209,7 +209,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetFilters(_: void) {
+  resetFilters(_: undefined) {
     this.fetchSearchResults(true);
   }
 

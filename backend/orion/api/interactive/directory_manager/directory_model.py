@@ -7,6 +7,7 @@ from orion.api.interactive.directory_manager.directory_shared_model.directory_ca
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (
     directory_param_model,
 )
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 
@@ -45,8 +46,8 @@ class directory_model:
                     {"leak_model_last_update": {"$gte": start_date, "$lt": end_date}},
                     {"geneic_model_last_update": {"$gte": start_date, "$lt": end_date}},
                 ]
-            except Exception:
-                pass
+            except Exception as ex:
+                log.g().e(f"Invalid directory date range '{params.mDateRange}': {ex}")
 
         total_count = await self._engine.count(db_url_data_model, query)
 

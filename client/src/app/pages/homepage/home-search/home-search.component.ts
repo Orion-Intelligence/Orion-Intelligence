@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, input } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,11 +11,12 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { WorldHeatmapComponent } from '../world-heatmap/world-heatmap.component';
+import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component";
 
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, CommonModule, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent],
+  imports: [FormsModule, NgOptimizedImage, CommonModule, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, DemoTourComponent],
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
@@ -36,9 +37,8 @@ export class HomeSearchComponent implements OnInit {
   public insightDragging = false;
   public insightDragY: number | null = null;
   insightTranslateY = 0;
-
-  @Input() isRoleAdmin: boolean = true;
-  @Input() hideToolsSection: boolean = false;
+  readonly isRoleAdmin = input<boolean>(true);
+  readonly hideToolsSection = input<boolean>(false);
 
   constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
 
@@ -127,18 +127,18 @@ export class HomeSearchComponent implements OnInit {
 
   clearSearchInput(): void {
     this.searchQuery = '';
-    const input = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
-    if (input) {
-      input.value = '';
-      input.focus();
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+    const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    if (inputElement) {
+      inputElement.value = '';
+      inputElement.focus();
+      inputElement.dispatchEvent(new Event('input', { bubbles: true }));
     }
   }
 
   closeMatchTypeDropdown(): void {
-    const el = this.matchTypeDropdownRef?.nativeElement;
-    if (el?.open) {
-      el.open = false;
+    const dropdownElement = this.matchTypeDropdownRef?.nativeElement;
+    if (dropdownElement?.open) {
+      dropdownElement.open = false;
     }
   }
 
@@ -164,11 +164,13 @@ export class HomeSearchComponent implements OnInit {
     this.computeInsightMax();
     const max = this.insightMax;
 
-    const el = event.currentTarget as HTMLElement;
+    const currentTargetElement = event.currentTarget as HTMLElement;
     try {
-      el.setPointerCapture(event.pointerId);
+      currentTargetElement.setPointerCapture(event.pointerId);
     }
-    catch {}
+    catch {
+      // Ignore pointer-capture failures on unsupported targets.
+    }
 
     this.insightDragging = true;
     this.insightMoved = false;
@@ -186,9 +188,15 @@ export class HomeSearchComponent implements OnInit {
   private attachWindowPointerListeners() {
     this.detachWindowPointerListeners();
 
-    const move = (e: PointerEvent) => this.onInsightPointerMove(e);
-    const up = (e: PointerEvent) => this.onInsightPointerUp(e);
-    const cancel = (e: PointerEvent) => this.onInsightPointerCancel(e);
+    const move = (e: PointerEvent) => {
+      this.onInsightPointerMove(e); 
+    };
+    const up = (e: PointerEvent) => {
+      this.onInsightPointerUp(e); 
+    };
+    const cancel = (e: PointerEvent) => {
+      this.onInsightPointerCancel(e); 
+    };
 
     window.addEventListener('pointermove', move, { passive: false });
     window.addEventListener('pointerup', up, { passive: false });
@@ -284,5 +292,4 @@ export class HomeSearchComponent implements OnInit {
       detailsEl.open = false;
     }
   }
-
 }

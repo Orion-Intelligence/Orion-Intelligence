@@ -5,6 +5,26 @@ import { DataSet } from 'vis-data';
 import { NetworkData, PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
+import { ensureStylesheet } from '../../../../shared/utils/ensure-stylesheet.util';
+
+interface GraphPosition { x: number; y: number; }
+interface NetworkInstance {
+  focus(nodeId: string, options?: unknown): void;
+  addEdgeMode(): void;
+  disableEditMode(): void;
+  unselectAll(): void;
+  setOptions(options: unknown): void;
+  redraw(): void;
+  getPositions(nodeIds: string[]): Record<string, GraphPosition>;
+  getScale(): number;
+  getPosition(nodeId: string): GraphPosition | null;
+  canvasToDOM(position: GraphPosition): GraphPosition;
+  on(event: string, callback: (...args: any[]) => void): void;
+  getNodeAt(position: unknown): string | number | null;
+  getViewPosition(): GraphPosition;
+  moveTo(options: unknown): void;
+  destroy(): void;
+}
 @Component({
   selector: 'app-network-graph',
   templateUrl: './network-graph.component.html',
@@ -17,12 +37,12 @@ import { SocialMapperStateService } from '../services/social-mapper-state.servic
 })
 export class NetworkGraphComponent implements OnInit, OnDestroy {
   private fetchingState = inject(FetchingStateService);
-  private networkInstance = signal<Network | null>(null);
+  private networkInstance = signal<NetworkInstance | null>(null);
   private visData = { nodes: new DataSet<any>(), edges: new DataSet<any>(), };
   private animationFrameId: number | null = null;
   private animationStartTime: number | null = null;
   private readonly minZoomScale = 0.35;
-  private minZoomLockPosition: Position | null = null;
+  private minZoomLockPosition: GraphPosition | null = null;
 
   protected readonly isCypressEnvironment = typeof window !== 'undefined' && !!(window as any).Cypress;
 
@@ -41,8 +61,8 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         position: Position;
     }>();
   followersShortcutClicked = output<string>();
-  dragStart = output<void>();
-  zoom = output<void>();
+  dragStart = output<undefined>();
+  zoom = output<undefined>();
   edgeAdded = output<{
         from: string;
         to: string;
@@ -173,7 +193,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private applySearchHighlight(network: Network, term: string): void {
+  private applySearchHighlight(network: NetworkInstance, term: string): void {
     const originalNodes = this.data().nodes;
     const updates: any[] = [];
     const rawTerm = term ?? '';
@@ -391,6 +411,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
     this.startAnimationLoop();
   }
 
@@ -672,7 +693,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       }
     });
     network.on('dragStart', () => {
-      this.dragStart.emit();
+      this.dragStart.emit(undefined);
     });
     network.on('zoom', (properties: any) => {
       const currentScale = network.getScale();
@@ -690,7 +711,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       else {
         this.minZoomLockPosition = currentPosition;
       }
-      this.zoom.emit();
+      this.zoom.emit(undefined);
     });
     this.networkInstance.set(network);
   }
@@ -724,7 +745,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateDeleteButtonPosition(network: Network, edgeId: string): void {
+  private updateDeleteButtonPosition(network: NetworkInstance, edgeId: string): void {
     const edgeData = (network as any).body.data.edges.get(edgeId);
     const renderedEdge = (network as any)?.body?.edges?.[edgeId];
     if (!edgeData?.from || !edgeData?.to) {

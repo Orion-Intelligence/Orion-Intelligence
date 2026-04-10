@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { IpDetail } from '../../../shared/model/network-intel/network-intel.model';
 import { ScanHelperMethodsService } from '../network-intel-service.service';
 
@@ -12,34 +13,36 @@ import { ScanHelperMethodsService } from '../network-intel-service.service';
 export class IpDetailComponent {
   private readonly renderedTopLevelKeys = new Set([ 'ip',  'status', 'ip_info', 'hostnames', 'country', 'city', 'organization', 'isp', 'asn', 'cloud_provider', 'cloud_region', 'cloud_service', 'hosting_type', 'web_technologies', 'vulnerabilities', 'misconfigurations', 'security', 'cdn', 'waf', 'paas', 'amazon_s3', 'load_balancer', 'hsts', 'web_server', 'favicon_hash', 'allowed_methods', 'cookies', 'title', 'http_headers', 'cache_headers', 'link_headers', 'camera_paths', 'cameras', 'is_camera', 'ports', 'open_ports', ]);
 
-  @Input({ required: true }) detail!: IpDetail;
+  readonly detailInput = input<IpDetail | undefined>(undefined, { alias: 'detail' });
+  detail!: IpDetail;
 
-  constructor(public ui: ScanHelperMethodsService) {}
+  constructor(public ui: ScanHelperMethodsService, private sanitizer: DomSanitizer) {
+    effect(() => {
+      const detail = this.detailInput();
+      if (detail !== undefined) {
+        this.detail = detail;
+      }
+    });
+  }
 
   get cameraPortCount(): number {
     return (this.detail?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;
   }
 
   get iotPortCount(): number {
-    return (this.detail?.ports || []).filter((port: any) => port && port.is_iot).length;
+    return (this.detail?.ports || []).filter((port: any) => port?.is_iot).length;
   }
 
   get hasCameraSignals(): boolean {
     return !!this.detail?.is_camera || this.cameraPortCount > 0 || (this.detail?.cameras?.length ?? 0) > 0;
   }
 
-  get extraDetailEntries(): Array<[string, string]> {
-    return this.ui.safeEntries(this.detail)
-      .filter(([key, value]) => !this.renderedTopLevelKeys.has(key) && this.hasRenderableValue(value))
-      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
-      .filter(([, value]) => Boolean(value));
+  get extraDetailEntries(): [string, string][] {
+    return this.buildRenderableEntries(this.detail, (key) => !this.renderedTopLevelKeys.has(key));
   }
 
-  get generalInfoExtraEntries(): Array<[string, string]> {
-    return this.ui.safeEntries(this.detail?.ip_info)
-      .filter(([key, value]) => !this.isDuplicateGeneralInfoField(key, value) && this.hasRenderableValue(value))
-      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
-      .filter(([, value]) => Boolean(value));
+  get generalInfoExtraEntries(): [string, string][] {
+    return this.buildRenderableEntries(this.detail?.ip_info, (key, value) => !this.isDuplicateGeneralInfoField(key, value));
   }
 
   formatVulnerability(value: any): string {
@@ -59,7 +62,7 @@ export class IpDetailComponent {
     return '';
   }
 
-  renderHeaderEntries(source: Record<string, any> | undefined | null): Array<[string, string]> {
+  renderHeaderEntries(source: Record<string, any> | undefined | null): [string, string][] {
     return this.ui.safeEntries(source)
       .map(([key, value]) => [key.trim(), this.formatDisplayValue(value)] as [string, string])
       .filter(([key, value]) => Boolean(key && value));
@@ -84,20 +87,19 @@ export class IpDetailComponent {
     return String(value).trim();
   }
 
+  getCameraIframeUrl(ip: string, port: string | number): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`http://${ip}:${port}`);
+  }
+
   private hasRenderableValue(value: any): boolean {
-    if (value === null || value === undefined) {
-      return false;
-    }
-    if (typeof value === 'string') {
-      return value.trim().length > 0;
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0;
-    }
-    if (typeof value === 'object') {
-      return Object.keys(value).length > 0;
-    }
-    return true;
+    return this.ui.hasRenderableValue(value);
+  }
+
+  private buildRenderableEntries(source: Record<string, any> | undefined | null, includeEntry: (key: string, value: any) => boolean): [string, string][] {
+    return this.ui.safeEntries(source)
+      .filter(([key, value]) => includeEntry(key, value) && this.hasRenderableValue(value))
+      .map(([key, value]) => [this.formatLabel(key), this.formatDisplayValue(value)] as [string, string])
+      .filter(([, value]) => Boolean(value));
   }
 
   private formatLabel(value: string): string {

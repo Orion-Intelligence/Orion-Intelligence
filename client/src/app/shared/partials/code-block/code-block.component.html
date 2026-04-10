@@ -19,7 +19,7 @@
   }
   @if (isExpanded) {
     <div class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-810)] p-3">
-      <code [innerText]="code" class="block whitespace-pre-wrap text-xs text-[var(--color-text1)]"></code>
+      <code [innerText]="code()" class="block whitespace-pre-wrap text-xs text-[var(--color-text1)]"></code>
     </div>
   }
 </div>

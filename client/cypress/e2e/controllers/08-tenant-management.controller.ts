@@ -305,7 +305,9 @@ export function waitForBlockingOverlayToClose() {
 
     const $scanCancel = $body.find('[data-testid="tenant-scan-cancel"]:visible').first();
     if ($scanCancel.length) {
-      cy.wrap($scanCancel).scrollIntoView().click();
+      cy.wrap($scanCancel).scrollIntoView().then(($btn) => {
+        ($btn.get(0) as HTMLElement).click();
+      });
     }
 
     const $overlay = $body.find('div.fixed.inset-0.z-\\[9999\\]');

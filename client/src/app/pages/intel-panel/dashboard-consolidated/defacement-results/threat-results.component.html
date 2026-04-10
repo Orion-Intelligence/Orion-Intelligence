@@ -1,11 +1,11 @@
 <div data-testid="defacement-report" class="ui-consolidated-main max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
   <div class="flex cursor-pointer items-center justify-between max-[640px]:flex-wrap max-[640px]:gap-[10px]" (click)="toggleResultsBarCollapse()">
     <div data-testid="defacement-report-title" class="flex text-[16px] font-bold text-[var(--color-text1)]">
-      {{ results_defacement ? 'IP Threat Report' : 'Stealer Log Report' }}
+      {{ results_defacement() ? 'IP Threat Report' : 'Stealer Log Report' }}
     </div>
 
     <div class="mr-[-10px] flex items-center gap-[20px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
-      @if (results_defacement?.Result?.length && (threatTypeCounts | keyvalue).length > 0) {
+      @if (results_defacement()?.Result?.length && (threatTypeCounts | keyvalue).length > 0) {
         @for (type of threatTypeCounts | keyvalue; track type.key) {
           <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick(type.key, $event)">
             {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
@@ -14,7 +14,7 @@
         }
       }
 
-      @if (results_stealerlog?.Result?.length; as slCount) {
+      @if (results_stealerlog()?.Result?.length; as slCount) {
         <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick('stealerlog', $event)">
           stealerlog ({{ slCount >= 100 ? '100+' : slCount }})
           <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  @if (isExpandable && results_defacement?.Result; as defResults) {
+  @if (isExpandable && results_defacement()?.Result; as defResults) {
     @for (item of defResults.slice(0, showLimitDefacement); track item.m_hash || item.m_url || $index; let i = $index; let last = $last) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
         <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
@@ -125,8 +125,8 @@
     }
   }
 
-  @if (isExpandable && results_stealerlog?.Result; as stResults) {
-    @if (results_defacement?.Result?.length) {
+  @if (isExpandable && results_stealerlog()?.Result; as stResults) {
+    @if (results_defacement()?.Result?.length) {
       <hr class="mt-[16px] h-px border-0 bg-[var(--color-divider)]" />
     }
     @for (item of stResults.slice(0, showLimitStealer); track item['hash'] || item['url'] || item['username'] || $index; let i = $index) {

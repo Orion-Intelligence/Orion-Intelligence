@@ -25,14 +25,16 @@ export class EntityManagerComponent {
   isCollapsed = input.required<boolean>();
   isSmallScreen = input.required<boolean>();
   activeTabState = input.required<TabState>();
-  toggle = output<void>();
+  toggle = output<undefined>();
   deleteEntityRequested = output<string>();
   addEntityModalData = signal<AddEntityData | null>(null);
 
   constructor() {
     this.destroyRef.onDestroy(() => {
       this.isDestroyed = true;
-      Array.from(this.extractionTasks.keys()).forEach(id => this.cleanupExtractionTask(id));
+      Array.from(this.extractionTasks.keys()).forEach(id => {
+        this.cleanupExtractionTask(id);
+      });
     });
 
     effect(() => {
@@ -54,7 +56,9 @@ export class EntityManagerComponent {
   }
 
   ngOnDestroy() {
-    Array.from(this.extractionTasks.keys()).forEach(id => this.cleanupExtractionTask(id));
+    Array.from(this.extractionTasks.keys()).forEach(id => {
+      this.cleanupExtractionTask(id);
+    });
   }
 
   openAddEntityModal(type: CustomEntity['type']) {

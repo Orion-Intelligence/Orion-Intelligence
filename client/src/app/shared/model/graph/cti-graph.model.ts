@@ -1,24 +1,25 @@
 import { Color, Node } from 'vis-network';
+type GraphNodeColor = string | Color;
 export interface ExtendedNode extends Node {
     isGroup?: boolean;
     subNodes?: string[];
     nodeType?: string;
     propertyKey?: string | null;
 }
-export type NodeVisualState = {
-    color?: string | Color;
+export interface NodeVisualState {
+    color?: GraphNodeColor;
     borderWidth?: number;
     borderWidthSelected?: number;
     image?: string;
-};
-export type GraphResultItem = {
+}
+export interface GraphResultItem {
     vertex: any;
     edge?: any;
     path?: {
         vertices?: any[];
     };
-};
-export type GraphSessionState = {
+}
+export interface GraphSessionState {
     selectedType: string;
     singleInput: string;
     propertyType: string;
@@ -34,9 +35,9 @@ export type GraphSessionState = {
     isGraphView: boolean;
     isListingsCollapsed: boolean;
     expandEnabled: boolean;
-};
-export type GraphSessionTab = {
+}
+export interface GraphSessionTab {
     id: string;
     name: string;
     state: GraphSessionState;
-};
+}

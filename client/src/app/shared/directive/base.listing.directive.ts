@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, take } from 'rxjs';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { ScrollService } from '../services/scroll.service';
 import { FilterModel } from '../model/filter/filter.model';
 export interface BaseListResponse {
     total_count: number;
@@ -16,6 +17,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
   protected route = inject(ActivatedRoute);
   protected router = inject(Router);
   protected dashboard = inject(DashboardService);
+  protected scrollService = inject(ScrollService);
   protected destroyRef = inject(DestroyRef);
 
   selectedFilters: Record<string, string | null> = {};
@@ -77,10 +79,14 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
 
   applyFilters(filters: Record<string, string | null>): void {
     this.selectedFilters = filters;
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
     this.reload();
   }
 
   onSearchSubmit(): void {
+    this.scrollService.clearSavedPosition();
+    this.scrollService.scrollReportToTop();
     this.reload();
   }
 
@@ -88,7 +94,9 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
     this.selectedFilters = {};
     Object.keys(this.filterModel.filters).forEach(key => delete (this.filterModel.filters as any)[key].selected);
     const currentUrl = this.router.url.split('?')[0];
-    this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => this.reload());
+    this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => {
+      this.reload(); 
+    });
   }
 
   protected reload(): void {

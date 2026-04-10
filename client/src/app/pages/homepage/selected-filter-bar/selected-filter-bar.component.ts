@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, OnInit, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
@@ -19,11 +19,9 @@ export class SelectedFilterBarComponent implements OnInit {
   isFilterBarExpanded: boolean = false;
   maxVisibleTags = 8;
   Object: any;
-
-  @Input() showSorting!: boolean;
-
-  @Output() clearAll = new EventEmitter<void>();
-  @Output() searchFiltersChange = new EventEmitter<void>();
+  readonly showSorting = input.required<boolean>();
+  readonly clearAll = output<undefined>();
+  readonly searchFiltersChange = output<undefined>();
 
   get selectedFilters() {
     return this.dashboardService.selectedFilters();
@@ -51,7 +49,8 @@ export class SelectedFilterBarComponent implements OnInit {
       return updated;
     });
     this.app_service.set('matchType', "or");
-    this.clearAll.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.clearAll.emit(undefined);
   }
 
   clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
@@ -66,7 +65,8 @@ export class SelectedFilterBarComponent implements OnInit {
     if (scope=='all'){
       this.app_service.set('matchType', "or");
     }
-    this.clearAll.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.clearAll.emit(undefined);
   }
 
   removeEntityTypeFilterTag(tagToRemoveId: string) {
@@ -81,7 +81,8 @@ export class SelectedFilterBarComponent implements OnInit {
       }
     }
     this.app_service.set('entityfilterCategories', categories);
-    this.searchFiltersChange.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.searchFiltersChange.emit(undefined);
   }
 
   toggleFilterBarCollapse(): void {

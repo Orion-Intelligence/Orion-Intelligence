@@ -10,7 +10,6 @@ export function waitForSidebar() {
 }
 
 export function openSidebar() {
-  cy.wait(500)
   cy.scrollDashboardToTop()
   cy.openSideFilter();
   waitForSidebar();
@@ -66,8 +65,7 @@ export function openAnyMatchingReport(option: string) {
         .should('be.visible')
         .click();
 
-      cy.go('back');
-      cy.wait(1000);
+      cy.get('[data-testid="dashboard-header-back"]').click();
       cy.scrollDashboardToTop()
     });
   };

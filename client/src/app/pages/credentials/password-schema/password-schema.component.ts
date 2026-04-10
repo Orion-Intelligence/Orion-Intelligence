@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Component, HostListener, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
@@ -10,11 +10,9 @@ import { AppService } from '../../../services/core/app/app.service';
 })
 export class PasswordSchemaComponent {
   filter: PasswordSchemaFilter = { minLength: null, maxLength: null, hasAlphabets: false, hasNumbers: false, hasSpecialChars: false };
-
-  @Input() isOpen = false;
-
-  @Output() close = new EventEmitter<void>();
-  @Output() search = new EventEmitter<PasswordSchemaFilter>();
+  readonly isOpen = input(false);
+  readonly close = output<undefined>();
+  readonly search = output<PasswordSchemaFilter>();
 
   constructor(private appService: AppService) {}
 
@@ -25,18 +23,21 @@ export class PasswordSchemaComponent {
   onSearch() {
     this.normalizeRange();
     this.search.emit(this.filter);
-    this.close.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.close.emit(undefined);
   }
 
   onClose() {
-    this.close.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.close.emit(undefined);
   }
 
   @HostListener('document:click', ['$event'])
   onOutsideClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (this.isOpen && target.classList.contains('password-schema-overlay')) {
-      this.close.emit();
+    const eventTargetElement = event.target as HTMLElement;
+    if (this.isOpen() && eventTargetElement.classList.contains('password-schema-overlay')) {
+      // TODO: The 'emit' function requires a mandatory void argument
+      this.close.emit(undefined);
     }
   }
 

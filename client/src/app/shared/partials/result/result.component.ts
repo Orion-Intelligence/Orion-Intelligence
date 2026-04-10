@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, inject, input, output } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EmptyResultComponent } from '../empty-result/empty-result.component';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +26,7 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
+import { ProxyController } from '../../services/proxy-controller';
 
 @Component({
   selector: 'app-result',
@@ -35,10 +36,17 @@ import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/inte
   imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
+  private readonly proxied_resource = inject(ProxyController);
+
   protected readonly SortType = SortType;
   protected readonly Category = Category;
   protected readonly query = query;
 
+  readonly resultCountInput = input<number | undefined>(undefined, { alias: 'result_count' });
+  readonly searchQueryInput = input('', { alias: 'searchQuery' });
+  readonly consolidatedInput = input(false, { alias: 'consolidated' });
+  readonly filterModelInput = input<FilterModel | undefined>(undefined, { alias: 'filterModel' });
+  readonly activeTabInput = input('IOCs', { alias: 'activeTab' });
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
   @ViewChild('sortMenuRef', { static: false }) sortMenuRef?: ElementRef;
@@ -65,39 +73,50 @@ export class ResultComponent implements OnInit, OnChanges {
     }
     return "Match any term";
   });
-
-  @Input() result_count_enabled: boolean = true;
-  @Input() result_count!: number;
-  @Input() isLoading!: boolean;
-  @Input() showNoResult: boolean = true;
-  @Input() isList!: boolean;
-  @Input() isTool: boolean = true;
-  @Input() showEmptyQuery = false;
-  @Input() searchQuery = '';
-  @Input() analyticsToggle = false;
-  @Input() list_grid = false;
-  @Input() shrinkmenu = false;
-  @Input() disableScroll = false;
-  @Input() type!: Category;
-  @Input() discussion = false;
-  @Input() consolidated = false;
-  @Input() domain = false;
-  @Input() showTabs = true;
-  @Input() filterModel!: FilterModel;
-  @Input() showSorting: boolean = true;
-  @Input() showSelectedFilters: boolean = true;
-  @Input() activeTab: string = 'IOCs';
-
-  @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
-  @Output() resetFilter = new EventEmitter<void>();
-  @Output() onToggleSwitch = new EventEmitter<string>();
-  @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
-  @Output() reloadData = new EventEmitter<void>();
-  @Output() updateQuery = new EventEmitter<string>();
-  @Output() onToggleSort = new EventEmitter<SortType>();
+  readonly result_count_enabled = input<boolean>(true);
+  result_count!: number;
+  readonly isLoading = input(false);
+  readonly showNoResult = input<boolean>(true);
+  readonly isList = input(false);
+  readonly isTool = input<boolean>(true);
+  readonly showEmptyQuery = input(false);
+  searchQuery = '';
+  readonly analyticsToggle = input(false);
+  readonly list_grid = input(false);
+  readonly shrinkmenu = input(false);
+  readonly disableScroll = input(false);
+  readonly type = input<Category | undefined>(undefined);
+  readonly discussion = input(false);
+  consolidated = false;
+  readonly domain = input(false);
+  readonly showTabs = input(true);
+  filterModel!: FilterModel;
+  readonly showSorting = input<boolean>(true);
+  readonly showSelectedFilters = input<boolean>(true);
+  activeTab: string = 'IOCs';
+  readonly reloadSearchFilters = output<FilterCategory[]>();
+  readonly resetFilter = output<undefined>();
+  readonly onToggleSwitch = output<string>();
+  readonly reloadFilters = output<Record<string, string | null>>();
+  readonly reloadData = output<undefined>();
+  readonly updateQuery = output<string>();
+  readonly onToggleSort = output<SortType>();
 
   constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+    effect(() => {
+      const resultCount = this.resultCountInput();
+      if (resultCount !== undefined) {
+        this.result_count = resultCount;
+      }
+      this.searchQuery = this.searchQueryInput();
+      this.consolidated = this.consolidatedInput();
+      const filterModel = this.filterModelInput();
+      if (filterModel !== undefined) {
+        this.filterModel = filterModel;
+      }
+      this.activeTab = this.activeTabInput();
+    });
   }
 
   ngOnChanges(_: SimpleChanges): void {
@@ -114,12 +133,12 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onTabClick(event: Event): void {
-    const target = event.target as HTMLElement | null;
-    const tabEl = target?.closest('[data-tab]') as HTMLElement | null;
-    if (!tabEl) {
+    const eventTargetElement = event.target as HTMLElement | null;
+    const tabElement = eventTargetElement?.closest('[data-tab]') as HTMLElement | null;
+    if (!tabElement) {
       return;
     }
-    const tab = tabEl.getAttribute('data-tab') || '';
+    const tab = tabElement.getAttribute('data-tab') || '';
     if (!tab || tab === this.activeTab) {
       return;
     }
@@ -169,7 +188,8 @@ export class ResultComponent implements OnInit, OnChanges {
     this.result_triggered = true;
     this.showScans = false;
     this.updateQuery.emit(query);
-    this.reloadData.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.reloadData.emit(undefined);
     this.init_domains();
   }
 
@@ -232,7 +252,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   reloadFilter() {
-    this.reloadFilters.emit();
+    this.reloadFilters.emit({ ...this.dashboardService.selectedFilters() });
   }
 
   init_domains() {
@@ -252,7 +272,7 @@ export class ResultComponent implements OnInit, OnChanges {
     const url = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan'], {
       queryParams: { domain }
     }));
-    window.open(url, '_blank');
+    this.proxied_resource.open(url);
   }
 
   normalizeDisplayUrl(url?: string | null): string {
@@ -269,9 +289,9 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onSearchInput(event: Event): void {
-    const target = event.target as HTMLInputElement | null;
-    if (target) {
-      this.local_query = target.value;
+    const inputElement = event.target as HTMLInputElement | null;
+    if (inputElement) {
+      this.local_query = inputElement.value;
     }
     this.homeSearchService.handleSearchInput(event);
   }
@@ -279,9 +299,9 @@ export class ResultComponent implements OnInit, OnChanges {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     this.homeSearchService.handleDocumentClick(event, this.filtersWrapperRef, this.searchInputRef);
-    const target = event.target as Node | null;
-    const isInsideSort = !!(target && this.sortMenuRef?.nativeElement?.contains(target));
-    const isInsideSearch = !!(target && this.searchMenuRef?.nativeElement?.contains(target));
+    const eventTargetNode = event.target as Node | null;
+    const isInsideSort = !!(eventTargetNode && this.sortMenuRef?.nativeElement?.contains(eventTargetNode));
+    const isInsideSearch = !!(eventTargetNode && this.searchMenuRef?.nativeElement?.contains(eventTargetNode));
     if (!isInsideSort && !isInsideSearch) {
       this.closeMenus();
     }
@@ -290,10 +310,10 @@ export class ResultComponent implements OnInit, OnChanges {
   clearSearchInput(): void {
     this.searchQuery = '';
     this.local_query = '';
-    const input = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
-    if (input) {
-      input.value = '';
-      input.focus();
+    const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    if (inputElement) {
+      inputElement.value = '';
+      inputElement.focus();
     }
     this.updateQuery.emit('');
     this.init_domains();

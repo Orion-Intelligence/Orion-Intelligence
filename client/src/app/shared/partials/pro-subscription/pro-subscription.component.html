@@ -80,7 +80,7 @@
             Proceed to Payment
           </button>
 
-          @if (!permanent) {
+          @if (!permanent()) {
             <button type="button" class="w-full rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text3)]" (click)="closePopup()">
               Close
             </button>

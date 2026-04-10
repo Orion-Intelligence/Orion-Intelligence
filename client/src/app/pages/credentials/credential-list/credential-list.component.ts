@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../shared/animations/row.animations';
@@ -13,23 +13,29 @@ import { ExpandedRowComponent } from '../expanded-row/expanded-row.component';
   imports: [ExpandedRowComponent, DatePipe]
 })
 export class CredentialListComponent {
+  readonly rankedResultInput = input(new RankedCallbackModel(), { alias: 'rankedResult' });
   pageSize: number = 500;
   thretsExpandedRows = new Set<number>();
   stealersExpandedRows = new Set<number>();
+  readonly stealerData$ = input.required<StealerLogCallbackModel>();
+  readonly currentPage = input<number>(1);
+  readonly type = input<string>('credential');
+  readonly isLoading = input.required<boolean>();
+  rankedResult: RankedCallbackModel = new RankedCallbackModel();
+  readonly searchQuery = input<string>('');
 
-  @Input() stealerData$!: StealerLogCallbackModel;
-  @Input() currentPage: number = 1;
-  @Input() type: string = 'credential';
-  @Input() isLoading!: boolean;
-  @Input() rankedResult: RankedCallbackModel = new RankedCallbackModel();
-  @Input() searchQuery: string = '';
+  constructor() {
+    effect(() => {
+      this.rankedResult = this.rankedResultInput();
+    });
+  }
 
   trackByIndex(index: number): number {
     return index;
   }
 
   getDisplayIndex(index: number): number {
-    const currentPage = Number(this.currentPage || 1);
+    const currentPage = Number(this.currentPage() || 1);
     return ((Math.max(currentPage, 1) - 1) * this.pageSize) + index + 1;
   }
 

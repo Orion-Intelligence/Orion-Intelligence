@@ -1,4 +1,5 @@
-<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
+<div id="dashboard-consolidated">
+  <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
   (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
   [activeTab]="isIOC ? 'IOCs' : (isNetworkIntel ? 'Network Intelligence' : 'Deep Search')" [isLoading]="isLoading()" [searchQuery]="query"
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
@@ -127,4 +128,5 @@
     }
   }
 
+</div>
 </div>

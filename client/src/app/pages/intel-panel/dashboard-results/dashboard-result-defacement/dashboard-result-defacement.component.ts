@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, effect, inject, input } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -8,6 +8,7 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { ProxyController } from '../../../../shared/services/proxy-controller';
 @Component({
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
@@ -15,18 +16,25 @@ import { AuthService } from '../../../../services/authetication/auth.service';
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultDefacementComponent implements OnInit, AfterViewInit {
+  private readonly proxied_resource = inject(ProxyController);
+
+  readonly searchResultsInput = input<DefacementResultItem[]>([], { alias: 'searchResults' });
+  readonly isLoadingInput = input(true, { alias: 'isLoading' });
   currentUrl = '';
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   queryParams: { ci: string; } | undefined;
   isCollapsed = true;
-
-  @Input() searchResults: DefacementResultItem[] = [];
-  @Input() isExpandAble: boolean = false;
-  @Input() isList: boolean = true;
-  @Input() isLoading: boolean = true;
+  searchResults: DefacementResultItem[] = [];
+  readonly isExpandAble = input<boolean>(false);
+  readonly isList = input<boolean>(true);
+  isLoading: boolean = true;
 
   constructor(protected authService: AuthService, public appService: AppService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+    effect(() => {
+      this.searchResults = this.searchResultsInput();
+      this.isLoading = this.isLoadingInput();
+    });
   }
 
   ngOnInit() {
@@ -98,7 +106,6 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       return;
     }
 
-    window.open(url, '_blank');
+    this.proxied_resource.open(url);
   }
-
 }
