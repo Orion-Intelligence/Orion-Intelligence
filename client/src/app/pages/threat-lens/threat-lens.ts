@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom, Observable } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensMapData, ThreatLensMiddlewareService, ThreatLensRequestPayload } from './threat-lens-middleware.service';
-import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, extractArcSegment, getFeatureAnchor,getArcPointAtProgress } from './threat-lens-map.utils';
+import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor, getArcPointAtProgress } from './threat-lens-map.utils';
 import { SidebarService } from '../../shared/services/sidebar.service';
 import { FilterModel } from '../../shared/model/filter/filter.model';
 import { FiltersComponent } from "../../shared/partials/filters/filters.component";
@@ -46,7 +46,6 @@ type AnimatedArcDescriptor = {
 })
 export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewNode?: ElementRef<HTMLDivElement>;
-  protected readonly filterModel: FilterModel=consolidated_filters;
   private view: any | null = null;
   private countryLayer: any | null = null;
   private newsGraphicsLayer: any | null = null;
@@ -72,11 +71,12 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private readonly arcBatchDuration = 6000;
   private readonly countryNameFields = ['COUNTRY', 'COUNTRYAFF', 'NAME', 'ADMIN', 'SOVEREIGNT'];
   private activePulseGraphics: any[] = [];
-private readonly segmentCount = 6;
-private movingDotGraphics: any[] = [];
-  
- isFilterOpen$: Observable<boolean>;
+  private readonly segmentCount = 6;
+  private movingDotGraphics: any[] = [];
 
+  protected readonly filterModel: FilterModel=consolidated_filters;
+
+  isFilterOpen$: Observable<boolean>;
   searchTerm = '';
   currentQuery = '';
   selectedCountryName = '';
@@ -88,7 +88,7 @@ private movingDotGraphics: any[] = [];
   selectedCountryBreakdown: SelectedCountryCategoryCount[] = [];
 
   constructor(private ngZone: NgZone, private threatLensMiddleware: ThreatLensMiddlewareService, protected sidebarService: SidebarService) {
-     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+    this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -264,8 +264,6 @@ private movingDotGraphics: any[] = [];
         : 'Loading complete threat lens dataset...';
     });
 
-    // The match-all load can be very large, so keep the first render responsive
-    // and let explicit searches use the same fast path.
     const loadAllPages = false;
     let statsResult: { ok: true; stats: ThreatLensMapData } | { ok: false; stats: null };
     try {
@@ -491,66 +489,64 @@ private movingDotGraphics: any[] = [];
   }
 
   private startArcAnimation(): void {
-  if (!this.animatedArcGraphicsLayer || !this.animatedArcs.length) {
-    return;
-  }
+    if (!this.animatedArcGraphicsLayer || !this.animatedArcs.length) {
+      return;
+    }
 
-  this.ngZone.runOutsideAngular(() => {
-    const animate = (timestamp: number) => {
-      if (!this.animatedArcGraphicsLayer) {
-        this.arcAnimationFrame = null;
-        return;
-      }
-
-      if (!this.batchAnimationStartTime) {
-        this.batchAnimationStartTime = timestamp;
-      }
-
-      // throttle (performance)
-      if (this.lastAnimationTick && (timestamp - this.lastAnimationTick) < 40) {
-        this.arcAnimationFrame = requestAnimationFrame(animate);
-        return;
-      }
-
-      this.lastAnimationTick = timestamp;
-
-      const batch = this.getCurrentArcBatch(timestamp);
-
-      // if batch changed → recreate dots
-      if (batch.index !== this.visibleBatchIndex) {
-        this.renderArcBatch(batch.index, batch.items);
-      }
-
-      let index = 0;
-
-      for (const arc of batch.items) {
-        const progress = ((timestamp + (arc.animationOffset * arc.animationDuration)) % arc.animationDuration) / arc.animationDuration;
-
-        const point = getArcPointAtProgress(arc.arcPoints, progress);
-
-        const graphic = this.movingDotGraphics[index];
-
-        if (point && graphic) {
-          const [lon, lat, z] = point;
-
-          graphic.geometry = {
-            type: 'point',
-            longitude: lon,
-            latitude: lat,
-            z: z,
-            spatialReference: { wkid: 4326 }
-          };
+    this.ngZone.runOutsideAngular(() => {
+      const animate = (timestamp: number) => {
+        if (!this.animatedArcGraphicsLayer) {
+          this.arcAnimationFrame = null;
+          return;
         }
 
-        index++;
-      }
+        if (!this.batchAnimationStartTime) {
+          this.batchAnimationStartTime = timestamp;
+        }
+
+        if (this.lastAnimationTick && (timestamp - this.lastAnimationTick) < 40) {
+          this.arcAnimationFrame = requestAnimationFrame(animate);
+          return;
+        }
+
+        this.lastAnimationTick = timestamp;
+
+        const batch = this.getCurrentArcBatch(timestamp);
+
+        if (batch.index !== this.visibleBatchIndex) {
+          this.renderArcBatch(batch.index, batch.items);
+        }
+
+        let index = 0;
+
+        for (const arc of batch.items) {
+          const progress = ((timestamp + (arc.animationOffset * arc.animationDuration)) % arc.animationDuration) / arc.animationDuration;
+
+          const point = getArcPointAtProgress(arc.arcPoints, progress);
+
+          const graphic = this.movingDotGraphics[index];
+
+          if (point && graphic) {
+            const [lon, lat, z] = point;
+
+            graphic.geometry = {
+              type: 'point',
+              longitude: lon,
+              latitude: lat,
+              z: z,
+              spatialReference: { wkid: 4326 }
+            };
+          }
+
+          index++;
+        }
+
+        this.arcAnimationFrame = requestAnimationFrame(animate);
+      };
 
       this.arcAnimationFrame = requestAnimationFrame(animate);
-    };
-
-    this.arcAnimationFrame = requestAnimationFrame(animate);
-  });
-}
+    });
+  }
 
   private stopArcAnimation(): void {
     if (this.arcAnimationFrame !== null) {
@@ -654,60 +650,56 @@ private movingDotGraphics: any[] = [];
     this.ngZone.run(() => {
       this.arcCount = items.length;
     });
-// 🔥 Prepare reusable pulse graphics (only once per batch)
-this.activePulseGraphics = [];
+    this.activePulseGraphics = [];
 
-const totalGraphics = items.length * this.segmentCount;
+    const totalGraphics = items.length * this.segmentCount;
 
-for (let i = 0; i < totalGraphics; i++) {
-  this.activePulseGraphics.push({
-    geometry: null,
-    symbol: {
-      type: 'line-3d',
-      symbolLayers: [
-        {
-          type: 'path',
-          profile: 'quad',
-          width: 6,
-          cap: 'round',
-          material: { color: [255, 255, 255, 0.3] },
-          anchor: 'center',
-        }
-      ],
-    },
-  });
-}
-
-// clear and add once (NOT per frame)
-this.animatedArcGraphicsLayer.removeAll();
-this.animatedArcGraphicsLayer.addMany(this.activePulseGraphics);
-// 🔥 Create moving dots (one per arc)
-this.movingDotGraphics = [];
-
-for (const arc of items) {
-  const graphic = {
-    geometry: null,
-    symbol: {
-      type: 'point-3d',
-      symbolLayers: [
-        {
-          type: 'object',
-          resource: { primitive: 'sphere' },
-          width: 120000,
-          height: 120000,
-          depth: 120000,
-          material: { color: [...arc.color, 1] },
-        }
-      ]
+    for (let i = 0; i < totalGraphics; i++) {
+      this.activePulseGraphics.push({
+        geometry: null,
+        symbol: {
+          type: 'line-3d',
+          symbolLayers: [
+            {
+              type: 'path',
+              profile: 'quad',
+              width: 6,
+              cap: 'round',
+              material: { color: [255, 255, 255, 0.3] },
+              anchor: 'center',
+            }
+          ],
+        },
+      });
     }
-  };
 
-  this.movingDotGraphics.push(graphic);
-}
+    this.animatedArcGraphicsLayer.removeAll();
+    this.animatedArcGraphicsLayer.addMany(this.activePulseGraphics);
+    this.movingDotGraphics = [];
 
-// clear and add once
-this.animatedArcGraphicsLayer.removeAll();
-this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
-    
+    for (const arc of items) {
+      const graphic = {
+        geometry: null,
+        symbol: {
+          type: 'point-3d',
+          symbolLayers: [
+            {
+              type: 'object',
+              resource: { primitive: 'sphere' },
+              width: 120000,
+              height: 120000,
+              depth: 120000,
+              material: { color: [...arc.color, 1] },
+            }
+          ]
+        }
+      };
+
+      this.movingDotGraphics.push(graphic);
+    }
+
+    this.animatedArcGraphicsLayer.removeAll();
+    this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
+
   }
 }
