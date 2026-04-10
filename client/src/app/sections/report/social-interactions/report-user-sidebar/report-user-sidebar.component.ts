@@ -15,7 +15,6 @@ export class ReportUserSidebarComponent {
   private readonly router = inject(Router);
 
   isOpen = false;
-  hasOpened = false;
   isLoading = false;
   errorMessage = '';
   userData: PublicUserData | null = null;
@@ -31,7 +30,6 @@ export class ReportUserSidebarComponent {
       return;
     }
     this.userId = userId;
-    this.hasOpened = true;
     this.isOpen = true;
     window.requestAnimationFrame(() => this.loadUser());
   }

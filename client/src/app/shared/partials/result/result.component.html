@@ -138,7 +138,7 @@
     </div>
   }
 
-  @if (filterModel && !shrinkmenu()) {
+  @if (filterModel && !shrinkmenu() && (isFilterOpen$ | async)) {
     <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
