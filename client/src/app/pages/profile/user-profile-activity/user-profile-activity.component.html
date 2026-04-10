@@ -97,7 +97,7 @@
                     }
                   </div>
                   @if (item.route_path) {
-                    <button type="button" (click)="openThread(item)" class="inline-flex shrink-0 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35">
+                    <button data-testid="user-profile-open-thread" type="button" (click)="openThread(item)" class="inline-flex shrink-0 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35">
                       Open Thread
                     </button>
                   }

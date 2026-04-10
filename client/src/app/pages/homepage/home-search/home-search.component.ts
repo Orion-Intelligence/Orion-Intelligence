@@ -20,6 +20,7 @@ import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
+  private readonly allowedTabs = ['IOCs', 'Deep Search', 'Network Intelligence'];
   private insightPointerId: number | null = null;
   private insightStartY = 0;
   private insightStartOffset = 0;
@@ -37,7 +38,7 @@ export class HomeSearchComponent implements OnInit {
   public insightDragging = false;
   public insightDragY: number | null = null;
   insightTranslateY = 0;
-  selectedTab='All';
+  selectedTab='IOCs';
   readonly isRoleAdmin = input<boolean>(true);
   readonly hideToolsSection = input<boolean>(false);
 
@@ -50,11 +51,11 @@ export class HomeSearchComponent implements OnInit {
     this.computeInsightMax();
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
-      if (tab) {
+      if (typeof tab === 'string' && this.allowedTabs.includes(tab)) {
         this.selectTab(tab);
       }
       else{
-        this.selectTab("All");
+        this.selectTab("IOCs");
       }
     });
   }

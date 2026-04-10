@@ -52,8 +52,8 @@ async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_
     return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
 
 
-def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user) -> None:
-    if current_user and getattr(current_user, "role", None) == user_role.DEMO:
+def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user, is_free: bool = False) -> None:
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free:
         param.safe = True
 
 
@@ -67,11 +67,11 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
 async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user), role: user_role = Depends(get_current_role), is_free: bool = Depends(get_is_free_token)):
-    _enforce_demo_safe_search(param, current_user)
+    _enforce_demo_safe_search(param, current_user, is_free)
     if role == user_role.DEMO or is_free:
         param.network = "onion"
     base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
-    if current_user and getattr(current_user, "role", None) == user_role.DEMO and param.category == "all":
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free and param.category == "all":
         base_index = [
             ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_LEAK_INDEX,

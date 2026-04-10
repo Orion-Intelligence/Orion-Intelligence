@@ -7,6 +7,7 @@ declare global {
             closeSideFilter(): Chainable<void>;
             applySideFilter(): Chainable<void>;
             scrollDashboardToTop(): Chainable<void>;
+            scrollDashboardToBottom(): Chainable<void>;
         }
     }
 }

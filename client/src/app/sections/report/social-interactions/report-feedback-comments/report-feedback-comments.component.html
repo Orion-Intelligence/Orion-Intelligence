@@ -15,11 +15,11 @@
 
   <div class="report-comment-surface relative mt-4 overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3.5">
     <div class="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(87,165,235,0.18)_18%,rgba(87,165,235,0.32)_50%,rgba(87,165,235,0.18)_82%,transparent_100%)]"></div>
-    <textarea [(ngModel)]="draft" rows="3" placeholder="Add an analyst note, context, or follow-up..." class="min-h-[90px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20"></textarea>
+    <textarea data-testid="report-feedback-comment-input" [(ngModel)]="draft" rows="3" placeholder="Add an analyst note, context, or follow-up..." class="min-h-[90px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20"></textarea>
 
     <div class="mt-3 flex items-center justify-between gap-3 border-t border-[var(--color-divider)] pt-3">
       <p class="text-[11px] text-[var(--color-text4)]">Notes are shared on this report.</p>
-      <button type="button" [disabled]="!docId || !draft.trim() || isSaving" (click)="submitComment()" class="inline-flex h-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-640)] px-3.5 text-[12px] font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60">
+      <button data-testid="report-feedback-comment-save" type="button" [disabled]="!docId || !draft.trim() || isSaving" (click)="submitComment()" class="inline-flex h-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-640)] px-3.5 text-[12px] font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60">
         {{ isSaving ? 'Saving...' : 'Save Comment' }}
       </button>
     </div>
@@ -35,12 +35,12 @@
         <div class="report-comment-surface relative overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3.5 py-3">
           <div class="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(87,165,235,0.18)_18%,rgba(87,165,235,0.32)_50%,rgba(87,165,235,0.18)_82%,transparent_100%)]"></div>
           <div class="flex items-start gap-3">
-            <button type="button" (click)="openUser(comment.user_id)" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[11px] font-semibold uppercase text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:text-[var(--color-text1)]">
+            <button data-testid="report-feedback-comment-user-avatar" type="button" (click)="openUser(comment.user_id)" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[11px] font-semibold uppercase text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:text-[var(--color-text1)]">
               {{ (comment.username || 'A').slice(0, 1) }}
             </button>
             <div class="min-w-0 flex-1">
               <div class="flex min-w-0 items-center justify-between gap-3">
-                <button type="button" (click)="openUser(comment.user_id)" class="truncate text-[13px] font-semibold text-[var(--color-text1)] transition hover:text-[var(--color-blue-640)]">
+                <button data-testid="report-feedback-comment-user-name" type="button" (click)="openUser(comment.user_id)" class="truncate text-[13px] font-semibold text-[var(--color-text1)] transition hover:text-[var(--color-blue-640)]">
                   {{ comment.username || 'Analyst note' }}
                 </button>
                 <div class="shrink-0 text-[11px] text-[var(--color-text4)]">{{ comment.created_at | date:'medium' }}</div>

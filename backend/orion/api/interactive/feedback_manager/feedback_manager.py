@@ -291,7 +291,10 @@ class FeedbackManager:
         current_user_id = str(current_user.id)
         one_hour_ago = now - timedelta(hours=1)
         for existing_comment in doc.comments:
-            if existing_comment.user_id == current_user_id and existing_comment.created_at >= one_hour_ago:
+            created_at = existing_comment.created_at
+            if created_at.tzinfo is None:
+                created_at = created_at.replace(tzinfo=UTC)
+            if existing_comment.user_id == current_user_id and created_at >= one_hour_ago:
                 raise HTTPException(status_code=429, detail="Only one comment per hour is allowed.")
         encrypted_comment = comment.strip()
         tenant_id = await self._get_tenant_id_for_user_id(current_user_id)

@@ -41,7 +41,7 @@
           <p class="mt-1 text-[12px] text-rose-200/80">{{ errorMessage }}</p>
         </div>
       } @else if (userData?.hidden) {
-        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div data-testid="report-user-sidebar-hidden-profile" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
           <div class="ui-section-title">Profile</div>
           <div class="ui-section-description">{{ userData?.message || 'Profile hidden by user' }}</div>
         </div>
@@ -102,7 +102,7 @@
           </div>
 
           <div class="mt-4">
-            <button type="button" (click)="openDetails()" class="inline-flex w-full items-center justify-center rounded-[8px] border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] px-3 py-2 text-[12px] font-semibold text-white transition hover:brightness-105">
+            <button data-testid="report-user-sidebar-open-profile" type="button" (click)="openDetails()" class="inline-flex w-full items-center justify-center rounded-[8px] border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] px-3 py-2 text-[12px] font-semibold text-white transition hover:brightness-105">
               View Profile Detail
             </button>
           </div>

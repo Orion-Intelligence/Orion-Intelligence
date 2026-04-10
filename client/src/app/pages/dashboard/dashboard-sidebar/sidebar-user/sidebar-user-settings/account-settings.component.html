@@ -76,7 +76,7 @@
         </div>
 
         @if (isTenantProfileVisibilityEnabled()) {
-          <div class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isProfileVisible = !isProfileVisible; toggleProfileVisibility()">
+          <div data-testid="account-settings-profile-visibility-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isProfileVisible = !isProfileVisible; toggleProfileVisibility()">
             <div class="flex items-center justify-between gap-3">
               <div>
                 <label class="block text-sm font-semibold text-[var(--color-text1)]">Profile Visibility</label>
