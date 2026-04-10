@@ -41,7 +41,10 @@ export class UserProfileActivityComponent {
     if (!item.route_path) {
       return;
     }
-    this.router.navigate(['/', ...item.route_path.split('/').filter(Boolean)], { queryParams: item.route_query });
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/', ...item.route_path.split('/').filter(Boolean)], { queryParams: item.route_query })
+    );
+    window.open(url, '_blank', 'noopener');
   }
 
   trackByDocId(_: number, item: PublicUserActivityItem): string {

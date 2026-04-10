@@ -46,6 +46,41 @@
         </div>
       </div>
 
+      <div class="mb-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Profile</div>
+        <div class="ui-section-description">User details and assigned access.</div>
+
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Username</label>
+            <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.username || '-' }}</div>
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Role</label>
+            <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.role || '-' }}</div>
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Tenant / Location</label>
+            <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.tenant_name || '-' }}</div>
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Email</label>
+            <div class="h-10 w-full truncate rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.email || '-' }}</div>
+          </div>
+        </div>
+
+        <div class="mt-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3">
+          <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Licenses</div>
+          <div class="flex flex-wrap gap-2">
+            @for (license of response.profile.licenses; track license) {
+              <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ license }}</span>
+            } @empty {
+              <span class="text-[13px] text-[var(--color-text4)]">No licenses listed.</span>
+            }
+          </div>
+        </div>
+      </div>
+
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
         <div class="ui-section-title">Activity</div>
         <div class="ui-section-description">Feedback and comment history across report threads.</div>
@@ -82,7 +117,7 @@
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ item.comments_count }} comment{{ item.comments_count > 1 ? 's' : '' }}</span>
                   }
                   @if (item.report_date) {
-                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text4)]">{{ item.report_date }}</span>
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text4)]">{{ item.report_date | date:'medium' }}</span>
                   }
                 </div>
               </div>
