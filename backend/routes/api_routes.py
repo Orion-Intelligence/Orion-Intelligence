@@ -33,7 +33,8 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
-from routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS)
+from routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS,
+                              SYSTEM_INFO_DOCS, ONION_SEARCH_DOCS)
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -723,10 +724,10 @@ async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_us
 @api_routes.post(
     "/api/onion/search",
     summary="Scan onion search engines",
-    # description=CRYPTO_DOCS["crypto_scan"]["description"],
-    # tags=["Entity Scans"],
-    # operation_id="dynamicCryptoScan",
-    # response_description=CRYPTO_DOCS["crypto_scan"]["response_description"],
+    description=ONION_SEARCH_DOCS["onion_search "]["description"],
+    tags=["Entity Scans"],
+    operation_id="dynamicOnionSearch",
+    response_description=ONION_SEARCH_DOCS["onion_search"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),

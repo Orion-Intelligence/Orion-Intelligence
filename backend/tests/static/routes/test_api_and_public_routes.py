@@ -332,6 +332,12 @@ def test_crypto_scan_route(api_public_client):
     assert resp.status_code == 200
 
 
+def test_onion_search_route(api_public_client):
+    payload = {"text": {"query": "hacking"}}
+    resp = api_public_client.post("/api/onion/search", json=payload)
+    assert resp.status_code == 200
+
+
 def test_network_intel_routes(api_public_client):
     assert api_public_client.post("/api/netintel/resolve_ip", json={"domain": "example.com"}).status_code == 200
     assert api_public_client.post("/api/netintel/ipscanner", json={"ip": "8.8.8.8"}).status_code == 200

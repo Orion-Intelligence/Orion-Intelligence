@@ -333,3 +333,38 @@ describe('Consolidated - IOC Basic Flow', () => {
     runDomainScannerFlow();
   });
 });
+
+it('runs Onion Search card in consolidated Deep Search', () => {
+  cy.loginAsAdmin();
+
+  openHomepageAndSearch('{enter}');
+  switchToDeepSearchTab();
+  searchDeepFromTop('hacking');
+
+  cy.get('[data-testid="dashboard-body"]', { timeout: 60000 }).should('exist');
+
+  cy.get('[data-testid="onion-search-report"]', { timeout: 60000 })
+    .scrollIntoView()
+    .should('be.visible')
+    .within(() => {
+      cy.get('[data-testid="onion-search-report-title"]')
+        .should('contain.text', 'Onion Search Report');
+    });
+
+  cy.get('[data-testid="onion-search-report-title"]')
+    .scrollIntoView()
+    .click();
+
+  cy.get('body', { timeout: 120000 }).then(($body) => {
+    const hasEngineCards = $body.find('[data-testid="onion-search-report-card"]').length > 0;
+
+    if (hasEngineCards) {
+      cy.get('[data-testid="onion-search-report-card"]')
+        .should('have.length.at.least', 1);
+    } else {
+      cy.contains(/searching onion engines|loading|no successful onion results|onion search failed/i, {
+        timeout: 120000,
+      }).should('exist');
+    }
+  });
+});

@@ -11,20 +11,14 @@ import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operato
   templateUrl: './onion-search-card.component.html',
 })
 export class OnionSearchCardComponent {
-  @Input() query = '';
-
   isExpandable = false;
   isLoading = false;
-
   progress = 0;
   currentStep = '';
   hasError = false;
+  engines: Array<{ engine: string; search_url?: string; first_result?: { url?: string; title?: string; description?: string }; }> = [];
 
-  engines: Array<{
-    engine: string;
-    search_url?: string;
-    first_result?: { url?: string; title?: string; description?: string };
-  }> = [];
+  @Input() query = '';
 
   constructor(private http: HttpClient) {}
 
@@ -63,10 +57,14 @@ export class OnionSearchCardComponent {
 
           if (this.isPendingResponse(res)) {
             const p = res?.result?.progress ?? res?.progress;
-            if (typeof p === 'number' && !Number.isNaN(p)) this.progress = p;
+            if (typeof p === 'number' && !Number.isNaN(p)) {
+              this.progress = p;
+            }
 
             const st = res?.result?.step ?? res?.step;
-            if (typeof st === 'string' && st) this.currentStep = st;
+            if (typeof st === 'string' && st) {
+              this.currentStep = st;
+            }
 
             return;
           }
@@ -92,20 +90,19 @@ export class OnionSearchCardComponent {
 
   get progressValue(): number {
     const p = Number(this.progress);
-    if (!Number.isFinite(p)) return 0;
+    if (!Number.isFinite(p)) {
+      return 0;
+    }
     return Math.max(0, Math.min(100, Math.round(p)));
   }
 
   private fetchSearchResults(apiEndpoint: string, payload: any): Observable<any> {
-    return this.http.post<any>(apiEndpoint, payload).pipe(
-      expand((res) =>
-        this.shouldContinuePolling(res)
-          ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, payload)))
-          : EMPTY
-      ),
-      takeWhile((res) => this.shouldContinuePolling(res), true),
-      catchError(() => of(null))
-    );
+    return this.http.post<any>(apiEndpoint, payload).pipe(expand((res) =>
+      this.shouldContinuePolling(res)
+        ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, payload)))
+        : EMPTY),
+    takeWhile((res) => this.shouldContinuePolling(res), true),
+    catchError(() => of(null)));
   }
 
   private isPendingResponse(res: any): boolean {
