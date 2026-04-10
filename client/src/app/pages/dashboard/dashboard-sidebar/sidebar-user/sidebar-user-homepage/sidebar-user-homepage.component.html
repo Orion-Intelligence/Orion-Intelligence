@@ -8,9 +8,9 @@
               <app-alert-scan-loading></app-alert-scan-loading>
             </div>
           }
-          @if (!licenseService.isMaintainer() && licenseService.getLicenses().includes('enterprise')) {
+          @if (licenseService.getLicenses().includes('enterprise')) {
             <div class="mb-[15px]">
-              <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true"></app-home-search>
+              <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true" [hideHeatmapAndAnalytics]="licenseService.isMaintainer()"></app-home-search>
               <div class="mt-[12px] flex justify-end max-[640px]:justify-start">
                 <div class="ioc-action-toolbar inline-flex items-center gap-2 rounded-[8px] border border-[#ffffff15] bg-[var(--color-blue-800)] px-[8px] py-[6px] max-[640px]:w-full max-[640px]:justify-center" [ngClass]="isLightTheme() ? 'bg-[#f7fbff] border-[#d3deeb]' : ''">
                   @if (hasReports()) {
