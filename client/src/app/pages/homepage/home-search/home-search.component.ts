@@ -41,6 +41,8 @@ export class HomeSearchComponent implements OnInit {
   selectedTab='IOCs';
   readonly isRoleAdmin = input<boolean>(true);
   readonly hideToolsSection = input<boolean>(false);
+  readonly hideHeatmapAndAnalytics = input<boolean>(false);
+  readonly compactLayout = input<boolean>(false);
 
   constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
 

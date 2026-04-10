@@ -1,11 +1,11 @@
-<div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px] pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
+<div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[15px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
   @for (tab of ["IOCs", "Deep Search", "Network Intelligence"]; track tab) {
     <div [attr.data-testid]="'ioc-basic-tag-' + tab" (click)="selectTab(tab)" [ngClass]="selectedTab === tab ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
       {{ tab }}
     </div>
   }
 </div>
-<form  (submit)="onSearchSubmit($event)" class="flex items-center mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px] max-[550px]:grid">
+<form (submit)="onSearchSubmit($event)" class="flex items-center max-[550px]:grid" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[6px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
   <div class="flex w-full flex-wrap items-start justify-between">
     <div class="w-full">
       @if (homeSearchService.showFiltersOverlay) {
@@ -13,7 +13,7 @@
       }
 
       @if (app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') ||
-        app_service.userSessionData().user.role === 'analyst') {
+        app_service.userSessionData().user.role === 'analyst' || licenseService.isMaintainer()) {
         <div class="relative">
           <div >
           <div id="homeSearch" class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-[calc(100vw-90px)] max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay }">
@@ -78,26 +78,28 @@
         }
       }
 
-      @defer (on idle) {
-        <div>
-          <app-world-heatmap [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') || app_service.userSessionData().user.role === 'analyst'"></app-world-heatmap>
-        </div>
-        <div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [ngClass]="'ui-translate-y-neg-' + insightTranslateY">
-            <div class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)">
-              <button type="button" aria-label="Drag Panel" class="ui-home-insight-drag-btn group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-text1)] shadow-[0_12px_28px_rgba(0,0,0,0.28)] transition hover:border-[rgba(148,163,184,0.6)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.32)] active:scale-[0.97]">
-                <svg class="ui-home-insight-drag-icon h-4 w-4 opacity-80 transition-transform duration-200 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 5v14" />
-                  <path d="M8 9l4-4 4 4" />
-                  <path d="M16 15l-4 4-4-4" />
-                </svg>
-                Drag Panel
-              </button>
-            </div>
-            <app-home-insight></app-home-insight>
+      @if (!hideHeatmapAndAnalytics()) {
+        @defer (on idle) {
+          <div>
+            <app-world-heatmap [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') || app_service.userSessionData().user.role === 'analyst'"></app-world-heatmap>
           </div>
-        } @placeholder {
-          <div class="mt-[20px] min-h-[420px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-800)]/45"></div>
-        }
+          <div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [ngClass]="'ui-translate-y-neg-' + insightTranslateY">
+              <div class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)">
+                <button type="button" aria-label="Drag Panel" class="ui-home-insight-drag-btn group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-text1)] shadow-[0_12px_28px_rgba(0,0,0,0.28)] transition hover:border-[rgba(148,163,184,0.6)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.32)] active:scale-[0.97]">
+                  <svg class="ui-home-insight-drag-icon h-4 w-4 opacity-80 transition-transform duration-200 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14" />
+                    <path d="M8 9l4-4 4 4" />
+                    <path d="M16 15l-4 4-4-4" />
+                  </svg>
+                  Drag Panel
+                </button>
+              </div>
+              <app-home-insight></app-home-insight>
+            </div>
+          } @placeholder {
+            <div class="mt-[20px] min-h-[420px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-800)]/45"></div>
+          }
+      }
     </div>
   </div>
 </form>
