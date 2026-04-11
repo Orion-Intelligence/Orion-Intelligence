@@ -9,8 +9,8 @@
       <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
     </button>
 
-    <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
     @if (lang()!==lang_detected()) {
+      <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
       <button (click)="langUpdate()" appTooltip="Translator" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25" class="ui-action-icon">
       </button>
@@ -21,12 +21,16 @@
       <button (click)="aiSuggest()" appTooltip="AI Summary" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="AI Summary" height="25" ngSrc="assets/images/shared/theme/ai.svg" width="25" class="ui-action-icon" />
       </button>
+      <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
+      <button (click)="shareResult()" appTooltip="Share" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+        <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon" />
+      </button>
+    } @else {
+      <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
+      <button (click)="shareResult()" appTooltip="Share" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+        <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon" />
+      </button>
     }
-    <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-
-    <button (click)="shareResult()" appTooltip="Share" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon" />
-    </button>
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
     <button (click)="redirectToUrl()" appTooltip="Open Breach Link" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
