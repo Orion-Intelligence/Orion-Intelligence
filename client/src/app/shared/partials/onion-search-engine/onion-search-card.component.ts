@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { EMPTY, Observable, of, timer } from 'rxjs';
@@ -16,7 +16,10 @@ export class OnionSearchCardComponent {
   progress = 0;
   currentStep = '';
   hasError = false;
+  canScrollLeft = false;
+  canScrollRight = false;
   engines: Array<{ engine: string; search_url?: string; first_result?: { url?: string; title?: string; description?: string }; }> = [];
+  @ViewChild('scrollRow') scrollRow?: ElementRef<HTMLDivElement>;
 
   @Input() query = '';
 
@@ -28,6 +31,9 @@ export class OnionSearchCardComponent {
     // trigger search when opening
     if (this.isExpandable && !this.isLoading && this.engines.length === 0 && !this.hasError) {
       this.onSearch();
+    }
+    else if (this.isExpandable) {
+      setTimeout(() => this.updateScrollState());
     }
   }
 
@@ -83,9 +89,24 @@ export class OnionSearchCardComponent {
               search_url: r.search_url,
               first_result: r.first_result,
             }));
+          setTimeout(() => this.updateScrollState());
         },
         error: () => (this.hasError = true),
       });
+  }
+
+  scrollResults(direction: 'left' | 'right', event: Event): void {
+    event.stopPropagation();
+    const el = this.scrollRow?.nativeElement;
+    if (!el) {
+      return;
+    }
+    el.scrollBy({ left: direction === 'left' ? -332 : 332, behavior: 'smooth' });
+    setTimeout(() => this.updateScrollState(), 250);
+  }
+
+  onScrollRow(): void {
+    this.updateScrollState();
   }
 
   get progressValue(): number {
@@ -116,5 +137,16 @@ export class OnionSearchCardComponent {
 
   private shouldContinuePolling(res: any): boolean {
     return this.isPendingResponse(res);
+  }
+
+  private updateScrollState(): void {
+    const el = this.scrollRow?.nativeElement;
+    if (!el) {
+      this.canScrollLeft = false;
+      this.canScrollRight = false;
+      return;
+    }
+    this.canScrollLeft = el.scrollLeft > 2;
+    this.canScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
   }
 }

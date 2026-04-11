@@ -15,7 +15,7 @@
       </p>
     </div>
 
-    <div class="flex items-center gap-[10px] self-start max-[640px]:w-full max-[640px]:justify-between">
+    <div class="mr-[5px] flex items-center gap-[10px] self-start max-[640px]:mr-0 max-[640px]:w-full max-[640px]:justify-between">
       @if (isLoading) {
         <div class="inline-flex h-[28px] items-center justify-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[11px] text-[11px] font-[700] text-[var(--color-text5)]">
           <span class="inline-block h-[7px] w-[7px] animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
@@ -94,16 +94,16 @@
                 Top suggested result from each responding engine.
               </div>
               <div class="inline-flex items-center gap-[6px]">
-                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-colors duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" (click)="scrollRow.scrollBy({ left: -332, behavior: 'smooth' }); $event.stopPropagation()">
+                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-[opacity,background,color] duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" [class.opacity-50]="!canScrollLeft" (click)="scrollResults('left', $event)">
                   <img src="assets/images/shared/theme/cheveron-right.svg" alt="Scroll left" class="h-[12px] w-[12px] rotate-180 opacity-80" />
                 </button>
-                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-colors duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" (click)="scrollRow.scrollBy({ left: 332, behavior: 'smooth' }); $event.stopPropagation()">
+                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-[opacity,background,color] duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" [class.opacity-50]="!canScrollRight" (click)="scrollResults('right', $event)">
                   <img src="assets/images/shared/theme/cheveron-right.svg" alt="Scroll right" class="h-[12px] w-[12px] opacity-80" />
                 </button>
               </div>
             </div>
 
-            <div #scrollRow class="flex gap-[12px] overflow-x-auto pb-[4px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div #scrollRow class="flex gap-[12px] overflow-x-auto pb-[4px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" (scroll)="onScrollRow()">
               @for (e of engines; track e.engine; let i = $index) {
                 <div data-testid="onion-search-report-card" class="group min-w-[320px] flex-[0_0_320px] overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-consolidated-secondary)] text-[var(--color-text1)] transition-[transform,border-color,background] duration-200 hover:border-[rgba(34,197,94,0.2)] hover:bg-[var(--color-consolidated-secondary)]">
                   <div class="flex items-start justify-between gap-[12px] border-b border-[rgba(255,255,255,0.08)] px-[14px] py-[12px] max-[640px]:px-[10px]">
@@ -154,34 +154,6 @@
                           Open engine search
                         </a>
                       }
-                    </div>
-                  </div>
-                </div>
-              }
-              @if (engines.length === 1) {
-                <div class="min-w-[320px] flex-[0_0_320px] overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-consolidated-secondary)] text-[var(--color-text1)] opacity-70">
-                  <div class="flex items-start justify-between gap-[12px] border-b border-[rgba(255,255,255,0.08)] px-[14px] py-[12px] max-[640px]:px-[10px]">
-                    <div class="min-w-0">
-                      <div class="mb-[8px] flex flex-wrap items-center gap-[8px]">
-                        <span class="inline-flex h-[24px] items-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[10px] font-[800] uppercase tracking-[0.08em] text-[var(--color-text5)]">
-                          Slot #2
-                        </span>
-                      </div>
-                      <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">
-                        Waiting for another engine
-                      </b>
-                    </div>
-                  </div>
-
-                  <div class="px-[14px] py-[12px] max-[640px]:px-[10px]">
-                    <div class="overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-[800] leading-[1.45] text-[var(--color-text1)]">
-                      No second suggestion returned
-                    </div>
-                    <div class="mt-[8px] h-[96px] overflow-hidden text-[12px] leading-[1.6] text-[var(--color-text4)]">
-                      Only one responding engine returned a top match for this query.
-                    </div>
-                    <div class="mt-[10px] overflow-hidden text-ellipsis whitespace-nowrap rounded-[10px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[8px] font-mono text-[12px] font-[600] text-[var(--color-text5)]">
-                      No additional result URL available
                     </div>
                   </div>
                 </div>
