@@ -1,4 +1,4 @@
-<div data-testid="defacement-report" class="ui-consolidated-main max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
+<div data-testid="defacement-report" class="ui-consolidated-main mb-[16px] max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
   <div class="flex cursor-pointer items-center justify-between max-[640px]:flex-wrap max-[640px]:gap-[10px]" (click)="toggleResultsBarCollapse()">
     <div data-testid="defacement-report-title" class="flex text-[16px] font-bold text-[var(--color-text1)]">
       {{ results_defacement() ? 'IP Threat Report' : 'Stealer Log Report' }}
@@ -30,7 +30,7 @@
   @if (isExpandable && results_defacement()?.Result; as defResults) {
     @for (item of defResults.slice(0, showLimitDefacement); track item.m_hash || item.m_url || $index; let i = $index; let last = $last) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
-        <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
+        <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] text-[var(--color-text1)]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
             <div class="min-w-0">
               <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">IOC THREAT | {{ item.m_ioc_type[0] }}</b>
@@ -131,7 +131,7 @@
     }
     @for (item of stResults.slice(0, showLimitStealer); track item['hash'] || item['url'] || item['username'] || $index; let i = $index) {
       <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
-        <div class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
+        <div class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] text-[var(--color-text1)]">
           <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
             <div class="min-w-0">
               <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">LOG TYPE | {{ item['domain'] ? item['domain'] : 'Unknown' }}</b>

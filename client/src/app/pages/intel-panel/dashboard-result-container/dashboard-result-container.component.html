@@ -55,6 +55,16 @@
               [searchResults]="[item]">
             </app-dashboard-result-chat>
           }
+          @if ($index === 1 && shouldShowCrossSearch) {
+            <div class="w-full max-w-[910px]">
+              <app-onion-search-card [query]="currentQuery"></app-onion-search-card>
+            </div>
+          }
+        </div>
+      }
+      @if (shouldShowCrossSearch && currentResultModel?.length && currentResultModel.length < 2) {
+        <div class="w-full max-w-[910px] space-y-6">
+          <app-onion-search-card [query]="currentQuery"></app-onion-search-card>
         </div>
       }
     </div>

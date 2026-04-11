@@ -18,6 +18,7 @@ import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
 import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 import { ScrollService } from '../../../shared/services/scroll.service';
+import { OnionSearchCardComponent } from '../../../shared/partials/onion-search-engine/onion-search-card.component';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -25,6 +26,7 @@ import { ScrollService } from '../../../shared/services/scroll.service';
     PaginationComponent,
     DashboardResultsGeneralComponent,
     ResultComponent,
+    OnionSearchCardComponent,
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
@@ -58,6 +60,14 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   get currentQuery(): string {
     return this.currentParamModel?.q ?? '';
+  }
+
+  get shouldShowCrossSearch(): boolean {
+    return !this.isResponseLoading()
+      && !!this.currentQuery.trim()
+      && this.apiEndpoint !== 'search/defacement'
+      && this.apiEndpoint !== 'search/dump'
+      && !this.router.url.toLowerCase().includes('/defacement');
   }
 
   ngAfterViewInit(): void {

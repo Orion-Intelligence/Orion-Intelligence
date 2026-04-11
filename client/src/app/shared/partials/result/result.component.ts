@@ -103,6 +103,14 @@ export class ResultComponent implements OnInit, OnChanges {
   readonly updateQuery = output<string>();
   readonly onToggleSort = output<SortType>();
 
+  get shouldShowCrossSearchOnEmptyState(): boolean {
+    return !this.consolidated
+      && this.type() !== Category.DUMP
+      && this.type() !== Category.DEFACEMENT
+      && !this.router.url.toLowerCase().includes('/defacement')
+      && !!this.searchQuery.trim();
+  }
+
   constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
     effect(() => {
