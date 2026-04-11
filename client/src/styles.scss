@@ -948,12 +948,13 @@ body.demo-tour-scroll-locked {
 .light-theme .ui-home-insight-card {
   background: #ffffff !important;
   border-color: #d7e1ec !important;
-  box-shadow: 0 8px 20px rgb(16 24 40 / 7%) !important;
+  box-shadow: none !important;
 }
 
 .light-theme .ui-home-insight-card:hover {
-  background: #f8fbff !important;
-  border-color: #c8d6e8 !important;
+  background: #f9fbff !important;
+  border-color: #b9c8da !important;
+  box-shadow: none !important;
 }
 
 .light-theme .ui-home-insight-metric-card {
