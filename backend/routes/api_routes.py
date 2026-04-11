@@ -797,7 +797,7 @@ async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_us
 @api_routes.post(
     "/api/onion/search",
     summary="Scan onion search engines",
-    description=ONION_SEARCH_DOCS["onion_search "]["description"],
+    description=ONION_SEARCH_DOCS["onion_search"]["description"],
     tags=["Entity Scans"],
     operation_id="dynamicOnionSearch",
     response_description=ONION_SEARCH_DOCS["onion_search"]["response_description"],
