@@ -334,7 +334,7 @@ describe('Consolidated - IOC Basic Flow', () => {
   });
 });
 
-it('runs Onion Search card in consolidated Deep Search', () => {
+it('runs Cross Search card in consolidated Deep Search', () => {
   cy.loginAsAdmin();
 
   openHomepageAndSearch('{enter}');
@@ -348,7 +348,7 @@ it('runs Onion Search card in consolidated Deep Search', () => {
     .should('be.visible')
     .within(() => {
       cy.get('[data-testid="onion-search-report-title"]')
-        .should('contain.text', 'Onion Search Report');
+        .should('contain.text', 'Top Results From Cross Search');
     });
 
   cy.get('[data-testid="onion-search-report-title"]')
@@ -362,7 +362,7 @@ it('runs Onion Search card in consolidated Deep Search', () => {
       cy.get('[data-testid="onion-search-report-card"]')
         .should('have.length.at.least', 1);
     } else {
-      cy.contains(/searching onion engines|loading|no successful onion results|onion search failed/i, {
+      cy.contains(/searching across search engines|loading|no successful cross-search suggestions|cross search failed/i, {
         timeout: 120000,
       }).should('exist');
     }

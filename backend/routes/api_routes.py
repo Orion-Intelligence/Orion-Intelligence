@@ -37,7 +37,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
 from routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS,
-                              SYSTEM_INFO_DOCS, ONION_SEARCH_DOCS)
+                              SYSTEM_INFO_DOCS, CROSS_SEARCH_DOCS)
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -795,19 +795,33 @@ async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_us
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
 
 @api_routes.post(
-    "/api/onion/search",
-    summary="Scan onion search engines",
-    description=ONION_SEARCH_DOCS["onion_search"]["description"],
+    "/api/cross/search",
+    summary="Run Cross Search",
+    description=CROSS_SEARCH_DOCS["cross_search"]["description"],
     tags=["Entity Scans"],
-    operation_id="dynamicOnionSearch",
-    response_description=ONION_SEARCH_DOCS["onion_search"]["response_description"],
+    operation_id="dynamicCrossSearch",
+    response_description=CROSS_SEARCH_DOCS["cross_search"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("scanning"))
     ],
 )
-async def crypto_scan(param: search_dynamic_onion_search = Body(...), current_user=Depends(get_current_user)):
+@api_routes.post(
+    "/api/onion/search",
+    summary="Run Cross Search",
+    description=CROSS_SEARCH_DOCS["cross_search"]["description"],
+    tags=["Entity Scans"],
+    operation_id="dynamicOnionSearchLegacy",
+    response_description=CROSS_SEARCH_DOCS["cross_search"]["response_description"],
+    status_code=200,
+    deprecated=True,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning"))
+    ],
+)
+async def cross_search(param: search_dynamic_onion_search = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().onion_search(param, user_id=str(current_user.id))
 
 @api_routes.post(

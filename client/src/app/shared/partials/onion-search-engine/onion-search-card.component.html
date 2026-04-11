@@ -1,90 +1,163 @@
-<div data-testid="onion-search-report" class="ui-consolidated-main max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
-  <div class="flex cursor-pointer items-center justify-between max-[640px]:flex-wrap max-[640px]:gap-[10px]" (click)="toggleResultsBarCollapse()">
-    <div data-testid="onion-search-report-title" class="flex text-[16px] font-bold text-[var(--color-text1)]">
-      Onion Search Report
+<div data-testid="onion-search-report" class="ui-consolidated-main min-w-0 overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(34,197,94,0.04)_0%,rgba(255,255,255,0)_34%)] p-[14px] font-[Inter] text-[var(--color-text1)] max-[900px]:p-[12px] max-[640px]:p-[10px]">
+  <div class="flex cursor-pointer items-start justify-between gap-[12px] max-[640px]:flex-col max-[640px]:gap-[10px]" (click)="toggleResultsBarCollapse()">
+    <div class="min-w-0">
+      <div data-testid="onion-search-report-title" class="flex items-center gap-[10px] text-[17px] font-[800] text-[var(--color-text1)]">
+        <span>Top Results From Cross Search</span>
+        @if (!isLoading && engines.length > 0) {
+          <span class="inline-flex h-[26px] items-center rounded-full border border-[rgba(34,197,94,0.22)] bg-[rgba(34,197,94,0.09)] px-[10px] text-[11px] font-[700] text-[var(--color-text2)]">
+            {{ engines.length >= 100 ? '100+' : engines.length }} engines matched
+          </span>
+        }
+      </div>
+      <p class="mt-[6px] max-w-[760px] text-[12px] leading-[1.55] text-[var(--color-text4)]">
+        Top suggested matches returned by other leading search engines for this query, organized for quick cross-search comparison.
+      </p>
     </div>
 
-    <div class="mr-[-10px] flex items-center gap-[20px] max-[640px]:mr-0 max-[640px]:w-full max-[640px]:flex-wrap max-[640px]:gap-[8px]">
+    <div class="flex items-center gap-[10px] self-start max-[640px]:w-full max-[640px]:justify-between">
       @if (isLoading) {
-        <div class="flex h-[28px] items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)]">
-          Loading ({{ progressValue }}%)
+        <div class="inline-flex h-[28px] items-center justify-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[11px] text-[11px] font-[700] text-[var(--color-text5)]">
+          <span class="inline-block h-[7px] w-[7px] animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+          Loading {{ progressValue }}%
         </div>
-      } @else if (!isLoading && engines.length > 0) {
-        <div class="flex h-[28px] items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)]">
-          Engines ({{ engines.length >= 100 ? '100+' : engines.length }})
+      } @else if (!isLoading && engines.length === 0 && !hasError) {
+        <div class="inline-flex h-[28px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[11px] text-[11px] font-[700] text-[var(--color-text5)]">
+          Ready to search
         </div>
       }
 
-      <div data-testid="onion-search-report-toggle" class="relative inline-block cursor-pointer before:absolute before:inset-[-10px_-15px] before:content-['']">
-        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="p-[3px_8px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
+      <div data-testid="onion-search-report-toggle" class="relative inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] before:absolute before:inset-[-10px] before:content-['']">
+        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="h-[14px] w-[14px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
       </div>
     </div>
   </div>
 
-
   @if (isExpandable) {
-    <div class="mt-[12px]">
+    <div class="mt-[14px] border-t border-[var(--ui-consolidated-divider)] pt-[14px]">
       @if (isLoading) {
-        <div class="flex items-center gap-3">
-          <div class="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
-          <div class="text-sm text-[var(--color-text3)]">
-            <strong class="text-[var(--color-text1)]">Searching onion engines</strong>
-            <div>{{ currentStep || 'pending' }}... {{ progressValue }}%</div>
+        <div class="rounded-[14px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.02)] p-[14px]">
+          <div class="flex flex-wrap items-center justify-between gap-[10px]">
+            <div class="min-w-0">
+              <div class="text-[13px] font-[800] text-[var(--color-text1)]">
+                Searching across search engines
+              </div>
+              <div class="mt-[4px] text-[12px] text-[var(--color-text4)]">
+                {{ currentStep || 'Preparing engine queries' }}
+              </div>
+            </div>
+            <div class="inline-flex items-center gap-[8px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[10px] py-[6px] text-[11px] font-[800] text-[var(--color-text5)]">
+              <span class="inline-block h-[7px] w-[7px] animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+              {{ progressValue }}%
+            </div>
+          </div>
+
+          <div class="mt-[12px] h-[8px] w-full overflow-hidden rounded-full bg-[var(--color-tags)]">
+            <div [class]="'h-full min-w-[5%] rounded-full bg-[linear-gradient(90deg,var(--color-blue-640),rgba(34,197,94,0.9))] transition-all duration-1000 ease-out animate-pulse ' + (progressValue <= 5 ? 'w-[5%]' : progressValue <= 10 ? 'w-[10%]' : progressValue <= 15 ? 'w-[15%]' : progressValue <= 20 ? 'w-[20%]' : progressValue <= 25 ? 'w-[25%]' : progressValue <= 30 ? 'w-[30%]' : progressValue <= 35 ? 'w-[35%]' : progressValue <= 40 ? 'w-[40%]' : progressValue <= 45 ? 'w-[45%]' : progressValue <= 50 ? 'w-[50%]' : progressValue <= 55 ? 'w-[55%]' : progressValue <= 60 ? 'w-[60%]' : progressValue <= 65 ? 'w-[65%]' : progressValue <= 70 ? 'w-[70%]' : progressValue <= 75 ? 'w-[75%]' : progressValue <= 80 ? 'w-[80%]' : progressValue <= 85 ? 'w-[85%]' : progressValue <= 90 ? 'w-[90%]' : progressValue <= 95 ? 'w-[95%]' : 'w-full')">
+            </div>
+          </div>
+
+          <div class="mt-[14px] grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))] max-[640px]:grid-cols-1">
+            @for (placeholder of [1, 2, 3]; track placeholder) {
+              <div class="overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.02)] p-[14px]">
+                <div class="flex items-center justify-between gap-[10px]">
+                  <div class="h-[11px] w-[120px] animate-pulse rounded-full bg-[var(--color-tags)]"></div>
+                  <div class="h-[24px] w-[54px] animate-pulse rounded-full bg-[var(--color-tags)]"></div>
+                </div>
+                <div class="mt-[14px] h-[14px] w-[82%] animate-pulse rounded-full bg-[var(--color-tags)]"></div>
+                <div class="mt-[10px] h-[10px] w-[100%] animate-pulse rounded-full bg-[var(--color-tags)]"></div>
+                <div class="mt-[8px] h-[10px] w-[72%] animate-pulse rounded-full bg-[var(--color-tags)]"></div>
+                <div class="mt-[16px] flex gap-[8px]">
+                  <div class="h-[24px] w-[92px] animate-pulse rounded-full bg-[var(--color-tags)]"></div>
+                  <div class="h-[24px] w-[110px] animate-pulse rounded-full bg-[var(--color-tags)]"></div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       } @else {
         @if (hasError) {
-          <div class="text-sm text-red-400">
-            Onion search failed.
+          <div class="rounded-[14px] border border-red-500/20 bg-red-500/5 p-[14px] text-sm text-red-300">
+            <div class="font-[800] text-red-200">Cross Search failed</div>
+            <div class="mt-[4px] text-[12px] text-red-200/80">
+              The engine suggestions could not be loaded for this query.
+            </div>
           </div>
         } @else {
           @if (engines.length === 0) {
-            <div class="text-sm text-[var(--color-text4)]">
-              No successful onion results.
+            <div class="rounded-[14px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.02)] p-[14px] text-sm text-[var(--color-text4)]">
+              No successful cross-search suggestions were returned for this query.
             </div>
           } @else {
-            <div class="mt-[12px] mr-0 grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] max-[640px]:[grid-template-columns:1fr]">
+            <div class="mb-[12px] flex flex-wrap items-center justify-between gap-[10px]">
+              <div class="text-[12px] text-[var(--color-text4)]">
+                Top suggested result from each responding engine.
+              </div>
+              <div class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[10px] py-[5px] text-[11px] font-[700] text-[var(--color-text5)]">
+                Cross-engine quick view
+              </div>
+            </div>
+
+            <div class="grid gap-[12px] [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))] max-[640px]:grid-cols-1">
               @for (e of engines; track e.engine; let i = $index) {
-                <div data-testid="onion-search-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border text-[var(--color-text1)]">
-                  <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+                <div data-testid="onion-search-report-card" class="ui-consolidated-sub group w-full overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.018)_0%,rgba(255,255,255,0)_100%)] text-[var(--color-text1)] transition-[transform,border-color,background] duration-200 hover:border-[rgba(34,197,94,0.2)] hover:bg-[rgba(255,255,255,0.03)]">
+                  <div class="flex items-start justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[12px] max-[640px]:px-[10px]">
                     <div class="min-w-0">
-                      <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">
-                        ENGINE | {{ e.engine }}
+                      <div class="mb-[8px] flex flex-wrap items-center gap-[8px]">
+                        <span class="inline-flex h-[24px] items-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[10px] font-[800] uppercase tracking-[0.08em] text-[var(--color-text5)]">
+                          Rank #{{ i + 1 }}
+                        </span>
+                        <span class="inline-flex h-[24px] items-center rounded-full border border-[rgba(34,197,94,0.22)] bg-[rgba(34,197,94,0.08)] px-[9px] text-[10px] font-[800] uppercase tracking-[0.08em] text-[var(--color-text2)]">
+                          Suggested top hit
+                        </span>
+                      </div>
+                      <b class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">
+                        {{ e.engine }}
                       </b>
-                      @if (e.search_url) {
-                        <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
-                          Search URL:
-                          <span class="font-[600] text-[var(--color-text2)] break-all">{{ e.search_url }}</span>
-                        </div>
-                      }
                     </div>
                   </div>
 
-                  <div class="px-[14px] py-[10px] max-[640px]:px-[10px]">
-                    @if (e.first_result?.title) {
-                      <div class="text-[13px] font-[700] text-[var(--color-text1)]">
-                        {{ e.first_result?.title }}
+                  <div class="px-[14px] py-[12px] max-[640px]:px-[10px]">
+                    <div class="break-all text-[14px] font-[800] leading-[1.45] text-[var(--color-text1)]">
+                      {{ e.first_result?.title || 'Top result title unavailable' }}
+                    </div>
+
+                    @if (e.first_result?.description) {
+                      <div class="mt-[8px] break-all text-[12px] leading-[1.6] text-[var(--color-text3)]">
+                        {{ e.first_result?.description }}
+                      </div>
+                    } @else {
+                      <div class="mt-[8px] break-all text-[12px] leading-[1.6] text-[var(--color-text4)]">
+                        No summary was provided by this engine.
                       </div>
                     }
+
                     @if (e.first_result?.url) {
-                      <div class="mt-[4px] font-mono text-[12.5px] font-[600] text-[var(--color-text5)] break-all">
+                      <div class="mt-[10px] rounded-[10px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.02)] px-[10px] py-[8px] font-mono text-[12px] font-[600] text-[var(--color-text5)] break-all">
                         {{ e.first_result?.url }}
                       </div>
                     }
-                    @if (e.first_result?.description) {
-                      <div class="mt-[6px] text-[12px] text-[var(--color-text3)]">
-                        {{ e.first_result?.description }}
-                      </div>
-                    }
+
+                    <div class="mt-[12px] flex flex-wrap items-center gap-[8px]">
+                      @if (e.first_result?.url) {
+                        <a [href]="e.first_result?.url" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-[30px] items-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[10px] text-[11px] font-[800] text-[var(--color-text2)] no-underline transition-colors duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" (click)="$event.stopPropagation()">
+                          Open result
+                        </a>
+                      }
+                      @if (e.search_url) {
+                        <a [href]="e.search_url" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-[30px] items-center rounded-full border border-[var(--color-border)] px-[10px] text-[11px] font-[800] text-[var(--color-text5)] no-underline transition-colors duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" (click)="$event.stopPropagation()">
+                          Open engine search
+                        </a>
+                      }
+                    </div>
                   </div>
                 </div>
               }
             </div>
           }
 
-          <div class="mt-[12px]">
-            <button type="button" class="inline-flex h-[32px] items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)] transition-[background,transform,filter] duration-150 hover:bg-[var(--color-blue-820)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0" (click)="onSearch(); $event.stopPropagation()" [disabled]="!(query || '').trim()">
-              Re-run Onion Search
+          <div class="mt-[14px] flex flex-wrap items-center justify-between gap-[10px]">
+            <button type="button" class="inline-flex min-h-[36px] items-center justify-center rounded-full border border-[var(--color-border)] bg-transparent px-[14px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)] transition-[background,transform,filter] duration-150 hover:bg-[var(--color-blue-820)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" (click)="onSearch(); $event.stopPropagation()" [disabled]="!(query || '').trim()">
+              Re-run Cross Search
             </button>
           </div>
         }

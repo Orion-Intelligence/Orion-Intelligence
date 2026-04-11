@@ -332,7 +332,13 @@ def test_crypto_scan_route(api_public_client):
     assert resp.status_code == 200
 
 
-def test_onion_search_route(api_public_client):
+def test_cross_search_route(api_public_client):
+    payload = {"text": {"query": "hacking"}}
+    resp = api_public_client.post("/api/cross/search", json=payload)
+    assert resp.status_code == 200
+
+
+def test_cross_search_legacy_route(api_public_client):
     payload = {"text": {"query": "hacking"}}
     resp = api_public_client.post("/api/onion/search", json=payload)
     assert resp.status_code == 200

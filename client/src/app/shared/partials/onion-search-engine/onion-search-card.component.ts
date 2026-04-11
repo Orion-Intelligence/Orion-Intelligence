@@ -46,7 +46,7 @@ export class OnionSearchCardComponent {
 
     const payload = { text: { query: q } };
 
-    this.fetchSearchResults('/api/onion/search', payload)
+    this.fetchSearchResults('/api/cross/search', payload)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (res) => {
