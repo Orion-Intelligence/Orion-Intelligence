@@ -2384,6 +2384,8 @@ DYNAMIC_DOCS = {"dynamic_user_email": _doc("dynamic/dynamic_user_email.md"), "dy
 
 CRYPTO_DOCS = {"crypto_scan": _doc("dynamic/crypto_scan.md"),}
 
+ONION_SEARCH_DOCS = {"onion_search": _doc("dynamic/onion_search.md"),}
+
 SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
     "search/stealerlogs.md"), "consolidated": _doc("search/consolidated.md"), "consolidated_ranked": _doc(
     "search/consolidated_ranked.md"), "telegram": _doc("search/telegram.md"), "social_models": _doc(

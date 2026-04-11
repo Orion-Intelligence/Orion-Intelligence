@@ -33,12 +33,9 @@
                   </div>
                 </div>
               } @else {
-                @if ((((consolidatedCallbackModel.defacement_model?.Result?.length ?? 0) || (stealerlogCallbackModel?.Result?.length ?? 0))) > 0) {
-                  <app-defacement-results [isExpandable]="false" @scanAnimation
-                    [results_defacement]="consolidatedCallbackModel.defacement_model"
-                    [results_stealerlog]="stealerlogCallbackModel"
-                    >
-                  </app-defacement-results>
+                @if ((((consolidatedCallbackModel.defacement_model?.Result?.length ?? 0) || (stealerlogCallbackModel?.Result?.length ?? 0))) >= 0) {
+                  <app-onion-search-card [query]="query"></app-onion-search-card>
+
                 }
               }
               @for (index of groupedResults | sortGroupedResults; track index.key) {
