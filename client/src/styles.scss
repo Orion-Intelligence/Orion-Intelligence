@@ -1019,7 +1019,7 @@ body.demo-tour-scroll-locked {
 .light-theme .ui-result-card {
   background-color: #ffffff !important;
   border-color: #d7e2ee !important;
-  box-shadow: 0 1px 0 rgb(15 23 42 / 3%), 0 8px 22px rgb(15 23 42 / 4%);
+  box-shadow: none !important;
   background-image: repeating-linear-gradient(135deg, rgb(15 23 42 / 2.2%) 0px, rgb(15 23 42 / 2.2%) 1px, transparent 1px, transparent 12px) !important;
 }
 
@@ -1035,7 +1035,7 @@ body.demo-tour-scroll-locked {
 .light-theme .ui-result-card.ui-result-card-hover:hover {
   background-color: #f2f7ff !important;
   border-color: #c6d6ea !important;
-  box-shadow: 0 1px 0 rgb(15 23 42 / 4%), 0 10px 24px rgb(15 23 42 / 6%) !important;
+  box-shadow: none !important;
 }
 
 .light-theme .ui-pagination-shell .ui-pagination-btn {
