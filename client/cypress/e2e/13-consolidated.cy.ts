@@ -348,7 +348,7 @@ it('runs Cross Search card in consolidated Deep Search', () => {
     .should('be.visible')
     .within(() => {
       cy.get('[data-testid="onion-search-report-title"]')
-        .should('contain.text', 'Results From Other Search Engines');
+        .should('contain.text', 'See Results From Other Search Engines');
     });
 
   cy.get('[data-testid="onion-search-report-title"]')
