@@ -105,6 +105,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
   get shouldShowCrossSearchOnEmptyState(): boolean {
     return !this.consolidated
+      && !this.app_service.isMobileMode()
       && this.type() !== Category.DUMP
       && this.type() !== Category.DEFACEMENT
       && !this.router.url.toLowerCase().includes('/defacement')

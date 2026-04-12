@@ -26,6 +26,7 @@ export class CrossSearchCardComponent {
   @ViewChild('scrollRow') scrollRow?: ElementRef<HTMLDivElement>;
 
   @Input() query = '';
+  @Input() consolidated = false;
 
   constructor(private http: HttpClient) {}
 

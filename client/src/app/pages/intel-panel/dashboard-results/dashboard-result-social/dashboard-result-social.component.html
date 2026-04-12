@@ -50,7 +50,7 @@
           @if (hasCodeType(item)) {
             <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
             Code snippet - content not available</p>
-            <div class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
+            <div class="mb-[12px] mt-[10px] max-h-[300px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
               <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
             </div>
           } @else {
