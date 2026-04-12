@@ -107,20 +107,6 @@ is the list of libraries and frameworks used:
 | [Orion Social](https://github.com/Orion-Intelligence/Orion-Social)       | Social-data-focused module supporting collection and processing for social intelligence workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Social?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Social?style=social)         |
 | [Orion Intelligence Landing](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | Landing and presentation layer for the broader Orion Intelligence project presence. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence-Landing?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence-Landing?style=social)         |
 | [Orion Tor2Web](https://github.com/Orion-Intelligence/Orion-Tor2Web)     | Tor-to-web support component for controlled access and related connectivity workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Tor2Web?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Tor2Web?style=social)         |
-## Platform Architecture
-
-Orion is designed as a modular intelligence platform rather than a single-purpose application. The project combines a
-search interface, crawler-connected ingestion workflows, analysis services, and supporting infrastructure into one
-operational system. This architecture allows the platform to unify collection, processing, indexing, enrichment, and
-visualization while still remaining flexible enough to evolve as new data sources and investigative workflows are added.
-
-## Intelligence Workflow
-
-At the project level, Orion is built to reduce the gap between raw collected data and analyst-ready output. The broader
-workflow starts with ingestion and source acquisition, moves through normalization and processing, and ends in
-searchable, correlated intelligence that can be explored through a single interface. This makes the project useful not
-just as a search product, but as a complete environment for operational intelligence work.
-
 ## Browser Support
 
 Orion Browser is an Android application designed to provide a secure, private browsing experience by leveraging onion
