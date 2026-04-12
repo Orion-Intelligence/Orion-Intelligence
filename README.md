@@ -78,31 +78,20 @@ At a high level, the project operates as a connected flow:
 
 `Crawler / Collector -> Storage / Micros -> Orion Platform -> Browser / Social / Tor2Web / Landing`
 
-## Repository Quality and Build Status
-
-| Repository | Build | Tests | Docs | Codacy | CodeQL | MDN HTTP Observatory | Security Headers | SSLLabs |
-|-----------|-------|-------|------|--------|--------|----------------------|------------------|----------|
-| [Orion Platform](https://github.com/Orion-Intelligence/Orion-Intelligence) | ![Build](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/build.yml/badge.svg?branch=trusted-main) | ![Tests](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/test.yml/badge.svg?branch=trusted-main) | ![Docs](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/docs.yml/badge.svg?branch=trusted-main) | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2799076ac8d748368a8cb0a4de5a939f)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Intelligence/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/github-code-scanning/codeql/badge.svg) | [![Status](https://img.shields.io/badge/observatory-A%2B-brightgreen)](https://developer.mozilla.org/en-US/observatory/analyze?host=try.orionintelligence.org) | [![Status](https://img.shields.io/badge/security%20headers-A%2B-brightgreen)](https://securityheaders.com/?q=https%3A%2F%2Ftry.orionintelligence.org%2F&followRedirects=on) | [![Status](https://img.shields.io/static/v1?label=SSLLabs&message=A%2B&color=brightgreen)](https://www.ssllabs.com/ssltest/analyze.html?d=try.orionintelligence.org&latest) |
-| [Orion Crawler](https://github.com/Orion-Intelligence/Orion-Crawler) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ddf7febc17424d967e34b3afa8ad8c)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Crawler/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Crawler/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
-| [Orion Collector](https://github.com/Orion-Intelligence/Orion-Collector) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3e52faaeda504a518f0b675984f9af21)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Collector/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Collector/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
-| [Orion Micros](https://github.com/Orion-Intelligence/Orion-Micros) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/5737f50b6feb4069b95e208bde905fcc)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Micros/dashboard) | - | - | - | - |
-| [Orion Browser](https://github.com/Orion-Intelligence/Orion-Browser) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/37df35b2d275406e9fe466818bc7d779)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Browser/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Browser/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
-| [Orion Leaks](https://github.com/Orion-Intelligence/Orion-Leaks) | - | - | - | - | - | - | - | - |
-| [Orion Storage](https://github.com/Orion-Intelligence/Orion-Storage) | - | - | - | - | - | - | - | - |
-| [Orion Social](https://github.com/Orion-Intelligence/Orion-Social) | - | - | - | - | - | - | - | - |
-| [Orion Intelligence Landing](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | - | - | - | - | - | - | - | - |
-| [Orion Tor2Web](https://github.com/Orion-Intelligence/Orion-Tor2Web) | - | - | - | - | - | - | - | - |
-
 ## Technology Stack
 
-The Orion ecosystem uses a mixed stack across collection, indexing, web application delivery, and browser/mobile
-components.
+The Orion platform is built using various technologies to provide optimal search capabilities and data handling. Below
+is the list of libraries and frameworks used:
 
-- Frontend: Angular, TypeScript
-- Backend: Python, FastAPI, Celery
-- Search and data: Elasticsearch, MongoDB, Redis
-- Infrastructure: Docker, Traefik, Tor
-- Mobile and browser tooling: Java, Kotlin
+![MongoDB](https://badgen.net/badge/search-crawler/MongoDB/green)
+![Redis](https://badgen.net/badge/search-crawler/Redis/red)
+![Celery](https://badgen.net/badge/crawler/Celery/red)
+![Python](https://badgen.net/badge/search-crawler/Python/blue)
+![Tor](https://badgen.net/badge/search-crawler/Tor/purple)
+![Traefik](https://badgen.net/badge/search/Traefik/orange)
+![elastic](https://badgen.net/badge/search/elastic/pink)
+![java](https://badgen.net/badge/browser/java/cyan)
+![kotlin](https://badgen.net/badge/browser/kotlin/yellow)
 
 ## Associated Repositories
 
