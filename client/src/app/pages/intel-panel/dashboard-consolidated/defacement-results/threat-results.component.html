@@ -1,19 +1,19 @@
-<div data-testid="defacement-report" class="ui-consolidated-main mb-[16px] max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border p-[13px_20px_13px_13px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
+<div data-testid="defacement-report" class="ui-consolidated-main mb-[16px] max-h-[760px] min-w-0 overflow-y-auto rounded-[10px] border px-[13px] py-[10px] pr-[20px] font-[Inter] text-[var(--color-text1)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[900px]:p-[12px] max-[640px]:max-h-none max-[640px]:p-[10px]">
   <div class="flex cursor-pointer items-start justify-between gap-[12px] max-[640px]:flex-col max-[640px]:gap-[10px]" (click)="toggleResultsBarCollapse()">
     <div class="min-w-0">
-      <div data-testid="defacement-report-title" class="flex items-center gap-[10px] text-[17px] font-[800] text-[var(--color-text1)]">
+      <div data-testid="defacement-report-title" class="flex items-center gap-[10px] text-[16px] font-[800] text-[var(--color-text1)]">
         <span>{{ results_defacement() ? 'IP Threat Report' : 'Stealer Log Report' }}</span>
       </div>
-      <p class="mt-[6px] max-w-[760px] text-[12px] leading-[1.55] text-[var(--color-text4)]">
+      <p class="mt-[3px] max-w-[760px] text-[12px] leading-[1.55] text-[var(--color-text4)]">
         Curated threat findings grouped for quick review.
       </p>
     </div>
 
-    <div class="ml-auto flex items-center justify-end gap-[10px] self-start max-[640px]:ml-0 max-[640px]:w-full max-[640px]:justify-between">
+    <div class="ml-auto flex items-center justify-end gap-[10px] self-center max-[640px]:ml-0 max-[640px]:w-full max-[640px]:justify-between">
       <div class="flex flex-wrap items-center justify-end gap-[8px]">
       @if (results_defacement()?.Result?.length && (threatTypeCounts | keyvalue).length > 0) {
         @for (type of threatTypeCounts | keyvalue; track type.key) {
-          <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick(type.key, $event)">
+          <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] pl-[12px] pr-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick(type.key, $event)">
             {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
             <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
           </div>
@@ -21,15 +21,15 @@
       }
 
       @if (results_stealerlog()?.Result?.length; as slCount) {
-        <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-tags)] px-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick('stealerlog', $event)">
+        <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] pl-[12px] pr-[9px] text-[11px] font-medium text-[var(--color-text5)] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick('stealerlog', $event)">
           stealerlog ({{ slCount >= 100 ? '100+' : slCount }})
           <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
         </div>
       }
       </div>
 
-      <div data-testid="defacement-report-toggle" class="relative inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] before:absolute before:inset-[-10px] before:content-['']">
-        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="h-[14px] w-[14px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
+      <div data-testid="defacement-report-toggle" class="relative inline-flex h-[28px] w-[28px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] before:absolute before:inset-[-10px] before:content-['']">
+        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="h-[12px] w-[12px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
       </div>
     </div>
   </div>
