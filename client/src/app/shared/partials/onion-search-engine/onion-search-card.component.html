@@ -103,9 +103,19 @@
               </div>
             </div>
 
-            <div #scrollRow class="flex gap-[12px] overflow-x-auto pb-[4px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" (scroll)="onScrollRow()">
+            <div
+              #scrollRow
+              class="gap-[12px] pb-[4px]"
+              [ngClass]="engines.length === 1
+                ? 'grid grid-cols-1 overflow-hidden md:grid-cols-2'
+                : 'flex overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'"
+              (scroll)="onScrollRow()">
               @for (e of engines; track e.engine; let i = $index) {
-                <div data-testid="onion-search-report-card" class="group min-w-[320px] flex-[0_0_320px] overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-consolidated-secondary)] text-[var(--color-text1)] transition-[transform,border-color,background] duration-200 hover:border-[rgba(34,197,94,0.2)] hover:bg-[var(--color-consolidated-secondary)]">
+                <div
+                  data-testid="onion-search-report-card"
+                  class="group overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-consolidated-secondary)] text-[var(--color-text1)] transition-[transform,border-color,background] duration-200 hover:cursor-pointer hover:bg-[var(--color-blue-810)] hover:border-[var(--color-border)]"
+                  [ngClass]="engines.length === 1 ? 'min-w-0' : 'min-w-[320px] flex-[0_0_320px]'"
+                  (click)="openEngineCard(e, $event)">
                   <div class="flex items-start justify-between gap-[12px] border-b border-[rgba(255,255,255,0.08)] px-[14px] py-[12px] max-[640px]:px-[10px]">
                     <div class="min-w-0">
                       <div class="mb-[8px] flex flex-wrap items-center gap-[8px]">
@@ -143,17 +153,17 @@
                       </div>
                     }
 
-                    <div class="mt-[12px] flex flex-wrap items-center gap-[8px]">
-                      @if (e.first_result?.url) {
-                        <a [href]="e.first_result?.url" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-[30px] items-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[10px] text-[11px] font-[800] text-[var(--color-text2)] no-underline transition-colors duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" (click)="$event.stopPropagation()">
-                          Open result
-                        </a>
-                      }
-                      @if (e.search_url) {
-                        <a [href]="e.search_url" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-[30px] items-center rounded-full border border-[var(--color-border)] px-[10px] text-[11px] font-[800] text-[var(--color-text5)] no-underline transition-colors duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)]" (click)="$event.stopPropagation()">
-                          Open engine search
-                        </a>
-                      }
+                  </div>
+                </div>
+              }
+              @if (engines.length === 1) {
+                <div class="min-w-0 overflow-hidden rounded-[14px] border border-dashed border-white/20 bg-[var(--color-consolidated-secondary)]/45 px-[16px] py-[14px]">
+                  <div class="flex h-full min-h-[190px] flex-col justify-center text-center">
+                    <div class="text-[13px] font-[800] text-[var(--color-text2)]">
+                      No additional result found
+                    </div>
+                    <div class="mt-[6px] text-[12px] leading-[1.55] text-[var(--color-text4)]">
+                      Other search engines did not return another top match for this query.
                     </div>
                   </div>
                 </div>

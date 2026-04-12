@@ -109,6 +109,15 @@ export class OnionSearchCardComponent {
     this.updateScrollState();
   }
 
+  openEngineCard(entry: { search_url?: string; first_result?: { url?: string } }, event?: Event): void {
+    event?.stopPropagation();
+    const targetUrl = entry.first_result?.url || entry.search_url;
+    if (!targetUrl || typeof window === 'undefined') {
+      return;
+    }
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+  }
+
   get progressValue(): number {
     const p = Number(this.progress);
     if (!Number.isFinite(p)) {
