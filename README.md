@@ -40,7 +40,7 @@ actionable insights.<br>
 The Orion homepage provides a search-first investigation workspace with summary panels, recent findings, and
 visual pivots that help analysts move quickly from overview to deeper investigation.
 
-<img src="README-assets/homepage-overview-readme.png" alt="Homepage Overview" style="border-radius: 18px; border: 2.5px solid white;" />
+<img src="README-assets/homepage-overview-readme.png" alt="Homepage Overview" />
 
 ## Getting Started
 
