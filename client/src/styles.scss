@@ -2331,7 +2331,7 @@ body.demo-tour-scroll-locked {
 }
 
 .light-theme app-graph-loading > div.fixed.inset-0.overflow-hidden {
-  background: radial-gradient(circle at top, rgba(87, 165, 235, 0.12), transparent 34%), linear-gradient(180deg, #f8fbff, #eef5fc) !important;
+  background: linear-gradient(180deg, #f8fbff, #eef5fc) !important;
 }
 
 .light-theme app-graph-loading > div.fixed.inset-0.overflow-hidden > .absolute.inset-0 {
@@ -2345,8 +2345,8 @@ body.demo-tour-scroll-locked {
 }
 
 .light-theme app-graph-loading > div.fixed.inset-0.overflow-hidden > .relative .rounded-2xl .rounded-2xl {
-  border-color: rgba(87, 165, 235, 0.22) !important;
-  background: rgba(87, 165, 235, 0.08) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  background: rgba(226, 232, 240, 0.5) !important;
 }
 
 .light-theme app-graph-loading > div.fixed.inset-0.overflow-hidden h2 {
