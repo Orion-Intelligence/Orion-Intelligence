@@ -35,59 +35,102 @@ information gathering, Orion provides a unified ecosystem that enhances the work
 actionable insights.<br>
 <br>
 
+## Platform Preview
+
+The Orion homepage provides a search-first investigation workspace with summary panels, recent findings, and
+visual pivots that help analysts move quickly from overview to deeper investigation.
+
+<img src="README-assets/homepage-overview-readme.png" alt="Homepage Overview" style="border-radius: 18px; border: 2.5px solid white;" />
+
+## Getting Started
+
+To explore the platform and project materials quickly:
+
+1. Open the documentation: https://orion-search.readthedocs.io
+2. Review the main platform repository: https://github.com/Orion-Intelligence/Orion-Intelligence
+3. Explore the wider Orion module set in the tables below
+4. Use the project documentation and repository modules to understand how collection, processing, and analyst workflows connect end to end
+
+## Core Capabilities
+
+Orion is built as an operational intelligence environment rather than a single search page. At a project level, the
+platform is centered around:
+
+- collection and ingestion from multiple sources
+- processing, normalization, and enrichment of collected data
+- indexing and retrieval for large investigative datasets
+- analyst-facing search, filtering, and correlation workflows
+- modular services that allow the ecosystem to expand as new investigative needs emerge
+
+## Who It's For
+
+Orion is intended for teams and individuals who need a unified investigation environment, including OSINT analysts,
+research teams, cyber threat investigators, and operators who work across collection, search, enrichment, and review
+workflows.
+
+## Project Modules
+
+The Orion ecosystem is composed of multiple connected repositories that together support the full intelligence
+lifecycle. Some modules focus on collection, some on storage or microservices, some on presentation and analyst
+experience, and others on specialized workflows such as browser-assisted acquisition or social-data handling.
+
+At a high level, the project operates as a connected flow:
+
+`Crawler / Collector -> Storage / Micros -> Orion Platform -> Browser / Social / Tor2Web / Landing`
+
 ## Repository Quality and Build Status
 
 | Repository | Build | Tests | Docs | Codacy | CodeQL | MDN HTTP Observatory | Security Headers | SSLLabs |
 |-----------|-------|-------|------|--------|--------|----------------------|------------------|----------|
-| [Orion Search](https://github.com/Orion-Intelligence/Orion-Intelligence) | ![Build](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/build.yml/badge.svg?branch=trusted-main) | ![Tests](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/test.yml/badge.svg?branch=trusted-main) | ![Docs](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/docs.yml/badge.svg?branch=trusted-main) | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2799076ac8d748368a8cb0a4de5a939f)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Intelligence/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/github-code-scanning/codeql/badge.svg) | [![Status](https://img.shields.io/badge/observatory-A%2B-brightgreen)](https://developer.mozilla.org/en-US/observatory/analyze?host=try.orionintelligence.org) | [![Status](https://img.shields.io/badge/security%20headers-A%2B-brightgreen)](https://securityheaders.com/?q=https%3A%2F%2Ftry.orionintelligence.org%2F&followRedirects=on) | [![Status](https://img.shields.io/static/v1?label=SSLLabs&message=A%2B&color=brightgreen)](https://www.ssllabs.com/ssltest/analyze.html?d=try.orionintelligence.org&latest) |
+| [Orion Platform](https://github.com/Orion-Intelligence/Orion-Intelligence) | ![Build](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/build.yml/badge.svg?branch=trusted-main) | ![Tests](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/test.yml/badge.svg?branch=trusted-main) | ![Docs](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/docs.yml/badge.svg?branch=trusted-main) | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2799076ac8d748368a8cb0a4de5a939f)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Intelligence/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/github-code-scanning/codeql/badge.svg) | [![Status](https://img.shields.io/badge/observatory-A%2B-brightgreen)](https://developer.mozilla.org/en-US/observatory/analyze?host=try.orionintelligence.org) | [![Status](https://img.shields.io/badge/security%20headers-A%2B-brightgreen)](https://securityheaders.com/?q=https%3A%2F%2Ftry.orionintelligence.org%2F&followRedirects=on) | [![Status](https://img.shields.io/static/v1?label=SSLLabs&message=A%2B&color=brightgreen)](https://www.ssllabs.com/ssltest/analyze.html?d=try.orionintelligence.org&latest) |
 | [Orion Crawler](https://github.com/Orion-Intelligence/Orion-Crawler) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ddf7febc17424d967e34b3afa8ad8c)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Crawler/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Crawler/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
 | [Orion Collector](https://github.com/Orion-Intelligence/Orion-Collector) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3e52faaeda504a518f0b675984f9af21)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Collector/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Collector/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
 | [Orion Micros](https://github.com/Orion-Intelligence/Orion-Micros) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/5737f50b6feb4069b95e208bde905fcc)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Micros/dashboard) | - | - | - | - |
 | [Orion Browser](https://github.com/Orion-Intelligence/Orion-Browser) | - | - | - | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/37df35b2d275406e9fe466818bc7d779)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Browser/dashboard) | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Browser/actions/workflows/github-code-scanning/codeql/badge.svg) | - | - | - |
+| [Orion Leaks](https://github.com/Orion-Intelligence/Orion-Leaks) | - | - | - | - | - | - | - | - |
+| [Orion Storage](https://github.com/Orion-Intelligence/Orion-Storage) | - | - | - | - | - | - | - | - |
+| [Orion Social](https://github.com/Orion-Intelligence/Orion-Social) | - | - | - | - | - | - | - | - |
+| [Orion Intelligence Landing](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | - | - | - | - | - | - | - | - |
+| [Orion Tor2Web](https://github.com/Orion-Intelligence/Orion-Tor2Web) | - | - | - | - | - | - | - | - |
 
 ## Technology Stack
 
-The Orion platform is built using various technologies to provide optimal search capabilities and data handling. Below
-is the list of libraries and frameworks used:
+The Orion ecosystem uses a mixed stack across collection, indexing, web application delivery, and browser/mobile
+components.
 
-![MongoDB](https://badgen.net/badge/search-crawler/MongoDB/green)
-![Redis](https://badgen.net/badge/search-crawler/Redis/red)
-![Celery](https://badgen.net/badge/crawler/Celery/red)
-![Python](https://badgen.net/badge/search-crawler/Python/blue)
-![Tor](https://badgen.net/badge/search-crawler/Tor/purple)
-![Traefik](https://badgen.net/badge/search/Traefik/orange)
-![elastic](https://badgen.net/badge/search/elastic/pink)
-![java](https://badgen.net/badge/browser/java/cyan)
-![kotlin](https://badgen.net/badge/browser/kotlin/yellow)
+- Frontend: Angular, TypeScript
+- Backend: Python, FastAPI, Celery
+- Search and data: Elasticsearch, MongoDB, Redis
+- Infrastructure: Docker, Traefik, Tor
+- Mobile and browser tooling: Java, Kotlin
 
 ## Associated Repositories
 
 | Repository                                                               | Description                                                                    | Stats                                                                                                                                                                           |
 |--------------------------------------------------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Orion Search](https://github.com/Orion-Intelligence/Orion-Intelligence) | A platform to visualize extracted data.                                        | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence?style=social) |
+| [Orion Platform](https://github.com/Orion-Intelligence/Orion-Intelligence) | Core analyst-facing platform for search, visualization, correlation, and investigation workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence?style=social) |
 | [Orion Crawler](https://github.com/Orion-Intelligence/Orion-Crawler)     | Used for monitoring and continuously crawling the hidden web.                  | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Crawler?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Crawler?style=social)         |
 | [Orion Collector](https://github.com/Orion-Intelligence/Orion-Collector) | Simplifies the task of creating custom crawling scripts for multiple websites. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Collector?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Collector?style=social)     |
 | [Orion Micros](https://github.com/Orion-Intelligence/Orion-Micros)       | Lightweight modular microservices supporting Orion components.                 | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Micros?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Micros?style=social)           |
 | [Orion Browser](https://github.com/Orion-Intelligence/Orion-Browser)     | A harvester-based browser used to scrape data as you browse.                   | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Browser?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Browser?style=social)         |
-## Data Extraction Techniques
+| [Orion Leaks](https://github.com/Orion-Intelligence/Orion-Leaks)         | Dedicated repository for leak-focused ingestion, handling, and related data flows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Leaks?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Leaks?style=social)         |
+| [Orion Storage](https://github.com/Orion-Intelligence/Orion-Storage)     | Storage-oriented module supporting persistence and data retention workflows across the platform. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Storage?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Storage?style=social)         |
+| [Orion Social](https://github.com/Orion-Intelligence/Orion-Social)       | Social-data-focused module supporting collection and processing for social intelligence workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Social?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Social?style=social)         |
+| [Orion Intelligence Landing](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | Landing and presentation layer for the broader Orion Intelligence project presence. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence-Landing?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence-Landing?style=social)         |
+| [Orion Tor2Web](https://github.com/Orion-Intelligence/Orion-Tor2Web)     | Tor-to-web support component for controlled access and related connectivity workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Tor2Web?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Tor2Web?style=social)         |
+## Platform Architecture
 
-This is a comprehensive flow diagram illustrating the functioning of the multithreaded crawler. It outlines the entire
-process, from initializing threads and managing task distribution to efficiently retrieving and processing data from
-multiple sources concurrently. The diagram highlights key components, such as task queues, thread synchronization
-mechanisms, and data handling workflows, providing a clear and detailed representation of the crawler's architecture and
-operational flow
+Orion is designed as a modular intelligence platform rather than a single-purpose application. The project combines a
+search interface, crawler-connected ingestion workflows, analysis services, and supporting infrastructure into one
+operational system. This architecture allows the platform to unify collection, processing, indexing, enrichment, and
+visualization while still remaining flexible enough to evolve as new data sources and investigative workflows are added.
 
-![image(1)](https://github.com/user-attachments/assets/696cf009-a0f3-4995-91fe-58e53b128825)
+## Intelligence Workflow
 
-## Deep Data Linting Roadmap
-
-This document outlines the proposed solution and future roadmap for deep data linting, focusing on integrating insights
-from multiple sources into a unified platform. The solution emphasizes advanced data validation, cross-source
-correlation, and seamless integration to ensure comprehensive data quality checks. The roadmap highlights phased
-development, scalability enhancements, and feature expansions aimed at providing a robust and centralized approach to
-data insight and linting
-
-![linting(2)](https://github.com/user-attachments/assets/ce1885dc-e701-45f6-89ab-9f412b057373)
+At the project level, Orion is built to reduce the gap between raw collected data and analyst-ready output. The broader
+workflow starts with ingestion and source acquisition, moves through normalization and processing, and ends in
+searchable, correlated intelligence that can be explored through a single interface. This makes the project useful not
+just as a search product, but as a complete environment for operational intelligence work.
 
 ## Browser Support
 
@@ -112,16 +155,16 @@ pull request.
 
 ## License
 
-Orion Search is licensed under the [MIT License](LICENSE).
+Orion Platform is licensed under the [MIT License](LICENSE).
 
 ## Disclaimer
 
-This project is intended for research purposes only. The authors of Orion Search do not support or endorse illegal
+This project is intended for research purposes only. The authors of Orion Platform do not support or endorse illegal
 activities, and users of this project are responsible for ensuring their actions comply with the law.
 
 ## GitHub Repository
 
-GitHub Repository URL: [https://github.com/msmannan00/Orion-Search.git](https://github.com/msmannan00/Orion-Search)
+GitHub Repository URL: [https://github.com/Orion-Intelligence/Orion-Intelligence](https://github.com/Orion-Intelligence/Orion-Intelligence)
 
 ## Project Information
 
