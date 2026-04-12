@@ -150,15 +150,10 @@ export class OnionSearchCardComponent {
   }
 
   private fetchSearchResults(apiEndpoint: string, payload: { text: { query: string } }): Observable<OnionSearchResponse | null> {
-    return this.http.post<OnionSearchResponse>(apiEndpoint, payload).pipe(
-      expand((res) =>
-        this.shouldContinuePolling(res)
-          ? timer(2000).pipe(switchMap(() => this.http.post<OnionSearchResponse>(apiEndpoint, payload)))
-          : EMPTY
-      ),
-      takeWhile((res) => this.shouldContinuePolling(res), true),
-      catchError(() => of(null))
-    );
+    return this.http.post<OnionSearchResponse>(apiEndpoint, payload).pipe(expand((res) =>
+      this.shouldContinuePolling(res)
+        ? timer(2000).pipe(switchMap(() => this.http.post<OnionSearchResponse>(apiEndpoint, payload)))
+        : EMPTY), takeWhile((res) => this.shouldContinuePolling(res), true), catchError(() => of(null)));
   }
 
   private isPendingResponse(res: OnionSearchResponse): boolean {
