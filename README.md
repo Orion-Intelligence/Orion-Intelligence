@@ -107,14 +107,6 @@ is the list of libraries and frameworks used:
 | [**Orion Social**](https://github.com/Orion-Intelligence/Orion-Social) | Social-data module for collection and processing in social intelligence workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Social?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Social?style=social) |
 | [**Orion Intelligence Landing**](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | Public-facing landing layer for project presentation and entry-point messaging. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence-Landing?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence-Landing?style=social) |
 | [**Orion Tor2Web**](https://github.com/Orion-Intelligence/Orion-Tor2Web) | Tor-to-web bridge component for controlled access and connectivity support. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Tor2Web?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Tor2Web?style=social) |
-## Browser Support
-
-Orion Browser is an Android application designed to provide a secure, private browsing experience by leveraging onion
-routing technology. This browser empowers users to access hidden web content anonymously, unblock restricted sites, and
-browse freely while safeguarding their online identity.
-
-![JPJ pdf](https://github.com/user-attachments/assets/399fd130-988d-4e0d-acef-2f60d6220a81)
-
 ## Contribution
 
 We welcome contributions to improve Orion Platform. If you'd like to contribute, please fork the repository and submit a
