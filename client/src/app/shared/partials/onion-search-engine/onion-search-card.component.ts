@@ -4,6 +4,29 @@ import { HttpClient } from '@angular/common/http';
 import { EMPTY, Observable, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
 
+type OnionSearchEntry = {
+  engine: string;
+  search_url?: string;
+  first_result?: {
+    url?: string;
+    title?: string;
+    description?: string;
+  };
+  status?: string;
+};
+
+type OnionSearchResponse = {
+  status?: string;
+  progress?: number;
+  step?: string;
+  result?: {
+    status?: string;
+    progress?: number;
+    step?: string;
+    results?: OnionSearchEntry[];
+  };
+};
+
 @Component({
   selector: 'app-onion-search-card',
   standalone: true,
@@ -18,7 +41,7 @@ export class OnionSearchCardComponent {
   hasError = false;
   canScrollLeft = false;
   canScrollRight = false;
-  engines: Array<{ engine: string; search_url?: string; first_result?: { url?: string; title?: string; description?: string }; }> = [];
+  engines: OnionSearchEntry[] = [];
   @ViewChild('scrollRow') scrollRow?: ElementRef<HTMLDivElement>;
 
   @Input() query = '';
@@ -55,7 +78,7 @@ export class OnionSearchCardComponent {
     this.fetchSearchResults('/api/cross/search', payload)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (res) => {
+        next: (res: OnionSearchResponse | null) => {
           if (!res) {
             this.hasError = true;
             return;
@@ -81,10 +104,10 @@ export class OnionSearchCardComponent {
             return;
           }
 
-          const results = Array.isArray(res?.result?.results) ? res.result.results : [];
+          const results = Array.isArray(res.result?.results) ? res.result.results : [];
           this.engines = results
-            .filter((r: any) => (r?.status ?? '').toLowerCase() === 'success')
-            .map((r: any) => ({
+            .filter((r) => (r?.status ?? '').toLowerCase() === 'success')
+            .map((r) => ({
               engine: r.engine,
               search_url: r.search_url,
               first_result: r.first_result,
@@ -109,7 +132,7 @@ export class OnionSearchCardComponent {
     this.updateScrollState();
   }
 
-  openEngineCard(entry: { search_url?: string; first_result?: { url?: string } }, event?: Event): void {
+  openEngineCard(entry: OnionSearchEntry, event?: Event): void {
     event?.stopPropagation();
     const targetUrl = entry.first_result?.url || entry.search_url;
     if (!targetUrl || typeof window === 'undefined') {
@@ -126,16 +149,19 @@ export class OnionSearchCardComponent {
     return Math.max(0, Math.min(100, Math.round(p)));
   }
 
-  private fetchSearchResults(apiEndpoint: string, payload: any): Observable<any> {
-    return this.http.post<any>(apiEndpoint, payload).pipe(expand((res) =>
-      this.shouldContinuePolling(res)
-        ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, payload)))
-        : EMPTY),
-    takeWhile((res) => this.shouldContinuePolling(res), true),
-    catchError(() => of(null)));
+  private fetchSearchResults(apiEndpoint: string, payload: { text: { query: string } }): Observable<OnionSearchResponse | null> {
+    return this.http.post<OnionSearchResponse>(apiEndpoint, payload).pipe(
+      expand((res) =>
+        this.shouldContinuePolling(res)
+          ? timer(2000).pipe(switchMap(() => this.http.post<OnionSearchResponse>(apiEndpoint, payload)))
+          : EMPTY
+      ),
+      takeWhile((res) => this.shouldContinuePolling(res), true),
+      catchError(() => of(null))
+    );
   }
 
-  private isPendingResponse(res: any): boolean {
+  private isPendingResponse(res: OnionSearchResponse): boolean {
     const topStatus = (res?.status || '').toLowerCase();
     const nestedStatus = (res?.result?.status || '').toLowerCase();
     return (
@@ -144,7 +170,7 @@ export class OnionSearchCardComponent {
     );
   }
 
-  private shouldContinuePolling(res: any): boolean {
+  private shouldContinuePolling(res: OnionSearchResponse): boolean {
     return this.isPendingResponse(res);
   }
 
