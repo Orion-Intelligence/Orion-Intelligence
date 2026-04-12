@@ -53,14 +53,13 @@ export function searchInIocs(query: string) {
 }
 
 export function ensureDomainScannerModalOpen() {
-  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click();
-  cy.get(`[data-testid="consolidated-open-domain-scanner"], ${DOMAIN_SCANNER_SELECTOR}`, {timeout: 30000}).then(($els) => {
+  cy.get(`[data-testid="consolidated-open-domain-scanner"], ${DOMAIN_SCANNER_SELECTOR}`).then(($els) => {
     const isModalVisible = $els.filter(`${DOMAIN_SCANNER_SELECTOR}:visible`).length > 0;
     if (!isModalVisible) {
-      cy.get('[data-testid="consolidated-open-domain-scanner"]', {timeout: 30000})
+      cy.get('[data-testid="consolidated-open-domain-scanner"]')
         .scrollIntoView()
         .should('be.visible')
-        .click({force: true});
+        .click();
     }
   });
   cy.get(DOMAIN_SCANNER_SELECTOR, {timeout: DOMAIN_SCANNER_MODAL_TIMEOUT}).should('exist');
