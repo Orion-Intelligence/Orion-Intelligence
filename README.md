@@ -187,7 +187,7 @@ GitHub Repository URL: [https://github.com/Orion-Intelligence/Orion-Intelligence
 
 ## Project Information
 
-[https://www.canva.com/design/DAF8Sa8KkDE/1H8z3RVausdHIMcE98Kvfg/edit](https://www.orionintelligence.org/collaboration)
+[https://www.orionintelligence.org/collaboration](https://www.orionintelligence.org/collaboration)
 
 ## Documentation
 
