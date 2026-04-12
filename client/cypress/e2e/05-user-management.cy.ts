@@ -146,6 +146,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.get('@profileWindowOpen').its('firstCall.args.0').should('include', '/dashboard/');
 
     openFirstStrategicReportFromSearch();
+    cy.wait(1000)
     cy.scrollDashboardToBottom()
     cy.get('[data-testid="report-feedback-comment-input"]').filter(':visible').first().scrollIntoView().should('be.visible').type(blockedCommentText);
     cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
@@ -167,7 +168,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
     loginAsUser(testUsers.testing5.username, testUsers.testing5.password);
     openFirstStrategicReportFromSearch();
-    cy.scrollTo('bottom');
+    cy.scrollDashboardToBottom()
     cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
     cy.get('[data-testid="report-user-sidebar-hidden-profile"]').should('exist');
     cy.get('[data-testid="report-user-sidebar-open-profile"]').should('not.exist');
