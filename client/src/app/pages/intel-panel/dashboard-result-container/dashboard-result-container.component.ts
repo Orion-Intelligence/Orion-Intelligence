@@ -64,6 +64,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   get shouldShowCrossSearch(): boolean {
     return !this.isResponseLoading()
+      && !this.appService.isMobileMode()
       && !!this.currentQuery.trim()
       && this.apiEndpoint !== 'search/defacement'
       && this.apiEndpoint !== 'search/dump'
