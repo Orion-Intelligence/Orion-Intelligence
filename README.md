@@ -68,7 +68,7 @@ Orion is intended for teams and individuals who need a unified investigation env
 research teams, cyber threat investigators, and operators who work across collection, search, enrichment, and review
 workflows.
 
-## Project Modules
+## Orion Ecosystem
 
 The Orion ecosystem is composed of multiple connected repositories that together support the full intelligence
 lifecycle. Some modules focus on collection, some on storage or microservices, some on presentation and analyst
@@ -76,7 +76,7 @@ experience, and others on specialized workflows such as browser-assisted acquisi
 
 At a high level, the project operates as a connected flow:
 
-`Crawler / Collector -> Storage / Micros -> Orion Platform -> Browser / Social / Tor2Web / Landing`
+`Collection -> Processing -> Orion Platform -> Access`
 
 ## Technology Stack
 
@@ -93,20 +93,25 @@ is the list of libraries and frameworks used:
 ![java](https://badgen.net/badge/browser/java/cyan)
 ![kotlin](https://badgen.net/badge/browser/kotlin/yellow)
 
-## Orion Modules
+### Core Modules
 
-| Module | Role | Stats |
-|--------|------|-------|
-| [**Orion Platform**](https://github.com/Orion-Intelligence/Orion-Intelligence) | Main analyst-facing platform for search, visualization, correlation, and investigation workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence?style=social) |
-| [**Orion Crawler**](https://github.com/Orion-Intelligence/Orion-Crawler) | Crawling engine for continuous acquisition from hidden-web and monitored sources. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Crawler?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Crawler?style=social) |
-| [**Orion Collector**](https://github.com/Orion-Intelligence/Orion-Collector) | Collector framework for custom source scripts and ingestion workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Collector?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Collector?style=social) |
-| [**Orion Micros**](https://github.com/Orion-Intelligence/Orion-Micros) | Modular backend services that support platform processing and integrations. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Micros?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Micros?style=social) |
-| [**Orion Browser**](https://github.com/Orion-Intelligence/Orion-Browser) | Browser-assisted acquisition module for private browsing and live collection workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Browser?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Browser?style=social) |
-| [**Orion Leaks**](https://github.com/Orion-Intelligence/Orion-Leaks) | Leak-oriented ingestion and handling module for exposed-data workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Leaks?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Leaks?style=social) |
-| [**Orion Storage**](https://github.com/Orion-Intelligence/Orion-Storage) | Storage layer for persistence, retention, and supporting data services. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Storage?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Storage?style=social) |
-| [**Orion Social**](https://github.com/Orion-Intelligence/Orion-Social) | Social-data module for collection and processing in social intelligence workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Social?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Social?style=social) |
-| [**Orion Intelligence Landing**](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | Public-facing landing layer for project presentation and entry-point messaging. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence-Landing?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence-Landing?style=social) |
-| [**Orion Tor2Web**](https://github.com/Orion-Intelligence/Orion-Tor2Web) | Tor-to-web bridge component for controlled access and connectivity support. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Tor2Web?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Tor2Web?style=social) |
+| Module | Purpose | Stats |
+|--------|---------|-------|
+| [**Orion Platform**](https://github.com/Orion-Intelligence/Orion-Intelligence) | Analyst-facing investigation platform. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence?style=social) |
+| [**Orion Crawler**](https://github.com/Orion-Intelligence/Orion-Crawler) | Hidden-web and monitored-source crawling engine. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Crawler?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Crawler?style=social) |
+| [**Orion Collector**](https://github.com/Orion-Intelligence/Orion-Collector) | Custom source collection framework. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Collector?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Collector?style=social) |
+| [**Orion Micros**](https://github.com/Orion-Intelligence/Orion-Micros) | Supporting backend service modules. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Micros?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Micros?style=social) |
+| [**Orion Storage**](https://github.com/Orion-Intelligence/Orion-Storage) | Persistence and retention layer. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Storage?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Storage?style=social) |
+
+### Supporting Modules
+
+| Module | Purpose | Stats |
+|--------|---------|-------|
+| [**Orion Browser**](https://github.com/Orion-Intelligence/Orion-Browser) | Browser-assisted private collection workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Browser?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Browser?style=social) |
+| [**Orion Social**](https://github.com/Orion-Intelligence/Orion-Social) | Social intelligence data workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Social?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Social?style=social) |
+| [**Orion Leaks**](https://github.com/Orion-Intelligence/Orion-Leaks) | Leak-focused ingestion and handling. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Leaks?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Leaks?style=social) |
+| [**Orion Tor2Web**](https://github.com/Orion-Intelligence/Orion-Tor2Web) | Tor-to-web access support component. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Tor2Web?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Tor2Web?style=social) |
+| [**Orion Intelligence Landing**](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | Public-facing landing experience. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence-Landing?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence-Landing?style=social) |
 ## Contribution
 
 We welcome contributions to improve Orion Platform. If you'd like to contribute, please fork the repository and submit a
