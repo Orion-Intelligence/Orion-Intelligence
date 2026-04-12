@@ -103,19 +103,9 @@
               </div>
             </div>
 
-            <div
-              #scrollRow
-              class="gap-[12px] pb-[4px]"
-              [ngClass]="engines.length === 1
-                ? 'grid grid-cols-1 overflow-hidden md:grid-cols-2'
-                : 'flex overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'"
-              (scroll)="onScrollRow()">
+            <div #scrollRow class="gap-[12px] pb-[4px]" [ngClass]="engines.length === 1 ? 'grid grid-cols-1 overflow-hidden md:grid-cols-2' : 'flex overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'" (scroll)="onScrollRow()">
               @for (e of engines; track e.engine; let i = $index) {
-                <div
-                  data-testid="onion-search-report-card"
-                  class="group overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-consolidated-secondary)] text-[var(--color-text1)] transition-[transform,border-color,background] duration-200 hover:cursor-pointer hover:bg-[var(--color-blue-810)] hover:border-[var(--color-border)]"
-                  [ngClass]="engines.length === 1 ? 'min-w-0' : 'min-w-[320px] flex-[0_0_320px]'"
-                  (click)="openEngineCard(e, $event)">
+                <div data-testid="onion-search-report-card" class="group overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-consolidated-secondary)] text-[var(--color-text1)] transition-[transform,border-color,background] duration-200 hover:cursor-pointer hover:bg-[var(--color-blue-810)] hover:border-[var(--color-border)]" [ngClass]="engines.length === 1 ? 'min-w-0' : 'min-w-[320px] flex-[0_0_320px]'" (click)="openEngineCard(e, $event)">
                   <div class="flex items-start justify-between gap-[12px] border-b border-[rgba(255,255,255,0.08)] px-[14px] py-[12px] max-[640px]:px-[10px]">
                     <div class="min-w-0">
                       <div class="mb-[8px] flex flex-wrap items-center gap-[8px]">
