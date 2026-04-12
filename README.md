@@ -17,12 +17,12 @@
 ![Web App](https://img.shields.io/uptimerobot/status/m802042352-33d9c489257791a41a505a06?label=web%20app&logo=googlechrome)
 ![Docs](https://img.shields.io/uptimerobot/status/m802042420-50c04caf485479764330029b?label=docs&logo=readthedocs)
 
-# Orion Intelligence
+# Orion Platform
 
 DOCUMENTATION  https://orion-search.readthedocs.io
 
 <br>
-Orion Intelligence is a comprehensive, web-based solution that combines the functionality of a browser, search engine, crawler, and data aggregation tools to empower OSINT (Open Source Intelligence) experts. Built on top of Docker, Orion provides a user-friendly interface to explore, search, and visualize data extracted by its powerful Orion Crawler.<br><br>
+Orion Platform is a comprehensive, web-based solution that combines the functionality of a browser, search engine, crawler, and data aggregation tools to empower OSINT (Open Source Intelligence) experts. Built on top of Docker, Orion provides a user-friendly interface to explore, search, and visualize data extracted by its powerful Orion Crawler.<br><br>
 
 The platform integrates seamlessly with machine learning models, enhancing search relevance and enabling advanced
 content analysis. Orion supports a broad range of functionalities, including the ability to search, filter, and
@@ -130,7 +130,7 @@ experience, and others on specialized workflows such as browser-assisted acquisi
 
 At a high level, the project operates as a connected flow:
 
-`Collection -> Processing -> Orion Intelligence -> Access`
+`Collection -> Processing -> Orion Platform -> Access`
 
 ## Technology Stack
 
@@ -151,7 +151,7 @@ is the list of libraries and frameworks used:
 
 | Module | Purpose | Stats |
 |--------|---------|-------|
-| [**Orion Intelligence**](https://github.com/Orion-Intelligence/Orion-Intelligence) | Analyst-facing investigation platform. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence?style=social) |
+| [**Orion Platform**](https://github.com/Orion-Intelligence/Orion-Intelligence) | Analyst-facing investigation platform. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence?style=social) |
 | [**Orion Crawler**](https://github.com/Orion-Intelligence/Orion-Crawler) | Hidden-web and monitored-source crawling engine. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Crawler?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Crawler?style=social) |
 | [**Orion Collector**](https://github.com/Orion-Intelligence/Orion-Collector) | Custom source collection framework. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Collector?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Collector?style=social) |
 | [**Orion Micros**](https://github.com/Orion-Intelligence/Orion-Micros) | Supporting backend service modules. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Micros?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Micros?style=social) |
@@ -161,7 +161,7 @@ is the list of libraries and frameworks used:
 | [**Orion Tor2Web**](https://github.com/Orion-Intelligence/Orion-Tor2Web) | Tor-to-web access support component. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Tor2Web?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Tor2Web?style=social) |
 ## Contribution
 
-We welcome contributions to improve Orion Intelligence. If you'd like to contribute, please fork the repository and submit a
+We welcome contributions to improve Orion Platform. If you'd like to contribute, please fork the repository and submit a
 pull request.
 
 ### Steps to Contribute
@@ -174,11 +174,11 @@ pull request.
 
 ## License
 
-Orion Intelligence is licensed under the [MIT License](LICENSE).
+Orion Platform is licensed under the [MIT License](LICENSE).
 
 ## Disclaimer
 
-This project is intended for research purposes only. The authors of Orion Intelligence do not support or endorse illegal
+This project is intended for research purposes only. The authors of Orion Platform do not support or endorse illegal
 activities, and users of this project are responsible for ensuring their actions comply with the law.
 
 ## GitHub Repository
