@@ -42,7 +42,7 @@ visual pivots that help analysts move quickly from overview to deeper investigat
 
 <img src="README-assets/homepage-overview-readme.png" alt="Homepage Overview" />
 
-<details>
+<details open>
   <summary><strong>Screenshot Gallery</strong></summary>
   <table>
     <tr>
@@ -147,7 +147,7 @@ is the list of libraries and frameworks used:
 ![java](https://badgen.net/badge/browser/java/cyan)
 ![kotlin](https://badgen.net/badge/browser/kotlin/yellow)
 
-### Core Modules
+### Modules
 
 | Module | Purpose | Stats |
 |--------|---------|-------|
@@ -155,17 +155,10 @@ is the list of libraries and frameworks used:
 | [**Orion Crawler**](https://github.com/Orion-Intelligence/Orion-Crawler) | Hidden-web and monitored-source crawling engine. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Crawler?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Crawler?style=social) |
 | [**Orion Collector**](https://github.com/Orion-Intelligence/Orion-Collector) | Custom source collection framework. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Collector?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Collector?style=social) |
 | [**Orion Micros**](https://github.com/Orion-Intelligence/Orion-Micros) | Supporting backend service modules. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Micros?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Micros?style=social) |
-| [**Orion Storage**](https://github.com/Orion-Intelligence/Orion-Storage) | Persistence and retention layer. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Storage?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Storage?style=social) |
-
-### Supporting Modules
-
-| Module | Purpose | Stats |
-|--------|---------|-------|
 | [**Orion Browser**](https://github.com/Orion-Intelligence/Orion-Browser) | Browser-assisted private collection workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Browser?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Browser?style=social) |
 | [**Orion Social**](https://github.com/Orion-Intelligence/Orion-Social) | Social intelligence data workflows. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Social?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Social?style=social) |
 | [**Orion Leaks**](https://github.com/Orion-Intelligence/Orion-Leaks) | Leak-focused ingestion and handling. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Leaks?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Leaks?style=social) |
 | [**Orion Tor2Web**](https://github.com/Orion-Intelligence/Orion-Tor2Web) | Tor-to-web access support component. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Tor2Web?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Tor2Web?style=social) |
-| [**Orion Intelligence Landing**](https://github.com/Orion-Intelligence/Orion-Intelligence-Landing) | Public-facing landing experience. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Intelligence-Landing?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Intelligence-Landing?style=social) |
 ## Contribution
 
 We welcome contributions to improve Orion Platform. If you'd like to contribute, please fork the repository and submit a
