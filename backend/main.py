@@ -45,13 +45,13 @@ app = FastAPI(title="API Access", lifespan=lifespan, docs_url=None, redoc_url=No
 setup_middlewares(app)
 
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
-app.mount("/static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="static")
+app.mount("/swagger-static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="swagger-static")
 
 
 @app.get("/docs", include_in_schema=False)
 def custom_swagger_ui():
     return get_swagger_ui_html(
-        openapi_url=app.openapi_url, title="API Access", swagger_css_url="/static/swagger-code.css")
+        openapi_url=app.openapi_url, title="API Access", swagger_css_url="/swagger-static/swagger-code.css")
 
 
 configure_swagger(app)

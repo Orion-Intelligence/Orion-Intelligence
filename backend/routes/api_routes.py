@@ -799,24 +799,10 @@ async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_us
     "/api/cross/search",
     summary="Run Cross Search",
     description=CROSS_SEARCH_DOCS["cross_search"]["description"],
-    tags=["Entity Scans"],
+    tags=["Support Method"],
     operation_id="dynamicCrossSearch",
     response_description=CROSS_SEARCH_DOCS["cross_search"]["response_description"],
     status_code=200,
-    dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
-        Depends(license_required("scanning"))
-    ],
-)
-@api_routes.post(
-    "/api/onion/search",
-    summary="Run Cross Search",
-    description=CROSS_SEARCH_DOCS["cross_search"]["description"],
-    tags=["Entity Scans"],
-    operation_id="dynamicOnionSearchLegacy",
-    response_description=CROSS_SEARCH_DOCS["cross_search"]["response_description"],
-    status_code=200,
-    deprecated=True,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("scanning"))

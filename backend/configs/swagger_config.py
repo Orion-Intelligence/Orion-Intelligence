@@ -16,6 +16,6 @@ def configure_swagger(app: FastAPI):
             title="Api Access",
             oauth2_redirect_url="/docs/oauth2-redirect", ).body.decode("utf-8")
 
-        swagger_ui_html += '<script src="/static/swagger-auth.js"></script>'
+        swagger_ui_html += '<script src="/swagger-static/swagger-auth.js"></script>'
 
         return HTMLResponse(content=swagger_ui_html)
