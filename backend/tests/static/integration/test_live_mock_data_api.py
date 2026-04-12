@@ -538,6 +538,8 @@ def test_live_mock_data_api_route_list_stays_complete():
         ("POST", "/api/feedback/comment/{doc_id}"),
         ("POST", "/api/feedback/trust/{doc_id}"),
         ("POST", "/api/feedback/untrust/{doc_id}"),
+        ("POST", "/api/cross/search"),
+        ("POST", "/api/onion/search"),
     }
 
     actual = set()

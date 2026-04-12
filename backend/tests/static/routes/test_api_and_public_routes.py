@@ -61,6 +61,15 @@ class _FakeSearchModel:
     async def dynamic_search(self, *args, **kwargs):
         return {"ok": True, "route": "dynamic"}
 
+    async def onion_search(self, *args, **kwargs):
+        return {
+            "status": "success",
+            "result": {
+                "status": "success",
+                "results": [],
+            },
+        }
+
     async def search_wanted_list(self, *args, **kwargs):
         return {"cards_data": [], "total": 0}
 
