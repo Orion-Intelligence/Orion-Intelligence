@@ -46,52 +46,52 @@ visual pivots that help analysts move quickly from overview to deeper investigat
   <summary><strong>Screenshot Gallery</strong></summary>
   <table>
     <tr>
-      <td align="center" valign="top"><img src="../screenshots/account-settings.png" alt="Account Settings" width="260"><br><sub>Account Settings</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/apk-scan-report.png" alt="Apk Scan Report" width="260"><br><sub>Apk Scan Report</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/audit-logs.png" alt="Audit Logs" width="260"><br><sub>Audit Logs</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/consolidated-insights.png" alt="Consolidated Insights" width="260"><br><sub>Consolidated Insights</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/consolidated-results.png" alt="Consolidated Results" width="260"><br><sub>Consolidated Results</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/cti-context-menu.png" alt="Cti Context Menu" width="260"><br><sub>Cti Context Menu</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/cti-export-modal.png" alt="Cti Export Modal" width="260"><br><sub>Cti Export Modal</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/cti-graph.png" alt="Cti Graph" width="260"><br><sub>Cti Graph</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/cti-list-view.png" alt="Cti List View" width="260"><br><sub>Cti List View</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/data-breach-tracking.png" alt="Data Breach Tracking" width="260"><br><sub>Data Breach Tracking</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/defacement-report.png" alt="Defacement Report" width="260"><br><sub>Defacement Report</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/directory-monitoring.png" alt="Directory Monitoring" width="260"><br><sub>Directory Monitoring</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/dump-listing.png" alt="Dump Listing" width="260"><br><sub>Dump Listing</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/entity-api-email-breach.png" alt="Entity Api Email Breach" width="260"><br><sub>Entity Api Email Breach</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/exploit-results.png" alt="Exploit Results" width="260"><br><sub>Exploit Results</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/feed-report.png" alt="Feed Report" width="260"><br><sub>Feed Report</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/file-scanner-report.png" alt="File Scanner Report" width="260"><br><sub>File Scanner Report</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/general-intelligence-results.png" alt="General Intelligence Results" width="260"><br><sub>General Intelligence Results</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/heatmap-report.png" alt="Heatmap Report" width="260"><br><sub>Heatmap Report</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/homepage-overview.png" alt="Homepage Overview" width="260"><br><sub>Homepage Overview</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/homepage-searchbar.png" alt="Homepage Searchbar" width="260"><br><sub>Homepage Searchbar</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/login-page.png" alt="Login Page" width="260"><br><sub>Login Page</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/network-intel-geo-modal.png" alt="Network Intel Geo Modal" width="260"><br><sub>Network Intel Geo Modal</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/network-intel-host-recon.png" alt="Network Intel Host Recon" width="260"><br><sub>Network Intel Host Recon</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/network-intel-ip-scan.png" alt="Network Intel Ip Scan" width="260"><br><sub>Network Intel Ip Scan</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/network-intel-vulnerability-scan.png" alt="Network Intel Vulnerability Scan" width="260"><br><sub>Network Intel Vulnerability Scan</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/password-reset.png" alt="Password Reset" width="260"><br><sub>Password Reset</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/report-chatbot.png" alt="Report Chatbot" width="260"><br><sub>Report Chatbot</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/report-json-viewer.png" alt="Report Json Viewer" width="260"><br><sub>Report Json Viewer</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/search-filters.png" alt="Search Filters" width="260"><br><sub>Search Filters</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/social-followers-popup.png" alt="Social Followers Popup" width="260"><br><sub>Social Followers Popup</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/social-intel-list-view.png" alt="Social Intel List View" width="260"><br><sub>Social Intel List View</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/social-intel.png" alt="Social Intel" width="260"><br><sub>Social Intel</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/social-manage-profiles.png" alt="Social Manage Profiles" width="260"><br><sub>Social Manage Profiles</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/social-metadata-results.png" alt="Social Metadata Results" width="260"><br><sub>Social Metadata Results</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/social-report.png" alt="Social Report" width="260"><br><sub>Social Report</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/social-summary-popup.png" alt="Social Summary Popup" width="260"><br><sub>Social Summary Popup</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/stealer-logs-results.png" alt="Stealer Logs Results" width="260"><br><sub>Stealer Logs Results</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/support-modal.png" alt="Support Modal" width="260"><br><sub>Support Modal</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/system-settings.png" alt="System Settings" width="260"><br><sub>System Settings</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/tenant-administration.png" alt="Tenant Administration" width="260"><br><sub>Tenant Administration</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/tenant-homepage.png" alt="Tenant Homepage" width="260"><br><sub>Tenant Homepage</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/tenant-manage-iocs.png" alt="Tenant Manage Iocs" width="260"><br><sub>Tenant Manage Iocs</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/tenant-settings.png" alt="Tenant Settings" width="260"><br><sub>Tenant Settings</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/tenant-users.png" alt="Tenant Users" width="260"><br><sub>Tenant Users</sub></td>
-      <td align="center" valign="top"><img src="../screenshots/web-scan-report.png" alt="Web Scan Report" width="260"><br><sub>Web Scan Report</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/account-settings-20260326.png" alt="Account Settings" width="260"><br><sub>Account Settings</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/apk-scan-report-20260326.png" alt="Apk Scan Report" width="260"><br><sub>Apk Scan Report</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/audit-logs-20260326.png" alt="Audit Logs" width="260"><br><sub>Audit Logs</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/consolidated-insights-20260326.png" alt="Consolidated Insights" width="260"><br><sub>Consolidated Insights</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/consolidated-results-20260326.png" alt="Consolidated Results" width="260"><br><sub>Consolidated Results</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/cti-context-menu-20260326.png" alt="Cti Context Menu" width="260"><br><sub>Cti Context Menu</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/cti-export-modal-20260326.png" alt="Cti Export Modal" width="260"><br><sub>Cti Export Modal</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/cti-graph-20260326.png" alt="Cti Graph" width="260"><br><sub>Cti Graph</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/cti-list-view-20260326.png" alt="Cti List View" width="260"><br><sub>Cti List View</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/data-breach-tracking-20260326.png" alt="Data Breach Tracking" width="260"><br><sub>Data Breach Tracking</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/defacement-report-20260326.png" alt="Defacement Report" width="260"><br><sub>Defacement Report</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/directory-monitoring-20260326.png" alt="Directory Monitoring" width="260"><br><sub>Directory Monitoring</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/dump-listing-20260326.png" alt="Dump Listing" width="260"><br><sub>Dump Listing</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/entity-api-email-breach-20260326.png" alt="Entity Api Email Breach" width="260"><br><sub>Entity Api Email Breach</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/exploit-results-20260326.png" alt="Exploit Results" width="260"><br><sub>Exploit Results</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/feed-report-20260326.png" alt="Feed Report" width="260"><br><sub>Feed Report</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/file-scanner-report-20260326.png" alt="File Scanner Report" width="260"><br><sub>File Scanner Report</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/general-intelligence-results-20260326.png" alt="General Intelligence Results" width="260"><br><sub>General Intelligence Results</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/heatmap-report-20260326.png" alt="Heatmap Report" width="260"><br><sub>Heatmap Report</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/homepage-overview-20260326.png" alt="Homepage Overview" width="260"><br><sub>Homepage Overview</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/homepage-searchbar-20260326.png" alt="Homepage Searchbar" width="260"><br><sub>Homepage Searchbar</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/login-page-20260326.png" alt="Login Page" width="260"><br><sub>Login Page</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/network-intel-geo-modal-20260326.png" alt="Network Intel Geo Modal" width="260"><br><sub>Network Intel Geo Modal</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/network-intel-host-recon-20260326.png" alt="Network Intel Host Recon" width="260"><br><sub>Network Intel Host Recon</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/network-intel-ip-scan-20260326.png" alt="Network Intel Ip Scan" width="260"><br><sub>Network Intel Ip Scan</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/network-intel-vulnerability-scan-20260326.png" alt="Network Intel Vulnerability Scan" width="260"><br><sub>Network Intel Vulnerability Scan</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/password-reset-20260326.png" alt="Password Reset" width="260"><br><sub>Password Reset</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/report-chatbot-20260326.png" alt="Report Chatbot" width="260"><br><sub>Report Chatbot</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/report-json-viewer-20260326.png" alt="Report Json Viewer" width="260"><br><sub>Report Json Viewer</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/search-filters-20260326.png" alt="Search Filters" width="260"><br><sub>Search Filters</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/social-followers-popup-20260326.png" alt="Social Followers Popup" width="260"><br><sub>Social Followers Popup</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/social-intel-list-view-20260326.png" alt="Social Intel List View" width="260"><br><sub>Social Intel List View</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/social-intel-20260326.png" alt="Social Intel" width="260"><br><sub>Social Intel</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/social-manage-profiles-20260326.png" alt="Social Manage Profiles" width="260"><br><sub>Social Manage Profiles</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/social-metadata-results-20260326.png" alt="Social Metadata Results" width="260"><br><sub>Social Metadata Results</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/social-report-20260326.png" alt="Social Report" width="260"><br><sub>Social Report</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/social-summary-popup-20260326.png" alt="Social Summary Popup" width="260"><br><sub>Social Summary Popup</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/stealer-logs-results-20260326.png" alt="Stealer Logs Results" width="260"><br><sub>Stealer Logs Results</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/support-modal-20260326.png" alt="Support Modal" width="260"><br><sub>Support Modal</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/system-settings-20260326.png" alt="System Settings" width="260"><br><sub>System Settings</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/tenant-administration-20260326.png" alt="Tenant Administration" width="260"><br><sub>Tenant Administration</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/tenant-homepage-20260326.png" alt="Tenant Homepage" width="260"><br><sub>Tenant Homepage</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/tenant-manage-iocs-20260326.png" alt="Tenant Manage Iocs" width="260"><br><sub>Tenant Manage Iocs</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/tenant-settings-20260326.png" alt="Tenant Settings" width="260"><br><sub>Tenant Settings</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/tenant-users-20260326.png" alt="Tenant Users" width="260"><br><sub>Tenant Users</sub></td>
+      <td align="center" valign="top"><img src="../screenshots/web-scan-report-20260326.png" alt="Web Scan Report" width="260"><br><sub>Web Scan Report</sub></td>
     </tr>
   </table>
 </details>
