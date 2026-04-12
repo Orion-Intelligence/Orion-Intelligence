@@ -74,7 +74,8 @@ async def search_general(param: search_consolidated_param_model = Body(...), cur
     if role == user_role.DEMO or is_free:
         param.network = "onion"
     base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
-    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free and param.category == "all":
+    has_query = bool((param.q or "").strip())
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free and param.category == "all" and has_query:
         base_index = [
             ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_LEAK_INDEX,
