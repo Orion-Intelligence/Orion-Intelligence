@@ -30,11 +30,11 @@ import { scanAnimation } from '../../../shared/animations/scan.animations';
 import { DefacementCallbackModel } from '../../../shared/model/results/defacement/defacement.callback.model';
 import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manager.utils';
 import { NetworkIntel } from '../../network-intel/network-intel';
-import { OnionSearchCardComponent } from '../../../shared/partials/onion-search-engine/onion-search-card.component';
+import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, OnionSearchCardComponent],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })

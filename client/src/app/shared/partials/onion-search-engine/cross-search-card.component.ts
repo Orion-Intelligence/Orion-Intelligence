@@ -1,39 +1,20 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { EMPTY, Observable, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
-
-type OnionSearchEntry = {
-  engine: string;
-  search_url?: string;
-  first_result?: {
-    url?: string;
-    title?: string;
-    description?: string;
-  };
-  status?: string;
-};
-
-type OnionSearchResponse = {
-  status?: string;
-  progress?: number;
-  step?: string;
-  result?: {
-    status?: string;
-    progress?: number;
-    step?: string;
-    results?: OnionSearchEntry[];
-  };
-};
+import { ProxyController } from '../../services/proxy-controller';
+import { CrossSearchEntry, CrossSearchResponse } from '../../model/results/cross-search/cross-search.model';
 
 @Component({
-  selector: 'app-onion-search-card',
+  selector: 'app-cross-search-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './onion-search-card.component.html',
+  templateUrl: './cross-search-card.component.html',
 })
-export class OnionSearchCardComponent {
+export class CrossSearchCardComponent {
+  private readonly proxied_resource = inject(ProxyController);
+
   isExpandable = false;
   isLoading = false;
   progress = 0;
@@ -41,7 +22,7 @@ export class OnionSearchCardComponent {
   hasError = false;
   canScrollLeft = false;
   canScrollRight = false;
-  engines: OnionSearchEntry[] = [];
+  engines: CrossSearchEntry[] = [];
   @ViewChild('scrollRow') scrollRow?: ElementRef<HTMLDivElement>;
 
   @Input() query = '';
@@ -78,7 +59,7 @@ export class OnionSearchCardComponent {
     this.fetchSearchResults('/api/cross/search', payload)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (res: OnionSearchResponse | null) => {
+        next: (res: CrossSearchResponse | null) => {
           if (!res) {
             this.hasError = true;
             return;
@@ -132,13 +113,13 @@ export class OnionSearchCardComponent {
     this.updateScrollState();
   }
 
-  openEngineCard(entry: OnionSearchEntry, event?: Event): void {
+  openEngineCard(entry: CrossSearchEntry, event?: Event): void {
     event?.stopPropagation();
     const targetUrl = entry.first_result?.url || entry.search_url;
-    if (!targetUrl || typeof window === 'undefined') {
+    if (!targetUrl) {
       return;
     }
-    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    this.proxied_resource.open(targetUrl);
   }
 
   get progressValue(): number {
@@ -149,14 +130,14 @@ export class OnionSearchCardComponent {
     return Math.max(0, Math.min(100, Math.round(p)));
   }
 
-  private fetchSearchResults(apiEndpoint: string, payload: { text: { query: string } }): Observable<OnionSearchResponse | null> {
-    return this.http.post<OnionSearchResponse>(apiEndpoint, payload).pipe(expand((res) =>
+  private fetchSearchResults(apiEndpoint: string, payload: { text: { query: string } }): Observable<CrossSearchResponse | null> {
+    return this.http.post<CrossSearchResponse>(apiEndpoint, payload).pipe(expand((res) =>
       this.shouldContinuePolling(res)
-        ? timer(2000).pipe(switchMap(() => this.http.post<OnionSearchResponse>(apiEndpoint, payload)))
+        ? timer(2000).pipe(switchMap(() => this.http.post<CrossSearchResponse>(apiEndpoint, payload)))
         : EMPTY), takeWhile((res) => this.shouldContinuePolling(res), true), catchError(() => of(null)));
   }
 
-  private isPendingResponse(res: OnionSearchResponse): boolean {
+  private isPendingResponse(res: CrossSearchResponse): boolean {
     const topStatus = (res?.status || '').toLowerCase();
     const nestedStatus = (res?.result?.status || '').toLowerCase();
     return (
@@ -165,7 +146,7 @@ export class OnionSearchCardComponent {
     );
   }
 
-  private shouldContinuePolling(res: OnionSearchResponse): boolean {
+  private shouldContinuePolling(res: CrossSearchResponse): boolean {
     return this.isPendingResponse(res);
   }
 

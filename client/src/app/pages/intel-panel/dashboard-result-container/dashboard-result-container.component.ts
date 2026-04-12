@@ -18,7 +18,7 @@ import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
 import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 import { ScrollService } from '../../../shared/services/scroll.service';
-import { OnionSearchCardComponent } from '../../../shared/partials/onion-search-engine/onion-search-card.component';
+import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -26,7 +26,7 @@ import { OnionSearchCardComponent } from '../../../shared/partials/onion-search-
     PaginationComponent,
     DashboardResultsGeneralComponent,
     ResultComponent,
-    OnionSearchCardComponent,
+    CrossSearchCardComponent,
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
