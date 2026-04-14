@@ -1,7 +1,20 @@
-<section class="relative h-[calc(100vh-7.75rem)] min-h-[560px] overflow-hidden rounded-[14px] border border-cyan-500/20 bg-slate-900">
+<section class="relative h-[calc(100vh)] min-h-[560px] overflow-hidden rounded-[14px] border border-cyan-500/20 bg-slate-900">
+
 	<div #mapViewNode class="h-full w-full"></div>
 
 	<div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(56,189,248,0.16),transparent_44%),radial-gradient(circle_at_82%_76%,rgba(34,197,94,0.16),transparent_40%)]"></div>
+
+	@if (isLoading) {
+		<div class="absolute inset-0 z-30 flex items-center justify-center bg-slate-950">
+			<div class="flex min-w-[220px] flex-col items-center gap-3 rounded-[16px] border border-cyan-400/20 bg-slate-900/85 px-6 py-5 text-center shadow-[0_0_30px_rgba(34,211,238,0.12)]">
+				<div class="h-11 w-11 animate-spin rounded-full border-4 border-cyan-400/20 border-t-cyan-300"></div>
+				<div>
+					<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-cyan-200">Loading Threat Lens</p>
+					<p class="mt-1 text-[12px] text-slate-300">{{ statusMessage }}</p>
+				</div>
+			</div>
+		</div>
+	}
 
 	<div class="absolute left-4 top-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)]">
 		<div class="rounded-[12px] border border-white/15 bg-slate-900/80 p-3 backdrop-blur-md">
@@ -20,10 +33,10 @@
 				<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-cyan-200">Top Highlighted Countries</h3>
 				<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1">
 					@for (item of topCountries; track item.country) {
-						<div class="flex items-center justify-between rounded-[8px] border border-white/10 bg-slate-950/45 px-2 py-1.5 text-[12px] text-slate-200">
+						<button type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[8px] border border-white/10 bg-slate-950/45 px-2 py-1.5 text-left text-[12px] text-slate-200 transition hover:border-cyan-400/50 hover:bg-slate-950/70">
 							<span class="truncate pr-2">{{ item.country }}</span>
 							<span class="font-semibold text-rose-300">{{ item.count }}</span>
-						</div>
+						</button>
 					}
 				</div>
 			}
@@ -74,13 +87,144 @@
 		</div>
 	</div>
 
-	<div class="absolute right-4 top-4 ">
-	<div class="flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end">
-                  <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
-                    <img alt="Filter Icon" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
-                    <span>Filter</span>
-                  </label>
-                </div></div>
+	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-3 max-[1100px]:left-4 max-[1100px]:right-4 max-[1100px]:top-auto max-[1100px]:w-auto">
+		<div class="flex justify-end">
+			<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
+				<img alt="Filter Icon" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
+				<span>Filter</span>
+			</label>
+		</div>
+
+		<div class="min-h-0 flex-1 space-y-3">
+			<div class="flex h-[calc(50%-0.375rem)] min-h-[250px] flex-col overflow-hidden rounded-[14px] border border-cyan-500/20 bg-slate-950/88 shadow-[0_0_35px_rgba(34,211,238,0.08)] backdrop-blur-md">
+				<div class="border-b border-white/10 px-4 py-3">
+					<div class="flex items-start justify-between gap-3">
+						<div>
+							<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-cyan-200">News Feed</p>
+							<p class="mt-1 text-[11px] text-slate-400">Live news stream from threat records.</p>
+						</div>
+						<span class="rounded-full border border-cyan-400/25 bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-100">
+							{{ newsFeedItems.length }} items
+						</span>
+					</div>
+					<div class="mt-3 flex flex-wrap gap-2">
+						@for (range of feedRanges; track range.key) {
+							<button type="button" (click)="setFeedRange(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [class.border-cyan-300]="selectedFeedRange === range.key" [class.bg-cyan-400]="selectedFeedRange === range.key" [class.text-slate-950]="selectedFeedRange === range.key" [class.border-white/10]="selectedFeedRange !== range.key" [class.bg-white/5]="selectedFeedRange !== range.key" [class.text-slate-200]="selectedFeedRange !== range.key">
+								{{ range.label }}
+							</button>
+						}
+					</div>
+					<p class="mt-3 rounded-[10px] border border-cyan-500/15 bg-cyan-500/8 px-3 py-2 text-[10px] leading-4 text-cyan-100/90">
+						Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
+					</p>
+				</div>
+
+				<div #newsFeedScroller (mouseenter)="onFeedHover('news', true)" (mouseleave)="onFeedHover('news', false)" (wheel)="onFeedInteract('news')" (touchstart)="onFeedInteract('news')" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+					@if (newsFeedItems.length) {
+						<div class="space-y-2">
+							@for (item of newsFeedItems; track item.id) {
+								<button type="button" (click)="openFeedItem(item)" class="block w-full rounded-[12px] border border-white/10 bg-slate-900/70 p-3 text-left transition hover:border-cyan-400/45 hover:bg-slate-900">
+									<div class="flex items-start justify-between gap-3">
+										<div class="min-w-0">
+											<div class="flex items-center gap-2">
+												<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+													<circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
+												</svg>
+												<span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-100">{{ item.categoryLabel }}</span>
+											</div>
+											<p class="mt-2 line-clamp-2 text-[13px] font-semibold text-slate-100">{{ item.title }}</p>
+										</div>
+										<span class="shrink-0 text-[10px] uppercase tracking-[0.12em] text-slate-400">{{ item.displayDate }}</span>
+									</div>
+
+									@if (item.summary) {
+										<p class="mt-2 line-clamp-3 text-[11px] leading-5 text-slate-300">{{ item.summary }}</p>
+									}
+
+									@if (item.highlights.length) {
+										<div class="mt-3 flex flex-wrap gap-1.5">
+											@for (highlight of item.highlights; track highlight) {
+												<span class="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-slate-200">{{ highlight }}</span>
+											}
+										</div>
+									}
+								</button>
+							}
+						</div>
+					}
+					@else {
+						<div class="flex h-full min-h-[140px] items-center justify-center rounded-[12px] border border-dashed border-white/10 bg-slate-900/50 px-4 text-center text-[12px] text-slate-400">
+							No news records found for the selected time window.
+						</div>
+					}
+				</div>
+			</div>
+
+			<div class="flex h-[calc(50%-0.375rem)] min-h-[250px] flex-col overflow-hidden rounded-[14px] border border-emerald-500/20 bg-slate-950/88 shadow-[0_0_35px_rgba(16,185,129,0.08)] backdrop-blur-md">
+				<div class="border-b border-white/10 px-4 py-3">
+					<div class="flex items-start justify-between gap-3">
+						<div>
+							<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-emerald-200">Archive</p>
+							<p class="mt-1 text-[11px] text-slate-400">Defacement, social, exploit, leak and other activity.</p>
+						</div>
+						<span class="whitespace-nowrap rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-100">
+							{{ archiveFeedItems.length }} items
+						</span>
+					</div>
+					<div class="mt-3 flex flex-wrap gap-2">
+						@for (range of feedRanges; track range.key) {
+							<button type="button" (click)="setFeedRange(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [class.border-emerald-300]="selectedFeedRange === range.key" [class.bg-emerald-400]="selectedFeedRange === range.key" [class.text-slate-950]="selectedFeedRange === range.key" [class.border-white/10]="selectedFeedRange !== range.key" [class.bg-white/5]="selectedFeedRange !== range.key" [class.text-slate-200]="selectedFeedRange !== range.key">
+								{{ range.label }}
+							</button>
+						}
+					</div>
+					<p class="mt-3 rounded-[10px] border border-emerald-500/15 bg-emerald-500/8 px-3 py-2 text-[10px] leading-4 text-emerald-100/90">
+						Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
+					</p>
+				</div>
+
+				<div #archiveFeedScroller (mouseenter)="onFeedHover('archive', true)" (mouseleave)="onFeedHover('archive', false)" (wheel)="onFeedInteract('archive')" (touchstart)="onFeedInteract('archive')" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+					@if (archiveFeedItems.length) {
+						<div class="space-y-2">
+							@for (item of archiveFeedItems; track item.id) {
+								<button type="button" (click)="openFeedItem(item)" class="block w-full rounded-[12px] border border-white/10 bg-slate-900/70 p-3 text-left transition hover:border-emerald-400/45 hover:bg-slate-900">
+									<div class="flex items-start justify-between gap-3">
+										<div class="min-w-0">
+											<div class="flex items-center gap-2">
+												<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+													<circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
+												</svg>
+												<span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-100">{{ item.categoryLabel }}</span>
+											</div>
+											<p class="mt-2 line-clamp-2 text-[13px] font-semibold text-slate-100">{{ item.title }}</p>
+										</div>
+										<span class="shrink-0 text-[10px] uppercase tracking-[0.12em] text-slate-400">{{ item.displayDate }}</span>
+									</div>
+
+									@if (item.summary) {
+										<p class="mt-2 line-clamp-3 text-[11px] leading-5 text-slate-300">{{ item.summary }}</p>
+									}
+
+									@if (item.highlights.length) {
+										<div class="mt-3 flex flex-wrap gap-1.5">
+											@for (highlight of item.highlights; track highlight) {
+												<span class="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-slate-200">{{ highlight }}</span>
+											}
+										</div>
+									}
+								</button>
+							}
+						</div>
+					}
+					@else {
+						<div class="flex h-full min-h-[140px] items-center justify-center rounded-[12px] border border-dashed border-white/10 bg-slate-900/50 px-4 text-center text-[12px] text-slate-400">
+							No archive activity found for the selected time window.
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
 
 

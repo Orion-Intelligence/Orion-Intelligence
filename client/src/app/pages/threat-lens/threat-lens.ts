@@ -3,12 +3,12 @@ import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild } fr
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom, Observable } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
-import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensMapData, ThreatLensMiddlewareService, ThreatLensRequestPayload } from './threat-lens-middleware.service';
+import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensMiddlewareService, ThreatLensRequestPayload } from './threat-lens-middleware.service';
 import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor, getArcPointAtProgress } from './threat-lens-map.utils';
 import { SidebarService } from '../../shared/services/sidebar.service';
 import { FilterModel } from '../../shared/model/filter/filter.model';
 import { FiltersComponent } from "../../shared/partials/filters/filters.component";
-import { consolidated_filters } from '../../shared/constants/filters';
+import { threat_lens_filters } from '../../shared/constants/filters';
 
 type ThreatLensLegendItem = {
   categoryKey: ThreatLensCategoryModelKey;
@@ -38,6 +38,13 @@ type AnimatedArcDescriptor = {
   animationDuration: number;
 };
 
+type ThreatLensFeedRange = '1d' | '7d' | 'all';
+
+type ThreatLensDisplayFeedItem = ThreatLensFeedItem & {
+  displayDate: string;
+  colorHex: string;
+};
+
 @Component({
   selector: 'app-threat-lens',
   standalone: true,
@@ -46,6 +53,8 @@ type AnimatedArcDescriptor = {
 })
 export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewNode?: ElementRef<HTMLDivElement>;
+  @ViewChild('newsFeedScroller') private newsFeedScroller?: ElementRef<HTMLDivElement>;
+  @ViewChild('archiveFeedScroller') private archiveFeedScroller?: ElementRef<HTMLDivElement>;
   private view: any | null = null;
   private countryLayer: any | null = null;
   private newsGraphicsLayer: any | null = null;
@@ -69,12 +78,24 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private readonly minArcWeight = 1;
   private readonly arcBatchSize = 5;
   private readonly arcBatchDuration = 6000;
+  private readonly movingDotBaseSize = 90000;
   private readonly countryNameFields = ['COUNTRY', 'COUNTRYAFF', 'NAME', 'ADMIN', 'SOVEREIGNT'];
   private activePulseGraphics: any[] = [];
   private readonly segmentCount = 6;
   private movingDotGraphics: any[] = [];
+  private activeArcCountryFilterKey = '';
+  private loadRequestId = 0;
+  private newsFeedAutoScrollTimer: number | null = null;
+  private archiveFeedAutoScrollTimer: number | null = null;
+  private newsFeedAutoScrollPaused = false;
+  private archiveFeedAutoScrollPaused = false;
+  private newsFeedResumeTimer: number | null = null;
+  private archiveFeedResumeTimer: number | null = null;
+  private allNewsFeedItems: ThreatLensDisplayFeedItem[] = [];
+  private allArchiveFeedItems: ThreatLensDisplayFeedItem[] = [];
 
-  protected readonly filterModel: FilterModel=consolidated_filters;
+  protected readonly filterModel: FilterModel = threat_lens_filters;
+  protected readonly feedRanges: Array<{ key: ThreatLensFeedRange; label: string }> = [{ key: '1d', label: '1 Day' }, { key: '7d', label: '1 Week' }, { key: 'all', label: 'All Time' }];
 
   isFilterOpen$: Observable<boolean>;
   searchTerm = '';
@@ -86,6 +107,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   arcCount = 0;
   categoryLegend: ThreatLensLegendItem[] = [];
   selectedCountryBreakdown: SelectedCountryCategoryCount[] = [];
+  selectedFeedRange: ThreatLensFeedRange = 'all';
+  newsFeedItems: ThreatLensDisplayFeedItem[] = [];
+  archiveFeedItems: ThreatLensDisplayFeedItem[] = [];
 
   constructor(private ngZone: NgZone, private threatLensMiddleware: ThreatLensMiddlewareService, protected sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -105,10 +129,20 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       this.view.destroy();
       this.view = null;
     }
+
+    this.stopFeedAutoScroll('news');
+    this.stopFeedAutoScroll('archive');
   }
 
   async onSearch(): Promise<void> {
     await this.loadThreatLensData(this.searchTerm.trim());
+  }
+
+  async onTopCountrySelect(country: string): Promise<void> {
+    const normalizedCountry = this.threatLensMiddleware.normalizeCountryLabel(country);
+    this.searchTerm = normalizedCountry;
+    await this.loadThreatLensData(normalizedCountry);
+    await this.focusCountryByKey(this.toCountryKey(normalizedCountry));
   }
 
   private async initializeMap(): Promise<void> {
@@ -254,8 +288,10 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private async loadThreatLensData(query: string): Promise<void> {
+    const requestId = ++this.loadRequestId;
     const activeQuery = query.trim();
     this.currentQuery = activeQuery;
+    this.activeArcCountryFilterKey = this.getSearchedCountryKey(activeQuery);
 
     this.ngZone.run(() => {
       this.isLoading = true;
@@ -274,15 +310,27 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       console.error('Failed to load threat lens data', error);
       statsResult = { ok: false, stats: null };
     }
-    console.log(statsResult);
+
+    if (requestId !== this.loadRequestId) {
+      return;
+    }
 
     if (!statsResult.ok || !statsResult.stats) {
       await this.renderCountryArcs([]);
       this.arcCount = 0;
+
+      if (requestId !== this.loadRequestId) {
+        return;
+      }
+
       this.ngZone.run(() => {
         this.topCountries = [];
         this.categoryLegend = [];
         this.selectedCountryBreakdown = [];
+        this.allNewsFeedItems = [];
+        this.allArchiveFeedItems = [];
+        this.newsFeedItems = [];
+        this.archiveFeedItems = [];
         this.statusMessage = activeQuery
           ? `Failed to load threat lens data for "${activeQuery}" from /api/threat/lens.`
           : 'Failed to load threat lens data from /api/threat/lens.';
@@ -309,12 +357,18 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
     await this.renderNewsIntensity(stats.countryCounts, stats.maxCount);
     const { totalArcCount, arcCountByCategory } = await this.renderCountryArcs(stats.categoryData);
+
+    if (requestId !== this.loadRequestId) {
+      return;
+    }
+
     this.arcCount = totalArcCount;
 
     const mostActive = stats.countryCounts[0];
     const queryLabel = activeQuery ? ` for "${activeQuery}"` : '';
 
     this.ngZone.run(() => {
+      this.setFeedCollections(stats.feedItems);
       this.topCountries = stats.countryCounts.slice(0, 8);
       this.categoryLegend = stats.categoryData.map((category) => ({
         categoryKey: category.categoryKey,
@@ -329,6 +383,12 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         this.selectedCountryBreakdown = this.getSelectedCountryBreakdown(this.toCountryKey(this.selectedCountryName));
       }
 
+      if (this.activeArcCountryFilterKey && this.countryFeatureIndex.has(this.activeArcCountryFilterKey)) {
+        const activeCountryName = this.extractCountryName(this.countryFeatureIndex.get(this.activeArcCountryFilterKey)?.attributes);
+        this.selectedCountryName = activeCountryName || this.selectedCountryName;
+        this.selectedCountryBreakdown = this.getSelectedCountryBreakdown(this.activeArcCountryFilterKey);
+      }
+
       if (!mostActive) {
         this.statusMessage = `Loaded ${stats.totalResults} records${queryLabel}, but no country metadata was found.`;
         this.isLoading = false;
@@ -336,10 +396,20 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       }
 
       this.statusMessage = totalArcCount > 0
-        ? `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing rotating arc batches of up to ${this.arcBatchSize} at a time. Most active: ${mostActive.country} (${mostActive.count}).`
-        : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
+        ? this.activeArcCountryFilterKey
+          ? `Loaded ${stats.totalResults} records${queryLabel}. Showing only arc connections linked to ${this.selectedCountryName || activeQuery}, rotating in batches of up to ${this.arcBatchSize}.`
+          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing rotating arc batches of up to ${this.arcBatchSize} at a time. Most active: ${mostActive.country} (${mostActive.count}).`
+        : this.activeArcCountryFilterKey
+          ? `Loaded ${stats.totalResults} records${queryLabel}, but no arc connections were found for ${this.selectedCountryName || activeQuery}.`
+          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
       this.isLoading = false;
     });
+
+    if (this.activeArcCountryFilterKey) {
+      await this.focusCountryByKey(this.activeArcCountryFilterKey);
+    }
+
+    this.restartFeedAutoScroll();
   }
 
   private async renderCountryArcs(categoryData: ThreatLensCategoryMapData[]): Promise<{
@@ -363,10 +433,13 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
     for (const category of categoryData) {
       const pairs = collectArcPairs(category.documentCountryGroups, (value) => this.toCountryKey(value), this.countryFeatureIndex, this.maxArcCount, this.minArcWeight);
+      const visiblePairs = this.activeArcCountryFilterKey
+        ? pairs.filter((pair) => pair.countryAKey === this.activeArcCountryFilterKey || pair.countryBKey === this.activeArcCountryFilterKey)
+        : pairs;
 
       let renderedArcCount = 0;
 
-      for (const pair of pairs) {
+      for (const pair of visiblePairs) {
         const featureA = this.countryFeatureIndex.get(pair.countryAKey);
         const featureB = this.countryFeatureIndex.get(pair.countryBKey);
         const start = getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
@@ -439,6 +512,32 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     return `#${color.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   }
 
+  setFeedRange(range: ThreatLensFeedRange): void {
+    if (this.selectedFeedRange === range) {
+      return;
+    }
+
+    this.selectedFeedRange = range;
+    this.applyFeedRangeFilter();
+    this.resetFeedScrollPositions();
+  }
+
+  onFeedHover(feedType: 'news' | 'archive', paused: boolean): void {
+    this.setFeedAutoScrollPaused(feedType, paused);
+  }
+
+  onFeedInteract(feedType: 'news' | 'archive'): void {
+    this.pauseFeedAutoScrollTemporarily(feedType);
+  }
+
+  openFeedItem(item: ThreatLensDisplayFeedItem): void {
+    if (!item.link || typeof window === 'undefined') {
+      return;
+    }
+
+    window.open(item.link, '_blank', 'noopener');
+  }
+
   private buildSearchPayload(query: string): Partial<ThreatLensRequestPayload> {
     const payload: Partial<ThreatLensRequestPayload> = { q: query };
     if (!query) {
@@ -455,6 +554,40 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     }
 
     return payload;
+  }
+
+  private getSearchedCountryKey(query: string): string {
+    if (!query) {
+      return '';
+    }
+
+    const normalizedCountry = this.threatLensMiddleware.normalizeCountryLabel(query);
+    const countryKey = this.toCountryKey(normalizedCountry);
+    return countryKey && this.countryFeatureIndex.has(countryKey) ? countryKey : '';
+  }
+
+  private async focusCountryByKey(countryKey: string): Promise<void> {
+    if (!this.view || !countryKey) {
+      return;
+    }
+
+    const graphic = this.countryFeatureIndex.get(countryKey);
+    if (!graphic) {
+      return;
+    }
+
+    this.applyHighlight(graphic);
+    const geometryToFocus = graphic.geometry?.extent ?? graphic.geometry;
+    const countryName = this.extractCountryName(graphic.attributes);
+
+    this.ngZone.run(() => {
+      this.selectedCountryName = countryName;
+      this.selectedCountryBreakdown = this.getSelectedCountryBreakdown(countryKey);
+    });
+
+    if (geometryToFocus) {
+      await this.view.goTo(geometryToFocus, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
+    }
   }
 
   private applyHighlight(graphic: any): void {
@@ -678,6 +811,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.movingDotGraphics = [];
 
     for (const arc of items) {
+      const movingDotSize = Math.min(120000, this.movingDotBaseSize + (arc.weight * 2200));
+
       const graphic = {
         geometry: null,
         symbol: {
@@ -686,9 +821,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
             {
               type: 'object',
               resource: { primitive: 'sphere' },
-              width: 120000,
-              height: 120000,
-              depth: 120000,
+              width: movingDotSize,
+              height: movingDotSize,
+              depth: movingDotSize,
               material: { color: [...arc.color, 1] },
             }
           ]
@@ -701,5 +836,172 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.animatedArcGraphicsLayer.removeAll();
     this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
 
+  }
+
+  private setFeedCollections(feedItems: ThreatLensFeedItem[]): void {
+    const normalizedItems = feedItems.map((item) => ({
+      ...item,
+      displayDate: this.formatFeedDate(item.date),
+      colorHex: this.toHexColor(item.color),
+    }));
+
+    this.allNewsFeedItems = normalizedItems.filter((item) => item.categoryKey === 'news_model');
+    this.allArchiveFeedItems = normalizedItems.filter((item) => item.categoryKey !== 'news_model');
+    this.applyFeedRangeFilter();
+    this.resetFeedScrollPositions();
+  }
+
+  private applyFeedRangeFilter(): void {
+    const minTimestamp = this.getFeedRangeMinTimestamp();
+    this.newsFeedItems = this.filterFeedItemsByRange(this.allNewsFeedItems, minTimestamp);
+    this.archiveFeedItems = this.filterFeedItemsByRange(this.allArchiveFeedItems, minTimestamp);
+  }
+
+  private filterFeedItemsByRange(items: ThreatLensDisplayFeedItem[], minTimestamp: number): ThreatLensDisplayFeedItem[] {
+    if (!minTimestamp) {
+      return items;
+    }
+
+    return items.filter((item) => item.timestamp >= minTimestamp);
+  }
+
+  private getFeedRangeMinTimestamp(): number {
+    if (this.selectedFeedRange === 'all') {
+      return 0;
+    }
+
+    const dayCount = Number.parseInt(this.selectedFeedRange, 10);
+    if (!Number.isFinite(dayCount)) {
+      return 0;
+    }
+
+    return Date.now() - (dayCount * 24 * 60 * 60 * 1000);
+  }
+
+  private formatFeedDate(value: string): string {
+    if (!value) {
+      return 'Date unavailable';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return 'Date unavailable';
+    }
+
+    return new Intl.DateTimeFormat('en', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(date);
+  }
+
+  private restartFeedAutoScroll(): void {
+    this.stopFeedAutoScroll('news');
+    this.stopFeedAutoScroll('archive');
+    this.startFeedAutoScroll('news');
+    this.startFeedAutoScroll('archive');
+  }
+
+  private startFeedAutoScroll(feedType: 'news' | 'archive'): void {
+    const timer = window.setInterval(() => {
+      const container = this.getFeedScroller(feedType)?.nativeElement;
+      const isPaused = feedType === 'news' ? this.newsFeedAutoScrollPaused : this.archiveFeedAutoScrollPaused;
+
+      if (!container || isPaused) {
+        return;
+      }
+
+      const maxScrollTop = container.scrollHeight - container.clientHeight;
+      if (maxScrollTop <= 0) {
+        return;
+      }
+
+      if (container.scrollTop >= maxScrollTop - 1) {
+        container.scrollTop = 0;
+        return;
+      }
+
+      container.scrollTop += 1;
+    }, 45);
+
+    if (feedType === 'news') {
+      this.newsFeedAutoScrollTimer = timer;
+      return;
+    }
+
+    this.archiveFeedAutoScrollTimer = timer;
+  }
+
+  private stopFeedAutoScroll(feedType: 'news' | 'archive'): void {
+    const activeTimer = feedType === 'news' ? this.newsFeedAutoScrollTimer : this.archiveFeedAutoScrollTimer;
+    if (activeTimer !== null) {
+      window.clearInterval(activeTimer);
+    }
+
+    if (feedType === 'news') {
+      this.newsFeedAutoScrollTimer = null;
+      if (this.newsFeedResumeTimer !== null) {
+        window.clearTimeout(this.newsFeedResumeTimer);
+        this.newsFeedResumeTimer = null;
+      }
+      return;
+    }
+
+    this.archiveFeedAutoScrollTimer = null;
+    if (this.archiveFeedResumeTimer !== null) {
+      window.clearTimeout(this.archiveFeedResumeTimer);
+      this.archiveFeedResumeTimer = null;
+    }
+  }
+
+  private setFeedAutoScrollPaused(feedType: 'news' | 'archive', paused: boolean): void {
+    if (feedType === 'news') {
+      this.newsFeedAutoScrollPaused = paused;
+      if (paused && this.newsFeedResumeTimer !== null) {
+        window.clearTimeout(this.newsFeedResumeTimer);
+        this.newsFeedResumeTimer = null;
+      }
+      return;
+    }
+
+    this.archiveFeedAutoScrollPaused = paused;
+    if (paused && this.archiveFeedResumeTimer !== null) {
+      window.clearTimeout(this.archiveFeedResumeTimer);
+      this.archiveFeedResumeTimer = null;
+    }
+  }
+
+  private pauseFeedAutoScrollTemporarily(feedType: 'news' | 'archive'): void {
+    this.setFeedAutoScrollPaused(feedType, true);
+
+    const resumeTimer = window.setTimeout(() => {
+      this.setFeedAutoScrollPaused(feedType, false);
+    }, 2500);
+
+    if (feedType === 'news') {
+      if (this.newsFeedResumeTimer !== null) {
+        window.clearTimeout(this.newsFeedResumeTimer);
+      }
+      this.newsFeedResumeTimer = resumeTimer;
+      return;
+    }
+
+    if (this.archiveFeedResumeTimer !== null) {
+      window.clearTimeout(this.archiveFeedResumeTimer);
+    }
+    this.archiveFeedResumeTimer = resumeTimer;
+  }
+
+  private getFeedScroller(feedType: 'news' | 'archive'): ElementRef<HTMLDivElement> | undefined {
+    return feedType === 'news' ? this.newsFeedScroller : this.archiveFeedScroller;
+  }
+
+  private resetFeedScrollPositions(): void {
+    window.setTimeout(() => {
+      this.newsFeedScroller?.nativeElement.scrollTo({ top: 0 });
+      this.archiveFeedScroller?.nativeElement.scrollTo({ top: 0 });
+    });
   }
 }

@@ -48,11 +48,26 @@ export interface ThreatLensCategoryMapData {
   documentCountryGroups: string[][];
 }
 
+export interface ThreatLensFeedItem {
+  id: string;
+  categoryKey: ThreatLensCategoryModelKey;
+  categoryLabel: string;
+  color: [number, number, number];
+  title: string;
+  summary: string;
+  highlights: string[];
+  link: string;
+  date: string;
+  timestamp: number;
+  countryKeys: string[];
+}
+
 export interface ThreatLensMapData {
   countryCounts: ThreatCountryCount[];
   totalResults: number;
   maxCount: number;
   categoryData: ThreatLensCategoryMapData[];
+  feedItems: ThreatLensFeedItem[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -151,15 +166,13 @@ export class ThreatLensMiddlewareService {
   }
 
   private buildMapDataFromResponses(responses: ConsolidatedCallbackModel[]): ThreatLensMapData {
-    console.log(responses)
     const normalizedResponses = responses.map((response) => new ConsolidatedCallbackModel(response));
     const overallCountryCounts = new Map<string, number>();
     const overallCountryNames = new Map<string, string>();
     const categoryDocuments = new Map<ThreatLensCategoryModelKey, any[]>();
     const categoryData: ThreatLensCategoryMapData[] = [];
+    const feedItems: ThreatLensFeedItem[] = [];
     let totalResults = 0;
-
-    console.log(normalizedResponses)
     for (const normalizedResponse of normalizedResponses) {
       for (const category of THREAT_LENS_CATEGORY_CONFIG) {
         const documents = this.extractResultItems(normalizedResponse[category.key]);
@@ -206,6 +219,11 @@ export class ThreatLensMiddlewareService {
         if (countriesForDoc.length) {
           documentCountryGroups.push(countriesForDoc);
         }
+
+        const feedItem = this.buildFeedItem(category, document, countriesForDoc);
+        if (feedItem) {
+          feedItems.push(feedItem);
+        }
       }
 
       const rankedCategoryCounts = this.rankCountryCounts(categoryCountryCounts, categoryCountryNames);
@@ -229,6 +247,7 @@ export class ThreatLensMiddlewareService {
       totalResults,
       maxCount: countryCounts.length ? countryCounts[0].count : 0,
       categoryData,
+      feedItems: feedItems.sort((a, b) => b.timestamp - a.timestamp),
     };
   }
 
@@ -326,5 +345,153 @@ export class ThreatLensMiddlewareService {
     }
 
     return '';
+  }
+
+  private buildFeedItem(category: typeof THREAT_LENS_CATEGORY_CONFIG[number], document: any, countriesForDoc: string[]): ThreatLensFeedItem | null {
+    const { isoDate, timestamp } = this.extractDocumentDate(document);
+    const title = this.extractDocumentTitle(document, category.label);
+    const summary = this.extractDocumentSummary(document);
+    const link = this.extractDocumentLink(document);
+    const highlights = this.extractDocumentHighlights(document);
+    const id = this.getDocumentIdentity(document);
+
+    if (!title && !summary && !highlights.length) {
+      return null;
+    }
+
+    return {
+      id,
+      categoryKey: category.key,
+      categoryLabel: category.label,
+      color: category.color,
+      title: title || `${category.label} item`,
+      summary,
+      highlights,
+      link,
+      date: isoDate,
+      timestamp,
+      countryKeys: countriesForDoc.map((country) => this.toCountryKey(country)).filter(Boolean),
+    };
+  }
+
+  private extractDocumentDate(document: any): { isoDate: string; timestamp: number } {
+    const candidates = [
+      document?.m_message_date,
+      document?.m_creation_date,
+      document?.m_update_date,
+      document?.m_leak_date,
+    ];
+
+    for (const candidate of candidates) {
+      const value = String(candidate || '').trim();
+      if (!value) {
+        continue;
+      }
+
+      const timestamp = new Date(value).getTime();
+      if (!Number.isNaN(timestamp)) {
+        return { isoDate: new Date(timestamp).toISOString(), timestamp };
+      }
+    }
+
+    return { isoDate: '', timestamp: 0 };
+  }
+
+  private extractDocumentTitle(document: any, fallbackLabel: string): string {
+    const candidates = [
+      document?.m_title,
+      document?.m_name,
+      document?.m_caption,
+      document?.m_media_caption,
+      document?.m_sender_name,
+      document?.m_channel_name,
+      document?.m_team,
+      document?.q,
+      document?.m_url,
+    ];
+
+    for (const candidate of candidates) {
+      const value = this.cleanText(candidate);
+      if (value) {
+        return value;
+      }
+    }
+
+    return `${fallbackLabel} item`;
+  }
+
+  private extractDocumentSummary(document: any): string {
+    const candidates = [
+      document?.m_important_content,
+      Array.isArray(document?.m_summary) ? document.m_summary.join(' ') : '',
+      document?.m_content,
+      document?.m_highlighted,
+      document?.m_caption,
+      document?.m_media_caption,
+    ];
+
+    for (const candidate of candidates) {
+      const value = this.cleanText(candidate);
+      if (value) {
+        return value;
+      }
+    }
+
+    return '';
+  }
+
+  private extractDocumentLink(document: any): string {
+    const candidates = [
+      document?.m_url,
+      document?.m_message_sharable_link,
+      document?.m_channel_url,
+      document?.m_base_url,
+      Array.isArray(document?.m_source_url) ? document.m_source_url[0] : '',
+      Array.isArray(document?.m_weblink) ? document.m_weblink[0] : '',
+    ];
+
+    for (const candidate of candidates) {
+      const value = String(candidate || '').trim();
+      if (value) {
+        return value;
+      }
+    }
+
+    return '';
+  }
+
+  private extractDocumentHighlights(document: any): string[] {
+    const entries = [
+      document?.m_platform,
+      document?.m_remote_type,
+      document?.m_risk,
+      document?.m_channel_name,
+      document?.m_sender_username,
+      document?.m_attacker,
+      document?.m_team,
+      document?.ioc,
+      document?.m_cve,
+      document?.m_content_type,
+      document?.m_country_name,
+      document?.m_location,
+    ];
+
+    const values = entries
+      .flatMap((entry) => Array.isArray(entry) ? entry : [entry])
+      .map((entry) => this.cleanText(entry))
+      .filter(Boolean);
+
+    return Array.from(new Set(values)).slice(0, 4);
+  }
+
+  private cleanText(value: unknown): string {
+    if (typeof value !== 'string') {
+      return '';
+    }
+
+    return value
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 }

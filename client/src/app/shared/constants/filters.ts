@@ -208,6 +208,14 @@ export const consolidated_filters: FilterModel = {
     platform: PLATFORM_FILTER
   }
 };
+export const threat_lens_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: createThreatContent(),
+    platform: PLATFORM_FILTER
+  }
+};
 export const alert_filters: FilterModel = {
   filters: {
     daterange: DATERANGE_DEFAULT,
