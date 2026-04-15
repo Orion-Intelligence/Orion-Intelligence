@@ -188,7 +188,8 @@ export class DashboardService {
       "content_type",
       "safe",
       "content",
-      "mitre"
+      "mitre",
+      "platform_result_count"
     ];
     const params = new URLSearchParams(window.location.search);
     const selected: Record<string, string | null> = {};

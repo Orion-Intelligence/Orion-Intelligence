@@ -167,6 +167,16 @@ const PLATFORM_FILTER = {
   tooltip: "Platform",
   selected: "all"
 };
+const PLATFORM_RESULT_COUNT_FILTER = {
+  title: "Platform Result Count",
+  options: [],
+  type: "number" as const,
+  tooltip: "Maximum results for per platform",
+  selected: "15",
+  min: 1,
+  max: 15,
+  placeholder: "Enter platforms result count"
+};
 export const dump_filters: FilterModel = {
   filters: {
     source: SOURCE_FILTER,
@@ -213,7 +223,8 @@ export const threat_lens_filters: FilterModel = {
     network: COMMON_NETWORK,
     daterange: DATERANGE_CREATION,
     content: createThreatContent(),
-    platform: PLATFORM_FILTER
+    platform: PLATFORM_FILTER,
+    platform_result_count: PLATFORM_RESULT_COUNT_FILTER
   }
 };
 export const alert_filters: FilterModel = {
@@ -230,5 +241,6 @@ export const filter_mapping: Record<string, string> = {
   content_type: "Content Type",
   safe: "Safe Search",
   content: "Content Type",
-  mitre: "Mitre TTP"
+  mitre: "Mitre TTP",
+  platform_result_count: "Platform Results Count"
 };
