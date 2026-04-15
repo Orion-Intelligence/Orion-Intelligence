@@ -4,12 +4,12 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   selector: 'app-graph-loading',
   standalone: true,
   template: `
-    <div class="fixed inset-0 overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_32%),linear-gradient(180deg,_var(--color-blue-850),_#08111f)]">
+    <div class="fixed inset-0 overflow-hidden bg-[linear-gradient(180deg,_var(--color-blue-850),_#08111f)]">
       <div class="absolute inset-0 opacity-30 [background-image:radial-gradient(circle,_rgba(148,163,184,0.18)_1px,_transparent_1px)] [background-size:1.5rem_1.5rem]"></div>
       <div class="relative flex h-full items-center justify-center px-6">
         <div class="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-800)]/70 p-8 text-center shadow-2xl backdrop-blur-md">
-          <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15">
-            <div class="h-6 w-6 animate-spin rounded-full border-2 border-indigo-300/30 border-t-indigo-300"></div>
+          <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-300/20 bg-slate-200/10">
+            <div class="h-6 w-6 animate-spin rounded-full border-2 border-slate-300/25 border-t-sky-300"></div>
           </div>
           <h2 class="text-lg font-semibold text-[var(--color-text1)]">{{ title() }}</h2>
           <p class="mt-2 text-sm text-[var(--color-text4)]">{{ subtitle() }}</p>

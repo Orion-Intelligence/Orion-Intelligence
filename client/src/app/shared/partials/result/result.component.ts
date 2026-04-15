@@ -27,13 +27,14 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
 import { ProxyController } from '../../services/proxy-controller';
+import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-card.component';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   private readonly proxied_resource = inject(ProxyController);
@@ -101,6 +102,15 @@ export class ResultComponent implements OnInit, OnChanges {
   readonly reloadData = output<undefined>();
   readonly updateQuery = output<string>();
   readonly onToggleSort = output<SortType>();
+
+  get shouldShowCrossSearchOnEmptyState(): boolean {
+    return !this.consolidated
+      && !this.app_service.isMobileMode()
+      && this.type() !== Category.DUMP
+      && this.type() !== Category.DEFACEMENT
+      && !this.router.url.toLowerCase().includes('/defacement')
+      && !!this.searchQuery.trim();
+  }
 
   constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -181,7 +191,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.scrollService.resetOnReload();
     this.dashboardService.consolidatedParamModel.page = 1;
     this.dashboardService.consolidatedParamModel.tab = "";
-    const query = (this.searchQuery || this.local_query || '').trim();
+    const query = (this.local_query || this.searchQuery || '').trim();
     this.searchInputRef?.nativeElement.blur();
     this.searchQuery = query;
     this.local_query = query;

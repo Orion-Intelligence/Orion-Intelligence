@@ -1,22 +1,23 @@
 import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
+import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
 import { CommonModule, NgClass, SlicePipe } from '@angular/common';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
+import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
+import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
+import { JsonApiViewerComponent } from '../../../../shared/partials/json-api-viewer/json-api-viewer.component';
 import { last } from 'rxjs';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { SocialResultItem } from '../../../model/results/social/social.callback.model';
-import { ReportHeaderComponent } from '../../report-header/report-header.component';
+import { SocialResultItem } from '../../../../shared/model/results/social/social.callback.model';
+import { ReportHeaderComponent } from '../../../../shared/partials/report-header/report-header.component';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
+import { ChatWidgetComponent } from '../../../../shared/partials/chat-widget/chat-widget.component';
 import { AppService } from '../../../../services/core/app/app.service';
-import { ScrollService } from '../../../services/scroll.service';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
+import { ScrollService } from '../../../../shared/services/scroll.service';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScanHelperMethodsService } from '../../../../pages/network-intel/network-intel-service.service';
+import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
@@ -30,7 +31,8 @@ import { ScanHelperMethodsService } from '../../../../pages/network-intel/networ
     JsonApiViewerComponent,
     TooltipDirective,
     ReportHeaderComponent,
-    ChatWidgetComponent
+    ChatWidgetComponent,
+    ReportInteractionHostComponent
   ],
   animations: [fadeInDashboardItem]
 })
@@ -223,5 +225,9 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     add('Commenters', item.m_commenters, true);
 
     return rows;
+  }
+
+  get reportDocId(): string {
+    return (this.resultItem as any)?.m_hash || (this.resultItem as any)?._id || '';
   }
 }

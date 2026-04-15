@@ -61,6 +61,15 @@ class _FakeSearchModel:
     async def dynamic_search(self, *args, **kwargs):
         return {"ok": True, "route": "dynamic"}
 
+    async def onion_search(self, *args, **kwargs):
+        return {
+            "status": "success",
+            "result": {
+                "status": "success",
+                "results": [],
+            },
+        }
+
     async def search_wanted_list(self, *args, **kwargs):
         return {"cards_data": [], "total": 0}
 
@@ -331,6 +340,11 @@ def test_crypto_scan_route(api_public_client):
     resp = api_public_client.post("/api/crypto/scan", json=payload)
     assert resp.status_code == 200
 
+
+def test_cross_search_route(api_public_client):
+    payload = {"text": {"query": "hacking"}}
+    resp = api_public_client.post("/api/cross/search", json=payload)
+    assert resp.status_code == 200
 
 def test_network_intel_routes(api_public_client):
     assert api_public_client.post("/api/netintel/resolve_ip", json={"domain": "example.com"}).status_code == 200

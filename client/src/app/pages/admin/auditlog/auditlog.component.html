@@ -1,6 +1,6 @@
 <ng-container>
   <span id="top"></span>
-  <div class="w-full p-3 md:p-4">
+  <div class="w-full p-3 pb-[100px] md:p-4 md:pb-[100px]">
     <div class="ui-page-container w-full max-w-[2400px]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -19,7 +19,7 @@
           @if (isFilterOpen$ | async) {
             <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="closeSidebar()"></div>
           }
-          <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
+          <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%]': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
             <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
               (filterReset)="resetFilters()" [filterModel]="filterModel"
             [isFilterOpen]="isFilterOpen$ | async"></app-filters>

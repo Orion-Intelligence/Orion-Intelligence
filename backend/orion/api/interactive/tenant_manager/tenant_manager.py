@@ -133,7 +133,8 @@ class TenantManager:
             values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (tenant.iocs or [])]
 
         tenant_request = TenantRequest(
-            id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models)
+            id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models,
+            profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True))
 
         return tenant_request
 
@@ -178,6 +179,9 @@ class TenantManager:
 
         if data.licenses is not None and len(data.licenses) > 0:
             tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
+
+        if data.profile_visibility_enabled is not None:
+            tenant.profile_visibility_enabled = data.profile_visibility_enabled
 
         if data.iocs is not None:
             tenant.iocs = [IocCategory(

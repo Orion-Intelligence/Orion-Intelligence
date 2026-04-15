@@ -60,7 +60,8 @@ export class TenantSettingsComponent implements OnInit {
       country: this.userSessionData.tenant.country,
       city: this.userSessionData.tenant.city,
       postal_code: this.userSessionData.tenant.postalCode,
-      iocs: []
+      iocs: [],
+      profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
     };
     this.apiService.post(route, tenantData).subscribe();
   }

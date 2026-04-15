@@ -9,6 +9,7 @@ declare global {
             closeSideFilter(): Chainable<void>;
             applySideFilter(): Chainable<void>;
             scrollDashboardToTop(): Chainable<void>;
+            scrollDashboardToBottom(): Chainable<void>;
             openLastMailAndGetUrl(): Chainable<string>;
             clearAllEmails(): Chainable<void>;
         }
@@ -70,6 +71,18 @@ Cypress.Commands.add("scrollDashboardToTop", () => {
 
         containers.forEach((el) => {
             el.scrollTop = 0;
+        });
+    });
+});
+
+Cypress.Commands.add("scrollDashboardToBottom", () => {
+    cy.window({ log: false }).then((win) => {
+        const containers = Array.from(
+            win.document.querySelectorAll<HTMLElement>('#dashboard-container, [data-testid="dashboard-container"], [data-testid="dashboard-body"]')
+        );
+
+        containers.forEach((el) => {
+            el.scrollTop = el.scrollHeight;
         });
     });
 });

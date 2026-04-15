@@ -229,6 +229,7 @@ def test_tenant_manager_update_tenant_persists_email_iocs(monkeypatch):
         country="CA",
         city="Toronto",
         postal_code="M5H",
+        profile_visibility_enabled=None,
         verified=True,
         user_quota=3,
         status=TenantStatus.ACTIVE,

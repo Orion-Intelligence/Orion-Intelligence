@@ -1,28 +1,30 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
+import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
+import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
 import { CommonModule, NgClass } from '@angular/common';
 import { last } from 'rxjs';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { HelperService } from '../../../services/helper.service';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { HelperService } from '../../../../shared/services/helper.service';
 import { AppService } from '../../../../services/core/app/app.service';
-import { Category } from '../../../constants/pages';
-import { ApiService } from '../../../services/api.service';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ReportMappingComponent } from "../../report-mapping/report-mapping.component";
+import { Category } from '../../../../shared/constants/pages';
+import { ApiService } from '../../../../shared/services/api.service';
+import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
+import { JsonApiViewerComponent } from '../../../../shared/partials/json-api-viewer/json-api-viewer.component';
+import { ReportMappingComponent } from "../../../../shared/partials/report-mapping/report-mapping.component";
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { ReportHeaderComponent } from '../../report-header/report-header.component';
-import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
-import { CodeBlockComponent } from '../../code-block/code-block.component';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isLikelyUrl as isLikelyUrlUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
-import { ScrollService } from '../../../services/scroll.service';
+import { ReportHeaderComponent } from '../../../../shared/partials/report-header/report-header.component';
+import { ChatWidgetComponent } from '../../../../shared/partials/chat-widget/chat-widget.component';
+import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-block.component';
+import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
+import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { ScrollService } from '../../../../shared/services/scroll.service';
+
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent],
+  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit, AfterViewInit {
@@ -185,19 +187,15 @@ export class ReportComponent implements OnInit, AfterViewInit {
     return formatKeyLabelUtil(key);
   }
 
-  private isLikelyUrl(value: string): boolean {
-    return isLikelyUrlUtil(value);
-  }
-
-  private formatTitleUrl(url?: string | null): string {
-    return formatTitleUrlUtil(url, '');
-  }
-
   getDisplayTitle(rawTitle?: string | null, fallbackUrl?: string | null): string {
     return getDisplayTitleUtil(rawTitle, fallbackUrl, 'Title not available');
   }
 
   normalizeDisplayUrl(url?: string | null): string {
     return normalizeDisplayUrlUtil(url, '-');
+  }
+
+  get reportDocId(): string {
+    return this.resultItem?.m_hash || this.resultItem?._id || '';
   }
 }

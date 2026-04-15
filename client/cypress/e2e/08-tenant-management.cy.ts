@@ -159,6 +159,55 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.location('pathname').should('include', '/dashboard/profile/homepage');
   });
 
+  it('goes through tenant settings and disables profile visibility', () => {
+    const phoneValue = `0300${Date.now().toString().slice(-7)}`;
+    const countryValue = 'Pakistan';
+    const cityValue = 'Karachi';
+
+    cy.visit('/login');
+    cy.get('[data-testid="login-user"]').type(tenant.username);
+    cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
+    cy.get('[data-testid="login-button"]').click();
+    cy.get('[data-testid="dashboard-main"]').should('be.visible');
+
+    cy.visit('/dashboard/profile/tenant-settings');
+    cy.contains('h1', 'Tenant Data').should('be.visible');
+    cy.contains('div', 'Profile').should('be.visible');
+    cy.contains('div', 'Contacts').should('be.visible');
+    cy.contains('div', 'Users').should('be.visible');
+    cy.contains('div', 'Privacy').should('be.visible');
+    cy.contains('div', 'Address').should('be.visible');
+
+    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);
+    cy.get('input[name="tenant_country"]').scrollIntoView().should('be.visible').clear().type(countryValue);
+    cy.get('input[name="tenant_city"]').scrollIntoView().should('be.visible').clear().type(cityValue);
+
+    cy.contains('label', 'Allow User Profile Visibility')
+      .scrollIntoView()
+      .parents('div.cursor-pointer')
+      .first()
+      .then(($toggle) => {
+        if (($toggle.text() || '').includes('Users can manage their profile visibility')) {
+          cy.wrap($toggle).click();
+        }
+      });
+
+    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.reload();
+
+    cy.location('pathname').should('include', '/dashboard/profile/tenant-settings');
+    cy.get('input[name="tenant_phone"]').should('have.value', phoneValue);
+    cy.get('input[name="tenant_country"]').should('have.value', countryValue);
+    cy.get('input[name="tenant_city"]').should('have.value', cityValue);
+    cy.contains('label', 'Allow User Profile Visibility')
+      .scrollIntoView()
+      .parents('div.cursor-pointer')
+      .first()
+      .should('contain.text', 'User profile visibility is disabled for this tenant');
+    cy.logout();
+  });
+
   it('handles tenant alerts and notifications end-to-end', () => {
     cy.visit('/login');
     cy.get('[data-testid="login-user"]').type(tenant.username);

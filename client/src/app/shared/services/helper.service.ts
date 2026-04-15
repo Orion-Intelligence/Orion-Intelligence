@@ -5,6 +5,7 @@ import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
 import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
+import { PublicUserActivityItem } from '../../sections/report/social-interactions/models/public-user-data.model';
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 @Injectable({
   providedIn: 'root'
@@ -214,6 +215,36 @@ export class HelperService {
       const comparison = strA.localeCompare(strB, undefined, { sensitivity: 'base' });
       return order === 'asc' ? comparison : -comparison;
     });
+  }
+
+  getActivityThreadTarget(item: PublicUserActivityItem): { path: string[]; queryParams: Record<string, string> } | null {
+    const docId = item.doc_id?.trim();
+    if (!docId) {
+      return null;
+    }
+
+    switch (item.index_name) {
+      case 'generic_model':
+        return { path: ['/dashboard', 'strategic', 'all', docId], queryParams: { ci: 'strategic' } };
+      case 'leak_model':
+        return { path: ['/dashboard', 'breach', 'all', docId], queryParams: { ci: 'leak' } };
+      case 'exploit_model':
+        return { path: ['/dashboard', 'exploit', 'all', docId], queryParams: { ci: 'exploit' } };
+      case 'defacement_model':
+        return { path: ['/dashboard', 'defacement', 'all', docId], queryParams: { ci: 'defacement' } };
+      case 'social_model':
+        return { path: ['/dashboard', 'social', 'all', docId], queryParams: { ci: 'social' } };
+      case 'chat_model':
+        return { path: ['/dashboard', 'social', 'chat', 'all', docId], queryParams: { ci: 'chat' } };
+      default:
+        if (!item.route_path) {
+          return null;
+        }
+        return {
+          path: ['/', ...item.route_path.split('/').filter(Boolean)],
+          queryParams: item.route_query,
+        };
+    }
   }
 
   private normalizeShareUrl(url: string): string {

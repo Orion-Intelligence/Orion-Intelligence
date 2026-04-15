@@ -29,6 +29,7 @@ class db_tenant_model(Model):
     status: TenantStatus = TenantStatus.DISABLE
     licenses: List[str] = []
     email: Optional[str] = ""
+    profile_visibility_enabled: bool = True
 
     @model_validator(mode="before")
     @classmethod
@@ -48,3 +49,4 @@ class TenantRequest(BaseModel):
     user_quota: Optional[int] = None
     status: Optional[TenantStatus] = None
     licenses: List[str] = []
+    profile_visibility_enabled: Optional[bool] = None

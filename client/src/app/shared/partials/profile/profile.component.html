@@ -1,5 +1,5 @@
 @if (this.username()) {
-  <div class="relative z-[30] flex items-center gap-[2px]">
+  <div class="relative z-[1300] flex items-center gap-[2px]">
     @if (licenseService.isMaintainer()) {
       @if (isMember()) {
         <a data-testid="profile-notification-bell" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
@@ -20,9 +20,9 @@
       </button>
     }
     @if (dropdownOpen()) {
-      <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[40] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
+      <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
         <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
-        <li class="mb-[6px] flex min-w-full items-center rounded-[10px] border border-[#eef2f6] bg-[#f8fafc] p-[8px]">
+        <li class="mb-[6px] flex min-w-full items-center rounded-[10px] border border-[#eef2f6] bg-[#f9fbff] p-[8px]">
           <div class="h-[46px] w-[46px] shrink-0 overflow-hidden rounded-full bg-[#e0e6ed]">
             <img [src]="this.appService.userSessionData().user.image" alt="User avatar" class="h-full w-full object-cover" />
           </div>

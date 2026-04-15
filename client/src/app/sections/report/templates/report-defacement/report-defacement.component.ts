@@ -2,15 +2,16 @@ import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ReportMappingComponent } from '../../report-mapping/report-mapping.component';
-import { DefacementResultItem } from '../../../model/results/defacement/defacement.callback.model';
-import { ReportHeaderComponent } from '../../report-header/report-header.component';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../utils/intel-report.util';
-import { ScrollService } from '../../../services/scroll.service';
+import { JsonApiViewerComponent } from '../../../../shared/partials/json-api-viewer/json-api-viewer.component';
+import { ReportMappingComponent } from '../../../../shared/partials/report-mapping/report-mapping.component';
+import { DefacementResultItem } from '../../../../shared/model/results/defacement/defacement.callback.model';
+import { ReportHeaderComponent } from '../../../../shared/partials/report-header/report-header.component';
+import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
+import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
+import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { ScrollService } from '../../../../shared/services/scroll.service';
+import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
@@ -23,7 +24,8 @@ import { ScrollService } from '../../../services/scroll.service';
     ResultSectionComponent,
     ResultListComponent,
     NgClass,
-    TooltipDirective
+    TooltipDirective,
+    ReportInteractionHostComponent
   ]
 })
 export class ReportDefacementComponent implements OnInit, AfterViewInit {
@@ -118,5 +120,9 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   normalizeDisplayUrl(url?: string | string[] | null): string {
     const rawUrl = Array.isArray(url) ? (url[0] || '') : (url || '');
     return normalizeDisplayUrlUtil(rawUrl, '-');
+  }
+
+  get reportDocId(): string {
+    return (this.defacementData as any)?.m_hash || (this.defacementData as any)?._id || '';
   }
 }

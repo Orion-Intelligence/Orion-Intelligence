@@ -3,6 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
 from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
 from configs.limiter_dependency import limiter_dependency
+from orion.api.interactive.account_manager.account_manager import AccountManager
+from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
+from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (directory_param_model, )
 from orion.api.interactive.dump_manager.dump_model import dump_model
@@ -10,7 +13,9 @@ from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model impor
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (search_consolidated_param_model, )
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (search_credential_param_model, )
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, search_dynamic_crypto_model, )
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (
+    search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, search_dynamic_crypto_model,
+    search_dynamic_onion_search, )
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
     DomainScanRequest,
@@ -31,7 +36,8 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
-from routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS)
+from routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS,
+                              SYSTEM_INFO_DOCS, CROSS_SEARCH_DOCS)
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -49,8 +55,8 @@ async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_
     return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
 
 
-def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user) -> None:
-    if current_user and getattr(current_user, "role", None) == user_role.DEMO:
+def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user, is_free: bool = False) -> None:
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free:
         param.safe = True
 
 
@@ -64,14 +70,16 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
 async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user), role: user_role = Depends(get_current_role), is_free: bool = Depends(get_is_free_token)):
-    _enforce_demo_safe_search(param, current_user)
+    _enforce_demo_safe_search(param, current_user, is_free)
     if role == user_role.DEMO or is_free:
         param.network = "onion"
     base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
-    if current_user and getattr(current_user, "role", None) == user_role.DEMO and param.category == "all":
+    has_query = param.q != ""
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free and param.category == "all" and has_query:
         base_index = [
-            ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_LEAK_INDEX,
+            ELASTIC_INDEX.S_GENERIC_INDEX,
+            ELASTIC_INDEX.S_EXPLOIT_INDEX,
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX,
         ]
@@ -154,6 +162,76 @@ async def search_defacement(param: search_consolidated_param_model = Body(...), 
     param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
+
+
+@api_routes.post(
+    "/api/feedback/comment/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def add_feedback_comment(doc_id: str, param: feedback_comment_param_model = Body(...), current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().add_comment(doc_id, param.comment, current_user)
+
+
+@api_routes.get(
+    "/api/feedback/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def get_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().get_feedback(doc_id, current_user)
+
+
+@api_routes.post(
+    "/api/feedback/recommended/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def increment_recommended_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().increment_recommended(doc_id, current_user)
+
+
+@api_routes.post(
+    "/api/feedback/trust/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def increment_trust_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().increment_trust(doc_id, current_user)
+
+
+@api_routes.post(
+    "/api/feedback/untrust/{doc_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def increment_untrust_feedback(doc_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().increment_untrust(doc_id, current_user)
+
+
+@api_routes.get(
+    "/api/user/{user_id}/get",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def get_public_user(user_id: str, current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().get_public_user(user_id, current_user)
+
+
+@api_routes.get(
+    "/api/user/{user_id}/activity",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def get_public_user_activity(user_id: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().get_public_user_activity(user_id, current_user)
 
 
 @api_routes.get(
@@ -728,6 +806,22 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
 )
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
+
+@api_routes.post(
+    "/api/cross/search",
+    summary="Run Cross Search",
+    description=CROSS_SEARCH_DOCS["cross_search"]["description"],
+    tags=["Support Method"],
+    operation_id="dynamicCrossSearch",
+    response_description=CROSS_SEARCH_DOCS["cross_search"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning"))
+    ],
+)
+async def cross_search(param: search_dynamic_onion_search = Body(...), current_user=Depends(get_current_user)):
+    return await search_model.getInstance().onion_search(param, user_id=str(current_user.id))
 
 @api_routes.post(
     "/api/netintel/resolve_ip",

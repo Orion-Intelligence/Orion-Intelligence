@@ -1,8 +1,9 @@
 <app-report-header [csv_object]="resultItem" [lang_detected]="lang_detected" [url]="resultItem?.m_url"
 [content]="resultItem?.m_content" [lang]="lang" (languageUpdated)="langUpdate($event)"></app-report-header>
 
-<div id="report-detail" class="pb-[100px]">
-  <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+<app-report-interaction-host [docId]="reportDocId">
+<div id="report-detail">
+  <div class="mt-4 mx-[12px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 sm:mx-[15px] lg:mx-[30px]">
     <div class="pb-3">
       <p class="text-[20px] font-semibold leading-tight text-[var(--color-text1)]">
         {{ getDisplayTitle(resultItem?.m_title, resultItem?.m_url) | slice:0:150 }}{{ getDisplayTitle(resultItem?.m_title, resultItem?.m_url).length > 150 ? '...' : '' }}
@@ -82,12 +83,12 @@
     </div>
   </div>
 
-  <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+  <div class="mt-4 mx-[12px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 sm:mx-[15px] lg:mx-[30px]">
     <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
       <div class="min-w-0">
         <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
-          <span class="truncate">Metadata</span>
           <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
+          <span class="truncate">Metadata</span>
         </div>
         <p class="mt-1 text-[12px] text-[var(--color-text4)]">Detected entities, extracted sections, and structured attributes.</p>
       </div>
@@ -132,12 +133,12 @@
   }
 
   @if (type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!='') {
-    <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+    <div class="mt-4 mx-[12px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 sm:mx-[15px] lg:mx-[30px]">
       <div (click)="screenshootToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
-            <span class="truncate">Leak Screenshot</span>
             <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" appTooltip="Leak Screenshot">
+            <span class="truncate">Leak Screenshot</span>
           </div>
         </div>
         <div [attr.aria-label]="isExpandedScreenshoot ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
@@ -172,3 +173,4 @@
     <app-chat-widget [reportText]="resultItem?.m_content"></app-chat-widget>
   }
 </div>
+</app-report-interaction-host>

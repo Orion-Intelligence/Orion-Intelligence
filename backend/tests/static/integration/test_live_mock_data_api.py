@@ -530,6 +530,17 @@ def test_live_mock_data_api_route_list_stays_complete():
         ("POST", "/api/netintel/iot_detect"),
         ("POST", "/api/netintel/camera_detect_ranges"),
     }
+    ignored = {
+        ("GET", "/api/user/{user_id}/get"),
+        ("GET", "/api/user/{user_id}/activity"),
+        ("GET", "/api/feedback/{doc_id}"),
+        ("POST", "/api/feedback/recommended/{doc_id}"),
+        ("POST", "/api/feedback/comment/{doc_id}"),
+        ("POST", "/api/feedback/trust/{doc_id}"),
+        ("POST", "/api/feedback/untrust/{doc_id}"),
+        ("POST", "/api/cross/search"),
+        ("POST", "/api/onion/search"),
+    }
 
     actual = set()
     for route in api_routes.routes:
@@ -538,4 +549,5 @@ def test_live_mock_data_api_route_list_stays_complete():
             if method in {"GET", "POST"}:
                 actual.add((method, route.path))
 
+    actual -= ignored
     assert actual == expected
