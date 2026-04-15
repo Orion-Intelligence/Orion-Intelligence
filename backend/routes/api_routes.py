@@ -744,38 +744,23 @@ async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
 
 
-@api_routes.post(
-    "/api/ioc/extract",
-    summary="Extract IOCs from file(.pdf or .txt) or image(.png, .jpg or .jpeg)",
-    description=DYNAMIC_DOCS["ioc_extract"]["description"],
-    tags=["Entity Scans"],
-    operation_id="iocExtractFromFile",
-    response_description=DYNAMIC_DOCS["ioc_extract"]["response_description"],
-    status_code=200,
-    dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST, Depends(license_required("scanning"))])),
-    ],
-)
-async def extract_ioc(file: UploadFile = File(...), current_user=Depends(get_current_user)):
-    file_content = await file.read()
-    result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename, user_id=str(current_user.id))
-    return result
 
 
 @api_routes.post(
-    "/api/apk/scan",
-    summary="Dynamic analysis scan to identify application metadata, cracking indicators, etc",
-    description=DYNAMIC_DOCS["apk_scan"]["description"],
+    "/api/file/scan",
+    summary="Scan file for IOCs & METADATA",
+    description=DYNAMIC_DOCS["file_scan"]["description"],
     tags=["Entity Scans"],
-    operation_id="dynamicApkScan",
-    response_description=DYNAMIC_DOCS["apk_scan"]["response_description"],
+    operation_id="fileScanFromFile",
+    response_description=DYNAMIC_DOCS["file_scan"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning"))],
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),Depends(license_required("scanning"))]
 )
-async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_current_user)):
+
+async def file_scan(file: UploadFile = File(...), current_user=Depends(get_current_user)):
     file_content = await file.read()
-    result = await search_model.getInstance().scan_apk(file_content, file.filename, user_id=str(current_user.id))
+    result = await search_model.getInstance().scan_file(file_content, file.filename, user_id=str(current_user.id))
 
     return result
 

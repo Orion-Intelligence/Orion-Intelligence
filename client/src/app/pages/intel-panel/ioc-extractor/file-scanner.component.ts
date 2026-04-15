@@ -9,7 +9,7 @@ import { finalize, expand, switchMap, takeWhile } from 'rxjs/operators';
 import { EMPTY, timer } from 'rxjs';
 import { IocExtractionResult, IocItem, GroupedIoc, ApkScanResult, SummaryItem } from '../../../shared/model/ioc-extractor/ioc.extractor.model';
 import { ApiService } from '../../../shared/services/api.service';
-import { ALLOWED_FILE_TYPES, APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, IOC_LABELS, MAX_FILE_SIZE_APK, MAX_FILE_SIZE_IOC } from './file-scanner.constants';
+import { ALLOWED_FILE_TYPES, FILE_SCAN_ENDPOINT, IOC_LABELS, MAX_FILE_SIZE_APK, MAX_FILE_SIZE_IOC } from './file-scanner.constants';
 @Component({
   selector: 'app-ioc-extractor',
   standalone: true,
@@ -132,7 +132,7 @@ export class FileScannerComponent {
     }
     const formData = new FormData();
     formData.append('file', this.selectedFile);
-    const endpoint = isApk ? APK_SCAN_ENDPOINT : IOC_EXTRACT_ENDPOINT;
+    const endpoint = FILE_SCAN_ENDPOINT;
     this.isLoading = true;
     this.isFetched = false;
     this.hasError = false;

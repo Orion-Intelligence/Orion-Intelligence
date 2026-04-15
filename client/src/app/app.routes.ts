@@ -605,7 +605,7 @@ export const routes: Routes = [
             data: { type: 'seo', animation: 'CategoryPage' }
           },
           {
-            path: 'apk-scan',
+            path: 'apk-scan', // willl remove ittt
             loadComponent: loadFileScannerComponent,
             data: {
               animation: 'CategoryPage',

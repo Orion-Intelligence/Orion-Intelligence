@@ -343,6 +343,27 @@ class search_model:
 
         return response.json()
 
+
+    async def scan_file(self, file_content: bytes, filename: str, user_id: str = "system"):
+
+        async with httpx.AsyncClient(timeout=120) as client:
+            files = {
+                "file": (filename, file_content)
+            }
+
+            response = await client.post(
+                f"http://trusted-micros-api:8010/file/scan/{user_id}",
+                files=files
+            )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Error from trusted-micros-api: {response.text}"
+            )
+
+        return response.json()
+
     async def scan_apk(self, file_content: bytes, filename: str, user_id: str = "system"):
 
         async with httpx.AsyncClient(timeout=120) as client:
