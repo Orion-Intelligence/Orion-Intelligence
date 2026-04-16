@@ -447,8 +447,8 @@ class elastic_request_generator:
         m_network = p_query_model.network
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = p_query_model.content
-        m_platform = (p_query_model.platform or "").strip().lower()
         m_safe_search = p_query_model.safe
+        result_size = p_query_model.platform_result_count
         must_clauses = []
         must_not_clause = []
 
@@ -548,8 +548,8 @@ class elastic_request_generator:
             m_page_number=m_page_number,
             date_field=date_field)
 
-        unified_query["size"] = 15
-        unified_query["from"] = max(0, (m_page_number - 1) * 15)
+        unified_query["size"] = result_size
+        unified_query["from"] = max(0, (m_page_number - 1) * result_size)
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
