@@ -581,18 +581,13 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'basic-scan',
+            redirectTo: 'network-scan',
             pathMatch: 'full'
           },
           {
-            path: 'basic-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'basic', animation: 'CategoryPage' }
-          },
-          {
-            path: 'port-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'advanced', animation: 'CategoryPage' }
+            path: 'network-scan',
+            loadComponent: loadNetworkIntelComponent,
+            data: { animation: 'CategoryPage' }
           },
           {
             path: 'repository-scan',
