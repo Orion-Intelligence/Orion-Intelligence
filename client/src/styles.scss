@@ -1475,20 +1475,22 @@ body.demo-tour-scroll-locked {
 
 .ui-popup-select,
 .ui-graph-popup-panel select,
-.ui-select {
+.ui-select,
+select:not(.ui-popup-select):not(.ui-select) {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding-right: 2.5rem !important;
+  padding-right: 2.75rem !important;
   background-image: var(--filter-dropdown-icon);
   background-repeat: no-repeat;
-  background-position: right 0.8rem center;
+  background-position: right 1rem center;
   background-size: 11px 11px;
 }
 
 .ui-popup-select::-ms-expand,
 .ui-graph-popup-panel select::-ms-expand,
-.ui-select::-ms-expand {
+.ui-select::-ms-expand,
+select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
   display: none;
 }
 
