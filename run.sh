@@ -15,20 +15,6 @@ stop_docker() {
     docker rm trusted-web-nginx 2>/dev/null || true
 }
 
-create_parser_zip() {
-    PARSER_DIR="backend/static/.well-known/parser_files"
-    OUTPUT_DIR="backend/static/.well-known"
-    ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
-    if ! command -v zip &> /dev/null; then
-        echo "Error: 'zip' command not found. Please install 'zip' and try again."
-        exit 1
-    fi
-    [ -f "$ZIP_FILE" ] && rm -f "$ZIP_FILE"
-    if [ -d "$PARSER_DIR" ]; then
-        (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .) || exit 1
-    fi
-}
-
 ensure_local_ssl_cert() {
     mkdir -p "$LOCAL_SSL_DIR"
     if [ -f "$LOCAL_SSL_CERT" ] && [ -f "$LOCAL_SSL_KEY" ]; then
@@ -226,8 +212,6 @@ fi
 
 stop_docker
 
-create_parser_zip
-
 COMMAND=$1
 FLAG=$2
 
@@ -293,7 +277,7 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server

@@ -18,7 +18,6 @@ from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert_job import alert_job
 from orion.api.interactive.account_manager.models.user_model import user_model
-
 tenant_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))], tags=["Orion API"], )
 

@@ -1,4 +1,5 @@
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
+from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model

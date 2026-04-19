@@ -5,7 +5,9 @@ import { Component } from '@angular/core';
 })
 export class ScrollTopComponent {
   scrollToTop(): void {
-    const container = document.getElementById('dashboard-container');
+    const container =
+      (document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null) ||
+      document.getElementById('dashboard-container');
     if (container) {
       container.scrollTo({ top: 0, behavior: 'smooth' });
     }

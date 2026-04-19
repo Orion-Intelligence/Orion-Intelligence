@@ -93,6 +93,7 @@ export enum NETINTSubCategory {
 }
 export enum ProfileSubCategory {
     HOMEPAGE = 'Homepage',
+    FEEDER = 'Feeder',
     IOC = 'IOC',
     TENANT_SETTINGS = 'Tenant-Settings',
     ACCOUNT = 'Account',

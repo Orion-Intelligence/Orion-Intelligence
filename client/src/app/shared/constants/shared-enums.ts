@@ -84,6 +84,7 @@ export const sidebarItemTooltips: Record<string, string> = {
   'File-Scanner': 'File Scanner',
   'Crypto-Scanner': 'Crypto Scanner',
   'IOCS': 'IOCs',
+  'Feeder': 'Feeder Scripts',
 };
 export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set<string>([
   "tools",

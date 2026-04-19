@@ -1,0 +1,177 @@
+@if (isReplaceConfirmationOpen) {
+  <app-confirmation-popup [message]="replaceConfirmationMessage" (confirmed)="confirmReplaceUpload($event)"></app-confirmation-popup>
+}
+
+<div class="mt-6">
+  @if (formError) {
+    <div class="mb-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+      {{ formError }}
+    </div>
+  }
+
+  @if (isCatalogLoading) {
+    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-5 [body.light-theme_&]:bg-white">
+      <div class="ui-section-title">Loading Rule Setup</div>
+      <div class="ui-section-description">Preparing the upload form for this rule.</div>
+
+      <div class="mt-5 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-5 [body.light-theme_&]:bg-[#f8fbff]">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="text-sm font-semibold text-[var(--color-text1)]">Parser File</div>
+            <div class="mt-1 text-sm text-[var(--color-text4)]">No Python file selected yet</div>
+          </div>
+          <div class="ui-shimmer h-[36px] w-[104px] rounded-[8px] bg-[var(--color-divider)]"></div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex gap-2">
+          <div class="ui-shimmer h-[30px] w-[128px] rounded-full bg-[var(--color-divider)]"></div>
+          <div class="ui-shimmer h-[30px] w-[136px] rounded-full bg-[var(--color-divider)]"></div>
+        </div>
+        <div class="ui-shimmer h-[36px] w-[120px] rounded-[8px] bg-[var(--color-divider)]"></div>
+      </div>
+    </div>
+  } @else {
+    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-5 [body.light-theme_&]:bg-white">
+      <div class="ui-section-title">{{ panelTitle }}</div>
+      <input #fileInput hidden type="file" accept=".py" multiple (change)="onFileSelected($event)" />
+      @if (panelDescription) {
+        <div class="ui-section-description">{{ panelDescription }}</div>
+      }
+
+      @if (selectedRuleType === 'shared') {
+        <div class="mt-5 rounded-[12px] border border-dashed border-[rgba(87,165,235,0.32)] bg-[var(--color-blue-820-light)] p-5 [body.light-theme_&]:bg-[#f8fbff]">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-semibold text-[var(--color-text1)]">Parser File</div>
+              <div class="mt-1 text-sm text-[var(--color-text4)]">{{ selectedFiles.length ? (selectedFiles.length === 1 ? selectedFiles[0].name : selectedFiles.length + ' Python files selected') : (hasSharedScriptUploaded() ? 'Parser file already uploaded' : 'No Python file selected yet') }}</div>
+              @if (!selectedFiles.length && hasSharedScriptUploaded() && !isSharedScriptStatusLoading) {
+                <div class="mt-2 inline-flex items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-xs text-[var(--color-text4)] [body.light-theme_&]:bg-white">
+                  <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M6 2.75h5.5L15.25 6.5V15A2.25 2.25 0 0 1 13 17.25H6A2.25 2.25 0 0 1 3.75 15V5A2.25 2.25 0 0 1 6 2.75Z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M11.25 2.75V6.5h3.75" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                  <span>Parser uploaded</span>
+                </div>
+              }
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="fileInput.click()">
+                Select File
+              </button>
+              @if (selectedFiles.length) {
+                <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] [body.light-theme_&]:text-[#b42318]" (click)="clearFile(fileInput)">
+                  Remove
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (isSubmitting && uploadProgressTotal > 0 && uploadMode === 'file') {
+            <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 [body.light-theme_&]:bg-white">
+              <div class="flex items-center justify-between gap-3 text-[12px]">
+                <span class="font-semibold text-[var(--color-text1)]">Uploading files</span>
+                <span class="text-[var(--color-text4)]">{{ uploadProgressCurrent }} / {{ uploadProgressTotal }}</span>
+              </div>
+            </div>
+          }
+
+          @if (selectedFiles.length) {
+            <div class="mt-5 flex justify-end">
+              <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting || !selectedFiles.length" (click)="uploadSharedFile(fileInput)">
+                {{ isSubmitting && uploadMode === 'file' ? 'Uploading...' : 'Upload Script' }}
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="mt-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-5 [body.light-theme_&]:bg-[#f8fbff]">
+          <label class="mb-2 block text-sm font-semibold text-[var(--color-text1)]">Values</label>
+          @if (isValuesLoading || isSharedScriptStatusLoading) {
+            <div class="rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-4 [body.light-theme_&]:bg-white">
+              <div class="ui-shimmer h-[18px] w-[120px] rounded-[6px] bg-[var(--color-divider)]"></div>
+              <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 pt-3 pb-2 [body.light-theme_&]:bg-[#f8fbff]">
+                <div class="ui-shimmer h-[10px] w-full rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[88%] rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[76%] rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[92%] rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[68%] rounded-[999px] bg-[var(--color-divider)]"></div>
+              </div>
+            </div>
+          } @else if (isSharedValueBlocked()) {
+            <div class="mb-4 rounded-[10px] border border-[rgba(245,158,11,0.28)] bg-[rgba(120,53,15,0.22)] px-4 py-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:bg-[#fffbeb] [body.light-theme_&]:text-[#92400e]">
+              <div class="font-semibold">Parser required</div>
+              <div class="mt-1 text-xs opacity-80">Upload the parser file first to unlock values.</div>
+            </div>
+            <div class="rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-6 text-center [body.light-theme_&]:bg-white">
+              <div class="text-sm font-semibold text-[var(--color-text1)]">Values are locked</div>
+              <div class="mt-1 text-xs text-[var(--color-text4)]">Upload the parser file first to unlock value entry.</div>
+            </div>
+          } @else {
+            <textarea [(ngModel)]="valuesText" name="valuesText" rows="8" placeholder="One URL per line" class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-sm text-[var(--color-text1)] outline-none [body.light-theme_&]:bg-white"></textarea>
+            <div class="mt-2 text-xs text-[var(--color-text4)]">Paste one strict URL per line. New values are appended and duplicates are skipped.</div>
+
+            <div class="mt-5 flex justify-end">
+              <button type="button" class="inline-flex h-9 items-center rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting" (click)="uploadSharedValues(fileInput)">
+                {{ isSubmitting && uploadMode === 'values' ? 'Uploading...' : 'Upload Values' }}
+              </button>
+            </div>
+          }
+        </div>
+      } @else if (uploadMode === 'file') {
+        <div class="mt-5 rounded-[12px] border border-dashed border-[rgba(87,165,235,0.32)] bg-[var(--color-blue-820-light)] p-5 [body.light-theme_&]:bg-[#f8fbff]">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="text-sm font-semibold text-[var(--color-text1)]">Parser File</div>
+              <div class="mt-1 text-sm text-[var(--color-text4)]">{{ selectedFiles.length ? (selectedFiles.length === 1 ? selectedFiles[0].name : selectedFiles.length + ' Python files selected') : 'No Python file selected yet' }}</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="fileInput.click()">
+                Select File
+              </button>
+              @if (selectedFiles.length) {
+                <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] [body.light-theme_&]:text-[#b42318]" (click)="clearFile(fileInput)">
+                  Remove
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (isSubmitting && uploadProgressTotal > 0) {
+            <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 [body.light-theme_&]:bg-white">
+              <div class="flex items-center justify-between gap-3 text-[12px]">
+                <span class="font-semibold text-[var(--color-text1)]">Uploading files</span>
+                <span class="text-[var(--color-text4)]">{{ uploadProgressCurrent }} / {{ uploadProgressTotal }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="mt-5">
+          @if (isValuesLoading) {
+            <div class="rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-4 [body.light-theme_&]:bg-[#f8fbff]">
+              <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 pt-3 pb-2 [body.light-theme_&]:bg-[#f8fbff]">
+                <div class="ui-shimmer h-[10px] w-full rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[85%] rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[73%] rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[90%] rounded-[999px] bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer mt-3 h-[10px] w-[64%] rounded-[999px] bg-[var(--color-divider)]"></div>
+              </div>
+            </div>
+          } @else {
+            <textarea [(ngModel)]="valuesText" name="valuesText" rows="8" placeholder="One URL per line" class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 pt-3 pb-1 text-sm text-[var(--color-text1)] outline-none [body.light-theme_&]:bg-[#f8fbff]"></textarea>
+          }
+        </div>
+      }
+
+      @if (selectedRuleType !== 'shared') {
+      <div class="mt-5 flex justify-end">
+        <button type="button" class="inline-flex h-9 items-center rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting || isValuesLoading" (click)="uploadScript(fileInput)">
+          {{ isSubmitting ? 'Uploading...' : (uploadMode === 'values' ? 'Upload Values' : 'Upload Script') }}
+        </button>
+      </div>
+      }
+    </div>
+  }
+</div>
