@@ -1,5 +1,5 @@
 <div (click)="closeMenus()">
-  <header class="h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
+  <header class="relative z-50 h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
     <div class="flex h-full items-center justify-between pl-4">
       <nav class="flex h-full items-center gap-1.5">
         @for (tab of visibleTabs(); track trackById($index, tab)) {
