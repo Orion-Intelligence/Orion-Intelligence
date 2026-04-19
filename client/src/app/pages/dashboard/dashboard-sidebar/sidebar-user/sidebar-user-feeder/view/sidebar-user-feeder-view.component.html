@@ -107,7 +107,7 @@
                   <div class="max-w-[560px] truncate whitespace-nowrap font-mono text-[12px] leading-6" [title]="value.url">{{ value.url }}</div>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getValueStatus(value) === 'failure' ? 'bg-red-500/10 text-red-300' : getValueStatus(value) === 'success' ? 'bg-sky-500/10 text-sky-300' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
+                  <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getValueStatus(value) === 'failure' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getValueStatus(value) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
                     {{ getValueStatus(value) }}
                   </span>
                 </td>
@@ -158,7 +158,7 @@
         <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-830)]">
           <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2">
             <div class="text-xs font-semibold tracking-wide text-[var(--color-text4)]">#{{ getValueRowNumber(rowIndex) }}</div>
-            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getValueStatus(value) === 'failure' ? 'bg-red-500/10 text-red-300' : getValueStatus(value) === 'success' ? 'bg-sky-500/10 text-sky-300' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
+            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getValueStatus(value) === 'failure' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getValueStatus(value) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
               {{ getValueStatus(value) }}
             </span>
           </div>
@@ -231,7 +231,7 @@
           <tbody>
             @for (script of displayedScripts; track script.id; let rowIndex = $index) {
               <tr class="border-t border-[var(--color-border)] text-sm text-[var(--color-text1)]" [ngClass]="{ 'opacity-60': !script.enabled, 'bg-[rgba(87,165,235,0.08)]': selectedScript?.id === script.id }">
-                <td class="px-4 py-2.5">
+                <td class="px-4 py-2.5" [ngClass]="{ 'border-l-4 border-l-emerald-400 pl-3': script.enabled }">
                   <div class="font-mono text-[12px] text-[var(--color-text4)]">{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</div>
                 </td>
                 <td class="px-4 py-2.5">
@@ -246,12 +246,12 @@
                   </div>
                 </td>
                 <td class="px-4 py-2.5">
-                  <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300'">
+                  <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
                     {{ script.enabled ? 'enabled' : 'disabled' }}
                   </span>
                 </td>
                 <td class="px-4 py-2.5">
-                  <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
+                  <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
                     {{ getRuntimeStatus(script) }}
                   </span>
                 </td>
@@ -336,14 +336,14 @@
     </div>
     <div class="mt-4 space-y-3 min-[1401px]:hidden">
       @for (script of displayedScripts; track script.id; let rowIndex = $index) {
-        <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-830)]">
+        <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-830)]" [ngClass]="{ 'border-l-4 border-l-emerald-400': script.enabled }">
           <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2">
             <div class="text-xs font-semibold tracking-wide text-[var(--color-text4)]">#{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</div>
             <div class="flex items-center gap-2">
-              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300'">
+              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
                 {{ script.enabled ? 'enabled' : 'disabled' }}
               </span>
-              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
+              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
                 {{ getRuntimeStatus(script) }}
               </span>
             </div>
