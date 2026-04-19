@@ -44,6 +44,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
   ipRows:          IpRowState[]     = [];
   shodanResult:    IpDetail | null  = null;
   vulnerabilityResult: any   = null;
+  vulnerabilityTargets: string[] = [];
+  vulnerabilityActiveTarget: string | null = null;
   geoIpListResult: DnsResult | null = null;
   geoIpRows:       IpRowState[]     = [];
   geoResult:       GeoResult | null    = null;
@@ -337,6 +339,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.ipRows          = [];
     this.shodanResult    = null;
     this.vulnerabilityResult = null;
+    this.vulnerabilityTargets = [];
+    this.vulnerabilityActiveTarget = null;
     this.geoIpListResult = null;
     this.geoIpRows       = [];
     this.geoResult       = null;
@@ -430,7 +434,27 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.hasSearched = true;
     this.clearAll(false);
     this.syncUrl();
-    this.sub = this.scanHelper.scanUrlVulnerability(this.vulnForm.ip.trim());
+    this.sub = this.scanHelper.scanSubdomains(this.vulnForm.ip.trim(), false);
+    this.watchResult(this.parseVulnerabilityTargets.bind(this));
+  }
+
+  startVulnerabilityScanForTarget(target: string): void {
+    const normalizedTarget = target.trim();
+    if (!normalizedTarget || this.isScanning()) {
+      return;
+    }
+    this.vulnForm.ip = normalizedTarget;
+    this.validateVulnerability();
+    if (this.formError) {
+      return;
+    }
+    this.resetActiveWork();
+    this.hasSearched = true;
+    this.vulnerabilityActiveTarget = normalizedTarget;
+    this.vulnerabilityResult = null;
+    this.lastResultCount = this.vulnerabilityTargets.length;
+    this.syncUrl();
+    this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget);
     this.watchResult(this.parseVulnerabilityResult.bind(this));
   }
 
@@ -473,6 +497,32 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.vulnerabilityResult = payload;
       this.lastResultCount = payload?.summary?.total ?? payload?.findings?.length ?? payload?.top_findings?.length ?? 0;
     }
+  }
+
+  private parseVulnerabilityTargets(): void {
+    const done = this.scanHelper.onDone();
+    if (!done) {
+      return;
+    }
+    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
+    const payload = done.result ?? done;
+    const status = String(payload?.status || done?.status || '').toLowerCase();
+    if (status === 'pending' || status === 'busy') {
+      return;
+    }
+
+    const baseDomain = this.vulnForm.ip.trim();
+    const subdomains = Array.isArray(payload?.subdomains)
+      ? payload.subdomains
+      : Array.isArray(payload?.live_subdomains)
+        ? payload.live_subdomains
+        : [];
+
+    this.vulnerabilityTargets = [
+      baseDomain,
+      ...subdomains.filter((entry: string) => entry && entry !== baseDomain),
+    ].filter(Boolean);
+    this.lastResultCount = this.vulnerabilityTargets.length;
   }
 
   startGeoScan(): void {

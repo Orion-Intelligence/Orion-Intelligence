@@ -125,7 +125,11 @@
       [currentStep]="currentStep"
       [errorMessage]="scanHelper.onError()?.message || null"
       [hasSearched]="hasSearched"
+      [targets]="vulnerabilityTargets"
+      [activeTarget]="vulnerabilityActiveTarget"
+      [searchDomain]="vulnForm.ip"
       [vulnerabilityResult]="vulnerabilityResult"
+      (selectTarget)="startVulnerabilityScanForTarget($event)"
       @fadeInDashboardItem>
     </app-network-intel-vulnerability-section>
   }
