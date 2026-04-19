@@ -4,7 +4,7 @@ export enum Category {
     HOMEPAGE = 'Home',
     DIRECTORY = 'Directory',
     DUMP = 'Dump',
-    DEFACEMENT = 'Compromise-Monitoring',
+    DEFACEMENT = 'Defacement',
     SOCIAL = 'Social',
     API = 'Api',
     EXPLOIT = 'Exploit',
