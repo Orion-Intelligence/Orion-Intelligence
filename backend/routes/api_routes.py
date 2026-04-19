@@ -237,7 +237,7 @@ async def get_public_user_activity(user_id: str, current_user=Depends(get_curren
     operation_id="getSystemDirectory",
     response_description=SYSTEM_INFO_DOCS["directory"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))])
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))])
 async def get_directory(param: directory_param_model = Depends()):
     return await directory_model.getInstance().invoke_directory(param)
 
