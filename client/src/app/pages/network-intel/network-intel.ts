@@ -149,6 +149,17 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.syncUrl();
   }
 
+  setGeoTab(): void {
+    if (this.isScanning()) {
+      return;
+    }
+    this.geoMode = 'coords';
+    this.activeTab = 'geo';
+    this.clearAll();
+    this.syncUrl();
+    this.openGeoCoordinatesModalFromStatus();
+  }
+
   openGeoCoordinatesModal(): void {
     if (this.isScanning()) {
       return;
@@ -162,6 +173,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.geoMode = 'coords';
     this.showGeoRangesModal = false;
     this.showGeoCoordinatesModal = true;
+  }
+
+  onGeoCoordinatesChange(value: string): void {
+    this.geoForm.coordinates = value;
+    this.activeTab = 'geo';
+    this.geoMode = 'coords';
+    this.validateGeo();
+    this.syncUrl();
   }
 
   openGeoRangesModal(): void {
